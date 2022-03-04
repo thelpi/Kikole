@@ -8,13 +8,18 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Country;
 
-        internal override bool IsSuccessful(PlayerDto player,
+        internal override string IsSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
             var countryId = (ulong)Enum.Parse<Country>(Value);
-            return player.Country1Id == countryId
-                || player.Country2Id == countryId;
+            var ok1 = player.Country1Id == countryId;
+            var ok2 = player.Country2Id == countryId;
+            return ok1
+                ? ((Country)player.Country1Id).ToString()
+                : (ok2
+                    ? ((Country)player.Country2Id).ToString()
+                    : null);
         }
 
         internal override string IsValid()

@@ -104,10 +104,12 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            var successful = request.IsSuccessful(
+            var successfulValue = request.IsSuccessful(
                 todayPlayer,
                 playerClubs,
                 playerClubsDetails);
+
+            var successful = !string.IsNullOrWhiteSpace(successfulValue);
 
             var userId = GetAuthenticatedUser();
             if (userId.HasValue)
@@ -120,7 +122,7 @@ namespace KikoleApi.Controllers
             return Ok(new ProposalResponse
             {
                 Successful = successful,
-                Value = request.Value
+                Value = successfulValue
             });
         }
     }

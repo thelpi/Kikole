@@ -1,0 +1,71 @@
+﻿@model MainModel
+<div>
+    @if (!string.IsNullOrWhiteSpace(Model.NameOkSubmitted))
+    {
+        <div style="padding-top: 5px; padding-bottom: 5px">
+            <label style="width: 150px">Congratulations!</label>
+            <label style="width: 150px; color:crimson">@Model.NameOkSubmitted</label>
+        </div>
+    }
+    else
+    {
+        if (Model.HasWrongGuess)
+        {
+            <div style="padding-top: 5px; padding-bottom: 15px">
+                <label style="width: 150px; color:crimson">You guess wrong!</label>
+            </div>
+        }
+            <form method="post" action="/">
+                <input type="hidden" name="ClubsOkSubmitted" value="@Model.ClubsOkSubmitted" />
+                <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
+                <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
+                <div style="padding-top: 5px; padding-bottom: 5px">
+                    @if (string.IsNullOrWhiteSpace(Model.YearOkSubmitted))
+                    {
+                        <label style="width: 150px">Guess birth year:</label>
+                        @Html.TextBoxFor(m => m.SelectedValueYear, new { @style = "width: 150px" })
+                        <input type="submit" value="Submit" name="submit-Year" />
+                    }
+                    else
+                    {
+                        <label style="width: 150px">Birth year:</label>
+                        <label style="width: 150px">@Model.YearOkSubmitted</label>
+                    }
+                </div>
+                <div style="padding-top: 5px; padding-bottom: 5px">
+                    @if (string.IsNullOrWhiteSpace(Model.CountryOkSubmitted))
+                    {
+                        <label style="width: 150px">Guess nationality:</label>
+                        @Html.DropDownListFor(m => m.SelectedValueCountry, Model.Countries.Select(x => new SelectListItem(x.Value, x.Key.ToString())), new { @style = "width: 150px" })
+                        <input type="submit" value="Submit" name="submit-Country" />
+                    }
+                    else
+                    {
+                        <label style="width: 150px">Nationality:</label>
+                        <label style="width: 150px">@Model.CountryOkSubmitted</label>
+                    }
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ClubsOkSubmitted))
+                {
+                    <div style="padding-top: 5px; padding-bottom: 5px">
+                        <label style="width: 150px">Career club so far:</label>
+                        @Html.DropDownListFor(m => m.ClubsOkCurrentlySelected, new SelectList(Model.ClubsOkSubmitted.Split(';')), new { @style = "width: 150px" })
+                    </div>
+                }
+                <div style="padding-top: 5px; padding-bottom: 5px">
+                    <label style="width: 150px">Guess career club:</label>
+                    @Html.TextBoxFor(m => m.SelectedValueClub, new { @style = "width: 150px" })
+                    <input type="submit" value="Submit" name="submit-Club" />
+                </div>
+                <div style="padding-top: 5px; padding-bottom: 5px">
+                    <label style="width: 304px">No idea? Ask for a clue:</label>
+                    <input type="submit" value="Submit" name="submit-Clue" />
+                </div>
+                <div style="padding-top: 30px; padding-bottom: 5px">
+                    <label style="width: 150px">Guess the player:</label>
+                    @Html.TextBoxFor(m => m.SelectedValueName, new { @style = "width: 150px" })
+                    <input type="submit" value="Submit" name="submit-Name" style="color:crimson" />
+                </div>
+            </form>
+    }
+</div>

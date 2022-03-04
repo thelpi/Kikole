@@ -8,12 +8,11 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Clue;
 
-        internal override bool IsSuccessful(PlayerDto player,
+        internal override string IsSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            Value = clubs.First(c => c.Id == playerClubs.OrderBy(pc => pc.ImportancePosition).First().ClubId).Name;
-            return true;
+            return clubs.First(c => c.Id == playerClubs.OrderBy(pc => pc.ImportancePosition).First().ClubId).Name;
         }
 
         internal override string IsValid()

@@ -7,11 +7,14 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Year;
 
-        internal override bool IsSuccessful(PlayerDto player,
+        internal override string IsSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            return ushort.Parse(Value) == player.YearOfBirth;
+            var ok = ushort.Parse(Value) == player.YearOfBirth;
+            return ok
+                ? player.YearOfBirth.ToString()
+                : null;
         }
 
         internal override string IsValid()

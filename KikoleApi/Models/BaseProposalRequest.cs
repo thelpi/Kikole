@@ -12,7 +12,7 @@ namespace KikoleApi.Models
 
         internal abstract ProposalType ProposalType { get; }
 
-        internal abstract bool IsSuccessful(PlayerDto player,
+        internal abstract string IsSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs);
 
