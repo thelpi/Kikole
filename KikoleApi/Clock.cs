@@ -1,4 +1,5 @@
 ﻿using System;
+using KikoleApi.Abstractions;
 
 namespace KikoleApi
 {

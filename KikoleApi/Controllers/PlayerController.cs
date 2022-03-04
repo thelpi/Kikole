@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using KikoleApi.Domain.Models;
-using KikoleApi.Repositories;
+using KikoleApi.Abstractions;
+using KikoleApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
@@ -31,15 +31,8 @@ namespace KikoleApi.Controllers
                 .CreatePlayerAsync(request.ToDto())
                 .ConfigureAwait(false);
 
-            if (playerId <= 0)
+            if (playerId == 0)
                 return StatusCode((int)HttpStatusCode.InternalServerError, "Player creation failure");
-
-            foreach (var name in request.AllowedNames.ToDtos(playerId))
-            {
-                await _playerRepository
-                    .CreatePlayerNamesAsync(name)
-                    .ConfigureAwait(false);
-            }
             
             foreach (var club in request.Clubs.ToDtos(playerId))
             {

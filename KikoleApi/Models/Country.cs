@@ -1,4 +1,4 @@
-﻿namespace KikoleApi.Domain.Models
+﻿namespace KikoleApi.Models
 {
     public enum Country
     {

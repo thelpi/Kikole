@@ -1,40 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using KikoleApi.Domain.Models;
-using KikoleApi.Domain.Models.Dtos;
+using KikoleApi.Models;
+using KikoleApi.Models.Dtos;
 
 namespace KikoleApi
 {
     internal static class Converters
     {
-        internal static IReadOnlyCollection<PlayerClubDto> ToDtos(this IReadOnlyCollection<ClubRequest> clubs, long playerId)
+        internal static IReadOnlyCollection<PlayerClubDto> ToDtos(this IReadOnlyCollection<PlayerClubRequest> clubs, ulong playerId)
         {
             return clubs
                 .Select(c => c.ToDto(playerId))
                 .ToList();
         }
 
-        private static PlayerClubDto ToDto(this ClubRequest club, long playerId)
+        private static PlayerClubDto ToDto(this PlayerClubRequest club, ulong playerId)
         {
             return new PlayerClubDto
             {
-                AllowedNames = club.AllowedNames.SanitizeJoin(),
                 HistoryPosition = club.HistoryPosition,
                 ImportancePosition = club.ImportancePosition,
-                Name = club.Name,
+                ClubId = club.ClubId,
                 PlayerId = playerId
             };
-        }
-
-        internal static IReadOnlyCollection<PlayerNameDto> ToDtos(this IEnumerable<string> playerNames, long playerId)
-        {
-            return playerNames
-                .Select(pn => new PlayerNameDto
-                {
-                    Name = pn.Sanitize(),
-                    PlayerId = playerId
-                })
-                .ToList();
         }
 
         internal static PlayerDto ToDto(this PlayerRequest request)
@@ -45,7 +33,17 @@ namespace KikoleApi
                 Country2Id = (ulong?)request.SecondCountry,
                 Name = request.Name,
                 ProposalDate = request.ProposalDate,
-                YearOfBirth = (uint)request.DateOfBirth.Year
+                YearOfBirth = (uint)request.DateOfBirth.Year,
+                AllowedNames = request.AllowedNames.SanitizeJoin(request.Name)
+            };
+        }
+
+        internal static ClubDto ToDto(this ClubRequest request)
+        {
+            return new ClubDto
+            {
+                AllowedNames = request.AllowedNames.SanitizeJoin(request.Name),
+                Name = request.Name
             };
         }
     }

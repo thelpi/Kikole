@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KikoleApi.Domain.Models
+namespace KikoleApi.Models
 {
     public class PlayerRequest
     {
@@ -18,7 +18,7 @@ namespace KikoleApi.Domain.Models
 
         public IReadOnlyList<string> AllowedNames { get; set; }
 
-        public IReadOnlyList<ClubRequest> Clubs { get; set; }
+        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
 
         internal string IsValid()
         {

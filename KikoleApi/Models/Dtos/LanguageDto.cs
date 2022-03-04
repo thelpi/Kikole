@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace KikoleApi.Domain.Models.Dtos
+namespace KikoleApi.Models.Dtos
 {
     internal class LanguageDto
     {
-        public long Id { get; set; }
+        public ulong Id { get; set; }
 
         public string Code { get; set; }
 

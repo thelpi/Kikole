@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using KikoleApi.Abstractions;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
@@ -67,9 +68,9 @@ namespace KikoleApi.Repositories
             }
         }
 
-        protected async Task<long> GetLastInsertedIdAsync()
+        protected async Task<ulong> GetLastInsertedIdAsync()
         {
-            return await ExecuteScalarAsync<long>("SELECT LAST_INSERT_ID()", null)
+            return await ExecuteScalarAsync<ulong>("SELECT LAST_INSERT_ID()", null)
                 .ConfigureAwait(false);
         }
 

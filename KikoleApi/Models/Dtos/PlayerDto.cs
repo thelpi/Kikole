@@ -1,12 +1,14 @@
 ﻿using System;
 
-namespace KikoleApi.Domain.Models.Dtos
+namespace KikoleApi.Models.Dtos
 {
     public class PlayerDto
     {
         public ulong Id { get; set; }
 
         public string Name { get; set; }
+
+        public string AllowedNames { get; set; }
 
         public uint YearOfBirth { get; set; }
 

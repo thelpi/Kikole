@@ -1,11 +1,12 @@
-﻿using KikoleApi.Repositories;
+﻿using KikoleApi.Abstractions;
+using KikoleApi.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KikoleApi
+namespace KikoleApi.Bootstrap
 {
     public class Startup
     {
@@ -28,6 +29,7 @@ namespace KikoleApi
 
             services
                 .AddSingleton<IPlayerRepository, PlayerRepository>()
+                .AddSingleton<IClubRepository, ClubRepository>()
                 .AddSingleton<IClock, Clock>();
         }
 
