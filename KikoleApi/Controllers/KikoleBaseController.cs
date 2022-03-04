@@ -14,12 +14,17 @@ namespace KikoleApi.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        protected bool IsAdminAuthentification()
+        {
+            return true;
+        }
+
         protected bool IsFaultedAuthentication()
         {
             return false;
         }
 
-        protected ulong? GetAuthenticatedPlayer()
+        protected ulong? GetAuthenticatedUser()
         {
             return null;
         }

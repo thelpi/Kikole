@@ -109,7 +109,7 @@ namespace KikoleApi.Controllers
                 playerClubs,
                 playerClubsDetails);
 
-            var userId = GetAuthenticatedPlayer();
+            var userId = GetAuthenticatedUser();
             if (userId.HasValue)
             {
                 await _proposalRepository
