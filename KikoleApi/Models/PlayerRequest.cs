@@ -67,7 +67,7 @@ namespace KikoleApi.Models
                 Country2Id = (ulong?)SecondCountry,
                 Name = Name,
                 ProposalDate = ProposalDate,
-                YearOfBirth = (uint)DateOfBirth.Year,
+                YearOfBirth = (ushort)DateOfBirth.Year,
                 AllowedNames = AllowedNames.SanitizeJoin(Name)
             };
         }

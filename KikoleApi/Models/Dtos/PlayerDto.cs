@@ -10,7 +10,7 @@ namespace KikoleApi.Models.Dtos
 
         public string AllowedNames { get; set; }
 
-        public uint YearOfBirth { get; set; }
+        public ushort YearOfBirth { get; set; }
 
         public ulong Country1Id { get; set; }
 

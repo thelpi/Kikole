@@ -1,16 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using KikoleApi.Models.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
 {
-    [Route("proposals")]
     public class ProposalController : KikoleBaseController
     {
         private readonly IProposalRepository _proposalRepository;
@@ -28,10 +26,53 @@ namespace KikoleApi.Controllers
             _clubRepository = clubRepository;
         }
 
-        [HttpPost]
+        [HttpPut("club-proposals")]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<ProposalResponse>> SubmitProposalAsync([FromBody] ProposalRequest request)
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitClubProposalAsync([FromBody] ClubProposalRequest request)
+        {
+            return await SubmitProposalAsync(request).ConfigureAwait(false);
+        }
+
+        [HttpPut("year-proposals")]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitYearProposalAsync([FromBody] YearProposalRequest request)
+        {
+            return await SubmitProposalAsync(request).ConfigureAwait(false);
+        }
+
+        [HttpPut("name-proposals")]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitNameProposalAsync([FromBody] NameProposalRequest request)
+        {
+            return await SubmitProposalAsync(request).ConfigureAwait(false);
+        }
+
+        [HttpPut("country-proposals")]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitCountryProposalAsync([FromBody] CountryProposalRequest request)
+        {
+            return await SubmitProposalAsync(request).ConfigureAwait(false);
+        }
+
+        [HttpPut("clue-proposals")]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitClueProposalAsync([FromBody] ClueProposalRequest request)
+        {
+            return await SubmitProposalAsync(request).ConfigureAwait(false);
+        }
+
+        private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request)
+            where T : BaseProposalRequest
         {
             if (IsFaultedAuthentication())
                 return Unauthorized();
@@ -54,56 +95,32 @@ namespace KikoleApi.Controllers
                 .GetPlayerClubsAsync(todayPlayer.Id)
                 .ConfigureAwait(false);
 
-            var successful = false;
-            var value = request.Value;
-            switch (request.ProposalType)
+            var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
+            foreach (var pc in playerClubs)
             {
-                case ProposalType.Club:
-                    foreach (var pc in playerClubs)
-                    {
-                        var c = await _clubRepository
-                            .GetClubAsync(pc.ClubId)
-                            .ConfigureAwait(false);
-                        if (c.AllowedNames.Contains(value.Sanitize()))
-                        {
-                            successful = true;
-                            break;
-                        }
-                    }
-                    break;
-                case ProposalType.Clue:
-                    successful = true;
-                    var clubId = playerClubs.OrderBy(pc => pc.ImportancePosition).First().ClubId;
-                    var club = await _clubRepository
-                        .GetClubAsync(clubId)
-                        .ConfigureAwait(false);
-                    value = club.Name;
-                    break;
-                case ProposalType.Country:
-                    var countryId = (ulong)Enum.Parse<Country>(value);
-                    successful = todayPlayer.Country1Id == countryId
-                        || todayPlayer.Country2Id == countryId;
-                    break;
-                case ProposalType.Name:
-                    successful = todayPlayer.AllowedNames.Contains(value.Sanitize());
-                    break;
-                case ProposalType.Year:
-                    successful = int.Parse(value) == todayPlayer.YearOfBirth;
-                    break;
+                var c = await _clubRepository
+                    .GetClubAsync(pc.ClubId)
+                    .ConfigureAwait(false);
+                playerClubsDetails.Add(c);
             }
 
-            var userid = GetAuthenticatedPlayer();
-            if (userid.HasValue)
+            var successful = request.IsSuccessful(
+                todayPlayer,
+                playerClubs,
+                playerClubsDetails);
+
+            var userId = GetAuthenticatedPlayer();
+            if (userId.HasValue)
             {
                 await _proposalRepository
-                    .CreateProposalAsync(request.ToDto(userid.Value, successful))
+                    .CreateProposalAsync(request.ToDto(userId.Value, successful))
                     .ConfigureAwait(false);
             }
 
             return Ok(new ProposalResponse
             {
                 Successful = successful,
-                Value = value
+                Value = request.Value
             });
         }
     }

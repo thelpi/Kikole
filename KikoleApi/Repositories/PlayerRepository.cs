@@ -44,7 +44,7 @@ namespace KikoleApi.Repositories
         {
             return await GetDtoAsync<PlayerDto>(
                     "players",
-                    ("proposal_date", date))
+                    ("proposal_date", date.Date))
                 .ConfigureAwait(false);
         }
 
