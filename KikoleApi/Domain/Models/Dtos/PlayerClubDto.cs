@@ -1,6 +1,6 @@
 ﻿namespace KikoleApi.Domain.Models.Dtos
 {
-    internal class PlayerClubDto
+    public class PlayerClubDto
     {
         public long PlayerId { get; set; }
 

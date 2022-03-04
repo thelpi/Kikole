@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KikoleApi.Domain.Models
 {
@@ -14,19 +16,45 @@ namespace KikoleApi.Domain.Models
 
         public DateTime? ProposalDate { get; set; }
 
-        public string[] AllowedNames { get; set; }
+        public IReadOnlyList<string> AllowedNames { get; set; }
 
-        public ClubRequest[] Clubs { get; set; }
+        public IReadOnlyList<ClubRequest> Clubs { get; set; }
 
-        public class ClubRequest
+        internal string IsValid()
         {
-            public string Name { get; set; }
+            if (string.IsNullOrWhiteSpace(Name))
+                return "Invalid name";
 
-            public byte HistoryPosition { get; set; }
+            if (!Enum.IsDefined(typeof(Country), Country))
+                return "Invalid country";
 
-            public byte ImportancePosition { get; set; }
+            if (SecondCountry.HasValue)
+            {
+                if (!Enum.IsDefined(typeof(Country), SecondCountry.Value))
+                    return "Invalid second country";
 
-            public string[] AllowedNames { get; set; }
+                if (Country == SecondCountry.Value)
+                    return "Countries should be different";
+            }
+
+            if (!AllowedNames.IsValid())
+                return "Invalid allowed names";
+
+            if (Clubs == null || Clubs.Count == 0)
+                return "Empty clubs list";
+
+            if (Clubs.Any(c => c?.IsValid() != true))
+                return "At least one invalid club";
+
+            var iRange = Enumerable.Range(1, Clubs.Count);
+
+            if (!iRange.All(i => Clubs.Any(c => c.HistoryPosition == i)))
+                return "Invalid history positions sequence.";
+
+            if (!iRange.All(i => Clubs.Any(c => c.ImportancePosition == i)))
+                return "Invalid importance positions sequence.";
+
+            return null;
         }
     }
 }

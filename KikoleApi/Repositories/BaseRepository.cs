@@ -10,12 +10,15 @@ namespace KikoleApi.Repositories
 {
     public abstract class BaseRepository
     {
+        protected readonly IClock Clock;
+
         private readonly string _connectionString;
         private const string ConnectionStringName = "Kikole";
 
-        protected BaseRepository(IConfiguration configuration)
+        protected BaseRepository(IConfiguration configuration, IClock clock)
         {
             _connectionString = configuration.GetConnectionString(ConnectionStringName);
+            Clock = clock;
         }
 
         protected async Task ExecuteNonQueryAsync(string sql, object parameters)
@@ -31,9 +34,9 @@ namespace KikoleApi.Repositories
             }
         }
 
-        protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters)
+        protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters, T defaultValue = default(T))
         {
-            T result = default(T);
+            T result = defaultValue;
 
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -44,7 +47,8 @@ namespace KikoleApi.Repositories
                         commandType: CommandType.Text)
                     .ConfigureAwait(false);
 
-                result = results.FirstOrDefault();
+                if (results.Any())
+                    result = results.First();
             }
 
             return result;

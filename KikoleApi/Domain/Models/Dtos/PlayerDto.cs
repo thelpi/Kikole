@@ -2,7 +2,7 @@
 
 namespace KikoleApi.Domain.Models.Dtos
 {
-    internal class PlayerDto
+    public class PlayerDto
     {
         public ulong Id { get; set; }
 

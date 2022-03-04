@@ -4,24 +4,24 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
-    public class PlayerRepository : BaseRepository
+    public class PlayerRepository : BaseRepository, IPlayerRepository
     {
-        public PlayerRepository(IConfiguration configuration)
-            : base(configuration)
+        public PlayerRepository(IConfiguration configuration, IClock clock)
+            : base(configuration, clock)
         { }
 
-        internal async Task<long> CreatePlayerAsync(PlayerDto player)
+        public async Task<long> CreatePlayerAsync(PlayerDto player)
         {
             await ExecuteInsertAsync(
                     "players",
                     new[] { "name", "year_of_birth", "country1_id", "country2_id", "proposal_date", "creation_date" },
-                    new object[] { player.Name, player.YearOfBirth, player.Country1Id, player.Country2Id, player.ProposalDate, System.DateTime.Now })
+                    new object[] { player.Name, player.YearOfBirth, player.Country1Id, player.Country2Id, player.ProposalDate, Clock.Now })
                 .ConfigureAwait(false);
 
             return await GetLastInsertedIdAsync().ConfigureAwait(false);
         }
 
-        internal async Task CreatePlayerNamesAsync(PlayerNameDto playerName)
+        public async Task CreatePlayerNamesAsync(PlayerNameDto playerName)
         {
             await ExecuteInsertAsync(
                     "player_names",
@@ -30,7 +30,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        internal async Task CreatePlayerClubsAsync(PlayerClubDto playerClub)
+        public async Task CreatePlayerClubsAsync(PlayerClubDto playerClub)
         {
             await ExecuteInsertAsync(
                     "player_clubs",

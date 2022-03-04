@@ -26,7 +26,9 @@ namespace KikoleApi
 
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-            services.AddSingleton<PlayerRepository>();
+            services
+                .AddSingleton<IPlayerRepository, PlayerRepository>()
+                .AddSingleton<IClock, Clock>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
