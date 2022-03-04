@@ -2,22 +2,27 @@
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
 {
     [Route("players")]
-    public class PlayerController : ControllerBase
+    public class PlayerController : KikoleBaseController
     {
         private readonly IPlayerRepository _playerRepository;
 
-        public PlayerController(IPlayerRepository playerRepository)
+        public PlayerController(IPlayerRepository playerRepository,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _playerRepository = playerRepository;
         }
 
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreatePlayerAsync([FromBody] PlayerRequest request)
         {
             if (request == null)

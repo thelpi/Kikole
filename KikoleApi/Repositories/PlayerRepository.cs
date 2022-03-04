@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -15,8 +17,13 @@ namespace KikoleApi.Repositories
         {
             await ExecuteInsertAsync(
                     "players",
-                    new[] { "name", "allowed_names", "year_of_birth", "country1_id", "country2_id", "proposal_date", "creation_date" },
-                    new object[] { player.Name, player.AllowedNames, player.YearOfBirth, player.Country1Id, player.Country2Id, player.ProposalDate, Clock.Now })
+                    ("name", player.Name),
+                    ("allowed_names", player.AllowedNames),
+                    ("year_of_birth", player.YearOfBirth),
+                    ("country1_id", player.Country1Id),
+                    ("country2_id", player.Country2Id),
+                    ("proposal_date", player.ProposalDate),
+                    ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
 
             return await GetLastInsertedIdAsync().ConfigureAwait(false);
@@ -26,8 +33,26 @@ namespace KikoleApi.Repositories
         {
             await ExecuteInsertAsync(
                     "player_clubs",
-                    new[] { "player_id", "club_id", "history_position", "importance_position" },
-                    new object[] { playerClub.PlayerId, playerClub.ClubId, playerClub.HistoryPosition, playerClub.ImportancePosition })
+                    ("player_id", playerClub.PlayerId),
+                    ("club_id", playerClub.ClubId),
+                    ("history_position", playerClub.HistoryPosition),
+                    ("importance_position", playerClub.ImportancePosition))
+                .ConfigureAwait(false);
+        }
+
+        public async Task<PlayerDto> GetTodayPlayerAsync(DateTime date)
+        {
+            return await GetDtoAsync<PlayerDto>(
+                    "players",
+                    ("proposal_date", date))
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId)
+        {
+            return await GetDtosAsync<PlayerClubDto>(
+                    "player_clubs",
+                    ("player_id", playerId))
                 .ConfigureAwait(false);
         }
     }

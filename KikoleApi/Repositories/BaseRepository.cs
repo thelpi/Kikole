@@ -55,7 +55,7 @@ namespace KikoleApi.Repositories
             return result;
         }
 
-        protected async Task<IReadOnlyCollection<T>> ExecuteReaderAsync<T>(string sql, object parameters)
+        protected async Task<IReadOnlyList<T>> ExecuteReaderAsync<T>(string sql, object parameters)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -74,15 +74,46 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        protected async Task ExecuteInsertAsync(string table, string[] columns, object[] values)
+        protected async Task ExecuteInsertAsync(string table, params (string column, object value)[] columns)
         {
-            var sql = $"INSERT INTO {table} ({string.Join(", ", columns)}) VALUES ({string.Join(", ", columns.Select(c => $"@{c}"))})";
+            await ExecuteNonQueryAsync(
+                    GetBasicInsertSql(table, columns),
+                    GetDynamicParameters(columns))
+                .ConfigureAwait(false);
+        }
 
+        protected async Task<T> GetDtoAsync<T>(string table, params (string column, object value)[] conditions)
+        {
+            return await ExecuteScalarAsync<T>(
+                    GetBasicSelectSql(table, conditions),
+                    GetDynamicParameters(conditions))
+                .ConfigureAwait(false);
+        }
+
+        protected async Task<IReadOnlyList<T>> GetDtosAsync<T>(string table, params (string column, object value)[] conditions)
+        {
+            return await ExecuteReaderAsync<T>(
+                    GetBasicSelectSql(table, conditions),
+                    GetDynamicParameters(conditions))
+                .ConfigureAwait(false);
+        }
+
+        private static string GetBasicSelectSql(string table, (string column, object value)[] conditions)
+        {
+            return $"SELECT * FROM {table} WHERE {string.Join(" AND ", conditions.Select(c => $"{c.column} = @{c.column}"))}";
+        }
+
+        private static string GetBasicInsertSql(string table, (string column, object value)[] columns)
+        {
+            return $"INSERT INTO {table} ({string.Join(", ", columns.Select(c => c.column))}) VALUES ({string.Join(", ", columns.Select(c => $"@{c.column}"))})";
+        }
+
+        private static DynamicParameters GetDynamicParameters((string column, object value)[] conditions)
+        {
             var parameters = new DynamicParameters();
-            for (var i = 0; i < columns.Length; i++)
-                parameters.Add(columns[i], values[i]);
-
-            await ExecuteNonQueryAsync(sql, parameters).ConfigureAwait(false);
+            for (var i = 0; i < conditions.Length; i++)
+                parameters.Add(conditions[i].column, conditions[i].value);
+            return parameters;
         }
     }
 }

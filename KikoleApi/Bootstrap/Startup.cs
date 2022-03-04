@@ -31,7 +31,9 @@ namespace KikoleApi.Bootstrap
             services
                 .AddSingleton<IPlayerRepository, PlayerRepository>()
                 .AddSingleton<IClubRepository, ClubRepository>()
-                .AddSingleton<IClock, Clock>();
+                .AddSingleton<IClock, Clock>()
+                .AddSingleton<IProposalRepository, ProposalRepository>()
+                .AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

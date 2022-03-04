@@ -6,5 +6,7 @@ namespace KikoleApi.Interfaces
     public interface IClubRepository
     {
         Task<ulong> CreateClubAsync(ClubDto club);
+
+        Task<ClubDto> GetClubAsync(ulong clubId);
     }
 }

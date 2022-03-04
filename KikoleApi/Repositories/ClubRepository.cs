@@ -15,11 +15,20 @@ namespace KikoleApi.Repositories
         {
             await ExecuteInsertAsync(
                     "clubs",
-                    new[] { "name", "allowed_names", "creation_date" },
-                    new object[] { club.Name, club.AllowedNames, Clock.Now })
+                    ("name", club.Name),
+                    ("allowed_names", club.AllowedNames),
+                    ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
 
             return await GetLastInsertedIdAsync().ConfigureAwait(false);
+        }
+
+        public async Task<ClubDto> GetClubAsync(ulong clubId)
+        {
+            return await GetDtoAsync<ClubDto>(
+                    "clubs",
+                    ("id", clubId))
+                .ConfigureAwait(false);
         }
     }
 }

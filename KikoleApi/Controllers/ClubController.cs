@@ -2,22 +2,27 @@
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
 {
     [Route("clubs")]
-    public class ClubController : ControllerBase
+    public class ClubController : KikoleBaseController
     {
         private readonly IClubRepository _clubRepository;
 
-        public ClubController(IClubRepository clubRepository)
+        public ClubController(IClubRepository clubRepository,
+            IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _clubRepository = clubRepository;
         }
 
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateClubAsync([FromBody] ClubRequest request)
         {
             if (request == null)

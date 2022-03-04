@@ -72,7 +72,7 @@ namespace KikoleApi.Models
             };
         }
 
-        internal IReadOnlyCollection<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
+        internal IReadOnlyList<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
         {
             return Clubs
                 .Select(c => c.ToDto(playerId))
