@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using KikoleApi.Models.Dtos;
 
-namespace KikoleApi.Abstractions
+namespace KikoleApi.Interfaces
 {
     public interface IClubRepository
     {

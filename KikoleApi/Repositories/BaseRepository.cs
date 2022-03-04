@@ -3,7 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using KikoleApi.Abstractions;
+using KikoleApi.Interfaces;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 

@@ -1,4 +1,6 @@
-﻿namespace KikoleApi.Models
+﻿using KikoleApi.Models.Dtos;
+
+namespace KikoleApi.Models
 {
     public class PlayerClubRequest
     {
@@ -13,6 +15,17 @@
             return ClubId >= 0
                 && HistoryPosition > 0
                 && ImportancePosition > 0;
+        }
+
+        internal PlayerClubDto ToDto(ulong playerId)
+        {
+            return new PlayerClubDto
+            {
+                HistoryPosition = HistoryPosition,
+                ImportancePosition = ImportancePosition,
+                ClubId = ClubId,
+                PlayerId = playerId
+            };
         }
     }
 }

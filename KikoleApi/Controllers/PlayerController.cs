@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using KikoleApi.Abstractions;
+using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,7 +34,7 @@ namespace KikoleApi.Controllers
             if (playerId == 0)
                 return StatusCode((int)HttpStatusCode.InternalServerError, "Player creation failure");
             
-            foreach (var club in request.Clubs.ToDtos(playerId))
+            foreach (var club in request.ToPlayerClubDtos(playerId))
             {
                 await _playerRepository
                     .CreatePlayerClubsAsync(club)

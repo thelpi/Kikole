@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KikoleApi.Abstractions
+namespace KikoleApi.Interfaces
 {
     public interface IClock
     {

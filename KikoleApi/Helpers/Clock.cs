@@ -1,7 +1,7 @@
 ﻿using System;
-using KikoleApi.Abstractions;
+using KikoleApi.Interfaces;
 
-namespace KikoleApi
+namespace KikoleApi.Helpers
 {
     public class Clock : IClock
     {

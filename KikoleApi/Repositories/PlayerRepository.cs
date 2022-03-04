@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using KikoleApi.Abstractions;
+using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
-using KikoleApi.Abstractions;
+using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using Microsoft.AspNetCore.Mvc;
 

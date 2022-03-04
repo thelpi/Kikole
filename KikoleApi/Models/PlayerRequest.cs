@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleApi.Helpers;
+using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
 {
@@ -55,6 +57,26 @@ namespace KikoleApi.Models
                 return "Invalid importance positions sequence.";
 
             return null;
+        }
+
+        internal PlayerDto ToDto()
+        {
+            return new PlayerDto
+            {
+                Country1Id = (ulong)Country,
+                Country2Id = (ulong?)SecondCountry,
+                Name = Name,
+                ProposalDate = ProposalDate,
+                YearOfBirth = (uint)DateOfBirth.Year,
+                AllowedNames = AllowedNames.SanitizeJoin(Name)
+            };
+        }
+
+        internal IReadOnlyCollection<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
+        {
+            return Clubs
+                .Select(c => c.ToDto(playerId))
+                .ToList();
         }
     }
 }

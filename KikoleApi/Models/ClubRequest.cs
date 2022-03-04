@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using KikoleApi.Helpers;
+using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
 {
@@ -17,6 +19,15 @@ namespace KikoleApi.Models
                 return "Invalid allowed names";
 
             return null;
+        }
+
+        internal ClubDto ToDto()
+        {
+            return new ClubDto
+            {
+                AllowedNames = AllowedNames.SanitizeJoin(Name),
+                Name = Name
+            };
         }
     }
 }
