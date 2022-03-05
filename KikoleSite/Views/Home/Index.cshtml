@@ -36,7 +36,7 @@
                         </div>
                         <div>
                             @Html.TextBoxFor(m => m.SelectedValueClub, new { @style = "width: 300px" })
-                            <input type="submit" value="Submit" name="submit-Club" />
+                            <input type="submit" value="Submit" name="submit-Club" style="visibility:hidden" />
                         </div>
                         <div style="font-size: small">(notice you can enter names forever, regardless as if the whole career has been found already)</div>
                     </div>
@@ -97,14 +97,18 @@
                     </div>
                     <div style="font-size: small">(this will give you the club where the player has played the most in his career)</div>
                 </div>
-
+            </form>
+            <form method="post" action="/">
+                <input type="hidden" name="ClubsOkSerializedOutput" value="@Model.ClubsOkSerializedInput" />
+                <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
+                <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
                 <div style="margin-top: 30px">
                     <div>
                         <label style="color:crimson">Submit your player here:</label>
                     </div>
                     <div>
                         @Html.TextBoxFor(m => m.SelectedValueName, new { @style = "width: 300px" })
-                        <input type="submit" value="Submit" name="submit-Name" />
+                        <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
                     </div>
                 </div>
             </form>
