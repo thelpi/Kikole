@@ -15,6 +15,7 @@
         <div style="margin-top: 5px">
             <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.NameOkSubmitted</span>. Come back tomorrow for a new player!</label>
         </div>
+        <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
     }
     else
     {
@@ -24,39 +25,39 @@
                 <label style="color:crimson">Your guess is wrong!</label>
             </div>
         }
-            <form method="post" action="/">
-                <input type="hidden" name="ClubsOkSerializedOutput" value="@Model.ClubsOkSerializedInput" />
-                <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
-                <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
-
-                <fieldset style="margin-top: 30px">
+        <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+        <form method="post" action="/">
+            <input type="hidden" name="ClubsOkSerializedOutput" value="@Model.ClubsOkSerializedInput" />
+            <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
+            <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
+            <input type="hidden" name="Points" value="@Model.Points" />
+            <fieldset style="margin-top: 30px">
+                <div>
                     <div>
-                        <div>
-                            <label>Enters the name of a club:</label>
-                        </div>
-                        <div>
-                            @Html.TextBoxFor(m => m.SelectedValueClub, new { @style = "width: 300px" })
-                            <input type="submit" value="Submit" name="submit-Club" style="visibility:hidden" />
-                        </div>
-                        <div style="font-size: small">(notice you can enter names forever, regardless as if the whole career has been found already)</div>
+                        <label>Enters the name of a club:</label>
                     </div>
-                    @if (Model.ClubsOkSubmitted?.Count > 0)
-                    {
-                        <div style="margin-top: 15px">
-                            <label>Career club so far:</label>
-                            <ul>
-                                @foreach (var club in Model.ClubsOkSubmitted)
-                                {
-                                    <li>@club.Name</li>
-                                }
-                            </ul>
-                        </div>
-                        <div style="font-size: small">(clubs are chronologic, but a missing club might be between two clubs found)</div>
-                        <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
-                    }
-                </fieldset>
+                    <div>
+                        @Html.TextBoxFor(m => m.SelectedValueClub, new { @style = "width: 300px" })
+                        <input type="submit" value="Submit" name="submit-Club" style="visibility:hidden" />
+                    </div>
+                    <div style="font-size: small">(notice you can enter names forever, regardless as if the whole career has been found already)</div>
+                </div>
+                @if (Model.ClubsOkSubmitted?.Count > 0)
+                {
+                    <div style="margin-top: 15px">
+                        <label>Career club so far:</label>
+                        <ul>
+                            @foreach (var club in Model.ClubsOkSubmitted)
+                            {
+                                <li>@string.Format("{0} - {1}", club.HistoryPosition, club.Name)</li>
+                            }
+                        </ul>
+                    </div>
+                    <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
+                }
+            </fieldset>
 
-                @*<div style="padding-top: 5px; padding-bottom: 5px">
+            @*<div style="padding-top: 5px; padding-bottom: 5px">
                     @if (string.IsNullOrWhiteSpace(Model.YearOkSubmitted))
                     {
                         <label style="width: 150px">Guess birth year:</label>
@@ -70,47 +71,48 @@
                     }
                 </div>*@
 
-                <div style="margin-top: 30px">
-                    <div>
-                        <label>Nationality:</label>
-                    </div>
-                    @if (string.IsNullOrWhiteSpace(Model.CountryOkSubmitted))
-                    {
-                        <div>
-                            @Html.DropDownListFor(m => m.SelectedValueCountry, Model.Countries.Select(x => new SelectListItem(x.Value, x.Key.ToString())), new { @style = "width: 300px" })
-                            <input type="submit" value="Submit" name="submit-Country" />
-                        </div>
-                        <div style="font-size: small">(for players with double nationality, it's the one with int. selections)</div>
-                        <div style="font-size: small">(in case above but the player has no selection, both nationality are considered OK)</div>
-                    }
-                    else
-                    {
-                        <div>
-                            <label>@Model.CountryOkSubmitted</label>
-                        </div>
-                    }
+            <div style="margin-top: 30px">
+                <div>
+                    <label>Nationality:</label>
                 </div>
-                
-                <div style="margin-top: 30px">
+                @if (string.IsNullOrWhiteSpace(Model.CountryOkSubmitted))
+                {
                     <div>
-                        <input type="submit" value="I need help, give me a clue!" name="submit-Clue" style="width: 300px" />
+                        @Html.DropDownListFor(m => m.SelectedValueCountry, Model.Countries.Select(x => new SelectListItem(x.Value, x.Key.ToString())), new { @style = "width: 300px" })
+                        <input type="submit" value="Submit" name="submit-Country" />
                     </div>
-                    <div style="font-size: small">(this will give you the club where the player has played the most in his career)</div>
+                    <div style="font-size: small">(for players with double nationality, it's the one with int. selections)</div>
+                    <div style="font-size: small">(in case above but the player has no selection, both nationality are considered OK)</div>
+                }
+                else
+                {
+                    <div>
+                        <label>@Model.CountryOkSubmitted</label>
+                    </div>
+                }
+            </div>
+
+            <div style="margin-top: 30px">
+                <div>
+                    <input type="submit" value="I need help, give me a clue!" name="submit-Clue" style="width: 300px" />
                 </div>
-            </form>
-            <form method="post" action="/">
-                <input type="hidden" name="ClubsOkSerializedOutput" value="@Model.ClubsOkSerializedInput" />
-                <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
-                <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
-                <div style="margin-top: 30px">
-                    <div>
-                        <label style="color:crimson">Submit your player here:</label>
-                    </div>
-                    <div>
-                        @Html.TextBoxFor(m => m.SelectedValueName, new { @style = "width: 300px" })
-                        <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
-                    </div>
+                <div style="font-size: small">(this will give you the club where the player has played the most in his career)</div>
+            </div>
+        </form>
+        <form method="post" action="/">
+            <input type="hidden" name="ClubsOkSerializedOutput" value="@Model.ClubsOkSerializedInput" />
+            <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
+            <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
+            <input type="hidden" name="Points" value="@Model.Points" />
+            <div style="margin-top: 30px">
+                <div>
+                    <label style="color:crimson">Submit your player here:</label>
                 </div>
-            </form>
+                <div>
+                    @Html.TextBoxFor(m => m.SelectedValueName, new { @style = "width: 300px" })
+                    <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
+                </div>
+            </div>
+        </form>
     }
 </div>

@@ -20,7 +20,8 @@ namespace KikoleSite.Controllers
         {
             var model = new MainModel
             {
-                Countries = Constants.Countries
+                Countries = Constants.Countries,
+                Points = 1000
             };
 
             return View(model);
@@ -66,6 +67,10 @@ namespace KikoleSite.Controllers
                 {
                     case ProposalType.Club:
                     case ProposalType.Clue:
+                        if (proposalType == ProposalType.Clue)
+                        {
+                            model.RemovePoints(500);
+                        }
                         var clubSubmissions = model.ClubsOkSubmitted ?? new List<PlayerClub>();
                         if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
                         {
@@ -79,13 +84,29 @@ namespace KikoleSite.Controllers
                         model.ClubsOkSubmitted = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                         break;
                     case ProposalType.Country:
-                        model.CountryOkSubmitted = response.Value.ToString();
+                        model.CountryOkSubmitted = Constants.Countries.First(c => c.Key.ToString() == response.Value.ToString()).Value;
                         break;
                     case ProposalType.Name:
                         model.NameOkSubmitted = response.Value.ToString();
                         break;
                     case ProposalType.Year:
                         model.YearOkSubmitted = response.Value.ToString();
+                        break;
+                }
+            }
+            else
+            {
+                switch (proposalType)
+                {
+                    case ProposalType.Club:
+                    case ProposalType.Country:
+                        model.RemovePoints(100);
+                        break;
+                    case ProposalType.Name:
+                        model.RemovePoints(200);
+                        break;
+                    case ProposalType.Year:
+                        model.RemovePoints(50);
                         break;
                 }
             }

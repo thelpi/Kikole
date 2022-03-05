@@ -9,6 +9,7 @@ namespace KikoleSite.Models
             ? null
             : string.Join(';', ClubsOkSubmitted.Select(cc => $"{cc.Name}§{cc.HistoryPosition}§{cc.ImportancePosition}"));
 
+        public int Points { get; set; }
         public string ClubsOkSerializedOutput { get; set; }
         public bool HasWrongGuess { get; set; }
         public string YearOkSubmitted { get; set; }
@@ -21,6 +22,12 @@ namespace KikoleSite.Models
         public string SelectedValueClub { get; set; }
         public string SelectedValueYear { get; set; }
         public IReadOnlyDictionary<Country, string> Countries { get; set; }
+
+        internal void RemovePoints(int ptsToRemove)
+        {
+            Points -= ptsToRemove;
+            Points = Points < 0 ? 0 : Points;
+        }
 
         internal List<PlayerClub> ToClubsOkSubmitted()
         {
