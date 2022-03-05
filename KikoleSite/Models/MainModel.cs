@@ -20,7 +20,7 @@ namespace KikoleSite.Models
         public string SelectedValueName { get; set; }
         public string SelectedValueClub { get; set; }
         public string SelectedValueYear { get; set; }
-        public Dictionary<Country, string> Countries { get; set; }
+        public IReadOnlyDictionary<Country, string> Countries { get; set; }
 
         internal List<PlayerClub> ToClubsOkSubmitted()
         {

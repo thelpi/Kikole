@@ -20,7 +20,7 @@ namespace KikoleSite.Controllers
         {
             var model = new MainModel
             {
-                Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToDictionary(c => c, c => c.ToString())
+                Countries = Constants.Countries
             };
 
             return View(model);
@@ -58,7 +58,7 @@ namespace KikoleSite.Controllers
             model.SelectedValueCountry = Country.AF;
             model.SelectedValueName = null;
             model.SelectedValueYear = null;
-            model.Countries = Enum.GetValues(typeof(Country)).Cast<Country>().ToDictionary(c => c, c => c.ToString());
+            model.Countries = Constants.Countries;
 
             if (response.Successful)
             {
