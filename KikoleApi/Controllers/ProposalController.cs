@@ -104,26 +104,20 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            var successfulValue = request.IsSuccessful(
+            request.CheckSuccessful(
                 todayPlayer,
                 playerClubs,
                 playerClubsDetails);
-
-            var successful = !string.IsNullOrWhiteSpace(successfulValue);
 
             var userId = GetAuthenticatedUser();
             if (userId.HasValue)
             {
                 await _proposalRepository
-                    .CreateProposalAsync(request.ToDto(userId.Value, successful))
+                    .CreateProposalAsync(request.ToDto(userId.Value))
                     .ConfigureAwait(false);
             }
 
-            return Ok(new ProposalResponse
-            {
-                Successful = successful,
-                Value = successfulValue
-            });
+            return Ok(new ProposalResponse(request));
         }
     }
 }

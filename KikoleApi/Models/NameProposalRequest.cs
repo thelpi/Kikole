@@ -8,14 +8,12 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Name;
 
-        internal override string IsSuccessful(PlayerDto player,
+        internal override void CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var ok = player.AllowedNames.Contains(Value.Sanitize());
-            return ok
-                ? player.Name
-                : null;
+            Successful = player.AllowedNames.Contains(Value.Sanitize());
+            SuccessfulValue = Successful ? player.Name : null;
         }
     }
 }

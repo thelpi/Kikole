@@ -29,6 +29,8 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(MainModel model)
         {
+            model.ClubsOkSubmitted = model.ToClubsOkSubmitted();
+
             var proposalType = Enum.Parse<ProposalType>(
                 HttpContext.Request.Form.Keys.Single(x => x.StartsWith("submit-")).Split('-')[1]);
 
@@ -64,18 +66,26 @@ namespace KikoleSite.Controllers
                 {
                     case ProposalType.Club:
                     case ProposalType.Clue:
-                        var clubSubmissions = model.ClubsOkSubmitted?.Split(';')?.ToList() ?? new List<string>();
-                        clubSubmissions.Add(response.Value);
-                        model.ClubsOkSubmitted = string.Join(';', clubSubmissions.Distinct().ToList());
+                        var clubSubmissions = model.ClubsOkSubmitted ?? new List<PlayerClub>();
+                        if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
+                        {
+                            clubSubmissions.Add(new PlayerClub
+                            {
+                                HistoryPosition = response.Value.historyPosition,
+                                ImportancePosition = response.Value.importancePosition,
+                                Name = response.Value.name.ToString()
+                            });
+                        }
+                        model.ClubsOkSubmitted = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                         break;
                     case ProposalType.Country:
-                        model.CountryOkSubmitted = response.Value;
+                        model.CountryOkSubmitted = response.Value.ToString();
                         break;
                     case ProposalType.Name:
-                        model.NameOkSubmitted = response.Value;
+                        model.NameOkSubmitted = response.Value.ToString();
                         break;
                     case ProposalType.Year:
-                        model.YearOkSubmitted = response.Value;
+                        model.YearOkSubmitted = response.Value.ToString();
                         break;
                 }
             }

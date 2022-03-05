@@ -16,7 +16,7 @@
             </div>
         }
             <form method="post" action="/">
-                <input type="hidden" name="ClubsOkSubmitted" value="@Model.ClubsOkSubmitted" />
+                <input type="hidden" name="ClubsOkSerializedOutput" value="@Model.ClubsOkSerializedInput" />
                 <input type="hidden" name="CountryOkSubmitted" value="@Model.CountryOkSubmitted" />
                 <input type="hidden" name="YearOkSubmitted" value="@Model.YearOkSubmitted" />
                 <div style="padding-top: 5px; padding-bottom: 5px">
@@ -45,11 +45,16 @@
                         <label style="width: 150px">@Model.CountryOkSubmitted</label>
                     }
                 </div>
-                @if (!string.IsNullOrWhiteSpace(Model.ClubsOkSubmitted))
+                @if (Model.ClubsOkSubmitted?.Count > 0)
                 {
                     <div style="padding-top: 5px; padding-bottom: 5px">
                         <label style="width: 150px">Career club so far:</label>
-                        @Html.DropDownListFor(m => m.ClubsOkCurrentlySelected, new SelectList(Model.ClubsOkSubmitted.Split(';')), new { @style = "width: 150px" })
+                        <ul style="width: 150px">
+                            @foreach (var club in Model.ClubsOkSubmitted)
+                            {
+                                <li>@club.Name</li>
+                            }
+                        </ul>
                     </div>
                 }
                 <div style="padding-top: 5px; padding-bottom: 5px">
