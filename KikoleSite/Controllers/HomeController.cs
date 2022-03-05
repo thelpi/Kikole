@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleSite.Controllers
@@ -18,6 +19,10 @@ namespace KikoleSite.Controllers
 
         public IActionResult Index()
         {
+            var context = HttpContext;
+            var toto = Request;
+            var tutu = Response;
+
             var model = new MainModel
             {
                 Countries = Constants.Countries,
@@ -112,6 +117,17 @@ namespace KikoleSite.Controllers
             }
 
             return View(model);
+        }
+
+        private void AddCookie(string cookieName, string cookieValue, DateTime expiration)
+        {
+            var option = new CookieOptions
+            {
+                Expires = expiration,
+                IsEssential = true,
+                Secure = false
+            };
+            Response.Cookies.Append(cookieName, cookieValue, option);
         }
     }
 }
