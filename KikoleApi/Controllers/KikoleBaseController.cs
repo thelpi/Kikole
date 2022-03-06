@@ -46,11 +46,7 @@ namespace KikoleApi.Controllers
             if (_disableAuthorization)
                 return null;
 
-            var (id, isAdmin, isFaulted) = ExtractAuthTokenHeaderInfo();
-
-            return isFaulted
-                ? default(ulong?)
-                : id;
+            return ExtractAuthTokenHeaderInfo().id;
         }
 
         private string GetAuthTokenHeaderValue()
@@ -68,18 +64,18 @@ namespace KikoleApi.Controllers
                 : values[0].Trim();
         }
 
-        private (ulong id, bool isAdmin, bool isFaulted) ExtractAuthTokenHeaderInfo()
+        private (ulong? id, bool isAdmin, bool isFaulted) ExtractAuthTokenHeaderInfo()
         {
             var token = GetAuthTokenHeaderValue();
 
             if (string.IsNullOrWhiteSpace(token))
-                return (0, false, false);
+                return (null, false, false);
 
             var tokenParts = token.Split('_', StringSplitOptions.RemoveEmptyEntries);
             if (tokenParts.Length != 3
                 || !ulong.TryParse(tokenParts[0], out var userId)
                 || !byte.TryParse(tokenParts[1], out var isAdmin))
-                return (0, false, true);
+                return (null, false, true);
 
             return (userId, isAdmin > 0, !Crypter.Encrypt($"{userId}_{isAdmin}").Equals(tokenParts[2]));
         }

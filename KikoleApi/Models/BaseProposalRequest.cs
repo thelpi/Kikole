@@ -31,7 +31,7 @@ namespace KikoleApi.Models
                 ProposalDate = ProposalDate,
                 Successful = (byte)(successful ? 1 : 0),
                 UserId = userId,
-                Value = Value.ToString(),
+                Value = Value?.ToString(),
                 ProposalTypeId = (ulong)ProposalType
             };
         }
