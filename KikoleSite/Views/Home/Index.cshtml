@@ -1,9 +1,9 @@
 ﻿@model MainModel
 <div>
-    <fieldset title="How to play?" style="margin-top: 10px">
+    <fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
         <span style="color: crimson">"Kikole?"</span> is a game where you have to guess a new football player every single day.<br />
         The way to do this is to figure out in which clubs he played (or currently plays) during his career.<br />
-        You can also try to guess his nationality.<br />
+        You can also try to guess his nationality or his birth year.<br />
         <ul>
             <li>The player can be active or retired.</li>
             <li>All text submissions are case-insensitive and diacritics is ignored.</li>
@@ -15,6 +15,7 @@
             <li>Asking for the clue costs 500 points</li>
             <li>An incorrect player proposition costs 200 points</li>
             <li>An incorrect club or country proposition costs 100 points</li>
+            <li>An incorrect year proposition costs 50 points</li>
             <li>A good guess on any category costs no points</li>
         </ul>
     </fieldset>
@@ -29,16 +30,16 @@
     {
         if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay))
         {
-        <div style="margin-top: 5px">
-            @if (Model.IsErrorMessage)
-            {
-                <label style="color:crimson">@Model.MessageToDisplay</label>
-            }
-            else
-            {
-                <label style="color:forestgreen">@Model.MessageToDisplay</label>
-            }
-        </div>
+            <div style="margin-top: 5px">
+                @if (Model.IsErrorMessage)
+                {
+                    <label style="color:crimson">@Model.MessageToDisplay</label>
+                }
+                else
+                {
+                    <label style="color:forestgreen">@Model.MessageToDisplay</label>
+                }
+            </div>
         }
         <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
         <form method="post" action="/">
@@ -67,7 +68,8 @@
                     <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
                 }
             </fieldset>
-
+        </form>
+        <form method="post" action="/">
             <div style="margin-top: 30px">
                 <div>
                     <label>Nationality:</label>
@@ -88,16 +90,29 @@
                     </div>
                 }
             </div>
-
-            <div style="margin-top: 30px">
-                <div>
-                    <input type="submit" value="I need help, give me a clue!" name="submit-Clue" style="width: 300px" />
-                </div>
-                <div style="font-size: small">(this will give you the club where the player has played the most in his career)</div>
-            </div>
         </form>
         <form method="post" action="/">
             <div style="margin-top: 30px">
+                <div>
+                    <label>Year of birth:</label>
+                </div>
+                @if (string.IsNullOrWhiteSpace(Model.BirthYear))
+                {
+                    <div>
+                        @Html.DropDownListFor(m => m.BirthYearSubmission, Enumerable.Range(1900, 110).Select(x => new SelectListItem(x.ToString(), x.ToString())), new { @style = "width: 300px" })
+                        <input type="submit" value="Submit" name="submit-Year" />
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <label>@Model.BirthYear</label>
+                    </div>
+                }
+            </div>
+        </form>
+        <form method="post" action="/">
+            <div style="margin-top: 50px">
                 <div>
                     <label style="color:crimson">Submit your player here:</label>
                 </div>
@@ -105,6 +120,14 @@
                     @Html.TextBoxFor(m => m.PlayerNameSubmission, new { @style = "width: 300px" })
                     <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
                 </div>
+            </div>
+        </form>
+        <form method="post" action="/">
+            <div style="margin-top: 50px">
+                <div>
+                    <input type="submit" value="I need help, give me a clue!" name="submit-Clue" style="width: 300px" />
+                </div>
+                <div style="font-size: small">(this will give you the club where the player has played the most in his career)</div>
             </div>
         </form>
     }

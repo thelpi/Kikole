@@ -17,6 +17,7 @@ namespace KikoleSite.Controllers
         const int CluePointsRemoval = 500;
         const int NamePointsRemoval = 200;
         const int DefaultPointsRemoval = 100;
+        const int YearPointsRemoval = 50;
 
         private readonly ApiProvider _apiProvider;
 
@@ -50,6 +51,7 @@ namespace KikoleSite.Controllers
                 case ProposalType.Club: value = model.ClubNameSubmission; break;
                 case ProposalType.Country: value = model.CountryNameSubmission; break;
                 case ProposalType.Name: value = model.PlayerNameSubmission; break;
+                case ProposalType.Year: value = model.BirthYearSubmission; break;
             }
 
             var response = await _apiProvider
@@ -69,7 +71,7 @@ namespace KikoleSite.Controllers
                 ? "A clue has been given in career clubs section"
                 : (response.Successful
                     ? $"Valid {proposalType} guess"
-                    : $"Invalid {proposalType} guess");
+                    : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
 
             if (response.Successful)
             {
@@ -99,6 +101,9 @@ namespace KikoleSite.Controllers
                     case ProposalType.Name:
                         model.PlayerName = response.Value.ToString();
                         break;
+                    case ProposalType.Year:
+                        model.BirthYear = response.Value.ToString();
+                        break;
                 }
             }
             else
@@ -111,6 +116,9 @@ namespace KikoleSite.Controllers
                         break;
                     case ProposalType.Name:
                         model.RemovePoints(NamePointsRemoval);
+                        break;
+                    case ProposalType.Year:
+                        model.RemovePoints(YearPointsRemoval);
                         break;
                 }
             }

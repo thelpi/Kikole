@@ -8,6 +8,7 @@ namespace KikoleSite.Models
         public string MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }
 
+        public string BirthYear { get; set; }
         public string PlayerName { get; set; }
         public string CountryName { get; set; }
         public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
@@ -15,6 +16,7 @@ namespace KikoleSite.Models
         public string ClubNameSubmission { get; set; }
         public string PlayerNameSubmission { get; set; }
         public string CountryNameSubmission { get; set; }
+        public string BirthYearSubmission { get; set; }
 
         internal MainModel ClearNonPersistentData()
         {
@@ -23,6 +25,7 @@ namespace KikoleSite.Models
             IsErrorMessage = false;
             MessageToDisplay = null;
             PlayerNameSubmission = null;
+            BirthYearSubmission = null;
             return this;
         }
 
