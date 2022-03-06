@@ -2,9 +2,9 @@
 
 namespace KikoleSite
 {
-    internal static class Constants
+    public static class Constants
     {
-        internal static readonly IReadOnlyDictionary<Country, string> Countries = new Dictionary<Country, string>
+        public static readonly IReadOnlyDictionary<Country, string> Countries = new Dictionary<Country, string>
         {
             { Country.AF, "Afghanistan" },
             { Country.AX, "Åland Islands" },

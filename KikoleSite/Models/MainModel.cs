@@ -21,7 +21,6 @@ namespace KikoleSite.Models
         public string SelectedValueName { get; set; }
         public string SelectedValueClub { get; set; }
         public string SelectedValueYear { get; set; }
-        public IReadOnlyDictionary<Country, string> Countries { get; set; }
 
         internal void RemovePoints(int ptsToRemove)
         {

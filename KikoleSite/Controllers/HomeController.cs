@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace KikoleSite.Controllers
 {
     public class HomeController : Controller
     {
+        private const string CookieName = "KikoleKooKie";
+
         private readonly ApiProvider _apiProvider;
 
         public HomeController(ApiProvider apiProvider)
@@ -19,13 +22,8 @@ namespace KikoleSite.Controllers
 
         public IActionResult Index()
         {
-            var context = HttpContext;
-            var toto = Request;
-            var tutu = Response;
-
-            var model = new MainModel
+            var model = GetModelCookie() ?? new MainModel
             {
-                Countries = Constants.Countries,
                 Points = 1000
             };
 
@@ -64,7 +62,6 @@ namespace KikoleSite.Controllers
             model.SelectedValueCountry = Country.AF;
             model.SelectedValueName = null;
             model.SelectedValueYear = null;
-            model.Countries = Constants.Countries;
 
             if (response.Successful)
             {
@@ -116,11 +113,14 @@ namespace KikoleSite.Controllers
                 }
             }
 
+            SetModelCookie(model);
+
             return View(model);
         }
 
-        private void AddCookie(string cookieName, string cookieValue, DateTime expiration)
+        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
         {
+            Response.Cookies.Delete(cookieName);
             var option = new CookieOptions
             {
                 Expires = expiration,
@@ -128,6 +128,24 @@ namespace KikoleSite.Controllers
                 Secure = false
             };
             Response.Cookies.Append(cookieName, cookieValue, option);
+        }
+
+        private MainModel GetModelCookie()
+        {
+            if (Request.Cookies.TryGetValue(CookieName, out string cookieValue))
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<MainModel>(cookieValue);
+                }
+                catch { }
+            }
+            return null;
+        }
+
+        private void SetModelCookie(MainModel model)
+        {
+            SetCookie(CookieName, JsonConvert.SerializeObject(model), DateTime.Now.AddDays(1).Date);
         }
     }
 }
