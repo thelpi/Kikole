@@ -11,5 +11,7 @@
         public string PasswordResetAnswer { get; set; }
 
         public ulong LanguageId { get; set; }
+
+        public byte IsAdmin { get; set; }
     }
 }

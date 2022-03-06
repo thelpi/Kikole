@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
@@ -52,6 +53,34 @@ namespace KikoleApi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, "User creation failure");
 
             return Created($"users/{userId}", null);
+        }
+
+        [HttpGet("{login}/authentication-tokens")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<string>> GetAuthenticationTokenAsync(
+            [FromRoute] string login,
+            [FromQuery][Required] string password)
+        {
+            if (string.IsNullOrWhiteSpace(login))
+                return BadRequest("Invalid request: empty login");
+
+            if (string.IsNullOrWhiteSpace(password))
+                return BadRequest("Invalid request: empty password");
+
+            var existingUser = await _userRepository
+                .GetUserByLoginAsync(login.Sanitize())
+                .ConfigureAwait(false);
+
+            if (existingUser == null)
+                return NotFound();
+
+            if (!_crypter.Encrypt(password).Equals(existingUser.Password))
+                return Unauthorized();
+
+            return _crypter.Encrypt(existingUser.Id.ToString());
         }
     }
 }
