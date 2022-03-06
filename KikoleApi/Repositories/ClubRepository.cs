@@ -13,14 +13,12 @@ namespace KikoleApi.Repositories
 
         public async Task<ulong> CreateClubAsync(ClubDto club)
         {
-            await ExecuteInsertAsync(
+            return await ExecuteInsertAsync(
                     "clubs",
                     ("name", club.Name),
                     ("allowed_names", club.AllowedNames),
                     ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
-
-            return await GetLastInsertedIdAsync().ConfigureAwait(false);
         }
 
         public async Task<ClubDto> GetClubAsync(ulong clubId)

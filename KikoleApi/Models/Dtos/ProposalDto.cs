@@ -2,10 +2,8 @@
 
 namespace KikoleApi.Models.Dtos
 {
-    public class ProposalDto
+    public class ProposalDto : BaseDto
     {
-        public ulong Id { get; set; }
-
         public ulong UserId { get; set; }
 
         public ulong ProposalTypeId { get; set; }

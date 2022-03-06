@@ -13,16 +13,15 @@ namespace KikoleApi.Repositories
 
         public async Task<ulong> CreateProposalAsync(ProposalDto proposal)
         {
-            await ExecuteInsertAsync(
+            return await ExecuteInsertAsync(
                     "proposals",
                     ("user_id", proposal.UserId),
                     ("proposal_type_id", proposal.ProposalTypeId),
                     ("value", proposal.Value),
                     ("successful", proposal.Successful),
-                    ("proposal_date", proposal.ProposalDate))
+                    ("proposal_date", proposal.ProposalDate),
+                    ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
-
-            return await GetLastInsertedIdAsync().ConfigureAwait(false);
         }
     }
 }

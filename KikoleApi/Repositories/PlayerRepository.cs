@@ -15,7 +15,7 @@ namespace KikoleApi.Repositories
 
         public async Task<ulong> CreatePlayerAsync(PlayerDto player)
         {
-            await ExecuteInsertAsync(
+            return await ExecuteInsertAsync(
                     "players",
                     ("name", player.Name),
                     ("allowed_names", player.AllowedNames),
@@ -25,8 +25,6 @@ namespace KikoleApi.Repositories
                     ("proposal_date", player.ProposalDate),
                     ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
-
-            return await GetLastInsertedIdAsync().ConfigureAwait(false);
         }
 
         public async Task CreatePlayerClubsAsync(PlayerClubDto playerClub)

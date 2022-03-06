@@ -1,17 +1,9 @@
-﻿using System;
-
-namespace KikoleApi.Models.Dtos
+﻿namespace KikoleApi.Models.Dtos
 {
-    internal class LanguageDto
+    internal class LanguageDto : BaseDto
     {
-        public ulong Id { get; set; }
-
         public string Code { get; set; }
 
         public string Name { get; set; }
-
-        public DateTime CreationDate { get; set; }
-
-        public DateTime UpdateDate { get; set; }
     }
 }

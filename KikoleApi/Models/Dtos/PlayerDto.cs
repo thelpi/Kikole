@@ -2,10 +2,8 @@
 
 namespace KikoleApi.Models.Dtos
 {
-    public class PlayerDto
+    public class PlayerDto : BaseDto
     {
-        public ulong Id { get; set; }
-
         public string Name { get; set; }
 
         public string AllowedNames { get; set; }
@@ -17,9 +15,5 @@ namespace KikoleApi.Models.Dtos
         public ulong? Country2Id { get; set; }
 
         public DateTime? ProposalDate { get; set; }
-
-        public DateTime CreationDate { get; set; }
-
-        public DateTime UpdateDate { get; set; }
     }
 }

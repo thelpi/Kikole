@@ -33,6 +33,8 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IClubRepository, ClubRepository>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton<IProposalRepository, ProposalRepository>()
+                .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<ICrypter, Crypter>()
                 .AddHttpContextAccessor();
         }
 

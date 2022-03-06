@@ -22,6 +22,27 @@ namespace KikoleApi.Repositories
             Clock = clock;
         }
 
+        protected async Task<ulong> ExecuteNonQueryAndGetInsertedIdAsync(string sql, object parameters)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                await connection
+                    .QueryAsync(
+                        sql,
+                        parameters,
+                        commandType: CommandType.Text)
+                    .ConfigureAwait(false);
+
+                var results = await connection
+                    .QueryAsync<ulong>(
+                        "SELECT LAST_INSERT_ID()",
+                        commandType: CommandType.Text)
+                    .ConfigureAwait(false);
+
+                return results.FirstOrDefault();
+            }
+        }
+
         protected async Task ExecuteNonQueryAsync(string sql, object parameters)
         {
             using (var connection = new MySqlConnection(_connectionString))
@@ -68,15 +89,9 @@ namespace KikoleApi.Repositories
             }
         }
 
-        protected async Task<ulong> GetLastInsertedIdAsync()
+        protected async Task<ulong> ExecuteInsertAsync(string table, params (string column, object value)[] columns)
         {
-            return await ExecuteScalarAsync<ulong>("SELECT LAST_INSERT_ID()", null)
-                .ConfigureAwait(false);
-        }
-
-        protected async Task ExecuteInsertAsync(string table, params (string column, object value)[] columns)
-        {
-            await ExecuteNonQueryAsync(
+            return await ExecuteNonQueryAndGetInsertedIdAsync(
                     GetBasicInsertSql(table, columns),
                     GetDynamicParameters(columns))
                 .ConfigureAwait(false);
