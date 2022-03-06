@@ -2,14 +2,10 @@
 {
     public class ProposalResponse
     {
-        public bool Successful { get; }
+        public bool Successful { get; set; }
 
-        public object Value { get; }
+        public object Value { get; set; }
 
-        internal ProposalResponse(BaseProposalRequest request)
-        {
-            Successful = request.Successful;
-            Value = request.SuccessfulValue;
-        }
+        public string Tip { get; set; }
     }
 }

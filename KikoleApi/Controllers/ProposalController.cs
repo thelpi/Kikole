@@ -107,7 +107,7 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            request.CheckSuccessful(
+            var response = request.CheckSuccessful(
                 todayPlayer,
                 playerClubs,
                 playerClubsDetails);
@@ -116,11 +116,11 @@ namespace KikoleApi.Controllers
             if (userId.HasValue)
             {
                 await _proposalRepository
-                    .CreateProposalAsync(request.ToDto(userId.Value))
+                    .CreateProposalAsync(request.ToDto(userId.Value, response.Successful))
                     .ConfigureAwait(false);
             }
 
-            return Ok(new ProposalResponse(request));
+            return Ok(response);
         }
     }
 }

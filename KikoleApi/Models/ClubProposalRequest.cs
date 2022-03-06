@@ -9,16 +9,19 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Club;
 
-        internal override void CheckSuccessful(PlayerDto player,
+        internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
             var c = clubs.FirstOrDefault(_ => _.AllowedNames.Contains(Value.Sanitize()));
 
-            Successful = c != null;
-            SuccessfulValue = Successful
-                ? new PlayerClub(c, playerClubs.First(_ => _.ClubId == c.Id))
-                : null;
+            return new ProposalResponse
+            {
+                Successful = c != null,
+                Value = c != null
+                    ? new PlayerClub(c, playerClubs.First(_ => _.ClubId == c.Id))
+                    : null
+            };
         }
     }
 }

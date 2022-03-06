@@ -12,11 +12,7 @@ namespace KikoleApi.Models
 
         internal abstract ProposalType ProposalType { get; }
 
-        internal protected bool Successful { get; protected set; }
-
-        internal protected object SuccessfulValue { get; protected set; }
-
-        internal abstract void CheckSuccessful(PlayerDto player,
+        internal abstract ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs);
 
@@ -28,12 +24,12 @@ namespace KikoleApi.Models
             return null;
         }
 
-        internal virtual ProposalDto ToDto(ulong userId)
+        internal virtual ProposalDto ToDto(ulong userId, bool successful)
         {
             return new ProposalDto
             {
                 ProposalDate = ProposalDate,
-                Successful = (byte)(Successful ? 1 : 0),
+                Successful = (byte)(successful ? 1 : 0),
                 UserId = userId,
                 Value = Value.ToString(),
                 ProposalTypeId = (ulong)ProposalType

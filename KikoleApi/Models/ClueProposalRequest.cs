@@ -8,16 +8,17 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Clue;
 
-        internal override void CheckSuccessful(PlayerDto player,
+        internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            Successful = true;
-
             var pc = playerClubs.OrderBy(_ => _.ImportancePosition).First();
             var c = clubs.First(_ => _.Id == pc.ClubId);
-
-            SuccessfulValue = new PlayerClub(c, pc);
+            return new ProposalResponse
+            {
+                Successful = true,
+                Value = new PlayerClub(c, pc)
+            };
         }
 
         internal override string IsValid()
