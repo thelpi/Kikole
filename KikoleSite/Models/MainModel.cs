@@ -1,46 +1,35 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace KikoleSite.Models
 {
     public class MainModel
     {
-        public string ClubsOkSerializedInput => ClubsOkSubmitted == null
-            ? null
-            : string.Join(';', ClubsOkSubmitted.Select(cc => $"{cc.Name}§{cc.HistoryPosition}§{cc.ImportancePosition}"));
-
         public int Points { get; set; }
-        public string ClubsOkSerializedOutput { get; set; }
-        public bool HasWrongGuess { get; set; }
-        public string YearOkSubmitted { get; set; }
-        public string CountryOkSubmitted { get; set; }
-        public string NameOkSubmitted { get; set; }
-        public List<PlayerClub> ClubsOkSubmitted { get; set; }
-        public string ClubsOkCurrentlySelected { get; set; }
-        public Country SelectedValueCountry { get; set; }
-        public string SelectedValueName { get; set; }
-        public string SelectedValueClub { get; set; }
-        public string SelectedValueYear { get; set; }
+        public string MessageToDisplay { get; set; }
+        public bool IsErrorMessage { get; set; }
+
+        public string PlayerName { get; set; }
+        public string CountryName { get; set; }
+        public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
+
+        public string ClubNameSubmission { get; set; }
+        public string PlayerNameSubmission { get; set; }
+        public string CountryNameSubmission { get; set; }
+
+        internal MainModel ClearNonPersistentData()
+        {
+            ClubNameSubmission = null;
+            CountryNameSubmission = null;
+            IsErrorMessage = false;
+            MessageToDisplay = null;
+            PlayerNameSubmission = null;
+            return this;
+        }
 
         internal void RemovePoints(int ptsToRemove)
         {
             Points -= ptsToRemove;
             Points = Points < 0 ? 0 : Points;
-        }
-
-        internal List<PlayerClub> ToClubsOkSubmitted()
-        {
-            return ClubsOkSerializedOutput == null
-                ? null
-                : ClubsOkSerializedOutput
-                    .Split(';')
-                    .Select(_ => new PlayerClub
-                    {
-                        HistoryPosition = byte.Parse(_.Split('§')[1]),
-                        ImportancePosition = byte.Parse(_.Split('§')[2]),
-                        Name = _.Split('§')[0]
-                    })
-                    .ToList();
         }
     }
 }

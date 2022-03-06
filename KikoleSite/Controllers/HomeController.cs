@@ -11,7 +11,12 @@ namespace KikoleSite.Controllers
 {
     public class HomeController : Controller
     {
-        private const string CookieName = "KikoleKooKie";
+        const string CookieName = "SubmissionForm";
+
+        const int BasePoints = 1000;
+        const int CluePointsRemoval = 500;
+        const int NamePointsRemoval = 200;
+        const int DefaultPointsRemoval = 100;
 
         private readonly ApiProvider _apiProvider;
 
@@ -22,10 +27,13 @@ namespace KikoleSite.Controllers
 
         public IActionResult Index()
         {
-            var model = GetModelCookie() ?? new MainModel
-            {
-                Points = 1000
-            };
+            var model = GetSubmissionFormCookie()?.ClearNonPersistentData()
+                ?? new MainModel
+                {
+                    Points = BasePoints
+                };
+
+            SetSubmissionFormCookie(model);
 
             return View(model);
         }
@@ -33,18 +41,15 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(MainModel model)
         {
-            model.ClubsOkSubmitted = model.ToClubsOkSubmitted();
-
             var proposalType = Enum.Parse<ProposalType>(
                 HttpContext.Request.Form.Keys.Single(x => x.StartsWith("submit-")).Split('-')[1]);
 
             string value = null;
             switch (proposalType)
             {
-                case ProposalType.Club: value = model.SelectedValueClub; break;
-                case ProposalType.Country: value = model.SelectedValueCountry.ToString(); break;
-                case ProposalType.Name: value = model.SelectedValueName; break;
-                case ProposalType.Year: value = model.SelectedValueYear; break;
+                case ProposalType.Club: value = model.ClubNameSubmission; break;
+                case ProposalType.Country: value = model.CountryNameSubmission; break;
+                case ProposalType.Name: value = model.PlayerNameSubmission; break;
             }
 
             var response = await _apiProvider
@@ -57,11 +62,14 @@ namespace KikoleSite.Controllers
                     proposalType)
                 .ConfigureAwait(false);
 
-            model.HasWrongGuess = !response.Successful;
-            model.SelectedValueClub = null;
-            model.SelectedValueCountry = Country.AF;
-            model.SelectedValueName = null;
-            model.SelectedValueYear = null;
+            model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
+
+            model.IsErrorMessage = !response.Successful;
+            model.MessageToDisplay = proposalType == ProposalType.Clue
+                ? "A clue has been given in career clubs section"
+                : (response.Successful
+                    ? $"Valid {proposalType} guess"
+                    : $"Invalid {proposalType} guess");
 
             if (response.Successful)
             {
@@ -71,9 +79,9 @@ namespace KikoleSite.Controllers
                     case ProposalType.Clue:
                         if (proposalType == ProposalType.Clue)
                         {
-                            model.RemovePoints(500);
+                            model.RemovePoints(CluePointsRemoval);
                         }
-                        var clubSubmissions = model.ClubsOkSubmitted ?? new List<PlayerClub>();
+                        var clubSubmissions = model.KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
                         if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
                         {
                             clubSubmissions.Add(new PlayerClub
@@ -83,16 +91,13 @@ namespace KikoleSite.Controllers
                                 Name = response.Value.name.ToString()
                             });
                         }
-                        model.ClubsOkSubmitted = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
+                        model.KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                         break;
                     case ProposalType.Country:
-                        model.CountryOkSubmitted = Constants.Countries.First(c => c.Key.ToString() == response.Value.ToString()).Value;
+                        model.CountryName = Constants.Countries.First(c => c.Key.ToString() == response.Value.ToString()).Value;
                         break;
                     case ProposalType.Name:
-                        model.NameOkSubmitted = response.Value.ToString();
-                        break;
-                    case ProposalType.Year:
-                        model.YearOkSubmitted = response.Value.ToString();
+                        model.PlayerName = response.Value.ToString();
                         break;
                 }
             }
@@ -102,18 +107,15 @@ namespace KikoleSite.Controllers
                 {
                     case ProposalType.Club:
                     case ProposalType.Country:
-                        model.RemovePoints(100);
+                        model.RemovePoints(DefaultPointsRemoval);
                         break;
                     case ProposalType.Name:
-                        model.RemovePoints(200);
-                        break;
-                    case ProposalType.Year:
-                        model.RemovePoints(50);
+                        model.RemovePoints(NamePointsRemoval);
                         break;
                 }
             }
 
-            SetModelCookie(model);
+            SetSubmissionFormCookie(model);
 
             return View(model);
         }
@@ -130,7 +132,7 @@ namespace KikoleSite.Controllers
             Response.Cookies.Append(cookieName, cookieValue, option);
         }
 
-        private MainModel GetModelCookie()
+        private MainModel GetSubmissionFormCookie()
         {
             if (Request.Cookies.TryGetValue(CookieName, out string cookieValue))
             {
@@ -143,7 +145,7 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private void SetModelCookie(MainModel model)
+        private void SetSubmissionFormCookie(MainModel model)
         {
             SetCookie(CookieName, JsonConvert.SerializeObject(model), DateTime.Now.AddDays(1).Date);
         }
