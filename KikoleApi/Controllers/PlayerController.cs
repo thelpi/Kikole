@@ -1,10 +1,9 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
+using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
@@ -13,25 +12,19 @@ namespace KikoleApi.Controllers
     {
         private readonly IPlayerRepository _playerRepository;
 
-        public PlayerController(IPlayerRepository playerRepository,
-            IHttpContextAccessor httpContextAccessor,
-            ICrypter crypter,
-            IConfiguration configuration)
-            : base(httpContextAccessor, crypter, configuration)
+        public PlayerController(IPlayerRepository playerRepository)
         {
             _playerRepository = playerRepository;
         }
 
         [HttpPost]
+        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> CreatePlayerAsync([FromBody] PlayerRequest request)
         {
-            if (!IsAdminAuthentification())
-                return Unauthorized();
-
             if (request == null)
                 return BadRequest("Invalid request: null");
 

@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
@@ -18,11 +17,7 @@ namespace KikoleApi.Controllers
 
         public ProposalController(IProposalRepository proposalRepository,
             IPlayerRepository playerRepository,
-            IClubRepository clubRepository,
-            IHttpContextAccessor httpContextAccessor,
-            ICrypter crypter,
-            IConfiguration configuration)
-            : base(httpContextAccessor, crypter, configuration)
+            IClubRepository clubRepository)
         {
             _proposalRepository = proposalRepository;
             _playerRepository = playerRepository;
@@ -30,56 +25,68 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("club-proposals")]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<ActionResult<ProposalResponse>> SubmitClubProposalAsync([FromBody] ClubProposalRequest request)
+        public async Task<ActionResult<ProposalResponse>> SubmitClubProposalAsync(
+            [FromBody] ClubProposalRequest request,
+            [FromQuery] ulong userId)
         {
-            return await SubmitProposalAsync(request).ConfigureAwait(false);
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
         [HttpPut("year-proposals")]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<ActionResult<ProposalResponse>> SubmitYearProposalAsync([FromBody] YearProposalRequest request)
+        public async Task<ActionResult<ProposalResponse>> SubmitYearProposalAsync(
+            [FromBody] YearProposalRequest request,
+            [FromQuery] ulong userId)
         {
-            return await SubmitProposalAsync(request).ConfigureAwait(false);
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
         [HttpPut("name-proposals")]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<ActionResult<ProposalResponse>> SubmitNameProposalAsync([FromBody] NameProposalRequest request)
+        public async Task<ActionResult<ProposalResponse>> SubmitNameProposalAsync(
+            [FromBody] NameProposalRequest request,
+            [FromQuery] ulong userId)
         {
-            return await SubmitProposalAsync(request).ConfigureAwait(false);
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
         [HttpPut("country-proposals")]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<ActionResult<ProposalResponse>> SubmitCountryProposalAsync([FromBody] CountryProposalRequest request)
+        public async Task<ActionResult<ProposalResponse>> SubmitCountryProposalAsync(
+            [FromBody] CountryProposalRequest request,
+            [FromQuery] ulong userId)
         {
-            return await SubmitProposalAsync(request).ConfigureAwait(false);
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
         [HttpPut("clue-proposals")]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<ActionResult<ProposalResponse>> SubmitClueProposalAsync([FromBody] ClueProposalRequest request)
+        public async Task<ActionResult<ProposalResponse>> SubmitClueProposalAsync(
+            [FromBody] ClueProposalRequest request,
+            [FromQuery] ulong userId)
         {
-            return await SubmitProposalAsync(request).ConfigureAwait(false);
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
-        private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request)
+        private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request,
+            ulong userId)
             where T : BaseProposalRequest
         {
-            if (IsFaultedAuthentication())
-                return Unauthorized();
-
             if (request == null)
                 return BadRequest("Invalid request: null");
 
@@ -111,12 +118,11 @@ namespace KikoleApi.Controllers
                 todayPlayer,
                 playerClubs,
                 playerClubsDetails);
-
-            var userId = GetAuthenticatedUser();
-            if (userId.HasValue)
+            
+            if (userId > 0)
             {
                 await _proposalRepository
-                    .CreateProposalAsync(request.ToDto(userId.Value, response.Successful))
+                    .CreateProposalAsync(request.ToDto(userId, response.Successful))
                     .ConfigureAwait(false);
             }
 

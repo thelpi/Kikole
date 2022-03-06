@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading.Tasks;
+using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
@@ -14,17 +13,16 @@ namespace KikoleApi.Controllers
     public class UserController : KikoleBaseController
     {
         private readonly IUserRepository _userRepository;
+        private readonly ICrypter _crypter;
 
-        public UserController(IUserRepository userRepository,
-            ICrypter crypter,
-            IHttpContextAccessor httpContextAccessor,
-            IConfiguration configuration)
-            : base(httpContextAccessor, crypter, configuration)
+        public UserController(IUserRepository userRepository, ICrypter crypter)
         {
             _userRepository = userRepository;
+            _crypter = crypter;
         }
 
         [HttpPost]
+        [AuthenticationLevel(AuthenticationLevel.None)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
@@ -46,7 +44,7 @@ namespace KikoleApi.Controllers
                 return Conflict("A account already exists with this login");
 
             var userId = await _userRepository
-                .CreateUserAsync(request.ToDto(Crypter))
+                .CreateUserAsync(request.ToDto(_crypter))
                 .ConfigureAwait(false);
 
             if (userId == 0)
@@ -56,6 +54,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("{login}/authentication-tokens")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -77,10 +76,10 @@ namespace KikoleApi.Controllers
             if (existingUser == null)
                 return NotFound();
 
-            if (!Crypter.Encrypt(password).Equals(existingUser.Password))
+            if (!_crypter.Encrypt(password).Equals(existingUser.Password))
                 return Unauthorized();
 
-            var encryptedCookiePart = Crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");
+            var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");
 
             return $"{existingUser.Id}_{existingUser.IsAdmin}_{encryptedCookiePart}";
         }

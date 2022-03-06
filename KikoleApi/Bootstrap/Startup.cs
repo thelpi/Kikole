@@ -1,4 +1,5 @@
-﻿using KikoleApi.Helpers;
+﻿using KikoleApi.Controllers.Filters;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -21,7 +22,13 @@ namespace KikoleApi.Bootstrap
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services
+                .AddMvc(options =>
+                {
+                    options.Filters.Add<AuthorizationFilter>();
+                    options.Filters.Add<ControllerErrorFilter>();
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen();

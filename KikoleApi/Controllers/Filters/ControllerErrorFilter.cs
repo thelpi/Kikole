@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleApi.Filters
+namespace KikoleApi.Controllers.Filters
 {
     public class ControllerErrorFilter : IExceptionFilter
     {
