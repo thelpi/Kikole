@@ -6,6 +6,7 @@ using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
@@ -18,8 +19,10 @@ namespace KikoleApi.Controllers
         public ProposalController(IProposalRepository proposalRepository,
             IPlayerRepository playerRepository,
             IClubRepository clubRepository,
-            IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ICrypter crypter,
+            IConfiguration configuration)
+            : base(httpContextAccessor, crypter, configuration)
         {
             _proposalRepository = proposalRepository;
             _playerRepository = playerRepository;

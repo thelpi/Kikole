@@ -4,6 +4,7 @@ using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
@@ -13,8 +14,10 @@ namespace KikoleApi.Controllers
         private readonly IPlayerRepository _playerRepository;
 
         public PlayerController(IPlayerRepository playerRepository,
-            IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ICrypter crypter,
+            IConfiguration configuration)
+            : base(httpContextAccessor, crypter, configuration)
         {
             _playerRepository = playerRepository;
         }

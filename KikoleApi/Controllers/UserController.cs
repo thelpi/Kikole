@@ -6,6 +6,7 @@ using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
@@ -13,15 +14,14 @@ namespace KikoleApi.Controllers
     public class UserController : KikoleBaseController
     {
         private readonly IUserRepository _userRepository;
-        private readonly ICrypter _crypter;
 
         public UserController(IUserRepository userRepository,
             ICrypter crypter,
-            IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IConfiguration configuration)
+            : base(httpContextAccessor, crypter, configuration)
         {
             _userRepository = userRepository;
-            _crypter = crypter;
         }
 
         [HttpPost]
@@ -46,7 +46,7 @@ namespace KikoleApi.Controllers
                 return Conflict("A account already exists with this login");
 
             var userId = await _userRepository
-                .CreateUserAsync(request.ToDto(_crypter))
+                .CreateUserAsync(request.ToDto(Crypter))
                 .ConfigureAwait(false);
 
             if (userId == 0)
@@ -77,10 +77,15 @@ namespace KikoleApi.Controllers
             if (existingUser == null)
                 return NotFound();
 
-            if (!_crypter.Encrypt(password).Equals(existingUser.Password))
+            if (!Crypter.Encrypt(password).Equals(existingUser.Password))
                 return Unauthorized();
 
-            return _crypter.Encrypt(existingUser.Id.ToString());
+            var encryptedCookiePart = Crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");
+
+            return $"{existingUser.Id}_{existingUser.IsAdmin}_{encryptedCookiePart}";
         }
+
+        // TODO: change password
+        // TODO: reset password with q&a
     }
 }

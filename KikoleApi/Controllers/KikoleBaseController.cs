@@ -1,40 +1,64 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using KikoleApi.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Controllers
 {
     public abstract class KikoleBaseController : ControllerBase
     {
-        const string AuthToken = "AuthToken";
+        const string AuthTokenHeader = "AuthToken";
 
         private readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly ICrypter Crypter;
+        private readonly bool _disableAuthorization;
 
-        protected KikoleBaseController(IHttpContextAccessor httpContextAccessor)
+        protected KikoleBaseController(IHttpContextAccessor httpContextAccessor,
+            ICrypter crypter,
+            IConfiguration configuration)
         {
             _httpContextAccessor = httpContextAccessor;
+            Crypter = crypter;
+            _disableAuthorization = configuration.GetValue<bool>("DisableAuthorization");
         }
 
         protected bool IsAdminAuthentification()
         {
-            return true;
+            if (_disableAuthorization)
+                return true;
+
+            var (_, isAdmin, isFaulted) = ExtractAuthTokenHeaderInfo();
+
+            return !isFaulted && isAdmin;
         }
 
         protected bool IsFaultedAuthentication()
         {
-            return false;
+            if (_disableAuthorization)
+                return false;
+
+            return ExtractAuthTokenHeaderInfo().isFaulted;
         }
 
         protected ulong? GetAuthenticatedUser()
         {
-            return null;
-        }
-
-        private string GetAuthTokenValue()
-        {
-            if (!_httpContextAccessor.HttpContext.Request.Headers.ContainsKey(AuthToken))
+            if (_disableAuthorization)
                 return null;
 
-            var values = _httpContextAccessor.HttpContext.Request.Headers[AuthToken];
+            var (id, isAdmin, isFaulted) = ExtractAuthTokenHeaderInfo();
+
+            return isFaulted
+                ? default(ulong?)
+                : id;
+        }
+
+        private string GetAuthTokenHeaderValue()
+        {
+            if (!_httpContextAccessor.HttpContext.Request.Headers.ContainsKey(AuthTokenHeader))
+                return null;
+
+            var values = _httpContextAccessor.HttpContext.Request.Headers[AuthTokenHeader];
 
             if (values.Count != 1)
                 return null;
@@ -42,6 +66,22 @@ namespace KikoleApi.Controllers
             return string.IsNullOrWhiteSpace(values[0])
                 ? null
                 : values[0].Trim();
+        }
+
+        private (ulong id, bool isAdmin, bool isFaulted) ExtractAuthTokenHeaderInfo()
+        {
+            var token = GetAuthTokenHeaderValue();
+
+            if (string.IsNullOrWhiteSpace(token))
+                return (0, false, false);
+
+            var tokenParts = token.Split('_', StringSplitOptions.RemoveEmptyEntries);
+            if (tokenParts.Length != 3
+                || !ulong.TryParse(tokenParts[0], out var userId)
+                || !byte.TryParse(tokenParts[1], out var isAdmin))
+                return (0, false, true);
+
+            return (userId, isAdmin > 0, !Crypter.Encrypt($"{userId}_{isAdmin}").Equals(tokenParts[2]));
         }
     }
 }
