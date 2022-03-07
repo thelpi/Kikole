@@ -6,6 +6,8 @@ namespace KikoleApi.Models
 {
     public class Club
     {
+        public ulong Id { get; set; }
+
         public string Name { get; set; }
 
         public IReadOnlyList<string> AllowedNames { get; set; }
@@ -16,6 +18,7 @@ namespace KikoleApi.Models
         {
             Name = dto.Name;
             AllowedNames = dto.AllowedNames.Disjoin();
+            Id = dto.Id;
         }
 
         internal string IsValid()
