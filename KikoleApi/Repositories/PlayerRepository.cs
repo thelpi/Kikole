@@ -22,7 +22,8 @@ namespace KikoleApi.Repositories
                     ("year_of_birth", player.YearOfBirth),
                     ("country_id", player.CountryId),
                     ("proposal_date", player.ProposalDate),
-                    ("creation_date", Clock.Now))
+                    ("creation_date", Clock.Now),
+                    ("clue", player.Clue))
                 .ConfigureAwait(false);
         }
 
