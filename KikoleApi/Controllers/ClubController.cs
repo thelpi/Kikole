@@ -23,13 +23,13 @@ namespace KikoleApi.Controllers
         [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
         [ProducesResponseType(typeof(IReadOnlyCollection<Club>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IReadOnlyCollection<Club>> GetClubsAsync()
+        public async Task<ActionResult<IReadOnlyCollection<Club>>> GetClubsAsync()
         {
             var clubs = await _clubRepository
                 .GetClubsAsync()
                 .ConfigureAwait(false);
 
-            return clubs.Select(c => new Club(c)).ToList();
+            return Ok(clubs.Select(c => new Club(c)).ToList());
         }
 
         [HttpPost]

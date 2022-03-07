@@ -36,12 +36,15 @@ namespace KikoleApi.Bootstrap
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
             services
+                // repositories
                 .AddSingleton<IPlayerRepository, PlayerRepository>()
                 .AddSingleton<IClubRepository, ClubRepository>()
-                .AddSingleton<IClock, Clock>()
                 .AddSingleton<IProposalRepository, ProposalRepository>()
                 .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<IInternationalRepository, InternationalRepository>()
+                // helpers
                 .AddSingleton<ICrypter, Crypter>()
+                .AddSingleton<IClock, Clock>()
                 .AddHttpContextAccessor();
         }
 

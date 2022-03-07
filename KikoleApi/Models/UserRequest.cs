@@ -25,7 +25,7 @@ namespace KikoleApi.Models
             if (string.IsNullOrWhiteSpace(Password))
                 return "Empty password";
 
-            if (Language.HasValue && !Enum.IsDefined(typeof(Language), Language))
+            if (Language.HasValue && !Enum.IsDefined(typeof(Language), Language.Value))
                 return "Invalid language";
 
             return null;
