@@ -115,7 +115,7 @@ namespace KikoleApi.Repositories
 
         private static string GetBasicSelectSql(string table, (string column, object value)[] conditions)
         {
-            return $"SELECT * FROM {table} WHERE {string.Join(" AND ", conditions.Select(c => $"{c.column} = @{c.column}"))}";
+            return $"SELECT * FROM {table} WHERE {(conditions?.Length > 0 ? string.Join(" AND ", conditions.Select(c => $"{c.column} = @{c.column}")) : "1=1")}";
         }
 
         private static string GetBasicInsertSql(string table, (string column, object value)[] columns)
@@ -125,6 +125,9 @@ namespace KikoleApi.Repositories
 
         private static DynamicParameters GetDynamicParameters((string column, object value)[] conditions)
         {
+            if (!(conditions?.Length > 0))
+                return null;
+
             var parameters = new DynamicParameters();
             for (var i = 0; i < conditions.Length; i++)
                 parameters.Add(conditions[i].column, conditions[i].value);

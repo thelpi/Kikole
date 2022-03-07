@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,13 @@ namespace KikoleApi.Repositories
             return await GetDtoAsync<ClubDto>(
                     "clubs",
                     ("id", clubId))
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ClubDto>> GetClubsAsync()
+        {
+            return await GetDtosAsync<ClubDto>(
+                    "clubs")
                 .ConfigureAwait(false);
         }
     }

@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
@@ -15,6 +17,19 @@ namespace KikoleApi.Controllers
         public ClubController(IClubRepository clubRepository)
         {
             _clubRepository = clubRepository;
+        }
+
+        [HttpGet]
+        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Club>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IReadOnlyCollection<Club>> GetClubsAsync()
+        {
+            var clubs = await _clubRepository
+                .GetClubsAsync()
+                .ConfigureAwait(false);
+
+            return clubs.Select(c => new Club(c)).ToList();
         }
 
         [HttpPost]

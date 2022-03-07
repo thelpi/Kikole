@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Interfaces
@@ -8,5 +9,7 @@ namespace KikoleApi.Interfaces
         Task<ulong> CreateClubAsync(ClubDto club);
 
         Task<ClubDto> GetClubAsync(ulong clubId);
+
+        Task<IReadOnlyCollection<ClubDto>> GetClubsAsync();
     }
 }
