@@ -14,7 +14,6 @@ namespace KikoleSite.Controllers
         const string CookieName = "SubmissionForm";
 
         const int BasePoints = 1000;
-        const int CluePointsRemoval = 500;
         const int NamePointsRemoval = 200;
         const int DefaultPointsRemoval = 100;
         const int YearPointsRemoval = 50;
@@ -68,7 +67,7 @@ namespace KikoleSite.Controllers
 
             model.IsErrorMessage = !response.Successful;
             model.MessageToDisplay = proposalType == ProposalType.Clue
-                ? "A clue has been given in career clubs section"
+                ? "A clue has been given, see below"
                 : (response.Successful
                     ? $"Valid {proposalType} guess"
                     : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
@@ -78,18 +77,12 @@ namespace KikoleSite.Controllers
                 switch (proposalType)
                 {
                     case ProposalType.Club:
-                    case ProposalType.Clue:
-                        if (proposalType == ProposalType.Clue)
-                        {
-                            model.RemovePoints(CluePointsRemoval);
-                        }
                         var clubSubmissions = model.KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
                         if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
                         {
                             clubSubmissions.Add(new PlayerClub
                             {
                                 HistoryPosition = response.Value.historyPosition,
-                                ImportancePosition = response.Value.importancePosition,
                                 Name = response.Value.name.ToString()
                             });
                         }
@@ -103,6 +96,10 @@ namespace KikoleSite.Controllers
                         break;
                     case ProposalType.Year:
                         model.BirthYear = response.Value.ToString();
+                        break;
+                    case ProposalType.Clue:
+                        model.RemovePoints(DefaultPointsRemoval);
+                        model.Clue = response.Value.ToString();
                         break;
                 }
             }

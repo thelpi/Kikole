@@ -12,21 +12,11 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var countryId = (ulong)Enum.Parse<Country>(Value);
-
-            var pr = new ProposalResponse
+            return new ProposalResponse
             {
-                Successful = true
+                Successful = player.CountryId == (ulong)Enum.Parse<Country>(Value),
+                Value = ((Country)player.CountryId).ToString()
             };
-
-            if (player.Country1Id == countryId)
-                pr.Value = ((Country)player.Country1Id).ToString();
-            else if (player.Country2Id == countryId)
-                pr.Value = ((Country)player.Country2Id).ToString();
-            else
-                pr.Successful = false;
-
-            return pr;
         }
 
         internal override string IsValid()

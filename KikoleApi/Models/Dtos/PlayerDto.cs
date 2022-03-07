@@ -10,10 +10,10 @@ namespace KikoleApi.Models.Dtos
 
         public ushort YearOfBirth { get; set; }
 
-        public ulong Country1Id { get; set; }
-
-        public ulong? Country2Id { get; set; }
+        public ulong CountryId { get; set; }
 
         public DateTime? ProposalDate { get; set; }
+
+        public string Clue { get; set; }
     }
 }

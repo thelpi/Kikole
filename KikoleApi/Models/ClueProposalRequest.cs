@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
@@ -12,12 +11,10 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var pc = playerClubs.OrderBy(_ => _.ImportancePosition).First();
-            var c = clubs.First(_ => _.Id == pc.ClubId);
             return new ProposalResponse
             {
                 Successful = true,
-                Value = new PlayerClub(c, pc)
+                Value = player.Clue
             };
         }
 

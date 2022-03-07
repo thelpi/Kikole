@@ -7,7 +7,5 @@
         public ulong ClubId { get; set; }
 
         public byte HistoryPosition { get; set; }
-
-        public byte ImportancePosition { get; set; }
     }
 }

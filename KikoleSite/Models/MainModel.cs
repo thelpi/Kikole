@@ -8,6 +8,7 @@ namespace KikoleSite.Models
         public string MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }
 
+        public string Clue { get; set; }
         public string BirthYear { get; set; }
         public string PlayerName { get; set; }
         public string CountryName { get; set; }

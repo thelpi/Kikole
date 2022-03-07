@@ -10,17 +10,17 @@ namespace KikoleApi.Models
     {
         public string Name { get; set; }
 
-        public DateTime DateOfBirth { get; set; }
-
+        public ushort YearOfBirth { get; set; }
+        
         public Country Country { get; set; }
-
-        public Country? SecondCountry { get; set; }
 
         public DateTime? ProposalDate { get; set; }
 
         public IReadOnlyList<string> AllowedNames { get; set; }
 
-        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
+        public IReadOnlyList<ulong> Clubs { get; set; }
+
+        public string Clue { get; set; }
 
         internal string IsValid()
         {
@@ -30,14 +30,8 @@ namespace KikoleApi.Models
             if (!Enum.IsDefined(typeof(Country), Country))
                 return "Invalid country";
 
-            if (SecondCountry.HasValue)
-            {
-                if (!Enum.IsDefined(typeof(Country), SecondCountry.Value))
-                    return "Invalid second country";
-
-                if (Country == SecondCountry.Value)
-                    return "Countries should be different";
-            }
+            if (YearOfBirth < 1900 || YearOfBirth > 2100)
+                return "Invalid year of birth";
 
             if (!AllowedNames.IsValid())
                 return "Invalid allowed names";
@@ -45,16 +39,11 @@ namespace KikoleApi.Models
             if (Clubs == null || Clubs.Count == 0)
                 return "Empty clubs list";
 
-            if (Clubs.Any(c => c?.IsValid() != true))
+            if (Clubs.Any(c => c <= 0))
                 return "At least one invalid club";
 
-            var iRange = Enumerable.Range(1, Clubs.Count);
-
-            if (!iRange.All(i => Clubs.Any(c => c.HistoryPosition == i)))
-                return "Invalid history positions sequence.";
-
-            if (!iRange.All(i => Clubs.Any(c => c.ImportancePosition == i)))
-                return "Invalid importance positions sequence.";
+            if (string.IsNullOrWhiteSpace(Clue))
+                return "Invalid clue";
 
             return null;
         }
@@ -63,19 +52,24 @@ namespace KikoleApi.Models
         {
             return new PlayerDto
             {
-                Country1Id = (ulong)Country,
-                Country2Id = (ulong?)SecondCountry,
+                CountryId = (ulong)Country,
                 Name = Name,
                 ProposalDate = ProposalDate,
-                YearOfBirth = (ushort)DateOfBirth.Year,
-                AllowedNames = AllowedNames.SanitizeJoin(Name)
+                YearOfBirth = YearOfBirth,
+                AllowedNames = AllowedNames.SanitizeJoin(Name),
+                Clue = Clue
             };
         }
 
         internal IReadOnlyList<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
         {
             return Clubs
-                .Select(c => c.ToDto(playerId))
+                .Select((c, i) => new PlayerClubDto
+                {
+                    HistoryPosition = (byte)(i + 1),
+                    ClubId = c,
+                    PlayerId = playerId
+                })
                 .ToList();
         }
     }

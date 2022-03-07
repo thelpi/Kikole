@@ -12,7 +12,7 @@
         Score is computed with following rules:
         <ul>
             <li>You start with <span style="color: crimson">1000</span> points</li>
-            <li>Asking for the clue costs 500 points</li>
+            <li>Asking for the clue costs 100 points</li>
             <li>An incorrect player proposition costs 200 points</li>
             <li>An incorrect club or country proposition costs 100 points</li>
             <li>An incorrect year proposition costs 50 points</li>
@@ -50,7 +50,7 @@
                     </div>
                     <div>
                         @Html.TextBoxFor(m => m.ClubNameSubmission, new { @style = "width: 300px" })
-                        <input type="submit" value="Submit" name="submit-Club" style="visibility:hidden" />
+                        <input type="submit" value="Ok" name="submit-Club" style="visibility:hidden" />
                     </div>
                     <div style="font-size: small">(notice you can enter names forever, regardless as if the whole career has been found already)</div>
                 </div>
@@ -78,10 +78,9 @@
                 {
                     <div>
                         @Html.DropDownListFor(m => m.CountryNameSubmission, Constants.Countries.Select(x => new SelectListItem(x.Value, x.Key.ToString())), new { @style = "width: 300px" })
-                        <input type="submit" value="Submit" name="submit-Country" />
+                        <input type="submit" value="Ok" name="submit-Country" />
                     </div>
                     <div style="font-size: small">(for players with double nationality, it's the one with int. selections)</div>
-                    <div style="font-size: small">(in case above but the player has no selection, both nationality are considered OK)</div>
                 }
                 else
                 {
@@ -100,7 +99,7 @@
                 {
                     <div>
                         @Html.DropDownListFor(m => m.BirthYearSubmission, Enumerable.Range(1900, 110).Select(x => new SelectListItem(x.ToString(), x.ToString())), new { @style = "width: 300px" })
-                        <input type="submit" value="Submit" name="submit-Year" />
+                        <input type="submit" value="Ok" name="submit-Year" />
                     </div>
                 }
                 else
@@ -112,7 +111,29 @@
             </div>
         </form>
         <form method="post" action="/">
-            <div style="margin-top: 50px">
+            <div style="margin-top: 30px">
+                <div>
+                    <label>Clue:</label>
+                </div>
+                <div>
+                    @if (string.IsNullOrWhiteSpace(Model.Clue))
+                    {
+                        <div>
+                            <span style="width: 300px; display: inline-block">Use the following to get a clue:</span>
+                            <input type="submit" value="Ok" name="submit-Clue" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <label>@Model.Clue</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </form>
+        <form method="post" action="/">
+            <div style="margin-top: 60px">
                 <div>
                     <label style="color:crimson">Submit your player here:</label>
                 </div>
@@ -120,14 +141,6 @@
                     @Html.TextBoxFor(m => m.PlayerNameSubmission, new { @style = "width: 300px" })
                     <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
                 </div>
-            </div>
-        </form>
-        <form method="post" action="/">
-            <div style="margin-top: 50px">
-                <div>
-                    <input type="submit" value="I need help, give me a clue!" name="submit-Clue" style="width: 300px" />
-                </div>
-                <div style="font-size: small">(this will give you the club where the player has played the most in his career)</div>
             </div>
         </form>
     }

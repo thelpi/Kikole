@@ -20,8 +20,7 @@ namespace KikoleApi.Repositories
                     ("name", player.Name),
                     ("allowed_names", player.AllowedNames),
                     ("year_of_birth", player.YearOfBirth),
-                    ("country1_id", player.Country1Id),
-                    ("country2_id", player.Country2Id),
+                    ("country_id", player.CountryId),
                     ("proposal_date", player.ProposalDate),
                     ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
@@ -33,8 +32,7 @@ namespace KikoleApi.Repositories
                     "player_clubs",
                     ("player_id", playerClub.PlayerId),
                     ("club_id", playerClub.ClubId),
-                    ("history_position", playerClub.HistoryPosition),
-                    ("importance_position", playerClub.ImportancePosition))
+                    ("history_position", playerClub.HistoryPosition))
                 .ConfigureAwait(false);
         }
 
