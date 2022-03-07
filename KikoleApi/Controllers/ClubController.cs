@@ -38,7 +38,7 @@ namespace KikoleApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> CreateClubAsync([FromBody] ClubRequest request)
+        public async Task<IActionResult> CreateClubAsync([FromBody] Club request)
         {
             if (request == null)
                 return BadRequest("Invalid request: null");
