@@ -1,0 +1,60 @@
+﻿<Window x:Class="KikoleAdmin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KikoleAdmin"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Background="Gainsboro"
+        Title="KikoleAdmin" Height="600" Width="800">
+    <TabControl Margin="10">
+        <TabItem Header="Player">
+            <StackPanel Margin="5" Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Label Width="100" Content="Main name:" />
+                    <TextBox Width="200" Name="TxtPlayerName" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                    <Label Width="100" Content="Year of birth:" />
+                    <TextBox Width="75" Name="TxtPlayerYear" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                    <Label Width="100" Content="Nationality:" />
+                    <ComboBox Width="200" Name="CbbCountries" DisplayMemberPath="Name" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                    <Label Width="100" Content="Proposal date:" />
+                    <TextBox Width="75" Name="TxtProposalDate" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                    <Label Width="100" Content="Clue:" />
+                    <TextBox Width="200" Name="TxtClue" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                    <Label Width="100" Content="Names:" />
+                    <TextBox Width="200" Name="TxtAllowedNames" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Height="75" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Name="ClubsPanel" Margin="0, 5, 0, 0" />
+                <Button Width="75" HorizontalAlignment="Left" Margin="0, 5, 0, 0" Content="Add club" Name="AddClubBtn" Click="AddClubBtn_Click" />
+                <Button Content="Ajouter le joueur" Width="150" Margin="0, 75, 0, 0" HorizontalAlignment="Left" Name="AddPlayer" Click="AddPlayer_Click" />
+            </StackPanel>
+        </TabItem>
+        <TabItem Header="club">
+            <StackPanel Margin="5" Orientation="Vertical">
+                <TextBox Name="MainClubName" />
+                <TextBox Name="AltClubName0" Margin="0, 15, 0, 0" />
+                <TextBox Name="AltClubName1" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName2" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName3" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName4" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName5" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName6" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName7" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName8" Margin="0, 2, 0, 0" />
+                <TextBox Name="AltClubName9" Margin="0, 2, 0, 0" />
+                <Button Name="AddClubButton" Click="AddClubButton_Click" Content="Add" />
+            </StackPanel>
+        </TabItem>
+    </TabControl>
+</Window>
