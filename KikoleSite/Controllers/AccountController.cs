@@ -38,16 +38,14 @@ namespace KikoleSite.Controllers
             else if (submitFrom == "login")
             {
                 if (string.IsNullOrWhiteSpace(model.LoginSubmission)
-                    || string.IsNullOrWhiteSpace(model.Password1Submission)
-                    || string.IsNullOrWhiteSpace(model.Password2Submission)
-                    || !string.Equals(model.Password1Submission, model.Password2Submission))
+                    || string.IsNullOrWhiteSpace(model.PasswordSubmission))
                 {
                     model.Error = "Invalid form values";
                 }
                 else
                 {
                     var result = await _apiProvider
-                        .LoginAsync(model.LoginSubmission, model.Password1Submission)
+                        .LoginAsync(model.LoginSubmission, model.PasswordSubmission)
                         .ConfigureAwait(false);
                     if (result.Item2)
                     {
@@ -57,6 +55,38 @@ namespace KikoleSite.Controllers
                     }
                     else
                         model.Error = result.Item1;
+                }
+            }
+            else if (submitFrom == "create")
+            {
+                if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)
+                    || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
+                    || string.IsNullOrWhiteSpace(model.PasswordCreate2Submission)
+                    || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
+                {
+                    model.Error = "Invalid form values";
+                }
+                else
+                {
+                    var createResul = await _apiProvider
+                        .CreateAccountAsync(model.LoginCreateSubmission,
+                            model.PasswordCreate1Submission,
+                            model.RecoveryQCreate,
+                            model.RecoveryACreate)
+                        .ConfigureAwait(false);
+                    if (!createResul.Item1)
+                    {
+                        model.Error = createResul.Item2;
+                    }
+                    else
+                    {
+                        model = new AccountModel
+                        {
+                            SuccessInfo = "You can now login with this account",
+                            LoginSubmission = model.LoginCreateSubmission,
+                            PasswordSubmission = model.PasswordCreate1Submission
+                        };
+                    }
                 }
             }
 

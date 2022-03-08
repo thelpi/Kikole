@@ -19,6 +19,25 @@ namespace KikoleSite
             };
         }
 
+        public async Task<(bool, string)> CreateAccountAsync(string login,
+            string password, string q, string a)
+        {
+            var response = await _client
+                .PostAsJsonAsync(new Uri("users", UriKind.Relative), new
+                {
+                    login,
+                    password,
+                    passwordResetQuestion = q,
+                    passwordResetAnswer = q?.Trim()
+                })
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return (false, $"Creation failed: {response.StatusCode}");
+
+            return (true, null);
+        }
+
         public async Task<(string, bool)> LoginAsync(string login, string password)
         {
             var response = await _client
