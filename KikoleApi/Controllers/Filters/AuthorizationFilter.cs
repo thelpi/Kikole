@@ -45,7 +45,7 @@ namespace KikoleApi.Controllers.Filters
             if (!IsAuthorized((authAttribute as AuthenticationLevelAttribute).Level, id, isAdmin, isFaulted))
                 context.Result = new StatusCodeResult((int)HttpStatusCode.Unauthorized);
             else
-                context.HttpContext.Request.QueryString.Add(UserIdQueryParam, id.GetValueOrDefault(0).ToString());
+                context.HttpContext.Request.QueryString = context.HttpContext.Request.QueryString.Add(UserIdQueryParam, id.GetValueOrDefault(0).ToString());
         }
 
         private static string GetAuthTokenHeaderValue(HttpContext httpContext)

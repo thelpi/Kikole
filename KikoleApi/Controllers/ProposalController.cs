@@ -73,6 +73,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("clue-proposals")]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
