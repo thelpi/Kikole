@@ -19,6 +19,22 @@ namespace KikoleSite
             };
         }
 
+        public async Task<(string, bool)> LoginAsync(string login, string password)
+        {
+            var response = await _client
+                .GetAsync(new Uri($"users/{login}/authentication-tokens?password={password}", UriKind.Relative))
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return ($"Authentication failed: {response.StatusCode}", false);
+
+            var token = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(token))
+                return ($"Authentication failed: invalid token", false);
+
+            return (token, true);
+        }
+
         public async Task<ProposalResponse> SubmitProposalAsync(ProposalRequest request,
             ProposalType proposalType)
         {

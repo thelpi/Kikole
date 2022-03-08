@@ -1,0 +1,36 @@
+﻿@model AccountModel
+
+@if (!string.IsNullOrWhiteSpace(Model.Error))
+{
+    <div style="color:crimson; margin-top: 10px">Error: @Model.Error</div>
+}
+
+@if (Model.IsAuthenticated)
+{
+    <fieldset style="margin-top: 10px">
+        <form method="post" action="/Account">
+            <div>You're logged under the account <span style="color:crimson">@Model.Login</span></div>
+            <input type="submit" value="Logout" name="submit-logoff" />
+        </form>
+    </fieldset>
+}
+else
+{
+    <fieldset title="Connection" style="margin-top: 10px">
+        <form method="post" action="/Account">
+            <div>
+                <label style="width: 150px">Login:</label>
+                @Html.TextBoxFor(m => m.LoginSubmission, new { @style = "width: 150px" })
+            </div>
+            <div>
+                <label style="width: 150px">Password:</label>
+                @Html.PasswordFor(m => m.Password1Submission, new { @style = "width: 150px" })
+            </div>
+            <div>
+                <label style="width: 150px">Repeat password:</label>
+                @Html.PasswordFor(m => m.Password2Submission, new { @style = "width: 150px" })
+            </div>
+            <input type="submit" value="Login" name="submit-login" />
+        </form>
+    </fieldset>
+}
