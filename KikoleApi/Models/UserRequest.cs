@@ -35,7 +35,7 @@ namespace KikoleApi.Models
         {
             var realPasswordResetAnswer = string.IsNullOrWhiteSpace(PasswordResetAnswer)
                 ? crypter.Generate()
-                : PasswordResetAnswer;
+                : PasswordResetAnswer.Sanitize();
 
             var realPasswordResetQuestion = string.IsNullOrWhiteSpace(PasswordResetQuestion)
                 ? crypter.Generate()
