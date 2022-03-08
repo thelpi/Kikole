@@ -69,7 +69,7 @@ namespace KikoleAdmin
                     ProposalDate = string.IsNullOrWhiteSpace(TxtProposalDate.Text)
                         ? default(DateTime?)
                         : DateTime.Parse(TxtProposalDate.Text),
-                    Clubs = ClubsPanel.Children.Cast<ComboBox>().Select(cbb => (cbb.SelectedItem as Club).Id).ToList(),
+                    Clubs = ClubsPanel.Children.Cast<ComboBox>().Where(cbb => cbb.SelectedIndex >= 0).Select(cbb => (cbb.SelectedItem as Club).Id).ToList(),
                     Clue = TxtClue.Text,
                     Country = (CbbCountries.SelectedItem as Country).Code,
                     AllowedNames = TxtAllowedNames.Text.Split(new string[] { "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries),
@@ -78,6 +78,17 @@ namespace KikoleAdmin
                 };
 
                 _apiProvider.AddPlayerAsync(req).GetAwaiter().GetResult();
+                var result = MessageBox.Show("Player added! Clear?", "Ok", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    TxtProposalDate.Text = "";
+                    ClubsPanel.Children.Clear();
+                    TxtClue.Text = "";
+                    CbbCountries.SelectedIndex = -1;
+                    TxtAllowedNames.Text = "";
+                    TxtPlayerName.Text = "";
+                    TxtPlayerYear.Text = "";
+                }
             }
             catch (Exception ex)
             {
