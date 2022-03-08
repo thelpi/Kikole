@@ -10,6 +10,16 @@ namespace KikoleSite
     {
         private readonly HttpClient _client;
 
+        private HttpClient GetClient(string authToken)
+        {
+            _client.DefaultRequestHeaders.Clear();
+
+            if (!string.IsNullOrWhiteSpace(authToken))
+                _client.DefaultRequestHeaders.Add("AuthToken", authToken);
+
+            return _client;
+        }
+
         public ApiProvider(IConfiguration configuration)
         {
             var backApiBaseUrl = configuration.GetValue<string>("BackApiBaseUrl");
@@ -22,7 +32,7 @@ namespace KikoleSite
         public async Task<(bool, string)> CreateAccountAsync(string login,
             string password, string q, string a)
         {
-            var response = await _client
+            var response = await GetClient(null)
                 .PostAsJsonAsync(new Uri("users", UriKind.Relative), new
                 {
                     login,
@@ -40,7 +50,7 @@ namespace KikoleSite
 
         public async Task<(string, bool)> LoginAsync(string login, string password)
         {
-            var response = await _client
+            var response = await GetClient(null)
                 .GetAsync(new Uri($"users/{login}/authentication-tokens?password={password}", UriKind.Relative))
                 .ConfigureAwait(false);
 
@@ -55,7 +65,8 @@ namespace KikoleSite
         }
 
         public async Task<ProposalResponse> SubmitProposalAsync(ProposalRequest request,
-            ProposalType proposalType)
+            ProposalType proposalType,
+            string authToken)
         {
             var route = "";
             switch (proposalType)
@@ -77,7 +88,7 @@ namespace KikoleSite
                     break;
             }
 
-            var response = await _client
+            var response = await GetClient(authToken)
                 .PutAsJsonAsync(new Uri(route, UriKind.Relative), request)
                 .ConfigureAwait(false);
             response.EnsureSuccessStatusCode();

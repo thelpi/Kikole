@@ -60,7 +60,8 @@ namespace KikoleSite.Controllers
                         ProposalDate = DateTime.Now,
                         Value = value
                     },
-                    proposalType)
+                    proposalType,
+                    GetCookieAuthValue())
                 .ConfigureAwait(false);
 
             model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
@@ -135,6 +136,20 @@ namespace KikoleSite.Controllers
                 Secure = false
             };
             Response.Cookies.Append(cookieName, cookieValue, option);
+        }
+
+        private string GetCookieAuthValue()
+        {
+            if (Request.Cookies.TryGetValue("AccountForm", out string cookieValue))
+            {
+                var cookieParts = cookieValue.Split("§§§");
+                if (cookieParts.Length > 1)
+                {
+                    return cookieParts[0];
+                }
+            }
+
+            return null;
         }
 
         private MainModel GetSubmissionFormCookie()
