@@ -8,6 +8,8 @@ namespace KikoleApi.Models.Dtos
 
         public ulong ProposalTypeId { get; set; }
 
+        public uint DaysBefore { get; set; }
+
         public string Value { get; set; }
 
         public byte Successful { get; set; }

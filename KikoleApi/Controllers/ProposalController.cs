@@ -95,15 +95,15 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest($"Invalid request: {validityRequest}");
 
-            var todayPlayer = await _playerRepository
-                .GetTodayPlayerAsync(request.ProposalDate)
+            var playerOfTheDay = await _playerRepository
+                .GetPlayerOfTheDayAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
-            if (todayPlayer == null)
+            if (playerOfTheDay == null)
                 return BadRequest("Invalid proposal date");
 
             var playerClubs = await _playerRepository
-                .GetPlayerClubsAsync(todayPlayer.Id)
+                .GetPlayerClubsAsync(playerOfTheDay.Id)
                 .ConfigureAwait(false);
 
             var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
@@ -116,7 +116,7 @@ namespace KikoleApi.Controllers
             }
 
             var response = request.CheckSuccessful(
-                todayPlayer,
+                playerOfTheDay,
                 playerClubs,
                 playerClubsDetails);
             

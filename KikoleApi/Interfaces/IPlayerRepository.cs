@@ -11,7 +11,7 @@ namespace KikoleApi.Interfaces
 
         Task CreatePlayerClubsAsync(PlayerClubDto playerClub);
 
-        Task<PlayerDto> GetTodayPlayerAsync(DateTime date);
+        Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date);
 
         Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
     }

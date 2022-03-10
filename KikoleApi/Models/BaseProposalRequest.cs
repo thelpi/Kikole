@@ -8,6 +8,8 @@ namespace KikoleApi.Models
     {
         public DateTime ProposalDate { get; set; }
 
+        public uint DaysBefore { get; set; }
+
         public string Value { get; set; }
 
         internal abstract ProposalType ProposalType { get; }
@@ -32,8 +34,11 @@ namespace KikoleApi.Models
                 Successful = (byte)(successful ? 1 : 0),
                 UserId = userId,
                 Value = Value?.ToString(),
-                ProposalTypeId = (ulong)ProposalType
+                ProposalTypeId = (ulong)ProposalType,
+                DaysBefore = DaysBefore
             };
         }
+
+        internal DateTime PlayerSubmissionDate => ProposalDate.AddDays(-DaysBefore);
     }
 }

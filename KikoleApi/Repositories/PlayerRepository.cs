@@ -37,7 +37,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<PlayerDto> GetTodayPlayerAsync(DateTime date)
+        public async Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date)
         {
             return await GetDtoAsync<PlayerDto>(
                     "players",
