@@ -63,7 +63,11 @@ namespace KikoleSite.Api
         }
 
         public async Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
-            string value, int daysBefore, ProposalType proposalType, string authToken)
+            string value,
+            int daysBefore,
+            ProposalType proposalType,
+            string authToken,
+            int sourcePoints)
         {
             var response = await SendAsync(
                     $"{proposalType.ToString().ToLowerInvariant()}-proposals",
@@ -73,7 +77,8 @@ namespace KikoleSite.Api
                     {
                         proposalDate,
                         value,
-                        daysBefore
+                        daysBefore,
+                        sourcePoints
                     })
                 .ConfigureAwait(false);
             

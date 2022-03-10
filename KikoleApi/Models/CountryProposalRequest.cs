@@ -9,14 +9,19 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Country;
 
+        internal override int PointsCost => 25;
+
         internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
+            var success = player.CountryId == (ulong)Enum.Parse<Country>(Value);
             return new ProposalResponse
             {
-                Successful = player.CountryId == (ulong)Enum.Parse<Country>(Value),
-                Value = player.CountryId
+                Successful = success,
+                Value = player.CountryId,
+                TotalPoints = SourcePoints,
+                LostPoints = success ? 0 : PointsCost
             };
         }
 

@@ -12,7 +12,11 @@ namespace KikoleApi.Models
 
         public string Value { get; set; }
 
+        public int SourcePoints { get; set; }
+
         internal abstract ProposalType ProposalType { get; }
+
+        internal abstract int PointsCost { get; }
 
         internal abstract ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,

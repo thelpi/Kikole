@@ -60,14 +60,7 @@ namespace KikoleSite.Controllers
         {
             var proposalType = Enum.Parse<ProposalType>(GetSubmitAction());
 
-            string value = null;
-            switch (proposalType)
-            {
-                case ProposalType.Club: value = model.ClubNameSubmission; break;
-                case ProposalType.Country: value = model.CountryNameSubmission; break;
-                case ProposalType.Name: value = model.PlayerNameSubmission; break;
-                case ProposalType.Year: value = model.BirthYearSubmission; break;
-            }
+            var value = model.GetValueFromProposalType(proposalType);
 
             var (token, login) = this.GetAuthenticationCookie();
 
@@ -76,9 +69,11 @@ namespace KikoleSite.Controllers
             var response = await _apiProvider
                 .SubmitProposalAsync(DateTime.Now, value, model.CurrentDay,
                     proposalType,
-                    token)
+                    token,
+                    model.Points)
                 .ConfigureAwait(false);
 
+            model.Points = response.TotalPoints;
             model.IsErrorMessage = !response.Successful;
             model.MessageToDisplay = proposalType == ProposalType.Clue
                 ? "A clue has been given, see below"
@@ -112,24 +107,7 @@ namespace KikoleSite.Controllers
                         model.BirthYear = response.Value.ToString();
                         break;
                     case ProposalType.Clue:
-                        model.RemovePoints(DefaultPointsRemoval);
                         model.Clue = response.Value.ToString();
-                        break;
-                }
-            }
-            else
-            {
-                switch (proposalType)
-                {
-                    case ProposalType.Club:
-                    case ProposalType.Country:
-                        model.RemovePoints(DefaultPointsRemoval);
-                        break;
-                    case ProposalType.Name:
-                        model.RemovePoints(NamePointsRemoval);
-                        break;
-                    case ProposalType.Year:
-                        model.RemovePoints(YearPointsRemoval);
                         break;
                 }
             }

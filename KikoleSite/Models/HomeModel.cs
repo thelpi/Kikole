@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using KikoleSite.Api;
 using KikoleSite.Cookies;
 using KikoleSite.ItemDatas;
 
@@ -55,10 +56,16 @@ namespace KikoleSite.Models
             };
         }
 
-        internal void RemovePoints(int ptsToRemove)
+        internal string GetValueFromProposalType(ProposalType proposalType)
         {
-            Points -= ptsToRemove;
-            Points = Points < 0 ? 0 : Points;
+            switch (proposalType)
+            {
+                case ProposalType.Club: return ClubNameSubmission;
+                case ProposalType.Country: return CountryNameSubmission;
+                case ProposalType.Name: return PlayerNameSubmission;
+                case ProposalType.Year: return BirthYearSubmission;
+                default: return null;
+            }
         }
     }
 }

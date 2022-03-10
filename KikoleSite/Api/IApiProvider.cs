@@ -10,7 +10,11 @@ namespace KikoleSite.Api
             string password, string question, string answer);
 
         Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
-            string value, int daysBefore, ProposalType proposalType, string authToken);
+            string value,
+            int daysBefore,
+            ProposalType proposalType,
+            string authToken,
+            int sourcePoints);
 
         Task<(bool success, string value)> LoginAsync(string login, string password);
 

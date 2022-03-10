@@ -7,6 +7,8 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Clue;
 
+        internal override int PointsCost => 100;
+
         internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
@@ -14,7 +16,9 @@ namespace KikoleApi.Models
             return new ProposalResponse
             {
                 Successful = true,
-                Value = player.Clue
+                Value = player.Clue,
+                TotalPoints = SourcePoints,
+                LostPoints = PointsCost
             };
         }
 

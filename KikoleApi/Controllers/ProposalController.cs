@@ -102,6 +102,9 @@ namespace KikoleApi.Controllers
             if (playerOfTheDay == null)
                 return BadRequest("Invalid proposal date");
 
+            // TODO: get points from userId
+            // and override value from request
+
             var playerClubs = await _playerRepository
                 .GetPlayerClubsAsync(playerOfTheDay.Id)
                 .ConfigureAwait(false);
