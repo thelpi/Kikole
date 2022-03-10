@@ -2,7 +2,7 @@
 
 namespace KikoleSite.Controllers
 {
-    public class HowToPlayController : Controller
+    public class HowToPlayController : KikoleBaseController
     {
         public IActionResult Index()
         {

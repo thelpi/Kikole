@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace KikoleSite.Cookies
 {
-    internal static class CookieManager
+    internal static class CookieExtensions
     {
         const string AuthenticationCookieName = "AccountForm";
         const string SubmissionFormCookieName = "SubmissionForm";

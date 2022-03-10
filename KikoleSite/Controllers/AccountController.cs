@@ -1,14 +1,12 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KikoleSite.Api;
 using KikoleSite.Cookies;
 using KikoleSite.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleSite.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : KikoleBaseController
     {
         private readonly IApiProvider _apiProvider;
 
@@ -31,7 +29,7 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(AccountModel model)
         {
-            var submitFrom = HttpContext.Request.Form.Keys.Single(x => x.StartsWith("submit-")).Split('-')[1];
+            var submitFrom = GetSubmitAction();
 
             if (submitFrom == "logoff")
             {

@@ -6,12 +6,11 @@ using KikoleSite.Api;
 using KikoleSite.Cookies;
 using KikoleSite.ItemDatas;
 using KikoleSite.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleSite.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : KikoleBaseController
     {
         const ulong DefaultLanguageId = 1;
 
@@ -59,8 +58,7 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(HomeModel model)
         {
-            var proposalType = Enum.Parse<ProposalType>(
-                HttpContext.Request.Form.Keys.Single(x => x.StartsWith("submit-")).Split('-')[1]);
+            var proposalType = Enum.Parse<ProposalType>(GetSubmitAction());
 
             string value = null;
             switch (proposalType)
