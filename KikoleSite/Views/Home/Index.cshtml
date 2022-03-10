@@ -10,6 +10,20 @@
             <label>You are logged as <span style="color: forestgreen">@Model.LoggedAs</span></label>
         }
     </div>
+    <div style="margin-top: 10px">
+        @if (!Model.NoPreviousDay)
+        {
+            <a href="/?day=@Model.PreviousDay">Previous day</a>
+        }
+        @if (Model.CurrentDay > 1)
+        {
+            <a href="/?day=@Model.NextDay">Next day</a>
+        }
+        else if (Model.CurrentDay == 1)
+        {
+            <a href="/?day=@Model.NextDay">Current day</a>
+        }
+    </div>
     @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
     {
         <div style="margin-top: 5px">

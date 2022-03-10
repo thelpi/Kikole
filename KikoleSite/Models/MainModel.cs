@@ -20,6 +20,10 @@ namespace KikoleSite.Models
         public string BirthYearSubmission { get; set; }
 
         public string LoggedAs { get; set; }
+        public int CurrentDay { get; set; }
+        public int NextDay => CurrentDay - 1;
+        public int PreviousDay => CurrentDay + 1;
+        public bool NoPreviousDay { get; set; }
 
         internal MainModel ClearNonPersistentData()
         {

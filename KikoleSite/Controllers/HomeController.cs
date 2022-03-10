@@ -18,6 +18,8 @@ namespace KikoleSite.Controllers
         const int DefaultPointsRemoval = 100;
         const int YearPointsRemoval = 50;
 
+        static readonly DateTime FirstDate = new DateTime(2022, 3, 5);
+
         private readonly ApiProvider _apiProvider;
 
         public HomeController(ApiProvider apiProvider)
@@ -25,13 +27,26 @@ namespace KikoleSite.Controllers
             _apiProvider = apiProvider;
         }
 
-        public IActionResult Index()
+        public IActionResult Index([FromQuery] int? day)
         {
             var model = GetSubmissionFormCookie()?.ClearNonPersistentData()
                 ?? new MainModel
                 {
                     Points = BasePoints
                 };
+
+            if (day.HasValue
+                && model.CurrentDay != day.Value
+                && day.Value >= 0
+                && DateTime.Now.AddDays(-day.Value).Date >= FirstDate)
+            {
+                model = new MainModel
+                {
+                    Points = BasePoints,
+                    CurrentDay = day.Value,
+                    NoPreviousDay = DateTime.Now.AddDays(-day.Value).Date == FirstDate
+                };
+            }
 
             SetSubmissionFormCookie(model);
 
@@ -56,18 +71,19 @@ namespace KikoleSite.Controllers
 
             var cookieAuth = GetCookieAuthValue();
 
+            model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
+
             var response = await _apiProvider
                 .SubmitProposalAsync(
                     new ProposalRequest
                     {
                         ProposalDate = DateTime.Now,
-                        Value = value
+                        Value = value,
+                        DaysBefore = model.CurrentDay
                     },
                     proposalType,
                     cookieAuth.Item1)
                 .ConfigureAwait(false);
-
-            model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
 
             model.IsErrorMessage = !response.Successful;
             model.MessageToDisplay = proposalType == ProposalType.Clue
