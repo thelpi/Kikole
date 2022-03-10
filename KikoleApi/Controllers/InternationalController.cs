@@ -20,7 +20,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("countries")]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(AuthenticationLevel.None)]
         [ProducesResponseType(typeof(IReadOnlyCollection<CountryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
