@@ -25,6 +25,8 @@ namespace KikoleSite.Models
         public int PreviousDay => CurrentDay + 1;
         public bool NoPreviousDay { get; set; }
 
+        public IReadOnlyDictionary<string, string> Countries { get; set; }
+
         internal MainModel ClearNonPersistentData()
         {
             ClubNameSubmission = null;
@@ -34,6 +36,7 @@ namespace KikoleSite.Models
             PlayerNameSubmission = null;
             BirthYearSubmission = null;
             LoggedAs = null;
+            Countries = null;
             return this;
         }
 

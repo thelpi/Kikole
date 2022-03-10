@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -77,6 +78,17 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
             
             return await GetResponseContentAsync<ProposalResponse>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId)
+        {
+            var response = await SendAsync(
+                    $"countrie?languageId={languageId}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<CountryKvp>>(response)
                 .ConfigureAwait(false);
         }
 

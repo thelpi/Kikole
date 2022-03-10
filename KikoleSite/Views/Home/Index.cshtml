@@ -82,7 +82,7 @@
                 @if (string.IsNullOrWhiteSpace(Model.CountryName))
                 {
                     <div>
-                        @Html.DropDownListFor(m => m.CountryNameSubmission, Constants.Countries.Select(x => new SelectListItem(x.Value, x.Key.ToString())), new { @style = "width: 300px" })
+                        @Html.DropDownListFor(m => m.CountryNameSubmission, Model.Countries.Select(x => new SelectListItem(x.Value, x.Key)), new { @style = "width: 300px" })
                         <input type="submit" value="Ok" name="submit-Country" />
                     </div>
                     <div style="font-size: small">(for players with double nationality, it's the one with int. selections)</div>

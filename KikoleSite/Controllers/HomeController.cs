@@ -14,6 +14,8 @@ namespace KikoleSite.Controllers
     {
         const string CookieName = "SubmissionForm";
 
+        const ulong DefaultLanguageId = 1;
+
         const int BasePoints = 1000;
         const int NamePointsRemoval = 200;
         const int DefaultPointsRemoval = 100;
@@ -22,6 +24,9 @@ namespace KikoleSite.Controllers
         static readonly DateTime FirstDate = new DateTime(2022, 3, 5);
 
         private readonly IApiProvider _apiProvider;
+
+        private static readonly Dictionary<ulong, IReadOnlyDictionary<string, string>> _countriesCache
+             = new Dictionary<ulong, IReadOnlyDictionary<string, string>>();
 
         public HomeController(IApiProvider apiProvider)
         {
@@ -52,6 +57,7 @@ namespace KikoleSite.Controllers
             SetSubmissionFormCookie(model);
 
             model.LoggedAs = GetCookieAuthValue().Item2;
+            model.Countries = GetCountries();
             return View(model);
         }
 
@@ -104,7 +110,7 @@ namespace KikoleSite.Controllers
                         model.KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                         break;
                     case ProposalType.Country:
-                        model.CountryName = Constants.Countries.First(c => c.Key.ToString() == response.Value.ToString()).Value;
+                        model.CountryName = GetCountries()[response.Value.ToString()];
                         break;
                     case ProposalType.Name:
                         model.PlayerName = response.Value.ToString();
@@ -138,6 +144,7 @@ namespace KikoleSite.Controllers
             SetSubmissionFormCookie(model);
 
             model.LoggedAs = cookieAuth.Item2;
+            model.Countries = GetCountries();
             return View(model);
         }
 
@@ -183,6 +190,21 @@ namespace KikoleSite.Controllers
         private void SetSubmissionFormCookie(MainModel model)
         {
             SetCookie(CookieName, JsonConvert.SerializeObject(model), DateTime.Now.AddDays(1).Date);
+        }
+
+        private IReadOnlyDictionary<string, string> GetCountries(ulong languageId = DefaultLanguageId)
+        {
+            if (!_countriesCache.ContainsKey(languageId))
+            {
+                // synchronous
+                var apiCountries = _apiProvider
+                    .GetCountriesAsync(languageId)
+                    .GetAwaiter()
+                    .GetResult();
+                _countriesCache.Add(languageId, apiCountries.ToDictionary(ac => ac.Code, ac => ac.Name));
+            }
+
+            return _countriesCache[DefaultLanguageId];
         }
     }
 }

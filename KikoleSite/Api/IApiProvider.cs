@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace KikoleSite.Api
@@ -12,5 +13,7 @@ namespace KikoleSite.Api
             string value, int daysBefore, ProposalType proposalType, string authToken);
 
         Task<(bool success, string value)> LoginAsync(string login, string password);
+
+        Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId);
     }
 }
