@@ -1,45 +1,38 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace KikoleSite.Api
 {
-    public class ApiProvider
+    public class ApiProvider : IApiProvider
     {
         private readonly HttpClient _client;
 
-        private HttpClient GetClient(string authToken)
-        {
-            _client.DefaultRequestHeaders.Clear();
-
-            if (!string.IsNullOrWhiteSpace(authToken))
-                _client.DefaultRequestHeaders.Add("AuthToken", authToken);
-
-            return _client;
-        }
-
         public ApiProvider(IConfiguration configuration)
         {
-            var backApiBaseUrl = configuration.GetValue<string>("BackApiBaseUrl");
             _client = new HttpClient
             {
-                BaseAddress = new Uri(backApiBaseUrl)
+                BaseAddress = new Uri(configuration.GetValue<string>("BackApiBaseUrl"))
             };
         }
 
         public async Task<(bool, string)> CreateAccountAsync(string login,
-            string password, string q, string a)
+            string password, string question, string answer)
         {
-            var response = await GetClient(null)
-                .PostAsJsonAsync(new Uri("users", UriKind.Relative), new
-                {
-                    login,
-                    password,
-                    passwordResetQuestion = q,
-                    passwordResetAnswer = q?.Trim()
-                })
+            var response = await SendAsync(
+                    "users",
+                    HttpMethod.Post,
+                    null,
+                    new
+                    {
+                        login,
+                        password,
+                        passwordResetQuestion = question,
+                        passwordResetAnswer = answer?.Trim()
+                    })
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
@@ -48,56 +41,78 @@ namespace KikoleSite.Api
             return (true, null);
         }
 
-        public async Task<(string, bool)> LoginAsync(string login, string password)
+        public async Task<(bool, string)> LoginAsync(string login, string password)
         {
-            var response = await GetClient(null)
-                .GetAsync(new Uri($"users/{login}/authentication-tokens?password={password}", UriKind.Relative))
+            var response = await SendAsync(
+                    $"users/{login}/authentication-tokens?password={password}",
+                    HttpMethod.Get)
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
-                return ($"Authentication failed: {response.StatusCode}", false);
+                return (false, $"Authentication failed: {response.StatusCode}");
 
-            var token = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var token = await response.Content
+                .ReadAsStringAsync()
+                .ConfigureAwait(false);
+
             if (string.IsNullOrWhiteSpace(token))
-                return ($"Authentication failed: invalid token", false);
+                return (false, $"Authentication failed: invalid token");
 
-            return (token, true);
+            return (true, token);
         }
 
-        public async Task<ProposalResponse> SubmitProposalAsync(ProposalRequest request,
-            ProposalType proposalType,
-            string authToken)
+        public async Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
+            string value, int daysBefore, ProposalType proposalType, string authToken)
         {
-            var route = "";
-            switch (proposalType)
-            {
-                case ProposalType.Club:
-                    route = "club-proposals";
-                    break;
-                case ProposalType.Clue:
-                    route = "clue-proposals";
-                    break;
-                case ProposalType.Country:
-                    route = "country-proposals";
-                    break;
-                case ProposalType.Name:
-                    route = "name-proposals";
-                    break;
-                case ProposalType.Year:
-                    route = "year-proposals";
-                    break;
-            }
-
-            var response = await GetClient(authToken)
-                .PutAsJsonAsync(new Uri(route, UriKind.Relative), request)
+            var response = await SendAsync(
+                    $"{proposalType.ToString().ToLowerInvariant()}-proposals",
+                    HttpMethod.Put,
+                    authToken,
+                    new
+                    {
+                        proposalDate,
+                        value,
+                        daysBefore
+                    })
                 .ConfigureAwait(false);
+            
+            return await GetResponseContentAsync<ProposalResponse>(response)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
+            string authToken = null,
+            object content = null)
+        {
+            var request = new HttpRequestMessage
+            {
+                Content = content == null
+                    ? null
+                    : new StringContent(
+                            JsonConvert.SerializeObject(content),
+                            Encoding.UTF8,
+                            "application/json"),
+                Method = method,
+                RequestUri = new Uri(route, UriKind.Relative)
+            };
+
+            if (!string.IsNullOrWhiteSpace(authToken))
+                request.Headers.Add("AuthToken", authToken);
+
+            return await _client
+                .SendAsync(request)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<T> GetResponseContentAsync<T>(HttpResponseMessage response)
+        {
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content
                 .ReadAsStringAsync()
                 .ConfigureAwait(false);
 
-            return JsonConvert.DeserializeObject<ProposalResponse>(content);
+            return JsonConvert.DeserializeObject<T>(content);
         }
     }
 }

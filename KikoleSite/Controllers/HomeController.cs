@@ -21,9 +21,9 @@ namespace KikoleSite.Controllers
 
         static readonly DateTime FirstDate = new DateTime(2022, 3, 5);
 
-        private readonly ApiProvider _apiProvider;
+        private readonly IApiProvider _apiProvider;
 
-        public HomeController(ApiProvider apiProvider)
+        public HomeController(IApiProvider apiProvider)
         {
             _apiProvider = apiProvider;
         }
@@ -75,13 +75,7 @@ namespace KikoleSite.Controllers
             model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
 
             var response = await _apiProvider
-                .SubmitProposalAsync(
-                    new ProposalRequest
-                    {
-                        ProposalDate = DateTime.Now,
-                        Value = value,
-                        DaysBefore = model.CurrentDay
-                    },
+                .SubmitProposalAsync(DateTime.Now, value, model.CurrentDay,
                     proposalType,
                     cookieAuth.Item1)
                 .ConfigureAwait(false);

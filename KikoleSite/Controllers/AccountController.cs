@@ -12,9 +12,9 @@ namespace KikoleSite.Controllers
     {
         const string CookieName = "AccountForm";
 
-        private readonly ApiProvider _apiProvider;
+        private readonly IApiProvider _apiProvider;
 
-        public AccountController(ApiProvider apiProvider)
+        public AccountController(IApiProvider apiProvider)
         {
             _apiProvider = apiProvider;
         }
@@ -48,14 +48,14 @@ namespace KikoleSite.Controllers
                     var result = await _apiProvider
                         .LoginAsync(model.LoginSubmission, model.PasswordSubmission)
                         .ConfigureAwait(false);
-                    if (result.Item2)
+                    if (result.success)
                     {
-                        SetCookie(CookieName, $"{result.Item1}§§§{model.LoginSubmission}", DateTime.Now.AddMonths(1));
+                        SetCookie(CookieName, $"{result.value}§§§{model.LoginSubmission}", DateTime.Now.AddMonths(1));
                         model.IsAuthenticated = true;
                         model.Login = model.LoginSubmission;
                     }
                     else
-                        model.Error = result.Item1;
+                        model.Error = result.value;
                 }
             }
             else if (submitFrom == "create")
