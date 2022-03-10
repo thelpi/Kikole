@@ -19,6 +19,8 @@ namespace KikoleAdmin
             {
                 BaseAddress = new Uri(Settings.Default.BackApiBaseUrl)
             };
+            _client.DefaultRequestHeaders.Add("AuthToken",
+                "4_1_2e0913992cab0860dac21a6b2c24baab046983071341f63bf5c4244cf8b13cb5");
         }
 
         public async Task AddPlayerAsync(PlayerRequest player)
