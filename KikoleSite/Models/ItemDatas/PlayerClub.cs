@@ -1,4 +1,4 @@
-﻿namespace KikoleSite
+﻿namespace KikoleSite.ItemDatas
 {
     public class PlayerClub
     {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using KikoleSite.ItemDatas;
 
 namespace KikoleSite.Models
 {
