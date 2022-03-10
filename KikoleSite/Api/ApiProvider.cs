@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace KikoleSite
+namespace KikoleSite.Api
 {
     public class ApiProvider
     {

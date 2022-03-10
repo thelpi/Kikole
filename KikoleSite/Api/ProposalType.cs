@@ -1,4 +1,4 @@
-﻿namespace KikoleSite
+﻿namespace KikoleSite.Api
 {
     public enum ProposalType
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KikoleSite
+namespace KikoleSite.Api
 {
     public class ProposalRequest
     {
