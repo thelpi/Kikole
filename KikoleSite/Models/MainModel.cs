@@ -19,6 +19,8 @@ namespace KikoleSite.Models
         public string CountryNameSubmission { get; set; }
         public string BirthYearSubmission { get; set; }
 
+        public string LoggedAs { get; set; }
+
         internal MainModel ClearNonPersistentData()
         {
             ClubNameSubmission = null;
@@ -27,6 +29,7 @@ namespace KikoleSite.Models
             MessageToDisplay = null;
             PlayerNameSubmission = null;
             BirthYearSubmission = null;
+            LoggedAs = null;
             return this;
         }
 

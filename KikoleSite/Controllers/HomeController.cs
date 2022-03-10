@@ -35,6 +35,7 @@ namespace KikoleSite.Controllers
 
             SetSubmissionFormCookie(model);
 
+            model.LoggedAs = GetCookieAuthValue().Item2;
             return View(model);
         }
 
@@ -53,6 +54,8 @@ namespace KikoleSite.Controllers
                 case ProposalType.Year: value = model.BirthYearSubmission; break;
             }
 
+            var cookieAuth = GetCookieAuthValue();
+
             var response = await _apiProvider
                 .SubmitProposalAsync(
                     new ProposalRequest
@@ -61,7 +64,7 @@ namespace KikoleSite.Controllers
                         Value = value
                     },
                     proposalType,
-                    GetCookieAuthValue())
+                    cookieAuth.Item1)
                 .ConfigureAwait(false);
 
             model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
@@ -123,6 +126,7 @@ namespace KikoleSite.Controllers
 
             SetSubmissionFormCookie(model);
 
+            model.LoggedAs = cookieAuth.Item2;
             return View(model);
         }
 
@@ -138,18 +142,18 @@ namespace KikoleSite.Controllers
             Response.Cookies.Append(cookieName, cookieValue, option);
         }
 
-        private string GetCookieAuthValue()
+        private (string, string) GetCookieAuthValue()
         {
             if (Request.Cookies.TryGetValue("AccountForm", out string cookieValue))
             {
                 var cookieParts = cookieValue.Split("§§§");
                 if (cookieParts.Length > 1)
                 {
-                    return cookieParts[0];
+                    return (cookieParts[0], cookieParts[1]);
                 }
             }
 
-            return null;
+            return (null, null);
         }
 
         private MainModel GetSubmissionFormCookie()
