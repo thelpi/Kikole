@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
+using KikoleSite.Cookies;
 using KikoleSite.ItemDatas;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace KikoleSite.Controllers
 {
     public class HomeController : Controller
     {
-        const string CookieName = "SubmissionForm";
-
         const ulong DefaultLanguageId = 1;
 
         const int BasePoints = 1000;
@@ -36,11 +34,7 @@ namespace KikoleSite.Controllers
 
         public IActionResult Index([FromQuery] int? day)
         {
-            var model = GetSubmissionFormCookie()?.ClearNonPersistentData()
-                ?? new HomeModel
-                {
-                    Points = BasePoints
-                };
+            var model = GetCookieModelOrDefault(new HomeModel { Points = BasePoints });
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
@@ -55,9 +49,9 @@ namespace KikoleSite.Controllers
                 };
             }
 
-            SetSubmissionFormCookie(model);
+            this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
-            model.LoggedAs = GetCookieAuthValue().Item2;
+            model.LoggedAs = this.GetAuthenticationCookie().login;
             model.Countries = GetCountries();
             return View(model);
         }
@@ -77,14 +71,14 @@ namespace KikoleSite.Controllers
                 case ProposalType.Year: value = model.BirthYearSubmission; break;
             }
 
-            var cookieAuth = GetCookieAuthValue();
+            var (token, login) = this.GetAuthenticationCookie();
 
-            model = (GetSubmissionFormCookie() ?? model).ClearNonPersistentData();
+            model = GetCookieModelOrDefault(model);
 
             var response = await _apiProvider
                 .SubmitProposalAsync(DateTime.Now, value, model.CurrentDay,
                     proposalType,
-                    cookieAuth.Item1)
+                    token)
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;
@@ -142,55 +136,11 @@ namespace KikoleSite.Controllers
                 }
             }
 
-            SetSubmissionFormCookie(model);
+            this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
-            model.LoggedAs = cookieAuth.Item2;
+            model.LoggedAs = login;
             model.Countries = GetCountries();
             return View(model);
-        }
-
-        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
-        {
-            Response.Cookies.Delete(cookieName);
-            var option = new CookieOptions
-            {
-                Expires = expiration,
-                IsEssential = true,
-                Secure = false
-            };
-            Response.Cookies.Append(cookieName, cookieValue, option);
-        }
-
-        private (string, string) GetCookieAuthValue()
-        {
-            if (Request.Cookies.TryGetValue("AccountForm", out string cookieValue))
-            {
-                var cookieParts = cookieValue.Split("§§§");
-                if (cookieParts.Length > 1)
-                {
-                    return (cookieParts[0], cookieParts[1]);
-                }
-            }
-
-            return (null, null);
-        }
-
-        private HomeModel GetSubmissionFormCookie()
-        {
-            if (Request.Cookies.TryGetValue(CookieName, out string cookieValue))
-            {
-                try
-                {
-                    return JsonConvert.DeserializeObject<HomeModel>(cookieValue);
-                }
-                catch { }
-            }
-            return null;
-        }
-
-        private void SetSubmissionFormCookie(HomeModel model)
-        {
-            SetCookie(CookieName, JsonConvert.SerializeObject(model), DateTime.Now.AddDays(1).Date);
         }
 
         private IReadOnlyDictionary<ulong, string> GetCountries(ulong languageId = DefaultLanguageId)
@@ -208,6 +158,15 @@ namespace KikoleSite.Controllers
             }
 
             return _countriesCache[languageId];
+        }
+
+        private HomeModel GetCookieModelOrDefault(HomeModel defaultModel)
+        {
+            var cookieSubForm = this.GetSubmissionFormCookie();
+
+            return cookieSubForm != null
+                ? new HomeModel(cookieSubForm)
+                : defaultModel;
         }
     }
 }

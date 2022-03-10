@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
+using KikoleSite.Cookies;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +10,6 @@ namespace KikoleSite.Controllers
 {
     public class AccountController : Controller
     {
-        const string CookieName = "AccountForm";
-
         private readonly IApiProvider _apiProvider;
 
         public AccountController(IApiProvider apiProvider)
@@ -21,9 +19,13 @@ namespace KikoleSite.Controllers
 
         public IActionResult Index()
         {
-            var model = GetCookieModel();
+            var (token, login) = this.GetAuthenticationCookie();
 
-            return View(model);
+            return View(new AccountModel
+            {
+                IsAuthenticated = login != null,
+                Login = login
+            });
         }
 
         [HttpPost]
@@ -33,7 +35,7 @@ namespace KikoleSite.Controllers
 
             if (submitFrom == "logoff")
             {
-                Response.Cookies.Delete(CookieName);
+                this.ResetAuthenticationCookie();
                 model = new AccountModel();
             }
             else if (submitFrom == "login")
@@ -45,17 +47,17 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var result = await _apiProvider
+                    var (success, value) = await _apiProvider
                         .LoginAsync(model.LoginSubmission, model.PasswordSubmission)
                         .ConfigureAwait(false);
-                    if (result.success)
+                    if (success)
                     {
-                        SetCookie(CookieName, $"{result.value}§§§{model.LoginSubmission}", DateTime.Now.AddMonths(1));
+                        this.SetCookie(value, model.LoginSubmission);
                         model.IsAuthenticated = true;
                         model.Login = model.LoginSubmission;
                     }
                     else
-                        model.Error = result.value;
+                        model.Error = value;
                 }
             }
             else if (submitFrom == "create")
@@ -69,15 +71,15 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var createResul = await _apiProvider
+                    var (success, value) = await _apiProvider
                         .CreateAccountAsync(model.LoginCreateSubmission,
                             model.PasswordCreate1Submission,
                             model.RecoveryQCreate,
                             model.RecoveryACreate)
                         .ConfigureAwait(false);
-                    if (!createResul.Item1)
+                    if (!success)
                     {
-                        model.Error = createResul.Item2;
+                        model.Error = value;
                     }
                     else
                     {
@@ -92,35 +94,6 @@ namespace KikoleSite.Controllers
             }
 
             return View(model);
-        }
-
-        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
-        {
-            Response.Cookies.Delete(cookieName);
-            var option = new CookieOptions
-            {
-                Expires = expiration,
-                IsEssential = true,
-                Secure = false
-            };
-            Response.Cookies.Append(cookieName, cookieValue, option);
-        }
-
-        private AccountModel GetCookieModel()
-        {
-            var model = new AccountModel();
-
-            if (Request.Cookies.TryGetValue(CookieName, out string cookieValue))
-            {
-                var cookieParts = cookieValue.Split("§§§");
-                if (cookieParts.Length > 1)
-                {
-                    model.IsAuthenticated = true;
-                    model.Login = cookieParts[1];
-                }
-            }
-
-            return model;
         }
     }
 }
