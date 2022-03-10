@@ -25,7 +25,7 @@ namespace KikoleSite.Models
         public int PreviousDay => CurrentDay + 1;
         public bool NoPreviousDay { get; set; }
 
-        public IReadOnlyDictionary<string, string> Countries { get; set; }
+        public IReadOnlyDictionary<ulong, string> Countries { get; set; }
 
         internal MainModel ClearNonPersistentData()
         {

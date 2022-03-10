@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
@@ -15,14 +16,22 @@ namespace KikoleApi.Models
             return new ProposalResponse
             {
                 Successful = player.CountryId == (ulong)Enum.Parse<Country>(Value),
-                Value = ((Country)player.CountryId).ToString()
+                Value = player.CountryId
             };
         }
 
         internal override string IsValid()
         {
-            if (!Enum.IsDefined(typeof(Country), Value))
-                return "Invalid value";
+            if (int.TryParse(Value, out var countryId))
+            {
+                if (!Enum.GetValues(typeof(Country)).Cast<int>().Contains(countryId))
+                    return "Invalid value";
+            }
+            else
+            {
+                if (!Enum.IsDefined(typeof(Country), Value))
+                    return "Invalid value";
+            }
 
             return null;
         }

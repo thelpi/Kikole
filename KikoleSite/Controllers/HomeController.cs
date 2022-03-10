@@ -25,8 +25,8 @@ namespace KikoleSite.Controllers
 
         private readonly IApiProvider _apiProvider;
 
-        private static readonly Dictionary<ulong, IReadOnlyDictionary<string, string>> _countriesCache
-             = new Dictionary<ulong, IReadOnlyDictionary<string, string>>();
+        private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
+             = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
 
         public HomeController(IApiProvider apiProvider)
         {
@@ -110,7 +110,7 @@ namespace KikoleSite.Controllers
                         model.KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                         break;
                     case ProposalType.Country:
-                        model.CountryName = GetCountries()[response.Value.ToString()];
+                        model.CountryName = GetCountries()[ulong.Parse(response.Value.ToString())];
                         break;
                     case ProposalType.Name:
                         model.PlayerName = response.Value.ToString();
@@ -192,7 +192,7 @@ namespace KikoleSite.Controllers
             SetCookie(CookieName, JsonConvert.SerializeObject(model), DateTime.Now.AddDays(1).Date);
         }
 
-        private IReadOnlyDictionary<string, string> GetCountries(ulong languageId = DefaultLanguageId)
+        private IReadOnlyDictionary<ulong, string> GetCountries(ulong languageId = DefaultLanguageId)
         {
             if (!_countriesCache.ContainsKey(languageId))
             {
@@ -200,11 +200,13 @@ namespace KikoleSite.Controllers
                 var apiCountries = _apiProvider
                     .GetCountriesAsync(languageId)
                     .GetAwaiter()
-                    .GetResult();
-                _countriesCache.Add(languageId, apiCountries.ToDictionary(ac => ac.Code, ac => ac.Name));
+                    .GetResult()
+                    .OrderBy(ac => ac.Name)
+                    .ToDictionary(ac => ac.Code, ac => ac.Name);
+                _countriesCache.Add(languageId, apiCountries);
             }
 
-            return _countriesCache[DefaultLanguageId];
+            return _countriesCache[languageId];
         }
     }
 }

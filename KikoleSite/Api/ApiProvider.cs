@@ -84,7 +84,7 @@ namespace KikoleSite.Api
         public async Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId)
         {
             var response = await SendAsync(
-                    $"countrie?languageId={languageId}",
+                    $"countries?languageId={languageId}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

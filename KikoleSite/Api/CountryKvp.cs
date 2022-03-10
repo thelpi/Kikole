@@ -2,8 +2,8 @@
 {
     public class CountryKvp
     {
-        public string Code { get; }
-
-        public string Name { get; }
+        public ulong Code { get; set; }
+        
+        public string Name { get; set; }
     }
 }
