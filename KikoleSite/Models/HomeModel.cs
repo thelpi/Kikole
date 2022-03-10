@@ -3,7 +3,7 @@ using KikoleSite.ItemDatas;
 
 namespace KikoleSite.Models
 {
-    public class MainModel
+    public class HomeModel
     {
         public int Points { get; set; }
         public string MessageToDisplay { get; set; }
@@ -28,7 +28,7 @@ namespace KikoleSite.Models
 
         public IReadOnlyDictionary<ulong, string> Countries { get; set; }
 
-        internal MainModel ClearNonPersistentData()
+        internal HomeModel ClearNonPersistentData()
         {
             ClubNameSubmission = null;
             CountryNameSubmission = null;

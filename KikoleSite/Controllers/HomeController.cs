@@ -37,7 +37,7 @@ namespace KikoleSite.Controllers
         public IActionResult Index([FromQuery] int? day)
         {
             var model = GetSubmissionFormCookie()?.ClearNonPersistentData()
-                ?? new MainModel
+                ?? new HomeModel
                 {
                     Points = BasePoints
                 };
@@ -47,7 +47,7 @@ namespace KikoleSite.Controllers
                 && day.Value >= 0
                 && DateTime.Now.AddDays(-day.Value).Date >= FirstDate)
             {
-                model = new MainModel
+                model = new HomeModel
                 {
                     Points = BasePoints,
                     CurrentDay = day.Value,
@@ -63,7 +63,7 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index(MainModel model)
+        public async Task<IActionResult> Index(HomeModel model)
         {
             var proposalType = Enum.Parse<ProposalType>(
                 HttpContext.Request.Form.Keys.Single(x => x.StartsWith("submit-")).Split('-')[1]);
@@ -175,20 +175,20 @@ namespace KikoleSite.Controllers
             return (null, null);
         }
 
-        private MainModel GetSubmissionFormCookie()
+        private HomeModel GetSubmissionFormCookie()
         {
             if (Request.Cookies.TryGetValue(CookieName, out string cookieValue))
             {
                 try
                 {
-                    return JsonConvert.DeserializeObject<MainModel>(cookieValue);
+                    return JsonConvert.DeserializeObject<HomeModel>(cookieValue);
                 }
                 catch { }
             }
             return null;
         }
 
-        private void SetSubmissionFormCookie(MainModel model)
+        private void SetSubmissionFormCookie(HomeModel model)
         {
             SetCookie(CookieName, JsonConvert.SerializeObject(model), DateTime.Now.AddDays(1).Date);
         }
