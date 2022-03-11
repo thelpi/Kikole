@@ -15,5 +15,7 @@ namespace KikoleApi.Models.Dtos
         public DateTime? ProposalDate { get; set; }
 
         public string Clue { get; set; }
+
+        public ulong PositionId { get; set; }
     }
 }

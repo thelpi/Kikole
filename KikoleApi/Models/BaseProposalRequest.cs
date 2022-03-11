@@ -30,7 +30,7 @@ namespace KikoleApi.Models
             return null;
         }
 
-        internal virtual ProposalDto ToDto(ulong userId, bool successful)
+        internal ProposalDto ToDto(ulong userId, bool successful)
         {
             return new ProposalDto
             {

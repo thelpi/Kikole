@@ -84,6 +84,18 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        [HttpPut("position-proposals")]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitPositionProposalAsync(
+            [FromBody] PositionProposalRequest request,
+            [FromQuery] ulong userId)
+        {
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
+        }
+
         private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request,
             ulong userId)
             where T : BaseProposalRequest

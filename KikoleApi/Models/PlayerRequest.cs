@@ -22,13 +22,20 @@ namespace KikoleApi.Models
 
         public string Clue { get; set; }
 
-        internal string IsValid()
+        public Position Position { get; set; }
+
+        public bool SetLatestProposalDate { get; set; }
+
+        internal string IsValid(DateTime now)
         {
             if (string.IsNullOrWhiteSpace(Name))
                 return "Invalid name";
 
             if (!Enum.IsDefined(typeof(Country), Country))
                 return "Invalid country";
+
+            if (!Enum.IsDefined(typeof(Position), Position))
+                return "Invalid position";
 
             if (YearOfBirth < 1900 || YearOfBirth > 2100)
                 return "Invalid year of birth";
@@ -45,6 +52,9 @@ namespace KikoleApi.Models
             if (string.IsNullOrWhiteSpace(Clue))
                 return "Invalid clue";
 
+            if (ProposalDate.HasValue && ProposalDate.Value.Date < now.Date)
+                return "Invalid proposal date";
+
             return null;
         }
 
@@ -57,7 +67,8 @@ namespace KikoleApi.Models
                 ProposalDate = ProposalDate,
                 YearOfBirth = YearOfBirth,
                 AllowedNames = AllowedNames.SanitizeJoin(Name),
-                Clue = Clue
+                Clue = Clue,
+                PositionId = (ulong)Position
             };
         }
 

@@ -11,10 +11,12 @@ namespace KikoleApi.Controllers
     public class PlayerController : KikoleBaseController
     {
         private readonly IPlayerRepository _playerRepository;
+        private readonly IClock _clock;
 
-        public PlayerController(IPlayerRepository playerRepository)
+        public PlayerController(IPlayerRepository playerRepository, IClock clock)
         {
             _playerRepository = playerRepository;
+            _clock = clock;
         }
 
         [HttpPost]
@@ -28,9 +30,17 @@ namespace KikoleApi.Controllers
             if (request == null)
                 return BadRequest("Invalid request: null");
 
-            var validityRequest = request.IsValid();
+            var validityRequest = request.IsValid(_clock.Now);
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest($"Invalid request: {validityRequest}");
+
+            if (!request.ProposalDate.HasValue && request.SetLatestProposalDate)
+            {
+                var latestDate = await _playerRepository
+                    .GetLatestProposalDateasync()
+                    .ConfigureAwait(false);
+                request.ProposalDate = latestDate.AddDays(1).Date;
+            }
 
             var playerId = await _playerRepository
                 .CreatePlayerAsync(request.ToDto())

@@ -6,6 +6,7 @@
         Club,
         Year,
         Country,
-        Clue
+        Clue,
+        Position
     }
 }

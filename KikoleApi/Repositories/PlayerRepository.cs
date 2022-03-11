@@ -23,7 +23,8 @@ namespace KikoleApi.Repositories
                     ("country_id", player.CountryId),
                     ("proposal_date", player.ProposalDate),
                     ("creation_date", Clock.Now),
-                    ("clue", player.Clue))
+                    ("clue", player.Clue),
+                    ("position_id", player.PositionId))
                 .ConfigureAwait(false);
         }
 
@@ -50,6 +51,13 @@ namespace KikoleApi.Repositories
             return await GetDtosAsync<PlayerClubDto>(
                     "player_clubs",
                     ("player_id", playerId))
+                .ConfigureAwait(false);
+        }
+
+        public async Task<DateTime> GetLatestProposalDateasync()
+        {
+            return await ExecuteScalarAsync<DateTime>(
+                    "SELECT MAX(proposal_date) FROM players", null)
                 .ConfigureAwait(false);
         }
     }
