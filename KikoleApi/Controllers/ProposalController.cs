@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
@@ -104,6 +106,41 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        [HttpGet("proposals")]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<IReadOnlyCollection<ProposalResponse>>> GetProposalsAsync(
+            [FromQuery] DateTime proposalDate,
+            [FromQuery] ulong userId)
+        {
+            var datas = await _proposalRepository
+                .GetProposalsAsync(proposalDate, userId)
+                .ConfigureAwait(false);
+
+            if (datas.Count == 0)
+                return Ok(new List<ProposalResponse>(0));
+
+            var playerOfTheDay = await _playerRepository
+                .GetPlayerOfTheDayAsync(proposalDate)
+                .ConfigureAwait(false);
+
+            var playerClubs = await _playerRepository
+                .GetPlayerClubsAsync(playerOfTheDay.Id)
+                .ConfigureAwait(false);
+
+            var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
+            foreach (var pc in playerClubs)
+            {
+                var c = await _clubRepository
+                    .GetClubAsync(pc.ClubId)
+                    .ConfigureAwait(false);
+                playerClubsDetails.Add(c);
+            }
+
+            return Ok(datas.Select(d => new ProposalResponse(d, playerOfTheDay, playerClubs, playerClubsDetails)).ToList());
+        }
+
         private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request,
             ulong userId)
             where T : BaseProposalRequest
@@ -115,15 +152,15 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest($"Invalid request: {validityRequest}");
 
+            // TODO: get points from userId
+            // and override value from request
+
             var playerOfTheDay = await _playerRepository
                 .GetPlayerOfTheDayAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
             if (playerOfTheDay == null)
                 return BadRequest("Invalid proposal date");
-
-            // TODO: get points from userId
-            // and override value from request
 
             var playerClubs = await _playerRepository
                 .GetPlayerClubsAsync(playerOfTheDay.Id)

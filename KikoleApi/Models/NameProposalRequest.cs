@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
@@ -12,13 +11,19 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var success = player.AllowedNames.Contains(Value.Sanitize());
+            bool? success = null;
+            var value = ProposalResponse.GetValueFromProposalType(ProposalType,
+                Value, ref success, player, playerClubs, clubs);
+
             return new ProposalResponse
             {
-                Successful = success,
-                Value = success ? player.Name : null,
+                Successful = success.Value,
+                Value = value,
                 TotalPoints = SourcePoints,
-                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType]
+                LostPoints = success.Value
+                    ? 0
+                    : ProposalChart.Default.ProposalTypesCost[ProposalType],
+                ProposalType = ProposalType
             };
         }
     }

@@ -29,15 +29,19 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var success = player.PositionId == ulong.Parse(Value);
+            bool? success = null;
+            var value = ProposalResponse.GetValueFromProposalType(ProposalType,
+                Value, ref success, player, playerClubs, clubs);
+            
             return new ProposalResponse
             {
-                Successful = success,
-                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType],
+                Successful = success.Value,
+                LostPoints = success.Value
+                    ? 0
+                    : ProposalChart.Default.ProposalTypesCost[ProposalType],
                 TotalPoints = SourcePoints,
-                Value = success
-                    ? player.PositionId
-                    : default(ulong?)
+                Value = value,
+                ProposalType = ProposalType
             };
         }
     }

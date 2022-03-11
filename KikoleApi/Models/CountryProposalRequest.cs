@@ -13,13 +13,19 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var success = player.CountryId == (ulong)Enum.Parse<Country>(Value);
+            bool? success = null;
+            var value = ProposalResponse.GetValueFromProposalType(ProposalType,
+                Value, ref success, player, playerClubs, clubs);
+
             return new ProposalResponse
             {
-                Successful = success,
-                Value = player.CountryId,
+                Successful = success.Value,
+                Value = value,
                 TotalPoints = SourcePoints,
-                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType]
+                LostPoints = success.Value
+                    ? 0
+                    : ProposalChart.Default.ProposalTypesCost[ProposalType],
+                ProposalType = ProposalType
             };
         }
 

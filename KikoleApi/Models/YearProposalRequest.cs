@@ -11,17 +11,20 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
-            var numValue = ushort.Parse(Value);
-            var success = numValue == player.YearOfBirth;
+            bool? success = null;
+            var value = ProposalResponse.GetValueFromProposalType(ProposalType,
+                Value, ref success, player, playerClubs, clubs);
+
             return new ProposalResponse
             {
-                Successful = success,
-                Value = success
-                    ? player.YearOfBirth.ToString()
-                    : null,
-                Tip = $"The player is {(numValue > player.YearOfBirth ? "older" : "younger")}",
+                Successful = success.Value,
+                Value = value,
+                Tip = $"The player is {(ushort.Parse(Value) > player.YearOfBirth ? "older" : "younger")}",
                 TotalPoints = SourcePoints,
-                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType]
+                LostPoints = success.Value
+                    ? 0
+                    : ProposalChart.Default.ProposalTypesCost[ProposalType],
+                ProposalType = ProposalType
             };
         }
 

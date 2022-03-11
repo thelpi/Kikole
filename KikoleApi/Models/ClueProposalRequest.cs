@@ -11,12 +11,17 @@ namespace KikoleApi.Models
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
         {
+            bool? successful = null;
+            var value = ProposalResponse.GetValueFromProposalType(ProposalType,
+                Value, ref successful, player, playerClubs, clubs);
+
             return new ProposalResponse
             {
-                Successful = true,
-                Value = player.Clue,
+                Successful = successful.Value,
+                Value = value,
                 TotalPoints = SourcePoints,
-                LostPoints = ProposalChart.Default.ProposalTypesCost[ProposalType]
+                LostPoints = ProposalChart.Default.ProposalTypesCost[ProposalType],
+                ProposalType = ProposalType
             };
         }
 
