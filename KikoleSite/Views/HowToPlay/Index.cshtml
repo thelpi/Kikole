@@ -1,5 +1,6 @@
-﻿<fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
-    <span style="color: crimson">"Kikole?"</span> is a game where you have to guess a new football player every single day.<br />
+﻿@model KikoleSite.Api.ProposalChart
+<fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
+    <span style="color: crimson; font-size: large">"Kikole?"</span> is a game where you have to guess a new football player every single day.<br />
     The way to do this is to figure out in which clubs he played (or currently plays) during his career.<br />
     You can also try to guess his nationality, birth year or position on the field.<br />
     <ul>
@@ -9,14 +10,13 @@
     </ul>
     Score is computed with following rules:
     <ul>
-        <!-- TODO: dynamic from API -->
-        <li>You start with <span style="color: crimson">1000</span> points</li>
-        <li>Asking for the clue costs 100 points</li>
-        <li>An incorrect player proposition costs 200 points</li>
-        <li>An incorrect club proposition costs 50 points</li>
-        <li>An incorrect country proposition costs 25 points</li>
-        <li>An incorrect year proposition costs 25 points</li>
-        <li>An incorrect position proposition costs 200 points</li>
-        <li>A good guess on any category costs no points</li>
+        <li>You start with <span style="color: forestgreen; font-size: large">@Model.BasePoints</span> points</li>
+        <li>Asking for the clue costs <span style="color: crimson; font-size: large">@Model.ProposalTypesCost[KikoleSite.Api.ProposalType.Clue]</span> points</li>
+        <li>An incorrect player proposition costs <span style="color: crimson; font-size: large">@Model.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> points</li>
+        <li>An incorrect club proposition costs <span style="color: crimson; font-size: large">@Model.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> points</li>
+        <li>An incorrect country proposition costs <span style="color: crimson; font-size: large">@Model.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> points</li>
+        <li>An incorrect year proposition costs <span style="color: crimson; font-size: large">@Model.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> points</li>
+        <li>An incorrect position proposition costs <span style="color: crimson; font-size: large">@Model.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> points</li>
+        <li>A good guess on any category costs <span style="color: forestgreen; font-size: large">no points</span></li>
     </ul>
 </fieldset>

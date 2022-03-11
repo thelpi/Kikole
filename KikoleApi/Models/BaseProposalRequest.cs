@@ -16,8 +16,6 @@ namespace KikoleApi.Models
 
         internal abstract ProposalType ProposalType { get; }
 
-        internal abstract int PointsCost { get; }
-
         internal abstract ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs);

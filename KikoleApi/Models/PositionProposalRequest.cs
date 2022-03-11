@@ -9,8 +9,6 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Position;
 
-        internal override int PointsCost => 200;
-
         internal override string IsValid()
         {
             if (int.TryParse(Value, out var positionId))
@@ -35,7 +33,7 @@ namespace KikoleApi.Models
             return new ProposalResponse
             {
                 Successful = success,
-                LostPoints = success ? 0 : PointsCost,
+                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType],
                 TotalPoints = SourcePoints,
                 Value = success
                     ? player.PositionId

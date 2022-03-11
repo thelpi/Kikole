@@ -9,8 +9,6 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Club;
 
-        internal override int PointsCost => 50;
-
         internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
@@ -24,7 +22,7 @@ namespace KikoleApi.Models
                     ? new PlayerClub(c, playerClubs.First(_ => _.ClubId == c.Id))
                     : null,
                 TotalPoints = SourcePoints,
-                LostPoints = c != null ? 0 : PointsCost
+                LostPoints = c != null ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType]
             };
         }
     }

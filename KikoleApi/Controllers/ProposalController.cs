@@ -24,6 +24,14 @@ namespace KikoleApi.Controllers
             _clubRepository = clubRepository;
         }
 
+        [HttpGet("proposal-charts")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType(typeof(ProposalChart), (int)HttpStatusCode.OK)]
+        public ActionResult<ProposalChart> GetProposalChart()
+        {
+            return ProposalChart.Default;
+        }
+
         [HttpPut("club-proposals")]
         [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]

@@ -14,14 +14,11 @@ namespace KikoleSite.Controllers
     {
         const ulong DefaultLanguageId = 1;
 
-        const int BasePoints = 1000;
-
-        static readonly DateTime FirstDate = new DateTime(2022, 3, 5);
-
         private readonly IApiProvider _apiProvider;
 
         private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
              = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
+        private static ProposalChart _proposalChartCache;
 
         public HomeController(IApiProvider apiProvider)
         {
@@ -30,18 +27,20 @@ namespace KikoleSite.Controllers
 
         public IActionResult Index([FromQuery] int? day)
         {
-            var model = GetCookieModelOrDefault(new HomeModel { Points = BasePoints });
+            var chart = GetProposalChartCache();
+
+            var model = GetCookieModelOrDefault(new HomeModel { Points = chart.BasePoints });
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
                 && day.Value >= 0
-                && DateTime.Now.AddDays(-day.Value).Date >= FirstDate)
+                && DateTime.Now.AddDays(-day.Value).Date >= chart.FirstDate)
             {
                 model = new HomeModel
                 {
-                    Points = BasePoints,
+                    Points = chart.BasePoints,
                     CurrentDay = day.Value,
-                    NoPreviousDay = DateTime.Now.AddDays(-day.Value).Date == FirstDate
+                    NoPreviousDay = DateTime.Now.AddDays(-day.Value).Date == chart.FirstDate
                 };
             }
 
@@ -158,6 +157,12 @@ namespace KikoleSite.Controllers
             return cookieSubForm != null
                 ? new HomeModel(cookieSubForm)
                 : defaultModel;
+        }
+
+        private ProposalChart GetProposalChartCache()
+        {
+            return _proposalChartCache ??
+                (_proposalChartCache = _apiProvider.GetProposalChartAsync().GetAwaiter().GetResult());
         }
     }
 }

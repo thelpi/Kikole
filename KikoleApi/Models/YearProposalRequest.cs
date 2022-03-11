@@ -7,8 +7,6 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Year;
 
-        internal override int PointsCost => 25;
-
         internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
@@ -23,7 +21,7 @@ namespace KikoleApi.Models
                     : null,
                 Tip = $"The player is {(numValue > player.YearOfBirth ? "older" : "younger")}",
                 TotalPoints = SourcePoints,
-                LostPoints = success ? 0 : PointsCost
+                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType]
             };
         }
 

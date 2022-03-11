@@ -9,8 +9,6 @@ namespace KikoleApi.Models
     {
         internal override ProposalType ProposalType => ProposalType.Country;
 
-        internal override int PointsCost => 25;
-
         internal override ProposalResponse CheckSuccessful(PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
@@ -21,7 +19,7 @@ namespace KikoleApi.Models
                 Successful = success,
                 Value = player.CountryId,
                 TotalPoints = SourcePoints,
-                LostPoints = success ? 0 : PointsCost
+                LostPoints = success ? 0 : ProposalChart.Default.ProposalTypesCost[ProposalType]
             };
         }
 

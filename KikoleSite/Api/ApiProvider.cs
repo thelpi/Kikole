@@ -97,6 +97,17 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
+        public async Task<ProposalChart> GetProposalChartAsync()
+        {
+            var response = await SendAsync(
+                    "proposal-charts",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<ProposalChart>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)

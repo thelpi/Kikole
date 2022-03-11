@@ -19,5 +19,7 @@ namespace KikoleSite.Api
         Task<(bool success, string value)> LoginAsync(string login, string password);
 
         Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId);
+
+        Task<ProposalChart> GetProposalChartAsync();
     }
 }
