@@ -5,6 +5,7 @@ using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers

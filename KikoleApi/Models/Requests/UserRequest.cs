@@ -3,7 +3,7 @@ using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 
-namespace KikoleApi.Models
+namespace KikoleApi.Models.Requests
 {
     public class UserRequest
     {

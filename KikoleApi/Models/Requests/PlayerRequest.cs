@@ -4,7 +4,7 @@ using System.Linq;
 using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 
-namespace KikoleApi.Models
+namespace KikoleApi.Models.Requests
 {
     public class PlayerRequest
     {

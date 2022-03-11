@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using KikoleApi.Models.Dtos;
 
-namespace KikoleApi.Models
+namespace KikoleApi.Models.Requests
 {
     public abstract class BaseProposalRequest
     {
@@ -16,9 +16,10 @@ namespace KikoleApi.Models
 
         internal abstract ProposalType ProposalType { get; }
 
-        internal abstract ProposalResponse CheckSuccessful(PlayerDto player,
-            IReadOnlyList<PlayerClubDto> playerClubs,
-            IReadOnlyList<ClubDto> clubs);
+        internal virtual string GetTip(PlayerDto player)
+        {
+            return null;
+        }
 
         internal virtual string IsValid()
         {

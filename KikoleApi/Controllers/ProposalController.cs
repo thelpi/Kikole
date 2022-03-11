@@ -7,6 +7,7 @@ using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
@@ -175,10 +176,8 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            var response = request.CheckSuccessful(
-                playerOfTheDay,
-                playerClubs,
-                playerClubsDetails);
+            var response = new ProposalResponse(request, 
+                playerOfTheDay, playerClubs, playerClubsDetails);
             
             if (userId > 0)
             {
