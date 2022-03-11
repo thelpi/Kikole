@@ -46,17 +46,17 @@ namespace KikoleSite.Controllers
             }
 
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
-
-            model.LoggedAs = this.GetAuthenticationCookie().login;
-            model.Countries = GetCountries();
-            model.Positions = GetPositions();
-            return View(model);
+            
+            return ViewWithFullModel(model, this.GetAuthenticationCookie().login);
         }
 
         [HttpPost]
         public async Task<IActionResult> Index(HomeModel model)
         {
-            var proposalType = Enum.Parse<ProposalType>(GetSubmitAction());
+            if (model == null || !Enum.TryParse<ProposalType>(GetSubmitAction(), out var proposalType))
+            {
+                return Redirect("/");
+            }
 
             var value = model.GetValueFromProposalType(proposalType);
 
@@ -115,6 +115,11 @@ namespace KikoleSite.Controllers
 
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
+            return ViewWithFullModel(model, login);
+        }
+
+        private IActionResult ViewWithFullModel(HomeModel model, string login)
+        {
             model.LoggedAs = login;
             model.Countries = GetCountries();
             model.Positions = GetPositions();
