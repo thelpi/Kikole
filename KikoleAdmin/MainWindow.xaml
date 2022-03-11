@@ -20,12 +20,16 @@
                     <TextBox Width="75" Name="TxtPlayerYear" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
+                    <Label Width="100" Content="Propose next:" />
+                    <CheckBox Name="ChkSetLatestProposal" IsChecked="True" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
                     <Label Width="100" Content="Nationality:" />
                     <ComboBox Width="200" Name="CbbCountries" DisplayMemberPath="Name" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
-                    <Label Width="100" Content="Proposal date:" />
-                    <TextBox Width="75" Name="TxtProposalDate" />
+                    <Label Width="100" Content="Position:" />
+                    <ComboBox Width="75" Name="CbbPositions" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0, 5, 0, 0">
                     <Label Width="100" Content="Clue:" />

@@ -25,7 +25,7 @@ namespace KikoleAdmin.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://192.168.1.85:996/")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:52279/")]
         public string BackApiBaseUrl {
             get {
                 return ((string)(this["BackApiBaseUrl"]));

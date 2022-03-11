@@ -22,6 +22,7 @@ namespace KikoleAdmin
                 .GetAwaiter()
                 .GetResult()
                 .OrderBy(x => x.Name);
+            CbbPositions.ItemsSource = Enum.GetValues(typeof(Position));
         }
 
         private void AddClubButton_Click(object sender, RoutedEventArgs e)
@@ -66,22 +67,22 @@ namespace KikoleAdmin
             {
                 var req = new PlayerRequest
                 {
-                    ProposalDate = string.IsNullOrWhiteSpace(TxtProposalDate.Text)
-                        ? default(DateTime?)
-                        : DateTime.Parse(TxtProposalDate.Text),
+                    ProposalDate = null,
                     Clubs = ClubsPanel.Children.Cast<ComboBox>().Where(cbb => cbb.SelectedIndex >= 0).Select(cbb => (cbb.SelectedItem as Club).Id).ToList(),
                     Clue = TxtClue.Text,
                     Country = (CbbCountries.SelectedItem as Country).Code,
                     AllowedNames = TxtAllowedNames.Text.Split(new string[] { "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries),
                     Name = TxtPlayerName.Text,
-                    YearOfBirth = ushort.Parse(TxtPlayerYear.Text)
+                    YearOfBirth = ushort.Parse(TxtPlayerYear.Text),
+                    Position = CbbPositions.SelectedItem.ToString(),
+                    SetLatestProposalDate = ChkSetLatestProposal.IsChecked == true
                 };
 
                 _apiProvider.AddPlayerAsync(req).GetAwaiter().GetResult();
                 var result = MessageBox.Show("Player added! Clear?", "Ok", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
-                    TxtProposalDate.Text = "";
+                    CbbPositions.SelectedIndex = -1;
                     ClubsPanel.Children.Clear();
                     TxtClue.Text = "";
                     CbbCountries.SelectedIndex = -1;

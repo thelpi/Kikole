@@ -17,6 +17,10 @@ namespace KikoleAdmin
 
         public IReadOnlyList<ulong> Clubs { get; set; }
 
+        public string Position { get; set; }
+
+        public bool SetLatestProposalDate { get; set; }
+
         public string Clue { get; set; }
     }
 }
