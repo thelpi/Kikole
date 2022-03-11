@@ -15,9 +15,6 @@ namespace KikoleSite.Controllers
         const ulong DefaultLanguageId = 1;
 
         const int BasePoints = 1000;
-        const int NamePointsRemoval = 200;
-        const int DefaultPointsRemoval = 100;
-        const int YearPointsRemoval = 50;
 
         static readonly DateTime FirstDate = new DateTime(2022, 3, 5);
 
@@ -52,6 +49,7 @@ namespace KikoleSite.Controllers
 
             model.LoggedAs = this.GetAuthenticationCookie().login;
             model.Countries = GetCountries();
+            model.Positions = GetPositions();
             return View(model);
         }
 
@@ -100,6 +98,9 @@ namespace KikoleSite.Controllers
                     case ProposalType.Country:
                         model.CountryName = GetCountries()[ulong.Parse(response.Value.ToString())];
                         break;
+                    case ProposalType.Position:
+                        model.Position = GetPositions()[ulong.Parse(response.Value.ToString())];
+                        break;
                     case ProposalType.Name:
                         model.PlayerName = response.Value.ToString();
                         break;
@@ -116,7 +117,16 @@ namespace KikoleSite.Controllers
 
             model.LoggedAs = login;
             model.Countries = GetCountries();
+            model.Positions = GetPositions();
             return View(model);
+        }
+
+        private IReadOnlyDictionary<ulong, string> GetPositions()
+        {
+            return Enum
+                .GetValues(typeof(Position))
+                .Cast<Position>()
+                .ToDictionary(_ => (ulong)_, _ => _.ToString());
         }
 
         private IReadOnlyDictionary<ulong, string> GetCountries(ulong languageId = DefaultLanguageId)

@@ -13,5 +13,6 @@ namespace KikoleSite.Cookies
         public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }
+        public string Position { get; set; }
     }
 }

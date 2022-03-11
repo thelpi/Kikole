@@ -26,10 +26,19 @@
     </div>
     @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
     {
-        <div style="margin-top: 5px">
-            <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
-        </div>
-        <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+        if (Model.CurrentDay == 0)
+        {
+            <div style="margin-top: 5px">
+                <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
+            </div>
+            <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+        }
+        else
+        {
+            <div style="margin-top: 5px">
+                <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>.</label>
+            </div>
+        }
     }
     else
     {
@@ -91,6 +100,26 @@
                 {
                     <div>
                         <label>@Model.CountryName</label>
+                    </div>
+                }
+            </div>
+        </form>
+        <form method="post" action="/">
+            <div style="margin-top: 30px">
+                <div>
+                    <label>Position:</label>
+                </div>
+                @if (string.IsNullOrWhiteSpace(Model.Position))
+                {
+                    <div>
+                        @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions.Select(x => new SelectListItem(x.Value.ToString(), x.Key.ToString())), new { @style = "width: 300px" })
+                        <input type="submit" value="Ok" name="submit-Position" />
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <label>@Model.Position</label>
                     </div>
                 }
             </div>

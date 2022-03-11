@@ -14,12 +14,15 @@ namespace KikoleSite.Models
         public string BirthYear { get; set; }
         public string PlayerName { get; set; }
         public string CountryName { get; set; }
+        public string Position { get; set; }
         public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
         public string ClubNameSubmission { get; set; }
         public string PlayerNameSubmission { get; set; }
         public string CountryNameSubmission { get; set; }
         public string BirthYearSubmission { get; set; }
+        public string PositionSubmission { get; set; }
         public IReadOnlyDictionary<ulong, string> Countries { get; set; }
+        public IReadOnlyDictionary<ulong, string> Positions { get; set; }
         public string LoggedAs { get; set; }
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }
@@ -39,6 +42,7 @@ namespace KikoleSite.Models
             NoPreviousDay = submissionFormCookie.NoPreviousDay;
             PlayerName = submissionFormCookie.PlayerName;
             Points = submissionFormCookie.Points;
+            Position = submissionFormCookie.Position;
         }
 
         internal SubmissionForm ToSubmissionFormCookie()
@@ -52,7 +56,8 @@ namespace KikoleSite.Models
                 KnownPlayerClubs = KnownPlayerClubs,
                 NoPreviousDay = NoPreviousDay,
                 PlayerName = PlayerName,
-                Points = Points
+                Points = Points,
+                Position = Position
             };
         }
 
@@ -64,6 +69,7 @@ namespace KikoleSite.Models
                 case ProposalType.Country: return CountryNameSubmission;
                 case ProposalType.Name: return PlayerNameSubmission;
                 case ProposalType.Year: return BirthYearSubmission;
+                case ProposalType.Position: return PositionSubmission;
                 default: return null;
             }
         }
