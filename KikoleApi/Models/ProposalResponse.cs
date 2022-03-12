@@ -39,14 +39,14 @@ namespace KikoleApi.Models
             {
                 case ProposalType.Name:
                     if (!success.HasValue)
-                        Successful = player.AllowedNames.Contains(sourceValue.Sanitize());
+                        Successful = player.AllowedNames.ContainsSanitized(sourceValue);
                     Value = Successful
                         ? player.Name
                         : null;
                     break;
 
                 case ProposalType.Club:
-                    var c = clubs.FirstOrDefault(_ => _.AllowedNames.Contains(sourceValue.Sanitize()));
+                    var c = clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
                     if (!success.HasValue)
                         Successful = c != null;
                     Value = Successful

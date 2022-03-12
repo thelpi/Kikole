@@ -9,6 +9,11 @@ namespace KikoleApi.Helpers
         const string Iso8859Code = "ISO-8859-8";
         const char Separator = ';';
 
+        internal static bool ContainsSanitized(this string source, string value)
+        {
+            return source.Disjoin().Contains(value.Sanitize());
+        }
+
         internal static IReadOnlyList<string> Disjoin(this string value)
         {
             return value.Split(Separator).ToList();
