@@ -25,5 +25,8 @@ namespace KikoleSite.Api
 
         Task<(bool success, IReadOnlyCollection<ProposalResponse> proposals)> GetProposalsAsync(
             DateTime proposalDate, string authToken, string ip);
+
+        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
+            int limit, bool includeAnonymous, DateTime? minimalDate);
     }
 }

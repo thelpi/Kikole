@@ -1,0 +1,43 @@
+﻿@model LeaderboardModel
+<fieldset title="Leaderboard" style="margin-top: 10px">
+    <form action="/Leaderboard" method="post">
+        <div>
+            <span style="width: 200px">Sort type:</span>
+            @Html.DropDownListFor(m => m.SortType, System.Enum.GetValues(typeof(KikoleSite.Api.LeaderSort)).Cast<KikoleSite.Api.LeaderSort>().Select(x => new SelectListItem(x.ToString(), x.ToString())), new { @style = "width: 150px" })
+        </div>
+        <div>
+            <span style="width: 200px">With anonymous users?</span>
+            @Html.CheckBoxFor(m => m.IncludeAnonymous)
+        </div>
+        <div>
+            <span style="width: 200px">From minimal date:</span>
+            @Html.TextBoxFor(m => m.MinimalDate, new { @style = "width: 150px" });
+        </div>
+        <div>
+            <input type="submit" value="Afficher" />
+        </div>
+    </form>
+    <table style="margin-top: 20px">
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th style="color: crimson">Username</th>
+                <th>Points</th>
+                <th>Players found</th>
+                <th>Best time (minutes)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leader in Model.Leaders)
+            {
+                <tr>
+                    <td>@leader.Position</td>
+                    <td style="color: crimson">@leader.Login</td>
+                    <td>@leader.TotalPoints</td>
+                    <td>@leader.SuccessCount</td>
+                    <td>@leader.BestTime.TotalMinutes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</fieldset>

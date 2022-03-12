@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -126,6 +127,56 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
 
             return (true, proposals);
+        }
+
+        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
+            int limit, bool includeAnonymous, DateTime? minimalDate)
+        {
+            var response = await SendAsync(
+                    $"leaders?minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&includeAnonymous={includeAnonymous}&leaderSort={(int)leaderSort}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            var datas = await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
+                .ConfigureAwait(false);
+
+            uint? totalPoints = null;
+            TimeSpan? bestTime = null;
+            int? successCount = null;
+            int currentPos = 0;
+            return datas
+                .Select((d, i) =>
+                {
+                    switch (leaderSort)
+                    {
+                        case LeaderSort.BestTime:
+                            if (!bestTime.HasValue || bestTime != d.BestTime)
+                            {
+                                currentPos = i + 1;
+                                bestTime = d.BestTime;
+                            }
+                            break;
+                        case LeaderSort.SuccessCount:
+                            if (!successCount.HasValue || successCount != d.SuccessCount)
+                            {
+                                currentPos = i + 1;
+                                successCount = d.SuccessCount;
+                            }
+                            break;
+                        case LeaderSort.TotalPoints:
+                            if (!totalPoints.HasValue || totalPoints != d.TotalPoints)
+                            {
+                                currentPos = i + 1;
+                                totalPoints = d.TotalPoints;
+                            }
+                            break;
+                    }
+                    d.Position = currentPos;
+
+                    return d;
+                })
+                .Take(limit)
+                .ToList();
         }
 
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
