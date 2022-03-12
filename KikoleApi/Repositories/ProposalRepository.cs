@@ -24,7 +24,7 @@ namespace KikoleApi.Repositories
                     ("successful", proposal.Successful),
                     ("proposal_date", proposal.ProposalDate),
                     ("days_before", proposal.DaysBefore),
-                    ("creation_date", proposal.CreationDate))
+                    ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
         }
 

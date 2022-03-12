@@ -33,7 +33,7 @@ namespace KikoleApi.Models.Requests
             return null;
         }
 
-        internal ProposalDto ToDto(ulong userId, bool successful, DateTime timestamp)
+        internal ProposalDto ToDto(ulong userId, bool successful)
         {
             return new ProposalDto
             {
@@ -43,8 +43,7 @@ namespace KikoleApi.Models.Requests
                 Value = Value?.ToString(),
                 ProposalTypeId = (ulong)ProposalType,
                 DaysBefore = DaysBefore,
-                Ip = UserIp,
-                CreationDate = timestamp
+                Ip = UserIp
             };
         }
 

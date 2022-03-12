@@ -219,10 +219,9 @@ namespace KikoleApi.Controllers
                     playerClubs,
                     playerClubsDetails)
                 .WithTotalPoints(request.SourcePoints);
-
-            var timestamp = _clock.Now;
+            
             await _proposalRepository
-                .CreateProposalAsync(request.ToDto(userId, response.Successful, timestamp))
+                .CreateProposalAsync(request.ToDto(userId, response.Successful))
                 .ConfigureAwait(false);
 
             if (response.IsWin && request.DaysBefore == 0)
@@ -233,7 +232,7 @@ namespace KikoleApi.Controllers
                         Ip = request.UserIp,
                         Points = (ushort)response.TotalPoints,
                         ProposalDate = request.ProposalDate,
-                        Time = Convert.ToUInt16(Math.Ceiling((timestamp - request.ProposalDate.Date).TotalMinutes)),
+                        Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
                         UserId = userId
                     })
                     .ConfigureAwait(false);

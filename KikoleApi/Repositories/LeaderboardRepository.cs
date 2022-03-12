@@ -22,7 +22,7 @@ namespace KikoleApi.Repositories
                     ("proposal_date", request.ProposalDate.Date),
                     ("points", request.Points),
                     ("time", request.Time),
-                    ("creation_date", request.CreationDate))
+                    ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
         }
 
