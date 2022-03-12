@@ -21,6 +21,8 @@ namespace KikoleApi.Models
 
         public ProposalType ProposalType { get; set; }
 
+        internal bool IsWin => ProposalType == ProposalType.Name && Successful;
+
         private ProposalResponse(ProposalType proposalType,
             string sourceValue,
             bool? success,

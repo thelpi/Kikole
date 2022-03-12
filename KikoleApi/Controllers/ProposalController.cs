@@ -145,6 +145,8 @@ namespace KikoleApi.Controllers
             }
 
             int totalPoints = ProposalChart.Default.BasePoints;
+            int? indexOfEnd = null;
+            int currentIndex = 0;
             var proposals = datas
                 .OrderBy(pDto => pDto.CreationDate)
                 .Select(pDto =>
@@ -156,9 +158,20 @@ namespace KikoleApi.Controllers
                             playerClubsDetails)
                         .WithTotalPoints(totalPoints);
                     totalPoints = pr.TotalPoints;
+                    if (pr.IsWin && !indexOfEnd.HasValue)
+                    {
+                        indexOfEnd = currentIndex;
+                    }
+                    currentIndex++;
                     return pr;
                 })
                 .ToList();
+
+            if (indexOfEnd.HasValue)
+            {
+                for (var i = proposals.Count - 1; i > indexOfEnd.Value; i--)
+                    proposals.RemoveAt(i);
+            }
 
             return Ok(proposals);
         }
