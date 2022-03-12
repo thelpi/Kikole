@@ -46,7 +46,7 @@ namespace KikoleSite.Controllers
                 else
                 {
                     var (success, value) = await _apiProvider
-                        .LoginAsync(model.LoginSubmission, model.PasswordSubmission)
+                        .LoginAsync(model.LoginSubmission, model.PasswordSubmission, this.GetIp())
                         .ConfigureAwait(false);
                     if (success)
                     {

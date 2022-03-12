@@ -72,7 +72,8 @@ namespace KikoleSite.Controllers
                 .SubmitProposalAsync(DateTime.Now, value, model.CurrentDay,
                     proposalType,
                     token,
-                    model.Points)
+                    model.Points,
+                    this.GetIp())
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;
@@ -141,7 +142,7 @@ namespace KikoleSite.Controllers
             DateTime proposalDate, string authToken)
         {
             var (success, proposals) = await _apiProvider
-                .GetProposalsAsync(proposalDate, authToken)
+                .GetProposalsAsync(proposalDate, authToken, this.GetIp())
                 .ConfigureAwait(false);
 
             if (success)

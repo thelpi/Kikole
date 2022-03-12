@@ -42,10 +42,10 @@ namespace KikoleSite.Api
             return (true, null);
         }
 
-        public async Task<(bool, string)> LoginAsync(string login, string password)
+        public async Task<(bool, string)> LoginAsync(string login, string password, string ip)
         {
             var response = await SendAsync(
-                    $"users/{login}/authentication-tokens?password={password}",
+                    $"users/{login}/authentication-tokens?password={password}&ip={ip}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
@@ -67,7 +67,8 @@ namespace KikoleSite.Api
             int daysBefore,
             ProposalType proposalType,
             string authToken,
-            int sourcePoints)
+            int sourcePoints,
+            string ip)
         {
             var response = await SendAsync(
                     $"{proposalType.ToString().ToLowerInvariant()}-proposals",
@@ -78,7 +79,8 @@ namespace KikoleSite.Api
                         proposalDate,
                         value,
                         daysBefore,
-                        sourcePoints
+                        sourcePoints,
+                        userIp = ip
                     })
                 .ConfigureAwait(false);
             
@@ -109,10 +111,10 @@ namespace KikoleSite.Api
         }
 
         public async Task<(bool, IReadOnlyCollection<ProposalResponse>)> GetProposalsAsync(
-            DateTime proposalDate, string authToken)
+            DateTime proposalDate, string authToken, string ip)
         {
             var response = await SendAsync(
-                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}",
+                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}&userIp={ip}",
                     HttpMethod.Get,
                     authToken)
                 .ConfigureAwait(false);
