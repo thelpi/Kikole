@@ -139,7 +139,23 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            return Ok(datas.Select(d => new ProposalResponse(d, playerOfTheDay, playerClubs, playerClubsDetails)).ToList());
+            int totalPoints = ProposalChart.Default.BasePoints;
+            var proposals = datas
+                .OrderBy(pDto => pDto.CreationDate)
+                .Select(pDto =>
+                {
+                    var pr = new ProposalResponse(
+                            pDto,
+                            playerOfTheDay,
+                            playerClubs,
+                            playerClubsDetails)
+                        .WithTotalPoints(totalPoints);
+                    totalPoints = pr.TotalPoints;
+                    return pr;
+                })
+                .ToList();
+
+            return Ok(proposals);
         }
 
         private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request,
@@ -176,9 +192,13 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            var response = new ProposalResponse(request, 
-                playerOfTheDay, playerClubs, playerClubsDetails);
-            
+            var response = new ProposalResponse(
+                    request, 
+                    playerOfTheDay,
+                    playerClubs,
+                    playerClubsDetails)
+                .WithTotalPoints(request.SourcePoints);
+
             if (userId > 0)
             {
                 await _proposalRepository

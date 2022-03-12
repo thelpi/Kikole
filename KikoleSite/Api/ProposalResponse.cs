@@ -11,5 +11,7 @@
         public int LostPoints { get; set; }
 
         public int TotalPoints { get; set; }
+
+        public ProposalType ProposalType { get; set; }
     }
 }

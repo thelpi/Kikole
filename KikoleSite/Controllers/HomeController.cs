@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
 using KikoleSite.Cookies;
-using KikoleSite.ItemDatas;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,28 +24,34 @@ namespace KikoleSite.Controllers
             _apiProvider = apiProvider;
         }
 
-        public IActionResult Index([FromQuery] int? day)
+        public async Task<IActionResult> Index([FromQuery] int? day)
         {
+            var (token, login) = this.GetAuthenticationCookie();
+
             var chart = GetProposalChartCache();
 
             var model = GetCookieModelOrDefault(new HomeModel { Points = chart.BasePoints });
-
+            
             if (day.HasValue
                 && model.CurrentDay != day.Value
                 && day.Value >= 0
-                && DateTime.Now.AddDays(-day.Value).Date >= chart.FirstDate)
+                && DateTime.Now.Date.AddDays(-day.Value) >= chart.FirstDate)
             {
                 model = new HomeModel
                 {
                     Points = chart.BasePoints,
                     CurrentDay = day.Value,
-                    NoPreviousDay = DateTime.Now.AddDays(-day.Value).Date == chart.FirstDate
+                    NoPreviousDay = DateTime.Now.Date.AddDays(-day.Value) == chart.FirstDate
                 };
             }
 
+            var proposalDate = DateTime.Now.Date.AddDays(-model.CurrentDay);
+
+            await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
+
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
             
-            return ViewWithFullModel(model, this.GetAuthenticationCookie().login);
+            return ViewWithFullModel(model, login);
         }
 
         [HttpPost]
@@ -70,7 +75,6 @@ namespace KikoleSite.Controllers
                     model.Points)
                 .ConfigureAwait(false);
 
-            model.Points = response.TotalPoints;
             model.IsErrorMessage = !response.Successful;
             model.MessageToDisplay = proposalType == ProposalType.Clue
                 ? "A clue has been given, see below"
@@ -78,39 +82,7 @@ namespace KikoleSite.Controllers
                     ? $"Valid {proposalType} guess"
                     : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
 
-            if (response.Successful)
-            {
-                switch (proposalType)
-                {
-                    case ProposalType.Club:
-                        var clubSubmissions = model.KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
-                        if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
-                        {
-                            clubSubmissions.Add(new PlayerClub
-                            {
-                                HistoryPosition = response.Value.historyPosition,
-                                Name = response.Value.name.ToString()
-                            });
-                        }
-                        model.KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
-                        break;
-                    case ProposalType.Country:
-                        model.CountryName = GetCountries()[ulong.Parse(response.Value.ToString())];
-                        break;
-                    case ProposalType.Position:
-                        model.Position = GetPositions()[ulong.Parse(response.Value.ToString())];
-                        break;
-                    case ProposalType.Name:
-                        model.PlayerName = response.Value.ToString();
-                        break;
-                    case ProposalType.Year:
-                        model.BirthYear = response.Value.ToString();
-                        break;
-                    case ProposalType.Clue:
-                        model.Clue = response.Value.ToString();
-                        break;
-                }
-            }
+            model.SetPropertiesFromProposal(response, GetCountries(), GetPositions());
 
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
@@ -163,6 +135,22 @@ namespace KikoleSite.Controllers
         {
             return _proposalChartCache ??
                 (_proposalChartCache = _apiProvider.GetProposalChartAsync().GetAwaiter().GetResult());
+        }
+
+        private async Task SetModelFromApiAsync(HomeModel model,
+            DateTime proposalDate, string authToken)
+        {
+            var (success, proposals) = await _apiProvider
+                .GetProposalsAsync(proposalDate, authToken)
+                .ConfigureAwait(false);
+
+            if (success)
+            {
+                foreach (var p in proposals)
+                {
+                    model.SetPropertiesFromProposal(p, GetCountries(), GetPositions());
+                }
+            }
         }
     }
 }

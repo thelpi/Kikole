@@ -2,7 +2,7 @@
 {
     public enum ProposalType
     {
-        Name,
+        Name = 1,
         Club,
         Year,
         Country,

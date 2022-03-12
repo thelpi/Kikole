@@ -108,6 +108,24 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
+        public async Task<(bool, IReadOnlyCollection<ProposalResponse>)> GetProposalsAsync(
+            DateTime proposalDate, string authToken)
+        {
+            var response = await SendAsync(
+                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return (false, null);
+
+            var proposals = await GetResponseContentAsync<IReadOnlyCollection<ProposalResponse>>(response)
+                .ConfigureAwait(false);
+
+            return (true, proposals);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)

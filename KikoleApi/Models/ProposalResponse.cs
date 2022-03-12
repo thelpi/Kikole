@@ -9,26 +9,15 @@ namespace KikoleApi.Models
 {
     public class ProposalResponse
     {
-        private int _lostPoints;
-
         public bool Successful { get; set; }
 
         public object Value { get; set; }
 
         public string Tip { get; set; }
 
-        public int LostPoints
-        {
-            get { return _lostPoints; }
-            set
-            {
-                _lostPoints = value;
-                TotalPoints -= _lostPoints;
-                TotalPoints = System.Math.Max(TotalPoints, 0);
-            }
-        }
+        public int LostPoints { get; set; }
 
-        public int TotalPoints { get; internal set; }
+        public int TotalPoints { get; private set; }
 
         public ProposalType ProposalType { get; set; }
 
@@ -93,6 +82,10 @@ namespace KikoleApi.Models
                     Value = player.Clue;
                     break;
             }
+            
+            LostPoints = Successful
+                ? 0
+                : ProposalChart.Default.ProposalTypesCost[ProposalType];
         }
 
         internal ProposalResponse(BaseProposalRequest request,
@@ -101,10 +94,6 @@ namespace KikoleApi.Models
             IReadOnlyList<ClubDto> clubs)
             : this(request.ProposalType, request.Value, null, player, playerClubs, clubs)
         {
-            TotalPoints = request.SourcePoints;
-            LostPoints = Successful
-                ? 0
-                : ProposalChart.Default.ProposalTypesCost[ProposalType];
             Tip = request.GetTip(player);
         }
 
@@ -114,5 +103,11 @@ namespace KikoleApi.Models
             IReadOnlyList<ClubDto> clubs)
             : this((ProposalType)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, playerClubs, clubs)
         { }
+
+        internal ProposalResponse WithTotalPoints(int sourcePoints)
+        {
+            TotalPoints = Math.Max(0, sourcePoints - LostPoints);
+            return this;
+        }
     }
 }

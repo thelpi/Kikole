@@ -1,9 +1,14 @@
-﻿@model HomeModel
+﻿@using Microsoft.Extensions.Configuration
+@model HomeModel
 <div>
     <div style="margin-top: 10px">
         @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
         {
             <label>You are <span style="color: crimson">not logged</span></label>
+            @if (System.DateTime.Now.Date == Startup.StaticConfig.GetValue<DateTime>("EncryptionCookieDateSwitch").Date)
+            {
+                <div style="color: crimson; font-size:larger">Due to an update, you have been logout; sorry for the inconvenience, please login again!</div>
+            }
         }
         else
         {
@@ -55,7 +60,10 @@
                 }
             </div>
         }
-        <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+        @if (Model.CurrentDay == 0)
+        {
+            <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+        }
         <form method="post" action="/">
             <fieldset style="margin-top: 30px">
                 <div>

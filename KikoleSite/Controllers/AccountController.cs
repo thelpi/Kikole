@@ -50,7 +50,7 @@ namespace KikoleSite.Controllers
                         .ConfigureAwait(false);
                     if (success)
                     {
-                        this.SetCookie(value, model.LoginSubmission);
+                        this.SetAuthenticationCookie(value, model.LoginSubmission);
                         model.IsAuthenticated = true;
                         model.Login = model.LoginSubmission;
                     }

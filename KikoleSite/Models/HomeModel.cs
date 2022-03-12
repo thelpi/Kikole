@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using KikoleSite.Api;
 using KikoleSite.Cookies;
 using KikoleSite.ItemDatas;
@@ -71,6 +72,46 @@ namespace KikoleSite.Models
                 case ProposalType.Year: return BirthYearSubmission;
                 case ProposalType.Position: return PositionSubmission;
                 default: return null;
+            }
+        }
+
+        internal void SetPropertiesFromProposal(ProposalResponse response,
+            IReadOnlyDictionary<ulong, string> countries,
+            IReadOnlyDictionary<ulong, string> positions)
+        {
+            Points = response.TotalPoints;
+            if (response.Successful)
+            {
+                switch (response.ProposalType)
+                {
+                    case ProposalType.Club:
+                        var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
+                        if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
+                        {
+                            clubSubmissions.Add(new PlayerClub
+                            {
+                                HistoryPosition = response.Value.historyPosition,
+                                Name = response.Value.name.ToString()
+                            });
+                        }
+                        KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
+                        break;
+                    case ProposalType.Country:
+                        CountryName = countries[ulong.Parse(response.Value.ToString())];
+                        break;
+                    case ProposalType.Position:
+                        Position = positions[ulong.Parse(response.Value.ToString())];
+                        break;
+                    case ProposalType.Name:
+                        PlayerName = response.Value.ToString();
+                        break;
+                    case ProposalType.Year:
+                        BirthYear = response.Value.ToString();
+                        break;
+                    case ProposalType.Clue:
+                        Clue = response.Value.ToString();
+                        break;
+                }
             }
         }
     }

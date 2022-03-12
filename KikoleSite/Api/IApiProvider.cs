@@ -21,5 +21,8 @@ namespace KikoleSite.Api
         Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId);
 
         Task<ProposalChart> GetProposalChartAsync();
+
+        Task<(bool success, IReadOnlyCollection<ProposalResponse> proposals)> GetProposalsAsync(
+            DateTime proposalDate, string authToken);
     }
 }
