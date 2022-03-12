@@ -14,11 +14,15 @@ namespace KikoleApi.Controllers
     public class UserController : KikoleBaseController
     {
         private readonly IUserRepository _userRepository;
+        private readonly IProposalRepository _proposalRepository;
         private readonly ICrypter _crypter;
 
-        public UserController(IUserRepository userRepository, ICrypter crypter)
+        public UserController(IUserRepository userRepository,
+            IProposalRepository proposalRepository,
+            ICrypter crypter)
         {
             _userRepository = userRepository;
+            _proposalRepository = proposalRepository;
             _crypter = crypter;
         }
 
@@ -62,13 +66,17 @@ namespace KikoleApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<string>> GetAuthenticationTokenAsync(
             [FromRoute] string login,
-            [FromQuery][Required] string password)
+            [FromQuery][Required] string password,
+            [FromQuery][Required] string ip)
         {
             if (string.IsNullOrWhiteSpace(login))
                 return BadRequest("Invalid request: empty login");
 
             if (string.IsNullOrWhiteSpace(password))
                 return BadRequest("Invalid request: empty password");
+
+            if (string.IsNullOrWhiteSpace(ip))
+                return BadRequest("Invalid request: empty ip");
 
             var existingUser = await _userRepository
                 .GetUserByLoginAsync(login.Sanitize())
@@ -79,6 +87,10 @@ namespace KikoleApi.Controllers
 
             if (!_crypter.Encrypt(password).Equals(existingUser.Password))
                 return Unauthorized();
+
+            await _proposalRepository
+                .UpdateProposalsUserAsync(existingUser.Id, ip)
+                .ConfigureAwait(false);
 
             var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");
 

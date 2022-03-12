@@ -9,6 +9,8 @@ namespace KikoleApi.Interfaces
     {
         Task<ulong> CreateProposalAsync(ProposalDto proposal);
 
-        Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime proposalDate, ulong userId);
+        Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime proposalDate, ulong userId, string ip);
+
+        Task UpdateProposalsUserAsync(ulong userId, string ip);
     }
 }

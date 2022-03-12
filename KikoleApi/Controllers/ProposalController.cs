@@ -108,15 +108,20 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<IReadOnlyCollection<ProposalResponse>>> GetProposalsAsync(
             [FromQuery] DateTime proposalDate,
-            [FromQuery] ulong userId)
+            [FromQuery] ulong userId,
+            [FromQuery] string userIp)
         {
+            if (userId == 0 && string.IsNullOrWhiteSpace(userIp))
+                return BadRequest("IP is required");
+
             var datas = await _proposalRepository
-                .GetProposalsAsync(proposalDate, userId)
+                .GetProposalsAsync(proposalDate, userId, userIp)
                 .ConfigureAwait(false);
 
             if (datas.Count == 0)
@@ -169,9 +174,6 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest($"Invalid request: {validityRequest}");
 
-            // TODO: get points from userId
-            // and override value from request
-
             var playerOfTheDay = await _playerRepository
                 .GetPlayerOfTheDayAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
@@ -199,12 +201,9 @@ namespace KikoleApi.Controllers
                     playerClubsDetails)
                 .WithTotalPoints(request.SourcePoints);
 
-            if (userId > 0)
-            {
-                await _proposalRepository
-                    .CreateProposalAsync(request.ToDto(userId, response.Successful))
-                    .ConfigureAwait(false);
-            }
+            await _proposalRepository
+                .CreateProposalAsync(request.ToDto(userId, response.Successful))
+                .ConfigureAwait(false);
 
             return Ok(response);
         }
