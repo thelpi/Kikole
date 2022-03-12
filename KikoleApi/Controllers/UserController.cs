@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
-using KikoleApi.Models;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,17 +14,17 @@ namespace KikoleApi.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IProposalRepository _proposalRepository;
-        private readonly ILeaderboardRepository _leaderboardRepository;
+        private readonly ILeaderRepository _leaderRepository;
         private readonly ICrypter _crypter;
 
         public UserController(IUserRepository userRepository,
             IProposalRepository proposalRepository,
-            ILeaderboardRepository leaderboardRepository,
+            ILeaderRepository leaderRepository,
             ICrypter crypter)
         {
             _userRepository = userRepository;
             _proposalRepository = proposalRepository;
-            _leaderboardRepository = leaderboardRepository;
+            _leaderRepository = leaderRepository;
             _crypter = crypter;
         }
 
@@ -95,8 +94,8 @@ namespace KikoleApi.Controllers
                 .UpdateProposalsUserAsync(existingUser.Id, ip)
                 .ConfigureAwait(false);
 
-            await _leaderboardRepository
-                .UpdateLeaderboardsUserAsync(existingUser.Id, ip)
+            await _leaderRepository
+                .UpdateLeadersUserAsync(existingUser.Id, ip)
                 .ConfigureAwait(false);
 
             var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");

@@ -5,7 +5,7 @@ using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
 {
-    public class Leaderboard
+    public class Leader
     {
         public string Login { get; }
 
@@ -15,8 +15,8 @@ namespace KikoleApi.Models
 
         public int SuccessCount { get; }
 
-        internal Leaderboard(
-            IGrouping<(string key, bool isIp), LeaderboardDto> userDtos,
+        internal Leader(
+            IGrouping<(string key, bool isIp), LeaderDto> userDtos,
             IReadOnlyCollection<UserDto> users)
         {
             Login = userDtos.Key.isIp

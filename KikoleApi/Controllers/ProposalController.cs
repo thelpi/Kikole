@@ -15,7 +15,7 @@ namespace KikoleApi.Controllers
     public class ProposalController : KikoleBaseController
     {
         private readonly IProposalRepository _proposalRepository;
-        private readonly ILeaderboardRepository _leaderboardRepository;
+        private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IClock _clock;
@@ -23,13 +23,13 @@ namespace KikoleApi.Controllers
         public ProposalController(IProposalRepository proposalRepository,
             IPlayerRepository playerRepository,
             IClubRepository clubRepository,
-            ILeaderboardRepository leaderboardRepository,
+            ILeaderRepository leaderRepository,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
-            _leaderboardRepository = leaderboardRepository;
+            _leaderRepository = leaderRepository;
             _clock = clock;
         }
 
@@ -226,8 +226,8 @@ namespace KikoleApi.Controllers
 
             if (response.IsWin && request.DaysBefore == 0)
             {
-                await _leaderboardRepository
-                    .CreateLeaderboardAsync(new LeaderboardDto
+                await _leaderRepository
+                    .CreateLeaderAsync(new LeaderDto
                     {
                         Ip = request.UserIp,
                         Points = (ushort)response.TotalPoints,

@@ -2,7 +2,7 @@
 
 namespace KikoleApi.Models.Dtos
 {
-    public class LeaderboardDto : BaseDto
+    public class LeaderDto : BaseDto
     {
         public ulong? UserId { get; set; }
 

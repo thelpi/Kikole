@@ -10,28 +10,28 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
 {
-    public class LeaderboardController : KikoleBaseController
+    public class LeaderController : KikoleBaseController
     {
-        private readonly ILeaderboardRepository _leaderboardRepository;
+        private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
 
-        public LeaderboardController(ILeaderboardRepository leaderboardRepository,
+        public LeaderController(ILeaderRepository leaderRepository,
             IUserRepository userRepository)
         {
-            _leaderboardRepository = leaderboardRepository;
+            _leaderRepository = leaderRepository;
             _userRepository = userRepository;
         }
 
-        [HttpGet("leaderboards")]
+        [HttpGet("leaders")]
         [AuthenticationLevel(AuthenticationLevel.None)]
-        [ProducesResponseType(typeof(IReadOnlyCollection<Leaderboard>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<Leaderboard>>> GetLeaderboardsAsync(
+        [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetLeadersAsync(
             [FromQuery] DateTime? minimalDate,
             [FromQuery] bool includeAnonymous,
-            [FromQuery] LeaderboardSort leaderboardSort)
+            [FromQuery] LeaderSort leaderSort)
         {
-            var dtos = await _leaderboardRepository
-                .GetLeaderboardsAsync(minimalDate, includeAnonymous)
+            var dtos = await _leaderRepository
+                .GetLeadersAsync(minimalDate, includeAnonymous)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
@@ -40,18 +40,18 @@ namespace KikoleApi.Controllers
 
             var leaders = dtos
                 .GroupBy(dto => dto.Key)
-                .Select(dto => new Leaderboard(dto, users))
+                .Select(dto => new Leader(dto, users))
                 .ToList();
 
-            switch (leaderboardSort)
+            switch (leaderSort)
             {
-                case LeaderboardSort.SuccessCount:
+                case LeaderSort.SuccessCount:
                     leaders = leaders.OrderByDescending(l => l.SuccessCount).ToList();
                     break;
-                case LeaderboardSort.BestTime:
+                case LeaderSort.BestTime:
                     leaders = leaders.OrderBy(l => l.BestTime.TotalMinutes).ToList();
                     break;
-                case LeaderboardSort.TotalPoints:
+                case LeaderSort.TotalPoints:
                     leaders = leaders.OrderByDescending(l => l.TotalPoints).ToList();
                     break;
             }

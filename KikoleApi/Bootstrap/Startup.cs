@@ -42,7 +42,7 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IProposalRepository, ProposalRepository>()
                 .AddSingleton<IUserRepository, UserRepository>()
                 .AddSingleton<IInternationalRepository, InternationalRepository>()
-                .AddSingleton<ILeaderboardRepository, LeaderboardRepository>()
+                .AddSingleton<ILeaderRepository, LeaderRepository>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
