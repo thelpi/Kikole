@@ -15,16 +15,22 @@ namespace KikoleApi.Controllers
     public class ProposalController : KikoleBaseController
     {
         private readonly IProposalRepository _proposalRepository;
+        private readonly ILeaderboardRepository _leaderboardRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
+        private readonly IClock _clock;
 
         public ProposalController(IProposalRepository proposalRepository,
             IPlayerRepository playerRepository,
-            IClubRepository clubRepository)
+            IClubRepository clubRepository,
+            ILeaderboardRepository leaderboardRepository,
+            IClock clock)
         {
             _proposalRepository = proposalRepository;
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
+            _leaderboardRepository = leaderboardRepository;
+            _clock = clock;
         }
 
         [HttpGet("proposal-charts")]
@@ -214,9 +220,24 @@ namespace KikoleApi.Controllers
                     playerClubsDetails)
                 .WithTotalPoints(request.SourcePoints);
 
+            var timestamp = _clock.Now;
             await _proposalRepository
-                .CreateProposalAsync(request.ToDto(userId, response.Successful))
+                .CreateProposalAsync(request.ToDto(userId, response.Successful, timestamp))
                 .ConfigureAwait(false);
+
+            if (response.IsWin && request.DaysBefore == 0)
+            {
+                await _leaderboardRepository
+                    .CreateLeaderboardAsync(new LeaderboardDto
+                    {
+                        Ip = request.UserIp,
+                        Points = (ushort)response.TotalPoints,
+                        ProposalDate = request.ProposalDate,
+                        Time = Convert.ToUInt16(Math.Ceiling((timestamp - request.ProposalDate.Date).TotalMinutes)),
+                        UserId = userId
+                    })
+                    .ConfigureAwait(false);
+            }
 
             return Ok(response);
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Interfaces
@@ -14,5 +15,7 @@ namespace KikoleApi.Interfaces
         Task<bool> ResetUserKnownPasswordAsync(string login, string oldPassword, string newPassword);
 
         Task<bool> ResetUserUnknownPasswordAsync(string login, string passwordResetAnswer, string newPassword);
+
+        Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync();
     }
 }

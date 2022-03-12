@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +30,8 @@ namespace KikoleApi.Repositories
             return await GetDtoAsync<UserDto>(
                     "users",
                     ("login", login),
-                    ("password", password))
+                    ("password", password),
+                    ("is_disabled", 0))
                 .ConfigureAwait(false);
         }
 
@@ -37,7 +39,8 @@ namespace KikoleApi.Repositories
         {
             return await GetDtoAsync<UserDto>(
                     "users",
-                    ("login", login))
+                    ("login", login),
+                    ("is_disabled", 0))
                 .ConfigureAwait(false);
         }
 
@@ -59,13 +62,22 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync()
+        {
+            return await GetDtosAsync<UserDto>("users",
+                    ("is_disabled", 0),
+                    ("is_admin", 0))
+                .ConfigureAwait(false);
+        }
+
         private async Task<bool> ResetUserPasswordAsync(string login, (string, string) fieldInfo, string newPassword)
         {
             var user = await GetDtoAsync<UserDto>(
-                       "users",
-                       ("login", login),
-                       (fieldInfo.Item1, fieldInfo.Item2))
-                   .ConfigureAwait(false);
+                    "users",
+                    ("login", login),
+                    ("is_disabled", 0),
+                    (fieldInfo.Item1, fieldInfo.Item2))
+                .ConfigureAwait(false);
 
             if (user == null)
                 return false;
