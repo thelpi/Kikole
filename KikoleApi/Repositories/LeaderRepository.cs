@@ -30,9 +30,9 @@ namespace KikoleApi.Repositories
             DateTime? minimalDate, bool includeAnonymous)
         {
             return await ExecuteReaderAsync<LeaderDto>(
-                    $"SELECT * FROM leaders" +
-                    $"WHERE (IFNULL(user_id, 0) > 0 OR 1 = @anonymous)" +
-                    $"AND (@minimal_date IS NULL OR proposal_date >= @minimal_date)"+
+                    $"SELECT * FROM leaders " +
+                    $"WHERE (IFNULL(user_id, 0) > 0 OR 1 = @anonymous) " +
+                    $"AND (@minimal_date IS NULL OR proposal_date >= @minimal_date) "+
                     $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR is_admin = 1)",
                     new
                     {
