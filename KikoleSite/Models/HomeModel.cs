@@ -3,6 +3,7 @@ using System.Linq;
 using KikoleSite.Api;
 using KikoleSite.Cookies;
 using KikoleSite.ItemDatas;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Models
 {
@@ -22,8 +23,7 @@ namespace KikoleSite.Models
         public string CountryNameSubmission { get; set; }
         public string BirthYearSubmission { get; set; }
         public string PositionSubmission { get; set; }
-        public IReadOnlyDictionary<ulong, string> Countries { get; set; }
-        public IReadOnlyDictionary<ulong, string> Positions { get; set; }
+        public IReadOnlyList<SelectListItem> Positions { get; set; }
         public string LoggedAs { get; set; }
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }

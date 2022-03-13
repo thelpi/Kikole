@@ -6,6 +6,7 @@ using KikoleSite.Api;
 using KikoleSite.Cookies;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Controllers
 {
@@ -90,11 +91,23 @@ namespace KikoleSite.Controllers
             return ViewWithFullModel(model, login);
         }
 
+        [HttpPost]
+        public JsonResult AutoComplete(string prefix, ulong languageId = DefaultLanguageId)
+        {
+            var countries = GetCountries()
+                .Where(c =>
+                    c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
+
+            return Json(countries);
+        }
+
         private IActionResult ViewWithFullModel(HomeModel model, string login)
         {
             model.LoggedAs = login;
-            model.Countries = GetCountries();
-            model.Positions = GetPositions();
+            model.Positions = new[] { new SelectListItem("", "0") }
+                .Concat(GetPositions()
+                    .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
+                .ToList();
             return View(model);
         }
 
