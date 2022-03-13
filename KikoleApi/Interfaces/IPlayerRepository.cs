@@ -16,5 +16,7 @@ namespace KikoleApi.Interfaces
         Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
         Task<DateTime> GetLatestProposalDateasync();
+
+        Task<IReadOnlyCollection<PlayerDto>> GetProposedPlayersAsync();
     }
 }

@@ -17,7 +17,7 @@ namespace KikoleApi.Models
             = new Dictionary<ProposalType, int>
             {
                 { ProposalType.Club, 50 },
-                { ProposalType.Clue, 100 },
+                { ProposalType.Clue, 200 },
                 { ProposalType.Country, 25 },
                 { ProposalType.Name, 200 },
                 { ProposalType.Position, 200 },

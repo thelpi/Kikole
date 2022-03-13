@@ -58,6 +58,18 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime proposalDate)
+        {
+            return await ExecuteReaderAsync<ProposalDto>(
+                    "SELECT * FROM proposals WHERE proposal_type_id = @proposal_type_id AND successful > 0 AND days_before = 0 AND DATE(proposal_date) = @proposal_date",
+                    new
+                    {
+                        proposal_type_id = (ulong)Models.ProposalType.Name,
+                        proposal_date = proposalDate.Date
+                    })
+                .ConfigureAwait(false);
+        }
+
         public async Task UpdateProposalsUserAsync(ulong userId, string ip)
         {
             await ExecuteNonQueryAsync(

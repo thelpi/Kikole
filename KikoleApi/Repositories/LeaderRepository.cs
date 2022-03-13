@@ -26,6 +26,14 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task DeleteLeadersAsync(DateTime proposalDate)
+        {
+            await ExecuteNonQueryAsync(
+                    "DELETE FROM leaders WHERE proposal_date = @proposal_date",
+                    new { proposal_date = proposalDate.Date })
+                .ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(
             DateTime? minimalDate, bool includeAnonymous)
         {

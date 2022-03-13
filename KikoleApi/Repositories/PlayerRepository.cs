@@ -60,5 +60,12 @@ namespace KikoleApi.Repositories
                     "SELECT MAX(proposal_date) FROM players", null)
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<PlayerDto>> GetProposedPlayersAsync()
+        {
+            return await ExecuteReaderAsync<PlayerDto>(
+                    "SELECT * FROM players WHERE proposal_date <= DATE(NOW())", null)
+                .ConfigureAwait(false);
+        }
     }
 }

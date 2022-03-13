@@ -12,5 +12,7 @@ namespace KikoleApi.Interfaces
         Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime proposalDate, ulong userId, string ip);
 
         Task UpdateProposalsUserAsync(ulong userId, string ip);
+
+        Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime proposalDate);
     }
 }
