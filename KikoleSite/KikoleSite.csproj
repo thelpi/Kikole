@@ -10,9 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Views\HowToPlay\Index.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
     <Content Update="Views\Account\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

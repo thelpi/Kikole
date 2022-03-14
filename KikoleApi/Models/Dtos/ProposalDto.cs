@@ -4,9 +4,7 @@ namespace KikoleApi.Models.Dtos
 {
     public class ProposalDto : BaseDto
     {
-        public ulong? UserId { get; set; }
-
-        public string Ip { get; set; }
+        public ulong UserId { get; set; }
 
         public ulong ProposalTypeId { get; set; }
 

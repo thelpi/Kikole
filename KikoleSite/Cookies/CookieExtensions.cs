@@ -100,11 +100,6 @@ namespace KikoleSite.Cookies
             controller.Response.Cookies.Delete(GetSubmissionFormCookieName());
         }
 
-        internal static string GetIp(this Controller controller)
-        {
-            return controller.Request.HttpContext.Connection.RemoteIpAddress.ToString();
-        }
-
         private static string GetCookieContent(this Controller controller,
             string cookieName)
         {

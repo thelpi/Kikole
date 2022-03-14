@@ -43,10 +43,10 @@ namespace KikoleSite.Api
             return (true, null);
         }
 
-        public async Task<(bool, string)> LoginAsync(string login, string password, string ip)
+        public async Task<(bool, string)> LoginAsync(string login, string password)
         {
             var response = await SendAsync(
-                    $"users/{login}/authentication-tokens?password={password}&ip={ip}",
+                    $"users/{login}/authentication-tokens?password={password}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
@@ -68,8 +68,7 @@ namespace KikoleSite.Api
             int daysBefore,
             ProposalType proposalType,
             string authToken,
-            int sourcePoints,
-            string ip)
+            int sourcePoints)
         {
             var response = await SendAsync(
                     $"{proposalType.ToString().ToLowerInvariant()}-proposals",
@@ -80,8 +79,7 @@ namespace KikoleSite.Api
                         proposalDate,
                         value,
                         daysBefore,
-                        sourcePoints,
-                        userIp = ip
+                        sourcePoints
                     })
                 .ConfigureAwait(false);
             
@@ -112,10 +110,10 @@ namespace KikoleSite.Api
         }
 
         public async Task<(bool, IReadOnlyCollection<ProposalResponse>)> GetProposalsAsync(
-            DateTime proposalDate, string authToken, string ip)
+            DateTime proposalDate, string authToken)
         {
             var response = await SendAsync(
-                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}&userIp={ip}",
+                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}",
                     HttpMethod.Get,
                     authToken)
                 .ConfigureAwait(false);
@@ -130,10 +128,10 @@ namespace KikoleSite.Api
         }
 
         public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
-            int limit, bool includeAnonymous, DateTime? minimalDate)
+            int limit, DateTime? minimalDate)
         {
             var response = await SendAsync(
-                    $"leaders?minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&includeAnonymous={includeAnonymous}&leaderSort={(int)leaderSort}",
+                    $"leaders?minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

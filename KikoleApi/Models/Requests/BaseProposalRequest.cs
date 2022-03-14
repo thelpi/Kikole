@@ -13,8 +13,6 @@ namespace KikoleApi.Models.Requests
 
         public int SourcePoints { get; set; }
 
-        public string UserIp { get; set; }
-
         internal abstract ProposalType ProposalType { get; }
 
         internal virtual string GetTip(PlayerDto player)
@@ -26,9 +24,6 @@ namespace KikoleApi.Models.Requests
         {
             if (string.IsNullOrWhiteSpace(Value))
                 return "Invalid value";
-
-            if (string.IsNullOrWhiteSpace(UserIp))
-                return "IP is empty";
 
             return null;
         }
@@ -42,8 +37,7 @@ namespace KikoleApi.Models.Requests
                 UserId = userId,
                 Value = Value?.ToString(),
                 ProposalTypeId = (ulong)ProposalType,
-                DaysBefore = DaysBefore,
-                Ip = UserIp
+                DaysBefore = DaysBefore
             };
         }
 

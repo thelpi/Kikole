@@ -15,13 +15,10 @@ namespace KikoleApi.Models
 
         public int SuccessCount { get; }
 
-        internal Leader(
-            IGrouping<(string key, bool isIp), LeaderDto> userDtos,
+        internal Leader(IGrouping<ulong, LeaderDto> userDtos,
             IReadOnlyCollection<UserDto> users)
         {
-            Login = userDtos.Key.isIp
-                ? userDtos.Key.key
-                : users.Single(p => p.Id == ulong.Parse(userDtos.Key.key)).Login;
+            Login = users.Single(p => p.Id == userDtos.Key).Login;
             SuccessCount = userDtos.Count();
             TotalPoints = (uint)userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);

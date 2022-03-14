@@ -42,7 +42,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("club-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -54,7 +54,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("year-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -66,7 +66,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("name-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -78,7 +78,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("country-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -90,7 +90,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("clue-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -102,7 +102,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("position-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -114,20 +114,16 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("proposals")]
-        [AuthenticationLevel(AuthenticationLevel.AuthenticatedOrAnonymous)]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<IReadOnlyCollection<ProposalResponse>>> GetProposalsAsync(
             [FromQuery] DateTime proposalDate,
-            [FromQuery] ulong userId,
-            [FromQuery] string userIp)
+            [FromQuery] ulong userId)
         {
-            if (userId == 0 && string.IsNullOrWhiteSpace(userIp))
-                return BadRequest("IP is required");
-
             var datas = await _proposalRepository
-                .GetProposalsAsync(proposalDate, userId, userIp)
+                .GetProposalsAsync(proposalDate, userId)
                 .ConfigureAwait(false);
 
             if (datas.Count == 0)
@@ -229,7 +225,6 @@ namespace KikoleApi.Controllers
                 await _leaderRepository
                     .CreateLeaderAsync(new LeaderDto
                     {
-                        Ip = request.UserIp,
                         Points = (ushort)response.TotalPoints,
                         ProposalDate = request.ProposalDate,
                         Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),

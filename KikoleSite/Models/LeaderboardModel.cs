@@ -6,8 +6,6 @@ namespace KikoleSite.Models
     {
         public string MinimalDate { get; set; }
 
-        public bool IncludeAnonymous { get; set; }
-
         public Api.LeaderSort SortType { get; set; }
 
         public IReadOnlyCollection<Api.Leader> Leaders { get; set; }

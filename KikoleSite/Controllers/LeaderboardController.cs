@@ -20,12 +20,11 @@ namespace KikoleSite.Controllers
         public async Task<IActionResult> Index()
         {
             var leaders = await _apiProvider
-                .GetLeadersAsync(LeaderSort.TotalPoints, limit, false, null)
+                .GetLeadersAsync(LeaderSort.TotalPoints, limit, null)
                 .ConfigureAwait(false);
 
             return View(new LeaderboardModel
             {
-                IncludeAnonymous = false,
                 MinimalDate = null,
                 Leaders = leaders,
                 SortType = LeaderSort.TotalPoints
@@ -45,7 +44,6 @@ namespace KikoleSite.Controllers
                 .GetLeadersAsync(
                     model.SortType,
                     limit,
-                    model.IncludeAnonymous,
                     dtNull)
                 .ConfigureAwait(false);
 

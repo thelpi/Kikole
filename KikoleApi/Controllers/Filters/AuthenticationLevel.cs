@@ -3,7 +3,6 @@
     public enum AuthenticationLevel
     {
         None,
-        AuthenticatedOrAnonymous,
         Authenticated,
         AdminAuthenticated
     }

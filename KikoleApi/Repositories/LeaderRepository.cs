@@ -18,7 +18,6 @@ namespace KikoleApi.Repositories
             return await ExecuteInsertAsync(
                     "leaders",
                     ("user_id", request.UserId),
-                    ("ip", request.Ip),
                     ("proposal_date", request.ProposalDate.Date),
                     ("points", request.Points),
                     ("time", request.Time),
@@ -34,27 +33,16 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(
-            DateTime? minimalDate, bool includeAnonymous)
+        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate)
         {
             return await ExecuteReaderAsync<LeaderDto>(
                     $"SELECT * FROM leaders " +
-                    $"WHERE (IFNULL(user_id, 0) > 0 OR 1 = @anonymous) " +
-                    $"AND (@minimal_date IS NULL OR proposal_date >= @minimal_date) "+
+                    $"WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) "+
                     $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR is_admin = 1)",
                     new
                     {
-                        anonymous = includeAnonymous ? 1 : 0,
                         minimal_date = minimalDate
                     })
-                .ConfigureAwait(false);
-        }
-
-        public async Task UpdateLeadersUserAsync(ulong userId, string ip)
-        {
-            await ExecuteNonQueryAsync(
-                    "UPDATE leaders SET user_id = @user_id WHERE IFNULL(user_id, 0) = 0 AND ip = @ip",
-                    new { ip, user_id = userId })
                 .ConfigureAwait(false);
         }
     }

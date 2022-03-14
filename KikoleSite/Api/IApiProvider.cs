@@ -14,19 +14,18 @@ namespace KikoleSite.Api
             int daysBefore,
             ProposalType proposalType,
             string authToken,
-            int sourcePoints,
-            string ip);
+            int sourcePoints);
 
-        Task<(bool success, string value)> LoginAsync(string login, string password, string ip);
+        Task<(bool success, string value)> LoginAsync(string login, string password);
 
         Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId);
 
         Task<ProposalChart> GetProposalChartAsync();
 
         Task<(bool success, IReadOnlyCollection<ProposalResponse> proposals)> GetProposalsAsync(
-            DateTime proposalDate, string authToken, string ip);
+            DateTime proposalDate, string authToken);
 
         Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
-            int limit, bool includeAnonymous, DateTime? minimalDate);
+            int limit, DateTime? minimalDate);
     }
 }

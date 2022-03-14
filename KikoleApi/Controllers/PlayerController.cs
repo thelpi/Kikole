@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
-using KikoleApi.Models;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 

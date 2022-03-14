@@ -64,16 +64,14 @@ namespace KikoleApi.Controllers
                     .GetWiningProposalsAsync(playerOfTheDay.ProposalDate.Value)
                     .ConfigureAwait(false);
 
-                IEnumerable<(ulong userId, string ip)> leaders = proposalUsers
-                    .Select(p => p.UserId > 0
-                        ? (p.UserId.Value, p.Ip)
-                        : (0, p.Ip))
+                var leaders = proposalUsers
+                    .Select(p => p.UserId)
                     .Distinct();
 
-                foreach (var (userId, ip) in leaders)
+                foreach (var userId in leaders)
                 {
                     var proposals = await _proposalRepository
-                        .GetProposalsAsync(playerOfTheDay.ProposalDate.Value, userId, ip)
+                        .GetProposalsAsync(playerOfTheDay.ProposalDate.Value, userId)
                         .ConfigureAwait(false);
 
                     var points = ProposalChart.Default.BasePoints;
@@ -89,7 +87,6 @@ namespace KikoleApi.Controllers
                             await _leaderRepository
                                 .CreateLeaderAsync(new LeaderDto
                                 {
-                                    Ip = proposal.Ip,
                                     Points = (ushort)(points < 0 ? 0 : points),
                                     ProposalDate = proposal.ProposalDate,
                                     Time = Convert.ToUInt16(Math.Ceiling(
@@ -111,11 +108,10 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetLeadersAsync(
             [FromQuery] DateTime? minimalDate,
-            [FromQuery] bool includeAnonymous,
             [FromQuery] LeaderSort leaderSort)
         {
             var dtos = await _leaderRepository
-                .GetLeadersAsync(minimalDate, includeAnonymous)
+                .GetLeadersAsync(minimalDate)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
@@ -123,7 +119,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             var leaders = dtos
-                .GroupBy(dto => dto.Key)
+                .GroupBy(dto => dto.UserId)
                 .Select(dto => new Leader(dto, users))
                 .ToList();
 

@@ -82,16 +82,12 @@ namespace KikoleApi.Controllers.Filters
         private static bool IsAuthorized(AuthenticationLevel level,
             ulong? id, bool isAdmin, bool isFaulted)
         {
-            if (level == AuthenticationLevel.AdminAuthenticated
-                                && (!isAdmin || !id.HasValue || isFaulted))
-                return false;
-            else if (level == AuthenticationLevel.Authenticated
-                && (!id.HasValue || isFaulted))
-                return false;
-            else if (level == AuthenticationLevel.AuthenticatedOrAnonymous
-                && isFaulted)
-                return false;
-            return true;
+            if (level == AuthenticationLevel.None)
+                return true;
+
+            return !isFaulted
+                && id.HasValue
+                && (isAdmin || level != AuthenticationLevel.AdminAuthenticated);
         }
     }
 }
