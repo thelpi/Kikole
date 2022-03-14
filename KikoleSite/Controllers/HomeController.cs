@@ -29,6 +29,11 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = this.GetAuthenticationCookie();
 
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                this.ResetSubmissionFormCookie();
+            }
+
             var chart = GetProposalChartCache();
 
             var model = GetCookieModelOrDefault(new HomeModel { Points = chart.BasePoints });
@@ -58,14 +63,16 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(HomeModel model)
         {
-            if (model == null || !Enum.TryParse<ProposalType>(GetSubmitAction(), out var proposalType))
+            var (token, login) = this.GetAuthenticationCookie();
+
+            if (model == null
+                || !Enum.TryParse<ProposalType>(GetSubmitAction(), out var proposalType)
+                || string.IsNullOrWhiteSpace(token))
             {
                 return Redirect("/");
             }
 
             var value = model.GetValueFromProposalType(proposalType);
-
-            var (token, login) = this.GetAuthenticationCookie();
 
             model = GetCookieModelOrDefault(model);
 
@@ -108,6 +115,7 @@ namespace KikoleSite.Controllers
                 .Concat(GetPositions()
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
+            model.Chart = GetProposalChartCache();
             return View(model);
         }
 

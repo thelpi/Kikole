@@ -1,239 +1,260 @@
-﻿@using Microsoft.Extensions.Configuration
-@model HomeModel
+﻿@model HomeModel
 <div>
-    <div style="margin-top: 10px">
-        @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
-        {
-            <label>You are <span style="color: crimson">not logged</span></label>
-            @if (System.DateTime.Now.Date == Startup.StaticConfig.GetValue<DateTime>("EncryptionCookieDateSwitch").Date)
+    @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
+    {
+        <fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
+            <span style="color: crimson; font-size: large">"Kikole?"</span> is a game where you have to guess a new football player every single day.<br />
+            The way to do this is to figure out in which clubs he played (or currently plays) during his career.<br />
+            You can also try to guess his nationality, birth year or position on the field.<br />
+            <ul>
+                <li>The player can be active or retired.</li>
+                <li>All text submissions are case-insensitive and diacritics is ignored.</li>
+                <li>You can propose a name at any time (no need to find every clue)</li>
+            </ul>
+            Score is computed with following rules:
+            <ul>
+                <li>You start with <span style="color: forestgreen; font-size: large">@Model.Chart.BasePoints</span> points</li>
+                <li>Asking for the clue costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Clue]</span> points</li>
+                <li>An incorrect player proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> points</li>
+                <li>An incorrect club proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> points</li>
+                <li>An incorrect country proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> points</li>
+                <li>An incorrect year proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> points</li>
+                <li>An incorrect position proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> points</li>
+                <li>A good guess on any category costs <span style="color: forestgreen; font-size: large">no points</span></li>
+            </ul>
+        </fieldset>
+        <div style="margin-top: 20px">
+            <label>You are <a href="/Account"><span style="color: crimson">not logged</span></a></label>
+        </div>
+        <div style="margin-top: 10px">
+            An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!
+        </div>
+    }
+    else
+    {
+        <div style="margin-top: 10px">
+            <label>You are logged as <span style="color: forestgreen">@Model.LoggedAs</span></label>
+        </div>
+        <div style="margin-top: 10px">
+            @if (!Model.NoPreviousDay)
             {
-                <div style="color: crimson; font-size:larger">Due to an update, you have been logout; sorry for the inconvenience, please login again!</div>
+                <a href="/?day=@Model.PreviousDay">Previous day</a>
+            }
+            @if (Model.CurrentDay > 1)
+            {
+                <a href="/?day=@Model.NextDay">Next day</a>
+            }
+            else if (Model.CurrentDay == 1)
+            {
+                <a href="/?day=@Model.NextDay">Current day</a>
+            }
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
+        {
+            if (Model.CurrentDay == 0)
+            {
+                <div style="margin-top: 5px">
+                    <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
+                </div>
+                <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+            }
+            else
+            {
+                <div style="margin-top: 5px">
+                    <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>.</label>
+                </div>
             }
         }
         else
         {
-            <label>You are logged as <span style="color: forestgreen">@Model.LoggedAs</span></label>
-        }
-    </div>
-    <div style="margin-top: 10px">
-        @if (!Model.NoPreviousDay)
-        {
-            <a href="/?day=@Model.PreviousDay">Previous day</a>
-        }
-        @if (Model.CurrentDay > 1)
-        {
-            <a href="/?day=@Model.NextDay">Next day</a>
-        }
-        else if (Model.CurrentDay == 1)
-        {
-            <a href="/?day=@Model.NextDay">Current day</a>
-        }
-    </div>
-    @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
-    {
-        if (Model.CurrentDay == 0)
-        {
-            <div style="margin-top: 5px">
-                <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
-            </div>
-            <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
-        }
-        else
-        {
-            <div style="margin-top: 5px">
-                <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>.</label>
-            </div>
-        }
-    }
-    else
-    {
-        if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay))
-        {
-            <div style="margin-top: 5px">
-                @if (Model.IsErrorMessage)
-                {
-                    <label style="color:crimson">@Model.MessageToDisplay</label>
-                }
-                else
-                {
-                    <label style="color:forestgreen">@Model.MessageToDisplay</label>
-                }
-            </div>
-        }
-        @if (Model.CurrentDay == 0)
-        {
-            <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
-        }
-        <form method="post" action="/">
-            <fieldset style="margin-top: 30px">
-                <div>
-                    <div>
-                        <label>Clubs:</label>
-                    </div>
-                    <div>
-                        @Html.TextBoxFor(m => m.ClubNameSubmission, new { @style = "width: 300px" })
-                        <input type="submit" value="Ok" name="submit-Club" style="visibility:hidden" />
-                    </div>
-                    <div style="font-size: small">(one club at a time)</div>
+            if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay))
+            {
+                <div style="margin-top: 5px">
+                    @if (Model.IsErrorMessage)
+                    {
+                        <label style="color:crimson">@Model.MessageToDisplay</label>
+                    }
+                    else
+                    {
+                        <label style="color:forestgreen">@Model.MessageToDisplay</label>
+                    }
                 </div>
-                @if (Model.KnownPlayerClubs?.Count > 0)
-                {
-                    <div style="margin-top: 15px">
-                        <label>Career club so far:</label>
-                        <ul>
-                            @foreach (var club in Model.KnownPlayerClubs)
-                            {
-                                <li>@string.Format("{0} - {1}", club.HistoryPosition, club.Name)</li>
-                            }
-                        </ul>
-                    </div>
-                    <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
-                }
-            </fieldset>
-        </form>
-        <form method="post" action="/">
-            <div style="margin-top: 30px">
-                <div>
-                    <label>Nationality:</label>
-                </div>
-                @if (string.IsNullOrWhiteSpace(Model.CountryName))
-                {
-                    <script>
-                        $(function () {
-                            $("#countryName").autocomplete({
-                                source: function (request, response) {
-                                    $.ajax({
-                                        url: '/Home/AutoComplete/',
-                                        data: {
-                                            "prefix": request.term
-                                            // add languageID here
-                                        },
-                                        type: "POST",
-                                        success: function (data) {
-                                            response($.map(data, function (item) {
-                                                return item;
-                                            }))
-                                        }
-                                    });
-                                },
-                                select: function (e, i) {
-                                    $("#countryId").val(i.item.key);
-                                    $("#submitCountry").click();
-                                },
-                                minLength: 1
-                            });
-                        });
-                    </script>
+            }
+            @if (Model.CurrentDay == 0)
+            {
+                <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+            }
+            <form method="post" action="/">
+                <fieldset style="margin-top: 30px">
                     <div>
-                        <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
-                        <input type="hidden" id="countryId" name="CountryNameSubmission" />
-                        <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden" />
+                        <div>
+                            <label>Clubs:</label>
+                        </div>
+                        <div>
+                            @Html.TextBoxFor(m => m.ClubNameSubmission, new { @style = "width: 300px" })
+                            <input type="submit" value="Ok" name="submit-Club" style="visibility:hidden" />
+                        </div>
+                        <div style="font-size: small">(one club at a time; as a rule of thumb, city alone is not enough: prefer "real madrid" instead of "madrid")</div>
                     </div>
-                    <div style="font-size: small">(it's the nationality, not the national team he plays or played)</div>
-                }
-                else
-                {
+                    @if (Model.KnownPlayerClubs?.Count > 0)
+                    {
+                        <div style="margin-top: 15px">
+                            <label>Career club so far:</label>
+                            <ul>
+                                @foreach (var club in Model.KnownPlayerClubs)
+                                {
+                                    <li>@string.Format("{0} - {1}", club.HistoryPosition, club.Name)</li>
+                                }
+                            </ul>
+                        </div>
+                        <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
+                    }
+                </fieldset>
+            </form>
+            <form method="post" action="/">
+                <div style="margin-top: 30px">
                     <div>
-                        <label>@Model.CountryName</label>
+                        <label>Nationality:</label>
                     </div>
-                }
-            </div>
-        </form>
-        <form method="post" action="/">
-            <div style="margin-top: 30px">
-                <div>
-                    <label>Position:</label>
-                </div>
-                @if (string.IsNullOrWhiteSpace(Model.Position))
-                {
-                    <div>
+                    @if (string.IsNullOrWhiteSpace(Model.CountryName))
+                    {
                         <script>
                             $(function () {
-                                $("#positionSubmission").on("change", function (e) {
-                                    if ($("#positionSubmission").val() != "0") {
-                                        $("#submitPosition").click();
-                                    }
+                                $("#countryName").autocomplete({
+                                    source: function (request, response) {
+                                        $.ajax({
+                                            url: '/Home/AutoComplete/',
+                                            data: {
+                                                "prefix": request.term
+                                                // add languageID here
+                                            },
+                                            type: "POST",
+                                            success: function (data) {
+                                                response($.map(data, function (item) {
+                                                    return item;
+                                                }))
+                                            }
+                                        });
+                                    },
+                                    select: function (e, i) {
+                                        $("#countryId").val(i.item.key);
+                                        $("#submitCountry").click();
+                                    },
+                                    minLength: 1
                                 });
                             });
                         </script>
-                        @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
-                        <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden" />
-                    </div>
-                }
-                else
-                {
-                    <div>
-                        <label>@Model.Position</label>
-                    </div>
-                }
-            </div>
-        </form>
-        <form method="post" action="/">
-            <div style="margin-top: 30px">
-                <div>
-                    <label>Year of birth:</label>
-                </div>
-                @if (string.IsNullOrWhiteSpace(Model.BirthYear))
-                {
-                <div>
-                    <script>
-                        $(function () {
-                            var availableTags = [];
-                            for (var i = 1900; i <= 2010; i++)
-                                availableTags.push(i.toString());
-                            $("#birthYearValue").autocomplete({
-                                source: availableTags,
-                                select: function (e, i) {
-                                    $("#birthYearValue").val(i.item.value);
-                                    $("#submitYear").click();
-                                },
-                                minLength: 1
-                            });
-                        });
-                    </script>
-                    <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
-                    <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden" />
-                </div>
-                }
-                else
-                {
-                    <div>
-                        <label>@Model.BirthYear</label>
-                    </div>
-                }
-            </div>
-        </form>
-        <form method="post" action="/">
-            <div style="margin-top: 30px">
-                <div>
-                    <label>Clue:</label>
-                </div>
-                <div>
-                    @if (string.IsNullOrWhiteSpace(Model.Clue))
+                        <div>
+                            <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
+                            <input type="hidden" id="countryId" name="CountryNameSubmission" />
+                            <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden" />
+                        </div>
+                        <div style="font-size: small">(it's the nationality, not the national team he plays or played)</div>
+                    }
+                    else
                     {
                         <div>
-                            <input type="submit" value="Click to get a clue" name="submit-Clue" style="width: 300px" />
+                            <label>@Model.CountryName</label>
+                        </div>
+                    }
+                </div>
+            </form>
+            <form method="post" action="/">
+                <div style="margin-top: 30px">
+                    <div>
+                        <label>Position:</label>
+                    </div>
+                    @if (string.IsNullOrWhiteSpace(Model.Position))
+                    {
+                        <div>
+                            <script>
+                                $(function () {
+                                    $("#positionSubmission").on("change", function (e) {
+                                        if ($("#positionSubmission").val() != "0") {
+                                            $("#submitPosition").click();
+                                        }
+                                    });
+                                });
+                            </script>
+                            @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
+                            <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden" />
                         </div>
                     }
                     else
                     {
                         <div>
-                            <label>@Model.Clue</label>
+                            <label>@Model.Position</label>
                         </div>
                     }
                 </div>
-            </div>
-        </form>
-        <form method="post" action="/">
-            <div style="margin-top: 60px">
-                <div>
-                    <label style="color:crimson">Submit your player here:</label>
+            </form>
+            <form method="post" action="/">
+                <div style="margin-top: 30px">
+                    <div>
+                        <label>Year of birth:</label>
+                    </div>
+                    @if (string.IsNullOrWhiteSpace(Model.BirthYear))
+                    {
+                        <div>
+                            <script>
+                                $(function () {
+                                    var availableTags = [];
+                                    for (var i = 1900; i <= 2010; i++)
+                                        availableTags.push(i.toString());
+                                    $("#birthYearValue").autocomplete({
+                                        source: availableTags,
+                                        select: function (e, i) {
+                                            $("#birthYearValue").val(i.item.value);
+                                            $("#submitYear").click();
+                                        },
+                                        minLength: 1
+                                    });
+                                });
+                            </script>
+                            <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
+                            <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <label>@Model.BirthYear</label>
+                        </div>
+                    }
                 </div>
-                <div>
-                    @Html.TextBoxFor(m => m.PlayerNameSubmission, new { @style = "width: 300px" })
-                    <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
+            </form>
+            <form method="post" action="/">
+                <div style="margin-top: 30px">
+                    <div>
+                        <label>Clue:</label>
+                    </div>
+                    <div>
+                        @if (string.IsNullOrWhiteSpace(Model.Clue))
+                        {
+                            <div>
+                                <input type="submit" value="Click to get a clue" name="submit-Clue" style="width: 300px" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <label>@Model.Clue</label>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+            <form method="post" action="/">
+                <div style="margin-top: 60px">
+                    <div>
+                        <label style="color:crimson">Submit your player here:</label>
+                    </div>
+                    <div>
+                        @Html.TextBoxFor(m => m.PlayerNameSubmission, new { @style = "width: 300px" })
+                        <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
+                    </div>
+                </div>
+            </form>
+        }
     }
 </div>

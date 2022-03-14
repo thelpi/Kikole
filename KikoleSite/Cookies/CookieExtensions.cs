@@ -95,6 +95,11 @@ namespace KikoleSite.Cookies
             controller.Response.Cookies.Delete(GetAuthenticationCookieName());
         }
 
+        internal static void ResetSubmissionFormCookie(this Controller controller)
+        {
+            controller.Response.Cookies.Delete(GetSubmissionFormCookieName());
+        }
+
         internal static string GetIp(this Controller controller)
         {
             return controller.Request.HttpContext.Connection.RemoteIpAddress.ToString();

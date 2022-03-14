@@ -9,6 +9,7 @@ namespace KikoleSite.Models
 {
     public class HomeModel
     {
+        public ProposalChart Chart { get; set; }
         public int Points { get; set; }
         public string MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }
