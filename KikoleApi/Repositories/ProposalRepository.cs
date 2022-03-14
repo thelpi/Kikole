@@ -38,7 +38,7 @@ namespace KikoleApi.Repositories
                 where = "ip = @ip";
                 prms = new
                 {
-                    ip,
+                    ip = "quick hack to avoid getting ip proposals",
                     real_proposal_date = proposalDate.Date
                 };
             }

@@ -90,13 +90,13 @@ namespace KikoleApi.Controllers
             if (!_crypter.Encrypt(password).Equals(existingUser.Password))
                 return Unauthorized();
 
-            await _proposalRepository
+            /*await _proposalRepository
                 .UpdateProposalsUserAsync(existingUser.Id, ip)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false);*/
 
-            await _leaderRepository
+           /* await _leaderRepository
                 .UpdateLeadersUserAsync(existingUser.Id, ip)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false);*/
 
             var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");
 
