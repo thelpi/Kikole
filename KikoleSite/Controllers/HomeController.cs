@@ -19,10 +19,13 @@ namespace KikoleSite.Controllers
         private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
              = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
         private static ProposalChart _proposalChartCache;
+        private static (IReadOnlyCollection<Club> clubs, DateTime expiration) _clubsCache;
 
         public HomeController(IApiProvider apiProvider)
         {
             _apiProvider = apiProvider;
+            // force cache
+            GetClubs();
         }
 
         public async Task<IActionResult> Index([FromQuery] int? day)
@@ -100,13 +103,23 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult AutoComplete(string prefix, ulong languageId = DefaultLanguageId)
+        public JsonResult AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
         {
             var countries = GetCountries()
                 .Where(c =>
                     c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
 
             return Json(countries);
+        }
+
+        [HttpPost]
+        public JsonResult AutoCompleteClubs(string prefix)
+        {
+            var clubs = GetClubs()
+                .Where(c =>
+                    c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
+
+            return Json(clubs.Select(x => x.Name));
         }
 
         private IActionResult ViewWithFullModel(HomeModel model, string login, string clue)
@@ -119,6 +132,20 @@ namespace KikoleSite.Controllers
             model.Chart = GetProposalChartCache();
             model.Clue = clue;
             return View(model);
+        }
+
+        private IReadOnlyCollection<Club> GetClubs()
+        {
+            if (_clubsCache.clubs == null || _clubsCache.expiration < DateTime.Now)
+            {
+                var clubs = _apiProvider
+                    .GetClubsAsync().GetAwaiter()
+                    .GetResult();
+
+                _clubsCache = (clubs.OrderBy(c => c.Name).ToList(), DateTime.Now.AddHours(1));
+            }
+
+            return _clubsCache.clubs;
         }
 
         private IReadOnlyDictionary<ulong, string> GetPositions()

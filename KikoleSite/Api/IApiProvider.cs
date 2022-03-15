@@ -29,5 +29,7 @@ namespace KikoleSite.Api
             int limit, DateTime? minimalDate);
 
         Task<string> GetClueAsync(DateTime proposalDate);
+
+        Task<IReadOnlyCollection<Club>> GetClubsAsync();
     }
 }

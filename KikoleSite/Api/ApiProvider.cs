@@ -177,6 +177,30 @@ namespace KikoleSite.Api
                 .ToList();
         }
 
+        public async Task<string> GetClueAsync(DateTime proposalDate)
+        {
+            var response = await SendAsync(
+                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return "";
+
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<Club>> GetClubsAsync()
+        {
+            var response = await SendAsync(
+                    "clubs",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)
@@ -210,19 +234,6 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
 
             return JsonConvert.DeserializeObject<T>(content);
-        }
-
-        public async Task<string> GetClueAsync(DateTime proposalDate)
-        {
-            var response = await SendAsync(
-                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-                return "";
-
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
     }
 }

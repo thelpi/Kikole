@@ -85,11 +85,35 @@
                         <div>
                             <label>Clubs:</label>
                         </div>
+                        <script>
+                            $(function () {
+                                $("#clubName").autocomplete({
+                                    source: function (request, response) {
+                                        $.ajax({
+                                            url: '/Home/AutoCompleteClubs/',
+                                            data: {
+                                                "prefix": request.term
+                                            },
+                                            type: "POST",
+                                            success: function (data) {
+                                                response($.map(data, function (item) {
+                                                    return item;
+                                                }))
+                                            }
+                                        });
+                                    },
+                                    select: function (e, i) {
+                                        $("#clubName").val(i.item.value);
+                                    },
+                                    minLength: 1
+                                });
+                            });
+                        </script>
                         <div>
-                            @Html.TextBoxFor(m => m.ClubNameSubmission, new { @style = "width: 300px" })
-                            <input type="submit" value="Ok" name="submit-Club" style="visibility:hidden" />
+                            <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
+                            <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden" />
                         </div>
-                        <div style="font-size: small">(one club at a time; as a rule of thumb, city alone is not enough: prefer "real madrid" instead of "madrid")</div>
+                        <div style="font-size: small">(one club at a time; autompletion suggestions are NOT exhaustive)</div>
                     </div>
                     @if (Model.KnownPlayerClubs?.Count > 0)
                     {
@@ -118,7 +142,7 @@
                                 $("#countryName").autocomplete({
                                     source: function (request, response) {
                                         $.ajax({
-                                            url: '/Home/AutoComplete/',
+                                            url: '/Home/AutoCompleteCountries/',
                                             data: {
                                                 "prefix": request.term
                                                 // add languageID here

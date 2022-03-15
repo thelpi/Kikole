@@ -20,7 +20,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(AuthenticationLevel.None)]
         [ProducesResponseType(typeof(IReadOnlyCollection<Club>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<IReadOnlyCollection<Club>>> GetClubsAsync()
