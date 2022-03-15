@@ -211,5 +211,18 @@ namespace KikoleSite.Api
 
             return JsonConvert.DeserializeObject<T>(content);
         }
+
+        public async Task<string> GetClueAsync(DateTime proposalDate)
+        {
+            var response = await SendAsync(
+                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return "";
+
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
     }
 }

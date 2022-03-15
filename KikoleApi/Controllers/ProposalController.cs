@@ -88,19 +88,7 @@ namespace KikoleApi.Controllers
         {
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
-
-        [HttpPut("clue-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
-        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<ActionResult<ProposalResponse>> SubmitClueProposalAsync(
-            [FromBody] ClueProposalRequest request,
-            [FromQuery] ulong userId)
-        {
-            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
-        }
-
+        
         [HttpPut("position-proposals")]
         [AuthenticationLevel(AuthenticationLevel.Authenticated)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]

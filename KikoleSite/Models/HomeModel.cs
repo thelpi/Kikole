@@ -9,11 +9,12 @@ namespace KikoleSite.Models
 {
     public class HomeModel
     {
+        public string Clue { get; set; }
+
         public ProposalChart Chart { get; set; }
         public int Points { get; set; }
         public string MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }
-        public string Clue { get; set; }
         public string BirthYear { get; set; }
         public string PlayerName { get; set; }
         public string CountryName { get; set; }
@@ -37,7 +38,6 @@ namespace KikoleSite.Models
         internal HomeModel(SubmissionForm submissionFormCookie)
         {
             BirthYear = submissionFormCookie.BirthYear;
-            Clue = submissionFormCookie.Clue;
             CountryName = submissionFormCookie.CountryName;
             CurrentDay = submissionFormCookie.CurrentDay;
             KnownPlayerClubs = submissionFormCookie.KnownPlayerClubs;
@@ -52,7 +52,6 @@ namespace KikoleSite.Models
             return new SubmissionForm
             {
                 BirthYear = BirthYear,
-                Clue = Clue,
                 CountryName = CountryName,
                 CurrentDay = CurrentDay,
                 KnownPlayerClubs = KnownPlayerClubs,
@@ -108,9 +107,6 @@ namespace KikoleSite.Models
                         break;
                     case ProposalType.Year:
                         BirthYear = response.Value.ToString();
-                        break;
-                    case ProposalType.Clue:
-                        Clue = response.Value.ToString();
                         break;
                 }
             }

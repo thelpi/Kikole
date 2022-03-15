@@ -1,8 +1,8 @@
 ﻿@model HomeModel
 <div>
-    <div style="margin-top: 20px; color:crimson; font-size: large">
+    @*<div style="margin-top: 20px; color:crimson; font-size: large">
         Le site étant toujours en construction, des erreurs peuvent se produire. Merci de votre compréhension !
-    </div>
+    </div>*@
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         <fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
@@ -13,17 +13,6 @@
                 <li>The player can be active or retired.</li>
                 <li>All text submissions are case-insensitive and diacritics is ignored.</li>
                 <li>You can propose a name at any time (no need to find every clue)</li>
-            </ul>
-            Score is computed with following rules:
-            <ul>
-                <li>You start with <span style="color: forestgreen; font-size: large">@Model.Chart.BasePoints</span> points</li>
-                <li>Asking for the clue costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Clue]</span> points</li>
-                <li>An incorrect player proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> points</li>
-                <li>An incorrect club proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> points</li>
-                <li>An incorrect country proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> points</li>
-                <li>An incorrect year proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> points</li>
-                <li>An incorrect position proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> points</li>
-                <li>A good guess on any category costs <span style="color: forestgreen; font-size: large">no points</span></li>
             </ul>
         </fieldset>
         <div style="margin-top: 20px">
@@ -87,6 +76,9 @@
             {
                 <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
             }
+            <div style="margin-top: 30px; font-size: larger">
+                Clue of the day: <span style="font-style:italic">@Model.Clue</span>
+            </div>
             <form method="post" action="/">
                 <fieldset style="margin-top: 30px">
                     <div>
@@ -227,27 +219,6 @@
                 </div>
             </form>
             <form method="post" action="/">
-                <div style="margin-top: 30px">
-                    <div>
-                        <label>Clue:</label>
-                    </div>
-                    <div>
-                        @if (string.IsNullOrWhiteSpace(Model.Clue))
-                        {
-                            <div>
-                                <input type="submit" value="Click to get a clue" name="submit-Clue" style="width: 300px" />
-                            </div>
-                        }
-                        else
-                        {
-                            <div>
-                                <label>@Model.Clue</label>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </form>
-            <form method="post" action="/">
                 <div style="margin-top: 60px">
                     <div>
                         <label style="color:crimson">Submit your player here:</label>
@@ -260,4 +231,16 @@
             </form>
         }
     }
+    <div style="margin-top: 60px">
+        Score is computed with following rules:
+        <ul>
+            <li>You start with <span style="color: forestgreen; font-size: large">@Model.Chart.BasePoints</span> points</li>
+            <li>An incorrect player proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> points</li>
+            <li>An incorrect club proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> points</li>
+            <li>An incorrect country proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> points</li>
+            <li>An incorrect year proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> points</li>
+            <li>An incorrect position proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> points</li>
+            <li>A good guess on any category costs <span style="color: forestgreen; font-size: large">no points</span></li>
+        </ul>
+    </div>
 </div>

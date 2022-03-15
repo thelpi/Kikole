@@ -79,7 +79,7 @@ namespace KikoleApi.Controllers
                     foreach (var proposal in proposals.Where(p => p.DaysBefore == 0).OrderBy(p => p.CreationDate))
                     {
                         var minusPoints = ProposalChart.Default.ProposalTypesCost[(ProposalType)proposal.ProposalTypeId];
-                        if (proposal.Successful == 0 || (ProposalType)proposal.ProposalTypeId == ProposalType.Clue)
+                        if (proposal.Successful == 0)
                             points -= minusPoints;
 
                         if (proposal.Successful > 0 && (ProposalType)proposal.ProposalTypeId == ProposalType.Name)

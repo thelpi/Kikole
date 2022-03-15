@@ -56,8 +56,10 @@ namespace KikoleSite.Controllers
             await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
 
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
-            
-            return ViewWithFullModel(model, login);
+
+            var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue);
         }
 
         [HttpPost]
@@ -84,17 +86,17 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;
-            model.MessageToDisplay = proposalType == ProposalType.Clue
-                ? "A clue has been given, see below"
-                : (response.Successful
-                    ? $"Valid {proposalType} guess"
-                    : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
+            model.MessageToDisplay = (response.Successful
+                ? $"Valid {proposalType} guess"
+                : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
 
             model.SetPropertiesFromProposal(response, GetCountries(), GetPositions());
 
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
-            return ViewWithFullModel(model, login);
+            var clue = await _apiProvider.GetClueAsync(DateTime.Now.AddDays(-model.CurrentDay)).ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue);
         }
 
         [HttpPost]
@@ -107,7 +109,7 @@ namespace KikoleSite.Controllers
             return Json(countries);
         }
 
-        private IActionResult ViewWithFullModel(HomeModel model, string login)
+        private IActionResult ViewWithFullModel(HomeModel model, string login, string clue)
         {
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }
@@ -115,6 +117,7 @@ namespace KikoleSite.Controllers
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
             model.Chart = GetProposalChartCache();
+            model.Clue = clue;
             return View(model);
         }
 

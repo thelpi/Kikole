@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
@@ -17,6 +19,17 @@ namespace KikoleApi.Controllers
         {
             _playerRepository = playerRepository;
             _clock = clock;
+        }
+
+        [HttpGet("/player-clues")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        public async Task<ActionResult<string>> GetPlayerOfTheDayClueAsync([FromQuery][Required] DateTime proposalDate)
+        {
+            var player = await _playerRepository
+                .GetPlayerOfTheDayAsync(proposalDate)
+                .ConfigureAwait(false);
+
+            return Ok(player.Clue);
         }
 
         [HttpPost]

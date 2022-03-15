@@ -77,15 +77,9 @@ namespace KikoleApi.Models
                         ? player.YearOfBirth.ToString()
                         : null;
                     break;
-
-                case ProposalType.Clue:
-                    if (!success.HasValue)
-                        Successful = true;
-                    Value = player.Clue;
-                    break;
             }
             
-            LostPoints = Successful && ProposalType != ProposalType.Clue
+            LostPoints = Successful
                 ? 0
                 : ProposalChart.Default.ProposalTypesCost[ProposalType];
         }

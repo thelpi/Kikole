@@ -27,5 +27,7 @@ namespace KikoleSite.Api
 
         Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
             int limit, DateTime? minimalDate);
+
+        Task<string> GetClueAsync(DateTime proposalDate);
     }
 }
