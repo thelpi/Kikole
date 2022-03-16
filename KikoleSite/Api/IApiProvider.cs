@@ -33,5 +33,7 @@ namespace KikoleSite.Api
         Task<IReadOnlyCollection<Club>> GetClubsAsync();
 
         Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync();
+
+        Task<UserStats> GetUserStats(ulong id);
     }
 }

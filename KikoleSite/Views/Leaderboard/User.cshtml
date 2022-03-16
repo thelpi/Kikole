@@ -1,4 +1,41 @@
-﻿@model UserStatsModel
-<fieldset title="Leaderboard" style="margin-top: 10px">
-    <div>Je suis là</div>
+﻿@model KikoleSite.Api.UserStats
+<fieldset title="User stats" style="margin-top: 10px">
+    <div>Username: @Model.Login</div>
+    <div>Average time: @Model.AverageTime</div>
+    <div>Best time: @Model.BestTime</div>
+    <div>Success count: @Model.SuccessFulCount</div>
+    <div>Attemps count: @Model.TriedCount</div>
+    <div>Total points: @Model.TotalPoints</div>
+    <div>
+        <div style="font-size: large">Stats by day</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Answer</th>
+                    <th>Tried?</th>
+                    <th>SuccessFul?</th>
+                    <th>Points</th>
+                    <th>Points ranking</th>
+                    <th>Time</th>
+                    <th>Time ranking</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in Model.Stats)
+                {
+                <tr>
+                    <td>@stat.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@stat.Answer</td>
+                    <td>@stat.Tried.ToString()</td>
+                    <td>@stat.SuccessFul.ToString()</td>
+                    <td>@stat.Points</td>
+                    <td>@stat.PointsPosition</td>
+                    <td>@stat.Time.ToString(@"hh\:mm")</td>
+                    <td>@stat.TimePosition</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </fieldset>

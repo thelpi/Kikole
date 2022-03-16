@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
+using KikoleApi.Models;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -93,5 +95,20 @@ namespace KikoleApi.Controllers
 
         // TODO: change password
         // TODO: reset password with q&a
+
+        [HttpGet("{userId}/stats")]
+        [ProducesResponseType(typeof(UserStats), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<UserStats>> GetUserStats(ulong userId)
+        {
+            if (userId == 0)
+                return BadRequest();
+
+            var us = new UserStats();
+
+            // TODO:stuff
+
+            return Ok(us);
+        }
     }
 }

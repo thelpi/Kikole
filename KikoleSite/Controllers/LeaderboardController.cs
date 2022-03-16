@@ -17,14 +17,23 @@ namespace KikoleSite.Controllers
             _apiProvider = apiProvider;
         }
         
-        public async Task<IActionResult> Index([FromQuery] ulong playerId)
+        public async Task<IActionResult> Index([FromQuery] ulong userId)
         {
-            if (playerId == 0)
+            if (userId == 0)
             {
                 return await Index().ConfigureAwait(false);
             }
 
-            return View("User", new UserStatsModel { });
+            var stats = await _apiProvider
+                .GetUserStats(userId)
+                .ConfigureAwait(false);
+
+            if (stats == null)
+            {
+                return await Index().ConfigureAwait(false);
+            }
+
+            return View("User", stats);
         }
 
         private async Task<IActionResult> Index()

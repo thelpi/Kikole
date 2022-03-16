@@ -212,6 +212,15 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
+        public async Task<UserStats> GetUserStats(ulong id)
+        {
+            var response = await SendAsync($"users/{id}/stats", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<UserStats>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)
