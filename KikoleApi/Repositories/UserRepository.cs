@@ -70,6 +70,15 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<UserDto> GetUserByIdAsync(ulong userId)
+        {
+            return await GetDtoAsync<UserDto>("users",
+                    ("id", userId),
+                    ("is_disabled", 0),
+                    ("is_admin", 0))
+                .ConfigureAwait(false);
+        }
+
         private async Task<bool> ResetUserPasswordAsync(string login, (string, string) fieldInfo, string newPassword)
         {
             var user = await GetDtoAsync<UserDto>(

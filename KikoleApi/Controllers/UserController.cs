@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,16 +20,22 @@ namespace KikoleApi.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
+        private readonly IPlayerRepository _playerRepository;
         private readonly ICrypter _crypter;
+        private readonly IClock _clock;
 
         public UserController(IUserRepository userRepository,
             IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
-            ICrypter crypter)
+            ICrypter crypter,
+            IPlayerRepository playerRepository,
+            IClock clock)
         {
             _userRepository = userRepository;
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
+            _playerRepository = playerRepository;
+            _clock = clock;
             _crypter = crypter;
         }
 
@@ -99,16 +108,97 @@ namespace KikoleApi.Controllers
         [HttpGet("{userId}/stats")]
         [ProducesResponseType(typeof(UserStats), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<UserStats>> GetUserStats(ulong userId)
         {
             if (userId == 0)
                 return BadRequest();
+            
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
 
-            var us = new UserStats();
+            if (user == null)
+                return NotFound();
 
-            // TODO:stuff
+            var stats = new List<SingleUserStat>();
+
+            var currentDate = ProposalChart.Default.FirstDate.Date;
+            var now = _clock.Now.Date;
+            while (currentDate <= now)
+            {
+                var pDay = await _playerRepository
+                    .GetPlayerOfTheDayAsync(currentDate)
+                    .ConfigureAwait(false);
+
+                var proposals = await _proposalRepository
+                    .GetProposalsAsync(currentDate, userId)
+                    .ConfigureAwait(false);
+
+                var leaders = await _leaderRepository
+                    .GetLeadersAtDateAsync(currentDate)
+                    .ConfigureAwait(false);
+
+                var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
+
+                var singleStat = new SingleUserStat
+                {
+                    Date = currentDate,
+                    Answer = pDay.Name,
+                    Attempt = proposals.Count > 0,
+                    Points = meLeader != null
+                        ? meLeader.Points
+                        : default(int?),
+                    Time = meLeader != null
+                        ? new TimeSpan(0, meLeader.Time, 0)
+                        : default(TimeSpan?),
+                    PointsPosition = GetUserPositionInLeaders(userId,
+                        leaders.OrderByDescending(t => t.Points)),
+                    TimePosition = GetUserPositionInLeaders(userId,
+                        leaders.OrderBy(t => t.Time))
+                };
+
+                stats.Add(singleStat);
+                currentDate = currentDate.AddDays(1);
+            }
+
+            var us = new UserStats
+            {
+                Attempts = stats.Count(s => s.Attempt),
+                AverageTime = stats.Where(s => s.Time.HasValue).Select(s => s.Time.Value).Average(),
+                BestPoints = stats.Any(s => s.Points.HasValue)
+                    ? stats.Where(s => s.Points.HasValue).Max(s => s.Points.Value)
+                    : default(int?),
+                BestTime = stats.Any(s => s.Time.HasValue)
+                    ? stats.Where(s => s.Time.HasValue).Min(s => s.Time.Value)
+                    : default(TimeSpan?),
+                Login = user.Login,
+                Stats = stats,
+                Successes = stats.Count(s => s.Points.HasValue),
+                TotalPoints = stats.Sum(s => s.Points.GetValueOrDefault(0))
+            };
 
             return Ok(us);
+        }
+
+        private static int? GetUserPositionInLeaders(ulong userId,
+            IOrderedEnumerable<LeaderDto> orderedLeaders)
+        {
+            var tIndex = -1;
+            var i = 0;
+            foreach (var orderedLeader in orderedLeaders)
+            {
+                if (orderedLeader.UserId == userId)
+                {
+                    tIndex = i + 1;
+                    break;
+                }
+                i++;
+            }
+
+            return tIndex == -1
+                ? default(int?)
+                : tIndex;
         }
     }
 }

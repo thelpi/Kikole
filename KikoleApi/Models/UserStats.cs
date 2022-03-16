@@ -7,15 +7,17 @@ namespace KikoleApi.Models
     {
         public string Login { get; set; }
 
-        public int TriedCount { get; set; }
+        public int Attempts { get; set; }
 
-        public int SuccessFulCount { get; set; }
+        public int Successes { get; set; }
 
         public int TotalPoints { get; set; }
 
-        public TimeSpan AverageTime { get; set; }
+        public int? BestPoints { get; set; }
 
-        public TimeSpan BestTime { get; set; }
+        public TimeSpan? AverageTime { get; set; }
+
+        public TimeSpan? BestTime { get; set; }
 
         public IReadOnlyCollection<SingleUserStat> Stats { get; set; }
     }

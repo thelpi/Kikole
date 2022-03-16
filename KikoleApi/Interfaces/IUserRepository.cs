@@ -17,5 +17,7 @@ namespace KikoleApi.Interfaces
         Task<bool> ResetUserUnknownPasswordAsync(string login, string passwordResetAnswer, string newPassword);
 
         Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync();
+
+        Task<UserDto> GetUserByIdAsync(ulong userId);
     }
 }

@@ -41,7 +41,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetTodayLeadersAsync()
         {
             var dtos = await _leaderRepository
-                .GetLeadersAsync(_clock.Now.Date)
+                .GetLeadersAtDateAsync(_clock.Now.Date)
                 .ConfigureAwait(false);
 
             var users = await _userRepository

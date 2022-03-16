@@ -33,6 +33,19 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date)
+        {
+            return await ExecuteReaderAsync<LeaderDto>(
+                    $"SELECT * FROM leaders " +
+                    $"WHERE DATE(proposal_date) = @date " +
+                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR is_admin = 1)",
+                    new
+                    {
+                        date.Date
+                    })
+                .ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate)
         {
             return await ExecuteReaderAsync<LeaderDto>(

@@ -1,39 +1,45 @@
-﻿@model KikoleSite.Api.UserStats
+﻿@model UserStatsModel
 <fieldset title="User stats" style="margin-top: 10px">
-    <div>Username: @Model.Login</div>
-    <div>Average time: @Model.AverageTime</div>
-    <div>Best time: @Model.BestTime</div>
-    <div>Success count: @Model.SuccessFulCount</div>
-    <div>Attemps count: @Model.TriedCount</div>
-    <div>Total points: @Model.TotalPoints</div>
-    <div>
-        <div style="font-size: large">Stats by day</div>
-        <table>
+    <div>Username: <span style="color: crimson; font-size: large">@Model.Login</span></div>
+    <div>Attempts: <span style="color: crimson; font-size: large">@Model.Attempts</span></div>
+    <div>Successes: <span style="color: crimson; font-size: large">@Model.Successes</span></div>
+    <div>Average time: <span style="color: crimson; font-size: large">@Model.AverageTime</span></div>
+    <div>Best time: <span style="color: crimson; font-size: large">@Model.BestTime</span></div>
+    <div>Best score: <span style="color: crimson; font-size: large">@Model.BestPoints</span></div>
+    <div>Total score: <span style="color: crimson; font-size: large">@Model.TotalPoints</span></div>
+    <div style="margin-top: 20px">
+        <div style="font-size: larger">Stats by day</div>
+        <table style="margin-top: 10px">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Answer</th>
-                    <th>Tried?</th>
-                    <th>SuccessFul?</th>
-                    <th>Points</th>
-                    <th>Points ranking</th>
-                    <th>Time</th>
-                    <th>Time ranking</th>
+                    <th style="width: 80px">Date</th>
+                    <th style="width: 80px">Answer</th>
+                    <th style="width: 80px">Attempt?</th>
+                    <th style="width: 80px">Success?</th>
+                    <th style="width: 80px">Points</th>
+                    <th style="width: 80px">Points ranking</th>
+                    <th style="width: 80px">Time</th>
+                    <th style="width: 80px">Time ranking</th>
                 </tr>
             </thead>
             <tbody>
+                @{
+                    var i = 0;
+                }
                 @foreach (var stat in Model.Stats)
                 {
-                <tr>
-                    <td>@stat.Date.ToString("yyyy-MM-dd")</td>
-                    <td>@stat.Answer</td>
-                    <td>@stat.Tried.ToString()</td>
-                    <td>@stat.SuccessFul.ToString()</td>
-                    <td>@stat.Points</td>
-                    <td>@stat.PointsPosition</td>
-                    <td>@stat.Time.ToString(@"hh\:mm")</td>
-                    <td>@stat.TimePosition</td>
-                </tr>
+                    var background = i % 2 == 0 ? "white" : "lavenderblush";
+                    <tr style="background-color: @background">
+                        <td>@stat.Date</td>
+                        <td>@stat.Answer</td>
+                        <td>@stat.Attempt</td>
+                        <td>@stat.Success</td>
+                        <td>@stat.Points</td>
+                        <td>@stat.PointsPosition</td>
+                        <td>@stat.Time</td>
+                        <td>@stat.TimePosition</td>
+                    </tr>
+                    i++;
                 }
             </tbody>
         </table>

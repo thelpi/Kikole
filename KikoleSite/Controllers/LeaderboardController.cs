@@ -33,7 +33,7 @@ namespace KikoleSite.Controllers
                 return await Index().ConfigureAwait(false);
             }
 
-            return View("User", stats);
+            return View("User", new UserStatsModel(stats));
         }
 
         private async Task<IActionResult> Index()
