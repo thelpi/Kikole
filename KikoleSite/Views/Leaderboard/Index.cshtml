@@ -13,27 +13,54 @@
             <input type="submit" value="Afficher" />
         </div>
     </form>
-    <table style="margin-top: 20px">
-        <thead>
-            <tr>
-                <th>Position</th>
-                <th style="color: crimson">Username</th>
-                <th>Points</th>
-                <th>Players found</th>
-                <th>Best time</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var leader in Model.Leaders)
-            {
+    <div style="margin-top: 20px">
+        <div style="font-size: large">General stats</div>
+        <table style="margin-top: 5px">
+            <thead>
+                <tr>
+                    <th style="width: 80px">Position</th>
+                    <th style="color: crimson; width: 120px">Username</th>
+                    <th style="width: 80px">Points</th>
+                    <th style="width: 80px">Best time</th>
+                    <th>Players found</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var leader in Model.Leaders)
+                {
                 <tr>
                     <td>@leader.Position</td>
-                    <td style="color: crimson">@leader.Login</td>
+                    <td style="color: crimson"><a href="/Leaderboard?playerId=@leader.Id">@leader.Login</a></td>
                     <td>@leader.TotalPoints</td>
-                    <td>@leader.SuccessCount</td>
                     <td>@leader.BestTime.ToString(@"hh\:mm")</td>
+                    <td>@leader.SuccessCount</td>
                 </tr>
-            }
-        </tbody>
-    </table>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top: 20px">
+        <div style="font-size: large">Today's stats</div>
+        <table style="margin-top: 5px">
+            <thead>
+                <tr>
+                    <th style="width: 80px">Position</th>
+                    <th style="color: crimson; width: 120px">Username</th>
+                    <th style="width: 80px">Time</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var leader in Model.TodayLeaders)
+                {
+                    <tr>
+                        <td>@leader.Position</td>
+                        <td style="color: crimson"><a href="/Leaderboard?playerId=@leader.Id">@leader.Login</a></td>
+                        <td>@leader.BestTime.ToString(@"hh\:mm")</td>
+                        <td>@leader.TotalPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </fieldset>

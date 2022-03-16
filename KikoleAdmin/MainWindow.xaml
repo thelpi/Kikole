@@ -60,5 +60,8 @@
                 <Button Name="AddClubButton" Click="AddClubButton_Click" Content="Add" />
             </StackPanel>
         </TabItem>
+        <TabItem Header="Leaderboard">
+            <Button Name="BtnRecompute" Content="Recompute" Click="BtnRecompute_Click" Height="25" Width="75" />
+        </TabItem>
     </TabControl>
 </Window>

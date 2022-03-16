@@ -111,5 +111,11 @@ namespace KikoleAdmin
             };
             ClubsPanel.Children.Add(cbb);
         }
+
+        private void BtnRecompute_Click(object sender, RoutedEventArgs e)
+        {
+            _apiProvider.RecomputeLeaderboardAsync().GetAwaiter().GetResult();
+            MessageBox.Show("Done!");
+        }
     }
 }

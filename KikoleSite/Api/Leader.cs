@@ -4,6 +4,8 @@ namespace KikoleSite.Api
 {
     public class Leader
     {
+        public ulong Id { get; set; }
+
         public int Position { get; set; }
 
         public string Login { get; set; }

@@ -78,5 +78,13 @@ namespace KikoleAdmin
 
             return JsonConvert.DeserializeObject<IReadOnlyCollection<Club>>(content);
         }
+
+        public async Task RecomputeLeaderboardAsync()
+        {
+            var response = await _client
+                .PutAsync("leaders-computing", null)
+                .ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+        }
     }
 }

@@ -16,8 +16,18 @@ namespace KikoleSite.Controllers
         {
             _apiProvider = apiProvider;
         }
+        
+        public async Task<IActionResult> Index([FromQuery] ulong playerId)
+        {
+            if (playerId == 0)
+            {
+                return await Index().ConfigureAwait(false);
+            }
 
-        public async Task<IActionResult> Index()
+            return View("User", new UserStatsModel { });
+        }
+
+        private async Task<IActionResult> Index()
         {
             var leaders = await _apiProvider
                 .GetLeadersAsync(LeaderSort.TotalPoints, limit, null)
@@ -27,7 +37,10 @@ namespace KikoleSite.Controllers
             {
                 MinimalDate = null,
                 Leaders = leaders,
-                SortType = LeaderSort.TotalPoints
+                SortType = LeaderSort.TotalPoints,
+                TodayLeaders = await _apiProvider
+                    .GetTodayLeadersAsync()
+                    .ConfigureAwait(false)
             });
         }
 
@@ -45,6 +58,10 @@ namespace KikoleSite.Controllers
                     model.SortType,
                     limit,
                     dtNull)
+                .ConfigureAwait(false);
+
+            model.TodayLeaders = await _apiProvider
+                .GetTodayLeadersAsync()
                 .ConfigureAwait(false);
 
             return View(model);

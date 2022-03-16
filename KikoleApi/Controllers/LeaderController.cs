@@ -18,18 +18,52 @@ namespace KikoleApi.Controllers
         private readonly IClubRepository _clubRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IClock _clock;
 
         public LeaderController(ILeaderRepository leaderRepository,
             IUserRepository userRepository,
             IPlayerRepository playerRepository,
             IClubRepository clubRepository,
-            IProposalRepository proposalRepository)
+            IProposalRepository proposalRepository,
+            IClock clock)
         {
             _leaderRepository = leaderRepository;
             _userRepository = userRepository;
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
             _proposalRepository = proposalRepository;
+            _clock = clock;
+        }
+
+        [HttpGet("today-leaders")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetTodayLeadersAsync()
+        {
+            var dtos = await _leaderRepository
+                .GetLeadersAsync(_clock.Now.Date)
+                .ConfigureAwait(false);
+
+            var users = await _userRepository
+                .GetActiveUsersAsync()
+                .ConfigureAwait(false);
+
+            var leaders = dtos
+                .GroupBy(dto => dto.UserId)
+                .Select(dto => new Leader(dto, users))
+                .ToList();
+
+            leaders = leaders
+                .OrderBy(l => l.BestTime.TotalMinutes)
+                .ThenByDescending(l => l.TotalPoints)
+                .Select((l, i) =>
+                {
+                    l.Position = i + 1;
+                    return l;
+                })
+                .ToList();
+
+            return Ok(leaders);
         }
 
         [HttpPut("leaders-computing")]

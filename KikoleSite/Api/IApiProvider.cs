@@ -31,5 +31,7 @@ namespace KikoleSite.Api
         Task<string> GetClueAsync(DateTime proposalDate);
 
         Task<IReadOnlyCollection<Club>> GetClubsAsync();
+
+        Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync();
     }
 }

@@ -9,5 +9,7 @@ namespace KikoleSite.Models
         public Api.LeaderSort SortType { get; set; }
 
         public IReadOnlyCollection<Api.Leader> Leaders { get; set; }
+
+        public IReadOnlyCollection<Api.Leader> TodayLeaders { get; set; }
     }
 }

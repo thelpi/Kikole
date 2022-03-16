@@ -201,6 +201,17 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync()
+        {
+            var response = await SendAsync(
+                    "today-leaders",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)

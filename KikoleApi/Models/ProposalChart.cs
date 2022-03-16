@@ -18,7 +18,7 @@ namespace KikoleApi.Models
             {
                 { ProposalType.Club, 50 },
                 { ProposalType.Country, 25 },
-                { ProposalType.Name, 200 },
+                { ProposalType.Name, 400 },
                 { ProposalType.Position, 200 },
                 { ProposalType.Year, 25 },
             };
