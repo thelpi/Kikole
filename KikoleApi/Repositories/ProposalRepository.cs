@@ -30,8 +30,28 @@ namespace KikoleApi.Repositories
         public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(
             DateTime proposalDate, ulong userId)
         {
+            return await GetProposalsInternalAsync(
+                    "DATE(DATE_ADD(proposal_date, INTERVAL -days_before DAY)) = @real_proposal_date",
+                    proposalDate,
+                    userId)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsDateExactAsync(
+            DateTime proposalDate, ulong userId)
+        {
+            return await GetProposalsInternalAsync(
+                    "days_before = 0 AND DATE(proposal_date) = @real_proposal_date",
+                    proposalDate,
+                    userId)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<IReadOnlyCollection<ProposalDto>> GetProposalsInternalAsync(
+            string where, DateTime proposalDate, ulong userId)
+        {
             return await ExecuteReaderAsync<ProposalDto>(
-                    $"SELECT * FROM proposals WHERE user_id = @user_id AND DATE(DATE_ADD(proposal_date, INTERVAL -days_before DAY)) = @real_proposal_date",
+                    $"SELECT * FROM proposals WHERE user_id = @user_id AND {where}",
                     new
                     {
                         user_id = userId,

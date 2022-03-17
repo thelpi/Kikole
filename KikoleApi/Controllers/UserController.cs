@@ -132,7 +132,7 @@ namespace KikoleApi.Controllers
                     .ConfigureAwait(false);
 
                 var proposals = await _proposalRepository
-                    .GetProposalsAsync(currentDate, userId)
+                    .GetProposalsDateExactAsync(currentDate, userId)
                     .ConfigureAwait(false);
 
                 var leaders = await _leaderRepository
