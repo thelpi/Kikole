@@ -17,6 +17,7 @@ namespace KikoleApi.Controllers
     [Route("users")]
     public class UserController : KikoleBaseController
     {
+        private readonly IBadgeRepository _badgeRepository;
         private readonly IUserRepository _userRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
@@ -29,14 +30,52 @@ namespace KikoleApi.Controllers
             ILeaderRepository leaderRepository,
             ICrypter crypter,
             IPlayerRepository playerRepository,
+            IBadgeRepository badgeRepository,
             IClock clock)
         {
             _userRepository = userRepository;
+            _badgeRepository = badgeRepository;
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
             _playerRepository = playerRepository;
             _clock = clock;
             _crypter = crypter;
+        }
+
+        [HttpGet("{userId}/badges")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync([FromRoute] ulong userId)
+        {
+            if (userId == 0)
+                return BadRequest();
+
+            var badges = await _badgeRepository
+                .GetBadgesAsync()
+                .ConfigureAwait(false);
+
+            var uBadges = await _badgeRepository
+                .GetUserBadges(userId)
+                .ConfigureAwait(false);
+
+            var badgesFull = uBadges
+                .Select(b =>
+                {
+                    var bRef = badges.Single(_ => _.Id == b.BadgeId);
+                    return new UserBadge
+                    {
+                        Description = bRef.Description,
+                        GetDate = b.GetDate,
+                        Badge = (Badges)bRef.Id,
+                        Name = bRef.Name,
+                        Users = bRef.Users
+                    };
+                })
+                .OrderByDescending(b => b.GetDate)
+                .ToList();
+
+            return Ok(badgesFull);
         }
 
         [HttpPost]

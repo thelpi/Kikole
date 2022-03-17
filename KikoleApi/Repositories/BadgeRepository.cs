@@ -41,5 +41,13 @@ namespace KikoleApi.Repositories
                     new { id = userBadge.BadgeId })
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadges(ulong userId)
+        {
+            return await GetDtosAsync<UserBadgeDto>(
+                    "user_badges",
+                    ("user_id", userId))
+                .ConfigureAwait(false);
+        }
     }
 }
