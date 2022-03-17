@@ -1,5 +1,6 @@
 ﻿@model UserStatsModel
-<fieldset title="User stats" style="margin-top: 10px">
+<div style="margin-top: 20px">
+    <h2>General information</h2>
     <div>Username: <span style="color: crimson; font-size: large">@Model.Login</span></div>
     <div>Attempts: <span style="color: crimson; font-size: large">@Model.Attempts</span></div>
     <div>Successes: <span style="color: crimson; font-size: large">@Model.Successes</span></div>
@@ -7,41 +8,61 @@
     <div>Best time: <span style="color: crimson; font-size: large">@Model.BestTime</span></div>
     <div>Best score: <span style="color: crimson; font-size: large">@Model.BestPoints</span></div>
     <div>Total score: <span style="color: crimson; font-size: large">@Model.TotalPoints</span></div>
-    <div style="margin-top: 20px">
-        <div style="font-size: larger">Stats by day</div>
-        <table style="margin-top: 10px">
-            <thead>
-                <tr>
-                    <th style="width: 80px">Date</th>
-                    <th style="width: 80px">Answer</th>
-                    <th style="width: 80px">Attempt?</th>
-                    <th style="width: 80px">Success?</th>
-                    <th style="width: 80px">Points</th>
-                    <th style="width: 80px">Points ranking</th>
-                    <th style="width: 80px">Time</th>
-                    <th style="width: 80px">Time ranking</th>
+</div>
+<div style="margin-top: 20px">
+    <h2>Stats by day</h2>
+    <table style="margin-top: 10px">
+        <thead>
+            <tr>
+                <th style="width: 80px">Date</th>
+                <th style="width: 80px">Answer</th>
+                <th style="width: 80px">Attempt?</th>
+                <th style="width: 80px">Success?</th>
+                <th style="width: 80px">Points</th>
+                <th style="width: 80px">Points ranking</th>
+                <th style="width: 80px">Time</th>
+                <th style="width: 80px">Time ranking</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var i = 0;
+            }
+            @foreach (var stat in Model.Stats)
+            {
+                var background = i % 2 == 0 ? "white" : "lavenderblush";
+                <tr style="background-color: @background">
+                    <td>@stat.Date</td>
+                    <td>@stat.Answer</td>
+                    <td>@stat.Attempt</td>
+                    <td>@stat.Success</td>
+                    <td>@stat.Points</td>
+                    <td>@stat.PointsPosition</td>
+                    <td>@stat.Time</td>
+                    <td>@stat.TimePosition</td>
                 </tr>
-            </thead>
-            <tbody>
-                @{
-                    var i = 0;
-                }
-                @foreach (var stat in Model.Stats)
-                {
-                    var background = i % 2 == 0 ? "white" : "lavenderblush";
-                    <tr style="background-color: @background">
-                        <td>@stat.Date</td>
-                        <td>@stat.Answer</td>
-                        <td>@stat.Attempt</td>
-                        <td>@stat.Success</td>
-                        <td>@stat.Points</td>
-                        <td>@stat.PointsPosition</td>
-                        <td>@stat.Time</td>
-                        <td>@stat.TimePosition</td>
-                    </tr>
-                    i++;
-                }
-            </tbody>
-        </table>
-    </div>
-</fieldset>
+                i++;
+            }
+        </tbody>
+    </table>
+</div>
+<div style="margin-top: 20px">
+    <h2>Badges</h2>
+    @foreach (var badge in Model.Badges)
+    {
+        <div style="margin-top: 5px">
+            <div style="color: crimson; font-size: large">@badge.Name</div>
+            <div>@badge.Description</div>
+            <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
+            @if (@badge.Users == 1)
+            {
+                <div>You're the only one with this badge!</div>
+            }
+            else
+            {
+                var v = badge.Users - 1;
+                <div><span style="color: crimson">@v</span> other users have this badge</div>
+            }
+        </div>
+    }
+</div>

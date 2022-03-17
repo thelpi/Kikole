@@ -33,7 +33,11 @@ namespace KikoleSite.Controllers
                 return await Index().ConfigureAwait(false);
             }
 
-            return View("User", new UserStatsModel(stats));
+            var badges = await _apiProvider
+                .GetUserBadges(userId)
+                .ConfigureAwait(false);
+
+            return View("User", new UserStatsModel(stats, badges));
         }
 
         private async Task<IActionResult> Index()

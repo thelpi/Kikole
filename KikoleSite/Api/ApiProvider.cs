@@ -221,6 +221,15 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadges(ulong userId)
+        {
+            var response = await SendAsync($"users/{userId}/badges", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<UserBadge>>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)

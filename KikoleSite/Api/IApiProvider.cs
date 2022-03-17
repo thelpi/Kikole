@@ -35,5 +35,7 @@ namespace KikoleSite.Api
         Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync();
 
         Task<UserStats> GetUserStats(ulong id);
+
+        Task<IReadOnlyCollection<UserBadge>> GetUserBadges(ulong userId);
     }
 }
