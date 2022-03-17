@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace KikoleApi.Models
 {
-    public class UserStats
+    public class UserStat
     {
         public string Login { get; set; }
 
@@ -19,6 +19,6 @@ namespace KikoleApi.Models
 
         public TimeSpan? BestTime { get; set; }
 
-        public IReadOnlyCollection<SingleUserStat> Stats { get; set; }
+        public IReadOnlyCollection<DailyUserStat> Stats { get; set; }
     }
 }

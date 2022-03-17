@@ -1,6 +1,6 @@
 ﻿namespace KikoleApi.Models
 {
-    public enum ProposalType
+    public enum ProposalTypes
     {
         Name = 1,
         Club,

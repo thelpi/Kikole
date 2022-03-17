@@ -15,7 +15,7 @@ namespace KikoleApi.Models.Requests
 
         public string PasswordResetAnswer { get; set; }
 
-        public Language? Language { get; set; }
+        public Languages? Language { get; set; }
 
         internal string IsValid()
         {
@@ -25,7 +25,7 @@ namespace KikoleApi.Models.Requests
             if (string.IsNullOrWhiteSpace(Password))
                 return "Empty password";
 
-            if (Language.HasValue && !Enum.IsDefined(typeof(Language), Language.Value))
+            if (Language.HasValue && !Enum.IsDefined(typeof(Languages), Language.Value))
                 return "Invalid language";
 
             return null;
@@ -43,7 +43,7 @@ namespace KikoleApi.Models.Requests
 
             return new UserDto
             {
-                LanguageId = (ulong)(Language ?? Models.Language.en),
+                LanguageId = (ulong)(Language ?? Models.Languages.en),
                 Login = Login.Sanitize(),
                 Password = crypter.Encrypt(Password),
                 PasswordResetAnswer = crypter.Encrypt(realPasswordResetAnswer),

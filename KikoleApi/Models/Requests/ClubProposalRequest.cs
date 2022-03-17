@@ -2,6 +2,6 @@
 {
     public class ClubProposalRequest : BaseProposalRequest
     {
-        internal override ProposalType ProposalType => ProposalType.Club;
+        internal override ProposalTypes ProposalType => ProposalTypes.Club;
     }
 }

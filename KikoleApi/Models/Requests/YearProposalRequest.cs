@@ -4,7 +4,7 @@ namespace KikoleApi.Models.Requests
 {
     public class YearProposalRequest : BaseProposalRequest
     {
-        internal override ProposalType ProposalType => ProposalType.Year;
+        internal override ProposalTypes ProposalType => ProposalTypes.Year;
 
         internal override string GetTip(PlayerDto player)
         {

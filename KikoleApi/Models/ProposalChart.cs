@@ -13,14 +13,14 @@ namespace KikoleApi.Models
 
         public int BasePoints = 1000;
 
-        public IReadOnlyDictionary<ProposalType, int> ProposalTypesCost
-            = new Dictionary<ProposalType, int>
+        public IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
+            = new Dictionary<ProposalTypes, int>
             {
-                { ProposalType.Club, 50 },
-                { ProposalType.Country, 25 },
-                { ProposalType.Name, 400 },
-                { ProposalType.Position, 200 },
-                { ProposalType.Year, 25 },
+                { ProposalTypes.Club, 50 },
+                { ProposalTypes.Country, 25 },
+                { ProposalTypes.Name, 400 },
+                { ProposalTypes.Position, 200 },
+                { ProposalTypes.Year, 25 },
             };
 
         // TODO: binds to database (if possible)

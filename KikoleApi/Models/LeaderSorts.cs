@@ -1,6 +1,6 @@
 ﻿namespace KikoleApi.Models
 {
-    public enum LeaderSort
+    public enum LeaderSorts
     {
         SuccessCount,
         BestTime,

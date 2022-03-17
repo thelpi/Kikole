@@ -19,11 +19,11 @@ namespace KikoleApi.Models
 
         public int TotalPoints { get; private set; }
 
-        public ProposalType ProposalType { get; set; }
+        public ProposalTypes ProposalType { get; set; }
 
-        internal bool IsWin => ProposalType == ProposalType.Name && Successful;
+        internal bool IsWin => ProposalType == ProposalTypes.Name && Successful;
 
-        private ProposalResponse(ProposalType proposalType,
+        private ProposalResponse(ProposalTypes proposalType,
             string sourceValue,
             bool? success,
             PlayerDto player,
@@ -37,7 +37,7 @@ namespace KikoleApi.Models
 
             switch (proposalType)
             {
-                case ProposalType.Name:
+                case ProposalTypes.Name:
                     if (!success.HasValue)
                         Successful = player.AllowedNames.ContainsSanitized(sourceValue);
                     Value = Successful
@@ -45,7 +45,7 @@ namespace KikoleApi.Models
                         : null;
                     break;
 
-                case ProposalType.Club:
+                case ProposalTypes.Club:
                     var c = clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
                     if (!success.HasValue)
                         Successful = c != null;
@@ -54,15 +54,15 @@ namespace KikoleApi.Models
                         : null;
                     break;
 
-                case ProposalType.Country:
+                case ProposalTypes.Country:
                     if (!success.HasValue)
-                        Successful = player.CountryId == (ulong)Enum.Parse<Country>(sourceValue);
+                        Successful = player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
                     Value = Successful
                         ? player.CountryId
                         : default(ulong?);
                     break;
 
-                case ProposalType.Position:
+                case ProposalTypes.Position:
                     if (!success.HasValue)
                         Successful = player.PositionId == ulong.Parse(sourceValue);
                     Value = Successful
@@ -70,7 +70,7 @@ namespace KikoleApi.Models
                         : default(ulong?);
                     break;
 
-                case ProposalType.Year:
+                case ProposalTypes.Year:
                     if (!success.HasValue)
                         Successful = ushort.Parse(sourceValue) == player.YearOfBirth;
                     Value = Successful
@@ -97,7 +97,7 @@ namespace KikoleApi.Models
             PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
             IReadOnlyList<ClubDto> clubs)
-            : this((ProposalType)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, playerClubs, clubs)
+            : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, playerClubs, clubs)
         { }
 
         internal ProposalResponse WithTotalPoints(int sourcePoints)

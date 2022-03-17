@@ -1,6 +1,6 @@
 ﻿namespace KikoleApi.Models
 {
-    public enum Language
+    public enum Languages
     {
         en = 1,
         fr

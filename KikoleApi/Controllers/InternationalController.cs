@@ -21,19 +21,19 @@ namespace KikoleApi.Controllers
 
         [HttpGet("countries")]
         [AuthenticationLevel(AuthenticationLevel.None)]
-        [ProducesResponseType(typeof(IReadOnlyCollection<CountryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Country>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<IReadOnlyCollection<CountryModel>>> GetCountriesAsync([FromQuery] ulong languageId)
+        public async Task<ActionResult<IReadOnlyCollection<Country>>> GetCountriesAsync([FromQuery] ulong languageId)
         {
-            if (!Enum.GetValues(typeof(Language)).Cast<Language>().Select(_ => (ulong)_).Contains(languageId))
+            if (!Enum.GetValues(typeof(Languages)).Cast<Languages>().Select(_ => (ulong)_).Contains(languageId))
                 return BadRequest("Invalid language");
 
             var countries = await _internationalRepository
                 .GetCountriesAsync(languageId)
                 .ConfigureAwait(false);
 
-            return Ok(countries.Select(c => new CountryModel(c)).ToList());
+            return Ok(countries.Select(c => new Country(c)).ToList());
         }
     }
 }

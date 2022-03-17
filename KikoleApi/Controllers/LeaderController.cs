@@ -112,11 +112,11 @@ namespace KikoleApi.Controllers
 
                     foreach (var proposal in proposals.Where(p => p.DaysBefore == 0).OrderBy(p => p.CreationDate))
                     {
-                        var minusPoints = ProposalChart.Default.ProposalTypesCost[(ProposalType)proposal.ProposalTypeId];
+                        var minusPoints = ProposalChart.Default.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
                         if (proposal.Successful == 0)
                             points -= minusPoints;
 
-                        if (proposal.Successful > 0 && (ProposalType)proposal.ProposalTypeId == ProposalType.Name)
+                        if (proposal.Successful > 0 && (ProposalTypes)proposal.ProposalTypeId == ProposalTypes.Name)
                         {
                             await _leaderRepository
                                 .CreateLeaderAsync(new LeaderDto
@@ -142,7 +142,7 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetLeadersAsync(
             [FromQuery] DateTime? minimalDate,
-            [FromQuery] LeaderSort leaderSort)
+            [FromQuery] LeaderSorts leaderSort)
         {
             var dtos = await _leaderRepository
                 .GetLeadersAsync(minimalDate)
@@ -159,13 +159,13 @@ namespace KikoleApi.Controllers
 
             switch (leaderSort)
             {
-                case LeaderSort.SuccessCount:
+                case LeaderSorts.SuccessCount:
                     leaders = leaders.OrderByDescending(l => l.SuccessCount).ToList();
                     break;
-                case LeaderSort.BestTime:
+                case LeaderSorts.BestTime:
                     leaders = leaders.OrderBy(l => l.BestTime.TotalMinutes).ToList();
                     break;
-                case LeaderSort.TotalPoints:
+                case LeaderSorts.TotalPoints:
                     leaders = leaders.OrderByDescending(l => l.TotalPoints).ToList();
                     break;
             }

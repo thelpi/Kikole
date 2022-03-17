@@ -13,7 +13,7 @@ namespace KikoleApi.Models.Requests
 
         public int SourcePoints { get; set; }
 
-        internal abstract ProposalType ProposalType { get; }
+        internal abstract ProposalTypes ProposalType { get; }
 
         internal virtual string GetTip(PlayerDto player)
         {

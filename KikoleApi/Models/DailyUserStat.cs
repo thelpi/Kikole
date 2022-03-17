@@ -2,7 +2,7 @@
 
 namespace KikoleApi.Models
 {
-    public class SingleUserStat
+    public class DailyUserStat
     {
         public DateTime Date { get; set; }
 

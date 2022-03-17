@@ -12,7 +12,7 @@ namespace KikoleApi.Models.Requests
 
         public ushort YearOfBirth { get; set; }
         
-        public Country Country { get; set; }
+        public Countries Country { get; set; }
 
         public DateTime? ProposalDate { get; set; }
 
@@ -22,7 +22,7 @@ namespace KikoleApi.Models.Requests
 
         public string Clue { get; set; }
 
-        public Position Position { get; set; }
+        public Positions Position { get; set; }
 
         public bool SetLatestProposalDate { get; set; }
 
@@ -31,10 +31,10 @@ namespace KikoleApi.Models.Requests
             if (string.IsNullOrWhiteSpace(Name))
                 return "Invalid name";
 
-            if (!Enum.IsDefined(typeof(Country), Country))
+            if (!Enum.IsDefined(typeof(Countries), Country))
                 return "Invalid country";
 
-            if (!Enum.IsDefined(typeof(Position), Position))
+            if (!Enum.IsDefined(typeof(Positions), Position))
                 return "Invalid position";
 
             if (YearOfBirth < 1900 || YearOfBirth > 2100)

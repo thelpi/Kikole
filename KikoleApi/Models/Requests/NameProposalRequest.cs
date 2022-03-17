@@ -2,6 +2,6 @@
 {
     public class NameProposalRequest : BaseProposalRequest
     {
-        internal override ProposalType ProposalType => ProposalType.Name;
+        internal override ProposalTypes ProposalType => ProposalTypes.Name;
     }
 }

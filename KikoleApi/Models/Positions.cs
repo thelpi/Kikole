@@ -1,6 +1,6 @@
 ﻿namespace KikoleApi.Models
 {
-    public enum Position
+    public enum Positions
     {
         Goalkeeper = 1,
         Defender,

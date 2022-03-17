@@ -106,10 +106,10 @@ namespace KikoleApi.Controllers
         // TODO: reset password with q&a
 
         [HttpGet("{userId}/stats")]
-        [ProducesResponseType(typeof(UserStats), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(UserStat), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<UserStats>> GetUserStats(ulong userId)
+        public async Task<ActionResult<UserStat>> GetUserStats(ulong userId)
         {
             if (userId == 0)
                 return BadRequest();
@@ -121,7 +121,7 @@ namespace KikoleApi.Controllers
             if (user == null)
                 return NotFound();
 
-            var stats = new List<SingleUserStat>();
+            var stats = new List<DailyUserStat>();
 
             var currentDate = ProposalChart.Default.FirstDate.Date;
             var now = _clock.Now.Date;
@@ -141,7 +141,7 @@ namespace KikoleApi.Controllers
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
-                var singleStat = new SingleUserStat
+                var singleStat = new DailyUserStat
                 {
                     Date = currentDate,
                     Answer = pDay.Name,
@@ -162,7 +162,7 @@ namespace KikoleApi.Controllers
                 currentDate = currentDate.AddDays(1);
             }
 
-            var us = new UserStats
+            var us = new UserStat
             {
                 Attempts = stats.Count(s => s.Attempt),
                 AverageTime = stats.Where(s => s.Time.HasValue).Select(s => s.Time.Value).Average(),
