@@ -37,7 +37,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
 
             await ExecuteNonQueryAsync(
-                    "UPDATE badges SET users = users + 1 WHEN id = @id",
+                    "UPDATE badges SET users = users + 1 WHERE id = @id",
                     new { id = userBadge.BadgeId })
                 .ConfigureAwait(false);
         }

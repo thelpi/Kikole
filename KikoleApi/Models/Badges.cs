@@ -5,7 +5,7 @@
         YourFirstSuccess = 3,
         YourActualFirstSuccess,
         HalfwayToTheTop,
-        ItsOVER9000,
+        ItsOver900,
         Archaeology,
         ThreeInARow,
         AWeekInARow,
