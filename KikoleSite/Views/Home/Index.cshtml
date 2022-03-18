@@ -1,7 +1,7 @@
 ﻿@model HomeModel
 <div>
     @*<div style="margin-top: 20px; color:crimson; font-size: large">
-        Le site étant toujours en construction, des erreurs peuvent se produire. Merci de votre compréhension !
+        Message personnel : bon anniversaire à l'utilisateur "cyril rool" !
     </div>*@
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
@@ -104,6 +104,7 @@
                                     },
                                     select: function (e, i) {
                                         $("#clubName").val(i.item.value);
+                                        $("#submitClub").click();
                                     },
                                     minLength: 1
                                 });
@@ -126,6 +127,7 @@
                                 }
                             </ul>
                         </div>
+                        <div style="font-size: small">(ordered from older to newer)</div>
                         <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
                     }
                 </fieldset>

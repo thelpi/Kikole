@@ -28,7 +28,8 @@ namespace KikoleSite.Controllers
             GetClubs();
         }
 
-        public async Task<IActionResult> Index([FromQuery] int? day)
+        public async Task<IActionResult> Index(
+            [FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
             var (token, login) = this.GetAuthenticationCookie();
 
@@ -62,6 +63,12 @@ namespace KikoleSite.Controllers
 
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
+            if (!string.IsNullOrWhiteSpace(errorMessageForced))
+            {
+                model.IsErrorMessage = true;
+                model.MessageToDisplay = errorMessageForced;
+            }
+
             return ViewWithFullModel(model, login, clue);
         }
 
@@ -78,6 +85,11 @@ namespace KikoleSite.Controllers
             }
 
             var value = model.GetValueFromProposalType(proposalType);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return await Index(model.CurrentDay, "Invalid request")
+                    .ConfigureAwait(false);
+            }
 
             model = GetCookieModelOrDefault(model);
 
