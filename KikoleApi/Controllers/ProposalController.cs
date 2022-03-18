@@ -146,7 +146,7 @@ namespace KikoleApi.Controllers
                             playerOfTheDay,
                             playerClubs,
                             playerClubsDetails)
-                        .WithTotalPoints(totalPoints);
+                        .WithTotalPoints(totalPoints, false);
                     totalPoints = pr.TotalPoints;
                     if (pr.IsWin && !indexOfEnd.HasValue)
                     {
@@ -198,27 +198,37 @@ namespace KikoleApi.Controllers
             }
 
             var response = new ProposalResponse(
-                    request, 
-                    playerOfTheDay,
-                    playerClubs,
-                    playerClubsDetails)
-                .WithTotalPoints(request.SourcePoints);
-            
-            await _proposalRepository
-                .CreateProposalAsync(request.ToDto(userId, response.Successful))
+                request,
+                playerOfTheDay,
+                playerClubs,
+                playerClubsDetails);
+
+            var reqDto = request.ToDto(userId, response.Successful);
+
+            var proposalMade = await _proposalRepository
+                .ExistProposalAsync(reqDto)
                 .ConfigureAwait(false);
 
-            if (response.IsWin && request.DaysBefore == 0)
+            response = response.WithTotalPoints(request.SourcePoints, proposalMade);
+
+            if (!proposalMade)
             {
-                await _leaderRepository
-                    .CreateLeaderAsync(new LeaderDto
-                    {
-                        Points = (ushort)response.TotalPoints,
-                        ProposalDate = request.ProposalDate,
-                        Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
-                        UserId = userId
-                    })
+                await _proposalRepository
+                    .CreateProposalAsync(reqDto)
                     .ConfigureAwait(false);
+
+                if (response.IsWin && request.DaysBefore == 0)
+                {
+                    await _leaderRepository
+                        .CreateLeaderAsync(new LeaderDto
+                        {
+                            Points = (ushort)response.TotalPoints,
+                            ProposalDate = request.ProposalDate,
+                            Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
+                            UserId = userId
+                        })
+                        .ConfigureAwait(false);
+                }
             }
 
             return Ok(response);

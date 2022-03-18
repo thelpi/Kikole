@@ -100,9 +100,9 @@ namespace KikoleApi.Models
             : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, playerClubs, clubs)
         { }
 
-        internal ProposalResponse WithTotalPoints(int sourcePoints)
+        internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)
         {
-            TotalPoints = Math.Max(0, sourcePoints - LostPoints);
+            TotalPoints = Math.Max(0, sourcePoints - (duplicate ? 0 : LostPoints));
             return this;
         }
     }
