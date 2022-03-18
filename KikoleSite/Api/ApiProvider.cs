@@ -230,6 +230,25 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
+        public async Task<string> CreateClubAsync(string name,
+            IReadOnlyList<string> allowedNames, string authToken)
+        {
+            var response = await SendAsync(
+                    "clubs",
+                    HttpMethod.Post,
+                    authToken,
+                    new
+                    {
+                        name,
+                        allowedNames
+                    })
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"StatusCode: {response.StatusCode}";
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)
