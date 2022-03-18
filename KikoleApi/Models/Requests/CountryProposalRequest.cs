@@ -9,6 +9,9 @@ namespace KikoleApi.Models.Requests
 
         internal override string IsValid()
         {
+            if (Value == null)
+                return "Invalid value";
+
             if (int.TryParse(Value, out var countryId))
             {
                 if (!Enum.GetValues(typeof(Countries)).Cast<int>().Contains(countryId))

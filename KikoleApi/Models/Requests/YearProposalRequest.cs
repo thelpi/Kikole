@@ -13,6 +13,9 @@ namespace KikoleApi.Models.Requests
 
         internal override string IsValid()
         {
+            if (Value == null)
+                return "Invalid value";
+
             if (!ushort.TryParse(Value, out _))
                 return "Invalid value";
 
