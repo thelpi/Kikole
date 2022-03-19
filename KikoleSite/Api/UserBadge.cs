@@ -4,8 +4,6 @@ namespace KikoleSite.Api
 {
     public class UserBadge
     {
-        public Badges Badge { get; set; }
-
         public DateTime GetDate { get; set; }
 
         public string Name { get; set; }
