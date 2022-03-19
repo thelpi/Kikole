@@ -30,6 +30,12 @@ namespace KikoleSite.Models
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }
 
+        public IReadOnlyList<string> IncorrectClubs { get; set; }
+        public IReadOnlyList<string> IncorrectCountries { get; set; }
+        public IReadOnlyList<string> IncorrectYears { get; set; }
+        public IReadOnlyList<string> IncorrectPositions { get; set; }
+        public IReadOnlyList<string> IncorrectNames { get; set; }
+
         public int NextDay => CurrentDay - 1;
         public int PreviousDay => CurrentDay + 1;
 
@@ -80,11 +86,11 @@ namespace KikoleSite.Models
             IReadOnlyDictionary<ulong, string> positions)
         {
             Points = response.TotalPoints;
-            if (response.Successful)
+            switch (response.ProposalType)
             {
-                switch (response.ProposalType)
-                {
-                    case ProposalType.Club:
+                case ProposalType.Club:
+                    if (response.Successful)
+                    {
                         var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
                         if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
                         {
@@ -95,21 +101,61 @@ namespace KikoleSite.Models
                             });
                         }
                         KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
-                        break;
-                    case ProposalType.Country:
-                        CountryName = countries[ulong.Parse(response.Value.ToString())];
-                        break;
-                    case ProposalType.Position:
-                        Position = positions[ulong.Parse(response.Value.ToString())];
-                        break;
-                    case ProposalType.Name:
-                        PlayerName = response.Value.ToString();
-                        break;
-                    case ProposalType.Year:
-                        BirthYear = response.Value.ToString();
-                        break;
-                }
+                    }
+                    else
+                    {
+                        var clValue = response.Value.ToString();
+                        if (Helper.IsPropertyExist(response.Value, "name"))
+                            clValue = response.Value.name;
+                        IncorrectClubs = AddToList(IncorrectClubs, clValue);
+                    }
+                    break;
+                case ProposalType.Country:
+                    var cValue = response.Value.ToString();
+                    if (response.Successful)
+                        CountryName = countries[ulong.Parse(cValue)];
+                    else
+                    {
+                        if (ulong.TryParse(cValue, out ulong cId)
+                            && countries.ContainsKey(cId))
+                            cValue = countries[cId];
+                        IncorrectCountries = AddToList(IncorrectCountries, cValue);
+                    }
+                    break;
+                case ProposalType.Position:
+                    var pValue = response.Value.ToString();
+                    if (response.Successful)
+                        Position = positions[ulong.Parse(pValue)];
+                    else
+                    {
+                        if (ulong.TryParse(pValue, out ulong pId)
+                            && positions.ContainsKey(pId))
+                            pValue = positions[pId];
+                        IncorrectPositions = AddToList(IncorrectPositions, pValue);
+                    }
+                    break;
+                case ProposalType.Name:
+                    var nValue = response.Value.ToString();
+                    if (response.Successful)
+                        PlayerName = nValue;
+                    else
+                        IncorrectNames = AddToList(IncorrectNames, nValue);
+                    break;
+                case ProposalType.Year:
+                    var yValue = response.Value.ToString();
+                    if (response.Successful)
+                        BirthYear = yValue;
+                    else
+                        IncorrectYears = AddToList(IncorrectYears, yValue);
+                    break;
             }
+        }
+
+        private IReadOnlyList<string> AddToList(IReadOnlyList<string> baseList, string value)
+        {
+            var list = (baseList ?? new List<string>(1)).ToList();
+            list.Add(value);
+            return list;
         }
     }
 }

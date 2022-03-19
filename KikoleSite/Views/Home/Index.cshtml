@@ -130,7 +130,16 @@
                         <div style="font-size: small">(ordered from older to newer)</div>
                         <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
                     }
-                </fieldset>
+                    @if (Model.IncorrectClubs?.Count > 0)
+                    {
+                        <div style="margin-top: 10px">
+                            @foreach (var iClub in Model.IncorrectClubs)
+                            {
+                                <div style="font-size: small; text-decoration: line-through">@iClub</div>
+                            }
+                        </div>
+                    }
+                    </fieldset>
             </form>
             <form method="post" action="/">
                 <div style="margin-top: 30px">
@@ -171,6 +180,15 @@
                             <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden" />
                         </div>
                         <div style="font-size: small">(it's the nationality, not the national team he plays or played)</div>
+                        @if (Model.IncorrectCountries?.Count > 0)
+                        {
+                            <div style="margin-top: 10px">
+                                @foreach (var iCountry in Model.IncorrectCountries)
+                                {
+                                    <div style="font-size: small; text-decoration: line-through">@iCountry</div>
+                                }
+                            </div>
+                        }
                     }
                     else
                     {
@@ -200,6 +218,15 @@
                             @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
                             <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden" />
                         </div>
+                        @if (Model.IncorrectPositions?.Count > 0)
+                        {
+                            <div style="margin-top: 10px">
+                                @foreach (var iPosition in Model.IncorrectPositions)
+                                {
+                                    <div style="font-size: small; text-decoration: line-through">@iPosition</div>
+                                }
+                            </div>
+                        }
                     }
                     else
                     {
@@ -235,6 +262,15 @@
                             <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
                             <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden" />
                         </div>
+                        @if (Model.IncorrectYears?.Count > 0)
+                        {
+                            <div style="margin-top: 10px">
+                                @foreach (var iYear in Model.IncorrectYears)
+                                {
+                                    <div style="font-size: small; text-decoration: line-through">@iYear</div>
+                                }
+                            </div>
+                        }
                     }
                     else
                     {
@@ -254,6 +290,15 @@
                         <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
                     </div>
                 </div>
+                @if (Model.IncorrectNames?.Count > 0)
+                {
+                    <div style="margin-top: 10px">
+                        @foreach (var iName in Model.IncorrectNames)
+                        {
+                            <div style="font-size: small; text-decoration: line-through">@iName</div>
+                        }
+                    </div>
+                }
             </form>
         }
     }
