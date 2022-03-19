@@ -10,8 +10,10 @@ namespace KikoleApi.Interfaces
 
         Task InsertUserBadgeAsync(UserBadgeDto userBadge);
 
-        Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadge(ulong badgeId);
+        Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadgeAsync(ulong badgeId);
 
-        Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadges(ulong userId);
+        Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadgesAsync(ulong userId);
+
+        Task ResetBadgeDatasAsync(ulong badgeId);
     }
 }

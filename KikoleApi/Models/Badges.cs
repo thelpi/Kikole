@@ -14,5 +14,8 @@
         CacaCaféClopeKikolé,
         OverTheTopPart1,
         OverTheTopPart2,
+        ItsAFuckingDisgrace,
+        ThirdWaveFeminism,
+        LegendTier
     }
 }

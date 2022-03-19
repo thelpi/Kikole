@@ -16,6 +16,8 @@ namespace KikoleApi.Models.Dtos
 
         public string Clue { get; set; }
 
+        public ulong? BadgeId { get; set; }
+
         public ulong PositionId { get; set; }
     }
 }

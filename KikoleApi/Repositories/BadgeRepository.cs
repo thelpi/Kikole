@@ -19,7 +19,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadge(ulong badgeId)
+        public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadgeAsync(ulong badgeId)
         {
             return await GetDtosAsync<UserBadgeDto>(
                     "user_badges",
@@ -42,11 +42,24 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadges(ulong userId)
+        public async Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadgesAsync(ulong userId)
         {
             return await GetDtosAsync<UserBadgeDto>(
                     "user_badges",
                     ("user_id", userId))
+                .ConfigureAwait(false);
+        }
+
+        public async Task ResetBadgeDatasAsync(ulong badgeId)
+        {
+            await ExecuteNonQueryAsync(
+                    "DELETE FROM user_badges WHERE badge_id = @badgeId",
+                    new { badgeId })
+                .ConfigureAwait(false);
+
+            await ExecuteNonQueryAsync(
+                    "UPDATE badges SET users = 0 WHERE id = @badgeId",
+                    new { badgeId })
                 .ConfigureAwait(false);
         }
     }

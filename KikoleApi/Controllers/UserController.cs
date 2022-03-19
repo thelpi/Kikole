@@ -56,7 +56,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             var uBadges = await _badgeRepository
-                .GetUserBadges(userId)
+                .GetUserBadgesAsync(userId)
                 .ConfigureAwait(false);
 
             var badgesFull = uBadges
@@ -148,7 +148,7 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(UserStat), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<UserStat>> GetUserStats(ulong userId)
+        public async Task<ActionResult<UserStat>> GetUserStatsAsync(ulong userId)
         {
             if (userId == 0)
                 return BadRequest();
@@ -218,6 +218,159 @@ namespace KikoleApi.Controllers
             };
 
             return Ok(us);
+        }
+
+        [HttpPut("/badges")]
+        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> RecomputeBadgesAsync()
+        {
+            var badges = Enum.GetValues(typeof(Badges)).Cast<Badges>();
+
+            foreach (var badge in badges)
+            {
+                await _badgeRepository
+                    .ResetBadgeDatasAsync((ulong)badge)
+                    .ConfigureAwait(false);
+            }
+
+            var currentDate = ProposalChart.Default.FirstDate.Date;
+            while (currentDate <= _clock.Now.Date)
+            {
+                var leaders = await _leaderRepository
+                    .GetLeadersAtDateAsync(currentDate)
+                    .ConfigureAwait(false);
+
+                var playerOfTheDay = await _playerRepository
+                    .GetPlayerOfTheDayAsync(currentDate)
+                    .ConfigureAwait(false);
+
+                if (playerOfTheDay.YearOfBirth < 1970)
+                {
+                    var usersWithbadge = await _badgeRepository
+                        .GetUsersWithBadgeAsync((ulong)Badges.Archaeology)
+                        .ConfigureAwait(false);
+
+                    foreach (var leader in leaders)
+                    {
+                        await CheckUserForBadgeAsync(
+                                currentDate, Badges.Archaeology, usersWithbadge, leader.UserId)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                if (playerOfTheDay.BadgeId.HasValue)
+                {
+                    var usersWithbadge = await _badgeRepository
+                       .GetUsersWithBadgeAsync(playerOfTheDay.BadgeId.Value)
+                       .ConfigureAwait(false);
+
+                    foreach (var leader in leaders)
+                    {
+                        await CheckUserForBadgeAsync(
+                                currentDate, (Badges)playerOfTheDay.BadgeId.Value, usersWithbadge, leader.UserId)
+                            .ConfigureAwait(false);
+                    }
+                }
+                
+                var oldLeaders = new List<IReadOnlyCollection<LeaderDto>>();
+                for (var i = 1; i <= 29; i++)
+                {
+                    var leadersBefore = await _leaderRepository
+                        .GetLeadersAtDateAsync(currentDate.AddDays(-i))
+                        .ConfigureAwait(false);
+                    oldLeaders.Add(leadersBefore);
+                }
+
+                var badgeCondition = new Dictionary<Badges, Func<LeaderDto, bool>>
+                {
+                    {
+                        Badges.CacaCaféClopeKikolé,
+                        l => new TimeSpan(0, l.Time, 0).Hours >= 5 && new TimeSpan(0, l.Time, 0).Hours < 8
+                    },
+                    {
+                        Badges.HalfwayToTheTop,
+                        l => l.Points >= 500
+                    },
+                    {
+                        Badges.ItsOver900,
+                        l => l.Points >= 900
+                    },
+                    {
+                        Badges.SavedByTheBell,
+                        l => new TimeSpan(0, l.Time, 0).Hours == 23
+                    },
+                    {
+                        Badges.StayUpLate,
+                        l => new TimeSpan(0, l.Time, 0).Hours < 2
+                    },
+                    {
+                        Badges.YourActualFirstSuccess,
+                        l => l.Points > 0
+                    },
+                    {
+                        Badges.YourFirstSuccess,
+                        l => true
+                    },
+                    {
+                        Badges.OverTheTopPart1,
+                        l => l.Time == leaders.Min(_ => _.Time)
+                    },
+                    {
+                        Badges.OverTheTopPart2,
+                        l => l.Points == leaders.Min(_ => _.Points)
+                    },
+                    {
+                        Badges.ThreeInARow,
+                        l => oldLeaders.Take(2).All(ol => ol.Select(_ => _.UserId).Contains(l.UserId))
+                    },
+                    {
+                        Badges.AWeekInARow,
+                        l => oldLeaders.Take(3).All(ol => ol.Select(_ => _.UserId).Contains(l.UserId))
+                    },
+                    {
+                        Badges.LegendTier,
+                        l => oldLeaders.Count >= 29 && oldLeaders.Take(29).All(ol => ol.Select(_ => _.UserId).Contains(l.UserId))
+                    }
+                };
+
+                foreach (var badge in badges)
+                {
+                    var usersWithbadge = await _badgeRepository
+                        .GetUsersWithBadgeAsync((ulong)badge)
+                        .ConfigureAwait(false);
+
+                    if (badgeCondition.ContainsKey(badge))
+                    {
+                        foreach (var leader in leaders.Where(l => badgeCondition[badge](l)))
+                        {
+                            await CheckUserForBadgeAsync(
+                                    currentDate, badge, usersWithbadge, leader.UserId)
+                                .ConfigureAwait(false);
+                        }
+                    }
+                }
+
+                currentDate = currentDate.AddDays(1).Date;
+            }
+
+            return NoContent();
+        }
+
+        private async Task CheckUserForBadgeAsync(DateTime yesterday, Badges badge, IEnumerable<UserBadgeDto> usersWithbadge, ulong userId)
+        {
+            if (!usersWithbadge.Any(u => u.UserId == userId))
+            {
+                await _badgeRepository
+                    .InsertUserBadgeAsync(new UserBadgeDto
+                    {
+                        GetDate = yesterday,
+                        BadgeId = (ulong)badge,
+                        UserId = userId
+                    })
+                    .ConfigureAwait(false);
+            }
         }
 
         private static int? GetUserPositionInLeaders(ulong userId,

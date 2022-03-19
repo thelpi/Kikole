@@ -7,5 +7,7 @@
         public string Description { get; set; }
 
         public ulong Users { get; set; }
+
+        public byte Hidden { get; set; }
     }
 }
