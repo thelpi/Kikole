@@ -42,7 +42,7 @@ namespace KikoleApi.Models
                         Successful = player.AllowedNames.ContainsSanitized(sourceValue);
                     Value = Successful
                         ? player.Name
-                        : null;
+                        : sourceValue;
                     break;
 
                 case ProposalTypes.Club:
@@ -51,7 +51,7 @@ namespace KikoleApi.Models
                         Successful = c != null;
                     Value = Successful
                         ? new PlayerClub(c, playerClubs.First(_ => _.ClubId == c.Id))
-                        : null;
+                        : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Country:
@@ -59,7 +59,7 @@ namespace KikoleApi.Models
                         Successful = player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
                     Value = Successful
                         ? player.CountryId
-                        : default(ulong?);
+                        : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Position:
@@ -67,7 +67,7 @@ namespace KikoleApi.Models
                         Successful = player.PositionId == ulong.Parse(sourceValue);
                     Value = Successful
                         ? player.PositionId
-                        : default(ulong?);
+                        : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Year:
@@ -75,7 +75,7 @@ namespace KikoleApi.Models
                         Successful = ushort.Parse(sourceValue) == player.YearOfBirth;
                     Value = Successful
                         ? player.YearOfBirth.ToString()
-                        : null;
+                        : sourceValue;
                     break;
             }
             
