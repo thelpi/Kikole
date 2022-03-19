@@ -1,7 +1,116 @@
-﻿
-@{
-    ViewData["Title"] = "Index";
+﻿@model PlayerCreationModel
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div style="color:crimson; margin-top: 10px">Error: @Model.ErrorMessage</div>
+}
+else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
+{
+    <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
-<h2>Index</h2>
+    <form method="post" action="/Admin">
+        <div style="margin-top: 20px">
+            <div>Name</div>
+            <input type="text" name="Name" style="width: 250px" />
+        </div>
 
+        @for (var i = 0; i < 10; i++)
+        {
+            var name = $"AlternativeName{i}";
+            <div style="margin-top: 5px">
+                <input type="text" name="@name" style="width: 250px" />
+            </div>
+        }
+
+        <div style="margin-top: 20px">
+            <div>Year of birth</div>
+            <input type="text" name="YearOfBirth" style="width: 100px" />
+        </div>
+
+        <div style="margin-top: 20px">
+            <div>Nationality</div>
+            <script>
+                $(function () {
+                    $("#countryName").autocomplete({
+                        source: function (request, response) {
+                            $.ajax({
+                                url: '/Admin/AutoCompleteCountries/',
+                                data: {
+                                    "prefix": request.term
+                                    // add languageID here
+                                },
+                                type: "POST",
+                                success: function (data) {
+                                    response($.map(data, function (item) {
+                                        return item;
+                                    }))
+                                }
+                            });
+                        },
+                        select: function (e, i) {
+                            $("#countryId").val(i.item.key);
+                            $("#submitCountry").click();
+                        },
+                        minLength: 1
+                    });
+                });
+            </script>
+            <div>
+                <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
+                <input type="hidden" id="countryId" name="Country" />
+            </div>
+        </div>
+
+        <div style="margin-top: 20px">
+            <div>Clue</div>
+            <input type="text" name="Clue" style="width: 300px" />
+        </div>
+
+        <div style="margin-top: 20px">
+            <div>Position</div>
+            @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
+        </div>
+
+        <div style="margin-top: 20px">
+            <div>Clubs</div>
+            <div>
+                <a href="/Admin/Club" target="_blank">Add club (new tab)</a>
+            </div>
+            @for (var i = 0; i < 10; i++)
+            {
+                var name = $"Club{i}";
+                <script>
+                    $(function () {
+                        $("#@name").autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '/Admin/AutoCompleteClubs/',
+                                    data: {
+                                        "prefix": request.term
+                                    },
+                                    type: "POST",
+                                    success: function (data) {
+                                        response($.map(data, function (item) {
+                                            return item;
+                                        }))
+                                    }
+                                });
+                            },
+                            select: function (e, i) {
+                                $("#@name").val(i.item.value);
+                            },
+                            minLength: 1
+                        });
+                    });
+                </script>
+                <div style="margin-top: 5px">
+                    <input type="text" id="@name" name="@name" style="width: 250px" />
+                </div>
+            }
+        </div>
+
+        <div style="margin-top: 10px">
+            <input type="submit" name="submit-club" value="Create player" />
+        </div>
+    </form>

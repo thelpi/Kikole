@@ -249,6 +249,21 @@ namespace KikoleSite.Api
                 : $"StatusCode: {response.StatusCode}";
         }
 
+        public async Task<string> CreatePlayerAsync(
+            PlayerRequest player, string authToken)
+        {
+            var response = await SendAsync(
+                    "players",
+                    HttpMethod.Post,
+                    authToken,
+                    player)
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"StatusCode: {response.StatusCode}";
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null,
             object content = null)

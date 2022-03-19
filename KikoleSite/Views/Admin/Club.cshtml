@@ -9,53 +9,53 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
-    <form method="post" action="/Admin/Club">
-        <div style="margin-top: 20px">
-            <div>Main name</div>
-            <input type="text" name="MainName" style="width: 250px" />
+<form method="post" action="/Admin/Club">
+    <div style="margin-top: 20px">
+        <div>Main name</div>
+        <input type="text" name="MainName" style="width: 250px" />
+    </div>
+    @for (var i = 0; i < 10; i++)
+    {
+        var display = $"Alt name {(i + 1)}";
+        var name = $"AlternativeName{i}";
+        <div style="margin-top: 5px">
+            <div>@display</div>
+            <input type="text" name="@name" style="width: 250px" />
         </div>
-        @for (var i = 0; i < 10; i++)
-        {
-            var display = $"Alt name {(i + 1)}";
-            var name = $"AlternativeName{i}";
-            <div style="margin-top: 5px">
-                <div>@display</div>
-                <input type="text" name="@name" style="width: 250px" />
-            </div>
-        }
-        <div style="margin-top: 10px">
-            <input type="submit" name="submit-club" value="Create club" />
+    }
+    <div style="margin-top: 10px">
+        <input type="submit" name="submit-club" value="Create club" />
+    </div>
+    <div style="margin-top: 20px">
+        <div>
+            <label>Checks an existing club:</label>
         </div>
-        <div style="margin-top: 20px">
-            <div>
-                <label>Checks an existing club:</label>
-            </div>
-            <script>
-                $(function () {
-                    $("#clubName").autocomplete({
-                        source: function (request, response) {
-                            $.ajax({
-                                url: '/Admin/AutoCompleteClubs/',
-                                data: {
-                                    "prefix": request.term
-                                },
-                                type: "POST",
-                                success: function (data) {
-                                    response($.map(data, function (item) {
-                                        return item;
-                                    }))
-                                }
-                            });
-                        },
-                        select: function (e, i) {
-                            $("#clubName").val(i.item.value);
-                        },
-                        minLength: 1
-                    });
+        <script>
+            $(function () {
+                $("#clubName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/Admin/AutoCompleteClubs/',
+                            data: {
+                                "prefix": request.term
+                            },
+                            type: "POST",
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item;
+                                }))
+                            }
+                        });
+                    },
+                    select: function (e, i) {
+                        $("#clubName").val(i.item.value);
+                    },
+                    minLength: 1
                 });
-            </script>
-            <div>
-                <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
-            </div>
+            });
+        </script>
+        <div>
+            <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
         </div>
-    </form>
+    </div>
+</form>

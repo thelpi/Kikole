@@ -39,5 +39,7 @@ namespace KikoleSite.Api
         Task<IReadOnlyCollection<UserBadge>> GetUserBadges(ulong userId);
 
         Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames, string authToken);
+
+        Task<string> CreatePlayerAsync(PlayerRequest player, string authToken);
     }
 }
