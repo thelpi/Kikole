@@ -27,6 +27,17 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId)
+        {
+            var data = await GetDtoAsync<UserBadgeDto>(
+                    "user_badges",
+                    ("user_id", userId),
+                    ("badge_id", badgeId))
+                .ConfigureAwait(false);
+
+            return data != null;
+        }
+
         public async Task InsertUserBadgeAsync(UserBadgeDto userBadge)
         {
             await ExecuteInsertAsync(

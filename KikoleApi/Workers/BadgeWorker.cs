@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
-using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -53,26 +51,15 @@ namespace KikoleApi.Workers
                 .GetLeadersAtDateAsync(yesterday)
                 .ConfigureAwait(false);
 
-            var badgeCondition = new Dictionary<Badges, Func<LeaderDto, bool>>
-            {
-                {
-                    Badges.OverTheTopPart1,
-                    l => l.Time == leaders.Min(_ => _.Time)
-                },
-                {
-                    Badges.OverTheTopPart2,
-                    l => l.Points == leaders.Min(_ => _.Points)
-                }
-            };
-
-            foreach (var badge in badgeCondition.Keys)
+            foreach (var badge in BadgeHelper.LeadersBasedBadgeCondition.Keys)
             {
                 var usersWithbadge = await _badgeRepository
                     .GetUsersWithBadgeAsync((ulong)badge)
                     .ConfigureAwait(false);
 
                 foreach (var leader in leaders.Where(l =>
-                    badgeCondition[badge](l) && !usersWithbadge.Any(u => u.UserId == l.UserId)))
+                    BadgeHelper.LeadersBasedBadgeCondition[badge](l, leaders)
+                    && !usersWithbadge.Any(u => u.UserId == l.UserId)))
                 {
                     await _badgeRepository
                         .InsertUserBadgeAsync(new UserBadgeDto

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
@@ -14,6 +15,8 @@ namespace KikoleApi.Controllers
 {
     public class ProposalController : KikoleBaseController
     {
+        private readonly IBadgeRepository _badgeRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerRepository _playerRepository;
@@ -24,12 +27,16 @@ namespace KikoleApi.Controllers
             IPlayerRepository playerRepository,
             IClubRepository clubRepository,
             ILeaderRepository leaderRepository,
+            IBadgeRepository badgeRepository,
+            IUserRepository userRepository,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
             _leaderRepository = leaderRepository;
+            _badgeRepository = badgeRepository;
+            _userRepository = userRepository;
             _clock = clock;
         }
 
@@ -219,15 +226,72 @@ namespace KikoleApi.Controllers
 
                 if (response.IsWin && request.DaysBefore == 0)
                 {
-                    await _leaderRepository
-                        .CreateLeaderAsync(new LeaderDto
+                    var user = await _userRepository
+                        .GetUserByIdAsync(userId)
+                        .ConfigureAwait(false);
+
+                    if (user.IsAdmin == 0)
+                    {
+                        var leader = new LeaderDto
                         {
                             Points = (ushort)response.TotalPoints,
                             ProposalDate = request.ProposalDate,
                             Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
                             UserId = userId
-                        })
-                        .ConfigureAwait(false);
+                        };
+
+                        await _leaderRepository
+                            .CreateLeaderAsync(leader)
+                            .ConfigureAwait(false);
+
+                        var leadersHistory = await _leaderRepository
+                            .GetLeadersHistoryAsync(request.ProposalDate.Date, 29)
+                            .ConfigureAwait(false);
+
+                        foreach (var badge in BadgeHelper.LeaderBasedBadgeCondition.Keys)
+                        {
+                            if (BadgeHelper.LeaderBasedBadgeCondition[badge](leader, leadersHistory))
+                            {
+                                var hasBadge = await _badgeRepository
+                                    .CheckUserHasBadgeAsync(userId, (ulong)badge)
+                                    .ConfigureAwait(false);
+
+                                if (!hasBadge)
+                                {
+                                    await _badgeRepository
+                                        .InsertUserBadgeAsync(new UserBadgeDto
+                                        {
+                                            GetDate = request.ProposalDate.Date,
+                                            BadgeId = (ulong)badge,
+                                            UserId = userId
+                                        })
+                                        .ConfigureAwait(false);
+                                }
+                            }
+                        }
+
+                        foreach (var badge in BadgeHelper.PlayerBasedBadgeCondition.Keys)
+                        {
+                            if (BadgeHelper.PlayerBasedBadgeCondition[badge](playerOfTheDay))
+                            {
+                                var hasBadge = await _badgeRepository
+                                    .CheckUserHasBadgeAsync(userId, (ulong)badge)
+                                    .ConfigureAwait(false);
+
+                                if (!hasBadge)
+                                {
+                                    await _badgeRepository
+                                        .InsertUserBadgeAsync(new UserBadgeDto
+                                        {
+                                            GetDate = request.ProposalDate.Date,
+                                            BadgeId = (ulong)badge,
+                                            UserId = userId
+                                        })
+                                        .ConfigureAwait(false);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

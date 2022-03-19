@@ -12,6 +12,8 @@ namespace KikoleApi.Interfaces
 
         Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadgeAsync(ulong badgeId);
 
+        Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId);
+
         Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadgesAsync(ulong userId);
 
         Task ResetBadgeDatasAsync(ulong badgeId);
