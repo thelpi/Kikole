@@ -224,9 +224,11 @@ namespace KikoleApi.Controllers
         [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> RecomputeBadgesAsync()
+        public async Task<IActionResult> RecomputeBadgesAsync([FromQuery] Badges[] badges)
         {
-            var badges = Enum.GetValues(typeof(Badges)).Cast<Badges>();
+            badges = badges?.Length > 0
+                ? badges
+                : Enum.GetValues(typeof(Badges)).Cast<Badges>().ToArray();
 
             foreach (var badge in badges)
             {
@@ -246,32 +248,25 @@ namespace KikoleApi.Controllers
                     .GetPlayerOfTheDayAsync(currentDate)
                     .ConfigureAwait(false);
 
-                if (playerOfTheDay.YearOfBirth < 1970)
+                if (playerOfTheDay.YearOfBirth < 1970 && badges.Contains(Badges.Archaeology))
                 {
-                    var usersWithbadge = await _badgeRepository
-                        .GetUsersWithBadgeAsync((ulong)Badges.Archaeology)
+                    await CheckBadgeInternalAsync(
+                            Badges.Archaeology, currentDate, leaders, l => true)
                         .ConfigureAwait(false);
+                }
 
-                    foreach (var leader in leaders)
-                    {
-                        await CheckUserForBadgeAsync(
-                                currentDate, Badges.Archaeology, usersWithbadge, leader.UserId)
-                            .ConfigureAwait(false);
-                    }
+                if (playerOfTheDay.YearOfBirth < 1940 && badges.Contains(Badges.WorldWarTwo))
+                {
+                    await CheckBadgeInternalAsync(
+                            Badges.WorldWarTwo, currentDate, leaders, l => true)
+                        .ConfigureAwait(false);
                 }
 
                 if (playerOfTheDay.BadgeId.HasValue)
                 {
-                    var usersWithbadge = await _badgeRepository
-                       .GetUsersWithBadgeAsync(playerOfTheDay.BadgeId.Value)
-                       .ConfigureAwait(false);
-
-                    foreach (var leader in leaders)
-                    {
-                        await CheckUserForBadgeAsync(
-                                currentDate, (Badges)playerOfTheDay.BadgeId.Value, usersWithbadge, leader.UserId)
-                            .ConfigureAwait(false);
-                    }
+                    await CheckBadgeInternalAsync(
+                            (Badges)playerOfTheDay.BadgeId.Value, currentDate, leaders, l => true)
+                        .ConfigureAwait(false);
                 }
                 
                 var oldLeaders = new List<IReadOnlyCollection<LeaderDto>>();
@@ -327,7 +322,7 @@ namespace KikoleApi.Controllers
                     },
                     {
                         Badges.AWeekInARow,
-                        l => oldLeaders.Take(3).All(ol => ol.Select(_ => _.UserId).Contains(l.UserId))
+                        l => oldLeaders.Take(6).All(ol => ol.Select(_ => _.UserId).Contains(l.UserId))
                     },
                     {
                         Badges.LegendTier,
@@ -335,21 +330,11 @@ namespace KikoleApi.Controllers
                     }
                 };
 
-                foreach (var badge in badges)
+                foreach (var badge in badges.Where(b => badgeCondition.ContainsKey(b)))
                 {
-                    var usersWithbadge = await _badgeRepository
-                        .GetUsersWithBadgeAsync((ulong)badge)
+                    await CheckBadgeInternalAsync(
+                            badge, currentDate, leaders, l => badgeCondition[badge](l))
                         .ConfigureAwait(false);
-
-                    if (badgeCondition.ContainsKey(badge))
-                    {
-                        foreach (var leader in leaders.Where(l => badgeCondition[badge](l)))
-                        {
-                            await CheckUserForBadgeAsync(
-                                    currentDate, badge, usersWithbadge, leader.UserId)
-                                .ConfigureAwait(false);
-                        }
-                    }
                 }
 
                 currentDate = currentDate.AddDays(1).Date;
@@ -358,16 +343,24 @@ namespace KikoleApi.Controllers
             return NoContent();
         }
 
-        private async Task CheckUserForBadgeAsync(DateTime yesterday, Badges badge, IEnumerable<UserBadgeDto> usersWithbadge, ulong userId)
+        private async Task CheckBadgeInternalAsync(Badges badge,
+            DateTime currentDate, IReadOnlyCollection<LeaderDto> leaders,
+            Func<LeaderDto, bool> conditionToCheck)
         {
-            if (!usersWithbadge.Any(u => u.UserId == userId))
+            var usersWithbadge = await _badgeRepository
+                .GetUsersWithBadgeAsync((ulong)badge)
+                .ConfigureAwait(false);
+
+            foreach (var leader in leaders.Where(l =>
+                conditionToCheck(l)
+                && !usersWithbadge.Any(u => u.UserId == l.UserId)))
             {
                 await _badgeRepository
                     .InsertUserBadgeAsync(new UserBadgeDto
                     {
-                        GetDate = yesterday,
+                        GetDate = currentDate,
                         BadgeId = (ulong)badge,
-                        UserId = userId
+                        UserId = leader.UserId
                     })
                     .ConfigureAwait(false);
             }

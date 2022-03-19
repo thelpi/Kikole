@@ -16,6 +16,7 @@
         OverTheTopPart2,
         ItsAFuckingDisgrace,
         ThirdWaveFeminism,
-        LegendTier
+        LegendTier,
+        WorldWarTwo
     }
 }
