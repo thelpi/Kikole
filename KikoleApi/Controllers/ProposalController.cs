@@ -249,6 +249,8 @@ namespace KikoleApi.Controllers
                             }
                         }
 
+                        // TODO: duplicate code
+                        // and not a good way to filter history
                         var myHistory = leadersHistory
                             .SelectMany(lh => lh)
                             .Where(lh => lh.UserId == leader.UserId)
