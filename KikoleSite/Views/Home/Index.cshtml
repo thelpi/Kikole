@@ -80,6 +80,7 @@
                 Clue of the day: <span style="font-style:italic">@Model.Clue</span>
             </div>
             <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
                 <fieldset style="margin-top: 30px">
                     <div>
                         <div>
@@ -139,9 +140,10 @@
                             }
                         </div>
                     }
-                    </fieldset>
+                </fieldset>
             </form>
             <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
                         <label>Nationality:</label>
@@ -199,6 +201,7 @@
                 </div>
             </form>
             <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
                         <label>Position:</label>
@@ -237,6 +240,7 @@
                 </div>
             </form>
             <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
                         <label>Year of birth:</label>
@@ -281,6 +285,7 @@
                 </div>
             </form>
             <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 60px">
                     <div>
                         <label style="color:crimson">Submit your player here:</label>

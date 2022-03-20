@@ -5,14 +5,12 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
-namespace KikoleSite.Cookies
+namespace KikoleSite
 {
     internal static class CookieExtensions
     {
         const string _cryptedAuthenticationCookieName = "AccountFormCrypt";
-        const string _cryptedSubmissionFormCookieName = "SubmissionFormCrypt";
 
         const string CookiePartsSeparator = "§§§";
 
@@ -50,31 +48,6 @@ namespace KikoleSite.Cookies
             return (null, null);
         }
 
-        internal static SubmissionForm GetSubmissionFormCookie(this Controller controller)
-        {
-            var cookieValue = controller.GetCookieContent(_cryptedSubmissionFormCookieName);
-            if (cookieValue != null)
-            {
-                try
-                {
-                    return JsonConvert.DeserializeObject<SubmissionForm>(cookieValue);
-                }
-                catch
-                {
-                    // TODO: log
-                }
-            }
-
-            return null;
-        }
-
-        internal static void SetSubmissionFormCookie(this Controller controller, SubmissionForm value)
-        {
-            controller.SetCookie(_cryptedSubmissionFormCookieName,
-                JsonConvert.SerializeObject(value),
-                DateTime.Now.AddDays(1).Date);
-        }
-
         internal static void SetAuthenticationCookie(this Controller controller,
             string token,
             string login)
@@ -87,11 +60,6 @@ namespace KikoleSite.Cookies
         internal static void ResetAuthenticationCookie(this Controller controller)
         {
             controller.Response.Cookies.Delete(_cryptedAuthenticationCookieName);
-        }
-
-        internal static void ResetSubmissionFormCookie(this Controller controller)
-        {
-            controller.Response.Cookies.Delete(_cryptedSubmissionFormCookieName);
         }
 
         private static string GetCookieContent(this Controller controller,

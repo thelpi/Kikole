@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Api;
-using KikoleSite.Cookies;
 using KikoleSite.ItemDatas;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -40,33 +39,6 @@ namespace KikoleSite.Models
         public int PreviousDay => CurrentDay + 1;
 
         public HomeModel() { }
-
-        internal HomeModel(SubmissionForm submissionFormCookie)
-        {
-            BirthYear = submissionFormCookie.BirthYear;
-            CountryName = submissionFormCookie.CountryName;
-            CurrentDay = submissionFormCookie.CurrentDay;
-            KnownPlayerClubs = submissionFormCookie.KnownPlayerClubs;
-            NoPreviousDay = submissionFormCookie.NoPreviousDay;
-            PlayerName = submissionFormCookie.PlayerName;
-            Points = submissionFormCookie.Points;
-            Position = submissionFormCookie.Position;
-        }
-
-        internal SubmissionForm ToSubmissionFormCookie()
-        {
-            return new SubmissionForm
-            {
-                BirthYear = BirthYear,
-                CountryName = CountryName,
-                CurrentDay = CurrentDay,
-                KnownPlayerClubs = KnownPlayerClubs,
-                NoPreviousDay = NoPreviousDay,
-                PlayerName = PlayerName,
-                Points = Points,
-                Position = Position
-            };
-        }
 
         internal string GetValueFromProposalType(ProposalType proposalType)
         {

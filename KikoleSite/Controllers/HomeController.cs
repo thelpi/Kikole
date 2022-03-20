@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
-using KikoleSite.Cookies;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -33,14 +32,9 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = this.GetAuthenticationCookie();
 
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                this.ResetSubmissionFormCookie();
-            }
-
             var chart = GetProposalChartCache();
 
-            var model = GetCookieModelOrDefault(new HomeModel { Points = chart.BasePoints });
+            var model = new HomeModel { Points = chart.BasePoints };
             
             if (day.HasValue
                 && model.CurrentDay != day.Value
@@ -50,16 +44,13 @@ namespace KikoleSite.Controllers
                 model = new HomeModel
                 {
                     Points = chart.BasePoints,
-                    CurrentDay = day.Value,
-                    NoPreviousDay = DateTime.Now.Date.AddDays(-day.Value) == chart.FirstDate
+                    CurrentDay = day.Value
                 };
             }
 
             var proposalDate = DateTime.Now.Date.AddDays(-model.CurrentDay);
 
             await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
-
-            this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
@@ -69,7 +60,7 @@ namespace KikoleSite.Controllers
                 model.MessageToDisplay = errorMessageForced;
             }
 
-            return ViewWithFullModel(model, login, clue);
+            return ViewWithFullModel(model, login, clue, chart);
         }
 
         [HttpPost]
@@ -91,8 +82,6 @@ namespace KikoleSite.Controllers
                     .ConfigureAwait(false);
             }
 
-            model = GetCookieModelOrDefault(model);
-
             var now = DateTime.Now;
 
             var response = await _apiProvider
@@ -111,11 +100,9 @@ namespace KikoleSite.Controllers
 
             await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
 
-            this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
-
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue);
+            return ViewWithFullModel(model, login, clue, GetProposalChartCache());
         }
 
         [HttpPost]
@@ -138,7 +125,8 @@ namespace KikoleSite.Controllers
             return Json(clubs.Select(x => x.Name));
         }
 
-        private IActionResult ViewWithFullModel(HomeModel model, string login, string clue)
+        private IActionResult ViewWithFullModel(
+            HomeModel model, string login, string clue, ProposalChart chart)
         {
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }
@@ -147,6 +135,7 @@ namespace KikoleSite.Controllers
                 .ToList();
             model.Chart = GetProposalChartCache();
             model.Clue = clue;
+            model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
             return View(model);
         }
 
@@ -187,15 +176,6 @@ namespace KikoleSite.Controllers
             }
 
             return _countriesCache[languageId];
-        }
-
-        private HomeModel GetCookieModelOrDefault(HomeModel defaultModel)
-        {
-            var cookieSubForm = this.GetSubmissionFormCookie();
-
-            return cookieSubForm != null
-                ? new HomeModel(cookieSubForm)
-                : defaultModel;
         }
 
         private ProposalChart GetProposalChartCache()
