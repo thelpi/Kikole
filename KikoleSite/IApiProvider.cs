@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KikoleSite.Api;
 
-namespace KikoleSite.Api
+namespace KikoleSite
 {
     public interface IApiProvider
     {

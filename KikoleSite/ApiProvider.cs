@@ -4,10 +4,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using KikoleSite.Api;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace KikoleSite.Api
+namespace KikoleSite
 {
     public class ApiProvider : IApiProvider
     {
