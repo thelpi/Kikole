@@ -221,7 +221,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("/badges")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> RecomputeBadgesAsync([FromQuery] Badges[] badges)
