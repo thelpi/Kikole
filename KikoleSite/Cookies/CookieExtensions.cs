@@ -11,39 +11,33 @@ namespace KikoleSite.Cookies
 {
     internal static class CookieExtensions
     {
-        const string _authenticationCookieName = "AccountForm";
-        const string _submissionFormCookieName = "SubmissionForm";
         const string _cryptedAuthenticationCookieName = "AccountFormCrypt";
         const string _cryptedSubmissionFormCookieName = "SubmissionFormCrypt";
 
         const string CookiePartsSeparator = "§§§";
 
-        static readonly DateTime SwitchDate = Startup.StaticConfig.GetValue<DateTime>("EncryptionCookieDateSwitch");
         static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
-
-        static bool CookiesAreCrypted => DateTime.Now >= SwitchDate;
 
         internal static void SetCookie(this Controller controller,
             string cookieName,
             string cookieValue,
             DateTime expiration)
         {
-            if (CookiesAreCrypted)
-                cookieValue = cookieValue.Encrypt();
-
             controller.Response.Cookies.Delete(cookieName);
-            var option = new CookieOptions
-            {
-                Expires = expiration,
-                IsEssential = true,
-                Secure = false
-            };
-            controller.Response.Cookies.Append(cookieName, cookieValue, option);
+            controller.Response.Cookies.Append(
+                cookieName,
+                cookieValue.Encrypt(),
+                    new CookieOptions
+                {
+                    Expires = expiration,
+                    IsEssential = true,
+                    Secure = false
+                });
         }
 
         internal static (string token, string login) GetAuthenticationCookie(this Controller controller)
         {
-            var cookieValue = controller.GetCookieContent(GetAuthenticationCookieName());
+            var cookieValue = controller.GetCookieContent(_cryptedAuthenticationCookieName);
             if (cookieValue != null)
             {
                 var cookieParts = cookieValue.Split(CookiePartsSeparator);
@@ -58,7 +52,7 @@ namespace KikoleSite.Cookies
 
         internal static SubmissionForm GetSubmissionFormCookie(this Controller controller)
         {
-            var cookieValue = controller.GetCookieContent(GetSubmissionFormCookieName());
+            var cookieValue = controller.GetCookieContent(_cryptedSubmissionFormCookieName);
             if (cookieValue != null)
             {
                 try
@@ -76,7 +70,7 @@ namespace KikoleSite.Cookies
 
         internal static void SetSubmissionFormCookie(this Controller controller, SubmissionForm value)
         {
-            controller.SetCookie(GetSubmissionFormCookieName(),
+            controller.SetCookie(_cryptedSubmissionFormCookieName,
                 JsonConvert.SerializeObject(value),
                 DateTime.Now.AddDays(1).Date);
         }
@@ -85,43 +79,27 @@ namespace KikoleSite.Cookies
             string token,
             string login)
         {
-            controller.SetCookie(GetAuthenticationCookieName(),
+            controller.SetCookie(_cryptedAuthenticationCookieName,
                 $"{token}{CookiePartsSeparator}{login}",
                 DateTime.Now.AddMonths(1));
         }
 
         internal static void ResetAuthenticationCookie(this Controller controller)
         {
-            controller.Response.Cookies.Delete(GetAuthenticationCookieName());
+            controller.Response.Cookies.Delete(_cryptedAuthenticationCookieName);
         }
 
         internal static void ResetSubmissionFormCookie(this Controller controller)
         {
-            controller.Response.Cookies.Delete(GetSubmissionFormCookieName());
+            controller.Response.Cookies.Delete(_cryptedSubmissionFormCookieName);
         }
 
         private static string GetCookieContent(this Controller controller,
             string cookieName)
         {
-            if (!controller.Request.Cookies.TryGetValue(cookieName, out string cookieValue))
-                return null;
-            if (CookiesAreCrypted)
-                cookieValue = cookieValue.Decrypt();
-            return cookieValue;
-        }
-
-        private static string GetAuthenticationCookieName()
-        {
-            return CookiesAreCrypted
-                ? _cryptedAuthenticationCookieName
-                : _authenticationCookieName;
-        }
-
-        private static string GetSubmissionFormCookieName()
-        {
-            return CookiesAreCrypted
-                ? _cryptedSubmissionFormCookieName
-                : _submissionFormCookieName;
+            return controller.Request.Cookies.TryGetValue(cookieName, out string cookieValue)
+                ? cookieValue.Decrypt()
+                : null;
         }
 
         private static string Encrypt(this string plainText)
