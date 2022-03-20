@@ -9,7 +9,7 @@ namespace KikoleSite
     {
         Task<string> CreateAccountAsync(string login, string password, string question, string answer);
 
-        Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate, string value, int daysBefore, ProposalType proposalType, string authToken, int sourcePoints);
+        Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate, string value, int daysBefore, ProposalType proposalType, string authToken);
 
         Task<(bool, string)> LoginAsync(string login, string password);
 

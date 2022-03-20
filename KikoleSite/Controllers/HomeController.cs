@@ -83,8 +83,7 @@ namespace KikoleSite.Controllers
             var response = await _apiProvider
                 .SubmitProposalAsync(now, value, model.CurrentDay,
                     proposalType,
-                    token,
-                    model.Points)
+                    token)
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;

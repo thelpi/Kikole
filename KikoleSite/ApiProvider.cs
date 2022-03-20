@@ -72,8 +72,7 @@ namespace KikoleSite
             string value,
             int daysBefore,
             ProposalType proposalType,
-            string authToken,
-            int sourcePoints)
+            string authToken)
         {
             var response = await SendAsync(
                     $"{proposalType.ToString().ToLowerInvariant()}-proposals",
@@ -83,8 +82,7 @@ namespace KikoleSite
                     {
                         proposalDate,
                         value,
-                        daysBefore,
-                        sourcePoints
+                        daysBefore
                     })
                 .ConfigureAwait(false);
             

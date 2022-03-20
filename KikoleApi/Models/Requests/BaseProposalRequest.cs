@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models.Requests
@@ -10,8 +12,6 @@ namespace KikoleApi.Models.Requests
         public uint DaysBefore { get; set; }
 
         public string Value { get; set; }
-
-        public int SourcePoints { get; set; }
 
         internal abstract ProposalTypes ProposalType { get; }
 
@@ -42,5 +42,13 @@ namespace KikoleApi.Models.Requests
         }
 
         internal DateTime PlayerSubmissionDate => ProposalDate.AddDays(-DaysBefore);
+
+        internal bool MatchAny(IEnumerable<ProposalDto> proposals)
+        {
+            // Assume date and user OK
+            return proposals.Any(p =>
+                p.ProposalTypeId == (ulong)ProposalType
+                && p.Value == Value);
+        }
     }
 }

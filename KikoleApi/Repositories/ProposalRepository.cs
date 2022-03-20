@@ -71,25 +71,5 @@ namespace KikoleApi.Repositories
                     })
                 .ConfigureAwait(false);
         }
-
-        public async Task<bool> ExistProposalAsync(ProposalDto proposal)
-        {
-            var count = await ExecuteScalarAsync<int>(
-                    "SELECT COUNT(*) FROM proposals " +
-                    "WHERE user_id = @user_id AND proposal_type_id = @proposal_type_id " +
-                    "AND value = @value AND DATE(proposal_date) = @proposal_date " +
-                    "AND days_before = @days_before",
-                    new
-                    {
-                        user_id = proposal.UserId,
-                        proposal_type_id = proposal.ProposalTypeId,
-                        value = proposal.Value,
-                        proposal_date = proposal.ProposalDate.Date,
-                        days_before = proposal.DaysBefore
-                    })
-                .ConfigureAwait(false);
-
-            return count > 0;
-        }
     }
 }

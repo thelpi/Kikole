@@ -141,36 +141,11 @@ namespace KikoleApi.Controllers
                 playerClubsDetails.Add(c);
             }
 
-            int totalPoints = ProposalChart.Default.BasePoints;
-            int? indexOfEnd = null;
-            int currentIndex = 0;
-            var proposals = datas
-                .OrderBy(pDto => pDto.CreationDate)
-                .Select(pDto =>
-                {
-                    var pr = new ProposalResponse(
-                            pDto,
-                            playerOfTheDay,
-                            playerClubs,
-                            playerClubsDetails)
-                        .WithTotalPoints(totalPoints, false);
-                    totalPoints = pr.TotalPoints;
-                    if (pr.IsWin && !indexOfEnd.HasValue)
-                    {
-                        indexOfEnd = currentIndex;
-                    }
-                    currentIndex++;
-                    return pr;
-                })
-                .ToList();
-
-            if (indexOfEnd.HasValue)
-            {
-                for (var i = proposals.Count - 1; i > indexOfEnd.Value; i--)
-                    proposals.RemoveAt(i);
-            }
-
-            return Ok(proposals);
+            return Ok(GetProposalResponsesWithPoints(datas,
+                playerOfTheDay,
+                playerClubs,
+                playerClubsDetails,
+                out _));
         }
 
         private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request,
@@ -209,19 +184,25 @@ namespace KikoleApi.Controllers
                 playerOfTheDay,
                 playerClubs,
                 playerClubsDetails);
-
-            var reqDto = request.ToDto(userId, response.Successful);
-
-            var proposalMade = await _proposalRepository
-                .ExistProposalAsync(reqDto)
+            
+            var proposalsAlready = await _proposalRepository
+                .GetProposalsAsync(request.PlayerSubmissionDate, userId)
                 .ConfigureAwait(false);
 
-            response = response.WithTotalPoints(request.SourcePoints, proposalMade);
+            var proposalMade = request.MatchAny(proposalsAlready);
+
+            GetProposalResponsesWithPoints(proposalsAlready,
+                playerOfTheDay,
+                playerClubs,
+                playerClubsDetails,
+                out int sourcePoints);
+
+            response = response.WithTotalPoints(sourcePoints, proposalMade);
 
             if (!proposalMade)
             {
                 await _proposalRepository
-                    .CreateProposalAsync(reqDto)
+                    .CreateProposalAsync(request.ToDto(userId, response.Successful))
                     .ConfigureAwait(false);
 
                 if (response.IsWin && request.DaysBefore == 0)
@@ -296,6 +277,46 @@ namespace KikoleApi.Controllers
             }
 
             return Ok(response);
+        }
+
+        private List<ProposalResponse> GetProposalResponsesWithPoints(
+            IEnumerable<ProposalDto> proposalDtos,
+            PlayerDto playerOfTheDay,
+            IReadOnlyList<PlayerClubDto> playerClubs,
+            IReadOnlyList<ClubDto> playerClubsDetails,
+            out int points)
+        {
+            var totalPoints = ProposalChart.Default.BasePoints;
+            int? indexOfEnd = null;
+            int currentIndex = 0;
+            var proposals = proposalDtos
+                .OrderBy(pDto => pDto.CreationDate)
+                .Select(pDto =>
+                {
+                    var pr = new ProposalResponse(
+                            pDto,
+                            playerOfTheDay,
+                            playerClubs,
+                            playerClubsDetails)
+                        .WithTotalPoints(totalPoints, false);
+                    totalPoints = pr.TotalPoints;
+                    if (pr.IsWin && !indexOfEnd.HasValue)
+                    {
+                        indexOfEnd = currentIndex;
+                    }
+                    currentIndex++;
+                    return pr;
+                })
+                .ToList();
+
+            if (indexOfEnd.HasValue)
+            {
+                for (var i = proposals.Count - 1; i > indexOfEnd.Value; i--)
+                    proposals.RemoveAt(i);
+            }
+
+            points = totalPoints;
+            return proposals;
         }
     }
 }
