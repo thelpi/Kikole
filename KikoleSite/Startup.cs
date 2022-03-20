@@ -10,6 +10,8 @@ namespace KikoleSite
 {
     public class Startup
     {
+        const ulong DefaultLanguageId = 1;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -32,7 +34,14 @@ namespace KikoleSite
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddSingleton<IApiProvider, ApiProvider>();
+            var apiProvider = new ApiProvider(Configuration);
+
+            services.AddSingleton<IApiProvider>(apiProvider);
+
+            // force cache
+            apiProvider.GetClubsAsync().GetAwaiter().GetResult();
+            apiProvider.GetCountriesAsync(DefaultLanguageId).GetAwaiter().GetResult();
+            apiProvider.GetProposalChartAsync().GetAwaiter().GetResult();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -15,10 +15,6 @@ namespace KikoleSite.Controllers
 
         private readonly IApiProvider _apiProvider;
 
-        private static (IReadOnlyCollection<Club> clubs, DateTime expiration) _clubsCache;
-        private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
-             = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
-
         public AdminController(IApiProvider apiProvider)
         {
             _apiProvider = apiProvider;
@@ -56,9 +52,13 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
+            var countries = await _apiProvider
+                .GetCountriesAsync(DefaultLanguageId)
+                .ConfigureAwait(false);
+
             if (model.Country == null
                 || !ulong.TryParse(model.Country, out var countryId)
-                || !GetCountries().Any(c => countryId == c.Key))
+                || !countries.Any(c => countryId == c.Key))
             {
                 model.ErrorMessage = "Country is mandatory";
                 SetPositionsOnModel(model);
@@ -92,17 +92,19 @@ namespace KikoleSite.Controllers
             };
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
 
+            var clubsReferential = await _apiProvider.GetClubsAsync().ConfigureAwait(false);
+
             var clubs = new List<ulong>();
-            AddClubIfValid(clubs, model.Club0);
-            AddClubIfValid(clubs, model.Club1);
-            AddClubIfValid(clubs, model.Club2);
-            AddClubIfValid(clubs, model.Club3);
-            AddClubIfValid(clubs, model.Club4);
-            AddClubIfValid(clubs, model.Club5);
-            AddClubIfValid(clubs, model.Club6);
-            AddClubIfValid(clubs, model.Club7);
-            AddClubIfValid(clubs, model.Club8);
-            AddClubIfValid(clubs, model.Club9);
+            AddClubIfValid(clubs, model.Club0, clubsReferential);
+            AddClubIfValid(clubs, model.Club1, clubsReferential);
+            AddClubIfValid(clubs, model.Club2, clubsReferential);
+            AddClubIfValid(clubs, model.Club3, clubsReferential);
+            AddClubIfValid(clubs, model.Club4, clubsReferential);
+            AddClubIfValid(clubs, model.Club5, clubsReferential);
+            AddClubIfValid(clubs, model.Club6, clubsReferential);
+            AddClubIfValid(clubs, model.Club7, clubsReferential);
+            AddClubIfValid(clubs, model.Club8, clubsReferential);
+            AddClubIfValid(clubs, model.Club9, clubsReferential);
 
             if (clubs.Count == 0)
             {
@@ -142,9 +144,9 @@ namespace KikoleSite.Controllers
             return View(model);
         }
 
-        private void AddClubIfValid(List<ulong> clubs, string value)
+        private void AddClubIfValid(List<ulong> clubs, string value, IReadOnlyCollection<Club> clubsReferential)
         {
-            ulong? id = GetClubs().FirstOrDefault(c => value == c.Name)?.Id;
+            ulong? id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
             if (id.HasValue)
                 clubs.Add(id.Value);
         }
@@ -201,8 +203,7 @@ namespace KikoleSite.Controllers
             }
 
             // force cache reset
-            _clubsCache = (null, DateTime.Now);
-            GetClubs();
+            await _apiProvider.GetClubsAsync(true).ConfigureAwait(false);
 
             model = new ClubCreationModel
             {
@@ -212,9 +213,11 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult AutoCompleteClubs(string prefix)
+        public async Task<JsonResult> AutoCompleteClubs(string prefix)
         {
-            var clubs = GetClubs()
+            var clubs = (await _apiProvider
+                .GetClubsAsync()
+                .ConfigureAwait(false))
                 .Where(c =>
                     c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
 
@@ -222,44 +225,15 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
+        public async Task<JsonResult> AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
         {
-            var countries = GetCountries()
+            var countries = (await _apiProvider
+                .GetCountriesAsync(DefaultLanguageId)
+                .ConfigureAwait(false))
                 .Where(c =>
                     c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
 
             return Json(countries);
-        }
-
-        private IReadOnlyCollection<Club> GetClubs()
-        {
-            if (_clubsCache.clubs == null || _clubsCache.expiration < DateTime.Now)
-            {
-                var clubs = _apiProvider
-                    .GetClubsAsync().GetAwaiter()
-                    .GetResult();
-
-                _clubsCache = (clubs.OrderBy(c => c.Name).ToList(), DateTime.Now.AddHours(1));
-            }
-
-            return _clubsCache.clubs;
-        }
-
-        private IReadOnlyDictionary<ulong, string> GetCountries(ulong languageId = DefaultLanguageId)
-        {
-            if (!_countriesCache.ContainsKey(languageId))
-            {
-                // synchronous
-                var apiCountries = _apiProvider
-                    .GetCountriesAsync(languageId)
-                    .GetAwaiter()
-                    .GetResult()
-                    .OrderBy(ac => ac.Name)
-                    .ToDictionary(ac => ac.Code, ac => ac.Name);
-                _countriesCache.Add(languageId, apiCountries);
-            }
-
-            return _countriesCache[languageId];
         }
 
         private IReadOnlyDictionary<ulong, string> GetPositions()

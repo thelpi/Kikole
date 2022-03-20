@@ -15,16 +15,9 @@ namespace KikoleSite.Controllers
 
         private readonly IApiProvider _apiProvider;
 
-        private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
-             = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
-        private static ProposalChart _proposalChartCache;
-        private static (IReadOnlyCollection<Club> clubs, DateTime expiration) _clubsCache;
-
         public HomeController(IApiProvider apiProvider)
         {
             _apiProvider = apiProvider;
-            // force cache
-            GetClubs();
         }
 
         public async Task<IActionResult> Index(
@@ -32,7 +25,9 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = this.GetAuthenticationCookie();
 
-            var chart = GetProposalChartCache();
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
 
             var model = new HomeModel { Points = chart.BasePoints };
             
@@ -102,13 +97,17 @@ namespace KikoleSite.Controllers
 
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, GetProposalChartCache());
+            var chart = await _apiProvider.GetProposalChartAsync().ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue, chart);
         }
 
         [HttpPost]
-        public JsonResult AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
+        public async Task<JsonResult> AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
         {
-            var countries = GetCountries()
+            var countries = (await _apiProvider
+                .GetCountriesAsync(languageId)
+                .ConfigureAwait(false))
                 .Where(c =>
                     c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
 
@@ -116,9 +115,11 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult AutoCompleteClubs(string prefix)
+        public async Task<JsonResult> AutoCompleteClubs(string prefix)
         {
-            var clubs = GetClubs()
+            var clubs = (await _apiProvider
+                .GetClubsAsync()
+                .ConfigureAwait(false))
                 .Where(c =>
                     c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
 
@@ -133,24 +134,10 @@ namespace KikoleSite.Controllers
                 .Concat(GetPositions()
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
-            model.Chart = GetProposalChartCache();
+            model.Chart = chart;
             model.Clue = clue;
             model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
             return View(model);
-        }
-
-        private IReadOnlyCollection<Club> GetClubs()
-        {
-            if (_clubsCache.clubs == null || _clubsCache.expiration < DateTime.Now)
-            {
-                var clubs = _apiProvider
-                    .GetClubsAsync().GetAwaiter()
-                    .GetResult();
-
-                _clubsCache = (clubs.OrderBy(c => c.Name).ToList(), DateTime.Now.AddHours(1));
-            }
-
-            return _clubsCache.clubs;
         }
 
         private IReadOnlyDictionary<ulong, string> GetPositions()
@@ -161,29 +148,6 @@ namespace KikoleSite.Controllers
                 .ToDictionary(_ => (ulong)_, _ => _.ToString());
         }
 
-        private IReadOnlyDictionary<ulong, string> GetCountries(ulong languageId = DefaultLanguageId)
-        {
-            if (!_countriesCache.ContainsKey(languageId))
-            {
-                // synchronous
-                var apiCountries = _apiProvider
-                    .GetCountriesAsync(languageId)
-                    .GetAwaiter()
-                    .GetResult()
-                    .OrderBy(ac => ac.Name)
-                    .ToDictionary(ac => ac.Code, ac => ac.Name);
-                _countriesCache.Add(languageId, apiCountries);
-            }
-
-            return _countriesCache[languageId];
-        }
-
-        private ProposalChart GetProposalChartCache()
-        {
-            return _proposalChartCache ??
-                (_proposalChartCache = _apiProvider.GetProposalChartAsync().GetAwaiter().GetResult());
-        }
-
         private async Task SetModelFromApiAsync(HomeModel model,
             DateTime proposalDate, string authToken)
         {
@@ -191,11 +155,17 @@ namespace KikoleSite.Controllers
                 .GetProposalsAsync(proposalDate, authToken)
                 .ConfigureAwait(false);
 
+            var countries = await _apiProvider
+                .GetCountriesAsync(DefaultLanguageId)
+                .ConfigureAwait(false);
+
+            var positions = GetPositions();
+
             if (success)
             {
                 foreach (var p in proposals)
                 {
-                    model.SetPropertiesFromProposal(p, GetCountries(), GetPositions());
+                    model.SetPropertiesFromProposal(p, countries, positions);
                 }
             }
         }

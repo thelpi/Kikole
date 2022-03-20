@@ -18,7 +18,7 @@ namespace KikoleSite.Api
 
         Task<(bool success, string value)> LoginAsync(string login, string password);
 
-        Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId);
+        Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId);
 
         Task<ProposalChart> GetProposalChartAsync();
 
@@ -30,7 +30,7 @@ namespace KikoleSite.Api
 
         Task<string> GetClueAsync(DateTime proposalDate);
 
-        Task<IReadOnlyCollection<Club>> GetClubsAsync();
+        Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false);
 
         Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync();
 

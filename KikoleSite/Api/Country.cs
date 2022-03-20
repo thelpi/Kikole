@@ -1,6 +1,6 @@
 ﻿namespace KikoleSite.Api
 {
-    public class CountryKvp
+    public class Country
     {
         public ulong Code { get; set; }
         

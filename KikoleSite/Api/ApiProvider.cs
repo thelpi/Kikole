@@ -13,6 +13,11 @@ namespace KikoleSite.Api
     {
         private readonly HttpClient _client;
 
+        private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
+             = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
+        private static ProposalChart _proposalChartCache;
+        private static IReadOnlyCollection<Club> _clubsCache;
+
         public ApiProvider(IConfiguration configuration)
         {
             _client = new HttpClient
@@ -87,26 +92,41 @@ namespace KikoleSite.Api
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<CountryKvp>> GetCountriesAsync(ulong languageId)
+        public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId)
         {
-            var response = await SendAsync(
+            if (!_countriesCache.ContainsKey(languageId))
+            {
+                var response = await SendAsync(
                     $"countries?languageId={languageId}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<IReadOnlyCollection<CountryKvp>>(response)
-                .ConfigureAwait(false);
+                var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
+                    .ConfigureAwait(false);
+
+                var apiCountriesDict = apiCountries
+                    .OrderBy(ac => ac.Name)
+                    .ToDictionary(ac => ac.Code, ac => ac.Name);
+                _countriesCache.Add(languageId, apiCountriesDict);
+            }
+
+            return _countriesCache[languageId];
         }
 
         public async Task<ProposalChart> GetProposalChartAsync()
         {
-            var response = await SendAsync(
-                    "proposal-charts",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
+            if (_proposalChartCache == null)
+            {
+                var response = await SendAsync(
+                       "proposal-charts",
+                       HttpMethod.Get)
+                   .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<ProposalChart>(response)
-                .ConfigureAwait(false);
+                _proposalChartCache = await GetResponseContentAsync<ProposalChart>(response)
+                    .ConfigureAwait(false);
+            }
+
+            return _proposalChartCache;
         }
 
         public async Task<(bool, IReadOnlyCollection<ProposalResponse>)> GetProposalsAsync(
@@ -190,15 +210,22 @@ namespace KikoleSite.Api
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<Club>> GetClubsAsync()
+        public async Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false)
         {
-            var response = await SendAsync(
+            if (_clubsCache == null || resetCache)
+            {
+                var response = await SendAsync(
                     "clubs",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
-                .ConfigureAwait(false);
+                var clubs = await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
+                    .ConfigureAwait(false);
+
+                _clubsCache = clubs.OrderBy(c => c.Name).ToList();
+            }
+
+            return _clubsCache;
         }
 
         public async Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync()
