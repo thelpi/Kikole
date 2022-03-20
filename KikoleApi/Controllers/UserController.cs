@@ -52,7 +52,7 @@ namespace KikoleApi.Controllers
                 return BadRequest();
 
             var badges = await _badgeRepository
-                .GetBadgesAsync()
+                .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
             var uBadges = await _badgeRepository
@@ -62,15 +62,9 @@ namespace KikoleApi.Controllers
             var badgesFull = uBadges
                 .Select(b =>
                 {
-                    var bRef = badges.Single(_ => _.Id == b.BadgeId);
-                    return new UserBadge
-                    {
-                        Description = bRef.Description,
-                        GetDate = b.GetDate,
-                        Badge = (Badges)bRef.Id,
-                        Name = bRef.Name,
-                        Users = bRef.Users
-                    };
+                    return new UserBadge(
+                        badges.Single(_ => _.Id == b.BadgeId),
+                        b);
                 })
                 .OrderByDescending(b => b.GetDate)
                 .ToList();
@@ -218,6 +212,23 @@ namespace KikoleApi.Controllers
             };
 
             return Ok(us);
+        }
+
+        [HttpGet("/badges")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Badge>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<Badge>>> GetBadgesAsync()
+        {
+            var dtos = await _badgeRepository
+                .GetBadgesAsync(false)
+                .ConfigureAwait(false);
+
+            var badges = dtos
+                .Select(b => new Badge(b))
+                .OrderByDescending(b => b.Users)
+                .ToList();
+
+            return Ok(badges);
         }
 
         [HttpPut("/badges")]

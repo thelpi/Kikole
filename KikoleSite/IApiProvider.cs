@@ -27,9 +27,11 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync();
 
-        Task<UserStats> GetUserStats(ulong id);
+        Task<UserStats> GetUserStatsAsync(ulong id);
 
-        Task<IReadOnlyCollection<UserBadge>> GetUserBadges(ulong userId);
+        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId);
+
+        Task<IReadOnlyCollection<Badge>> GetBadgesAsync();
 
         Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames, string authToken);
 

@@ -23,7 +23,11 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<Api.UserBadge> Badges { get; set; }
 
-        public UserStatsModel(Api.UserStats apiStat, IReadOnlyCollection<Api.UserBadge> badges)
+        public IReadOnlyCollection<Api.Badge> MissingBadges { get; set; }
+
+        public UserStatsModel(Api.UserStats apiStat,
+            IReadOnlyCollection<Api.UserBadge> badges,
+            IReadOnlyCollection<Api.Badge> allBadges)
         {
             Login = apiStat.Login;
             Attempts = apiStat.Attempts;
@@ -34,6 +38,7 @@ namespace KikoleSite.Models
             BestTime = apiStat.BestTime?.ToString(@"hh\:mm") ?? "N/A";
             Stats = apiStat.Stats.Select(s => new SingleUserStatModel(s)).ToList();
             Badges = badges;
+            MissingBadges = allBadges.Where(b => !badges.Any(_ => _.Id == b.Id)).ToList();
         }
     }
 }

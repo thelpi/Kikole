@@ -6,7 +6,7 @@ namespace KikoleApi.Interfaces
 {
     public interface IBadgeRepository
     {
-        Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync();
+        Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync(bool includeHidden);
 
         Task InsertUserBadgeAsync(UserBadgeDto userBadge);
 

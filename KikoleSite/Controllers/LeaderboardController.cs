@@ -23,7 +23,7 @@ namespace KikoleSite.Controllers
             }
 
             var stats = await _apiProvider
-                .GetUserStats(userId)
+                .GetUserStatsAsync(userId)
                 .ConfigureAwait(false);
 
             if (stats == null)
@@ -32,10 +32,14 @@ namespace KikoleSite.Controllers
             }
 
             var badges = await _apiProvider
-                .GetUserBadges(userId)
+                .GetUserBadgesAsync(userId)
                 .ConfigureAwait(false);
 
-            return View("User", new UserStatsModel(stats, badges));
+            var allBadges = await _apiProvider
+                .GetBadgesAsync()
+                .ConfigureAwait(false);
+
+            return View("User", new UserStatsModel(stats, badges, allBadges));
         }
 
         private async Task<IActionResult> Index()

@@ -190,7 +190,7 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<UserStats> GetUserStats(ulong id)
+        public async Task<UserStats> GetUserStatsAsync(ulong id)
         {
             var response = await SendAsync($"users/{id}/stats", HttpMethod.Get)
                 .ConfigureAwait(false);
@@ -199,7 +199,7 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadges(ulong userId)
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId)
         {
             var response = await SendAsync($"users/{userId}/badges", HttpMethod.Get)
                 .ConfigureAwait(false);
@@ -239,6 +239,17 @@ namespace KikoleSite
             return response.IsSuccessStatusCode
                 ? null
                 : $"StatusCode: {response.StatusCode}";
+        }
+
+        public async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
+        {
+            var response = await SendAsync(
+                    "badges",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Badge>>(response)
+                .ConfigureAwait(false);
         }
 
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,

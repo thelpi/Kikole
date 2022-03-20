@@ -12,10 +12,15 @@ namespace KikoleApi.Repositories
             : base(configuration, clock)
         { }
 
-        public async Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync()
+        public async Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync(bool includeHidden)
         {
+            var parameters = new List<(string, object)>();
+            if (!includeHidden)
+                parameters.Add(("hidden", 0));
+
             return await GetDtosAsync<BadgeDto>(
-                    "badges")
+                    "badges",
+                    parameters.ToArray())
                 .ConfigureAwait(false);
         }
 
