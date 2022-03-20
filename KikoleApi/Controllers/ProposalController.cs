@@ -226,7 +226,7 @@ namespace KikoleApi.Controllers
                             .ConfigureAwait(false);
 
                         var leadersHistory = await _leaderRepository
-                            .GetLeadersHistoryAsync(request.ProposalDate.Date, 29)
+                            .GetLeadersHistoryAsync(request.ProposalDate.Date)
                             .ConfigureAwait(false);
 
                         foreach (var badge in BadgeHelper.LeaderBasedBadgeCondition.Keys)

@@ -17,6 +17,10 @@
         ItsAFuckingDisgrace,
         ThirdWaveFeminism,
         LegendTier,
-        WorldWarTwo
+        WorldWarTwo,
+        MakeItDouble,
+        DoItYourself,
+        FourFourtwo,
+        AroundTheWorld
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
+using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -59,16 +60,18 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>> GetLeadersHistoryAsync(DateTime date, int daysToTake)
+        public async Task<IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>> GetLeadersHistoryAsync(DateTime date)
         {
             var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
-            for (var i = 1; i <= daysToTake; i++)
+
+            while (date.Date > ProposalChart.Default.FirstDate.Date)
             {
-                var leadersBefore = await GetLeadersAtDateAsync(
-                        date.AddDays(-i).Date)
+                date = date.AddDays(-1);
+                var leadersBefore = await GetLeadersAtDateAsync(date)
                     .ConfigureAwait(false);
                 leadersHistory.Add(leadersBefore);
             }
+
             return leadersHistory;
         }
     }

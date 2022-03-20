@@ -221,7 +221,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("/badges")]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(AuthenticationLevel.None)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> RecomputeBadgesAsync([FromQuery] Badges[] badges)
@@ -237,6 +237,9 @@ namespace KikoleApi.Controllers
                     .ConfigureAwait(false);
             }
 
+            var playersCache = new Dictionary<DateTime, PlayerDto>();
+            var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
+
             var currentDate = ProposalChart.Default.FirstDate.Date;
             while (currentDate <= _clock.Now.Date)
             {
@@ -244,12 +247,8 @@ namespace KikoleApi.Controllers
                     .GetLeadersAtDateAsync(currentDate)
                     .ConfigureAwait(false);
 
-                var playerOfTheDay = await _playerRepository
-                    .GetPlayerOfTheDayAsync(currentDate)
-                    .ConfigureAwait(false);
-
-                var leadersHistory = await _leaderRepository
-                    .GetLeadersHistoryAsync(currentDate, 29)
+                var playerOfTheDay = await GetPlayerOfTheDayFromCacheAsync(
+                        playersCache, currentDate)
                     .ConfigureAwait(false);
 
                 foreach (var badge in badges.Where(b => BadgeHelper.PlayerBasedBadgeCondition.ContainsKey(b)))
@@ -273,10 +272,62 @@ namespace KikoleApi.Controllers
                         .ConfigureAwait(false);
                 }
 
+                foreach (var leader in leaders)
+                {
+                    var myHistory = leadersHistory
+                        .SelectMany(lh => lh)
+                        .Where(lh => lh.UserId == leader.UserId)
+                        .ToList();
+
+                    var playersHistory = new List<PlayerDto>();
+                    foreach (var mh in myHistory)
+                    {
+                        var p = await GetPlayerOfTheDayFromCacheAsync(
+                                playersCache, mh.ProposalDate.Date)
+                            .ConfigureAwait(false);
+                        playersHistory.Add(p);
+                    }
+                    playersHistory.Add(playerOfTheDay);
+
+                    foreach (var badge in badges.Where(b => BadgeHelper.PlayersHistoryBadgeCondition.ContainsKey(b)))
+                    {
+                        var hasBadge = await _badgeRepository
+                            .CheckUserHasBadgeAsync(leader.UserId, (ulong)badge)
+                            .ConfigureAwait(false);
+
+                        if (!hasBadge && BadgeHelper.PlayersHistoryBadgeCondition[badge](playersHistory))
+                        {
+                            await _badgeRepository
+                                .InsertUserBadgeAsync(new UserBadgeDto
+                                {
+                                    GetDate = currentDate,
+                                    BadgeId = (ulong)badge,
+                                    UserId = leader.UserId
+                                })
+                                .ConfigureAwait(false);
+                        }
+                    }
+                }
+
+                leadersHistory.Insert(0, leaders);
                 currentDate = currentDate.AddDays(1).Date;
             }
 
             return NoContent();
+        }
+
+        private async Task<PlayerDto> GetPlayerOfTheDayFromCacheAsync(Dictionary<DateTime, PlayerDto> playersCache, DateTime currentDate)
+        {
+            if (playersCache.ContainsKey(currentDate))
+            {
+                return playersCache[currentDate];
+            }
+
+            var playerOfTheDay = await _playerRepository
+                .GetPlayerOfTheDayAsync(currentDate)
+                .ConfigureAwait(false);
+            playersCache.Add(currentDate, playerOfTheDay);
+            return playerOfTheDay;
         }
 
         private async Task CheckBadgeInternalAsync(Badges badge,
