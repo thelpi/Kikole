@@ -36,5 +36,7 @@ namespace KikoleSite
         Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames, string authToken);
 
         Task<string> CreatePlayerAsync(PlayerRequest player, string authToken);
+
+        Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken);
     }
 }

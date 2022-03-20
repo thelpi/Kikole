@@ -67,5 +67,15 @@ namespace KikoleApi.Repositories
                     "SELECT * FROM players WHERE proposal_date <= DATE(NOW())", null)
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
+        {
+            return await ExecuteReaderAsync<string>(
+                    "SELECT y.name FROM players AS y " +
+                    "INNER JOIN proposals AS p ON y.proposal_date = DATE(DATE_ADD(p.proposal_date, INTERVAL -p.days_before DAY)) " +
+                    "WHERE p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1",
+                    new { userId })
+                .ConfigureAwait(false);
+        }
     }
 }

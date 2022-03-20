@@ -27,18 +27,23 @@ namespace KikoleSite.Models
 
         public UserStatsModel(Api.UserStats apiStat,
             IReadOnlyCollection<Api.UserBadge> badges,
-            IReadOnlyCollection<Api.Badge> allBadges)
+            IReadOnlyCollection<Api.Badge> allBadges,
+            IReadOnlyCollection<string> knownAnswers)
         {
             Login = apiStat.Login;
             Attempts = apiStat.Attempts;
             Successes = apiStat.Successes;
             TotalPoints = apiStat.TotalPoints;
-            BestPoints = apiStat.BestPoints?.ToString() ?? "N/A";
-            AverageTime = apiStat.AverageTime?.ToString(@"hh\:mm") ?? "N/A";
-            BestTime = apiStat.BestTime?.ToString(@"hh\:mm") ?? "N/A";
-            Stats = apiStat.Stats.Select(s => new SingleUserStatModel(s)).ToList();
+            BestPoints = apiStat.BestPoints.ToNaString();
+            AverageTime = apiStat.AverageTime.ToNaString();
+            BestTime = apiStat.BestTime.ToNaString();
+            Stats = apiStat.Stats
+                .Select(s => new SingleUserStatModel(s, knownAnswers.Contains(s.Answer)))
+                .ToList();
             Badges = badges;
-            MissingBadges = allBadges.Where(b => !badges.Any(_ => _.Id == b.Id)).ToList();
+            MissingBadges = allBadges
+                .Where(b => !badges.Any(_ => _.Id == b.Id))
+                .ToList();
         }
     }
 }

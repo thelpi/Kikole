@@ -252,6 +252,16 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken)
+        {
+            var response = await SendAsync(
+                    "users/known-players", HttpMethod.Get, authToken)
+                .ConfigureAwait(false);
+            
+            return await GetResponseContentAsync<IReadOnlyCollection<string>>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
         {

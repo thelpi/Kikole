@@ -42,6 +42,20 @@ namespace KikoleApi.Controllers
             _crypter = crypter;
         }
 
+        [HttpGet("known-players")]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<string>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<string>>> GetKnownPlayersAsync(
+            [FromQuery] ulong userId)
+        {
+            var names = await _playerRepository
+                .GetKnownPlayerNamesAsync(userId)
+                .ConfigureAwait(false);
+
+            return Ok(names);
+        }
+
         [HttpGet("{userId}/badges")]
         [AuthenticationLevel(AuthenticationLevel.None)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]

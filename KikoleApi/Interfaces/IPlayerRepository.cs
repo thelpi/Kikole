@@ -18,5 +18,7 @@ namespace KikoleApi.Interfaces
         Task<DateTime> GetLatestProposalDateasync();
 
         Task<IReadOnlyCollection<PlayerDto>> GetProposedPlayersAsync();
+
+        Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId);
     }
 }

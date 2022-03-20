@@ -18,16 +18,16 @@
 
         public string PointsPosition { get; set; }
 
-        public SingleUserStatModel(Api.SingleUserStat apiStat)
+        public SingleUserStatModel(Api.SingleUserStat apiStat, bool knowPlayer)
         {
-            Answer = "???"; // TODO !
-            Attempt = apiStat.Attempt ? "Yes" : "No";
+            Answer = knowPlayer ? apiStat.Answer : "???";
+            Attempt = apiStat.Attempt.ToYesNo();
             Date = apiStat.Date.ToString("yyyy-MM-dd");
-            Points = apiStat.Points?.ToString() ?? "N/A";
-            PointsPosition = apiStat.PointsPosition?.ToString() ?? "N/A";
-            Success = apiStat.Time.HasValue ? "Yes" : "No";
-            Time = apiStat.Time?.ToString(@"hh\:mm") ?? "N/A";
-            TimePosition = apiStat.TimePosition?.ToString() ?? "N/A";
+            Points = apiStat.Points.ToNaString();
+            PointsPosition = apiStat.PointsPosition.ToNaString();
+            Success = apiStat.Time.HasValue.ToYesNo();
+            Time = apiStat.Time.ToNaString();
+            TimePosition = apiStat.TimePosition.ToNaString();
         }
     }
 }
