@@ -233,21 +233,9 @@ namespace KikoleApi.Controllers
                         {
                             if (BadgeHelper.LeaderBasedBadgeCondition[badge](leader, leadersHistory))
                             {
-                                var hasBadge = await _badgeRepository
-                                    .CheckUserHasBadgeAsync(userId, (ulong)badge)
+                                await InsertBadgeIfNotAlreadyAsync(
+                                        request, userId, badge)
                                     .ConfigureAwait(false);
-
-                                if (!hasBadge)
-                                {
-                                    await _badgeRepository
-                                        .InsertUserBadgeAsync(new UserBadgeDto
-                                        {
-                                            GetDate = request.ProposalDate.Date,
-                                            BadgeId = (ulong)badge,
-                                            UserId = userId
-                                        })
-                                        .ConfigureAwait(false);
-                                }
                             }
                         }
 
@@ -255,21 +243,34 @@ namespace KikoleApi.Controllers
                         {
                             if (BadgeHelper.PlayerBasedBadgeCondition[badge](playerOfTheDay))
                             {
-                                var hasBadge = await _badgeRepository
-                                    .CheckUserHasBadgeAsync(userId, (ulong)badge)
-                                    .ConfigureAwait(false);
+                                await InsertBadgeIfNotAlreadyAsync(
+                                         request, userId, badge)
+                                     .ConfigureAwait(false);
+                            }
+                        }
 
-                                if (!hasBadge)
-                                {
-                                    await _badgeRepository
-                                        .InsertUserBadgeAsync(new UserBadgeDto
-                                        {
-                                            GetDate = request.ProposalDate.Date,
-                                            BadgeId = (ulong)badge,
-                                            UserId = userId
-                                        })
-                                        .ConfigureAwait(false);
-                                }
+                        var myHistory = leadersHistory
+                            .SelectMany(lh => lh)
+                            .Where(lh => lh.UserId == leader.UserId)
+                            .ToList();
+
+                        var playersHistory = new List<PlayerDto>();
+                        foreach (var mh in myHistory)
+                        {
+                            var p = await _playerRepository
+                                .GetPlayerOfTheDayAsync(mh.ProposalDate.Date)
+                                .ConfigureAwait(false);
+                            playersHistory.Add(p);
+                        }
+                        playersHistory.Add(playerOfTheDay);
+
+                        foreach (var badge in BadgeHelper.PlayersHistoryBadgeCondition.Keys)
+                        {
+                            if (BadgeHelper.PlayersHistoryBadgeCondition[badge](playersHistory))
+                            {
+                                await InsertBadgeIfNotAlreadyAsync(
+                                        request, userId, badge)
+                                    .ConfigureAwait(false);
                             }
                         }
                     }
@@ -277,6 +278,25 @@ namespace KikoleApi.Controllers
             }
 
             return Ok(response);
+        }
+
+        private async Task InsertBadgeIfNotAlreadyAsync<T>(T request, ulong userId, Badges badge) where T : BaseProposalRequest
+        {
+            var hasBadge = await _badgeRepository
+                .CheckUserHasBadgeAsync(userId, (ulong)badge)
+                .ConfigureAwait(false);
+
+            if (!hasBadge)
+            {
+                await _badgeRepository
+                    .InsertUserBadgeAsync(new UserBadgeDto
+                    {
+                        GetDate = request.ProposalDate.Date,
+                        BadgeId = (ulong)badge,
+                        UserId = userId
+                    })
+                    .ConfigureAwait(false);
+            }
         }
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(
