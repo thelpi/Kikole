@@ -17,7 +17,7 @@ namespace KikoleApi.Helpers
                 },
                 {
                     Badges.OverTheTopPart2,
-                    (l, ls) => l.Points == ls.Min(_ => _.Points)
+                    (l, ls) => l.Points == ls.Max(_ => _.Points)
                 }
             };
 
