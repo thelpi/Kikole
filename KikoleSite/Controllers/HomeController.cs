@@ -93,8 +93,10 @@ namespace KikoleSite.Controllers
 
             model = GetCookieModelOrDefault(model);
 
+            var now = DateTime.Now;
+
             var response = await _apiProvider
-                .SubmitProposalAsync(DateTime.Now, value, model.CurrentDay,
+                .SubmitProposalAsync(now, value, model.CurrentDay,
                     proposalType,
                     token,
                     model.Points)
@@ -105,11 +107,13 @@ namespace KikoleSite.Controllers
                 ? $"Valid {proposalType} guess"
                 : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
 
-            model.SetPropertiesFromProposal(response, GetCountries(), GetPositions());
+            var proposalDate = now.Date.AddDays(-model.CurrentDay);
+
+            await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
 
             this.SetSubmissionFormCookie(model.ToSubmissionFormCookie());
 
-            var clue = await _apiProvider.GetClueAsync(DateTime.Now.AddDays(-model.CurrentDay)).ConfigureAwait(false);
+            var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
             return ViewWithFullModel(model, login, clue);
         }
