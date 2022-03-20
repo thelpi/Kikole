@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -156,17 +157,17 @@ namespace KikoleApi.Controllers
                 .GroupBy(dto => dto.UserId)
                 .Select(dto => new Leader(dto, users))
                 .ToList();
-
+            
             switch (leaderSort)
             {
                 case LeaderSorts.SuccessCount:
-                    leaders = leaders.OrderByDescending(l => l.SuccessCount).ToList();
+                    leaders = leaders.SetPositions(l => l.SuccessCount, true, (l, i) => l.Position = i);
                     break;
                 case LeaderSorts.BestTime:
-                    leaders = leaders.OrderBy(l => l.BestTime.TotalMinutes).ToList();
+                    leaders = leaders.SetPositions(l => l.BestTime, false, (l, i) => l.Position = i);
                     break;
                 case LeaderSorts.TotalPoints:
-                    leaders = leaders.OrderByDescending(l => l.TotalPoints).ToList();
+                    leaders = leaders.SetPositions(l => l.TotalPoints, true, (l, i) => l.Position = i);
                     break;
             }
 

@@ -68,13 +68,13 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var (success, value) = await _apiProvider
+                    var value = await _apiProvider
                         .CreateAccountAsync(model.LoginCreateSubmission,
                             model.PasswordCreate1Submission,
                             model.RecoveryQCreate,
                             model.RecoveryACreate)
                         .ConfigureAwait(false);
-                    if (!success)
+                    if (!string.IsNullOrWhiteSpace(value))
                     {
                         model.Error = value;
                     }

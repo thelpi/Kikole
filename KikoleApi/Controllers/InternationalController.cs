@@ -33,7 +33,7 @@ namespace KikoleApi.Controllers
                 .GetCountriesAsync(languageId)
                 .ConfigureAwait(false);
 
-            return Ok(countries.Select(c => new Country(c)).ToList());
+            return Ok(countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList());
         }
     }
 }

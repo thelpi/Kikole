@@ -45,7 +45,8 @@ namespace KikoleSite.Controllers
 
             var proposalDate = DateTime.Now.Date.AddDays(-model.CurrentDay);
 
-            await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(token))
+                await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
 
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
@@ -151,7 +152,7 @@ namespace KikoleSite.Controllers
         private async Task SetModelFromApiAsync(HomeModel model,
             DateTime proposalDate, string authToken)
         {
-            var (success, proposals) = await _apiProvider
+            var proposals = await _apiProvider
                 .GetProposalsAsync(proposalDate, authToken)
                 .ConfigureAwait(false);
 
@@ -161,12 +162,9 @@ namespace KikoleSite.Controllers
 
             var positions = GetPositions();
 
-            if (success)
+            foreach (var p in proposals)
             {
-                foreach (var p in proposals)
-                {
-                    model.SetPropertiesFromProposal(p, countries, positions);
-                }
+                model.SetPropertiesFromProposal(p, countries, positions);
             }
         }
     }

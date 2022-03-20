@@ -27,7 +27,7 @@ namespace KikoleSite
             };
         }
 
-        public async Task<(bool, string)> CreateAccountAsync(string login,
+        public async Task<string> CreateAccountAsync(string login,
             string password, string question, string answer)
         {
             var response = await SendAsync(
@@ -42,11 +42,10 @@ namespace KikoleSite
                         passwordResetAnswer = answer?.Trim()
                     })
                 .ConfigureAwait(false);
-
-            if (!response.IsSuccessStatusCode)
-                return (false, $"Creation failed: {response.StatusCode}");
-
-            return (true, null);
+            
+            return response.IsSuccessStatusCode
+                ? null
+                : $"Creation failed: {response.StatusCode}";
         }
 
         public async Task<(bool, string)> LoginAsync(string login, string password)
@@ -105,10 +104,10 @@ namespace KikoleSite
                 var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
                     .ConfigureAwait(false);
 
-                var apiCountriesDict = apiCountries
-                    .OrderBy(ac => ac.Name)
-                    .ToDictionary(ac => ac.Code, ac => ac.Name);
-                _countriesCache.Add(languageId, apiCountriesDict);
+                _countriesCache.Add(
+                    languageId,
+                    apiCountries
+                        .ToDictionary(ac => ac.Code, ac => ac.Name));
             }
 
             return _countriesCache[languageId];
@@ -130,7 +129,7 @@ namespace KikoleSite
             return _proposalChartCache;
         }
 
-        public async Task<(bool, IReadOnlyCollection<ProposalResponse>)> GetProposalsAsync(
+        public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(
             DateTime proposalDate, string authToken)
         {
             var response = await SendAsync(
@@ -139,63 +138,20 @@ namespace KikoleSite
                     authToken)
                 .ConfigureAwait(false);
 
-            if (!response.IsSuccessStatusCode)
-                return (false, null);
-
-            var proposals = await GetResponseContentAsync<IReadOnlyCollection<ProposalResponse>>(response)
+            return await GetResponseContentAsync<IReadOnlyCollection<ProposalResponse>>(response)
                 .ConfigureAwait(false);
-
-            return (true, proposals);
         }
 
-        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
-            int limit, DateTime? minimalDate)
+        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
+            LeaderSort leaderSort, DateTime? minimalDate)
         {
             var response = await SendAsync(
                     $"leaders?minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            var datas = await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
+            return await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
                 .ConfigureAwait(false);
-
-            uint? totalPoints = null;
-            TimeSpan? bestTime = null;
-            int? successCount = null;
-            int currentPos = 0;
-            return datas
-                .Select((d, i) =>
-                {
-                    switch (leaderSort)
-                    {
-                        case LeaderSort.BestTime:
-                            if (!bestTime.HasValue || bestTime != d.BestTime)
-                            {
-                                currentPos = i + 1;
-                                bestTime = d.BestTime;
-                            }
-                            break;
-                        case LeaderSort.SuccessCount:
-                            if (!successCount.HasValue || successCount != d.SuccessCount)
-                            {
-                                currentPos = i + 1;
-                                successCount = d.SuccessCount;
-                            }
-                            break;
-                        case LeaderSort.TotalPoints:
-                            if (!totalPoints.HasValue || totalPoints != d.TotalPoints)
-                            {
-                                currentPos = i + 1;
-                                totalPoints = d.TotalPoints;
-                            }
-                            break;
-                    }
-                    d.Position = currentPos;
-
-                    return d;
-                })
-                .Take(limit)
-                .ToList();
         }
 
         public async Task<string> GetClueAsync(DateTime proposalDate)
@@ -205,10 +161,8 @@ namespace KikoleSite
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            if (!response.IsSuccessStatusCode)
-                return "";
-
-            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false)
@@ -220,10 +174,8 @@ namespace KikoleSite
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
-                var clubs = await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
+                _clubsCache = await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
                     .ConfigureAwait(false);
-
-                _clubsCache = clubs.OrderBy(c => c.Name).ToList();
             }
 
             return _clubsCache;
@@ -277,8 +229,7 @@ namespace KikoleSite
                 : $"StatusCode: {response.StatusCode}";
         }
 
-        public async Task<string> CreatePlayerAsync(
-            PlayerRequest player, string authToken)
+        public async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
         {
             var response = await SendAsync(
                     "players",
@@ -293,8 +244,7 @@ namespace KikoleSite
         }
 
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
-            string authToken = null,
-            object content = null)
+            string authToken = null, object content = null)
         {
             var request = new HttpRequestMessage
             {
@@ -324,7 +274,9 @@ namespace KikoleSite
                 .ReadAsStringAsync()
                 .ConfigureAwait(false);
 
-            return JsonConvert.DeserializeObject<T>(content);
+            return typeof(T) == typeof(string)
+                ? (T)Convert.ChangeType(content, typeof(T))
+                : JsonConvert.DeserializeObject<T>(content);
         }
     }
 }

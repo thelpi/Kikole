@@ -29,7 +29,7 @@ namespace KikoleApi.Controllers
                 .GetClubsAsync()
                 .ConfigureAwait(false);
 
-            return Ok(clubs.Select(c => new Club(c)).ToList());
+            return Ok(clubs.Select(c => new Club(c)).OrderBy(c => c.Name).ToList());
         }
 
         [HttpPost]

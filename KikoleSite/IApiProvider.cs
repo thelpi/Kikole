@@ -7,27 +7,19 @@ namespace KikoleSite
 {
     public interface IApiProvider
     {
-        Task<(bool success, string value)> CreateAccountAsync(string login,
-            string password, string question, string answer);
+        Task<string> CreateAccountAsync(string login, string password, string question, string answer);
 
-        Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
-            string value,
-            int daysBefore,
-            ProposalType proposalType,
-            string authToken,
-            int sourcePoints);
+        Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate, string value, int daysBefore, ProposalType proposalType, string authToken, int sourcePoints);
 
-        Task<(bool success, string value)> LoginAsync(string login, string password);
+        Task<(bool, string)> LoginAsync(string login, string password);
 
         Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId);
 
         Task<ProposalChart> GetProposalChartAsync();
 
-        Task<(bool success, IReadOnlyCollection<ProposalResponse> proposals)> GetProposalsAsync(
-            DateTime proposalDate, string authToken);
+        Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync( DateTime proposalDate, string authToken);
 
-        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort,
-            int limit, DateTime? minimalDate);
+        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate);
 
         Task<string> GetClueAsync(DateTime proposalDate);
 

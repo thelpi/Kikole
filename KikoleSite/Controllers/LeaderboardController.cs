@@ -8,8 +8,6 @@ namespace KikoleSite.Controllers
 {
     public class LeaderboardController : KikoleBaseController
     {
-        const int limit = 50;
-
         private readonly IApiProvider _apiProvider;
 
         public LeaderboardController(IApiProvider apiProvider)
@@ -43,7 +41,7 @@ namespace KikoleSite.Controllers
         private async Task<IActionResult> Index()
         {
             var leaders = await _apiProvider
-                .GetLeadersAsync(LeaderSort.TotalPoints, limit, null)
+                .GetLeadersAsync(LeaderSort.TotalPoints, null)
                 .ConfigureAwait(false);
 
             return View(new LeaderboardModel
@@ -69,7 +67,6 @@ namespace KikoleSite.Controllers
             model.Leaders = await _apiProvider
                 .GetLeadersAsync(
                     model.SortType,
-                    limit,
                     dtNull)
                 .ConfigureAwait(false);
 
