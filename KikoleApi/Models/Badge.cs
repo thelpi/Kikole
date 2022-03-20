@@ -12,12 +12,15 @@ namespace KikoleApi.Models
 
         public ulong Users { get; set; }
 
+        public bool Hidden { get; set; }
+
         internal Badge(BadgeDto dto)
         {
             Id = dto.Id;
             Name = dto.Name;
             Description = dto.Description;
             Users = dto.Users;
+            Hidden = dto.Hidden > 0;
         }
     }
 }

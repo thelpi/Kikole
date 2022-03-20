@@ -51,7 +51,8 @@
     <h3>You own</h3>
     @foreach (var badge in Model.Badges)
     {
-        <div style="margin-top: 5px">
+        var color = !badge.Hidden ? "transparent" : "gold";
+        <div style="margin-top: 5px; background-color: @color">
             <div style="color: forestgreen; font-size: large">@badge.Name</div>
             <div>@badge.Description</div>
             <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>

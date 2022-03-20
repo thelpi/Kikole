@@ -9,5 +9,7 @@
         public string Description { get; set; }
 
         public ulong Users { get; set; }
+
+        public bool Hidden { get; set; }
     }
 }
