@@ -43,7 +43,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("known-players")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(IReadOnlyCollection<string>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<string>>> GetKnownPlayersAsync(
@@ -57,7 +57,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("{userId}/badges")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync([FromRoute] ulong userId)
@@ -87,7 +87,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPost]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
@@ -119,7 +119,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("{login}/authentication-tokens")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -144,15 +144,13 @@ namespace KikoleApi.Controllers
             if (!_crypter.Encrypt(password).Equals(existingUser.Password))
                 return Unauthorized();
 
-            var isAdmin = existingUser.UserTypeId == (ulong)UserTypes.Administrator ? 1 : 0;
+            var value = $"{existingUser.Id}_{existingUser.UserTypeId}";
 
-            var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{isAdmin}");
-
-            return $"{existingUser.Id}_{isAdmin}_{encryptedCookiePart}";
+            return $"{value}_{_crypter.Encrypt(value)}";
         }
 
         [HttpPut("/user-passwords")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -185,7 +183,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPatch("/user-questions")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -206,7 +204,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPatch("/reset-passwords")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
@@ -308,7 +306,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("/badges")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Badge>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Badge>>> GetBadgesAsync()
         {
@@ -325,7 +323,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("/badges")]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(UserTypes.Administrator)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> RecomputeBadgesAsync([FromQuery] Badges[] badges)
@@ -421,7 +419,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("/admin-users")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -438,7 +436,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("{login}/questions")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]

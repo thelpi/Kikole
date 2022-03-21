@@ -22,7 +22,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("/player-clues")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         public async Task<ActionResult<string>> GetPlayerOfTheDayClueAsync([FromQuery][Required] DateTime proposalDate)
         {
             var player = await _playerRepository
@@ -33,7 +33,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPost]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(Models.UserTypes.PowerUser)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]

@@ -26,7 +26,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("countries")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Country>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -43,7 +43,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("current-messages")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<string>> GetCurrentMessage()
         {

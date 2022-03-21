@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using KikoleApi.Interfaces;
+using KikoleApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -40,12 +41,12 @@ namespace KikoleApi.Controllers.Filters
             if (authAttribute == null)
                 return;
 
-            var (id, isAdmin, isFaulted) = ExtractAuthTokenHeaderInfo(context.HttpContext);
+            var (userId, userTypeId, isFaulted) = ExtractAuthTokenHeaderInfo(context.HttpContext);
 
-            if (!IsAuthorized((authAttribute as AuthenticationLevelAttribute).Level, id, isAdmin, isFaulted))
+            if (!IsAuthorized((authAttribute as AuthenticationLevelAttribute).UserType, userId, userTypeId, isFaulted))
                 context.Result = new StatusCodeResult((int)HttpStatusCode.Unauthorized);
             else
-                context.HttpContext.Request.QueryString = context.HttpContext.Request.QueryString.Add(UserIdQueryParam, id.GetValueOrDefault(0).ToString());
+                context.HttpContext.Request.QueryString = context.HttpContext.Request.QueryString.Add(UserIdQueryParam, (userId ?? 0).ToString());
         }
 
         private static string GetAuthTokenHeaderValue(HttpContext httpContext)
@@ -63,31 +64,37 @@ namespace KikoleApi.Controllers.Filters
                 : values[0].Trim();
         }
 
-        private (ulong? id, bool isAdmin, bool isFaulted) ExtractAuthTokenHeaderInfo(HttpContext httpContext)
+        private (ulong? userId, ulong? userTypeId, bool isFaulted) ExtractAuthTokenHeaderInfo(HttpContext httpContext)
         {
             var token = GetAuthTokenHeaderValue(httpContext);
 
             if (string.IsNullOrWhiteSpace(token))
-                return (null, false, false);
+                return (null, null, false);
 
             var tokenParts = token.Split('_', StringSplitOptions.RemoveEmptyEntries);
             if (tokenParts.Length != 3
                 || !ulong.TryParse(tokenParts[0], out var userId)
-                || !byte.TryParse(tokenParts[1], out var isAdmin))
-                return (null, false, true);
+                || !ulong.TryParse(tokenParts[1], out var userTypeId)
+                || !Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == userTypeId))
+                return (null, null, true);
 
-            return (userId, isAdmin > 0, !_crypter.Encrypt($"{userId}_{isAdmin}").Equals(tokenParts[2]));
+            return (userId, userTypeId, !_crypter.Encrypt($"{userId}_{userTypeId}").Equals(tokenParts[2]));
         }
 
-        private static bool IsAuthorized(AuthenticationLevel level,
-            ulong? id, bool isAdmin, bool isFaulted)
+        private static bool IsAuthorized(
+            UserTypes? expectedMinimalUserType,
+            ulong? actualUserId,
+            ulong? actualUserTypeId,
+            bool cookieIsFaulted)
         {
-            if (level == AuthenticationLevel.None)
+            // A faulted cookie is allowed in that case
+            if (!expectedMinimalUserType.HasValue)
                 return true;
 
-            return !isFaulted
-                && id.HasValue
-                && (isAdmin || level != AuthenticationLevel.AdminAuthenticated);
+            return !cookieIsFaulted
+                && actualUserId.HasValue
+                && actualUserTypeId.HasValue
+                && actualUserTypeId >= (ulong)expectedMinimalUserType.Value;
         }
     }
 }

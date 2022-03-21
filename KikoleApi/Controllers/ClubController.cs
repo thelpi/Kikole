@@ -20,7 +20,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Club>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<IReadOnlyCollection<Club>>> GetClubsAsync()
@@ -33,7 +33,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPost]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(UserTypes.PowerUser)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]

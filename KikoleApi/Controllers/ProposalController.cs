@@ -41,7 +41,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("proposal-charts")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(ProposalChart), (int)HttpStatusCode.OK)]
         public ActionResult<ProposalChart> GetProposalChart()
         {
@@ -49,7 +49,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("club-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -61,7 +61,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("year-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -73,7 +73,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("name-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -85,7 +85,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("country-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -97,7 +97,7 @@ namespace KikoleApi.Controllers
         }
         
         [HttpPut("position-proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -109,7 +109,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("proposals")]
-        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]

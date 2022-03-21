@@ -1,15 +1,21 @@
 ﻿using System;
+using KikoleApi.Models;
 
 namespace KikoleApi.Controllers.Filters
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class AuthenticationLevelAttribute : Attribute
     {
-        public AuthenticationLevel Level { get; }
+        public UserTypes? UserType { get; }
 
-        public AuthenticationLevelAttribute(AuthenticationLevel level)
+        public AuthenticationLevelAttribute(UserTypes userType)
         {
-            Level = level;
+            UserType = userType;
+        }
+
+        public AuthenticationLevelAttribute()
+        {
+            UserType = null;
         }
     }
 }

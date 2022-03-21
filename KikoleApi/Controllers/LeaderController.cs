@@ -37,7 +37,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("today-leaders")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetTodayLeadersAsync()
         {
@@ -68,7 +68,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("leaders-computing")]
-        [AuthenticationLevel(AuthenticationLevel.AdminAuthenticated)]
+        [AuthenticationLevel(UserTypes.Administrator)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> RecomputeLeadersAsync()
         {
@@ -139,7 +139,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("leaders")]
-        [AuthenticationLevel(AuthenticationLevel.None)]
+        [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetLeadersAsync(
             [FromQuery] DateTime? minimalDate,
