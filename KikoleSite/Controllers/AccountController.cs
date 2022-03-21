@@ -56,6 +56,67 @@ namespace KikoleSite.Controllers
                         model.Error = value;
                 }
             }
+            else if (submitFrom == "getloginquestion")
+            {
+                if (string.IsNullOrWhiteSpace(model.LoginRecoverySubmission))
+                {
+                    model.Error = "Invalid form values";
+                }
+                else
+                {
+                    // get question from login
+                    var (ok, msg) = await _apiProvider
+                        .GetLoginQuestionAsync(model.LoginRecoverySubmission)
+                        .ConfigureAwait(false);
+                    if (ok)
+                        model.QuestionRecovery = msg;
+                    else
+                        model.Error = msg;
+                }
+            }
+            else if (submitFrom == "resetpassword")
+            {
+                if (string.IsNullOrWhiteSpace(model.LoginRecoverySubmission)
+                    || string.IsNullOrWhiteSpace(model.RecoveryACreate)
+                    || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
+                    || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
+                {
+                    model.Error = "Invalid form values";
+                }
+                else
+                {
+                    var response = await _apiProvider
+                        .ResetPasswordAsync(model.LoginRecoverySubmission, model.RecoveryACreate, model.PasswordCreate1Submission)
+                        .ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(response))
+                        model.Error = response;
+                    else
+                        model.SuccessInfo = "Password has been reset";
+                }
+            }
+            else if (submitFrom == "resetqanda")
+            {
+                if (string.IsNullOrWhiteSpace(model.RecoveryQCreate)
+                    || string.IsNullOrWhiteSpace(model.RecoveryACreate))
+                {
+                    model.Error = "Invalid form values";
+                }
+                else
+                {
+                    var (token, login) = this.GetAuthenticationCookie();
+                    var response = await _apiProvider
+                        .ChangeQAndAAsync(token, model.RecoveryQCreate, model.RecoveryACreate)
+                        .ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(response))
+                        model.Error = response;
+                    else
+                    {
+                        model.SuccessInfo = "Q and A updated";
+                        model.IsAuthenticated = true;
+                        model.Login = login;
+                    }
+                }
+            }
             else if (submitFrom == "create")
             {
                 if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)

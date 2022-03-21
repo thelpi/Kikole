@@ -19,5 +19,7 @@ namespace KikoleApi.Interfaces
         Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync();
 
         Task<UserDto> GetUserByIdAsync(ulong userId);
+
+        Task ResetUserQAndAAsync(ulong userId, string question, string anwser);
     }
 }

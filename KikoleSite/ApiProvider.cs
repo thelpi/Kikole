@@ -295,6 +295,47 @@ namespace KikoleSite
                 : $"Invalid response: {response.StatusCode}";
         }
 
+        public async Task<string> ChangeQAndAAsync(string authToken,
+            string question, string answer)
+        {
+            var response = await SendAsync(
+                    $"user-questions?question={question}&answer={answer}",
+                    HttpMethod.Patch,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"Invalid response: {response.StatusCode}";
+        }
+
+        public async Task<string> ResetPasswordAsync(string login,
+            string answer, string newPassword)
+        {
+            var response = await SendAsync(
+                    $"reset-passwords?login={login}&answer={answer}&newPassword={newPassword}",
+                    HttpMethod.Patch)
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"Invalid response: {response.StatusCode}";
+        }
+
+        public async Task<(bool, string)> GetLoginQuestionAsync(string login)
+        {
+            var response = await SendAsync(
+                    $"users/{login}/questions",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return (false, $"Invalid response: {response.StatusCode}");
+
+            return (true, await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false));
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
         {

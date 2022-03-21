@@ -182,7 +182,52 @@ namespace KikoleApi.Controllers
             return NoContent();
         }
 
-        // TODO: reset password with q&a
+        [HttpPatch("/user-questions")]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateUserQAndA([FromQuery] ulong userId,
+            [FromQuery] string question,
+            [FromQuery] string answer)
+        {
+            if (userId == 0
+                || string.IsNullOrWhiteSpace(question)
+                || string.IsNullOrWhiteSpace(answer))
+                return BadRequest();
+
+            await _userRepository
+                .ResetUserQAndAAsync(userId, question, _crypter.Encrypt(answer))
+                .ConfigureAwait(false);
+
+            return NoContent();
+        }
+
+        [HttpPatch("/reset-passwords")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> ResetPasswordAsync([FromQuery] string login,
+            [FromQuery] string answer, [FromQuery] string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(login)
+                || string.IsNullOrWhiteSpace(answer)
+                || string.IsNullOrWhiteSpace(newPassword))
+                return BadRequest();
+
+            var response = await _userRepository
+                .ResetUserUnknownPasswordAsync(
+                    login,
+                    _crypter.Encrypt(answer),
+                    _crypter.Encrypt(newPassword))
+                .ConfigureAwait(false);
+
+            if (!response)
+                return Forbid();
+
+            return NoContent();
+        }
 
         [HttpGet("{userId}/stats")]
         [ProducesResponseType(typeof(UserStat), (int)HttpStatusCode.OK)]
@@ -388,6 +433,26 @@ namespace KikoleApi.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        [HttpGet("{login}/questions")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<string>> GetLoginQuestionAsync([FromRoute] string login)
+        {
+            if (string.IsNullOrWhiteSpace(login))
+                return BadRequest();
+
+            var user = await _userRepository
+                .GetUserByLoginAsync(login)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(user.PasswordResetQuestion);
         }
 
         private async Task<PlayerDto> GetPlayerOfTheDayFromCacheAsync(Dictionary<DateTime, PlayerDto> playersCache, DateTime currentDate)

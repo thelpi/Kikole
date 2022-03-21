@@ -44,5 +44,11 @@ namespace KikoleSite
         Task<bool> IsAdminAsync(string authToken);
 
         Task<string> ChangePasswordAsync(string authToken, string currentPassword, string newPassword);
+
+        Task<string> ChangeQAndAAsync(string authToken, string question, string answer);
+
+        Task<string> ResetPasswordAsync(string login, string answer, string newPassword);
+
+        Task<(bool, string)> GetLoginQuestionAsync(string login);
     }
 }

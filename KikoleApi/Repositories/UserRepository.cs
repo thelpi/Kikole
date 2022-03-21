@@ -78,6 +78,21 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task ResetUserQAndAAsync(ulong userId, string question, string anwser)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE users " +
+                    "SET password_reset_question = @question, password_reset_answer = @anwser " +
+                    "WHERE id = @userId",
+                    new
+                    {
+                        userId,
+                        question,
+                        anwser
+                    })
+                .ConfigureAwait(false);
+        }
+
         private async Task<bool> ResetUserPasswordAsync(string login, (string, string) fieldInfo, string newPassword)
         {
             var user = await GetDtoAsync<UserDto>(

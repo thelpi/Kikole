@@ -19,5 +19,9 @@
 
         public string Error { get; set; }
         public string SuccessInfo { get; set; }
+
+
+        public string LoginRecoverySubmission { get; set; }
+        public string QuestionRecovery { get; set; }
     }
 }

@@ -33,6 +33,19 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
         </div>
         <input type="submit" value="Update" name="submit-changepassword" />
     </form>
+
+    <h3>Change recovery Q and A</h3>
+    <form method="post" action="/Account">
+        <div>
+            <label style="width: 200px">Password recovery Q:</label>
+            @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">Password recovery A:</label>
+            @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
+        </div>
+        <input type="submit" value="Update" name="submit-resetqanda" />
+    </form>
 }
 else
 {
@@ -70,9 +83,46 @@ else
         <div style="font-size: small">Optionnal, but if you lose your password, the answer to this question might save you!</div>
         <div>
             <label style="width: 200px">Password recovery A:</label>
-            @Html.TextBoxFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
+            @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
         </div>
         <div style="font-size: small">Optionnal, answer to the question above.</div>
         <input type="submit" value="Create" name="submit-create" />
+    </form>
+
+    <h3>Change forgotten password with secret question</h3>
+    <form method="post" action="/Account">
+        @if (string.IsNullOrWhiteSpace(Model.QuestionRecovery))
+        {
+            <div>
+                <label style="width: 200px">Login to recover:</label>
+                @Html.TextBoxFor(m => m.LoginRecoverySubmission, new { @style = "width: 200px" })
+            </div>
+            <input type="submit" value="Update" name="submit-getloginquestion" />
+        }
+        else
+        {
+            <div>
+                <label style="width: 200px">Login to recover:</label>
+                <label style="width: 200px">@Model.LoginRecoverySubmission</label>
+                @Html.HiddenFor(m => m.LoginRecoverySubmission)
+            </div>
+            <div>
+                <label style="width: 200px">Question:</label>
+                <label style="width: 200px">@Model.QuestionRecovery</label>
+            </div>
+            <div>
+                <label style="width: 200px">Answer:</label>
+                @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
+            </div>
+            <div>
+                <label style="width: 200px">New password:</label>
+                @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
+            </div>
+            <div>
+                <label style="width: 200px">Repeat new password:</label>
+                @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
+            </div>
+            <input type="submit" value="Update" name="submit-resetpassword" />
+        }
     </form>
 }
