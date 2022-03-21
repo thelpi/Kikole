@@ -38,7 +38,9 @@ namespace KikoleApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> CreatePlayerAsync([FromBody] PlayerRequest request)
+        public async Task<IActionResult> CreatePlayerAsync(
+            [FromBody] PlayerRequest request,
+            [FromQuery] ulong userId)
         {
             if (request == null)
                 return BadRequest("Invalid request: null");
@@ -56,7 +58,7 @@ namespace KikoleApi.Controllers
             }
 
             var playerId = await _playerRepository
-                .CreatePlayerAsync(request.ToDto())
+                .CreatePlayerAsync(request.ToDto(userId))
                 .ConfigureAwait(false);
 
             if (playerId == 0)

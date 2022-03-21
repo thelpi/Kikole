@@ -58,7 +58,7 @@ namespace KikoleApi.Models.Requests
             return null;
         }
 
-        internal PlayerDto ToDto()
+        internal PlayerDto ToDto(ulong userId)
         {
             return new PlayerDto
             {
@@ -68,7 +68,8 @@ namespace KikoleApi.Models.Requests
                 YearOfBirth = YearOfBirth,
                 AllowedNames = AllowedNames.SanitizeJoin(Name),
                 Clue = Clue,
-                PositionId = (ulong)Position
+                PositionId = (ulong)Position,
+                CreationUserId = userId
             };
         }
 

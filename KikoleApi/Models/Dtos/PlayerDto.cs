@@ -19,5 +19,7 @@ namespace KikoleApi.Models.Dtos
         public ulong? BadgeId { get; set; }
 
         public ulong PositionId { get; set; }
+
+        public ulong CreationUserId { get; set; }
     }
 }
