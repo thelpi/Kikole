@@ -274,20 +274,16 @@ namespace KikoleSite
 
         public async Task<bool> IsPowerUserAsync(string authToken)
         {
-            var response = await SendAsync(
-                    "user-types", HttpMethod.Get, authToken)
+            return await IsTypeOfUserAsync(
+                    authToken, UserTypes.PowerUser)
                 .ConfigureAwait(false);
+        }
 
-            if (!response.IsSuccessStatusCode)
-                return false;
-
-            var value = await GetResponseContentAsync<string>(response)
+        public async Task<bool> IsAdminUserAsync(string authToken)
+        {
+            return await IsTypeOfUserAsync(
+                    authToken, UserTypes.Administrator)
                 .ConfigureAwait(false);
-
-            return value != null
-                && ulong.TryParse(value, out var id)
-                && Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == id)
-                && id > (ulong)UserTypes.StandardUser;
         }
 
         public async Task<string> ChangePasswordAsync(string authToken,
@@ -383,6 +379,24 @@ namespace KikoleSite
             return typeof(T) == typeof(string)
                 ? (T)Convert.ChangeType(content, typeof(T))
                 : JsonConvert.DeserializeObject<T>(content);
+        }
+
+        private async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)
+        {
+            var response = await SendAsync(
+                    "user-types", HttpMethod.Get, authToken)
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                return false;
+
+            var value = await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false);
+
+            return value != null
+                && ulong.TryParse(value, out var id)
+                && Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == id)
+                && id >= (ulong)minimalType;
         }
     }
 }

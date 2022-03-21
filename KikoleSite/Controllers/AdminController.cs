@@ -119,9 +119,13 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
+            var isAdmin = await _apiProvider
+                .IsAdminUserAsync(token)
+                .ConfigureAwait(false);
+
             var req = new PlayerRequest
             {
-                SetLatestProposalDate = true,
+                SetLatestProposalDate = isAdmin,
                 AllowedNames = names,
                 Clubs = clubs,
                 Clue = model.Clue,

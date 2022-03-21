@@ -11,10 +11,14 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 
     <form method="post" action="/Admin">
         <div style="margin-top: 20px">
-            <div>Name</div>
+            <div><label>Name</label></div>
+            <div style="font-size: smaller">(use english Wikipedia page title)</div>
             <input type="text" name="Name" style="width: 250px" />
         </div>
 
+        <div><label>Alternative names</label></div>
+        <div style="font-size: smaller">(at least the last name without the first name, and few alternatives of your choice)</div>
+        <div style="font-size: smaller">(don't mind diacritics, it will be considered equal)</div>
         @for (var i = 0; i < 10; i++)
         {
             var name = $"AlternativeName{i}";
@@ -24,12 +28,13 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         }
 
         <div style="margin-top: 20px">
-            <div>Year of birth</div>
+            <div><label>Year of birth</label></div>
             <input type="text" name="YearOfBirth" style="width: 100px" />
         </div>
 
         <div style="margin-top: 20px">
-            <div>Nationality</div>
+            <div><label>Nationality</label></div>
+            <div style="font-size: smaller">(keep in mind it's the country, not the int. selection)</div>
             <script>
                 $(function () {
                     $("#countryName").autocomplete({
@@ -63,19 +68,22 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         </div>
 
         <div style="margin-top: 20px">
-            <div>Clue</div>
+            <div><label>Clue</label></div>
+            <div style="font-size: smaller">(might be edited by the administrator)</div>
             <input type="text" name="Clue" style="width: 300px" />
         </div>
 
         <div style="margin-top: 20px">
-            <div>Position</div>
+            <div><label>Position</label></div>
+            <div style="font-size: smaller">(avoid players with ambiguous position)</div>
             @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
         </div>
 
         <div style="margin-top: 20px">
-            <div>Clubs</div>
+            <div><label>Clubs career</label></div>
+            <div style="font-size: smaller">(in chronological order, senior career only)</div>
             <div>
-                <a href="/Admin/Club" target="_blank">Add club (new tab)</a>
+                <a href="/Admin/Club" target="_blank">Add club (open a new tab, you will not lose this page)</a>
             </div>
             @for (var i = 0; i < 10; i++)
             {
@@ -109,6 +117,8 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                 </div>
             }
         </div>
+        <div style="font-size: smaller">(if more than 10 clubs, reconsider your player or ignore pointless clubs)</div>
+        <div style="font-size: smaller">(do NOT set twice a club in case of come-back: ignore the come-back)</div>
 
         <div style="margin-top: 10px">
             <input type="submit" name="submit-club" value="Create player" />

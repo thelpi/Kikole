@@ -43,6 +43,8 @@ namespace KikoleSite
 
         Task<bool> IsPowerUserAsync(string authToken);
 
+        Task<bool> IsAdminUserAsync(string authToken);
+
         Task<string> ChangePasswordAsync(string authToken, string currentPassword, string newPassword);
 
         Task<string> ChangeQAndAAsync(string authToken, string question, string answer);
