@@ -55,7 +55,10 @@
         <div style="margin-top: 5px; background-color: @color">
             <div style="color: forestgreen; font-size: large">@badge.Name</div>
             <div>@badge.Description</div>
-            <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
+            @if (!badge.Hidden)
+            {
+                <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
+            }
             @if (@badge.Users == 1)
             {
                 <div>You're the <span style="color: crimson">only one</span> with this badge!</div>
