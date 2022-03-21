@@ -11,54 +11,68 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
 
 @if (Model.IsAuthenticated)
 {
-    <fieldset style="margin-top: 10px">
-        <form method="post" action="/Account">
-            <div>You're logged under the account <span style="color:crimson">@Model.Login</span></div>
-            <input type="submit" value="Logout" name="submit-logoff" />
-        </form>
-    </fieldset>
+    <h3>Log out</h3>
+    <form method="post" action="/Account">
+        <div>You're logged under the account <span style="color:crimson">@Model.Login</span></div>
+        <input type="submit" value="Log out" name="submit-logoff" />
+    </form>
+
+    <h3>Change password</h3>
+    <form method="post" action="/Account">
+        <div>
+            <label style="width: 200px">Current password:</label>
+            @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">New password:</label>
+            @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">Repeat new password:</label>
+            @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
+        </div>
+        <input type="submit" value="Update" name="submit-changepassword" />
+    </form>
 }
 else
 {
-    <fieldset title="Connection" style="margin-top: 10px">
-        <form method="post" action="/Account">
-            <div>
-                <label style="width: 200px">Login:</label>
-                @Html.TextBoxFor(m => m.LoginSubmission, new { @style = "width: 200px" })
-            </div>
-            <div>
-                <label style="width: 200px">Password:</label>
-                @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
-            </div>
-            <input type="submit" value="Login" name="submit-login" />
-        </form>
-    </fieldset>
+    <h3>Log in</h3>
+    <form method="post" action="/Account">
+        <div>
+            <label style="width: 200px">Login:</label>
+            @Html.TextBoxFor(m => m.LoginSubmission, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">Password:</label>
+            @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
+        </div>
+        <input type="submit" value="Login" name="submit-login" />
+    </form>
 
-    <fieldset title="Create an account" style="margin-top: 50px">
-        <form method="post" action="/Account">
-            <div>
-                <label style="width: 200px">Login:</label>
-                @Html.TextBoxFor(m => m.LoginCreateSubmission, new { @style = "width: 200px" })
-            </div>
-            <div>
-                <label style="width: 200px">Password:</label>
-                @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
-            </div>
-            <div>
-                <label style="width: 200px">Repeat password:</label>
-                @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
-            </div>
-            <div>
-                <label style="width: 200px">Password recovery Q:</label>
-                @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
-            </div>
-            <div style="font-size: small">Optionnal, but if you lose your password, the answer to this question might save you!</div>
-            <div>
-                <label style="width: 200px">Password recovery A:</label>
-                @Html.TextBoxFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
-            </div>
-            <div style="font-size: small">Optionnal, answer to the question above.</div>
-            <input type="submit" value="Create" name="submit-create" />
-        </form>
-    </fieldset>
+    <h3>Create an account</h3>
+    <form method="post" action="/Account">
+        <div>
+            <label style="width: 200px">Login:</label>
+            @Html.TextBoxFor(m => m.LoginCreateSubmission, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">Password:</label>
+            @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">Repeat password:</label>
+            @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
+        </div>
+        <div>
+            <label style="width: 200px">Password recovery Q:</label>
+            @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
+        </div>
+        <div style="font-size: small">Optionnal, but if you lose your password, the answer to this question might save you!</div>
+        <div>
+            <label style="width: 200px">Password recovery A:</label>
+            @Html.TextBoxFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
+        </div>
+        <div style="font-size: small">Optionnal, answer to the question above.</div>
+        <input type="submit" value="Create" name="submit-create" />
+    </form>
 }

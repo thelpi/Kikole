@@ -281,6 +281,20 @@ namespace KikoleSite
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<string> ChangePasswordAsync(string authToken,
+            string currentPassword, string newPassword)
+        {
+            var response = await SendAsync(
+                    $"user-passwords?oldp={currentPassword}&newp={newPassword}",
+                    HttpMethod.Put,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"Invalid response: {response.StatusCode}";
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
         {

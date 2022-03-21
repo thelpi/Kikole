@@ -42,5 +42,7 @@ namespace KikoleSite
         Task<string> GetCurrentMessageAsync();
 
         Task<bool> IsAdminAsync(string authToken);
+
+        Task<string> ChangePasswordAsync(string authToken, string currentPassword, string newPassword);
     }
 }

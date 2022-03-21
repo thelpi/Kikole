@@ -34,7 +34,7 @@ namespace KikoleSite.Controllers
                 this.ResetAuthenticationCookie();
                 model = new AccountModel();
             }
-            else if (submitFrom == "login")
+            else if (submitFrom == "login" || model.ForceLoginAction)
             {
                 if (string.IsNullOrWhiteSpace(model.LoginSubmission)
                     || string.IsNullOrWhiteSpace(model.PasswordSubmission))
@@ -60,7 +60,6 @@ namespace KikoleSite.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)
                     || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
-                    || string.IsNullOrWhiteSpace(model.PasswordCreate2Submission)
                     || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
                 {
                     model.Error = "Invalid form values";
@@ -79,12 +78,36 @@ namespace KikoleSite.Controllers
                     }
                     else
                     {
-                        model = new AccountModel
+                        return await Index(new AccountModel
                         {
-                            SuccessInfo = "You can now login with this account",
                             LoginSubmission = model.LoginCreateSubmission,
-                            PasswordSubmission = model.PasswordCreate1Submission
-                        };
+                            PasswordSubmission = model.PasswordCreate1Submission,
+                            ForceLoginAction = true
+                        }).ConfigureAwait(false);
+                    }
+                }
+            }
+            else if (submitFrom == "changepassword")
+            {
+                if (string.IsNullOrWhiteSpace(model.PasswordSubmission)
+                    || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
+                    || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
+                {
+                    model.Error = "Invalid form values";
+                }
+                else
+                {
+                    var (token, login) = this.GetAuthenticationCookie();
+                    var response = await _apiProvider
+                        .ChangePasswordAsync(token, model.PasswordSubmission, model.PasswordCreate1Submission)
+                        .ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(response))
+                        model.Error = response;
+                    else
+                    {
+                        model.IsAuthenticated = true;
+                        model.Login = login;
+                        model.SuccessInfo = "Your password has been changed";
                     }
                 }
             }

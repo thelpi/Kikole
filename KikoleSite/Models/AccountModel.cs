@@ -15,6 +15,8 @@
         public string RecoveryQCreate { get; set; }
         public string RecoveryACreate { get; set; }
 
+        public bool ForceLoginAction { get; set; }
+
         public string Error { get; set; }
         public string SuccessInfo { get; set; }
     }

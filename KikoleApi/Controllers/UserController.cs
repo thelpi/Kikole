@@ -149,7 +149,39 @@ namespace KikoleApi.Controllers
             return $"{existingUser.Id}_{existingUser.IsAdmin}_{encryptedCookiePart}";
         }
 
-        // TODO: change password
+        [HttpPut("/user-passwords")]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
+        public async Task<IActionResult> ChangePasswordAsync([FromQuery] ulong userId,
+            [FromQuery] string oldp, [FromQuery] string newp)
+        {
+            if (userId == 0 || string.IsNullOrWhiteSpace(oldp) || string.IsNullOrWhiteSpace(newp))
+                return BadRequest();
+
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return NotFound();
+
+            var success = await _userRepository
+                .ResetUserKnownPasswordAsync(
+                    user.Login,
+                    _crypter.Encrypt(oldp),
+                    _crypter.Encrypt(newp))
+                .ConfigureAwait(false);
+
+            if (!success)
+                return Forbid();
+
+            return NoContent();
+        }
+
         // TODO: reset password with q&a
 
         [HttpGet("{userId}/stats")]
