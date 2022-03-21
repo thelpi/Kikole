@@ -144,9 +144,11 @@ namespace KikoleApi.Controllers
             if (!_crypter.Encrypt(password).Equals(existingUser.Password))
                 return Unauthorized();
 
-            var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{existingUser.IsAdmin}");
+            var isAdmin = existingUser.UserTypeId == (ulong)UserTypes.Administrator ? 1 : 0;
 
-            return $"{existingUser.Id}_{existingUser.IsAdmin}_{encryptedCookiePart}";
+            var encryptedCookiePart = _crypter.Encrypt($"{existingUser.Id}_{isAdmin}");
+
+            return $"{existingUser.Id}_{isAdmin}_{encryptedCookiePart}";
         }
 
         [HttpPut("/user-passwords")]
@@ -429,7 +431,7 @@ namespace KikoleApi.Controllers
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
-            if (user == null || user.IsAdmin != 1)
+            if (user == null || user.UserTypeId != (ulong)UserTypes.Administrator)
                 return NotFound();
 
             return NoContent();

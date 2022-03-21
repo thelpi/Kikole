@@ -211,7 +211,7 @@ namespace KikoleApi.Controllers
                         .GetUserByIdAsync(userId)
                         .ConfigureAwait(false);
 
-                    if (user.IsAdmin == 0)
+                    if (user.UserTypeId != (ulong)UserTypes.Administrator)
                     {
                         var leader = new LeaderDto
                         {

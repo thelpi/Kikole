@@ -43,11 +43,12 @@ namespace KikoleApi.Models.Requests
 
             return new UserDto
             {
-                LanguageId = (ulong)(Language ?? Models.Languages.en),
+                LanguageId = (ulong)(Language ?? Languages.en),
                 Login = Login.Sanitize(),
                 Password = crypter.Encrypt(Password),
                 PasswordResetAnswer = crypter.Encrypt(realPasswordResetAnswer),
-                PasswordResetQuestion = realPasswordResetQuestion
+                PasswordResetQuestion = realPasswordResetQuestion,
+                UserTypeId = (ulong)UserTypes.StandardUser
             };
         }
     }

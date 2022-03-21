@@ -21,6 +21,7 @@ namespace KikoleApi.Repositories
                     ("password_reset_question", user.PasswordResetQuestion),
                     ("password_reset_answer", user.PasswordResetAnswer),
                     ("language_id", user.LanguageId),
+                    ("user_type_id", user.UserTypeId),
                     ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
         }
@@ -64,9 +65,10 @@ namespace KikoleApi.Repositories
 
         public async Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync()
         {
-            return await GetDtosAsync<UserDto>("users",
-                    ("is_disabled", 0),
-                    ("is_admin", 0))
+            return await ExecuteReaderAsync<UserDto>(
+                    "SELECT * FROM users " +
+                    "WHERE is_disabled = 0 AND user_type_id != @adminId",
+                    new { adminId = (ulong)Models.UserTypes.Administrator })
                 .ConfigureAwait(false);
         }
 

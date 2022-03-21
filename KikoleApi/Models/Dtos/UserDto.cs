@@ -12,6 +12,6 @@
 
         public ulong LanguageId { get; set; }
 
-        public byte IsAdmin { get; set; }
+        public ulong UserTypeId { get; set; }
     }
 }

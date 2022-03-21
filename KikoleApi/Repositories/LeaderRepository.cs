@@ -39,10 +39,11 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<LeaderDto>(
                     $"SELECT * FROM leaders " +
                     $"WHERE DATE(proposal_date) = @date " +
-                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR is_admin = 1)",
+                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR user_type_id = @adminId)",
                     new
                     {
-                        date.Date
+                        date.Date,
+                        adminId = (ulong)UserTypes.Administrator
                     })
                 .ConfigureAwait(false);
         }
@@ -52,10 +53,11 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<LeaderDto>(
                     $"SELECT * FROM leaders " +
                     $"WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) "+
-                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR is_admin = 1)",
+                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR user_type_id = @adminId)",
                     new
                     {
-                        minimal_date = minimalDate
+                        minimal_date = minimalDate,
+                        adminId = (ulong)UserTypes.Administrator
                     })
                 .ConfigureAwait(false);
         }
