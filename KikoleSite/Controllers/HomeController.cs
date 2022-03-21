@@ -20,6 +20,12 @@ namespace KikoleSite.Controllers
             _apiProvider = apiProvider;
         }
 
+        public IActionResult Error()
+        {
+            this.ResetAuthenticationCookie();
+            return RedirectToAction("Index", "Home");
+        }
+
         public async Task<IActionResult> Index(
             [FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
