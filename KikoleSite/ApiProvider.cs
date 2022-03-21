@@ -398,5 +398,19 @@ namespace KikoleSite
                 && Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == id)
                 && id >= (ulong)minimalType;
         }
+
+        public async Task<PlayerCreator> IsPlayerOfTheDayUser(
+            DateTime proposalDate, string authToken)
+        {
+            var response = await SendAsync(
+                    $"player-of-the-day-users?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<PlayerCreator>(
+                    response, () => null)
+                .ConfigureAwait(false);
+        }
     }
 }

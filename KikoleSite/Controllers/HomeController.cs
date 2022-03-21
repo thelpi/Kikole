@@ -51,8 +51,12 @@ namespace KikoleSite.Controllers
 
             var proposalDate = DateTime.Now.Date.AddDays(-model.CurrentDay);
 
+            var playerCreator = await _apiProvider
+                .IsPlayerOfTheDayUser(proposalDate, token)
+                .ConfigureAwait(false);
+
             if (!string.IsNullOrWhiteSpace(token))
-                await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
+                await SetModelFromApiAsync(model, proposalDate, token, playerCreator).ConfigureAwait(false);
 
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
@@ -66,7 +70,7 @@ namespace KikoleSite.Controllers
                 .GetCurrentMessageAsync()
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg);
+            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login);
         }
 
         [HttpPost]
@@ -103,7 +107,12 @@ namespace KikoleSite.Controllers
 
             var proposalDate = now.Date.AddDays(-model.CurrentDay);
 
-            await SetModelFromApiAsync(model, proposalDate, token).ConfigureAwait(false);
+            var playerCreator = await _apiProvider
+                .IsPlayerOfTheDayUser(proposalDate, token)
+                .ConfigureAwait(false);
+
+            await SetModelFromApiAsync(model, proposalDate, token, playerCreator)
+                .ConfigureAwait(false);
 
             var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
 
@@ -113,7 +122,7 @@ namespace KikoleSite.Controllers
                 .GetCurrentMessageAsync()
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg);
+            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login);
         }
 
         [HttpPost]
@@ -140,9 +149,10 @@ namespace KikoleSite.Controllers
             return Json(clubs.Select(x => x.Name));
         }
 
-        private IActionResult ViewWithFullModel(HomeModel model,
-            string login, string clue, ProposalChart chart, string message)
+        private IActionResult ViewWithFullModel(HomeModel model, string login,
+            string clue, ProposalChart chart, string message, string creator)
         {
+            model.PlayerCreator = creator;
             model.Message = message;
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }
@@ -164,8 +174,14 @@ namespace KikoleSite.Controllers
         }
 
         private async Task SetModelFromApiAsync(HomeModel model,
-            DateTime proposalDate, string authToken)
+            DateTime proposalDate, string authToken, PlayerCreator pc)
         {
+            if (!string.IsNullOrWhiteSpace(pc?.PlayeName))
+            {
+                model.SetFinalFormIsUserIsCreator(pc.PlayeName);
+                return;
+            }
+
             var proposals = await _apiProvider
                 .GetProposalsAsync(proposalDate, authToken)
                 .ConfigureAwait(false);

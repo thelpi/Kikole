@@ -10,6 +10,7 @@ namespace KikoleSite.Models
     {
         public string Clue { get; set; }
         public string Message { get; set; }
+        public string PlayerCreator { get; set; }
 
         public ProposalChart Chart { get; set; }
         public int Points { get; set; }
@@ -29,6 +30,7 @@ namespace KikoleSite.Models
         public string LoggedAs { get; set; }
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }
+        public bool IsCreator { get; set; }
 
         public IReadOnlyList<string> IncorrectClubs { get; set; }
         public IReadOnlyList<string> IncorrectCountries { get; set; }
@@ -52,6 +54,12 @@ namespace KikoleSite.Models
                 case ProposalType.Position: return PositionSubmission;
                 default: return null;
             }
+        }
+
+        internal void SetFinalFormIsUserIsCreator(string playerName)
+        {
+            PlayerName = playerName;
+            IsCreator = true;
         }
 
         internal void SetPropertiesFromProposal(ProposalResponse response,

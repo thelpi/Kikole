@@ -42,6 +42,32 @@ namespace KikoleApi.Controllers
             _crypter = crypter;
         }
 
+        [HttpGet("/player-of-the-day-users")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(PlayerCreator), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<ActionResult<PlayerCreator>> GetPlayerOfTheDayFromUserAsync(
+            [FromQuery] ulong userId, [FromQuery] DateTime proposalDate)
+        {
+            var p = await _playerRepository
+                .GetPlayerOfTheDayAsync(proposalDate.Date)
+                .ConfigureAwait(false);
+
+            var u = await _userRepository
+                .GetUserByIdAsync(p.CreationUserId)
+                .ConfigureAwait(false);
+
+            return Ok(new PlayerCreator
+            {
+                Login = u.UserTypeId == (ulong)UserTypes.PowerUser
+                    ? u.Login
+                    : null,
+                PlayeName = p.CreationUserId == userId
+                    ? p.Name
+                    : null
+            });
+        }
+
         [HttpGet("known-players")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]

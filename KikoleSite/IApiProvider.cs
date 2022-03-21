@@ -52,5 +52,7 @@ namespace KikoleSite
         Task<string> ResetPasswordAsync(string login, string answer, string newPassword);
 
         Task<(bool, string)> GetLoginQuestionAsync(string login);
+
+        Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate, string authToken);
     }
 }

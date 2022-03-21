@@ -6,6 +6,12 @@
             @Model.Message
         </div>
     }
+    @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
+    {
+        <div style="margin-top: 20px; font-size: large">
+            <span style="color: crimson">@Model.PlayerCreator</span> has challenged you to find the player of the day!
+        </div>
+    }
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         <fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
@@ -46,7 +52,13 @@
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
         {
-            if (Model.CurrentDay == 0)
+            if (Model.IsCreator)
+            {
+                <div style="margin-top: 5px">
+                    <label>Today's player is <span style="font-style: italic; color:crimson">@Model.PlayerName</span></label>
+                </div>
+            }
+            else if (Model.CurrentDay == 0)
             {
                 <div style="margin-top: 5px">
                     <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
