@@ -249,6 +249,39 @@ namespace KikoleApi.Controllers
                             }
                         }
 
+                        var leaders = await _leaderRepository
+                            .GetLeadersAtDateAsync(request.ProposalDate.Date)
+                            .ConfigureAwait(false);
+
+                        foreach (var badge in BadgeHelper.LeadersBasedBadgeCondition.Keys)
+                        {
+                            var hasBadgeNotAlone = BadgeHelper.LeadersBasedBadgeNonUniqueCondition[badge](leader, leaders);
+                            if (hasBadgeNotAlone)
+                            {
+                                var badgeOwners = await _badgeRepository
+                                    .GetUsersOfTheDayWithBadgeAsync((ulong)badge, request.ProposalDate)
+                                    .ConfigureAwait(false);
+
+                                foreach (var bo in badgeOwners)
+                                {
+                                    await _badgeRepository
+                                        .RemoveUserBadgeAsync(new UserBadgeDto
+                                        {
+                                            BadgeId = (ulong)badge,
+                                            UserId = bo.UserId
+                                        })
+                                        .ConfigureAwait(false);
+                                }
+                                
+                                if (BadgeHelper.LeadersBasedBadgeCondition[badge](leader, leaders))
+                                {
+                                    await InsertBadgeIfNotAlreadyAsync(
+                                             request, userId, badge)
+                                         .ConfigureAwait(false);
+                                }
+                            }
+                        }
+
                         // TODO: duplicate code
                         // and not a good way to filter history
                         var myHistory = leadersHistory

@@ -13,6 +13,19 @@ namespace KikoleApi.Helpers
             {
                 {
                     Badges.OverTheTopPart1,
+                    (l, ls) => l.Time == ls.Min(_ => _.Time) && ls.Count(_ => _.Time == l.Time) == 1
+                },
+                {
+                    Badges.OverTheTopPart2,
+                    (l, ls) => l.Points == ls.Max(_ => _.Points) && ls.Count(_ => _.Points == l.Points) == 1
+                }
+            };
+
+        internal static IReadOnlyDictionary<Badges, Func<LeaderDto, IReadOnlyCollection<LeaderDto>, bool>> LeadersBasedBadgeNonUniqueCondition
+            = new Dictionary<Badges, Func<LeaderDto, IReadOnlyCollection<LeaderDto>, bool>>
+            {
+                {
+                    Badges.OverTheTopPart1,
                     (l, ls) => l.Time == ls.Min(_ => _.Time)
                 },
                 {

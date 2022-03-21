@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
@@ -32,6 +33,15 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateTime date)
+        {
+            return await GetDtosAsync<UserBadgeDto>(
+                    "user_badges",
+                    ("badge_id", badgeId),
+                    ("get_date", date.Date))
+                .ConfigureAwait(false);
+        }
+
         public async Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId)
         {
             var data = await GetDtoAsync<UserBadgeDto>(
@@ -53,8 +63,21 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
 
             await ExecuteNonQueryAsync(
-                    "UPDATE badges SET users = users + 1 WHERE id = @id",
-                    new { id = userBadge.BadgeId })
+                    "UPDATE badges SET users = users + 1 WHERE id = @BadgeId",
+                    new { userBadge.BadgeId })
+                .ConfigureAwait(false);
+        }
+
+        public async Task RemoveUserBadgeAsync(UserBadgeDto userBadge)
+        {
+            await ExecuteNonQueryAsync(
+                    "DELETE FROM user_badges WHERE badge_id = @BadgeId AND user_id = @UserId",
+                    new { userBadge.BadgeId, userBadge.UserId })
+                .ConfigureAwait(false);
+
+            await ExecuteNonQueryAsync(
+                    "UPDATE badges SET users = users - 1 WHERE id = @BadgeId",
+                    new { userBadge.BadgeId })
                 .ConfigureAwait(false);
         }
 
