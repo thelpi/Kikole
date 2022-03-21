@@ -49,34 +49,48 @@
 <div style="margin-top: 20px">
     <h2>Badges</h2>
     <h3>You own</h3>
-    @foreach (var badge in Model.Badges)
+    @if (Model.Badges.Count == 0)
     {
-        var color = !badge.Hidden ? "transparent" : "gold";
-        <div style="margin-top: 5px; background-color: @color">
-            <div style="color: forestgreen; font-size: large">@badge.Name</div>
-            <div>@badge.Description</div>
-            @if (!badge.Hidden)
-            {
-                <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
-            }
-            @if (@badge.Users == 1)
-            {
-                <div>You're the <span style="color: crimson">only one</span> with this badge!</div>
-            }
-            else
-            {
-                var v = badge.Users - 1;
-                <div><span style="color: crimson">@v</span> other users have this badge</div>
-            }
-        </div>
+        <div>You have no badge yet :-(</div>
+    }
+    else
+    {
+        foreach (var badge in Model.Badges)
+        {
+            var color = !badge.Hidden ? "transparent" : "gold";
+            <div style="margin-top: 5px; background-color: @color">
+                <div style="color: forestgreen; font-size: large">@badge.Name</div>
+                <div>@badge.Description</div>
+                @if (!badge.Hidden)
+                {
+                    <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
+                }
+                @if (@badge.Users == 1)
+                {
+                    <div>You're the <span style="color: crimson">only one</span> with this badge!</div>
+                }
+                else
+                {
+                    var v = badge.Users - 1;
+                    <div><span style="color: crimson">@v</span> other users have this badge</div>
+                }
+            </div>
+        }
     }
     <h3>You miss</h3>
-    @foreach (var badge in Model.MissingBadges)
+    @if (Model.MissingBadges.Count == 0)
     {
-        <div style="margin-top: 5px">
-            <div style="color: crimson; font-size: large">@badge.Name</div>
-            <div>@badge.Description</div>
-            <div><span style="color: crimson">@badge.Users</span> users have this badge</div>
-        </div>
+        <div>Congratulations, you have every badge!</div>
+    }
+    else
+    {
+        foreach (var badge in Model.MissingBadges)
+        {
+            <div style="margin-top: 5px">
+                <div style="color: crimson; font-size: large">@badge.Name</div>
+                <div>@badge.Description</div>
+                <div><span style="color: crimson">@badge.Users</span> users have this badge</div>
+            </div>
+        }
     }
 </div>foreach

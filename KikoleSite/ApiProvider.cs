@@ -195,7 +195,7 @@ namespace KikoleSite
             var response = await SendAsync($"users/{id}/stats", HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<UserStats>(response)
+            return await GetResponseContentAsync<UserStats>(response, () => null)
                 .ConfigureAwait(false);
         }
 
@@ -295,9 +295,13 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        private async Task<T> GetResponseContentAsync<T>(HttpResponseMessage response)
+        private async Task<T> GetResponseContentAsync<T>(HttpResponseMessage response,
+            Func<T> fallbackIsNotSucess = null)
         {
-            response.EnsureSuccessStatusCode();
+            if (fallbackIsNotSucess == null)
+                response.EnsureSuccessStatusCode();
+            else if (!response.IsSuccessStatusCode)
+                return fallbackIsNotSucess();
 
             var content = await response.Content
                 .ReadAsStringAsync()

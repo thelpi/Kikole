@@ -6,9 +6,11 @@ namespace KikoleApi.Helpers
 {
     internal static class DateHelper
     {
-        public static TimeSpan Average(this IEnumerable<TimeSpan> spans)
+        public static TimeSpan? Average(this IEnumerable<TimeSpan> spans)
         {
-            return TimeSpan.FromSeconds(spans.Select(s => s.TotalSeconds).Average());
+            return !spans.Any()
+                ? default(TimeSpan?)
+                : TimeSpan.FromSeconds(spans.Select(s => s.TotalSeconds).Average());
         }
     }
 }
