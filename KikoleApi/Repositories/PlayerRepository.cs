@@ -73,8 +73,9 @@ namespace KikoleApi.Repositories
         {
             return await ExecuteReaderAsync<string>(
                     "SELECT y.name FROM players AS y " +
-                    "INNER JOIN proposals AS p ON y.proposal_date = DATE(DATE_ADD(p.proposal_date, INTERVAL -p.days_before DAY)) " +
-                    "WHERE p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1",
+                    "LEFT JOIN proposals AS p ON y.proposal_date = DATE(DATE_ADD(p.proposal_date, INTERVAL -p.days_before DAY)) " +
+                    "WHERE (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1) " +
+                    "OR y.creation_user_id = @userId",
                     new { userId })
                 .ConfigureAwait(false);
         }
