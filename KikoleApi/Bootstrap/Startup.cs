@@ -2,7 +2,6 @@
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Repositories;
-using KikoleApi.Workers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -48,8 +47,7 @@ namespace KikoleApi.Bootstrap
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
-                .AddHttpContextAccessor()
-                .AddHostedService<BadgeWorker>();
+                .AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
