@@ -74,8 +74,7 @@ namespace KikoleApi.Repositories
         {
             return await GetDtoAsync<UserDto>("users",
                     ("id", userId),
-                    ("is_disabled", 0),
-                    ("is_admin", 0))
+                    ("is_disabled", 0))
                 .ConfigureAwait(false);
         }
 

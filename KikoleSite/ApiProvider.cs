@@ -272,6 +272,15 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
+        public async Task<bool> IsAdminAsync(string authToken)
+        {
+            var response = await SendAsync(
+                    "admin-users", HttpMethod.Get, authToken)
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode;
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
         {

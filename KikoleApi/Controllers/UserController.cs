@@ -341,6 +341,23 @@ namespace KikoleApi.Controllers
             return NoContent();
         }
 
+        [HttpGet("/admin-users")]
+        [AuthenticationLevel(AuthenticationLevel.Authenticated)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetAdministratorUserAsync([FromQuery] ulong userId)
+        {
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            if (user == null || user.IsAdmin != 1)
+                return NotFound();
+
+            return NoContent();
+        }
+
         private async Task<PlayerDto> GetPlayerOfTheDayFromCacheAsync(Dictionary<DateTime, PlayerDto> playersCache, DateTime currentDate)
         {
             if (playersCache.ContainsKey(currentDate))

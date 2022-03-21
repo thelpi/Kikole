@@ -40,5 +40,7 @@ namespace KikoleSite
         Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken);
 
         Task<string> GetCurrentMessageAsync();
+
+        Task<bool> IsAdminAsync(string authToken);
     }
 }

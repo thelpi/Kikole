@@ -21,8 +21,15 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var (token, _) = this.GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             var model = new PlayerCreationModel();
             SetPositionsOnModel(model);
             return View(model);
@@ -31,6 +38,13 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(PlayerCreationModel model)
         {
+            var (token, _) = this.GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 model.ErrorMessage = "Name is mandatory";
@@ -74,14 +88,6 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
             
-            var (token, _) = this.GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                model.ErrorMessage = "You must be authenticated to do this action";
-                SetPositionsOnModel(model);
-                return View(model);
-            }
-
             var names = new List<string>
             {
                 model.AlternativeName0, model.AlternativeName1,
@@ -160,24 +166,31 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public IActionResult Club()
+        public async Task<IActionResult> Club()
         {
+            var (token, _) = this.GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return View("Club", new ClubCreationModel());
         }
 
         [HttpPost]
         public async Task<IActionResult> Club(ClubCreationModel model)
         {
+            var (token, _) = this.GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (string.IsNullOrWhiteSpace(model.MainName))
             {
                 model.ErrorMessage = "Main name is mandatory";
-                return View("Club", model);
-            }
-
-            var (token, _) = this.GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                model.ErrorMessage = "You must be authenticated to do this action";
                 return View("Club", model);
             }
 
