@@ -38,5 +38,7 @@ namespace KikoleSite
         Task<string> CreatePlayerAsync(PlayerRequest player, string authToken);
 
         Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken);
+
+        Task<string> GetCurrentMessageAsync();
     }
 }

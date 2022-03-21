@@ -10,13 +10,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
 {
-    public class InternationalController : KikoleBaseController
+    public class SiteController : KikoleBaseController
     {
         private readonly IInternationalRepository _internationalRepository;
+        private readonly IMessageRepository _messageRepository;
+        private readonly IClock _clock;
 
-        public InternationalController(IInternationalRepository internationalRepository)
+        public SiteController(IInternationalRepository internationalRepository,
+            IMessageRepository messageRepository,
+            IClock clock)
         {
             _internationalRepository = internationalRepository;
+            _messageRepository = messageRepository;
+            _clock = clock;
         }
 
         [HttpGet("countries")]
@@ -34,6 +40,18 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             return Ok(countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList());
+        }
+
+        [HttpGet("current-messages")]
+        [AuthenticationLevel(AuthenticationLevel.None)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<string>> GetCurrentMessage()
+        {
+            var message = await _messageRepository
+                .GetMessageAsync(_clock.Now)
+                .ConfigureAwait(false);
+
+            return Ok(message?.Message);
         }
     }
 }

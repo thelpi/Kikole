@@ -56,7 +56,11 @@ namespace KikoleSite.Controllers
                 model.MessageToDisplay = errorMessageForced;
             }
 
-            return ViewWithFullModel(model, login, clue, chart);
+            var msg = await _apiProvider
+                .GetCurrentMessageAsync()
+                .ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue, chart, msg);
         }
 
         [HttpPost]
@@ -99,7 +103,11 @@ namespace KikoleSite.Controllers
 
             var chart = await _apiProvider.GetProposalChartAsync().ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart);
+            var msg = await _apiProvider
+                .GetCurrentMessageAsync()
+                .ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue, chart, msg);
         }
 
         [HttpPost]
@@ -126,9 +134,10 @@ namespace KikoleSite.Controllers
             return Json(clubs.Select(x => x.Name));
         }
 
-        private IActionResult ViewWithFullModel(
-            HomeModel model, string login, string clue, ProposalChart chart)
+        private IActionResult ViewWithFullModel(HomeModel model,
+            string login, string clue, ProposalChart chart, string message)
         {
+            model.Message = message;
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()

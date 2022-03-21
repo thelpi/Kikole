@@ -1,8 +1,11 @@
 ﻿@model HomeModel
 <div>
-    @*<div style="margin-top: 20px; color:crimson; font-size: large">
-        Message personnel : bon anniversaire à l'utilisateur "cyril rool" !
-    </div>*@
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div style="margin-top: 20px; color:crimson; font-size: large">
+            @Model.Message
+        </div>
+    }
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         <fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">

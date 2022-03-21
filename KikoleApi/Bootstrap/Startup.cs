@@ -44,6 +44,7 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IInternationalRepository, InternationalRepository>()
                 .AddSingleton<ILeaderRepository, LeaderRepository>()
                 .AddSingleton<IBadgeRepository, BadgeRepository>()
+                .AddSingleton<IMessageRepository, MessageRepository>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()

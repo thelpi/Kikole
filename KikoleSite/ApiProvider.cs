@@ -262,6 +262,16 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
+        public async Task<string> GetCurrentMessageAsync()
+        {
+            var response = await SendAsync(
+                    "current-messages", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false);
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
         {

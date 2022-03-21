@@ -9,6 +9,7 @@ namespace KikoleSite.Models
     public class HomeModel
     {
         public string Clue { get; set; }
+        public string Message { get; set; }
 
         public ProposalChart Chart { get; set; }
         public int Points { get; set; }
