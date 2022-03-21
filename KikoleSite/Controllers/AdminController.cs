@@ -25,7 +25,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = this.GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -40,7 +40,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = this.GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -170,7 +170,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = this.GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -183,7 +183,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = this.GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminAsync(token).ConfigureAwait(false)))
+                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("Index", "Home");
             }

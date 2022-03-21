@@ -418,21 +418,21 @@ namespace KikoleApi.Controllers
             return NoContent();
         }
 
-        [HttpGet("/admin-users")]
+        [HttpGet("/user-types")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> GetAdministratorUserAsync([FromQuery] ulong userId)
+        public async Task<ActionResult<UserTypes>> GetUserAsync([FromQuery] ulong userId)
         {
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
-            if (user == null || user.UserTypeId != (ulong)UserTypes.Administrator)
+            if (user == null)
                 return NotFound();
 
-            return NoContent();
+            return Ok((UserTypes)user.UserTypeId);
         }
 
         [HttpGet("{login}/questions")]

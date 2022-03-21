@@ -272,13 +272,22 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<bool> IsAdminAsync(string authToken)
+        public async Task<bool> IsPowerUserAsync(string authToken)
         {
             var response = await SendAsync(
-                    "admin-users", HttpMethod.Get, authToken)
+                    "user-types", HttpMethod.Get, authToken)
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+                return false;
+
+            var value = await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false);
+
+            return value != null
+                && ulong.TryParse(value, out var id)
+                && Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == id)
+                && id > (ulong)UserTypes.StandardUser;
         }
 
         public async Task<string> ChangePasswordAsync(string authToken,
