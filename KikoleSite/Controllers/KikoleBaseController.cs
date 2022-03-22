@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleSite.Controllers
@@ -10,6 +11,8 @@ namespace KikoleSite.Controllers
     public abstract class KikoleBaseController : Controller
     {
         internal const ulong DefaultLanguageId = 1;
+        internal const string _cryptedAuthenticationCookieName = "AccountFormCrypt";
+        internal const string CookiePartsSeparator = "§§§";
 
         protected readonly IApiProvider _apiProvider;
 
@@ -39,7 +42,7 @@ namespace KikoleSite.Controllers
                 .GetClubsAsync()
                 .ConfigureAwait(false))
                 .Where(c =>
-                    c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
+                    c.Name.Sanitize().Contains(prefix.Sanitize()));
 
             return Json(clubs.Select(x => x.Name));
         }
@@ -51,7 +54,7 @@ namespace KikoleSite.Controllers
                 .GetCountriesAsync(DefaultLanguageId)
                 .ConfigureAwait(false))
                 .Where(c =>
-                    c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
+                    c.Value.Sanitize().Contains(prefix.Sanitize()));
 
             return Json(countries);
         }
@@ -62,6 +65,54 @@ namespace KikoleSite.Controllers
                 .GetValues(typeof(Position))
                 .Cast<Position>()
                 .ToDictionary(_ => (ulong)_, _ => _.ToString());
+        }
+
+        protected (string token, string login) GetAuthenticationCookie()
+        {
+            var cookieValue = GetCookieContent(_cryptedAuthenticationCookieName);
+            if (cookieValue != null)
+            {
+                var cookieParts = cookieValue.Split(CookiePartsSeparator);
+                if (cookieParts.Length > 1)
+                {
+                    return (cookieParts[0], cookieParts[1]);
+                }
+            }
+
+            return (null, null);
+        }
+
+        protected void SetAuthenticationCookie(string token, string login)
+        {
+            SetCookie(_cryptedAuthenticationCookieName,
+                $"{token}{CookiePartsSeparator}{login}",
+                DateTime.Now.AddMonths(1));
+        }
+
+        protected void ResetAuthenticationCookie()
+        {
+            Response.Cookies.Delete(_cryptedAuthenticationCookieName);
+        }
+
+        private string GetCookieContent(string cookieName)
+        {
+            return Request.Cookies.TryGetValue(cookieName, out string cookieValue)
+                ? cookieValue.Decrypt()
+                : null;
+        }
+
+        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
+        {
+            Response.Cookies.Delete(cookieName);
+            Response.Cookies.Append(
+                cookieName,
+                cookieValue.Encrypt(),
+                    new CookieOptions
+                    {
+                        Expires = expiration,
+                        IsEssential = true,
+                        Secure = false
+                    });
         }
     }
 }

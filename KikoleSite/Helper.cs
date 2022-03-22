@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite
 {
@@ -8,6 +12,9 @@ namespace KikoleSite
     {
         const string NA = "N/A";
         const string TimeSpanPattern = @"hh\:mm";
+        const string Iso8859Code = "ISO-8859-8";
+
+        static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
 
         internal static bool IsPropertyExist(dynamic settings, string name)
         {
@@ -29,6 +36,77 @@ namespace KikoleSite
         internal static string ToYesNo(this bool data)
         {
             return data ? "Yes" : "No";
+        }
+
+        internal static string Encrypt(this string plainText)
+        {
+            try
+            {
+                byte[] array;
+                using (var aes = Aes.Create())
+                {
+                    aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
+                    aes.IV = new byte[16];
+                    var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                        {
+                            using (var streamWriter = new StreamWriter(cryptoStream))
+                            {
+                                streamWriter.Write(plainText);
+                            }
+                            array = memoryStream.ToArray();
+                        }
+                    }
+                }
+                return Convert.ToBase64String(array);
+            }
+            catch
+            {
+                // TODO: log
+                return plainText;
+            }
+        }
+
+        internal static string Decrypt(this string encryptedText)
+        {
+            try
+            {
+                var buffer = Convert.FromBase64String(encryptedText);
+                using (var aes = Aes.Create())
+                {
+                    aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
+                    aes.IV = new byte[16];
+                    var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                    using (var memoryStream = new MemoryStream(buffer))
+                    {
+                        using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                        {
+                            using (var streamReader = new StreamReader(cryptoStream))
+                            {
+                                return streamReader.ReadToEnd();
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // TODO: log
+                return encryptedText;
+            }
+        }
+
+        internal static string Sanitize(this string value)
+        {
+            return value.Trim().RemoveDiacritics().ToLowerInvariant();
+        }
+
+        internal static string RemoveDiacritics(this string value)
+        {
+            var tempBytes = Encoding.GetEncoding(Iso8859Code).GetBytes(value);
+            return Encoding.UTF8.GetString(tempBytes);
         }
     }
 }

@@ -14,8 +14,7 @@ namespace KikoleSite
     {
         private readonly HttpClient _client;
 
-        private static readonly Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache
-             = new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
+        private static Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
@@ -92,7 +91,7 @@ namespace KikoleSite
 
         public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId)
         {
-            if (!_countriesCache.ContainsKey(languageId))
+            if (_countriesCache?.ContainsKey(languageId) != true)
             {
                 var response = await SendAsync(
                     $"countries?languageId={languageId}",
@@ -102,6 +101,7 @@ namespace KikoleSite
                 var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
                     .ConfigureAwait(false);
 
+                _countriesCache = _countriesCache ?? new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
                 _countriesCache.Add(
                     languageId,
                     apiCountries
