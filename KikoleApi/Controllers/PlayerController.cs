@@ -167,7 +167,7 @@ namespace KikoleApi.Controllers
                 if (!hasBadge)
                 {
                     await _badgeRepository
-                        .InsertUserBadgeAsync(new Models.Dtos.UserBadgeDto
+                        .InsertUserBadgeAsync(new UserBadgeDto
                         {
                             BadgeId = (ulong)Badges.DoItYourself,
                             GetDate = _clock.Now.Date,

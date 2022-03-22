@@ -54,5 +54,9 @@ namespace KikoleSite
         Task<(bool, string)> GetLoginQuestionAsync(string login);
 
         Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate, string authToken);
+
+        Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken);
+
+        Task<string> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request, string authToken);
     }
 }

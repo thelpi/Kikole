@@ -13,7 +13,7 @@
     <Content Update="Views\Account\Index.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Admin\Validation.cshtml">
+    <Content Update="Views\Admin\PlayerSubmission.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
     <Content Update="Views\Leaderboard\User.cshtml">

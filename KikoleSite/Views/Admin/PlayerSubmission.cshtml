@@ -1,0 +1,121 @@
+﻿@model PlayerSubmissionsModel
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div style="color:crimson; margin-top: 10px">Error: @Model.ErrorMessage</div>
+}
+else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
+{
+    <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
+}
+
+@if (Model.SelectedPlayer != null)
+{
+    <form method="post" action="/Admin/PlayerSubmission">
+        <div style="margin-top: 20px">
+            <div>
+                <label>Creator login</label>
+                <div>@Model.SelectedPlayer.Login</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>Name</label>
+                <div>@Model.SelectedPlayer.Name</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>AllowedNames</label>
+                <div>@Model.SelectedPlayer.AllowedNames</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>YearOfBirth</label>
+                <div>@Model.SelectedPlayer.YearOfBirth</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>Country</label>
+                <div>@Model.SelectedPlayer.Country</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>Clue</label>
+                <div>@Model.SelectedPlayer.Clue</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>Position</label>
+                <div>@Model.SelectedPlayer.Position</div>
+            </div>
+            <div style="margin-top: 10px">
+                <label>Clubs</label>
+                @foreach (var club in Model.SelectedPlayer.Clubs.OrderBy(x => x.HistoryPosition))
+                {
+                    <div>@club.HistoryPosition - @club.Name</div>
+                }
+            </div>
+            <div style="margin-top: 5px">
+                <label>Check club by name:</label>
+                <script>
+                    $(function () {
+                        $("#clubName").autocomplete({
+                            source: function (request, response) {
+                                $.ajax({
+                                    url: '/Admin/AutoCompleteClubs/',
+                                    data: {
+                                        "prefix": request.term
+                                    },
+                                    type: "POST",
+                                    success: function (data) {
+                                        response($.map(data, function (item) {
+                                            return item;
+                                        }))
+                                    }
+                                });
+                            },
+                            select: function (e, i) {
+                                $("#clubName").val(i.item.value);
+                            },
+                            minLength: 1
+                        });
+                    });
+                </script>
+                <div>
+                    <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
+                </div>
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.SelectedId)
+        <div style="margin-top: 20px">
+            <label>Accept the player (clue override)</label>
+            <div>
+                <input type="text" name="ClueOverwrite" style="width: 300px" />
+                <input type="submit" value="OK" name="submit-accepted" />
+            </div>
+        </div>
+        <div style="margin-top: 20px">
+            <label>Refuse the player (reason of reject)</label>
+            <div>
+                <input type="text" name="RefusalReason" style="width: 300px" />
+                <input type="submit" value="KO" name="submit-refusal" />
+            </div>
+        </div>
+    </form>
+}
+else
+{
+    if (Model.Players.Count == 0)
+    {
+        <div style="margin-top: 20px">
+            <label>No player to validate</label>
+        </div>
+    }
+    else
+    {
+        <form method="post" action="/Admin/PlayerSubmission">
+            <div style="margin-top: 20px">
+                <label>Select a player</label>
+                <div>
+                    @Html.DropDownListFor(m => m.SelectedId, Model.Players.Select(p => new SelectListItem(p.Name, p.Id.ToString())))
+                </div>
+                <div>
+                    <input type="submit" value="Pick" name="submit-pchoice" />
+                </div>
+            </div>
+        </form>
+    }
+}

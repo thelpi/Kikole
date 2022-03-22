@@ -341,6 +341,48 @@ namespace KikoleSite
                 .ConfigureAwait(false));
         }
 
+        public async Task<PlayerCreator> IsPlayerOfTheDayUser(
+            DateTime proposalDate, string authToken)
+        {
+            var response = await SendAsync(
+                    $"player-of-the-day-users?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<PlayerCreator>(
+                    response, () => null)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
+        {
+            var response = await SendAsync(
+                    "player-submissions",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Player>>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<string> ValidatePlayerSubmissionAsync(
+            PlayerSubmissionValidationRequest request, string authToken)
+        {
+            var response = await SendAsync(
+                    "player-submissions",
+                    HttpMethod.Post,
+                    authToken,
+                    request)
+                .ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+                return null;
+
+            return $"Invalid response: {response.StatusCode}";
+        }
+
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
         {
@@ -397,20 +439,6 @@ namespace KikoleSite
                 && ulong.TryParse(value, out var id)
                 && Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == id)
                 && id >= (ulong)minimalType;
-        }
-
-        public async Task<PlayerCreator> IsPlayerOfTheDayUser(
-            DateTime proposalDate, string authToken)
-        {
-            var response = await SendAsync(
-                    $"player-of-the-day-users?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
-                    HttpMethod.Get,
-                    authToken)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<PlayerCreator>(
-                    response, () => null)
-                .ConfigureAwait(false);
         }
     }
 }

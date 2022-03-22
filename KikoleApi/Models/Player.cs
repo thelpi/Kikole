@@ -8,6 +8,8 @@ namespace KikoleApi.Models
 {
     public class Player : PlayerCreator
     {
+        public ulong Id { get; }
+
         public IReadOnlyCollection<PlayerClub> Clubs { get; }
 
         public IReadOnlyCollection<string> AllowedNames { get; }
@@ -31,6 +33,7 @@ namespace KikoleApi.Models
             IEnumerable<PlayerClubDto> playerClubs,
             IEnumerable<ClubDto> playerClubsDetails)
         {
+            Id = p.Id;
             ProposalDate = p.ProposalDate;
             RejectDate = p.RejectDate;
             AllowedNames = p.AllowedNames.Disjoin();

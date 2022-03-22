@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Api;
-using KikoleSite.ItemDatas;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Models

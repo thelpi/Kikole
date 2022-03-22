@@ -21,6 +21,91 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> PlayerSubmission()
+        {
+            var (token, _) = this.GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var players = await GetPlayerSubmissionsList(token)
+                .ConfigureAwait(false);
+
+            var model = new PlayerSubmissionsModel
+            {
+                Players = players
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
+        {
+            var (token, _) = this.GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (model == null)
+            {
+                return RedirectToAction("PlayerSubmission", "Admin");
+            }
+
+            model.Players = await GetPlayerSubmissionsList(token)
+                .ConfigureAwait(false);
+
+            if (model.Players.Count == 0)
+            {
+                return RedirectToAction("PlayerSubmission", "Admin");
+            }
+
+            var action = GetSubmitAction();
+
+            if (action == "accepted" || action == "refusal")
+            {
+                var result = await _apiProvider
+                    .ValidatePlayerSubmissionAsync(
+                        new PlayerSubmissionValidationRequest
+                        {
+                            ClueEdit = model.ClueOverwrite,
+                            IsAccepted = action == "accepted",
+                            PlayerId = model.SelectedId,
+                            RefusalReason = model.RefusalReason
+                        },
+                        token)
+                    .ConfigureAwait(false);
+
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    model.ErrorMessage = result;
+                }
+                else
+                {
+                    return RedirectToAction("PlayerSubmission", "Admin");
+                }
+            }
+            else if (action == "pchoice")
+            {
+                if (model.SelectedPlayer == null)
+                {
+                    model.ErrorMessage = "Invalid selected player";
+                    model.SelectedId = 0;
+                }
+            }
+            else
+            {
+                return RedirectToAction("PlayerSubmission", "Admin");
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var (token, _) = this.GetAuthenticationCookie();
@@ -259,6 +344,33 @@ namespace KikoleSite.Controllers
                 .GetValues(typeof(Position))
                 .Cast<Position>()
                 .ToDictionary(_ => (ulong)_, _ => _.ToString());
+        }
+
+        private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList(string token)
+        {
+            var pls = await _apiProvider
+                            .GetPlayerSubmissionsAsync(token)
+                            .ConfigureAwait(false);
+
+            var countries = await _apiProvider
+                .GetCountriesAsync(DefaultLanguageId)
+                .ConfigureAwait(false);
+
+            var players = pls
+                .Select(p => new PlayerSubmissionModel
+                {
+                    AllowedNames = string.Join(';', p.AllowedNames),
+                    Clubs = p.Clubs,
+                    Clue = p.Clue,
+                    Country = countries[p.Country],
+                    Id = p.Id,
+                    Login = p.Login,
+                    Name = p.Name,
+                    Position = Enum.GetValues(typeof(Position)).Cast<Position>().First(pp => (ulong)pp == p.Position).ToString(),
+                    YearOfBirth = p.YearOfBirth
+                })
+                .ToList();
+            return players;
         }
     }
 }
