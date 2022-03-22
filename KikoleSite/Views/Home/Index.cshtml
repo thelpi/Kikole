@@ -128,7 +128,8 @@
                         </script>
                         <div>
                             <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
-                            <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden" />
+                            <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> pts if incorrect)</span>
                         </div>
                         <div style="font-size: small">(one club at a time; autocompletion suggestions are NOT exhaustive)</div>
                     </div>
@@ -194,7 +195,8 @@
                         <div>
                             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
                             <input type="hidden" id="countryId" name="CountryNameSubmission" />
-                            <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden" />
+                            <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden; width: 0px" />
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> pts if incorrect)</span>
                         </div>
                         <div style="font-size: small">(it's the nationality, not the national team he plays or played)</div>
                         @if (Model.IncorrectCountries?.Count > 0)
@@ -223,19 +225,20 @@
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.Position))
                     {
-                        <div>
-                            <script>
-                                $(function () {
-                                    $("#positionSubmission").on("change", function (e) {
-                                        if ($("#positionSubmission").val() != "0") {
-                                            $("#submitPosition").click();
-                                        }
-                                    });
+                    <div>
+                        <script>
+                            $(function () {
+                                $("#positionSubmission").on("change", function (e) {
+                                    if ($("#positionSubmission").val() != "0") {
+                                        $("#submitPosition").click();
+                                    }
                                 });
-                            </script>
-                            @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
-                            <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden" />
-                        </div>
+                            });
+                        </script>
+                        @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
+                        <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
+                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> pts if incorrect)</span>
+                    </div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
                             <div style="margin-top: 10px">
@@ -262,25 +265,26 @@
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.BirthYear))
                     {
-                        <div>
-                            <script>
-                                $(function () {
-                                    var availableTags = [];
-                                    for (var i = 1900; i <= 2010; i++)
-                                        availableTags.push(i.toString());
-                                    $("#birthYearValue").autocomplete({
-                                        source: availableTags,
-                                        select: function (e, i) {
-                                            $("#birthYearValue").val(i.item.value);
-                                            $("#submitYear").click();
-                                        },
-                                        minLength: 1
-                                    });
+                    <div>
+                        <script>
+                            $(function () {
+                                var availableTags = [];
+                                for (var i = 1900; i <= 2010; i++)
+                                    availableTags.push(i.toString());
+                                $("#birthYearValue").autocomplete({
+                                    source: availableTags,
+                                    select: function (e, i) {
+                                        $("#birthYearValue").val(i.item.value);
+                                        $("#submitYear").click();
+                                    },
+                                    minLength: 1
                                 });
-                            </script>
-                            <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
-                            <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden" />
-                        </div>
+                            });
+                        </script>
+                        <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
+                        <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
+                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> pts if incorrect)</span>
+                    </div>
                         @if (Model.IncorrectYears?.Count > 0)
                         {
                             <div style="margin-top: 10px">
@@ -307,7 +311,8 @@
                     </div>
                     <div>
                         @Html.TextBoxFor(m => m.PlayerNameSubmission, new { @style = "width: 300px" })
-                        <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden" />
+                        <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
+                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> pts if incorrect)</span>
                     </div>
                 </div>
                 @if (Model.IncorrectNames?.Count > 0)
