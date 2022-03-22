@@ -13,12 +13,20 @@ namespace KikoleApi.Interfaces
 
         Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date);
 
+        Task<PlayerDto> GetPlayerByIdAsync(ulong id);
+
         Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
-        Task<DateTime> GetLatestProposalDateasync();
+        Task<DateTime> GetLatestProposalDateAsync();
 
         Task<IReadOnlyCollection<PlayerDto>> GetProposedPlayersAsync();
 
         Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId);
+
+        Task ValidatePlayerProposalAsync(ulong playerId, string clue, DateTime date);
+
+        Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync();
+
+        Task RefusePlayerProposalAsync(ulong playerId);
     }
 }

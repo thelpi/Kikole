@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
+using KikoleApi.Models;
+using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,17 +15,28 @@ namespace KikoleApi.Controllers
     [Route("players")]
     public class PlayerController : KikoleBaseController
     {
+        private readonly IBadgeRepository _badgeRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IClubRepository _clubRepository;
         private readonly IClock _clock;
 
-        public PlayerController(IPlayerRepository playerRepository, IClock clock)
+        public PlayerController(IPlayerRepository playerRepository,
+            IClock clock,
+            IBadgeRepository badgeRepository,
+            IUserRepository userRepository,
+            IClubRepository clubRepository)
         {
             _playerRepository = playerRepository;
+            _badgeRepository = badgeRepository;
+            _userRepository = userRepository;
+            _clubRepository = clubRepository;
             _clock = clock;
         }
 
         [HttpGet("/player-clues")]
         [AuthenticationLevel]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<string>> GetPlayerOfTheDayClueAsync([FromQuery][Required] DateTime proposalDate)
         {
             var player = await _playerRepository
@@ -33,7 +47,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPost]
-        [AuthenticationLevel(Models.UserTypes.PowerUser)]
+        [AuthenticationLevel(UserTypes.PowerUser)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
@@ -50,12 +64,7 @@ namespace KikoleApi.Controllers
                 return BadRequest($"Invalid request: {validityRequest}");
 
             if (!request.ProposalDate.HasValue && request.SetLatestProposalDate)
-            {
-                var latestDate = await _playerRepository
-                    .GetLatestProposalDateasync()
-                    .ConfigureAwait(false);
-                request.ProposalDate = latestDate.AddDays(1).Date;
-            }
+                request.ProposalDate = await GetNextDateAsync().ConfigureAwait(false);
 
             var playerId = await _playerRepository
                 .CreatePlayerAsync(request.ToDto(userId))
@@ -72,6 +81,121 @@ namespace KikoleApi.Controllers
             }
 
             return Created($"players/{playerId}", null);
+        }
+
+        [HttpGet("/player-submissions")]
+        [AuthenticationLevel(UserTypes.Administrator)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Player>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<Player>>> GetPlayerSubmissionsAsync()
+        {
+            var dtos = await _playerRepository
+                .GetPendingValidationPlayersAsync()
+                .ConfigureAwait(false);
+
+            var usersCache = new Dictionary<ulong, UserDto>();
+
+            var players = new List<Player>(dtos.Count);
+            foreach (var p in dtos)
+            {
+                if (!usersCache.ContainsKey(p.CreationUserId))
+                {
+                    var user = await _userRepository
+                        .GetUserByIdAsync(p.CreationUserId)
+                        .ConfigureAwait(false);
+                    usersCache.Add(p.CreationUserId, user);
+                }
+
+                var playerClubs = await _playerRepository
+                    .GetPlayerClubsAsync(p.Id)
+                    .ConfigureAwait(false);
+
+                var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
+                foreach (var pc in playerClubs)
+                {
+                    var c = await _clubRepository
+                        .GetClubAsync(pc.ClubId)
+                        .ConfigureAwait(false);
+                    playerClubsDetails.Add(c);
+                }
+
+                players.Add(new Player(p, usersCache.Values, playerClubs, playerClubsDetails));
+            }
+
+            return Ok(players);
+        }
+
+        [HttpPost("/player-submissions")]
+        [AuthenticationLevel(UserTypes.Administrator)]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
+        public async Task<IActionResult> ValidatePlayerSubmissionAsync(
+            [FromBody] PlayerSubmissionValidationRequest request)
+        {
+            if (request?.IsValid() != true)
+                return BadRequest();
+
+            var p = await _playerRepository
+                .GetPlayerByIdAsync(request.PlayerId)
+                .ConfigureAwait(false);
+
+            if (p == null)
+                return NotFound();
+
+            if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
+                return Conflict();
+
+            if (request.IsAccepted)
+            {
+                var clue = string.IsNullOrWhiteSpace(request.ClueEdit)
+                    ? p.Clue
+                    : request.ClueEdit.Trim();
+
+                var latestDate = await GetNextDateAsync().ConfigureAwait(false);
+
+                await _playerRepository
+                    .ValidatePlayerProposalAsync(request.PlayerId, clue, latestDate)
+                    .ConfigureAwait(false);
+
+                var hasBadge = await _badgeRepository
+                    .CheckUserHasBadgeAsync(p.CreationUserId, (ulong)Badges.DoItYourself)
+                    .ConfigureAwait(false);
+
+                if (!hasBadge)
+                {
+                    await _badgeRepository
+                        .InsertUserBadgeAsync(new Models.Dtos.UserBadgeDto
+                        {
+                            BadgeId = (ulong)Badges.DoItYourself,
+                            GetDate = _clock.Now.Date,
+                            UserId = p.CreationUserId
+                        })
+                        .ConfigureAwait(false);
+                }
+
+                // TODO: notify (+ badge)
+            }
+            else
+            {
+                await _playerRepository
+                    .RefusePlayerProposalAsync(request.PlayerId)
+                    .ConfigureAwait(false);
+
+                // TODO: notify refusal
+            }
+
+            return NoContent();
+        }
+
+        private async Task<DateTime> GetNextDateAsync()
+        {
+            var latestDate = await _playerRepository
+                .GetLatestProposalDateAsync()
+                .ConfigureAwait(false);
+            return latestDate.AddDays(1).Date;
         }
     }
 }

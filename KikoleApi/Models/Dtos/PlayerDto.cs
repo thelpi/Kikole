@@ -21,5 +21,7 @@ namespace KikoleApi.Models.Dtos
         public ulong PositionId { get; set; }
 
         public ulong CreationUserId { get; set; }
+
+        public DateTime? RejectDate { get; set; }
     }
 }

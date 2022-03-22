@@ -55,7 +55,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<DateTime> GetLatestProposalDateasync()
+        public async Task<DateTime> GetLatestProposalDateAsync()
         {
             return await ExecuteScalarAsync<DateTime>(
                     "SELECT MAX(proposal_date) FROM players", null)
@@ -77,6 +77,47 @@ namespace KikoleApi.Repositories
                     "WHERE (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1) " +
                     "OR y.creation_user_id = @userId",
                     new { userId })
+                .ConfigureAwait(false);
+        }
+
+        public async Task<PlayerDto> GetPlayerByIdAsync(ulong id)
+        {
+            return await GetDtoAsync<PlayerDto>(
+                    "players",
+                    ("id", id))
+                .ConfigureAwait(false);
+        }
+
+        public async Task ValidatePlayerProposalAsync(ulong playerId, string clue, DateTime date)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE players " +
+                    "SET proposal_date = @date, clue = @clue " +
+                    "WHERE id = @playerId",
+                    new
+                    {
+                        playerId,
+                        clue,
+                        date.Date
+                    })
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync()
+        {
+            return await ExecuteReaderAsync<PlayerDto>(
+                    "SELECT * FROM players " +
+                    "WHERE proposal_date IS NULL " +
+                    "AND reject_date IS NULL",
+                    new { })
+                .ConfigureAwait(false);
+        }
+
+        public async Task RefusePlayerProposalAsync(ulong playerId)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE players SET reject_date = NOW() WHERE id = @playerId",
+                    new { playerId })
                 .ConfigureAwait(false);
         }
     }

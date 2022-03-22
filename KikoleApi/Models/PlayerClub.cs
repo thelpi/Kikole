@@ -1,4 +1,6 @@
-﻿using KikoleApi.Models.Dtos;
+﻿using System.Collections.Generic;
+using System.Linq;
+using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
 {
@@ -8,10 +10,12 @@ namespace KikoleApi.Models
 
         public string Name { get; }
 
-        internal PlayerClub(ClubDto club, PlayerClubDto playerClub)
+        internal PlayerClub(ClubDto club, IEnumerable<PlayerClubDto> playerClubs)
         {
-            HistoryPosition = playerClub.HistoryPosition;
             Name = club.Name;
+            HistoryPosition = playerClubs
+                .First(pc => pc.ClubId == club.Id)
+                .HistoryPosition;
         }
     }
 }

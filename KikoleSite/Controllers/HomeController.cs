@@ -176,9 +176,9 @@ namespace KikoleSite.Controllers
         private async Task SetModelFromApiAsync(HomeModel model,
             DateTime proposalDate, string authToken, PlayerCreator pc)
         {
-            if (!string.IsNullOrWhiteSpace(pc?.PlayeName))
+            if (!string.IsNullOrWhiteSpace(pc?.Name))
             {
-                model.SetFinalFormIsUserIsCreator(pc.PlayeName);
+                model.SetFinalFormIsUserIsCreator(pc.Name);
                 return;
             }
 

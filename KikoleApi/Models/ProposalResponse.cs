@@ -50,7 +50,7 @@ namespace KikoleApi.Models
                     if (!success.HasValue)
                         Successful = c != null;
                     Value = Successful
-                        ? new PlayerClub(c, playerClubs.First(_ => _.ClubId == c.Id))
+                        ? new PlayerClub(c, playerClubs)
                         : (object)sourceValue;
                     break;
 

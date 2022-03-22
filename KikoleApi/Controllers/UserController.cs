@@ -62,7 +62,7 @@ namespace KikoleApi.Controllers
                 Login = u.UserTypeId == (ulong)UserTypes.PowerUser
                     ? u.Login
                     : null,
-                PlayeName = p.CreationUserId == userId
+                Name = p.CreationUserId == userId
                     ? p.Name
                     : null
             });
