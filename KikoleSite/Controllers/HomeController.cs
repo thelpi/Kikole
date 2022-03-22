@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
@@ -15,12 +14,14 @@ namespace KikoleSite.Controllers
             : base(apiProvider)
         { }
 
+        [HttpGet]
         public IActionResult Error()
         {
             this.ResetAuthenticationCookie();
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(
             [FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
@@ -120,30 +121,6 @@ namespace KikoleSite.Controllers
             return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login);
         }
 
-        [HttpPost]
-        public async Task<JsonResult> AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
-        {
-            var countries = (await _apiProvider
-                .GetCountriesAsync(languageId)
-                .ConfigureAwait(false))
-                .Where(c =>
-                    c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
-
-            return Json(countries);
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> AutoCompleteClubs(string prefix)
-        {
-            var clubs = (await _apiProvider
-                .GetClubsAsync()
-                .ConfigureAwait(false))
-                .Where(c =>
-                    c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
-
-            return Json(clubs.Select(x => x.Name));
-        }
-
         private IActionResult ViewWithFullModel(HomeModel model, string login,
             string clue, ProposalChart chart, string message, string creator)
         {
@@ -158,14 +135,6 @@ namespace KikoleSite.Controllers
             model.Clue = clue;
             model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
             return View(model);
-        }
-
-        private IReadOnlyDictionary<ulong, string> GetPositions()
-        {
-            return Enum
-                .GetValues(typeof(Position))
-                .Cast<Position>()
-                .ToDictionary(_ => (ulong)_, _ => _.ToString());
         }
 
         private async Task SetModelFromApiAsync(HomeModel model,

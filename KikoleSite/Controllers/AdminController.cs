@@ -234,21 +234,6 @@ namespace KikoleSite.Controllers
             return View(model);
         }
 
-        private void AddClubIfValid(List<ulong> clubs, string value, IReadOnlyCollection<Club> clubsReferential)
-        {
-            ulong? id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
-            if (id.HasValue)
-                clubs.Add(id.Value);
-        }
-
-        private void SetPositionsOnModel(PlayerCreationModel model)
-        {
-            model.Positions = new[] { new SelectListItem("", "0") }
-                .Concat(GetPositions()
-                    .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
-                .ToList();
-        }
-
         [HttpGet]
         public async Task<IActionResult> Club()
         {
@@ -309,38 +294,6 @@ namespace KikoleSite.Controllers
             return View("Club", model);
         }
 
-        [HttpPost]
-        public async Task<JsonResult> AutoCompleteClubs(string prefix)
-        {
-            var clubs = (await _apiProvider
-                .GetClubsAsync()
-                .ConfigureAwait(false))
-                .Where(c =>
-                    c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
-
-            return Json(clubs.Select(x => x.Name));
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
-        {
-            var countries = (await _apiProvider
-                .GetCountriesAsync(DefaultLanguageId)
-                .ConfigureAwait(false))
-                .Where(c =>
-                    c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
-
-            return Json(countries);
-        }
-
-        private IReadOnlyDictionary<ulong, string> GetPositions()
-        {
-            return Enum
-                .GetValues(typeof(Position))
-                .Cast<Position>()
-                .ToDictionary(_ => (ulong)_, _ => _.ToString());
-        }
-
         private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList(string token)
         {
             var pls = await _apiProvider
@@ -366,6 +319,21 @@ namespace KikoleSite.Controllers
                 })
                 .ToList();
             return players;
+        }
+
+        private void AddClubIfValid(List<ulong> clubs, string value, IReadOnlyCollection<Club> clubsReferential)
+        {
+            ulong? id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
+            if (id.HasValue)
+                clubs.Add(id.Value);
+        }
+
+        private void SetPositionsOnModel(PlayerCreationModel model)
+        {
+            model.Positions = new[] { new SelectListItem("", "0") }
+                .Concat(GetPositions()
+                    .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
+                .ToList();
         }
     }
 }

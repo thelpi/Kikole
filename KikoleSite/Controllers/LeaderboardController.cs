@@ -14,6 +14,7 @@ namespace KikoleSite.Controllers
             : base(apiProvider)
         { }
         
+        [HttpGet]
         public async Task<IActionResult> Index([FromQuery] ulong userId)
         {
             if (userId == 0)
@@ -51,23 +52,6 @@ namespace KikoleSite.Controllers
             return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers));
         }
 
-        private async Task<IActionResult> Index()
-        {
-            var leaders = await _apiProvider
-                .GetLeadersAsync(LeaderSort.TotalPoints, null)
-                .ConfigureAwait(false);
-
-            return View(new LeaderboardModel
-            {
-                MinimalDate = null,
-                Leaders = leaders,
-                SortType = LeaderSort.TotalPoints,
-                TodayLeaders = await _apiProvider
-                    .GetTodayLeadersAsync()
-                    .ConfigureAwait(false)
-            });
-        }
-
         [HttpPost]
         public async Task<IActionResult> Index(LeaderboardModel model)
         {
@@ -88,6 +72,23 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             return View(model);
+        }
+
+        private async Task<IActionResult> Index()
+        {
+            var leaders = await _apiProvider
+                .GetLeadersAsync(LeaderSort.TotalPoints, null)
+                .ConfigureAwait(false);
+
+            return View(new LeaderboardModel
+            {
+                MinimalDate = null,
+                Leaders = leaders,
+                SortType = LeaderSort.TotalPoints,
+                TodayLeaders = await _apiProvider
+                    .GetTodayLeadersAsync()
+                    .ConfigureAwait(false)
+            });
         }
     }
 }

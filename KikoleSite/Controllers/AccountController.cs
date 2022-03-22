@@ -10,6 +10,7 @@ namespace KikoleSite.Controllers
              : base(apiProvider)
         { }
 
+        [HttpGet]
         public IActionResult Index()
         {
             var (token, login) = this.GetAuthenticationCookie();

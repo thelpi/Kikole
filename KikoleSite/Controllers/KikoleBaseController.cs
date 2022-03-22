@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using KikoleSite.Api;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleSite.Controllers
@@ -26,6 +30,38 @@ namespace KikoleSite.Controllers
                 return null;
 
             return submitKeySplit[1];
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AutoCompleteClubs(string prefix)
+        {
+            var clubs = (await _apiProvider
+                .GetClubsAsync()
+                .ConfigureAwait(false))
+                .Where(c =>
+                    c.Name.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
+
+            return Json(clubs.Select(x => x.Name));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
+        {
+            var countries = (await _apiProvider
+                .GetCountriesAsync(DefaultLanguageId)
+                .ConfigureAwait(false))
+                .Where(c =>
+                    c.Value.ToLowerInvariant().Contains(prefix.ToLowerInvariant()));
+
+            return Json(countries);
+        }
+
+        protected IReadOnlyDictionary<ulong, string> GetPositions()
+        {
+            return Enum
+                .GetValues(typeof(Position))
+                .Cast<Position>()
+                .ToDictionary(_ => (ulong)_, _ => _.ToString());
         }
     }
 }
