@@ -6,12 +6,9 @@ namespace KikoleSite.Controllers
 {
     public class AccountController : KikoleBaseController
     {
-        private readonly IApiProvider _apiProvider;
-
         public AccountController(IApiProvider apiProvider)
-        {
-            _apiProvider = apiProvider;
-        }
+             : base(apiProvider)
+        { }
 
         public IActionResult Index()
         {

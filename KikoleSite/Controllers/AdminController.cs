@@ -11,14 +11,9 @@ namespace KikoleSite.Controllers
 {
     public class AdminController : KikoleBaseController
     {
-        const ulong DefaultLanguageId = 1;
-
-        private readonly IApiProvider _apiProvider;
-
         public AdminController(IApiProvider apiProvider)
-        {
-            _apiProvider = apiProvider;
-        }
+            : base(apiProvider)
+        { }
 
         [HttpGet]
         public async Task<IActionResult> PlayerSubmission()

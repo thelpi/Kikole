@@ -10,12 +10,9 @@ namespace KikoleSite.Controllers
 {
     public class LeaderboardController : KikoleBaseController
     {
-        private readonly IApiProvider _apiProvider;
-
         public LeaderboardController(IApiProvider apiProvider)
-        {
-            _apiProvider = apiProvider;
-        }
+            : base(apiProvider)
+        { }
         
         public async Task<IActionResult> Index([FromQuery] ulong userId)
         {

@@ -11,14 +11,9 @@ namespace KikoleSite.Controllers
 {
     public class HomeController : KikoleBaseController
     {
-        const ulong DefaultLanguageId = 1;
-
-        private readonly IApiProvider _apiProvider;
-
         public HomeController(IApiProvider apiProvider)
-        {
-            _apiProvider = apiProvider;
-        }
+            : base(apiProvider)
+        { }
 
         public IActionResult Error()
         {
