@@ -47,6 +47,22 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(
+            DateTime? minimalDate, DateTime? maximalDate)
+        {
+            return await ExecuteReaderAsync<PlayerDto>(
+                    "SELECT * FROM players " +
+                    "WHERE proposal_date IS NOT NULL " +
+                    "AND (@min_date IS NULL OR proposal_date >= @min_date) " +
+                    "AND (proposal_date <= IFNULL(@max_date, DATE(NOW())))",
+                    new
+                    {
+                        min_date = minimalDate?.Date,
+                        max_date = maximalDate?.Date
+                    })
+                .ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId)
         {
             return await GetDtosAsync<PlayerClubDto>(

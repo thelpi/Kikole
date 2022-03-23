@@ -13,6 +13,8 @@ namespace KikoleApi.Interfaces
 
         Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date);
 
+        Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(DateTime? minimalDate, DateTime? maximalDate);
+
         Task<PlayerDto> GetPlayerByIdAsync(ulong id);
 
         Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);

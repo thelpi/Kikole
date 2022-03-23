@@ -1,66 +1,79 @@
 ﻿@model LeaderboardModel
-<fieldset title="Leaderboard" style="margin-top: 10px">
-    <form action="/Leaderboard" method="post">
-        <div>
-            <span>Sort type:</span>
-            @Html.DropDownListFor(m => m.SortType, System.Enum.GetValues(typeof(KikoleSite.Api.LeaderSort)).Cast<KikoleSite.Api.LeaderSort>().Select(x => new SelectListItem(x.ToString(), x.ToString())), new { @style = "width: 150px" })
-        </div>
-        <div>
-            <span>From minimal date:</span>
-            @Html.TextBoxFor(m => m.MinimalDate, new { @style = "width: 150px" })
-        </div>
-        <div>
-            <input type="submit" value="Afficher" />
-        </div>
-    </form>
-    <div style="margin-top: 20px">
-        <div style="font-size: large">General stats</div>
-        <table style="margin-top: 5px">
-            <thead>
-                <tr>
-                    <th style="width: 80px">Position</th>
-                    <th style="color: crimson; width: 120px">Username</th>
-                    <th style="width: 80px">Points</th>
-                    <th style="width: 80px">Best time</th>
-                    <th>Players found</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var leader in Model.Leaders)
-                {
-                <tr>
-                    <td>@leader.Position</td>
-                    <td style="color: crimson"><a href="/Leaderboard?userId=@leader.Id">@leader.Login</a></td>
-                    <td>@leader.TotalPoints</td>
-                    <td>@leader.BestTime.ToString(@"hh\:mm")</td>
-                    <td>@leader.SuccessCount</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+
+<h3>Customize leaderboard</h3>
+<form action="/Leaderboard" method="post">
+    <div>
+        <label style="width: 100px; text-align: right">Sort type:</label>
+        @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.ToString(), x.ToString())))
     </div>
-    <div style="margin-top: 20px">
-        <div style="font-size: large">Today's stats</div>
-        <table style="margin-top: 5px">
-            <thead>
-                <tr>
-                    <th style="width: 80px">Position</th>
-                    <th style="color: crimson; width: 120px">Username</th>
-                    <th style="width: 80px">Time</th>
-                    <th>Points</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var leader in Model.TodayLeaders)
-                {
-                    <tr>
-                        <td>@leader.Position</td>
-                        <td style="color: crimson"><a href="/Leaderboard?userId=@leader.Id">@leader.Login</a></td>
-                        <td>@leader.BestTime.ToString(@"hh\:mm")</td>
-                        <td>@leader.TotalPoints</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div style="margin-top: 5px">
+        <label style="width: 100px; text-align: right">From date:</label>
+        @Html.EditorFor(m => m.MinimalDate)
     </div>
-</fieldset>
+    <div style="margin-top: 5px">
+        <label style="width: 100px; text-align: right">To date:</label>
+        @Html.EditorFor(m => m.MaximalDate)
+    </div>
+    <div style="margin-top: 5px">
+        <input type="submit" value="Get ranking" />
+    </div>
+</form>
+
+<h3>Global leaderboard</h3>
+<span>(by @Model.SortType, from @Model.MinimalDate.ToString("yyyy-MM-dd") to @Model.MaximalDate.ToString("yyyy-MM-dd"))</span>
+<table style="margin-top: 5px">
+    <thead>
+        <tr>
+            <th style="width: 50px">Pos.</th>
+            <th style="color: crimson; width: 150px">Username</th>
+            <th style="width: 100px">Points</th>
+            <th style="width: 100px">Best time</th>
+            <th>Players found</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 0;
+        }
+        @foreach (var leader in Model.Leaders)
+        {
+            var background = i % 2 == 0 ? "white" : "lavenderblush";
+            <tr style="background-color: @background">
+                <td>@leader.Position</td>
+                <td style="color: crimson"><a href="/Leaderboard?userId=@leader.Id">@leader.Login</a></td>
+                <td>@leader.TotalPoints</td>
+                <td>@leader.BestTime.ToString(@"hh\:mm")</td>
+                <td>@leader.SuccessCount</td>
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>
+
+<h3>Today's leaderboard</h3>
+<table style="margin-top: 5px">
+    <thead>
+        <tr>
+            <th style="width: 50px">Pos.</th>
+            <th style="color: crimson; width: 150px">Username</th>
+            <th style="width: 100px">Time</th>
+            <th>Points</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            i = 0;
+        }
+        @foreach (var leader in Model.TodayLeaders)
+        {
+            var background = i % 2 == 0 ? "white" : "lavenderblush";
+            <tr style="background-color: @background">
+                <td>@leader.Position</td>
+                <td style="color: crimson"><a href="/Leaderboard?userId=@leader.Id">@leader.Login</a></td>
+                <td>@leader.BestTime.ToString(@"hh\:mm")</td>
+                <td>@leader.TotalPoints</td>
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>

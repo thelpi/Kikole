@@ -1,15 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using KikoleSite.Api;
 
 namespace KikoleSite.Models
 {
     public class LeaderboardModel
     {
-        public string MinimalDate { get; set; }
+        [DataType(DataType.Date, ErrorMessage = "Date only")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime MinimalDate { get; set; }
 
-        public Api.LeaderSort SortType { get; set; }
+        [DataType(DataType.Date, ErrorMessage = "Date only")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime MaximalDate { get; set; }
 
-        public IReadOnlyCollection<Api.Leader> Leaders { get; set; }
+        public LeaderSort SortType { get; set; }
 
-        public IReadOnlyCollection<Api.Leader> TodayLeaders { get; set; }
+        public IReadOnlyCollection<Leader> Leaders { get; set; }
+
+        public IReadOnlyCollection<Leader> TodayLeaders { get; set; }
+
+        public IReadOnlyCollection<LeaderSort> SortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().ToList();
     }
 }

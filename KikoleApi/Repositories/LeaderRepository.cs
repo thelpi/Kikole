@@ -48,15 +48,17 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate)
+        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate)
         {
             return await ExecuteReaderAsync<LeaderDto>(
                     $"SELECT * FROM leaders " +
-                    $"WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) "+
+                    $"WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
+                    $"AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
                     $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR user_type_id = @adminId)",
                     new
                     {
-                        minimal_date = minimalDate,
+                        minimal_date = minimalDate?.Date,
+                        maximal_date = maximalDate?.Date,
                         adminId = (ulong)UserTypes.Administrator
                     })
                 .ConfigureAwait(false);

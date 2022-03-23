@@ -19,7 +19,7 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync( DateTime proposalDate, string authToken);
 
-        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate);
+        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate);
 
         Task<string> GetClueAsync(DateTime proposalDate);
 

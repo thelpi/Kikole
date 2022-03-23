@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
-using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -140,22 +140,43 @@ namespace KikoleApi.Controllers
 
         [HttpGet("leaders")]
         [AuthenticationLevel]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetLeadersAsync(
             [FromQuery] DateTime? minimalDate,
+            [FromQuery] DateTime? maximalDate,
             [FromQuery] LeaderSorts leaderSort)
         {
-            var dtos = await _leaderRepository
-                .GetLeadersAsync(minimalDate)
+            if (!Enum.IsDefined(typeof(LeaderSorts), leaderSort))
+                return BadRequest();
+
+            if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
+                return BadRequest();
+
+            if (minimalDate.HasValue && minimalDate.Value.Date > _clock.Now.Date)
+                return BadRequest();
+
+            if (maximalDate.HasValue && maximalDate.Value.Date > _clock.Now.Date)
+                return BadRequest();
+
+            var leaderDtos = await _leaderRepository
+                .GetLeadersAsync(minimalDate, maximalDate)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
                 .GetActiveUsersAsync()
                 .ConfigureAwait(false);
 
-            var leaders = dtos
-                .GroupBy(dto => dto.UserId)
-                .Select(dto => new Leader(dto, users))
+            var players = await _playerRepository
+                .GetPlayersOfTheDayAsync(minimalDate, maximalDate)
+                .ConfigureAwait(false);
+
+            var leaders = leaderDtos
+                .GroupBy(leaderDto => leaderDto.UserId)
+                .Select(leaderDto => new Leader(leaderDto, users)
+                    .WithPointsFromSubmittedPlayers(
+                        players.Where(p => p.CreationUserId == leaderDto.Key).Select(d => d.ProposalDate.Value),
+                        leaderDtos))
                 .ToList();
             
             switch (leaderSort)

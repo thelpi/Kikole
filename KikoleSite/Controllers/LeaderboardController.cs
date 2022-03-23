@@ -40,7 +40,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var knownAnswers = new List<string>();
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (!string.IsNullOrWhiteSpace(token))
             {
                 knownAnswers = (await _apiProvider
@@ -55,16 +55,19 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(LeaderboardModel model)
         {
-            DateTime? dtNull = null;
-            if (DateTime.TryParse(model.MinimalDate, out var dt))
-                dtNull = dt;
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
 
-            model.MinimalDate = dtNull?.ToString("yyyy-MM-dd");
+            model.MinimalDate = model.MinimalDate.Date.Max(chart.FirstDate.Date);
+            model.MaximalDate = model.MaximalDate.Date.Min(DateTime.Now.Date);
+            model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
             model.Leaders = await _apiProvider
                 .GetLeadersAsync(
                     model.SortType,
-                    dtNull)
+                    model.MinimalDate,
+                    model.MaximalDate)
                 .ConfigureAwait(false);
 
             model.TodayLeaders = await _apiProvider
@@ -76,15 +79,24 @@ namespace KikoleSite.Controllers
 
         private async Task<IActionResult> Index()
         {
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
+
+            var dateMin = chart.FirstDate.Date;
+            var dateMax = DateTime.Now.Date;
+            var sortType = LeaderSort.TotalPoints;
+
             var leaders = await _apiProvider
-                .GetLeadersAsync(LeaderSort.TotalPoints, null)
+                .GetLeadersAsync(sortType, dateMin, dateMax)
                 .ConfigureAwait(false);
 
             return View(new LeaderboardModel
             {
-                MinimalDate = null,
+                MinimalDate = dateMin,
+                MaximalDate = dateMax,
                 Leaders = leaders,
-                SortType = LeaderSort.TotalPoints,
+                SortType = sortType,
                 TodayLeaders = await _apiProvider
                     .GetTodayLeadersAsync()
                     .ConfigureAwait(false)

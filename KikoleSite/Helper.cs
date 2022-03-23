@@ -108,5 +108,15 @@ namespace KikoleSite
             var tempBytes = Encoding.GetEncoding(Iso8859Code).GetBytes(value);
             return Encoding.UTF8.GetString(tempBytes);
         }
+
+        internal static DateTime Min(this DateTime dt1, DateTime dt2)
+        {
+            return dt1 > dt2 ? dt2 : dt1;
+        }
+
+        internal static DateTime Max(this DateTime dt1, DateTime dt2)
+        {
+            return dt1 < dt2 ? dt2 : dt1;
+        }
     }
 }

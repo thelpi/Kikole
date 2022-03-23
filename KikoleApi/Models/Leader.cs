@@ -11,7 +11,7 @@ namespace KikoleApi.Models
 
         public string Login { get; }
 
-        public uint TotalPoints { get; }
+        public uint TotalPoints { get; private set; }
 
         public TimeSpan BestTime { get; }
 
@@ -28,6 +28,23 @@ namespace KikoleApi.Models
             TotalPoints = (uint)userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);
             Id = user.Id;
+        }
+
+        internal Leader WithPointsFromSubmittedPlayers(
+            IEnumerable<DateTime> dates,
+            IEnumerable<LeaderDto> datesLeaders)
+        {
+            foreach (var date in dates)
+            {
+                var leadersCosting = ProposalChart.Default.SubmissionBonusPoints - datesLeaders
+                    .Where(d => d.ProposalDate.Date == date && d.Points >= ProposalChart.Default.SubmissionThresholdlosePoints)
+                    .Sum(d => ProposalChart.Default.SubmissionLosePointsByLeader);
+
+                TotalPoints += ProposalChart.Default.SubmissionBasePoints
+                    + (uint)Math.Max(leadersCosting, 0);
+            }
+
+            return this;
         }
     }
 }

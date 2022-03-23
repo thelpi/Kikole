@@ -141,10 +141,10 @@ namespace KikoleSite
         }
 
         public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
-            LeaderSort leaderSort, DateTime? minimalDate)
+            LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate)
         {
             var response = await SendAsync(
-                    $"leaders?minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
+                    $"leaders?maximalDate={maximalDate?.ToString("yyyy-MM-dd")}&minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

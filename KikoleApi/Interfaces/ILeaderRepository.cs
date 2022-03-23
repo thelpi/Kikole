@@ -9,7 +9,7 @@ namespace KikoleApi.Interfaces
     {
         Task<ulong> CreateLeaderAsync(LeaderDto request);
 
-        Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate);
+        Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate);
 
         Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date);
 

@@ -13,6 +13,14 @@ namespace KikoleApi.Models
 
         public int BasePoints = 1000;
 
+        public uint SubmissionBasePoints = 500;
+
+        public uint SubmissionBonusPoints = 1000;
+
+        public uint SubmissionLosePointsByLeader = 100;
+
+        public uint SubmissionThresholdlosePoints = 750;
+
         public IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
             = new Dictionary<ProposalTypes, int>
             {
