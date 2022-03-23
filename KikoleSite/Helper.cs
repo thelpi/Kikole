@@ -12,6 +12,7 @@ namespace KikoleSite
     {
         const string NA = "N/A";
         const string TimeSpanPattern = @"hh\:mm";
+        const string DateTimePattern = "yyyy-MM-dd";
         const string Iso8859Code = "ISO-8859-8";
 
         static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
@@ -31,6 +32,16 @@ namespace KikoleSite
         internal static string ToNaString(this TimeSpan? data)
         {
             return data?.ToString(TimeSpanPattern) ?? NA;
+        }
+
+        internal static string ToNaString(this DateTime? data)
+        {
+            return data?.ToString(DateTimePattern) ?? NA;
+        }
+
+        internal static string ToNaString(this DateTime data)
+        {
+            return data.ToString(DateTimePattern);
         }
 
         internal static string ToYesNo(this bool data)

@@ -25,7 +25,7 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false);
 
-        Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync();
+        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day);
 
         Task<UserStats> GetUserStatsAsync(ulong id);
 

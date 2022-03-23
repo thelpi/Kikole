@@ -179,10 +179,10 @@ namespace KikoleSite
             return _clubsCache;
         }
 
-        public async Task<IReadOnlyCollection<Leader>> GetTodayLeadersAsync()
+        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day)
         {
             var response = await SendAsync(
-                    "today-leaders",
+                    $"day-leaders?day={day.ToString("yyyy-MM-dd")}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Models
+﻿using KikoleSite.Api;
+
+namespace KikoleSite.Models
 {
     public class SingleUserStatModel
     {
@@ -18,11 +20,11 @@
 
         public string PointsPosition { get; set; }
 
-        public SingleUserStatModel(Api.SingleUserStat apiStat, bool knowPlayer)
+        public SingleUserStatModel(SingleUserStat apiStat, bool knowPlayer)
         {
-            Answer = knowPlayer ? apiStat.Answer : "???";
+            Answer = knowPlayer ? apiStat.Answer : "***";
             Attempt = apiStat.Attempt.ToYesNo();
-            Date = apiStat.Date.ToString("yyyy-MM-dd");
+            Date = apiStat.Date.ToNaString();
             Points = apiStat.Points.ToNaString();
             PointsPosition = apiStat.PointsPosition.ToNaString();
             Success = apiStat.Time.HasValue.ToYesNo();

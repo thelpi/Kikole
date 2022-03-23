@@ -1,96 +1,114 @@
 ﻿@model UserStatsModel
-<div style="margin-top: 20px">
-    <h2>General information</h2>
-    <div>Username: <span style="color: crimson; font-size: large">@Model.Login</span></div>
-    <div>Attempts: <span style="color: crimson; font-size: large">@Model.Attempts</span></div>
-    <div>Successes: <span style="color: crimson; font-size: large">@Model.Successes</span></div>
-    <div>Average time: <span style="color: crimson; font-size: large">@Model.AverageTime</span></div>
-    <div>Best time: <span style="color: crimson; font-size: large">@Model.BestTime</span></div>
-    <div>Best score: <span style="color: crimson; font-size: large">@Model.BestPoints</span></div>
-    <div>Total score: <span style="color: crimson; font-size: large">@Model.TotalPoints</span></div>
+
+<h2>General information</h2>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Username:</label>
+    <label style="color: crimson">@Model.Login</label>
 </div>
-<div style="margin-top: 20px">
-    <h2>Stats by day</h2>
-    <table style="margin-top: 10px">
-        <thead>
-            <tr>
-                <th style="width: 80px">Date</th>
-                <th style="width: 80px">Answer</th>
-                <th style="width: 80px">Attempt?</th>
-                <th style="width: 80px">Success?</th>
-                <th style="width: 80px">Points</th>
-                <th style="width: 80px">Points ranking</th>
-                <th style="width: 80px">Time</th>
-                <th style="width: 80px">Time ranking</th>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Attempts:</label>
+    <label style="color: crimson">@Model.Attempts</label>
+</div>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Successes:</label>
+    <label style="color: crimson">@Model.Successes (@Model.SuccessRate %)</label>
+</div>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Average time:</label>
+    <label style="color: crimson">@Model.AverageTime</label>
+</div>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Best time:</label>
+    <label style="color: crimson">@Model.BestTime</label>
+</div>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Best score:</label>
+    <label style="color: crimson">@Model.BestPoints</label>
+</div>
+<div style="margin-top: 5px">
+    <label style="width: 120px; text-align: right">Total score:</label>
+    <span style="color: crimson">@Model.TotalPoints</span>
+</div>
+
+<h2>Stats by day</h2>
+<table style="margin-top: 10px">
+    <thead>
+        <tr>
+            <th style="width: 100px">Date</th>
+            <th style="width: 180px">Answer</th>
+            <th style="width: 80px">Attempt?</th>
+            <th style="width: 80px">Success?</th>
+            <th style="width: 80px">Points</th>
+            <th style="width: 80px">Points rk.</th>
+            <th style="width: 80px">Time</th>
+            <th style="width: 80px">Time rk.</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 0;
+        }
+        @foreach (var stat in Model.Stats)
+        {
+            var background = i % 2 == 0 ? "white" : "azure";
+            <tr style="background-color: @background">
+                <td>@stat.Date</td>
+                <td>@stat.Answer</td>
+                <td>@stat.Attempt</td>
+                <td>@stat.Success</td>
+                <td>@stat.Points</td>
+                <td>@stat.PointsPosition</td>
+                <td>@stat.Time</td>
+                <td>@stat.TimePosition</td>
             </tr>
-        </thead>
-        <tbody>
-            @{
-                var i = 0;
-            }
-            @foreach (var stat in Model.Stats)
+            i++;
+        }
+    </tbody>
+</table>
+
+<h2>Badges</h2>
+<h3>You own</h3>
+@if (Model.Badges.Count == 0)
+{
+    <div>You have no badge yet :-(</div>
+}
+else
+{
+    foreach (var badge in Model.Badges)
+    {
+        var color = !badge.Hidden ? "transparent" : "gold";
+        <div style="margin-top: 5px; background-color: @color">
+            <div style="color: forestgreen; font-size: large">@badge.Name</div>
+            <div>@badge.Description</div>
+            @if (!badge.Hidden)
             {
-                var background = i % 2 == 0 ? "white" : "lavenderblush";
-                <tr style="background-color: @background">
-                    <td>@stat.Date</td>
-                    <td>@stat.Answer</td>
-                    <td>@stat.Attempt</td>
-                    <td>@stat.Success</td>
-                    <td>@stat.Points</td>
-                    <td>@stat.PointsPosition</td>
-                    <td>@stat.Time</td>
-                    <td>@stat.TimePosition</td>
-                </tr>
-                i++;
+                <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
             }
-        </tbody>
-    </table>
-</div>
-<div style="margin-top: 20px">
-    <h2>Badges</h2>
-    <h3>You own</h3>
-    @if (Model.Badges.Count == 0)
-    {
-        <div>You have no badge yet :-(</div>
+            @if (@badge.Users == 1)
+            {
+                <div>You're the <span style="color: crimson">only one</span> with this badge!</div>
+            }
+            else
+            {
+                var v = badge.Users - 1;
+                <div><span style="color: crimson">@v</span> other users have this badge</div>
+            }
+        </div>
     }
-    else
+}
+<h3>You miss</h3>
+@if (Model.MissingBadges.Count == 0)
+{
+    <div>Congratulations, you have every badge!</div>
+}
+else
+{
+    foreach (var badge in Model.MissingBadges)
     {
-        foreach (var badge in Model.Badges)
-        {
-            var color = !badge.Hidden ? "transparent" : "gold";
-            <div style="margin-top: 5px; background-color: @color">
-                <div style="color: forestgreen; font-size: large">@badge.Name</div>
-                <div>@badge.Description</div>
-                @if (!badge.Hidden)
-                {
-                    <div>First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
-                }
-                @if (@badge.Users == 1)
-                {
-                    <div>You're the <span style="color: crimson">only one</span> with this badge!</div>
-                }
-                else
-                {
-                    var v = badge.Users - 1;
-                    <div><span style="color: crimson">@v</span> other users have this badge</div>
-                }
-            </div>
-        }
+        <div style="margin-top: 5px">
+            <div style="color: crimson; font-size: large">@badge.Name</div>
+            <div>@badge.Description</div>
+            <div><span style="color: crimson">@badge.Users</span> users have this badge</div>
+        </div>
     }
-    <h3>You miss</h3>
-    @if (Model.MissingBadges.Count == 0)
-    {
-        <div>Congratulations, you have every badge!</div>
-    }
-    else
-    {
-        foreach (var badge in Model.MissingBadges)
-        {
-            <div style="margin-top: 5px">
-                <div style="color: crimson; font-size: large">@badge.Name</div>
-                <div>@badge.Description</div>
-                <div><span style="color: crimson">@badge.Users</span> users have this badge</div>
-            </div>
-        }
-    }
-</div>
+}

@@ -23,5 +23,9 @@ namespace KikoleSite.Models
         public IReadOnlyCollection<Leader> TodayLeaders { get; set; }
 
         public IReadOnlyCollection<LeaderSort> SortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().ToList();
+
+        [DataType(DataType.Date, ErrorMessage = "Date only")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime LeaderboardDay { get; set; }
     }
 }

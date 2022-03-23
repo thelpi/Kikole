@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Api;
 
 namespace KikoleSite.Models
 {
     public class UserStatsModel
     {
+        public int SuccessRate => (int)Math.Round((Successes / (decimal)Attempts) * 100);
+
         public string Login { get; set; }
 
         public int Attempts { get; set; }
@@ -21,13 +25,13 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<SingleUserStatModel> Stats { get; set; }
 
-        public IReadOnlyCollection<Api.UserBadge> Badges { get; set; }
+        public IReadOnlyCollection<UserBadge> Badges { get; set; }
 
-        public IReadOnlyCollection<Api.Badge> MissingBadges { get; set; }
+        public IReadOnlyCollection<Badge> MissingBadges { get; set; }
 
-        public UserStatsModel(Api.UserStats apiStat,
-            IReadOnlyCollection<Api.UserBadge> badges,
-            IReadOnlyCollection<Api.Badge> allBadges,
+        public UserStatsModel(UserStats apiStat,
+            IReadOnlyCollection<UserBadge> badges,
+            IReadOnlyCollection<Badge> allBadges,
             IReadOnlyCollection<string> knownAnswers)
         {
             Login = apiStat.Login;

@@ -36,13 +36,13 @@ namespace KikoleApi.Controllers
             _clock = clock;
         }
 
-        [HttpGet("today-leaders")]
+        [HttpGet("day-leaders")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetTodayLeadersAsync()
+        public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetDayLeadersAsync([FromQuery] DateTime day)
         {
             var dtos = await _leaderRepository
-                .GetLeadersAtDateAsync(_clock.Now.Date)
+                .GetLeadersAtDateAsync(day.Date)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
