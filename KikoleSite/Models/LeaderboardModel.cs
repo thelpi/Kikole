@@ -27,5 +27,9 @@ namespace KikoleSite.Models
         [DataType(DataType.Date, ErrorMessage = "Date only")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime LeaderboardDay { get; set; }
+
+        public LeaderSort DaySortType { get; set; }
+
+        public IReadOnlyCollection<LeaderSort> DaySortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().Where(ls => ls != LeaderSort.SuccessCount).ToList();
     }
 }

@@ -73,7 +73,7 @@ namespace KikoleSite.Controllers
             var day = model.LeaderboardDay.Date.Max(chart.FirstDate);
 
             model.TodayLeaders = await _apiProvider
-                .GetDayLeadersAsync(day)
+                .GetDayLeadersAsync(day, model.DaySortType)
                 .ConfigureAwait(false);
 
             return View(model);
@@ -93,7 +93,8 @@ namespace KikoleSite.Controllers
                 .GetLeadersAsync(sortType, dateMin, dateMax)
                 .ConfigureAwait(false);
 
-            var today = DateTime.Now.Date;
+            var day = DateTime.Now.Date;
+            var daySort = LeaderSort.BestTime;
 
             return View(new LeaderboardModel
             {
@@ -102,9 +103,10 @@ namespace KikoleSite.Controllers
                 Leaders = leaders,
                 SortType = sortType,
                 TodayLeaders = await _apiProvider
-                    .GetDayLeadersAsync(today)
+                    .GetDayLeadersAsync(day, daySort)
                     .ConfigureAwait(false),
-                LeaderboardDay = today
+                LeaderboardDay = day,
+                DaySortType = daySort
             });
         }
     }

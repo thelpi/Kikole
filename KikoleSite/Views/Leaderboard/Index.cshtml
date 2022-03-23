@@ -51,6 +51,7 @@
 
     <h3>Daily leaderboard</h3>
     @Html.EditorFor(m => m.LeaderboardDay)
+    @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.ToString(), x.ToString())))
     <input type="submit" value="Ok" />
     <table style="margin-top: 5px">
         <thead>

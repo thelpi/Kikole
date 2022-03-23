@@ -17,7 +17,7 @@ namespace KikoleSite
 
         Task<ProposalChart> GetProposalChartAsync();
 
-        Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync( DateTime proposalDate, string authToken);
+        Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken);
 
         Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate);
 
@@ -25,7 +25,7 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false);
 
-        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day);
+        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort);
 
         Task<UserStats> GetUserStatsAsync(ulong id);
 

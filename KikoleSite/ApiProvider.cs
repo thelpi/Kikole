@@ -179,10 +179,10 @@ namespace KikoleSite
             return _clubsCache;
         }
 
-        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day)
+        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort)
         {
             var response = await SendAsync(
-                    $"day-leaders?day={day.ToString("yyyy-MM-dd")}",
+                    $"day-leaders?sort={(ulong)sort}&day={day.ToString("yyyy-MM-dd")}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

@@ -39,8 +39,13 @@ namespace KikoleApi.Controllers
         [HttpGet("day-leaders")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetDayLeadersAsync([FromQuery] DateTime day)
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetDayLeadersAsync(
+            [FromQuery] DateTime day, [FromQuery] LeaderSorts sort)
         {
+            if (sort == LeaderSorts.SuccessCount)
+                return BadRequest();
+
             var dtos = await _leaderRepository
                 .GetLeadersAtDateAsync(day.Date)
                 .ConfigureAwait(false);
@@ -51,12 +56,13 @@ namespace KikoleApi.Controllers
 
             var leaders = dtos
                 .GroupBy(dto => dto.UserId)
-                .Select(dto => new Leader(dto, users))
-                .ToList();
+                .Select(dto => new Leader(dto, users));
+
+            leaders = sort == LeaderSorts.TotalPoints
+                ? leaders.OrderByDescending(l => l.TotalPoints).ThenBy(l => l.BestTime.TotalMinutes)
+                : leaders.OrderBy(l => l.BestTime.TotalMinutes).ThenBy(l => l.TotalPoints);
 
             leaders = leaders
-                .OrderBy(l => l.BestTime.TotalMinutes)
-                .ThenByDescending(l => l.TotalPoints)
                 .Select((l, i) =>
                 {
                     l.Position = i + 1;
