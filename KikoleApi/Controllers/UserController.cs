@@ -106,7 +106,8 @@ namespace KikoleApi.Controllers
                         badges.Single(_ => _.Id == b.BadgeId),
                         b);
                 })
-                .OrderByDescending(b => b.GetDate)
+                .OrderByDescending(b => b.Hidden)
+                .OrderBy(b => b.Users)
                 .ToList();
 
             return Ok(badgesFull);
