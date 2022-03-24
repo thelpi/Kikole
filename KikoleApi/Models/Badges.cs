@@ -3,8 +3,7 @@
     public enum Badges
     {
         YourFirstSuccess = 3,
-        YourActualFirstSuccess,
-        HalfwayToTheTop,
+        HalfwayToTheTop = 5,
         ItsOver900,
         Archaeology,
         ThreeInARow,
@@ -21,6 +20,7 @@
         MakeItDouble,
         DoItYourself,
         FourFourtwo,
-        AroundTheWorld
+        AroundTheWorld,
+        WoodenSpoon
     }
 }

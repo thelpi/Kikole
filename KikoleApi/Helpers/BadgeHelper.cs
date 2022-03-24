@@ -95,8 +95,8 @@ namespace KikoleApi.Helpers
                     (l, lh) => new TimeSpan(0, l.Time, 0).Hours < 2
                 },
                 {
-                    Badges.YourActualFirstSuccess,
-                    (l, lh) => l.Points > 0
+                    Badges.WoodenSpoon,
+                    (l, lh) => l.Points == 0
                 },
                 {
                     Badges.YourFirstSuccess,
