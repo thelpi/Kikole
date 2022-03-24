@@ -14,16 +14,12 @@
     }
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
-        <fieldset id="how_to_play" title="How to play?" style="margin-top: 10px">
-            <span style="color: crimson; font-size: large">"Kikole?"</span> is a game where you have to guess a new football player every single day.<br />
-            The way to do this is to figure out in which clubs he played (or currently plays) during his career.<br />
-            You can also try to guess his nationality, birth year or position on the field.<br />
-            <ul>
-                <li>The player can be active or retired.</li>
-                <li>All text submissions are case-insensitive and diacritics is ignored.</li>
-                <li>You can propose a name at any time (no need to find every clue)</li>
-            </ul>
-        </fieldset>
+        <div style="margin-top: 10px">
+            <span style="color: crimson; font-size: large">"Kikole?"</span> is a very simple game where you have to guess a new football player <span style="color: crimson">every day</span>.<br />
+            Your opponents have the same player to guess, so be the best and you'll appear on our <a href="/Leaderboard">leaderboard</a>!<br />
+            To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.<br />
+            Notice that the player can be active or retired.
+        </div>
         <div style="margin-top: 20px">
             <label>You are <a href="/Account"><span style="color: crimson">not logged</span></a></label>
         </div>
