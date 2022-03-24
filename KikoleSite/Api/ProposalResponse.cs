@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Api
+﻿using System.Collections.Generic;
+
+namespace KikoleSite.Api
 {
     public class ProposalResponse
     {
@@ -13,5 +15,7 @@
         public int TotalPoints { get; set; }
 
         public ProposalType ProposalType { get; set; }
+
+        public IReadOnlyCollection<UserBadge> CollectedBadges { get; set; }
     }
 }

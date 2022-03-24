@@ -60,6 +60,32 @@
                     <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
                 </div>
                 <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+                @if (Model.Badges?.Count > 0)
+                {
+                    <div>You get the following badges:</div>
+                    foreach (var badge in Model.Badges)
+                    {
+                        var color = !badge.Hidden ? "transparent" : "gold";
+                        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+                            <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
+                            <div style="text-align:center">@badge.Description</div>
+                            @if (!badge.Hidden)
+                            {
+                                <div style="text-align:center">Got the @badge.GetDate.ToString("yyyy-MM-dd")</div>
+                            }
+                            @if (@badge.Users == 1)
+                            {
+                                <div style="text-align:center; font-weight: bold">You're the <span style="color: crimson">only one</span> with this badge!</div>
+                            }
+                            else
+                            {
+                                var v = badge.Users - 1;
+                                <div style="text-align:center"><span style="color: crimson">@v</span> other users have this badge</div>
+                            }
+                        </div>
+                    }
+                    <div style="clear: both" />
+                }
             }
             else
             {
@@ -221,20 +247,20 @@
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.Position))
                     {
-                    <div>
-                        <script>
-                            $(function () {
-                                $("#positionSubmission").on("change", function (e) {
-                                    if ($("#positionSubmission").val() != "0") {
-                                        $("#submitPosition").click();
-                                    }
+                        <div>
+                            <script>
+                                $(function () {
+                                    $("#positionSubmission").on("change", function (e) {
+                                        if ($("#positionSubmission").val() != "0") {
+                                            $("#submitPosition").click();
+                                        }
+                                    });
                                 });
-                            });
-                        </script>
-                        @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
-                        <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> pts if incorrect)</span>
-                    </div>
+                            </script>
+                            @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
+                            <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> pts if incorrect)</span>
+                        </div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
                             <div style="margin-top: 10px">
@@ -261,26 +287,26 @@
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.BirthYear))
                     {
-                    <div>
-                        <script>
-                            $(function () {
-                                var availableTags = [];
-                                for (var i = 1900; i <= 2010; i++)
-                                    availableTags.push(i.toString());
-                                $("#birthYearValue").autocomplete({
-                                    source: availableTags,
-                                    select: function (e, i) {
-                                        $("#birthYearValue").val(i.item.value);
-                                        $("#submitYear").click();
-                                    },
-                                    minLength: 1
+                        <div>
+                            <script>
+                                $(function () {
+                                    var availableTags = [];
+                                    for (var i = 1900; i <= 2010; i++)
+                                        availableTags.push(i.toString());
+                                    $("#birthYearValue").autocomplete({
+                                        source: availableTags,
+                                        select: function (e, i) {
+                                            $("#birthYearValue").val(i.item.value);
+                                            $("#submitYear").click();
+                                        },
+                                        minLength: 1
+                                    });
                                 });
-                            });
-                        </script>
-                        <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
-                        <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> pts if incorrect)</span>
-                    </div>
+                            </script>
+                            <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
+                            <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> pts if incorrect)</span>
+                        </div>
                         @if (Model.IncorrectYears?.Count > 0)
                         {
                             <div style="margin-top: 10px">

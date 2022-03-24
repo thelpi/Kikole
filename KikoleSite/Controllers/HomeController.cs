@@ -101,6 +101,8 @@ namespace KikoleSite.Controllers
                 ? $"Valid {proposalType} guess"
                 : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
 
+            model.Badges = response.CollectedBadges;
+
             var proposalDate = now.Date.AddDays(-model.CurrentDay);
 
             var playerCreator = await _apiProvider

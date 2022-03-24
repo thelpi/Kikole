@@ -21,6 +21,8 @@ namespace KikoleApi.Models
 
         public ProposalTypes ProposalType { get; set; }
 
+        public IReadOnlyCollection<UserBadge> CollectedBadges { get; set; }
+
         internal bool IsWin => ProposalType == ProposalTypes.Name && Successful;
 
         private ProposalResponse(ProposalTypes proposalType,

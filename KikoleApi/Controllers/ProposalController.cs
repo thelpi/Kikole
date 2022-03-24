@@ -229,13 +229,17 @@ namespace KikoleApi.Controllers
                             .GetLeadersHistoryAsync(request.ProposalDate.Date)
                             .ConfigureAwait(false);
 
+                        var collectedBadges = new List<Badges>();
+
                         foreach (var badge in BadgeHelper.LeaderBasedBadgeCondition.Keys)
                         {
                             if (BadgeHelper.LeaderBasedBadgeCondition[badge](leader, leadersHistory))
                             {
-                                await InsertBadgeIfNotAlreadyAsync(
+                                var added = await InsertBadgeIfNotAlreadyAsync(
                                         request, userId, badge)
                                     .ConfigureAwait(false);
+                                if (added)
+                                    collectedBadges.Add(badge);
                             }
                         }
 
@@ -243,9 +247,11 @@ namespace KikoleApi.Controllers
                         {
                             if (BadgeHelper.PlayerBasedBadgeCondition[badge](playerOfTheDay))
                             {
-                                await InsertBadgeIfNotAlreadyAsync(
+                                var added = await InsertBadgeIfNotAlreadyAsync(
                                          request, userId, badge)
                                      .ConfigureAwait(false);
+                                if (added)
+                                    collectedBadges.Add(badge);
                             }
                         }
 
@@ -303,11 +309,32 @@ namespace KikoleApi.Controllers
                         {
                             if (BadgeHelper.PlayersHistoryBadgeCondition[badge](playersHistory))
                             {
-                                await InsertBadgeIfNotAlreadyAsync(
+                                var added = await InsertBadgeIfNotAlreadyAsync(
                                         request, userId, badge)
                                     .ConfigureAwait(false);
+                                if (added)
+                                    collectedBadges.Add(badge);
                             }
                         }
+
+                        var badgesDto = await _badgeRepository
+                            .GetBadgesAsync(true)
+                            .ConfigureAwait(false);
+
+                        var collectedBadgesFinal = new List<UserBadge>();
+                        foreach (var badge in collectedBadges)
+                        {
+                            collectedBadgesFinal.Add(new UserBadge(
+                                badgesDto.Single(b => b.Id == (ulong)badge),
+                                new UserBadgeDto
+                                {
+                                    BadgeId = (ulong)badge,
+                                    GetDate = request.ProposalDate.Date,
+                                    UserId = userId
+                                }));
+                        }
+
+                        response.CollectedBadges = collectedBadgesFinal;
                     }
                 }
             }
@@ -315,7 +342,7 @@ namespace KikoleApi.Controllers
             return Ok(response);
         }
 
-        private async Task InsertBadgeIfNotAlreadyAsync<T>(T request, ulong userId, Badges badge) where T : BaseProposalRequest
+        private async Task<bool> InsertBadgeIfNotAlreadyAsync<T>(T request, ulong userId, Badges badge) where T : BaseProposalRequest
         {
             var hasBadge = await _badgeRepository
                 .CheckUserHasBadgeAsync(userId, (ulong)badge)
@@ -332,6 +359,8 @@ namespace KikoleApi.Controllers
                     })
                     .ConfigureAwait(false);
             }
+
+            return !hasBadge;
         }
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(
