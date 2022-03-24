@@ -1,6 +1,6 @@
 ﻿@model UserStatsModel
 
-<h2>General information</h2>
+<h3>General information</h3>
 <div style="margin-top: 5px">
     <label style="width: 120px; text-align: right">Username:</label>
     <label style="color: crimson">@Model.Login</label>
@@ -23,14 +23,14 @@
 </div>
 <div style="margin-top: 5px">
     <label style="width: 120px; text-align: right">Best score:</label>
-    <label style="color: crimson">@Model.BestPoints</label>
+    <label style="color: crimson">@Model.BestPoints (@Model.PointsPerAttempt pts p/ attempt)</label>
 </div>
 <div style="margin-top: 5px">
     <label style="width: 120px; text-align: right">Total score:</label>
     <label style="color: crimson">@Model.TotalPoints</label>
 </div>
 
-<h2>Stats by day</h2>
+<h3>Stats by day</h3>
 <table style="margin-top: 10px">
     <thead>
         <tr>
@@ -66,8 +66,8 @@
     </tbody>
 </table>
 
-<h2>Badges</h2>
-<h3>You own</h3>
+<h3>Badges</h3>
+<h4>You own</h4>
 @if (Model.Badges.Count == 0)
 {
     <div>You have no badge yet :-(</div>
@@ -82,11 +82,11 @@ else
             <div style="text-align:center">@badge.Description</div>
             @if (!badge.Hidden)
             {
-                <div style="text-align:center">First time: @badge.GetDate.ToString("yyyy-MM-dd")</div>
+                <div style="text-align:center">Got the @badge.GetDate.ToString("yyyy-MM-dd")</div>
             }
             @if (@badge.Users == 1)
             {
-                <div style="text-align:center">You're the <span style="color: crimson">only one</span> with this badge!</div>
+                <div style="text-align:center; font-weight: bold">You're the <span style="color: crimson">only one</span> with this badge!</div>
             }
             else
             {
@@ -97,7 +97,7 @@ else
     }
     <div style="clear: both" />
 }
-<h3>You miss</h3>
+<h4>You miss</h4>
 @if (Model.MissingBadges.Count == 0)
 {
     <div>Congratulations, you have every badge!</div>
@@ -109,7 +109,7 @@ else
         <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
             <div style="text-align:center; color: crimson; font-size: large">@badge.Name</div>
             <div style="text-align:center" >@badge.Description</div>
-            <div style="text-align:center"><span style="color: crimson">@badge.Users</span> users have this badge</div>
+            <div style="text-align:center; font-weight: bold"><span style="color: crimson">@badge.Users</span> users have this badge</div>
         </div>
     }
     <div style="clear: both" />

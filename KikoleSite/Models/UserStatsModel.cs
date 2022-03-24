@@ -9,6 +9,8 @@ namespace KikoleSite.Models
     {
         public int SuccessRate => (int)Math.Round((Successes / (decimal)Attempts) * 100);
 
+        public int PointsPerAttempt => (int)Math.Round(TotalPoints / (decimal)Attempts);
+
         public string Login { get; set; }
 
         public int Attempts { get; set; }
