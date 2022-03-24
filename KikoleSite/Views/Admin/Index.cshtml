@@ -9,41 +9,118 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
-    <form method="post" action="/Admin">
-        <div style="margin-top: 20px">
-            <div><label>Name</label></div>
-            <div style="font-size: smaller">(use english Wikipedia page title)</div>
-            <input type="text" name="Name" style="width: 250px" />
-        </div>
+<h3>Submit a player</h3>
+<form method="post" action="/Admin">
+    <div style="margin-top: 20px">
+        <div><label>Name</label></div>
+        <input type="text" name="Name" style="width: 250px" />
+        <div style="font-size: small">(use english Wikipedia page title)</div>
+    </div>
 
-        <div><label>Alternative names</label></div>
-        <div style="font-size: smaller">(at least the last name without the first name, and few alternatives of your choice)</div>
-        <div style="font-size: smaller">(don't mind diacritics, it will be considered equal)</div>
+    <div style="margin-top: 20px">
+        <label>Alternative names</label>
+    </div>
+    @for (var i = 0; i < 5; i++)
+    {
+        var name = $"AlternativeName{i}";
+        <div style="margin-top: 5px">
+            <input type="text" name="@name" style="width: 250px" />
+        </div>
+    }
+    <div style="font-size: small">(at least the last name without the first name, and few alternatives of your choice)</div>
+    <div style="font-size: small">(don't mind diacritics, it will be considered equal)</div>
+
+    <div style="margin-top: 20px">
+        <div>
+            <label>Year of birth</label>
+        </div>
+        <script>
+            $(function () {
+                var availableTags = [];
+                for (var i = 1900; i <= 2010; i++)
+                    availableTags.push(i.toString());
+                $("#birthYearValue").autocomplete({
+                    source: availableTags,
+                    select: function (e, i) {
+                        $("#birthYearValue").val(i.item.value);
+                    },
+                    minLength: 1
+                });
+            });
+        </script>
+        <input type="text" id="birthYearValue" name="YearOfBirth" style="width: 100px" />
+    </div>
+
+    <div style="margin-top: 20px">
+        <div>
+            <label>Nationality</label>
+        </div>
+        <script>
+            $(function () {
+                $("#countryName").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/Admin/AutoCompleteCountries/',
+                            data: {
+                                "prefix": request.term
+                                // add languageID here
+                            },
+                            type: "POST",
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item;
+                                }))
+                            }
+                        });
+                    },
+                    select: function (e, i) {
+                        $("#countryId").val(i.item.key);
+                        $("#submitCountry").click();
+                    },
+                    minLength: 1
+                });
+            });
+        </script>
+        <div>
+            <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
+            <input type="hidden" id="countryId" name="Country" />
+        </div>
+        <div style="font-size: small">(keep in mind it's the country, not the international selection)</div>
+    </div>
+
+    <div style="margin-top: 20px">
+        <div>
+            <label>Clue</label>
+        </div>
+        <input type="text" name="Clue" style="width: 300px" />
+        <div style="font-size: small">(might be override by the administrator)</div>
+    </div>
+
+    <div style="margin-top: 20px">
+        <div><label>Position</label></div>
+        @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px" })
+        <div style="font-size: small">(as a rule of thumb, avoid players with ambiguous position)</div>
+    </div>
+
+    <div style="margin-top: 20px">
+        <div>
+            <label>Clubs career</label>
+        </div>
+        <div>
+            <a href="/Admin/Club" target="_blank">Add club (open a new tab)</a>
+        </div>
+        <div style="font-size: small">(in chronological order, senior career only)</div>
         @for (var i = 0; i < 10; i++)
         {
-            var name = $"AlternativeName{i}";
-            <div style="margin-top: 5px">
-                <input type="text" name="@name" style="width: 250px" />
-            </div>
-        }
-
-        <div style="margin-top: 20px">
-            <div><label>Year of birth</label></div>
-            <input type="text" name="YearOfBirth" style="width: 100px" />
-        </div>
-
-        <div style="margin-top: 20px">
-            <div><label>Nationality</label></div>
-            <div style="font-size: smaller">(keep in mind it's the country, not the int. selection)</div>
+            var name = $"Club{i}";
             <script>
                 $(function () {
-                    $("#countryName").autocomplete({
+                    $("#@name").autocomplete({
                         source: function (request, response) {
                             $.ajax({
-                                url: '/Admin/AutoCompleteCountries/',
+                                url: '/Admin/AutoCompleteClubs/',
                                 data: {
                                     "prefix": request.term
-                                    // add languageID here
                                 },
                                 type: "POST",
                                 success: function (data) {
@@ -54,73 +131,21 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                             });
                         },
                         select: function (e, i) {
-                            $("#countryId").val(i.item.key);
-                            $("#submitCountry").click();
+                            $("#@name").val(i.item.value);
                         },
                         minLength: 1
                     });
                 });
             </script>
-            <div>
-                <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
-                <input type="hidden" id="countryId" name="Country" />
+            <div style="margin-top: 5px">
+                <input type="text" id="@name" name="@name" style="width: 250px" />
             </div>
-        </div>
+        }
+    </div>
+    <div style="font-size: small">(if more than 10 clubs, reconsider your player or ignore pointless clubs)</div>
+    <div style="font-size: small">(do NOT set twice a club in case of come-back: ignore the come-back)</div>
 
-        <div style="margin-top: 20px">
-            <div><label>Clue</label></div>
-            <div style="font-size: smaller">(might be edited by the administrator)</div>
-            <input type="text" name="Clue" style="width: 300px" />
-        </div>
-
-        <div style="margin-top: 20px">
-            <div><label>Position</label></div>
-            <div style="font-size: smaller">(avoid players with ambiguous position)</div>
-            @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
-        </div>
-
-        <div style="margin-top: 20px">
-            <div><label>Clubs career</label></div>
-            <div style="font-size: smaller">(in chronological order, senior career only)</div>
-            <div>
-                <a href="/Admin/Club" target="_blank">Add club (open a new tab, you will not lose this page)</a>
-            </div>
-            @for (var i = 0; i < 10; i++)
-            {
-                var name = $"Club{i}";
-                <script>
-                    $(function () {
-                        $("#@name").autocomplete({
-                            source: function (request, response) {
-                                $.ajax({
-                                    url: '/Admin/AutoCompleteClubs/',
-                                    data: {
-                                        "prefix": request.term
-                                    },
-                                    type: "POST",
-                                    success: function (data) {
-                                        response($.map(data, function (item) {
-                                            return item;
-                                        }))
-                                    }
-                                });
-                            },
-                            select: function (e, i) {
-                                $("#@name").val(i.item.value);
-                            },
-                            minLength: 1
-                        });
-                    });
-                </script>
-                <div style="margin-top: 5px">
-                    <input type="text" id="@name" name="@name" style="width: 250px" />
-                </div>
-            }
-        </div>
-        <div style="font-size: smaller">(if more than 10 clubs, reconsider your player or ignore pointless clubs)</div>
-        <div style="font-size: smaller">(do NOT set twice a club in case of come-back: ignore the come-back)</div>
-
-        <div style="margin-top: 10px">
-            <input type="submit" name="submit-club" value="Create player" />
-        </div>
-    </form>
+    <div style="margin-top: 20px">
+        <input type="submit" name="submit-club" value="Submit the player" />
+    </div>
+</form>
