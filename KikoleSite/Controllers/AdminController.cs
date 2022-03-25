@@ -112,6 +112,7 @@ namespace KikoleSite.Controllers
 
             var model = new PlayerCreationModel();
             SetPositionsOnModel(model);
+            model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
             return View(model);
         }
 
@@ -231,6 +232,7 @@ namespace KikoleSite.Controllers
                 InfoMessage = "Player created!"
             };
             SetPositionsOnModel(model);
+            model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
             return View(model);
         }
 

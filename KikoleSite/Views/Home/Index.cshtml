@@ -26,6 +26,18 @@
         <div style="margin-top: 10px">
             An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!
         </div>
+        <div style="margin-top: 60px">
+            Score is computed with following rules:
+            <ul>
+                <li>You start with <span style="color: forestgreen; font-size: large">@Model.Chart.BasePoints</span> points</li>
+                <li>An incorrect player proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> points</li>
+                <li>An incorrect club proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> points</li>
+                <li>An incorrect country proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> points</li>
+                <li>An incorrect year proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> points</li>
+                <li>An incorrect position proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> points</li>
+                <li>A good guess on any category costs <span style="color: forestgreen; font-size: large">no points</span></li>
+            </ul>
+        </div>
     }
     else
     {
@@ -153,7 +165,7 @@
                             <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
                             <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> pts if incorrect)</span>
                         </div>
-                        <div style="font-size: small">(one club at a time; autocompletion suggestions are NOT exhaustive)</div>
+                        <div style="font-size: small">(one club at a time)</div>
                     </div>
                     @if (Model.KnownPlayerClubs?.Count > 0)
                     {
@@ -243,46 +255,6 @@
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
-                        <label>Position:</label>
-                    </div>
-                    @if (string.IsNullOrWhiteSpace(Model.Position))
-                    {
-                        <div>
-                            <script>
-                                $(function () {
-                                    $("#positionSubmission").on("change", function (e) {
-                                        if ($("#positionSubmission").val() != "0") {
-                                            $("#submitPosition").click();
-                                        }
-                                    });
-                                });
-                            </script>
-                            @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
-                            <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> pts if incorrect)</span>
-                        </div>
-                        @if (Model.IncorrectPositions?.Count > 0)
-                        {
-                            <div style="margin-top: 10px">
-                                @foreach (var iPosition in Model.IncorrectPositions)
-                                {
-                                    <div style="font-size: small; text-decoration: line-through">@iPosition</div>
-                                }
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div>
-                            <label>@Model.Position</label>
-                        </div>
-                    }
-                </div>
-            </form>
-            <form method="post" action="/">
-                @Html.HiddenFor(m => m.CurrentDay)
-                <div style="margin-top: 30px">
-                    <div>
                         <label>Year of birth:</label>
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.BirthYear))
@@ -327,12 +299,52 @@
             </form>
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
+                <div style="margin-top: 30px">
+                    <div>
+                        <label>Position:</label>
+                    </div>
+                    @if (string.IsNullOrWhiteSpace(Model.Position))
+                    {
+                        <div>
+                            <script>
+                                $(function () {
+                                    $("#positionSubmission").on("change", function (e) {
+                                        if ($("#positionSubmission").val() != "0") {
+                                            $("#submitPosition").click();
+                                        }
+                                    });
+                                });
+                            </script>
+                            @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
+                            <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> pts if incorrect)</span>
+                        </div>
+                        @if (Model.IncorrectPositions?.Count > 0)
+                        {
+                            <div style="margin-top: 10px">
+                                @foreach (var iPosition in Model.IncorrectPositions)
+                                {
+                                    <div style="font-size: small; text-decoration: line-through">@iPosition</div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div>
+                            <label>@Model.Position</label>
+                        </div>
+                    }
+                </div>
+            </form>
+            <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 60px">
                     <div>
                         <label style="color:crimson">Submit your player here:</label>
                     </div>
                     <div>
-                        @Html.TextBoxFor(m => m.PlayerNameSubmission, new { @style = "width: 300px" })
+                        <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" style="width: 300px; border-color: crimson" />
                         <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
                         <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> pts if incorrect)</span>
                     </div>
@@ -349,16 +361,4 @@
             </form>
         }
     }
-    <div style="margin-top: 60px">
-        Score is computed with following rules:
-        <ul>
-            <li>You start with <span style="color: forestgreen; font-size: large">@Model.Chart.BasePoints</span> points</li>
-            <li>An incorrect player proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> points</li>
-            <li>An incorrect club proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> points</li>
-            <li>An incorrect country proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> points</li>
-            <li>An incorrect year proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> points</li>
-            <li>An incorrect position proposition costs <span style="color: crimson; font-size: large">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> points</li>
-            <li>A good guess on any category costs <span style="color: forestgreen; font-size: large">no points</span></li>
-        </ul>
-    </div>
 </div>

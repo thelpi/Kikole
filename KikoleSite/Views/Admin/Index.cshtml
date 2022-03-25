@@ -9,6 +9,11 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
+@if (Model.DisplayPlayerSubmissionLink)
+{
+    <div style="margin-top: 10px"><a href="/Admin/PlayerSubmission">Check submitted players</a></div>
+}
+
 <h3>Submit a player</h3>
 <form method="post" action="/Admin">
     <div style="margin-top: 20px">
