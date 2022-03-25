@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -237,6 +238,77 @@ namespace KikoleApi.Controllers
             }
 
             return Ok(okChallenges);
+        }
+
+        [HttpGet("requested-challenges")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Challenge>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<Challenge>> GetRequestedChallengesAsync([FromQuery] ulong userId)
+        {
+            if (userId == 0)
+                return BadRequest();
+
+            var challenges = await _challengeRepository
+                .GetChallengesByUserAndByDateAsync(userId, _clock.Now.AddDays(1).Date)
+                .ConfigureAwait(false);
+
+            var okChallenges = new List<Challenge>();
+            foreach (var c in challenges.Where(c => c.HostUserId == userId && c.IsAccepted == null))
+            {
+                var guestUser = await _userRepository
+                    .GetUserByIdAsync(c.GuestUserId)
+                    .ConfigureAwait(false);
+
+                if (guestUser == null)
+                {
+                    await _challengeRepository
+                        .RespondToChallengeAsync(c.Id, false)
+                        .ConfigureAwait(false);
+                }
+                else
+                    okChallenges.Add(new Challenge(c, guestUser.Login));
+            }
+
+            return Ok(okChallenges);
+        }
+
+        [HttpGet("accepted-challenges")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(Challenge), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<Challenge>> GetAcceptedChallengeAsync(
+            [FromQuery] ulong userId, [FromQuery] DateTime challengeDate)
+        {
+            if (userId == 0)
+                return BadRequest();
+
+            var challenges = await _challengeRepository
+                .GetChallengesByUserAndByDateAsync(userId, challengeDate.Date)
+                .ConfigureAwait(false);
+
+            Challenge okChallenge = null;
+            foreach (var challenge in challenges.Where(c => c.IsAccepted > 0))
+            {
+                var opponentUser = await _userRepository
+                    .GetUserByIdAsync(userId == challenge.HostUserId
+                        ? challenge.GuestUserId
+                        : challenge.HostUserId)
+                    .ConfigureAwait(false);
+
+                if (opponentUser == null || okChallenge != null)
+                {
+                    await _challengeRepository
+                        .RespondToChallengeAsync(challenge.Id, false)
+                        .ConfigureAwait(false);
+                }
+                else
+                    okChallenge = new Challenge(challenge, opponentUser.Login);
+            }
+
+            return Ok(okChallenge);
         }
     }
 }
