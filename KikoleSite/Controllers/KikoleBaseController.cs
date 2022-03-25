@@ -42,7 +42,8 @@ namespace KikoleSite.Controllers
                 .GetClubsAsync()
                 .ConfigureAwait(false))
                 .Where(c =>
-                    c.Name.Sanitize().Contains(prefix.Sanitize()));
+                    c.Name.Sanitize().Contains(prefix.Sanitize())
+                    || c.AllowedNames?.Any(_ => _.Sanitize().Contains(prefix.Sanitize())) == true);
 
             return Json(clubs.Select(x => x.Name));
         }
