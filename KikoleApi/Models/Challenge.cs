@@ -4,11 +4,11 @@ namespace KikoleApi.Models
 {
     public class Challenge
     {
-        public string OpponentLogin { get; set; }
+        public string OpponentLogin { get; }
 
-        public byte PointsRate { get; set; }
+        public byte PointsRate { get; }
 
-        public bool? IsAccepted { get; set; }
+        public bool? IsAccepted { get; }
 
         internal Challenge(ChallengeDto dto, string login)
         {

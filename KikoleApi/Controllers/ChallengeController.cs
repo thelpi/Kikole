@@ -245,7 +245,7 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<Challenge>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<Challenge>> GetRequestedChallengesAsync([FromQuery] ulong userId)
+        public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetRequestedChallengesAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
                 return BadRequest();
