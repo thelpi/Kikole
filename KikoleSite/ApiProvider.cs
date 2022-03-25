@@ -26,6 +26,8 @@ namespace KikoleSite
             };
         }
 
+        #region user accounts
+
         public async Task<string> CreateAccountAsync(string login,
             string password, string question, string answer)
         {
@@ -41,7 +43,7 @@ namespace KikoleSite
                         passwordResetAnswer = answer?.Trim()
                     })
                 .ConfigureAwait(false);
-            
+
             return response.IsSuccessStatusCode
                 ? null
                 : $"Creation failed: {response.StatusCode}";
@@ -65,211 +67,6 @@ namespace KikoleSite
                 return (false, $"Authentication failed: invalid token");
 
             return (true, token);
-        }
-
-        public async Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
-            string value,
-            int daysBefore,
-            ProposalType proposalType,
-            string authToken)
-        {
-            var response = await SendAsync(
-                    $"{proposalType.ToString().ToLowerInvariant()}-proposals",
-                    HttpMethod.Put,
-                    authToken,
-                    new
-                    {
-                        proposalDate,
-                        value,
-                        daysBefore
-                    })
-                .ConfigureAwait(false);
-            
-            return await GetResponseContentAsync<ProposalResponse>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId)
-        {
-            if (_countriesCache?.ContainsKey(languageId) != true)
-            {
-                var response = await SendAsync(
-                    $"countries?languageId={languageId}",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-                var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
-                    .ConfigureAwait(false);
-
-                _countriesCache = _countriesCache ?? new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
-                _countriesCache.Add(
-                    languageId,
-                    apiCountries
-                        .ToDictionary(ac => ac.Code, ac => ac.Name));
-            }
-
-            return _countriesCache[languageId];
-        }
-
-        public async Task<ProposalChart> GetProposalChartAsync()
-        {
-            if (_proposalChartCache == null)
-            {
-                var response = await SendAsync(
-                       "proposal-charts",
-                       HttpMethod.Get)
-                   .ConfigureAwait(false);
-
-                _proposalChartCache = await GetResponseContentAsync<ProposalChart>(response)
-                    .ConfigureAwait(false);
-            }
-
-            return _proposalChartCache;
-        }
-
-        public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(
-            DateTime proposalDate, string authToken)
-        {
-            var response = await SendAsync(
-                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}",
-                    HttpMethod.Get,
-                    authToken)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<IReadOnlyCollection<ProposalResponse>>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
-            LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate)
-        {
-            var response = await SendAsync(
-                    $"leaders?maximalDate={maximalDate?.ToString("yyyy-MM-dd")}&minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<string> GetClueAsync(DateTime proposalDate)
-        {
-            var response = await SendAsync(
-                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<string>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false)
-        {
-            if (_clubsCache == null || resetCache)
-            {
-                var response = await SendAsync(
-                    "clubs",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-                _clubsCache = await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
-                    .ConfigureAwait(false);
-            }
-
-            return _clubsCache;
-        }
-
-        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort)
-        {
-            var response = await SendAsync(
-                    $"day-leaders?sort={(ulong)sort}&day={day.ToString("yyyy-MM-dd")}",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<UserStats> GetUserStatsAsync(ulong id)
-        {
-            var response = await SendAsync($"users/{id}/stats", HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<UserStats>(response, () => null)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId)
-        {
-            var response = await SendAsync($"users/{userId}/badges", HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<IReadOnlyCollection<UserBadge>>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<string> CreateClubAsync(string name,
-            IReadOnlyList<string> allowedNames, string authToken)
-        {
-            var response = await SendAsync(
-                    "clubs",
-                    HttpMethod.Post,
-                    authToken,
-                    new
-                    {
-                        name,
-                        allowedNames
-                    })
-                .ConfigureAwait(false);
-
-            return response.IsSuccessStatusCode
-                ? null
-                : $"StatusCode: {response.StatusCode}";
-        }
-
-        public async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
-        {
-            var response = await SendAsync(
-                    "players",
-                    HttpMethod.Post,
-                    authToken,
-                    player)
-                .ConfigureAwait(false);
-
-            return response.IsSuccessStatusCode
-                ? null
-                : $"StatusCode: {response.StatusCode}";
-        }
-
-        public async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
-        {
-            var response = await SendAsync(
-                    "badges",
-                    HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<IReadOnlyCollection<Badge>>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken)
-        {
-            var response = await SendAsync(
-                    "users/known-players", HttpMethod.Get, authToken)
-                .ConfigureAwait(false);
-            
-            return await GetResponseContentAsync<IReadOnlyCollection<string>>(response)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<string> GetCurrentMessageAsync()
-        {
-            var response = await SendAsync(
-                    "current-messages", HttpMethod.Get)
-                .ConfigureAwait(false);
-
-            return await GetResponseContentAsync<string>(response)
-                .ConfigureAwait(false);
         }
 
         public async Task<bool> IsPowerUserAsync(string authToken)
@@ -341,18 +138,107 @@ namespace KikoleSite
                 .ConfigureAwait(false));
         }
 
-        public async Task<PlayerCreator> IsPlayerOfTheDayUser(
-            DateTime proposalDate, string authToken)
+        #endregion user accounts
+
+        #region stats, badges and leaderboard
+
+        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
+            LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate)
         {
             var response = await SendAsync(
-                    $"player-of-the-day-users?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
-                    HttpMethod.Get,
-                    authToken)
+                    $"leaders?maximalDate={maximalDate?.ToString("yyyy-MM-dd")}&minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
+                    HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<PlayerCreator>(
-                    response, () => null)
+            return await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
                 .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort)
+        {
+            var response = await SendAsync(
+                    $"day-leaders?sort={(ulong)sort}&day={day.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Leader>>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<UserStats> GetUserStatsAsync(ulong id)
+        {
+            var response = await SendAsync($"users/{id}/stats", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<UserStats>(response, () => null)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId)
+        {
+            var response = await SendAsync($"users/{userId}/badges", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<UserBadge>>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
+        {
+            var response = await SendAsync(
+                    "badges",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Badge>>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken)
+        {
+            var response = await SendAsync(
+                    "users/known-players", HttpMethod.Get, authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<string>>(response)
+                .ConfigureAwait(false);
+        }
+
+        #endregion stats, badges and leaderboard
+
+        #region player creation
+
+        public async Task<string> CreateClubAsync(string name,
+            IReadOnlyList<string> allowedNames, string authToken)
+        {
+            var response = await SendAsync(
+                    "clubs",
+                    HttpMethod.Post,
+                    authToken,
+                    new
+                    {
+                        name,
+                        allowedNames
+                    })
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"StatusCode: {response.StatusCode}";
+        }
+
+        public async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
+        {
+            var response = await SendAsync(
+                    "players",
+                    HttpMethod.Post,
+                    authToken,
+                    player)
+                .ConfigureAwait(false);
+
+            return response.IsSuccessStatusCode
+                ? null
+                : $"StatusCode: {response.StatusCode}";
         }
 
         public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
@@ -382,6 +268,212 @@ namespace KikoleSite
 
             return $"Invalid response: {response.StatusCode}";
         }
+
+        #endregion player creation
+
+        #region site management
+
+        public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId)
+        {
+            if (_countriesCache?.ContainsKey(languageId) != true)
+            {
+                var response = await SendAsync(
+                    $"countries?languageId={languageId}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+                var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
+                    .ConfigureAwait(false);
+
+                _countriesCache = _countriesCache ?? new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
+                _countriesCache.Add(
+                    languageId,
+                    apiCountries
+                        .ToDictionary(ac => ac.Code, ac => ac.Name));
+            }
+
+            return _countriesCache[languageId];
+        }
+
+        public async Task<ProposalChart> GetProposalChartAsync()
+        {
+            if (_proposalChartCache == null)
+            {
+                var response = await SendAsync(
+                       "proposal-charts",
+                       HttpMethod.Get)
+                   .ConfigureAwait(false);
+
+                _proposalChartCache = await GetResponseContentAsync<ProposalChart>(response)
+                    .ConfigureAwait(false);
+            }
+
+            return _proposalChartCache;
+        }
+
+        public async Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false)
+        {
+            if (_clubsCache == null || resetCache)
+            {
+                var response = await SendAsync(
+                    "clubs",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+                _clubsCache = await GetResponseContentAsync<IReadOnlyCollection<Club>>(response)
+                    .ConfigureAwait(false);
+            }
+
+            return _clubsCache;
+        }
+
+        public async Task<string> GetCurrentMessageAsync()
+        {
+            var response = await SendAsync(
+                    "current-messages", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false);
+        }
+
+        #endregion site management
+
+        #region main game
+
+        public async Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
+            string value,
+            int daysBefore,
+            ProposalType proposalType,
+            string authToken)
+        {
+            var response = await SendAsync(
+                    $"{proposalType.ToString().ToLowerInvariant()}-proposals",
+                    HttpMethod.Put,
+                    authToken,
+                    new
+                    {
+                        proposalDate,
+                        value,
+                        daysBefore
+                    })
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<ProposalResponse>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(
+            DateTime proposalDate, string authToken)
+        {
+            var response = await SendAsync(
+                    $"proposals?proposalDate={proposalDate.Date.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<ProposalResponse>>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<string> GetClueAsync(DateTime proposalDate)
+        {
+            var response = await SendAsync(
+                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<string>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<PlayerCreator> IsPlayerOfTheDayUser(
+            DateTime proposalDate, string authToken)
+        {
+            var response = await SendAsync(
+                    $"player-of-the-day-users?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<PlayerCreator>(
+                    response, () => null)
+                .ConfigureAwait(false);
+        }
+
+        #endregion main game
+
+        #region challenges
+
+        public async Task<string> CreateChallengeAsync(ulong guestUserId, byte pointsRate, string authToken)
+        {
+            var response = await SendAsync(
+                    "challenges",
+                    HttpMethod.Post,
+                    authToken,
+                    new { guestUserId, pointsRate })
+                .ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+                return null;
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            else
+                return $"Technical error: {response.StatusCode}";
+        }
+
+        public async Task<string> RespondToChallengeAsync(ulong id, bool isAccepted, string authToken)
+        {
+            var response = await SendAsync(
+                    $"challenges/{id}?isAccepted={isAccepted}",
+                    HttpMethod.Patch,
+                    authToken)
+                .ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+                return null;
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            else
+                return $"Technical error: {response.StatusCode}";
+        }
+        
+        public async Task<IReadOnlyCollection<Challenge>> GetChallengesWaitingForResponseAsync(string authToken)
+        {
+            var response = await SendAsync(
+                    $"waiting-challenges",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Challenge>>(response).ConfigureAwait(false);
+        }
+        
+        public async Task<IReadOnlyCollection<Challenge>> GetRequestedChallengesAsync(string authToken)
+        {
+            var response = await SendAsync(
+                    $"requested-challenges",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Challenge>>(response).ConfigureAwait(false);
+        }
+        
+        public async Task<Challenge> GetAcceptedChallengeAsync(DateTime challengeDate, string authToken)
+        {
+            var response = await SendAsync(
+                    $"accepted-challenges?challengeDate={challengeDate.ToString("yyyy-MM-dd")}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<Challenge>(response).ConfigureAwait(false);
+        }
+
+        #endregion challenges
+
+        #region private generic methods
 
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)
@@ -440,5 +532,7 @@ namespace KikoleSite
                 && Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == id)
                 && id >= (ulong)minimalType;
         }
+
+        #endregion private generic methods
     }
 }
