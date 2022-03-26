@@ -31,6 +31,11 @@ namespace KikoleSite.Controllers
                 return await Index().ConfigureAwait(false);
             }
 
+            var canSee = await CanSeeTodayOpponentResultAsync(stats.Login)
+                .ConfigureAwait(false);
+            if (!canSee)
+                return await Index().ConfigureAwait(false);
+
             var badges = await _apiProvider
                 .GetUserBadgesAsync(userId)
                 .ConfigureAwait(false);

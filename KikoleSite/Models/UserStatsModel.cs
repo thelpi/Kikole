@@ -7,9 +7,13 @@ namespace KikoleSite.Models
 {
     public class UserStatsModel
     {
-        public int SuccessRate => (int)Math.Round((Successes / (decimal)Attempts) * 100);
+        public int SuccessRate => Attempts == 0
+            ? 0
+            : (int)Math.Round((Successes / (decimal)Attempts) * 100);
 
-        public int PointsPerAttempt => (int)Math.Round(TotalPoints / (decimal)Attempts);
+        public int PointsPerAttempt => Attempts == 0
+            ? 0
+            : (int)Math.Round(TotalPoints / (decimal)Attempts);
 
         public string Login { get; set; }
 
