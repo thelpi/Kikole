@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
+using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -66,6 +67,45 @@ namespace KikoleApi.Repositories
                     "challenges",
                     ("id", id))
                 .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ChallengeDto>> GetRequestedAcceptedChallengesAsync(
+            ulong userId, DateTime startDate, DateTime endDate)
+        {
+            return await GetAcceptedChallengesAsync(
+                    userId, startDate, endDate, "host_user_id", "guest_user_id")
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ChallengeDto>> GetResponseAcceptedChallengesAsync(
+            ulong userId, DateTime startDate, DateTime endDate)
+        {
+            return await GetAcceptedChallengesAsync(
+                    userId, startDate, endDate, "guest_user_id", "host_user_id")
+                .ConfigureAwait(false);
+        }
+
+        private async Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesAsync(
+            ulong userId, DateTime startDate, DateTime endDate, string column1, string column2)
+        {
+            return await ExecuteReaderAsync<ChallengeDto>(
+                   "SELECT * FROM challenges " +
+                   "WHERE is_accepted = 1 " +
+                   "AND challenge_date <= @endDate " +
+                   "AND challenge_date >= @startDate " +
+                   $"AND {column1} = @userId " +
+                   $"AND {column2} IN (" +
+                   "   SELECT id FROM users " +
+                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
+                   ")",
+                   new
+                   {
+                       adminId = (ulong)UserTypes.Administrator,
+                       userId,
+                       startDate = startDate.Date,
+                       endDate = endDate.Date
+                   })
+               .ConfigureAwait(false);
         }
     }
 }

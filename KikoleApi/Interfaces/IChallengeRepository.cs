@@ -17,6 +17,10 @@ namespace KikoleApi.Interfaces
 
         Task<IReadOnlyCollection<ChallengeDto>> GetChallengesByUserAndByDateAsync(ulong userId, DateTime date);
 
+        Task<IReadOnlyCollection<ChallengeDto>> GetRequestedAcceptedChallengesAsync(ulong userId, DateTime startDate, DateTime endDate);
+
+        Task<IReadOnlyCollection<ChallengeDto>> GetResponseAcceptedChallengesAsync(ulong userId, DateTime startDate, DateTime endDate);
+
         Task<ChallengeDto> GetChallengeByIdAsync(ulong id);
     }
 }

@@ -11,6 +11,8 @@ namespace KikoleSite.Models
 
         public Challenge AcceptedChallenge { get; set; }
 
+        public Challenge TodayChallenge { get; set; }
+
         public IReadOnlyCollection<Challenge> RequestedChallenges { get; set; }
 
         public IReadOnlyCollection<Challenge> WaitingForResponseChallenges { get; set; }
@@ -24,5 +26,7 @@ namespace KikoleSite.Models
         public ulong SelectedUserId { get; set; }
 
         public byte PointsRate { get; set; }
+
+        public IReadOnlyCollection<Challenge> ChallengesHistory { get; set; }
     }
 }

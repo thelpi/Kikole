@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite
 {
-    internal static class Helper
+    public static class Helper
     {
         const string NA = "N/A";
         const string TimeSpanPattern = @"hh\:mm";
@@ -44,9 +44,16 @@ namespace KikoleSite
             return data.ToString(DateTimePattern);
         }
 
-        internal static string ToYesNo(this bool data)
+        public static string ToYesNo(this bool data)
         {
             return data ? "Yes" : "No";
+        }
+
+        public static string ToYesNo(this bool? data)
+        {
+            return !data.HasValue
+                ? NA
+                : (data.Value ? "Yes" : "No");
         }
 
         internal static string Encrypt(this string plainText)

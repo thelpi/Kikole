@@ -239,7 +239,7 @@ namespace KikoleApi.Controllers
                     if (hostUser == null)
                         koChallenges.Add(challenge.Id);
                     else
-                        okChallenges.Add(new Challenge(challenge, hostUser.Login));
+                        okChallenges.Add(new Challenge(challenge, hostUser.Login, userId));
                 }
             }
 
@@ -281,7 +281,7 @@ namespace KikoleApi.Controllers
                         .ConfigureAwait(false);
                 }
                 else
-                    okChallenges.Add(new Challenge(c, guestUser.Login));
+                    okChallenges.Add(new Challenge(c, guestUser.Login, userId));
             }
 
             return Ok(okChallenges);
@@ -318,10 +318,80 @@ namespace KikoleApi.Controllers
                         .ConfigureAwait(false);
                 }
                 else
-                    okChallenge = new Challenge(challenge, opponentUser.Login);
+                    okChallenge = new Challenge(challenge, opponentUser.Login, challenge.HostUserId);
             }
 
             return Ok(okChallenge);
+        }
+
+        [HttpGet("history-challenges")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(Challenge), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetChallengesHistoryAsync(
+            [FromQuery] ulong userId,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
+        {
+            if (userId == 0)
+                return BadRequest();
+
+            var debut = ProposalChart.Default.FirstDate.Date;
+            if (fromDate.HasValue && fromDate.Value.Date < debut)
+                return BadRequest();
+
+            var yesterday = _clock.Now.AddDays(-1).Date;
+            if (toDate.HasValue && toDate.Value.Date < yesterday)
+                return BadRequest();
+
+            if (toDate.HasValue && fromDate.HasValue && toDate.Value.Date < fromDate.Value.Date)
+                return BadRequest();
+
+            var dateBeginOk = fromDate?.Date ?? debut;
+            var dateEndOk = toDate?.Date ?? yesterday;
+
+            var hostChallenges = await _challengeRepository
+                .GetRequestedAcceptedChallengesAsync(userId, dateBeginOk, dateEndOk)
+                .ConfigureAwait(false);
+
+            var guestChallenges = await _challengeRepository
+                .GetResponseAcceptedChallengesAsync(userId, dateBeginOk, dateEndOk)
+                .ConfigureAwait(false);
+
+            var challenges = new List<Challenge>(hostChallenges.Count + guestChallenges.Count);
+            var usersCache = new Dictionary<ulong, string>();
+
+            foreach (var c in hostChallenges)
+            {
+                var uLogin = await GetOrSetUserFromCacheAsync(
+                        c.GuestUserId, usersCache)
+                    .ConfigureAwait(false);
+                challenges.Add(new Challenge(c, uLogin, userId));
+            }
+
+            foreach (var c in guestChallenges)
+            {
+                var uLogin = await GetOrSetUserFromCacheAsync(
+                        c.HostUserId, usersCache)
+                    .ConfigureAwait(false);
+                challenges.Add(new Challenge(c, uLogin, userId));
+            }
+
+            return Ok(challenges.OrderByDescending(c => c.ChallengeDate).ToList());
+        }
+
+        private async Task<string> GetOrSetUserFromCacheAsync(ulong userId,
+            Dictionary<ulong, string> usersCache)
+        {
+            if (!usersCache.ContainsKey(userId))
+            {
+                var user = await _userRepository
+                    .GetUserByIdAsync(userId)
+                    .ConfigureAwait(false);
+                usersCache.Add(userId, user.Login);
+            }
+            return usersCache[userId];
         }
     }
 }

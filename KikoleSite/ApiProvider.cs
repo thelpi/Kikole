@@ -484,6 +484,25 @@ namespace KikoleSite
             return await GetResponseContentAsync<Challenge>(response).ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<Challenge>> GetChallengesHistoryAsync(
+            DateTime? fromDate, DateTime? toDate, string authToken)
+        {
+            var parameters = new List<(string, string)>();
+            if (fromDate.HasValue)
+                parameters.Add(("fromDate", fromDate.Value.ToString("yyyy-MM-dd")));
+            if (toDate.HasValue)
+                parameters.Add(("toDate", toDate.Value.ToString("yyyy-MM-dd")));
+
+            var response = await SendAsync(
+                    $"history-challenges{(parameters.Count > 0 ? $"?{string.Join("&", parameters.Select(p => $"{p.Item1}={p.Item2}"))}" : string.Empty)}",
+                    HttpMethod.Get,
+                    authToken)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<Challenge>>(response)
+                .ConfigureAwait(false);
+        }
+
         #endregion challenges
 
         #region private generic methods

@@ -93,6 +93,8 @@ namespace KikoleSite
         
         Task<Challenge> GetAcceptedChallengeAsync(DateTime challengeDate, string authToken);
 
+        Task<IReadOnlyCollection<Challenge>> GetChallengesHistoryAsync(DateTime? fromDate, DateTime? toDate, string authToken);
+
         #endregion challenges
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Api
+﻿using System;
+
+namespace KikoleSite.Api
 {
     public class Challenge
     {
@@ -9,5 +11,11 @@
         public byte PointsRate { get; set; }
 
         public bool? IsAccepted { get; set; }
+
+        public bool? IsSuccess { get; set; }
+
+        public DateTime ChallengeDate { get; set; }
+
+        public bool Initiated { get; set; }
     }
 }

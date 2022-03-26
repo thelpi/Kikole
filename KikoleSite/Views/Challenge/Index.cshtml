@@ -9,6 +9,12 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
+@if (Model.TodayChallenge != null)
+{
+    <h3>Challenge in progress</h3>
+    <div>You have a challenge against <span style="color: crimson">@Model.TodayChallenge.OpponentLogin</span> today, for <span style="color: crimson">@Model.TodayChallenge.PointsRate</span>% of your points!</div>
+}
+
 @if (Model.AcceptedChallenge != null)
 {
     <h3>Accepted challenge</h3>
@@ -58,4 +64,39 @@ else
             </div>
         </div>
     </form>
+}
+
+<h3>Challenges history</h3>
+@if (Model.ChallengesHistory?.Count > 0)
+{
+    <table style="margin-top: 10px">
+        <thead>
+            <tr>
+                <th style="width: 100px">Date</th>
+                <th style="width: 180px">Opponent</th>
+                <th style="width: 80px">Initiated?</th>
+                <th style="width: 80px">Success?</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var i = 0;
+            }
+            @foreach (var c in Model.ChallengesHistory)
+            {
+                var background = i % 2 == 0 ? "white" : "azure";
+                <tr style="background-color: @background">
+                    <td>@c.ChallengeDate.ToString("yyyy-MM-dd")</td>
+                    <td style="font: bold">@c.OpponentLogin</td>
+                    <td>@c.Initiated.ToYesNo()</td>
+                    <td style="font: bold">@c.IsSuccess.ToYesNo()</td>
+                </tr>
+                i++;
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div>You have no history of challenges!</div>
 }

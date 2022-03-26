@@ -21,8 +21,7 @@ namespace KikoleSite.Controllers
 
             var model = new ChallengeModel();
 
-            await SetModelPropertiesAsync(
-                    model, DateTime.Now.AddDays(1).Date, token, login)
+            await SetModelPropertiesAsync(model, token, login)
                 .ConfigureAwait(false);
             return View(model);
         }
@@ -71,14 +70,13 @@ namespace KikoleSite.Controllers
                 }
             }
 
-            await SetModelPropertiesAsync(
-                    model, DateTime.Now.AddDays(1).Date, token, login)
+            await SetModelPropertiesAsync(model, token, login)
                 .ConfigureAwait(false);
             return View(model);
         }
 
         private async Task SetModelPropertiesAsync(ChallengeModel model,
-            DateTime date, string token, string myLogin)
+            string token, string myLogin)
         {
             var users = await _apiProvider
                 .GetActiveUsersAsync()
@@ -102,7 +100,13 @@ namespace KikoleSite.Controllers
             model.WaitingForResponseChallenges = pendings;
             model.Users = usersOk;
             model.AcceptedChallenge = await _apiProvider
-                .GetAcceptedChallengeAsync(date, token)
+                .GetAcceptedChallengeAsync(DateTime.Now.AddDays(1).Date, token)
+                .ConfigureAwait(false);
+            model.TodayChallenge = await _apiProvider
+                .GetAcceptedChallengeAsync(DateTime.Now.Date, token)
+                .ConfigureAwait(false);
+            model.ChallengesHistory = await _apiProvider
+                .GetChallengesHistoryAsync(null, null, token)
                 .ConfigureAwait(false);
         }
     }

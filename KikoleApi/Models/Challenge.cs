@@ -1,4 +1,5 @@
-﻿using KikoleApi.Models.Dtos;
+﻿using System;
+using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
 {
@@ -12,7 +13,13 @@ namespace KikoleApi.Models
 
         public bool? IsAccepted { get; }
 
-        internal Challenge(ChallengeDto dto, string login)
+        public bool? IsSuccess { get; }
+
+        public DateTime ChallengeDate { get; }
+
+        public bool Initiated { get; }
+
+        internal Challenge(ChallengeDto dto, string login, ulong userId)
         {
             Id = dto.Id;
             OpponentLogin = login;
@@ -20,6 +27,11 @@ namespace KikoleApi.Models
             IsAccepted = dto.IsAccepted.HasValue
                 ? dto.IsAccepted > 0
                 : default(bool?);
+            IsSuccess = dto.IsSuccess.HasValue
+                ? dto.IsSuccess > 0
+                : default(bool?);
+            ChallengeDate = dto.ChallengeDate;
+            Initiated = dto.HostUserId == userId;
         }
     }
 }
