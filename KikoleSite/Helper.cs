@@ -49,10 +49,10 @@ namespace KikoleSite
             return data ? "Yes" : "No";
         }
 
-        public static string ToYesNo(this bool? data)
+        public static string ToYesNo(this bool? data, string nullValue = NA)
         {
             return !data.HasValue
-                ? NA
+                ? nullValue
                 : (data.Value ? "Yes" : "No");
         }
 

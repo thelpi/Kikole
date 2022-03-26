@@ -12,7 +12,7 @@ namespace KikoleSite.Api
 
         public bool? IsAccepted { get; set; }
 
-        public bool? IsSuccess { get; set; }
+        public bool? IsHostSuccess { get; set; }
 
         public DateTime ChallengeDate { get; set; }
 

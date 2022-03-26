@@ -126,11 +126,14 @@ else
             @foreach (var c in Model.ChallengesHistory)
             {
                 var background = i % 2 == 0 ? "white" : "azure";
+                var color = c.IsHostSuccess.HasValue
+                    ? (c.IsHostSuccess.Value ? "forestgreen" : "crimson")
+                    : "black";
                 <tr style="background-color: @background">
                     <td>@c.ChallengeDate.ToString("yyyy-MM-dd")</td>
                     <td style="font: bold">@c.OpponentLogin</td>
                     <td>@c.Initiated.ToYesNo()</td>
-                    <td style="font: bold">@c.IsSuccess.ToYesNo()</td>
+                    <td style="font: bold; color: @color">@c.IsHostSuccess.ToYesNo("Tie")</td>
                 </tr>
                 i++;
             }
