@@ -472,6 +472,9 @@ namespace KikoleSite
         
         public async Task<Challenge> GetAcceptedChallengeAsync(DateTime challengeDate, string authToken)
         {
+            if (string.IsNullOrWhiteSpace(authToken))
+                return null;
+
             var response = await SendAsync(
                     $"accepted-challenges?challengeDate={challengeDate.ToString("yyyy-MM-dd")}",
                     HttpMethod.Get,

@@ -31,10 +31,22 @@ namespace KikoleSite.Controllers
                 return await Index().ConfigureAwait(false);
             }
 
-            var canSee = await CanSeeTodayOpponentResultAsync(stats.Login)
+            var (token, login) = GetAuthenticationCookie();
+
+            var today = DateTime.Now.Date;
+
+            var challenge = await _apiProvider
+                .GetAcceptedChallengeAsync(today, token)
                 .ConfigureAwait(false);
-            if (!canSee)
-                return await Index().ConfigureAwait(false);
+
+            if (challenge?.OpponentLogin == stats.Login)
+            {
+                var todayLeaders = await _apiProvider
+                    .GetDayLeadersAsync(today, LeaderSort.TotalPoints)
+                    .ConfigureAwait(false);
+                if (!todayLeaders.Any(tl => tl.Login == login))
+                    return await Index().ConfigureAwait(false);
+            }
 
             var badges = await _apiProvider
                 .GetUserBadgesAsync(userId)
@@ -45,7 +57,6 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var knownAnswers = new List<string>();
-            var (token, _) = GetAuthenticationCookie();
             if (!string.IsNullOrWhiteSpace(token))
             {
                 knownAnswers = (await _apiProvider
@@ -68,18 +79,28 @@ namespace KikoleSite.Controllers
             model.MaximalDate = model.MaximalDate.Date.Min(DateTime.Now.Date);
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
-            model.Leaders = await _apiProvider
-                .GetLeadersAsync(
-                    model.SortType,
-                    model.MinimalDate,
-                    model.MaximalDate)
+            var leaders = await _apiProvider
+                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate)
                 .ConfigureAwait(false);
 
             var day = model.LeaderboardDay.Date.Max(chart.FirstDate);
 
-            model.TodayLeaders = await _apiProvider
+            var dayleaders = await _apiProvider
                 .GetDayLeadersAsync(day, model.DaySortType)
                 .ConfigureAwait(false);
+
+            var (token, login) = GetAuthenticationCookie();
+
+            var challenge = await _apiProvider
+                .GetAcceptedChallengeAsync(DateTime.Now.Date, token)
+                .ConfigureAwait(false);
+
+            model.Leaders = model.MaximalDate.IsToday()
+                ? AnonymizeLeaders(leaders, challenge, login)
+                : leaders;
+            model.TodayLeaders = day.IsToday()
+                ? AnonymizeLeaders(dayleaders, challenge, login)
+                : dayleaders;
 
             return View(model);
         }
@@ -94,25 +115,57 @@ namespace KikoleSite.Controllers
             var dateMax = DateTime.Now.Date;
             var sortType = LeaderSort.TotalPoints;
 
+            var day = DateTime.Now.Date;
+            var daySort = LeaderSort.BestTime;
+
             var leaders = await _apiProvider
                 .GetLeadersAsync(sortType, dateMin, dateMax)
                 .ConfigureAwait(false);
 
-            var day = DateTime.Now.Date;
-            var daySort = LeaderSort.BestTime;
+            var todayLeaders = await _apiProvider
+                .GetDayLeadersAsync(day, daySort)
+                .ConfigureAwait(false);
+
+            var (token, login) = GetAuthenticationCookie();
+
+            var challenge = await _apiProvider
+                .GetAcceptedChallengeAsync(DateTime.Now.Date, token)
+                .ConfigureAwait(false);
 
             return View(new LeaderboardModel
             {
                 MinimalDate = dateMin,
                 MaximalDate = dateMax,
-                Leaders = leaders,
+                Leaders = AnonymizeLeaders(leaders, challenge, login),
                 SortType = sortType,
-                TodayLeaders = await _apiProvider
-                    .GetDayLeadersAsync(day, daySort)
-                    .ConfigureAwait(false),
+                TodayLeaders = AnonymizeLeaders(todayLeaders, challenge, login),
                 LeaderboardDay = day,
                 DaySortType = daySort
             });
+        }
+
+        private IReadOnlyCollection<Leader> AnonymizeLeaders(
+            IReadOnlyCollection<Leader> leaders, Challenge myChallenge, string myLogin)
+        {
+            if (myChallenge == null || leaders.Any(l => l.Login == myLogin))
+                return leaders;
+
+            var keepLeaders = new List<Leader>(leaders.Count);
+            int? excludePosition = null;
+            foreach (var l in leaders)
+            {
+                if (l.Login == myChallenge.OpponentLogin)
+                    excludePosition = l.Position;
+                else
+                {
+                    l.Position = excludePosition.HasValue && l.Position > excludePosition
+                        ? l.Position - 1
+                        : l.Position;
+                    keepLeaders.Add(l);
+                }
+            }
+
+            return keepLeaders;
         }
     }
 }

@@ -35,26 +35,6 @@ namespace KikoleSite.Controllers
             return submitKeySplit[1];
         }
 
-        protected async Task<bool> CanSeeTodayOpponentResultAsync(string opponentLogin)
-        {
-            var (token, login) = GetAuthenticationCookie();
-
-            var today = DateTime.Now.Date;
-
-            var challenge = await _apiProvider
-                .GetAcceptedChallengeAsync(today, token)
-                .ConfigureAwait(false);
-
-            if (challenge?.OpponentLogin != opponentLogin)
-                return true;
-
-            var todayLeaders = await _apiProvider
-                .GetDayLeadersAsync(today, LeaderSort.TotalPoints)
-                .ConfigureAwait(false);
-
-            return todayLeaders.Any(tl => tl.Login == login);
-        }
-
         [HttpPost]
         public async Task<JsonResult> AutoCompleteClubs(string prefix)
         {

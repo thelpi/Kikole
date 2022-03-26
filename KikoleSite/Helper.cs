@@ -129,5 +129,10 @@ namespace KikoleSite
         {
             return dt1 < dt2 ? dt2 : dt1;
         }
+
+        internal static bool IsToday(this DateTime date)
+        {
+            return date.Date == DateTime.Now.Date;
+        }
     }
 }
