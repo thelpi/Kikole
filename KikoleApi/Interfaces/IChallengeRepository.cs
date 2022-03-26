@@ -13,6 +13,8 @@ namespace KikoleApi.Interfaces
 
         Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesOfTheDayAsync(DateTime date);
 
+        Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesAsync(DateTime? startDate, DateTime? endDate);
+
         Task<IReadOnlyCollection<ChallengeDto>> GetPendingChallengesByGuestUserAsync(ulong userId);
 
         Task<IReadOnlyCollection<ChallengeDto>> GetChallengesByUserAndByDateAsync(ulong userId, DateTime date);

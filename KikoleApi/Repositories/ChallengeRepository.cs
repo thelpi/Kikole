@@ -54,6 +54,29 @@ namespace KikoleApi.Repositories
                .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesAsync(DateTime? startDate, DateTime? endDate)
+        {
+            return await ExecuteReaderAsync<ChallengeDto>(
+                   "SELECT * FROM challenges " +
+                   "WHERE is_accepted = 1 " +
+                   "AND (@startDate IS NULL OR challenge_date >= @startDate) " +
+                   "AND (@endDate IS NULL OR challenge_date <= @endDate) " +
+                   $"AND host_user_id IN (" +
+                   "   SELECT id FROM users " +
+                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
+                   ") AND guest_user_id IN (" +
+                   "   SELECT id FROM users " +
+                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
+                   ")",
+                   new
+                   {
+                       adminId = (ulong)UserTypes.Administrator,
+                       startDate = startDate?.Date,
+                       endDate = endDate?.Date
+                   })
+               .ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyCollection<ChallengeDto>> GetPendingChallengesByGuestUserAsync(ulong userId)
         {
             return await ExecuteReaderAsync<ChallengeDto>(

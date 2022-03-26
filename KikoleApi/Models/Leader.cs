@@ -26,7 +26,7 @@ namespace KikoleApi.Models
             Login = user.Login;
             SuccessCount = 0;
             TotalPoints = points;
-            BestTime = new TimeSpan(24, 0, 0);
+            BestTime = new TimeSpan(23, 59, 59);
             UserId = user.Id;
         }
 

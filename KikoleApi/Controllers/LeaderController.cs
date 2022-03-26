@@ -210,7 +210,42 @@ namespace KikoleApi.Controllers
                         players.Where(p => p.CreationUserId == leaderDto.Key).Select(d => d.ProposalDate.Value),
                         leaderDtos))
                 .ToList();
-            
+
+            var challenges = await _challengeRepository
+                .GetAcceptedChallengesAsync(minimalDate, maximalDate)
+                .ConfigureAwait(false);
+
+            foreach (var challenge in challenges)
+            {
+                var hostLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.HostUserId && l.ProposalDate == challenge.ChallengeDate);
+                var guestLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.GuestUserId && l.ProposalDate == challenge.ChallengeDate);
+                var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
+                if (pointsDelta != 0)
+                {
+                    if (hostLead == null)
+                    {
+                        var leadMatch = leaders.SingleOrDefault(l => l.UserId == challenge.HostUserId);
+                        if (leadMatch == null)
+                            leaders.Add(new Leader(challenge.HostUserId, pointsDelta, users));
+                        else
+                            leadMatch.TotalPoints += pointsDelta;
+                    }
+                    else
+                        leaders.Single(l => l.UserId == hostLead.UserId).TotalPoints += pointsDelta;
+
+                    if (guestLead == null)
+                    {
+                        var leadMatch = leaders.SingleOrDefault(l => l.UserId == challenge.GuestUserId);
+                        if (leadMatch == null)
+                            leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta, users));
+                        else
+                            leadMatch.TotalPoints += pointsDelta;
+                    }
+                    else
+                        leaders.Single(l => l.UserId == guestLead.UserId).TotalPoints -= pointsDelta;
+                }
+            }
+
             switch (leaderSort)
             {
                 case LeaderSorts.SuccessCount:
