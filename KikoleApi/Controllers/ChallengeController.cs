@@ -17,15 +17,18 @@ namespace KikoleApi.Controllers
         private readonly IClock _clock;
         private readonly IPlayerRepository _playerRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ILeaderRepository _leaderRepository;
 
         public ChallengeController(IChallengeRepository challengeRepository,
             IPlayerRepository playerRepository,
             IUserRepository userRepository,
+            ILeaderRepository leaderRepository,
             IClock clock)
         {
             _challengeRepository = challengeRepository;
             _playerRepository = playerRepository;
             _userRepository = userRepository;
+            _leaderRepository = leaderRepository;
             _clock = clock;
         }
 
@@ -362,36 +365,40 @@ namespace KikoleApi.Controllers
             var challenges = new List<Challenge>(hostChallenges.Count + guestChallenges.Count);
             var usersCache = new Dictionary<ulong, string>();
 
-            foreach (var c in hostChallenges)
-            {
-                var uLogin = await GetOrSetUserFromCacheAsync(
-                        c.GuestUserId, usersCache)
-                    .ConfigureAwait(false);
-                challenges.Add(new Challenge(c, uLogin, userId));
-            }
+            await AddChallengesAsync(
+                    challenges, usersCache, hostChallenges, c => c.GuestUserId, userId)
+                .ConfigureAwait(false);
 
-            foreach (var c in guestChallenges)
-            {
-                var uLogin = await GetOrSetUserFromCacheAsync(
-                        c.HostUserId, usersCache)
-                    .ConfigureAwait(false);
-                challenges.Add(new Challenge(c, uLogin, userId));
-            }
+            await AddChallengesAsync(
+                    challenges, usersCache, guestChallenges, c => c.HostUserId, userId)
+                .ConfigureAwait(false);
 
             return Ok(challenges.OrderByDescending(c => c.ChallengeDate).ToList());
         }
 
-        private async Task<string> GetOrSetUserFromCacheAsync(ulong userId,
-            Dictionary<ulong, string> usersCache)
+        private async Task AddChallengesAsync(List<Challenge> challenges,
+            Dictionary<ulong, string> usersCache,
+            IEnumerable<Models.Dtos.ChallengeDto> dtos,
+            Func<Models.Dtos.ChallengeDto, ulong> getOpponentUserIdFunc,
+            ulong userId)
         {
-            if (!usersCache.ContainsKey(userId))
+            foreach (var c in dtos)
             {
-                var user = await _userRepository
-                    .GetUserByIdAsync(userId)
+                var leaders = await _leaderRepository
+                    .GetLeadersAtDateAsync(c.ChallengeDate)
                     .ConfigureAwait(false);
-                usersCache.Add(userId, user.Login);
+
+                var opponentUserId = getOpponentUserIdFunc(c);
+                if (!usersCache.ContainsKey(opponentUserId))
+                {
+                    var user = await _userRepository
+                        .GetUserByIdAsync(opponentUserId)
+                        .ConfigureAwait(false);
+                    usersCache.Add(opponentUserId, user.Login);
+                }
+
+                challenges.Add(new Challenge(c, usersCache[opponentUserId], userId, leaders));
             }
-            return usersCache[userId];
         }
     }
 }

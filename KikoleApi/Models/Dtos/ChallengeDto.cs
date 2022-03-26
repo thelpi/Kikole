@@ -13,7 +13,5 @@ namespace KikoleApi.Models.Dtos
         public DateTime ChallengeDate { get; set; }
 
         public byte PointsRate { get; set; }
-
-        public byte? IsSuccess { get; set; }
     }
 }
