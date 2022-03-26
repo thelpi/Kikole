@@ -9,10 +9,14 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
+<h3>Challenge in progress</h3>
 @if (Model.TodayChallenge != null)
 {
-    <h3>Challenge in progress</h3>
     <div>You have a challenge against <span style="color: crimson">@Model.TodayChallenge.OpponentLogin</span> today, for <span style="color: crimson">@Model.TodayChallenge.PointsRate</span>% of your points!</div>
+}
+else
+{
+    <div>No challenge today.</div>
 }
 
 @if (Model.AcceptedChallenge != null)
@@ -22,9 +26,9 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 }
 else
 {
+    <h3>Opponents who have challenged you</h3>
     @if (Model.WaitingForResponseChallenges?.Count > 0)
     {
-        <h3>Opponents who have challenged you</h3>
         <form method="post" action="/Challenge">
             <div>
                 @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
@@ -33,9 +37,14 @@ else
             </div>
         </form>
     }
-    @if (Model.RequestedChallenges?.Count > 0)
+    else
     {
-        <h3>Challenges you've requested</h3>
+        <div>Nobody has challenged you for tomorrow</div>
+    }
+
+    <h3>Challenges you've requested</h3>
+    if (Model.RequestedChallenges?.Count > 0)
+    {
         <form method="post" action="/Challenge">
             <div>
                 @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
@@ -43,28 +52,60 @@ else
             </div>
         </form>
     }
+    else
+    {
+        <div>You've challenged nobody for tomorrow</div>
+    }
+
     <h3>Challenge someone</h3>
-    <form method="post" action="/Challenge">
-        <div>
-            <div style="margin-top: 5px">
-                <div>
-                    <label>Opponent:</label>
+    @if (System.DateTime.Now.Hour == 23)
+    {
+        <div>Challenges are closed after 11PM!</div>
+    }
+    else
+    {
+        <form method="post" action="/Challenge">
+            <div>
+                <div style="margin-top: 5px">
+                    <div>
+                        <label>Opponent:</label>
+                    </div>
+                    @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
                 </div>
-                @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
-            </div>
-            <div style="margin-top: 5px">
-                <div>
-                    <label>Points rate:</label>
+                <div style="margin-top: 5px">
+                    <div>
+                        <label>Points rate:</label>
+                    </div>
+                    @Html.DropDownListFor(m => m.PointsRate, Enumerable.Range(1, 10).Select(i => new SelectListItem((i * 10).ToString(), (i * 10).ToString())), new { @style = "width: 75px" })
                 </div>
-                @Html.DropDownListFor(m => m.PointsRate, Enumerable.Range(1, 10).Select(i => new SelectListItem((i * 10).ToString(), (i * 10).ToString())), new { @style = "width: 75px" })
+                <div style="font-size: small">(% of your tomorrow score you're willing to gamble)</div>
+                <div style="margin-top: 5px">
+                    <input value="Challenge" type="submit" name="submit-createchallenge" />
+                </div>
             </div>
-            <div style="font-size: small">(% of your tomorrow score you're willing to gamble)</div>
-            <div style="margin-top: 5px">
-                <input value="Challenge" type="submit" name="submit-createchallenge" />
-            </div>
-        </div>
-    </form>
+        </form>
+    }
 }
+
+<h3>How challenge works?</h3>
+<p>You target an opponent you think you can <span style="color:crimson">beat tomorrow</span> (ie more points than him/her).</p>
+<p>You have to set the percentage of points you <span style="color:crimson">gamble</span> in the challenge (see example below).</p>
+<p>If he/she accepts the challenge (he/she has until midnight to do so), you're on!</p>
+<p>Points won/lost during a challenge are computed <span style="color:crimson">after both users</span> have submitted the correct answer for the day.</p>
+<p>In case of withdrawal (ie the opponent don't find the daily player), the winner takes <span style="color:crimson">1000</span> points from the opponent's global score.</p>
+<p>If both users withdraw, nothing happens.</p>
+<p>You can't challenge in the following situations:</p>
+<ul>
+    <li>You've submitted tomorrow's player</li>
+    <li>Your opponent has submitted tomorrow's player</li>
+    <li>Your opponent has already accepted a challenge for tomorrow</li>
+    <li>You've already accepted a challenge for tomorrow</li>
+    <li>It's past 11PM</li>
+</ul>
+<p>Example : user X challenges Y for 40% of his/her score</p>
+<p>The next day, X scores 800 points and Y 900 points, so Y wins.</p>
+<p>X final score is 480 points (800 * 0.6)</p>
+<p>Y final score is 1220 points (900 + 800 * 0.4)</p>
 
 <h3>Challenges history</h3>
 @if (Model.ChallengesHistory?.Count > 0)
