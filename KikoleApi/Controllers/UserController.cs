@@ -42,6 +42,18 @@ namespace KikoleApi.Controllers
             _crypter = crypter;
         }
 
+        [HttpGet]
+        [AuthenticationLevel]
+        [ProducesResponseType(typeof(IReadOnlyCollection<User>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<User>>> GetUsersAsync()
+        {
+            var users = await _userRepository
+                .GetActiveUsersAsync()
+                .ConfigureAwait(false);
+
+            return Ok(users.Select(u => new User(u)).ToList());
+        }
+
         [HttpGet("/player-of-the-day-users")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(PlayerCreator), (int)HttpStatusCode.OK)]

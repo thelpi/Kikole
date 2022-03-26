@@ -4,6 +4,8 @@ namespace KikoleApi.Models
 {
     public class Challenge
     {
+        public ulong Id { get; }
+
         public string OpponentLogin { get; }
 
         public byte PointsRate { get; }
@@ -12,6 +14,7 @@ namespace KikoleApi.Models
 
         internal Challenge(ChallengeDto dto, string login)
         {
+            Id = dto.Id;
             OpponentLogin = login;
             PointsRate = dto.PointsRate;
             IsAccepted = dto.IsAccepted.HasValue
