@@ -21,7 +21,7 @@ else
         <h3>Opponents who have challenged you</h3>
         <form method="post" action="/Challenge">
             <div>
-                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} - {m.PointsRate}%", m.Id.ToString())), new { @style = "width: 200px" })
+                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
                 <input value="Accept" type="submit" name="submit-acceptchallenge" />
                 <input value="Refuse" type="submit" name="submit-refusechallenge" />
             </div>
@@ -32,7 +32,7 @@ else
         <h3>Challenges you've requested</h3>
         <form method="post" action="/Challenge">
             <div>
-                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} - {m.PointsRate}%", m.Id.ToString())), new { @style = "width: 200px" })
+                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
                 <input value="Cancel" type="submit" name="submit-cancelchallenge" />
             </div>
         </form>

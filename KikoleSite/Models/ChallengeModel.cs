@@ -17,7 +17,7 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<User> Users { get; set; }
 
-        public ulong? SelectedChallengeId { get; set; }
+        public ulong SelectedChallengeId { get; set; }
 
         public bool AcceptChallenge { get; set; }
 

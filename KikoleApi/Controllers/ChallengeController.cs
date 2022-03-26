@@ -126,14 +126,24 @@ namespace KikoleApi.Controllers
             if (challenge == null)
                 return NotFound();
 
-            if (challenge.GuestUserId != userId)
+            var isCancel = challenge.HostUserId == userId;
+
+            if (!isCancel && challenge.GuestUserId != userId)
                 return Forbid();
 
             if (challenge.IsAccepted.HasValue)
-                return Conflict("You've already respond to this challenge");
+            {
+                if (isCancel)
+                    return Conflict("You can't cancel an accepted challenge");
+                else
+                    return Conflict("You've already respond to this challenge");
+            }
 
             if (isAccepted)
             {
+                if (isCancel)
+                    return Forbid();
+
                 var hostUser = await _userRepository
                     .GetUserByIdAsync(challenge.HostUserId)
                     .ConfigureAwait(false);

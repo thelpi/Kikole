@@ -47,7 +47,25 @@ namespace KikoleSite.Controllers
                         .CreateChallengeAsync(model.SelectedUserId, model.PointsRate, token)
                         .ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(result))
-                        model.InfoMessage = $"Success! Challenge sent to your opponent";
+                        model.InfoMessage = "Success! Challenge sent to your opponent";
+                    else
+                        model.ErrorMessage = $"Error: {result}";
+                }
+            }
+            else if (action == "cancelchallenge" || action == "refusechallenge" || action == "acceptchallenge")
+            {
+                var isRefusal = action == "refusechallenge";
+                var isAccepted = action == "acceptchallenge";
+
+                if (model.SelectedChallengeId == 0)
+                    model.ErrorMessage = "Invalid challenge selected";
+                else
+                {
+                    var result = await _apiProvider
+                        .RespondToChallengeAsync(model.SelectedChallengeId, isAccepted, token)
+                        .ConfigureAwait(false);
+                    if (string.IsNullOrWhiteSpace(result))
+                        model.InfoMessage = $"Success! Challenge has been {(isRefusal ? "refused" : (isAccepted ? "accepted" : "cancelled"))}";
                     else
                         model.ErrorMessage = $"Error: {result}";
                 }
