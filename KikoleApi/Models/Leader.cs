@@ -11,7 +11,7 @@ namespace KikoleApi.Models
 
         public string Login { get; }
 
-        public uint TotalPoints { get; private set; }
+        public int TotalPoints { get; private set; }
 
         public TimeSpan BestTime { get; }
 
@@ -19,13 +19,24 @@ namespace KikoleApi.Models
 
         public int Position { get; internal set; }
 
+        internal Leader(LeaderDto leader,
+            IReadOnlyCollection<UserDto> users)
+        {
+            var user = users.Single(p => p.Id == leader.UserId);
+            Login = user.Login;
+            SuccessCount = 1;
+            TotalPoints = leader.Points;
+            BestTime = new TimeSpan(0, leader.Time, 0);
+            Id = user.Id;
+        }
+
         internal Leader(IGrouping<ulong, LeaderDto> userDtos,
             IReadOnlyCollection<UserDto> users)
         {
             var user = users.Single(p => p.Id == userDtos.Key);
             Login = user.Login;
             SuccessCount = userDtos.Count();
-            TotalPoints = (uint)userDtos.Sum(dto => dto.Points);
+            TotalPoints = userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);
             Id = user.Id;
         }
@@ -41,7 +52,7 @@ namespace KikoleApi.Models
                     .Sum(d => ProposalChart.Default.SubmissionLosePointsByLeader);
 
                 TotalPoints += ProposalChart.Default.SubmissionBasePoints
-                    + (uint)Math.Max(leadersCosting, 0);
+                    + Math.Max(leadersCosting, 0);
             }
 
             return this;

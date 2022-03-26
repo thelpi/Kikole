@@ -10,7 +10,7 @@ namespace KikoleSite.Api
 
         public string Login { get; set; }
 
-        public uint TotalPoints { get; set; }
+        public int TotalPoints { get; set; }
 
         public TimeSpan BestTime { get; set; }
 

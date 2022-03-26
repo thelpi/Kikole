@@ -55,7 +55,6 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             var leaders = dtos
-                .GroupBy(dto => dto.UserId)
                 .Select(dto => new Leader(dto, users));
 
             leaders = sort == LeaderSorts.TotalPoints
