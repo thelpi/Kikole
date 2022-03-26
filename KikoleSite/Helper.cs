@@ -49,13 +49,6 @@ namespace KikoleSite
             return data ? "Yes" : "No";
         }
 
-        public static string ToYesNo(this bool? data, string nullValue = NA)
-        {
-            return !data.HasValue
-                ? nullValue
-                : (data.Value ? "Yes" : "No");
-        }
-
         internal static string Encrypt(this string plainText)
         {
             try

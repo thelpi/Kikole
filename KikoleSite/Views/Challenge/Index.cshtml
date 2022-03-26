@@ -92,7 +92,7 @@ else
 <p>You have to set the percentage of points you <span style="color:crimson">gamble</span> in the challenge (see example below).</p>
 <p>If he/she accepts the challenge (he/she has until midnight to do so), you're on!</p>
 <p>Points won/lost during a challenge are computed <span style="color:crimson">after both users</span> have submitted the correct answer for the day.</p>
-<p>In case of withdrawal (ie the opponent don't find the daily player), the winner takes <span style="color:crimson">1000</span> points from the opponent's global score.</p>
+<p>In case of withdrawal (ie the opponent don't find the daily player), the winner takes <span style="color:crimson">@Model.DefaultPoints</span> points from the opponent's global score.</p>
 <p>If both users withdraw, nothing happens.</p>
 <p>You can't challenge in the following situations:</p>
 <ul>
@@ -116,7 +116,7 @@ else
                 <th style="width: 100px">Date</th>
                 <th style="width: 180px">Opponent</th>
                 <th style="width: 80px">Initiated?</th>
-                <th style="width: 80px">Success?</th>
+                <th style="width: 80px">Results</th>
             </tr>
         </thead>
         <tbody>
@@ -126,14 +126,14 @@ else
             @foreach (var c in Model.ChallengesHistory)
             {
                 var background = i % 2 == 0 ? "white" : "azure";
-                var color = c.IsHostSuccess.HasValue
-                    ? (c.IsHostSuccess.Value ? "forestgreen" : "crimson")
+                var color = c.HostPointsDelta != 0
+                    ? (c.HostPointsDelta > 0 ? "forestgreen" : "crimson")
                     : "black";
                 <tr style="background-color: @background">
                     <td>@c.ChallengeDate.ToString("yyyy-MM-dd")</td>
                     <td style="font: bold">@c.OpponentLogin</td>
                     <td>@c.Initiated.ToYesNo()</td>
-                    <td style="font: bold; color: @color">@c.IsHostSuccess.ToYesNo("Tie")</td>
+                    <td style="font: bold; color: @color">@c.HostPointsDelta pts</td>
                 </tr>
                 i++;
             }

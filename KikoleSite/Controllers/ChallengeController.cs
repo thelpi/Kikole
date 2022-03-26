@@ -95,7 +95,11 @@ namespace KikoleSite.Controllers
                     && !pendings.Any(r => r.OpponentLogin == u.Login)
                     && myLogin != u.Login)
                 .ToList();
-            
+
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
+
             model.RequestedChallenges = requests;
             model.WaitingForResponseChallenges = pendings;
             model.Users = usersOk;
@@ -108,6 +112,7 @@ namespace KikoleSite.Controllers
             model.ChallengesHistory = await _apiProvider
                 .GetChallengesHistoryAsync(null, null, token)
                 .ConfigureAwait(false);
+            model.DefaultPoints = chart.ChallengeWithdrawalPoints;
         }
     }
 }

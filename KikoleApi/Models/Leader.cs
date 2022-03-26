@@ -7,17 +7,28 @@ namespace KikoleApi.Models
 {
     public class Leader
     {
-        public ulong Id { get; }
+        public ulong UserId { get; }
 
         public string Login { get; }
 
-        public int TotalPoints { get; private set; }
+        public int TotalPoints { get; internal set; }
 
         public TimeSpan BestTime { get; }
 
         public int SuccessCount { get; }
 
         public int Position { get; internal set; }
+
+        internal Leader(ulong userId, int points,
+            IReadOnlyCollection<UserDto> users)
+        {
+            var user = users.Single(p => p.Id == userId);
+            Login = user.Login;
+            SuccessCount = 0;
+            TotalPoints = points;
+            BestTime = new TimeSpan(24, 0, 0);
+            UserId = user.Id;
+        }
 
         internal Leader(LeaderDto leader,
             IReadOnlyCollection<UserDto> users)
@@ -27,7 +38,7 @@ namespace KikoleApi.Models
             SuccessCount = 1;
             TotalPoints = leader.Points;
             BestTime = new TimeSpan(0, leader.Time, 0);
-            Id = user.Id;
+            UserId = user.Id;
         }
 
         internal Leader(IGrouping<ulong, LeaderDto> userDtos,
@@ -38,7 +49,7 @@ namespace KikoleApi.Models
             SuccessCount = userDtos.Count();
             TotalPoints = userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);
-            Id = user.Id;
+            UserId = user.Id;
         }
 
         internal Leader WithPointsFromSubmittedPlayers(

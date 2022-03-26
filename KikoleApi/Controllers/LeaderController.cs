@@ -14,6 +14,7 @@ namespace KikoleApi.Controllers
 {
     public class LeaderController : KikoleBaseController
     {
+        private readonly IChallengeRepository _challengeRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
@@ -26,6 +27,7 @@ namespace KikoleApi.Controllers
             IPlayerRepository playerRepository,
             IClubRepository clubRepository,
             IProposalRepository proposalRepository,
+            IChallengeRepository challengeRepository,
             IClock clock)
         {
             _leaderRepository = leaderRepository;
@@ -33,6 +35,7 @@ namespace KikoleApi.Controllers
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
             _proposalRepository = proposalRepository;
+            _challengeRepository = challengeRepository;
             _clock = clock;
         }
 
@@ -46,20 +49,44 @@ namespace KikoleApi.Controllers
             if (sort == LeaderSorts.SuccessCount)
                 return BadRequest();
 
-            var dtos = await _leaderRepository
-                .GetLeadersAtDateAsync(day.Date)
+            var leadersDto = await _leaderRepository
+                .GetLeadersAtDateAsync(day)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
                 .GetActiveUsersAsync()
                 .ConfigureAwait(false);
 
-            var leaders = dtos
-                .Select(dto => new Leader(dto, users));
+            var leaders = leadersDto
+                .Select(dto => new Leader(dto, users))
+                .ToList();
+
+            var challenges = await _challengeRepository
+                .GetAcceptedChallengesOfTheDayAsync(day)
+                .ConfigureAwait(false);
+
+            foreach (var challenge in challenges)
+            {
+                var hostLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.HostUserId);
+                var guestLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.GuestUserId);
+                var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
+                if (pointsDelta != 0)
+                {
+                    if (hostLead == null)
+                        leaders.Add(new Leader(challenge.HostUserId, pointsDelta, users));
+                    else
+                        leaders.Single(l => l.UserId == hostLead.UserId).TotalPoints += pointsDelta;
+
+                    if (guestLead == null)
+                        leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta, users));
+                    else
+                        leaders.Single(l => l.UserId == guestLead.UserId).TotalPoints -= pointsDelta;
+                }
+            }
 
             leaders = sort == LeaderSorts.TotalPoints
-                ? leaders.OrderByDescending(l => l.TotalPoints).ThenBy(l => l.BestTime.TotalMinutes)
-                : leaders.OrderBy(l => l.BestTime.TotalMinutes).ThenBy(l => l.TotalPoints);
+                ? leaders.OrderByDescending(l => l.TotalPoints).ThenBy(l => l.BestTime.TotalMinutes).ToList()
+                : leaders.OrderBy(l => l.BestTime.TotalMinutes).ThenBy(l => l.TotalPoints).ToList();
 
             leaders = leaders
                 .Select((l, i) =>

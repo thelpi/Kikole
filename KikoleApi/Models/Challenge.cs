@@ -17,7 +17,7 @@ namespace KikoleApi.Models
             ? _dto.IsAccepted > 0
             : default(bool?);
 
-        public bool? IsHostSuccess { get; }
+        public int HostPointsDelta { get; }
 
         public DateTime ChallengeDate => _dto.ChallengeDate;
 
@@ -36,18 +36,28 @@ namespace KikoleApi.Models
             IEnumerable<LeaderDto> leaders)
             : this(dto, login, userId)
         {
-            var hostLead = leaders.SingleOrDefault(l => l.UserId == _dto.HostUserId);
-            var guestLead = leaders.SingleOrDefault(l => l.UserId == _dto.GuestUserId);
+            HostPointsDelta = ComputeHostPoints(_dto,
+                leaders.SingleOrDefault(l => l.UserId == dto.HostUserId),
+                leaders.SingleOrDefault(l => l.UserId == dto.GuestUserId));
+        }
 
+        internal static int ComputeHostPoints(ChallengeDto dto,
+            LeaderDto hostLead, LeaderDto guestLead)
+        {
             if (hostLead != null && guestLead == null)
-                IsHostSuccess = true;
+                return ProposalChart.Default.ChallengeWithdrawalPoints;
             if (hostLead == null && guestLead != null)
-                IsHostSuccess = false;
-            else if (hostLead != null && guestLead != null
-                && hostLead.Points != guestLead.Points)
+                return -ProposalChart.Default.ChallengeWithdrawalPoints;
+            else if (hostLead?.Points != guestLead?.Points)
             {
-                IsHostSuccess = hostLead.Points > guestLead.Points;
+                var rate = dto.PointsRate / (decimal)100;
+                if (hostLead.Points > guestLead.Points)
+                    return (int)Math.Round(guestLead.Points * rate);
+                else
+                    return (int)Math.Round(hostLead.Points * rate * -1);
             }
+            else
+                return 0;
         }
     }
 }

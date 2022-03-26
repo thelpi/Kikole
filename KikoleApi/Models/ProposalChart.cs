@@ -21,6 +21,8 @@ namespace KikoleApi.Models
 
         public int SubmissionThresholdlosePoints = 750;
 
+        public int ChallengeWithdrawalPoints = 1000;
+
         public IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
             = new Dictionary<ProposalTypes, int>
             {

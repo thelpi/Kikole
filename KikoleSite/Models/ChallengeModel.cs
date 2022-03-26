@@ -28,5 +28,7 @@ namespace KikoleSite.Models
         public byte PointsRate { get; set; }
 
         public IReadOnlyCollection<Challenge> ChallengesHistory { get; set; }
+
+        public int DefaultPoints { get; set; }
     }
 }
