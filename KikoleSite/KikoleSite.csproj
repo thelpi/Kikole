@@ -17,6 +17,9 @@
     <Content Update="Views\Admin\PlayerSubmission.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\Challenge\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Leaderboard\User.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

@@ -1,0 +1,61 @@
+﻿@model ChallengeModel
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div style="color:crimson; margin-top: 10px">Error: @Model.ErrorMessage</div>
+}
+else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
+{
+    <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
+}
+
+@if (Model.AcceptedChallenge != null)
+{
+    <h3>Accepted challenge</h3>
+    <div>You have a challenge against <span style="color: crimson">@Model.AcceptedChallenge.OpponentLogin</span> tomorrow, for <span style="color: crimson">@Model.AcceptedChallenge.PointsRate</span>% of your points!</div>
+}
+else
+{
+    @if (Model.WaitingForResponseChallenges?.Count > 0)
+    {
+        <h3>Opponents who have challenged you</h3>
+        <form method="post" action="/Challenge">
+            <div>
+                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} - {m.PointsRate}%", m.Id.ToString())), new { @style = "width: 200px" })
+                <input value="Accept" type="submit" name="submit-acceptchallenge" />
+                <input value="Refuse" type="submit" name="submit-refusechallenge" />
+            </div>
+        </form>
+    }
+    @if (Model.RequestedChallenges?.Count > 0)
+    {
+        <h3>Challenges you've requested</h3>
+        <form method="post" action="/Challenge">
+            <div>
+                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} - {m.PointsRate}%", m.Id.ToString())), new { @style = "width: 200px" })
+                <input value="Cancel" type="submit" name="submit-cancelchallenge" />
+            </div>
+        </form>
+    }
+    <h3>Challenge someone</h3>
+    <form method="post" action="/Challenge">
+        <div>
+            <div style="margin-top: 5px">
+                <div>
+                    <label>Opponent:</label>
+                </div>
+                @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
+            </div>
+            <div style="margin-top: 5px">
+                <div>
+                    <label>Points rate:</label>
+                </div>
+                @Html.DropDownListFor(m => m.PointsRate, Enumerable.Range(1, 10).Select(i => new SelectListItem((i * 10).ToString(), (i * 10).ToString())), new { @style = "width: 75px" })
+            </div>
+            <div style="font-size: small">(% of your tomorrow score you're willing to gamble)</div>
+            <div style="margin-top: 5px">
+                <input value="Challenge" type="submit" name="submit-createchallenge" />
+            </div>
+        </div>
+    </form>
+}

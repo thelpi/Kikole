@@ -41,6 +41,9 @@ namespace KikoleApi.Controllers
             if (userId == 0 || request?.IsValid() != true)
                 return BadRequest();
 
+            if (request.GuestUserId == userId)
+                return Conflict("You can't challenge yourself");
+
             if (_clock.Now.Hour == 23)
                 return Conflict("Can't create challenge; it's past 11PM.");
 

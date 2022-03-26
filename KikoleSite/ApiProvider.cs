@@ -28,6 +28,16 @@ namespace KikoleSite
 
         #region user accounts
 
+        public async Task<IReadOnlyCollection<User>> GetActiveUsersAsync()
+        {
+            var response = await SendAsync(
+                    "users", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<User>>(response)
+                .ConfigureAwait(false);
+        }
+
         public async Task<string> CreateAccountAsync(string login,
             string password, string question, string answer)
         {

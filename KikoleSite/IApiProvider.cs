@@ -25,6 +25,8 @@ namespace KikoleSite
 
         Task<(bool, string)> GetLoginQuestionAsync(string login);
 
+        Task<IReadOnlyCollection<User>> GetActiveUsersAsync();
+
         #endregion user accounts
 
         #region stats, badges and leaderboard
