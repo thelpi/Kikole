@@ -21,6 +21,9 @@
         DoItYourself,
         FourFourtwo,
         AroundTheWorld,
-        WoodenSpoon
+        WoodenSpoon,
+        ChallengeAccepted,
+        GambleAddiction,
+        AllIn
     }
 }

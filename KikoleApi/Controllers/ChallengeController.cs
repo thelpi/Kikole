@@ -14,6 +14,7 @@ namespace KikoleApi.Controllers
 {
     public class ChallengeController : KikoleBaseController
     {
+        private readonly IBadgeRepository _badgeRepository;
         private readonly IChallengeRepository _challengeRepository;
         private readonly IClock _clock;
         private readonly IPlayerRepository _playerRepository;
@@ -24,12 +25,14 @@ namespace KikoleApi.Controllers
             IPlayerRepository playerRepository,
             IUserRepository userRepository,
             ILeaderRepository leaderRepository,
+            IBadgeRepository badgeRepository,
             IClock clock)
         {
             _challengeRepository = challengeRepository;
             _playerRepository = playerRepository;
             _userRepository = userRepository;
             _leaderRepository = leaderRepository;
+            _badgeRepository = badgeRepository;
             _clock = clock;
         }
 
@@ -142,7 +145,7 @@ namespace KikoleApi.Controllers
                 else
                     return Conflict("You've already respond to this challenge");
             }
-
+            
             if (isAccepted)
             {
                 if (isCancel)
@@ -208,6 +211,35 @@ namespace KikoleApi.Controllers
             await _challengeRepository
                 .RespondToChallengeAsync(id, isAccepted)
                 .ConfigureAwait(false);
+
+            if (isAccepted)
+            {
+                await AddBadgesIfEligibleAsync(
+                        Badges.ChallengeAccepted, challenge)
+                    .ConfigureAwait(false);
+
+                if (challenge.PointsRate >= 80)
+                {
+                    await AddBadgesIfEligibleAsync(
+                           Badges.AllIn, challenge)
+                       .ConfigureAwait(false);
+                }
+
+                var allAccepted = await _challengeRepository
+                    .GetAcceptedChallengesAsync(null, null)
+                    .ConfigureAwait(false);
+                
+                if (allAccepted.Count(ac => ac.HostUserId == challenge.HostUserId) >= 5)
+                {
+                    var usersBadged = await _badgeRepository
+                       .GetUsersWithBadgeAsync((ulong)Badges.GambleAddiction)
+                       .ConfigureAwait(false);
+
+                    await AddBadgeIfEligibleAsync(
+                            challenge, usersBadged, Badges.GambleAddiction, c => c.HostUserId)
+                        .ConfigureAwait(false);
+                }
+            }
 
             return NoContent();
         }
@@ -399,6 +431,38 @@ namespace KikoleApi.Controllers
                 }
 
                 challenges.Add(new Challenge(c, usersCache[opponentUserId], userId, leaders));
+            }
+        }
+
+        private async Task AddBadgesIfEligibleAsync(Badges badge, Models.Dtos.ChallengeDto challenge)
+        {
+            var usersBadged = await _badgeRepository
+                   .GetUsersWithBadgeAsync((ulong)badge)
+                   .ConfigureAwait(false);
+
+            await AddBadgeIfEligibleAsync(
+                    challenge, usersBadged, badge, c => c.GuestUserId)
+                .ConfigureAwait(false);
+            await AddBadgeIfEligibleAsync(
+                    challenge, usersBadged, badge, c => c.HostUserId)
+                .ConfigureAwait(false);
+        }
+
+        private async Task AddBadgeIfEligibleAsync(Models.Dtos.ChallengeDto challenge,
+            IEnumerable<Models.Dtos.UserBadgeDto> usersBadged,
+            Badges badge,
+            Func<Models.Dtos.ChallengeDto, ulong> userFunc)
+        {
+            if (!usersBadged.Any(ub => ub.UserId == userFunc(challenge)))
+            {
+                await _badgeRepository
+                    .InsertUserBadgeAsync(new Models.Dtos.UserBadgeDto
+                    {
+                        GetDate = challenge.ChallengeDate.AddDays(-1),
+                        BadgeId = (ulong)badge,
+                        UserId = userFunc(challenge)
+                    })
+                    .ConfigureAwait(false);
             }
         }
     }
