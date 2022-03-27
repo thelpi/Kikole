@@ -65,6 +65,7 @@ namespace KikoleApi.Repositories
 
         public async Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync()
         {
+            // TODO: could use "base.SubSqlValidUsers" maybe?
             return await ExecuteReaderAsync<UserDto>(
                     "SELECT * FROM users " +
                     "WHERE is_disabled = 0 AND user_type_id != @adminId",

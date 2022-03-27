@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
-using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -37,29 +36,24 @@ namespace KikoleApi.Repositories
         public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date)
         {
             return await ExecuteReaderAsync<LeaderDto>(
-                    $"SELECT * FROM leaders " +
-                    $"WHERE DATE(proposal_date) = @date " +
-                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR user_type_id = @adminId)",
-                    new
-                    {
-                        date.Date,
-                        adminId = (ulong)UserTypes.Administrator
-                    })
+                    "SELECT * FROM leaders " +
+                    "WHERE DATE(proposal_date) = @date " +
+                    $"AND user_id IN ({SubSqlValidUsers})",
+                    new { date.Date })
                 .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate)
         {
             return await ExecuteReaderAsync<LeaderDto>(
-                    $"SELECT * FROM leaders " +
-                    $"WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
-                    $"AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
-                    $"AND user_id NOT IN (SELECT id FROM users WHERE is_disabled = 1 OR user_type_id = @adminId)",
+                    "SELECT * FROM leaders " +
+                    "WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
+                    "AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
+                    $"AND user_id IN ({SubSqlValidUsers})",
                     new
                     {
                         minimal_date = minimalDate?.Date,
-                        maximal_date = maximalDate?.Date,
-                        adminId = (ulong)UserTypes.Administrator
+                        maximal_date = maximalDate?.Date
                     })
                 .ConfigureAwait(false);
         }
@@ -68,7 +62,7 @@ namespace KikoleApi.Repositories
         {
             var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
 
-            while (date.Date > ProposalChart.Default.FirstDate.Date)
+            while (date.Date > Models.ProposalChart.Default.FirstDate.Date)
             {
                 date = date.AddDays(-1);
                 var leadersBefore = await GetLeadersAtDateAsync(date)
