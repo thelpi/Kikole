@@ -9,7 +9,7 @@ namespace KikoleApi.Interfaces
     {
         Task<ulong> CreateChallengeAsync(ChallengeDto challenge);
 
-        Task RespondToChallengeAsync(ulong challengeId, bool accept);
+        Task RespondToChallengeAsync(ulong challengeId, bool accept, DateTime date);
 
         Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesOfTheDayAsync(DateTime date);
 
@@ -17,12 +17,16 @@ namespace KikoleApi.Interfaces
 
         Task<IReadOnlyCollection<ChallengeDto>> GetPendingChallengesByGuestUserAsync(ulong userId);
 
-        Task<IReadOnlyCollection<ChallengeDto>> GetChallengesByUserAndByDateAsync(ulong userId, DateTime date);
+        Task<IReadOnlyCollection<ChallengeDto>> GetPendingChallengesByHostUserAsync(ulong userId);
 
         Task<IReadOnlyCollection<ChallengeDto>> GetRequestedAcceptedChallengesAsync(ulong userId, DateTime startDate, DateTime endDate);
 
         Task<IReadOnlyCollection<ChallengeDto>> GetResponseAcceptedChallengesAsync(ulong userId, DateTime startDate, DateTime endDate);
 
         Task<ChallengeDto> GetChallengeByIdAsync(ulong id);
+
+        Task<IReadOnlyCollection<ChallengeDto>> GetUsersFutureChallengesAsync(ulong hostUserId, ulong guestUserId);
+
+        Task<IReadOnlyCollection<DateTime>> GetBookedChallengesAsync(ulong userId);
     }
 }

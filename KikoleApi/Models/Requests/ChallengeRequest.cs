@@ -16,11 +16,10 @@ namespace KikoleApi.Models.Requests
                 && PointsRate <= 100;
         }
 
-        internal ChallengeDto ToDto(ulong hostUserId, DateTime challengeDate)
+        internal ChallengeDto ToDto(ulong hostUserId)
         {
             return new ChallengeDto
             {
-                ChallengeDate = challengeDate,
                 GuestUserId = GuestUserId,
                 HostUserId = hostUserId,
                 PointsRate = PointsRate

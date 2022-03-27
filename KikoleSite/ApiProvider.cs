@@ -470,18 +470,19 @@ namespace KikoleSite
             return await GetResponseContentAsync<IReadOnlyCollection<Challenge>>(response).ConfigureAwait(false);
         }
         
-        public async Task<Challenge> GetAcceptedChallengeAsync(DateTime challengeDate, string authToken)
+        public async Task<IReadOnlyCollection<Challenge>> GetAcceptedChallengesAsync(string authToken)
         {
             if (string.IsNullOrWhiteSpace(authToken))
-                return null;
+                return new List<Challenge>();
 
             var response = await SendAsync(
-                    $"accepted-challenges?challengeDate={challengeDate.ToString("yyyy-MM-dd")}",
+                    "accepted-challenges",
                     HttpMethod.Get,
                     authToken)
                 .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<Challenge>(response).ConfigureAwait(false);
+            return await GetResponseContentAsync<IReadOnlyCollection<Challenge>>(response)
+                .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<Challenge>> GetChallengesHistoryAsync(

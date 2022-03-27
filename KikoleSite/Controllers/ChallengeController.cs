@@ -90,9 +90,19 @@ namespace KikoleSite.Controllers
                 .GetChallengesWaitingForResponseAsync(token)
                 .ConfigureAwait(false);
 
+            var accepteds = await _apiProvider
+                .GetAcceptedChallengesAsync(token)
+                .ConfigureAwait(false);
+
+            var histories = await _apiProvider
+                .GetChallengesHistoryAsync(null, null, token)
+                .ConfigureAwait(false);
+
             var usersOk = users
                 .Where(u => !requests.Any(r => r.OpponentLogin == u.Login)
                     && !pendings.Any(r => r.OpponentLogin == u.Login)
+                    && !accepteds.Any(r => r.ChallengeDate > DateTime.Now.Date
+                        && r.OpponentLogin == u.Login)
                     && myLogin != u.Login)
                 .ToList();
 
@@ -103,15 +113,10 @@ namespace KikoleSite.Controllers
             model.RequestedChallenges = requests;
             model.WaitingForResponseChallenges = pendings;
             model.Users = usersOk;
-            model.AcceptedChallenge = await _apiProvider
-                .GetAcceptedChallengeAsync(DateTime.Now.AddDays(1).Date, token)
-                .ConfigureAwait(false);
-            model.TodayChallenge = await _apiProvider
-                .GetAcceptedChallengeAsync(DateTime.Now.Date, token)
-                .ConfigureAwait(false);
-            model.ChallengesHistory = await _apiProvider
-                .GetChallengesHistoryAsync(null, null, token)
-                .ConfigureAwait(false);
+            model.AcceptedChallenges = accepteds;
+            model.TodayChallenge = accepteds
+                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
+            model.ChallengesHistory = histories;
             model.DefaultPoints = chart.ChallengeWithdrawalPoints;
         }
     }

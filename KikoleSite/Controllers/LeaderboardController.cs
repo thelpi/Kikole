@@ -35,9 +35,10 @@ namespace KikoleSite.Controllers
 
             var today = DateTime.Now.Date;
 
-            var challenge = await _apiProvider
-                .GetAcceptedChallengeAsync(today, token)
-                .ConfigureAwait(false);
+            var challenge = (await _apiProvider
+                    .GetAcceptedChallengesAsync(token)
+                    .ConfigureAwait(false))
+                .SingleOrDefault(c => c.ChallengeDate == today);
 
             if (challenge?.OpponentLogin == stats.Login)
             {
@@ -91,9 +92,10 @@ namespace KikoleSite.Controllers
 
             var (token, login) = GetAuthenticationCookie();
 
-            var challenge = await _apiProvider
-                .GetAcceptedChallengeAsync(DateTime.Now.Date, token)
-                .ConfigureAwait(false);
+            var challenge = (await _apiProvider
+                    .GetAcceptedChallengesAsync(token)
+                    .ConfigureAwait(false))
+                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
 
             model.Leaders = model.MaximalDate.IsToday()
                 ? AnonymizeLeaders(leaders, challenge, login)
@@ -128,9 +130,10 @@ namespace KikoleSite.Controllers
 
             var (token, login) = GetAuthenticationCookie();
 
-            var challenge = await _apiProvider
-                .GetAcceptedChallengeAsync(DateTime.Now.Date, token)
-                .ConfigureAwait(false);
+            var challenge = (await _apiProvider
+                    .GetAcceptedChallengesAsync(token)
+                    .ConfigureAwait(false))
+                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
 
             return View(new LeaderboardModel
             {

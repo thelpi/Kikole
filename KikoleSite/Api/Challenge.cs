@@ -14,7 +14,7 @@ namespace KikoleSite.Api
 
         public int HostPointsDelta { get; set; }
 
-        public DateTime ChallengeDate { get; set; }
+        public DateTime? ChallengeDate { get; set; }
 
         public bool Initiated { get; set; }
     }

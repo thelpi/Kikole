@@ -9,7 +9,7 @@ namespace KikoleSite.Models
 
         public string InfoMessage { get; set; }
 
-        public Challenge AcceptedChallenge { get; set; }
+        public IReadOnlyCollection<Challenge> AcceptedChallenges { get; set; }
 
         public Challenge TodayChallenge { get; set; }
 

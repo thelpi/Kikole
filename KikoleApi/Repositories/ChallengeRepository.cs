@@ -16,7 +16,6 @@ namespace KikoleApi.Repositories
         public async Task<ulong> CreateChallengeAsync(ChallengeDto challenge)
         {
             return await ExecuteInsertAsync("challenges",
-                    ("challenge_date", challenge.ChallengeDate.Date),
                     ("guest_user_id", challenge.GuestUserId),
                     ("host_user_id", challenge.HostUserId),
                     ("points_rate", challenge.PointsRate),
@@ -24,11 +23,18 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task RespondToChallengeAsync(ulong challengeId, bool accept)
+        public async Task RespondToChallengeAsync(ulong challengeId, bool accept, DateTime date)
         {
             await ExecuteNonQueryAsync(
-                    "UPDATE challenges SET is_accepted = @isAccepted WHERE id = @challengeId",
-                    new { challengeId, isAccepted = accept ? 1 : 0 })
+                    "UPDATE challenges " +
+                    "SET is_accepted = @isAccepted, challenge_date = @date " +
+                    "WHERE id = @challengeId",
+                    new
+                    {
+                        challengeId,
+                        isAccepted = accept ? 1 : 0,
+                        date = date.Date
+                    })
                 .ConfigureAwait(false);
         }
 
@@ -63,22 +69,6 @@ namespace KikoleApi.Repositories
                     "AND is_accepted IS NULL " +
                     $"AND host_user_id IN ({SubSqlValidUsers})",
                     new { userId })
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<ChallengeDto>> GetChallengesByUserAndByDateAsync(ulong userId, DateTime date)
-        {
-            return await ExecuteReaderAsync<ChallengeDto>(
-                    "SELECT * FROM challenges " +
-                    "WHERE challenge_date = @cDate " +
-                    "AND guest_user_id = @userId " +
-                    $"AND host_user_id IN ({SubSqlValidUsers}) " +
-                    "UNION ALL " +
-                    "SELECT * FROM challenges " +
-                    "WHERE challenge_date = @cDate " +
-                    "AND host_user_id = @userId " +
-                    $"AND guest_user_id IN ({SubSqlValidUsers}) ",
-                    new { cDate = date.Date, userId })
                 .ConfigureAwait(false);
         }
 
@@ -123,6 +113,42 @@ namespace KikoleApi.Repositories
                        endDate = endDate.Date
                    })
                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ChallengeDto>> GetPendingChallengesByHostUserAsync(ulong userId)
+        {
+            return await ExecuteReaderAsync<ChallengeDto>(
+                    "SELECT * FROM challenges " +
+                    "WHERE host_user_id = @userId " +
+                    "AND is_accepted IS NULL " +
+                    $"AND guest_user_id IN ({SubSqlValidUsers})",
+                    new { userId })
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ChallengeDto>> GetUsersFutureChallengesAsync(ulong hostUserId, ulong guestUserId)
+        {
+            return await ExecuteReaderAsync<ChallengeDto>(
+                    "SELECT * FROM challenges " +
+                    "WHERE challenge_date > DATE(NOW()) " +
+                    "AND guest_user_id = @guestUserId " +
+                    "AND host_user_id = @hostUserId",
+                    new { guestUserId, hostUserId })
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<DateTime>> GetBookedChallengesAsync(ulong userId)
+        {
+            return await ExecuteReaderAsync<DateTime>(
+                    "SELECT challenge_date " +
+                    "FROM challenges " +
+                    "WHERE (" +
+                    $"   (host_user_id = @userId AND guest_user_id IN ({SubSqlValidUsers})) " +
+                    $"   OR (guest_user_id = @userId AND host_user_id IN ({SubSqlValidUsers}))" +
+                    ") AND is_accepted = 1 " +
+                    "AND challenge_date > DATE(NOW())",
+                    new { userId })
+                .ConfigureAwait(false);
         }
     }
 }

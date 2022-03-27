@@ -17,7 +17,7 @@ namespace KikoleApi.Models
             ? _dto.IsAccepted > 0
             : default(bool?);
 
-        public DateTime ChallengeDate => _dto.ChallengeDate;
+        public DateTime? ChallengeDate => _dto.ChallengeDate;
 
         public int HostPointsDelta { get; }
 

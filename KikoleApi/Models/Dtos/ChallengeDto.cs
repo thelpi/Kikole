@@ -10,7 +10,7 @@ namespace KikoleApi.Models.Dtos
 
         public byte? IsAccepted { get; set; }
 
-        public DateTime ChallengeDate { get; set; }
+        public DateTime? ChallengeDate { get; set; }
 
         public byte PointsRate { get; set; }
     }

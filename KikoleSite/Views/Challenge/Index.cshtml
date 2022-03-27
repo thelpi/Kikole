@@ -19,90 +19,99 @@ else
     <div>No challenge today.</div>
 }
 
-@if (Model.AcceptedChallenge != null)
+<h3>Scheduled challenges</h3>
+@if (Model.AcceptedChallenges?.Count > 0)
 {
-    <h3>Accepted challenge</h3>
-    <div>You have a challenge against <span style="color: crimson">@Model.AcceptedChallenge.OpponentLogin</span> tomorrow, for <span style="color: crimson">@Model.AcceptedChallenge.PointsRate</span>% of your points!</div>
+    <table style="margin-top: 10px">
+        <thead>
+            <tr>
+                <th style="width: 100px">Date</th>
+                <th style="width: 180px">Opponent</th>
+                <th style="width: 80px">Initiated?</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var i = 0;
+            }
+            @foreach (var c in Model.AcceptedChallenges)
+            {
+                var background = i % 2 == 0 ? "white" : "azure";
+                <tr style="background-color: @background">
+                    <td>@c.ChallengeDate.Value.ToString("yyyy-MM-dd")</td>
+                    <td style="font: bold">@c.OpponentLogin</td>
+                    <td>@c.Initiated.ToYesNo()</td>
+                </tr>
+                i++;
+            }
+        </tbody>
+    </table>
 }
 else
 {
-    <h3>Opponents who have challenged you</h3>
-    @if (Model.WaitingForResponseChallenges?.Count > 0)
-    {
-        <form method="post" action="/Challenge">
-            <div>
-                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
-                <input value="Accept" type="submit" name="submit-acceptchallenge" />
-                <input value="Refuse" type="submit" name="submit-refusechallenge" />
-            </div>
-        </form>
-    }
-    else
-    {
-        <div>Nobody has challenged you for tomorrow</div>
-    }
-
-    <h3>Challenges you've requested</h3>
-    if (Model.RequestedChallenges?.Count > 0)
-    {
-        <form method="post" action="/Challenge">
-            <div>
-                @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
-                <input value="Cancel" type="submit" name="submit-cancelchallenge" />
-            </div>
-        </form>
-    }
-    else
-    {
-        <div>You've challenged nobody for tomorrow</div>
-    }
-
-    <h3>Challenge someone</h3>
-    @if (System.DateTime.Now.Hour == 23)
-    {
-        <div>Challenges are closed after 11PM!</div>
-    }
-    else
-    {
-        <form method="post" action="/Challenge">
-            <div>
-                <div style="margin-top: 5px">
-                    <div>
-                        <label>Opponent:</label>
-                    </div>
-                    @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
-                </div>
-                <div style="margin-top: 5px">
-                    <div>
-                        <label>Points rate:</label>
-                    </div>
-                    @Html.DropDownListFor(m => m.PointsRate, Enumerable.Range(1, 10).Select(i => new SelectListItem((i * 10).ToString(), (i * 10).ToString())), new { @style = "width: 75px" })
-                </div>
-                <div style="font-size: small">(% of your tomorrow score you're willing to gamble)</div>
-                <div style="margin-top: 5px">
-                    <input value="Challenge" type="submit" name="submit-createchallenge" />
-                </div>
-            </div>
-        </form>
-    }
+    <div>No challenge are scheduled</div>
 }
 
+<h3>Opponents who have requested to challenge you</h3>
+@if (Model.WaitingForResponseChallenges?.Count > 0)
+{
+    <form method="post" action="/Challenge">
+        <div>
+            @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
+            <input value="Accept" type="submit" name="submit-acceptchallenge" />
+            <input value="Refuse" type="submit" name="submit-refusechallenge" />
+        </div>
+    </form>
+}
+else
+{
+    <div>Nobody has requested to challenge you</div>
+}
+
+<h3>Challenges you've requested</h3>
+@if (Model.RequestedChallenges?.Count > 0)
+{
+    <form method="post" action="/Challenge">
+        <div>
+            @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
+            <input value="Cancel" type="submit" name="submit-cancelchallenge" />
+        </div>
+    </form>
+}
+else
+{
+    <div>You've challenged nobody</div>
+}
+
+<h3>Challenge someone</h3>
+<form method="post" action="/Challenge">
+    <div>
+        <div style="margin-top: 5px">
+            <label style="width: 100px">Opponent:</label>
+            @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
+        </div>
+        <div style="margin-top: 5px">
+            <label style="width: 100px">Points rate:</label>
+            @Html.DropDownListFor(m => m.PointsRate, Enumerable.Range(1, 10).Select(i => new SelectListItem((i * 10).ToString(), (i * 10).ToString())), new { @style = "width: 75px" })
+            <span style="font-size: small">(% of your tomorrow score you're willing to gamble)</span>
+        </div>
+        <div style="margin-top: 5px">
+            <input value="Challenge" type="submit" name="submit-createchallenge" />
+        </div>
+    </div>
+</form>
+
 <h3>How challenge works?</h3>
-<p>You target an opponent you think you can <span style="color:crimson">beat tomorrow</span> (ie more points than him/her).</p>
+<p>You target an opponent you think you can <span style="color:crimson">beat</span> (ie more points than him/her).</p>
 <p>You have to set the percentage of points you <span style="color:crimson">gamble</span> in the challenge (see example below).</p>
-<p>If he/she accepts the challenge (he/she has until midnight to do so), you're on!</p>
+<p>If he/she accepts the challenge, you're on!</p>
+<p>The challenge is scheduled for the next day where you and your opponent are free of any other challenge.</p>
+<p>Also, challenge cannot occurs a day where you or your opponent have submitted the daily player.</p>
 <p>Points won/lost during a challenge are computed <span style="color:crimson">after both users</span> have submitted the correct answer for the day.</p>
 <p>In case of withdrawal (ie the opponent don't find the daily player), the winner takes <span style="color:crimson">@Model.DefaultPoints</span> points from the opponent's global score.</p>
 <p>If both users withdraw, nothing happens.</p>
-<p>You can't challenge in the following situations:</p>
-<ul>
-    <li>You've submitted tomorrow's player</li>
-    <li>Your opponent has submitted tomorrow's player</li>
-    <li>Your opponent has already accepted a challenge for tomorrow</li>
-    <li>You've already accepted a challenge for tomorrow</li>
-    <li>It's past 11PM</li>
-</ul>
-<p>Example : user X challenges Y for 40% of his/her score</p>
+<p>Example of score:</p>
+<p>user X challenges Y for 40% of his/her score</p>
 <p>The next day, X scores 800 points and Y 900 points, so Y wins.</p>
 <p>X final score is 480 points (800 * 0.6)</p>
 <p>Y final score is 1220 points (900 + 800 * 0.4)</p>
@@ -130,7 +139,7 @@ else
                     ? (c.HostPointsDelta > 0 ? "forestgreen" : "crimson")
                     : "black";
                 <tr style="background-color: @background">
-                    <td>@c.ChallengeDate.ToString("yyyy-MM-dd")</td>
+                    <td>@c.ChallengeDate.Value.ToString("yyyy-MM-dd")</td>
                     <td style="font: bold">@c.OpponentLogin</td>
                     <td>@c.Initiated.ToYesNo()</td>
                     <td style="font: bold; color: @color">@c.HostPointsDelta pts</td>

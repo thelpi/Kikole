@@ -51,9 +51,6 @@ namespace KikoleApi.Controllers
             if (request.GuestUserId == userId)
                 return Conflict("You can't challenge yourself");
 
-            if (_clock.Now.Hour == 23)
-                return Conflict("Can't create challenge; it's past 11PM.");
-
             var hostUser = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
@@ -74,37 +71,15 @@ namespace KikoleApi.Controllers
             if (hostUser.UserTypeId == (ulong)UserTypes.Administrator)
                 return Conflict("Can't create challenge; opponent account is administrator");
 
-            var challengeDate = _clock.Now.AddDays(1).Date;
-
-            var playerOfTomorrow = await _playerRepository
-                .GetPlayerOfTheDayAsync(challengeDate)
+            var challengeAlready = await _challengeRepository
+                .GetUsersFutureChallengesAsync(userId, request.GuestUserId)
                 .ConfigureAwait(false);
 
-            if (playerOfTomorrow.CreationUserId == userId)
-                return Conflict("Can't create challenge; next player is yours");
-
-            if (playerOfTomorrow.CreationUserId == request.GuestUserId)
-                return Conflict("Can't create challenge; next player is his");
-
-            var hostChallenges = await _challengeRepository
-                .GetChallengesByUserAndByDateAsync(userId, challengeDate)
-                .ConfigureAwait(false);
-
-            if (hostChallenges.Any(c => c.IsAccepted > 0))
-                return Conflict("Can't create challenge; you're already in a challenge");
-
-            if (hostChallenges.Any(c => c.GuestUserId == request.GuestUserId))
-                return Conflict("Can't create challenge; already a request to this opponent");
-
-            var guestChallenges = await _challengeRepository
-                .GetChallengesByUserAndByDateAsync(request.GuestUserId, challengeDate)
-                .ConfigureAwait(false);
-
-            if (guestChallenges.Any(c => c.IsAccepted > 0))
-                return Conflict("Can't create challenge; opponent is already in a challenge");
+            if (challengeAlready.Count > 0)
+                return Conflict("Can't create challenge; a challenge against this opponent is already planned or requested");
 
             var challengeId = await _challengeRepository
-                .CreateChallengeAsync(request.ToDto(userId, challengeDate))
+                .CreateChallengeAsync(request.ToDto(userId))
                 .ConfigureAwait(false);
 
             return Created($"challenges/{challengeId}", null);
@@ -138,78 +113,64 @@ namespace KikoleApi.Controllers
             if (!isCancel && challenge.GuestUserId != userId)
                 return Forbid();
 
-            if (challenge.IsAccepted.HasValue)
+            if (isCancel && isAccepted)
+                return Forbid();
+
+            if (isCancel && challenge.IsAccepted.HasValue)
+                return Conflict("You can't cancel an accepted challenge");
+
+            if (!isCancel && challenge.IsAccepted.HasValue)
+                return Conflict("You've already respond to this challenge");
+
+            if (!isAccepted)
             {
-                if (isCancel)
-                    return Conflict("You can't cancel an accepted challenge");
-                else
-                    return Conflict("You've already respond to this challenge");
+                // date is irrelevant in this case
+                await _challengeRepository
+                   .RespondToChallengeAsync(id, isAccepted, _clock.Now)
+                   .ConfigureAwait(false);
+
+                return NoContent();
             }
-            
-            if (isAccepted)
+
+            var hostUser = await _userRepository
+                .GetUserByIdAsync(challenge.HostUserId)
+                .ConfigureAwait(false);
+
+            if (hostUser == null)
             {
-                if (isCancel)
-                    return Forbid();
+                // date is irrelevant in this case
+                await _challengeRepository
+                   .RespondToChallengeAsync(id, isAccepted, _clock.Now)
+                   .ConfigureAwait(false);
 
-                var hostUser = await _userRepository
-                    .GetUserByIdAsync(challenge.HostUserId)
-                    .ConfigureAwait(false);
-
-                var conflictReasons = new List<string>();
-
-                if (hostUser == null)
-                    conflictReasons.Add("Opponent is an invalid account");
-
-                var challengeDate = _clock.Now.AddDays(1).Date;
-
-                if (challenge.ChallengeDate != challengeDate)
-                    conflictReasons.Add("Challenge is obsolete");
-
-                var guestChallenges = await _challengeRepository
-                    .GetChallengesByUserAndByDateAsync(challenge.GuestUserId, challengeDate)
-                    .ConfigureAwait(false);
-
-                var hostChallenges = await _challengeRepository
-                    .GetChallengesByUserAndByDateAsync(challenge.HostUserId, challengeDate)
-                    .ConfigureAwait(false);
-
-                // this is a security: it should not happen as
-                // other challenges are refused when one is accepted
-                if (guestChallenges.Any(c => c.IsAccepted > 0))
-                    conflictReasons.Add("You've already accepted a challenge");
-
-                // this is a security: it should not happen as
-                // other challenges are refused when one is accepted
-                if (hostChallenges.Any(c => c.IsAccepted > 0))
-                    conflictReasons.Add("Opponent already accepted a challenge");
-
-                if (conflictReasons.Count > 0)
-                {
-                    // cancels the challenge
-                    await _challengeRepository
-                        .RespondToChallengeAsync(id, false)
-                        .ConfigureAwait(false);
-
-                    return Conflict(string.Join("; ", conflictReasons));
-                }
-
-                foreach (var c in guestChallenges.Where(gc => !gc.IsAccepted.HasValue && gc.Id != id))
-                {
-                    await _challengeRepository
-                        .RespondToChallengeAsync(c.Id, false)
-                        .ConfigureAwait(false);
-                }
-
-                foreach (var c in hostChallenges.Where(hc => !hc.IsAccepted.HasValue && hc.Id != id))
-                {
-                    await _challengeRepository
-                        .RespondToChallengeAsync(c.Id, false)
-                        .ConfigureAwait(false);
-                }
+                return Conflict("Opponent is an invalid account");
             }
+
+            var hostDates = await _challengeRepository
+                .GetBookedChallengesAsync(userId)
+                .ConfigureAwait(false);
+
+            var guestDates = await _challengeRepository
+                .GetBookedChallengesAsync(challenge.GuestUserId)
+                .ConfigureAwait(false);
+
+            var challengeDate = _clock.Now.Date;
+            Models.Dtos.PlayerDto p;
+            do
+            {
+                challengeDate = challengeDate.AddDays(1);
+
+                p = await _playerRepository
+                    .GetPlayerOfTheDayAsync(challengeDate)
+                    .ConfigureAwait(false);
+            }
+            while (hostDates.Contains(challengeDate)
+                || guestDates.Contains(challengeDate)
+                || p.CreationUserId == challenge.GuestUserId
+                || p.CreationUserId == challenge.HostUserId);
 
             await _challengeRepository
-                .RespondToChallengeAsync(id, isAccepted)
+                .RespondToChallengeAsync(id, isAccepted, challengeDate)
                 .ConfigureAwait(false);
 
             if (isAccepted)
@@ -254,39 +215,21 @@ namespace KikoleApi.Controllers
             if (userId == 0)
                 return BadRequest();
 
-            var challenges = await _challengeRepository
+            var dtos = await _challengeRepository
                 .GetPendingChallengesByGuestUserAsync(userId)
                 .ConfigureAwait(false);
 
-            var challengeDate = _clock.Now.AddDays(1).Date;
-
-            var okChallenges = new List<Challenge>();
-            var koChallenges = new List<ulong>();
-            foreach (var challenge in challenges)
+            var challenges = new List<Challenge>();
+            foreach (var challenge in dtos)
             {
-                if (challenge.ChallengeDate != challengeDate)
-                    koChallenges.Add(challenge.Id);
-                else
-                {
-                    var hostUser = await _userRepository
-                        .GetUserByIdAsync(challenge.HostUserId)
-                        .ConfigureAwait(false);
-
-                    if (hostUser == null)
-                        koChallenges.Add(challenge.Id);
-                    else
-                        okChallenges.Add(new Challenge(challenge, hostUser.Login, userId));
-                }
-            }
-
-            foreach (var id in koChallenges)
-            {
-                await _challengeRepository
-                    .RespondToChallengeAsync(id, false)
+                var hostUser = await _userRepository
+                    .GetUserByIdAsync(challenge.HostUserId)
                     .ConfigureAwait(false);
+
+                challenges.Add(new Challenge(challenge, hostUser.Login, userId));
             }
 
-            return Ok(okChallenges);
+            return Ok(challenges);
         }
 
         [HttpGet("requested-challenges")]
@@ -299,47 +242,39 @@ namespace KikoleApi.Controllers
             if (userId == 0)
                 return BadRequest();
 
-            var challenges = await _challengeRepository
-                .GetChallengesByUserAndByDateAsync(userId, _clock.Now.AddDays(1).Date)
+            var dtos = await _challengeRepository
+                .GetPendingChallengesByHostUserAsync(userId)
                 .ConfigureAwait(false);
 
-            var okChallenges = new List<Challenge>();
-            foreach (var c in challenges.Where(c => c.HostUserId == userId && c.IsAccepted == null))
+            var challenges = new List<Challenge>();
+            foreach (var c in dtos)
             {
                 var guestUser = await _userRepository
                     .GetUserByIdAsync(c.GuestUserId)
                     .ConfigureAwait(false);
 
-                if (guestUser == null)
-                {
-                    await _challengeRepository
-                        .RespondToChallengeAsync(c.Id, false)
-                        .ConfigureAwait(false);
-                }
-                else
-                    okChallenges.Add(new Challenge(c, guestUser.Login, userId));
+                challenges.Add(new Challenge(c, guestUser.Login, userId));
             }
 
-            return Ok(okChallenges);
+            return Ok(challenges);
         }
 
         [HttpGet("accepted-challenges")]
         [AuthenticationLevel(UserTypes.StandardUser)]
-        [ProducesResponseType(typeof(Challenge), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Challenge>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<Challenge>> GetAcceptedChallengeAsync(
-            [FromQuery] ulong userId, [FromQuery] DateTime challengeDate)
+        public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetAcceptedChallengeAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
                 return BadRequest();
 
-            var challenges = await _challengeRepository
-                .GetChallengesByUserAndByDateAsync(userId, challengeDate.Date)
+            var dtos = await _challengeRepository
+                .GetAcceptedChallengesAsync(_clock.Now, null)
                 .ConfigureAwait(false);
 
-            Challenge okChallenge = null;
-            foreach (var challenge in challenges.Where(c => c.IsAccepted > 0))
+            var challenges = new List<Challenge>();
+            foreach (var challenge in dtos.Where(c => c.GuestUserId == userId || c.HostUserId == userId))
             {
                 var opponentUser = await _userRepository
                     .GetUserByIdAsync(userId == challenge.HostUserId
@@ -347,17 +282,14 @@ namespace KikoleApi.Controllers
                         : challenge.HostUserId)
                     .ConfigureAwait(false);
 
-                if (opponentUser == null || okChallenge != null)
-                {
-                    await _challengeRepository
-                        .RespondToChallengeAsync(challenge.Id, false)
-                        .ConfigureAwait(false);
-                }
-                else
-                    okChallenge = new Challenge(challenge, opponentUser.Login, challenge.HostUserId);
+                challenges.Add(new Challenge(challenge, opponentUser.Login, userId));
             }
 
-            return Ok(okChallenge);
+            challenges = challenges
+                .OrderBy(c => c.ChallengeDate)
+                .ToList();
+
+            return Ok(challenges);
         }
 
         [HttpGet("history-challenges")]
@@ -417,8 +349,9 @@ namespace KikoleApi.Controllers
         {
             foreach (var c in dtos)
             {
+                // ChallengeDate.Value is safe here
                 var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(c.ChallengeDate)
+                    .GetLeadersAtDateAsync(c.ChallengeDate.Value)
                     .ConfigureAwait(false);
 
                 var opponentUserId = getOpponentUserIdFunc(c);
@@ -458,7 +391,7 @@ namespace KikoleApi.Controllers
                 await _badgeRepository
                     .InsertUserBadgeAsync(new Models.Dtos.UserBadgeDto
                     {
-                        GetDate = challenge.ChallengeDate.AddDays(-1),
+                        GetDate = _clock.Now.Date,
                         BadgeId = (ulong)badge,
                         UserId = userFunc(challenge)
                     })

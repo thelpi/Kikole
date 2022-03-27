@@ -91,7 +91,7 @@ namespace KikoleSite
         
         Task<IReadOnlyCollection<Challenge>> GetRequestedChallengesAsync(string authToken);
         
-        Task<Challenge> GetAcceptedChallengeAsync(DateTime challengeDate, string authToken);
+        Task<IReadOnlyCollection<Challenge>> GetAcceptedChallengesAsync(string authToken);
 
         Task<IReadOnlyCollection<Challenge>> GetChallengesHistoryAsync(DateTime? fromDate, DateTime? toDate, string authToken);
 
