@@ -32,6 +32,7 @@ namespace KikoleApi.Models
             IEnumerable<UserDto> users,
             IEnumerable<PlayerClubDto> playerClubs,
             IEnumerable<ClubDto> playerClubsDetails)
+            : base(users.Single(u => u.Id == p.CreationUserId), p)
         {
             Id = p.Id;
             ProposalDate = p.ProposalDate;
@@ -43,8 +44,6 @@ namespace KikoleApi.Models
                 .ToList();
             Clue = p.Clue;
             Country = (Countries)p.CountryId;
-            Login = users.Single(u => u.Id == p.CreationUserId).Login;
-            Name = p.Name;
             Position = (Positions)p.PositionId;
             YearOfBirth = p.YearOfBirth;
         }

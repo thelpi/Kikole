@@ -75,28 +75,16 @@ namespace KikoleApi.Controllers
                     if (hostLead == null)
                         leaders.Add(new Leader(challenge.HostUserId, pointsDelta, users));
                     else
-                        leaders.Single(l => l.UserId == hostLead.UserId).TotalPoints += pointsDelta;
+                        leaders.Single(l => l.UserId == hostLead.UserId).WithPointsFromChallenge(pointsDelta, true);
 
                     if (guestLead == null)
                         leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta, users));
                     else
-                        leaders.Single(l => l.UserId == guestLead.UserId).TotalPoints -= pointsDelta;
+                        leaders.Single(l => l.UserId == guestLead.UserId).WithPointsFromChallenge(pointsDelta, false);
                 }
             }
 
-            leaders = sort == LeaderSorts.TotalPoints
-                ? leaders.OrderByDescending(l => l.TotalPoints).ThenBy(l => l.BestTime.TotalMinutes).ToList()
-                : leaders.OrderBy(l => l.BestTime.TotalMinutes).ThenBy(l => l.TotalPoints).ToList();
-
-            leaders = leaders
-                .Select((l, i) =>
-                {
-                    l.Position = i + 1;
-                    return l;
-                })
-                .ToList();
-
-            return Ok(leaders);
+            return Ok(Leader.DoubleSortWithPosition(leaders, sort));
         }
 
         [HttpPut("leaders-computing")]
@@ -228,10 +216,10 @@ namespace KikoleApi.Controllers
                         if (leadMatch == null)
                             leaders.Add(new Leader(challenge.HostUserId, pointsDelta, users));
                         else
-                            leadMatch.TotalPoints += pointsDelta;
+                            leadMatch.WithPointsFromChallenge(pointsDelta, true);
                     }
                     else
-                        leaders.Single(l => l.UserId == hostLead.UserId).TotalPoints += pointsDelta;
+                        leaders.Single(l => l.UserId == hostLead.UserId).WithPointsFromChallenge(pointsDelta, true);
 
                     if (guestLead == null)
                     {
@@ -239,27 +227,14 @@ namespace KikoleApi.Controllers
                         if (leadMatch == null)
                             leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta, users));
                         else
-                            leadMatch.TotalPoints += pointsDelta;
+                            leadMatch.WithPointsFromChallenge(pointsDelta, false);
                     }
                     else
-                        leaders.Single(l => l.UserId == guestLead.UserId).TotalPoints -= pointsDelta;
+                        leaders.Single(l => l.UserId == guestLead.UserId).WithPointsFromChallenge(pointsDelta, false);
                 }
             }
 
-            switch (leaderSort)
-            {
-                case LeaderSorts.SuccessCount:
-                    leaders = leaders.SetPositions(l => l.SuccessCount, true, (l, i) => l.Position = i);
-                    break;
-                case LeaderSorts.BestTime:
-                    leaders = leaders.SetPositions(l => l.BestTime, false, (l, i) => l.Position = i);
-                    break;
-                case LeaderSorts.TotalPoints:
-                    leaders = leaders.SetPositions(l => l.TotalPoints, true, (l, i) => l.Position = i);
-                    break;
-            }
-
-            return Ok(leaders);
+            return Ok(Leader.SortWithPosition(leaders, leaderSort));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
@@ -11,13 +12,13 @@ namespace KikoleApi.Models
 
         public string Login { get; }
 
-        public int TotalPoints { get; internal set; }
-
         public TimeSpan BestTime { get; }
 
         public int SuccessCount { get; }
 
-        public int Position { get; internal set; }
+        public int TotalPoints { get; private set; }
+
+        public int Position { get; private set; }
 
         internal Leader(ulong userId, int points,
             IReadOnlyCollection<UserDto> users)
@@ -67,6 +68,39 @@ namespace KikoleApi.Models
             }
 
             return this;
+        }
+
+        internal Leader WithPointsFromChallenge(int challengePoints, bool hostWin)
+        {
+            TotalPoints += challengePoints * (hostWin ? 1 : -1);
+            return this;
+        }
+
+        internal static IReadOnlyCollection<Leader> DoubleSortWithPosition(
+            IEnumerable<Leader> leaders, LeaderSorts sort)
+        {
+            return sort == LeaderSorts.TotalPoints
+                ? leaders.SetPositions(l => l.TotalPoints, l => l.BestTime.TotalMinutes, true, false, (l, i) => l.Position = i)
+                : leaders.SetPositions(l => l.BestTime.TotalMinutes, l => l.TotalPoints, false, true, (l, i) => l.Position = i);
+        }
+
+        internal static IReadOnlyCollection<Leader> SortWithPosition(
+            IEnumerable<Leader> leaders, LeaderSorts sort)
+        {
+            switch (sort)
+            {
+                case LeaderSorts.SuccessCount:
+                    leaders = leaders.SetPositions(l => l.SuccessCount, true, (l, i) => l.Position = i);
+                    break;
+                case LeaderSorts.BestTime:
+                    leaders = leaders.SetPositions(l => l.BestTime, false, (l, i) => l.Position = i);
+                    break;
+                case LeaderSorts.TotalPoints:
+                    leaders = leaders.SetPositions(l => l.TotalPoints, true, (l, i) => l.Position = i);
+                    break;
+            }
+
+            return leaders.ToList();
         }
     }
 }

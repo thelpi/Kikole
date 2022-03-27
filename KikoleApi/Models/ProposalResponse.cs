@@ -9,19 +9,21 @@ namespace KikoleApi.Models
 {
     public class ProposalResponse
     {
-        public bool Successful { get; set; }
+        private readonly List<UserBadge> _badges = new List<UserBadge>();
 
-        public object Value { get; set; }
+        public bool Successful { get; }
 
-        public string Tip { get; set; }
+        public object Value { get; }
 
-        public int LostPoints { get; set; }
+        public string Tip { get; }
+
+        public int LostPoints { get; }
+
+        public ProposalTypes ProposalType { get; }
 
         public int TotalPoints { get; private set; }
 
-        public ProposalTypes ProposalType { get; set; }
-
-        public IReadOnlyCollection<UserBadge> CollectedBadges { get; set; }
+        public IReadOnlyCollection<UserBadge> CollectedBadges => _badges;
 
         internal bool IsWin => ProposalType == ProposalTypes.Name && Successful;
 
@@ -106,6 +108,11 @@ namespace KikoleApi.Models
         {
             TotalPoints = Math.Max(0, sourcePoints - (duplicate ? 0 : LostPoints));
             return this;
+        }
+
+        internal void AddBadge(UserBadge badge)
+        {
+            _badges.Add(badge);
         }
     }
 }

@@ -69,15 +69,7 @@ namespace KikoleApi.Controllers
                 .GetUserByIdAsync(p.CreationUserId)
                 .ConfigureAwait(false);
 
-            return Ok(new PlayerCreator
-            {
-                Login = u.UserTypeId == (ulong)UserTypes.PowerUser
-                    ? u.Login
-                    : null,
-                Name = p.CreationUserId == userId
-                    ? p.Name
-                    : null
-            });
+            return base.Ok(new PlayerCreator(userId, p, u));
         }
 
         [HttpGet("known-players")]
@@ -309,44 +301,14 @@ namespace KikoleApi.Controllers
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
-                var singleStat = new DailyUserStat
-                {
-                    Date = currentDate,
-                    Answer = pDay.Name,
-                    Attempt = proposals.Count > 0,
-                    Points = meLeader != null
-                        ? meLeader.Points
-                        : default(int?),
-                    Time = meLeader != null
-                        ? new TimeSpan(0, meLeader.Time, 0)
-                        : default(TimeSpan?),
-                    PointsPosition = GetUserPositionInLeaders(userId,
-                        leaders.OrderByDescending(t => t.Points)),
-                    TimePosition = GetUserPositionInLeaders(userId,
-                        leaders.OrderBy(t => t.Time))
-                };
+                var singleStat = new DailyUserStat(userId, currentDate, pDay.Name,
+                    proposals.Count > 0, leaders, meLeader);
 
                 stats.Add(singleStat);
                 currentDate = currentDate.AddDays(1);
             }
 
-            var us = new UserStat
-            {
-                Attempts = stats.Count(s => s.Attempt),
-                AverageTime = stats.Where(s => s.Time.HasValue).Select(s => s.Time.Value).Average(),
-                BestPoints = stats.Any(s => s.Points.HasValue)
-                    ? stats.Where(s => s.Points.HasValue).Max(s => s.Points.Value)
-                    : default(int?),
-                BestTime = stats.Any(s => s.Time.HasValue)
-                    ? stats.Where(s => s.Time.HasValue).Min(s => s.Time.Value)
-                    : default(TimeSpan?),
-                Login = user.Login,
-                Stats = stats,
-                Successes = stats.Count(s => s.Points.HasValue),
-                TotalPoints = stats.Sum(s => s.Points.GetValueOrDefault(0))
-            };
-
-            return Ok(us);
+            return Ok(new UserStat(stats, user.Login));
         }
 
         [HttpGet("/badges")]
@@ -545,26 +507,6 @@ namespace KikoleApi.Controllers
                         .ConfigureAwait(false);
                 }
             }
-        }
-
-        private static int? GetUserPositionInLeaders(ulong userId,
-            IOrderedEnumerable<LeaderDto> orderedLeaders)
-        {
-            var tIndex = -1;
-            var i = 0;
-            foreach (var orderedLeader in orderedLeaders)
-            {
-                if (orderedLeader.UserId == userId)
-                {
-                    tIndex = i + 1;
-                    break;
-                }
-                i++;
-            }
-
-            return tIndex == -1
-                ? default(int?)
-                : tIndex;
         }
     }
 }

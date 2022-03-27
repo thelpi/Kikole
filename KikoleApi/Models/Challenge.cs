@@ -7,9 +7,9 @@ namespace KikoleApi.Models
 {
     public class Challenge
     {
-        public ulong Id => _dto.Id;
+        private ChallengeDto _dto;
 
-        public string OpponentLogin { get; }
+        public ulong Id => _dto.Id;
 
         public byte PointsRate => _dto.PointsRate;
 
@@ -17,13 +17,13 @@ namespace KikoleApi.Models
             ? _dto.IsAccepted > 0
             : default(bool?);
 
-        public int HostPointsDelta { get; }
-
         public DateTime ChallengeDate => _dto.ChallengeDate;
 
-        public bool Initiated { get; }
+        public int HostPointsDelta { get; }
 
-        private ChallengeDto _dto;
+        public string OpponentLogin { get; }
+
+        public bool Initiated { get; }
 
         internal Challenge(ChallengeDto dto, string login, ulong userId)
         {
