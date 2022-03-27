@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
@@ -34,17 +35,20 @@ namespace KikoleApi.Repositories
                     "   SELECT id FROM users " +
                     "   WHERE user_type_id != @adminId AND is_disabled = 0" +
                     ")",
-                    new { badgeId, adminId = (ulong)Models.UserTypes.Administrator })
+                    new
+                    {
+                        badgeId,
+                        adminId = (ulong)Models.UserTypes.Administrator
+                    })
                 .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateTime date)
         {
-            return await GetDtosAsync<UserBadgeDto>(
-                    "user_badges",
-                    ("badge_id", badgeId),
-                    ("get_date", date.Date))
+            var userBadges = await GetUsersWithBadgeAsync(badgeId)
                 .ConfigureAwait(false);
+
+            return userBadges.Where(_ => _.GetDate == date.Date).ToList();
         }
 
         public async Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId)
