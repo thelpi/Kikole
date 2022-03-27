@@ -324,14 +324,20 @@ namespace KikoleApi.Controllers
                         var collectedBadgesFinal = new List<UserBadge>();
                         foreach (var badge in collectedBadges)
                         {
-                            collectedBadgesFinal.Add(new UserBadge(
-                                badgesDto.Single(b => b.Id == (ulong)badge),
-                                new UserBadgeDto
-                                {
-                                    BadgeId = (ulong)badge,
-                                    GetDate = request.ProposalDate.Date,
-                                    UserId = userId
-                                }));
+                            var b = badgesDto.Single(_ => _.Id == (ulong)badge);
+
+                            var ub = new UserBadgeDto
+                            {
+                                BadgeId = (ulong)badge,
+                                GetDate = request.ProposalDate.Date,
+                                UserId = userId
+                            };
+
+                            var users = await _badgeRepository
+                                .GetUsersWithBadgeAsync((ulong)badge)
+                                .ConfigureAwait(false);
+
+                            collectedBadgesFinal.Add(new UserBadge(b, ub, users.Count));
                         }
 
                         response.CollectedBadges = collectedBadgesFinal;

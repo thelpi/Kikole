@@ -4,22 +4,22 @@ namespace KikoleApi.Models
 {
     public class Badge
     {
-        public ulong Id { get; set; }
+        public ulong Id { get; }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public string Description { get; set; }
+        public string Description { get; }
 
-        public ulong Users { get; set; }
+        public int Users { get; }
 
-        public bool Hidden { get; set; }
+        public bool Hidden { get; }
 
-        internal Badge(BadgeDto dto)
+        internal Badge(BadgeDto dto, int usersCount)
         {
             Id = dto.Id;
             Name = dto.Name;
             Description = dto.Description;
-            Users = dto.Users;
+            Users = usersCount;
             Hidden = dto.Hidden > 0;
         }
     }

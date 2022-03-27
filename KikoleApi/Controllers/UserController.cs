@@ -107,19 +107,24 @@ namespace KikoleApi.Controllers
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
-            var uBadges = await _badgeRepository
+            var dtos = await _badgeRepository
                 .GetUserBadgesAsync(userId)
                 .ConfigureAwait(false);
 
-            var badgesFull = uBadges
-                .Select(b =>
-                {
-                    return new UserBadge(
-                        badges.Single(_ => _.Id == b.BadgeId),
-                        b);
-                })
+            var badgesFull = new List<UserBadge>();
+            foreach (var dto in dtos)
+            {
+                var users = await _badgeRepository
+                    .GetUsersWithBadgeAsync(dto.BadgeId)
+                    .ConfigureAwait(false);
+
+                var b = badges.Single(_ => _.Id == dto.BadgeId);
+                badgesFull.Add(new UserBadge(b, dto, users.Count));
+            }
+
+            badgesFull = badgesFull
                 .OrderByDescending(b => b.Hidden)
-                .OrderBy(b => b.Users)
+                .ThenBy(b => b.Users)
                 .ToList();
 
             return Ok(badgesFull);
@@ -353,8 +358,17 @@ namespace KikoleApi.Controllers
                 .GetBadgesAsync(false)
                 .ConfigureAwait(false);
 
-            var badges = dtos
-                .Select(b => new Badge(b))
+            var badges = new List<Badge>(dtos.Count);
+            foreach (var dto in dtos)
+            {
+                var users = await _badgeRepository
+                   .GetUsersWithBadgeAsync(dto.Id)
+                   .ConfigureAwait(false);
+
+                badges.Add(new Badge(dto, users.Count));
+            }
+
+            badges = badges
                 .OrderByDescending(b => b.Users)
                 .ToList();
 

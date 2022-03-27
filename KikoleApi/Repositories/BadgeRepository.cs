@@ -27,9 +27,14 @@ namespace KikoleApi.Repositories
 
         public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadgeAsync(ulong badgeId)
         {
-            return await GetDtosAsync<UserBadgeDto>(
-                    "user_badges",
-                    ("badge_id", badgeId))
+            return await ExecuteReaderAsync<UserBadgeDto>(
+                    "SELECT * FROM user_badges " +
+                    "WHERE badge_id = @badgeId " +
+                    "AND user_id IN (" +
+                    "   SELECT id FROM users " +
+                    "   WHERE user_type_id != @adminId AND is_disabled = 0" +
+                    ")",
+                    new { badgeId, adminId = (ulong)Models.UserTypes.Administrator })
                 .ConfigureAwait(false);
         }
 
@@ -61,11 +66,6 @@ namespace KikoleApi.Repositories
                     ("get_date", userBadge.GetDate.Date),
                     ("user_id", userBadge.UserId))
                 .ConfigureAwait(false);
-
-            await ExecuteNonQueryAsync(
-                    "UPDATE badges SET users = users + 1 WHERE id = @BadgeId",
-                    new { userBadge.BadgeId })
-                .ConfigureAwait(false);
         }
 
         public async Task RemoveUserBadgeAsync(UserBadgeDto userBadge)
@@ -73,11 +73,6 @@ namespace KikoleApi.Repositories
             await ExecuteNonQueryAsync(
                     "DELETE FROM user_badges WHERE badge_id = @BadgeId AND user_id = @UserId",
                     new { userBadge.BadgeId, userBadge.UserId })
-                .ConfigureAwait(false);
-
-            await ExecuteNonQueryAsync(
-                    "UPDATE badges SET users = users - 1 WHERE id = @BadgeId",
-                    new { userBadge.BadgeId })
                 .ConfigureAwait(false);
         }
 
@@ -93,11 +88,6 @@ namespace KikoleApi.Repositories
         {
             await ExecuteNonQueryAsync(
                     "DELETE FROM user_badges WHERE badge_id = @badgeId",
-                    new { badgeId })
-                .ConfigureAwait(false);
-
-            await ExecuteNonQueryAsync(
-                    "UPDATE badges SET users = 0 WHERE id = @badgeId",
                     new { badgeId })
                 .ConfigureAwait(false);
         }
