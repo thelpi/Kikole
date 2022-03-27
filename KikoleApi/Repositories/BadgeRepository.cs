@@ -31,15 +31,8 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<UserBadgeDto>(
                     "SELECT * FROM user_badges " +
                     "WHERE badge_id = @badgeId " +
-                    "AND user_id IN (" +
-                    "   SELECT id FROM users " +
-                    "   WHERE user_type_id != @adminId AND is_disabled = 0" +
-                    ")",
-                    new
-                    {
-                        badgeId,
-                        adminId = (ulong)Models.UserTypes.Administrator
-                    })
+                    $"AND user_id IN ({SubSqlValidUsers})",
+                    new { badgeId })
                 .ConfigureAwait(false);
         }
 

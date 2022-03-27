@@ -16,6 +16,10 @@ namespace KikoleApi.Repositories
         private readonly string _connectionString;
         private const string ConnectionStringName = "Kikole";
 
+        protected string SubSqlValidUsers => $"SELECT u.id FROM users AS u " +
+            $"WHERE u.user_type_id != {(ulong)Models.UserTypes.Administrator} " +
+            $"AND u.is_disabled = 0";
+
         protected BaseRepository(IConfiguration configuration, IClock clock)
         {
             _connectionString = configuration.GetConnectionString(ConnectionStringName);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
-using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -35,23 +34,8 @@ namespace KikoleApi.Repositories
 
         public async Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesOfTheDayAsync(DateTime date)
         {
-            return await ExecuteReaderAsync<ChallengeDto>(
-                   "SELECT * FROM challenges " +
-                   "WHERE is_accepted = 1 " +
-                   "AND challenge_date = @date " +
-                   $"AND host_user_id IN (" +
-                   "   SELECT id FROM users " +
-                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
-                   ") AND guest_user_id IN (" +
-                   "   SELECT id FROM users " +
-                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
-                   ")",
-                   new
-                   {
-                       adminId = (ulong)UserTypes.Administrator,
-                       date = date.Date
-                   })
-               .ConfigureAwait(false);
+            return await GetAcceptedChallengesAsync(date, date)
+                .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<ChallengeDto>> GetAcceptedChallengesAsync(DateTime? startDate, DateTime? endDate)
@@ -61,16 +45,10 @@ namespace KikoleApi.Repositories
                    "WHERE is_accepted = 1 " +
                    "AND (@startDate IS NULL OR challenge_date >= @startDate) " +
                    "AND (@endDate IS NULL OR challenge_date <= @endDate) " +
-                   $"AND host_user_id IN (" +
-                   "   SELECT id FROM users " +
-                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
-                   ") AND guest_user_id IN (" +
-                   "   SELECT id FROM users " +
-                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
-                   ")",
+                   $"AND host_user_id IN ({SubSqlValidUsers}) " +
+                   $"AND guest_user_id IN ({SubSqlValidUsers})",
                    new
                    {
-                       adminId = (ulong)UserTypes.Administrator,
                        startDate = startDate?.Date,
                        endDate = endDate?.Date
                    })
@@ -82,7 +60,8 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<ChallengeDto>(
                     "SELECT * FROM challenges " +
                     "WHERE guest_user_id = @userId " +
-                    $"AND is_accepted IS NULL",
+                    "AND is_accepted IS NULL " +
+                    $"AND host_user_id IN ({SubSqlValidUsers})",
                     new { userId })
                 .ConfigureAwait(false);
         }
@@ -92,7 +71,13 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<ChallengeDto>(
                     "SELECT * FROM challenges " +
                     "WHERE challenge_date = @cDate " +
-                    "AND (guest_user_id = @userId or host_user_id = @userId)",
+                    "AND guest_user_id = @userId " +
+                    $"AND host_user_id IN ({SubSqlValidUsers}) " +
+                    "UNION ALL " +
+                    "SELECT * FROM challenges " +
+                    "WHERE challenge_date = @cDate " +
+                    "AND host_user_id = @userId " +
+                    $"AND guest_user_id IN ({SubSqlValidUsers}) ",
                     new { cDate = date.Date, userId })
                 .ConfigureAwait(false);
         }
@@ -130,13 +115,9 @@ namespace KikoleApi.Repositories
                    "AND challenge_date <= @endDate " +
                    "AND challenge_date >= @startDate " +
                    $"AND {column1} = @userId " +
-                   $"AND {column2} IN (" +
-                   "   SELECT id FROM users " +
-                   "   WHERE user_type_id != @adminId AND is_disabled = 0" +
-                   ")",
+                   $"AND {column2} IN ({SubSqlValidUsers})",
                    new
                    {
-                       adminId = (ulong)UserTypes.Administrator,
                        userId,
                        startDate = startDate.Date,
                        endDate = endDate.Date
