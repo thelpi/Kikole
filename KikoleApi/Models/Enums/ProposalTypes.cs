@@ -1,4 +1,4 @@
-﻿namespace KikoleApi.Models
+﻿namespace KikoleApi.Models.Enums
 {
     public enum ProposalTypes
     {

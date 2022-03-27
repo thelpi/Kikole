@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Models.Requests
 {

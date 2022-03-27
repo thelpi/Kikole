@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using KikoleApi.Interfaces;
+using KikoleApi.Models.Enums;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
@@ -17,7 +18,7 @@ namespace KikoleApi.Repositories
         private const string ConnectionStringName = "Kikole";
 
         protected string SubSqlValidUsers => $"SELECT u.id FROM users AS u " +
-            $"WHERE u.user_type_id != {(ulong)Models.UserTypes.Administrator} " +
+            $"WHERE u.user_type_id != {(ulong)UserTypes.Administrator} " +
             $"AND u.is_disabled = 0";
 
         protected BaseRepository(IConfiguration configuration, IClock clock)

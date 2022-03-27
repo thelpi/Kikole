@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
@@ -70,7 +71,7 @@ namespace KikoleApi.Repositories
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new
                     {
-                        proposal_type_id = (ulong)Models.ProposalTypes.Name,
+                        proposal_type_id = (ulong)ProposalTypes.Name,
                         proposal_date = proposalDate.Date
                     })
                 .ConfigureAwait(false);

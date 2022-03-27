@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
@@ -69,7 +70,7 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<UserDto>(
                     "SELECT * FROM users " +
                     "WHERE is_disabled = 0 AND user_type_id != @adminId",
-                    new { adminId = (ulong)Models.UserTypes.Administrator })
+                    new { adminId = (ulong)UserTypes.Administrator })
                 .ConfigureAwait(false);
         }
 

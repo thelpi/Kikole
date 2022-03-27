@@ -1,4 +1,5 @@
 ﻿using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Models.Requests
 {

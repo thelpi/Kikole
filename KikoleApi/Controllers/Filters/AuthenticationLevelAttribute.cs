@@ -1,5 +1,5 @@
 ﻿using System;
-using KikoleApi.Models;
+using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Controllers.Filters
 {

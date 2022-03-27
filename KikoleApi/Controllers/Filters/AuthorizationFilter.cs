@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net;
 using KikoleApi.Interfaces;
-using KikoleApi.Models;
+using KikoleApi.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;

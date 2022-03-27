@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Models

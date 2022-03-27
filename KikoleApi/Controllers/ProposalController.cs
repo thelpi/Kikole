@@ -8,6 +8,7 @@ using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 

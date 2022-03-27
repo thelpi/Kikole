@@ -2,6 +2,7 @@
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Models.Requests
 {

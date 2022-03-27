@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using KikoleApi.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
