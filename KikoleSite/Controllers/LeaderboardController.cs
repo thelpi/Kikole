@@ -19,7 +19,7 @@ namespace KikoleSite.Controllers
         {
             if (userId == 0)
             {
-                return await Index().ConfigureAwait(false);
+                return await IndexInternal().ConfigureAwait(false);
             }
 
             var stats = await _apiProvider
@@ -28,7 +28,7 @@ namespace KikoleSite.Controllers
 
             if (stats == null)
             {
-                return await Index().ConfigureAwait(false);
+                return await IndexInternal().ConfigureAwait(false);
             }
 
             var (token, login) = GetAuthenticationCookie();
@@ -46,7 +46,7 @@ namespace KikoleSite.Controllers
                     .GetDayLeadersAsync(today, LeaderSort.TotalPoints)
                     .ConfigureAwait(false);
                 if (!todayLeaders.Any(tl => tl.Login == login))
-                    return await Index().ConfigureAwait(false);
+                    return await IndexInternal().ConfigureAwait(false);
             }
 
             var badges = await _apiProvider
@@ -76,26 +76,37 @@ namespace KikoleSite.Controllers
                 .GetProposalChartAsync()
                 .ConfigureAwait(false);
 
-            model.MinimalDate = model.MinimalDate.Date.Max(chart.FirstDate.Date);
+            await SetModelPropertiesAsync(
+                    model, chart.FirstDate)
+                .ConfigureAwait(false);
+
+            return View(model);
+        }
+
+        private async Task SetModelPropertiesAsync(
+            LeaderboardModel model,
+            DateTime firstDate)
+        {
+            model.MinimalDate = model.MinimalDate.Date.Max(firstDate.Date);
             model.MaximalDate = model.MaximalDate.Date.Min(DateTime.Now.Date);
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
-            var leaders = await _apiProvider
-                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate)
-                .ConfigureAwait(false);
+            var day = model.LeaderboardDay.Date.Max(firstDate);
 
-            var day = model.LeaderboardDay.Date.Max(chart.FirstDate);
+            var (token, login) = GetAuthenticationCookie();
 
             var dayleaders = await _apiProvider
                 .GetDayLeadersAsync(day, model.DaySortType)
                 .ConfigureAwait(false);
 
-            var (token, login) = GetAuthenticationCookie();
-
             var challenge = (await _apiProvider
                     .GetAcceptedChallengesAsync(token)
                     .ConfigureAwait(false))
                 .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
+
+            var leaders = await _apiProvider
+                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate)
+                .ConfigureAwait(false);
 
             model.Leaders = model.MaximalDate.IsToday()
                 ? AnonymizeLeaders(leaders, challenge, login)
@@ -103,48 +114,27 @@ namespace KikoleSite.Controllers
             model.TodayLeaders = day.IsToday()
                 ? AnonymizeLeaders(dayleaders, challenge, login)
                 : dayleaders;
-
-            return View(model);
         }
 
-        private async Task<IActionResult> Index()
+        private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
         {
+            model = model ?? new LeaderboardModel();
+
             var chart = await _apiProvider
                 .GetProposalChartAsync()
                 .ConfigureAwait(false);
 
-            var dateMin = chart.FirstDate.Date;
-            var dateMax = DateTime.Now.Date;
-            var sortType = LeaderSort.TotalPoints;
+            model.MinimalDate = chart.FirstDate.Date;
+            model.MaximalDate = DateTime.Now.Date;
+            model.SortType = LeaderSort.TotalPoints;
+            model.LeaderboardDay = DateTime.Now.Date;
+            model.DaySortType = LeaderSort.BestTime;
 
-            var day = DateTime.Now.Date;
-            var daySort = LeaderSort.BestTime;
-
-            var leaders = await _apiProvider
-                .GetLeadersAsync(sortType, dateMin, dateMax)
+            await SetModelPropertiesAsync(
+                    model, chart.FirstDate)
                 .ConfigureAwait(false);
 
-            var todayLeaders = await _apiProvider
-                .GetDayLeadersAsync(day, daySort)
-                .ConfigureAwait(false);
-
-            var (token, login) = GetAuthenticationCookie();
-
-            var challenge = (await _apiProvider
-                    .GetAcceptedChallengesAsync(token)
-                    .ConfigureAwait(false))
-                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
-
-            return View(new LeaderboardModel
-            {
-                MinimalDate = dateMin,
-                MaximalDate = dateMax,
-                Leaders = AnonymizeLeaders(leaders, challenge, login),
-                SortType = sortType,
-                TodayLeaders = AnonymizeLeaders(todayLeaders, challenge, login),
-                LeaderboardDay = day,
-                DaySortType = daySort
-            });
+            return View(model);
         }
 
         private IReadOnlyCollection<Leader> AnonymizeLeaders(
