@@ -106,10 +106,6 @@ namespace KikoleSite.Controllers
                     && myLogin != u.Login)
                 .ToList();
 
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
-
             model.RequestedChallenges = requests;
             model.WaitingForResponseChallenges = pendings;
             model.Users = usersOk;
@@ -117,7 +113,6 @@ namespace KikoleSite.Controllers
             model.TodayChallenge = accepteds
                 .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
             model.ChallengesHistory = histories;
-            model.DefaultPoints = chart.ChallengeWithdrawalPoints;
         }
     }
 }

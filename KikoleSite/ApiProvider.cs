@@ -450,6 +450,9 @@ namespace KikoleSite
         
         public async Task<IReadOnlyCollection<Challenge>> GetChallengesWaitingForResponseAsync(string authToken)
         {
+            if (string.IsNullOrWhiteSpace(authToken))
+                return new List<Challenge>();
+
             var response = await SendAsync(
                     $"waiting-challenges",
                     HttpMethod.Get,

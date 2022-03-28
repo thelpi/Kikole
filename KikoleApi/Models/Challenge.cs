@@ -45,16 +45,16 @@ namespace KikoleApi.Models
             LeaderDto hostLead, LeaderDto guestLead)
         {
             if (hostLead != null && guestLead == null)
-                return ProposalChart.Default.ChallengeWithdrawalPoints;
+                return hostLead.Points;
             if (hostLead == null && guestLead != null)
-                return -ProposalChart.Default.ChallengeWithdrawalPoints;
+                return -guestLead.Points;
             else if (hostLead?.Points != guestLead?.Points)
             {
                 var rate = dto.PointsRate / (decimal)100;
                 if (hostLead.Points > guestLead.Points)
-                    return (int)Math.Round(guestLead.Points * rate);
+                    return (int)Math.Round(hostLead.Points * rate);
                 else
-                    return (int)Math.Round(hostLead.Points * rate * -1);
+                    return (int)Math.Round(-guestLead.Points * rate);
             }
             else
                 return 0;

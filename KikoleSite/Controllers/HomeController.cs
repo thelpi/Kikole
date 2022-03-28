@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
@@ -66,7 +67,15 @@ namespace KikoleSite.Controllers
                 .GetCurrentMessageAsync()
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login);
+            var pendings = await _apiProvider
+                .GetChallengesWaitingForResponseAsync(token)
+                .ConfigureAwait(false);
+
+            var accepteds = await _apiProvider
+                .GetAcceptedChallengesAsync(token)
+                .ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings);
         }
 
         [HttpPost]
@@ -120,11 +129,21 @@ namespace KikoleSite.Controllers
                 .GetCurrentMessageAsync()
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login);
+            var pendings = await _apiProvider
+                .GetChallengesWaitingForResponseAsync(token)
+                .ConfigureAwait(false);
+
+            var accepteds = await _apiProvider
+                .GetAcceptedChallengesAsync(token)
+                .ConfigureAwait(false);
+
+            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings);
         }
 
         private IActionResult ViewWithFullModel(HomeModel model, string login,
-            string clue, ProposalChart chart, string message, string creator)
+            string clue, ProposalChart chart, string message, string creator,
+            IReadOnlyCollection<Challenge> acceptedChallenges,
+            IReadOnlyCollection<Challenge> pendingChallenges)
         {
             model.PlayerCreator = creator;
             model.Message = message;
@@ -136,6 +155,9 @@ namespace KikoleSite.Controllers
             model.Chart = chart;
             model.Clue = clue;
             model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
+            model.TodayChallenge = acceptedChallenges
+                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
+            model.HasPendingChallenges = pendingChallenges.Count > 0;
             return View(model);
         }
 

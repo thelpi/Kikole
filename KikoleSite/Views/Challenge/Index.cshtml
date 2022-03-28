@@ -108,13 +108,13 @@ else
 <p>The challenge is scheduled for the next day where you and your opponent are free of any other challenge.</p>
 <p>Also, challenge cannot occurs a day where you or your opponent have submitted the daily player.</p>
 <p>Points won/lost during a challenge are computed <span style="color:crimson">after both users</span> have submitted the correct answer for the day.</p>
-<p>In case of withdrawal (ie the opponent don't find the daily player), the winner takes <span style="color:crimson">@Model.DefaultPoints</span> points from the opponent's global score.</p>
-<p>If both users withdraw, nothing happens.</p>
+<p>In case of withdrawal (ie the opponent don't find the daily player), the winner double his score, loser lose the same amount.</p>
+<p>If both users withdraw or have the same score, nothing happens.</p>
 <p>Example of score:</p>
 <p>user X challenges Y for 40% of his/her score</p>
 <p>The next day, X scores 800 points and Y 900 points, so Y wins.</p>
-<p>X final score is 480 points (800 * 0.6)</p>
-<p>Y final score is 1220 points (900 + 800 * 0.4)</p>
+<p>Y final score is 1260 points (900 + 900 * 0.4)</p>
+<p>X final score is 440 points (800 - 900 * 0.4)</p>
 
 <h3>Challenges history</h3>
 @if (Model.ChallengesHistory?.Count > 0)
