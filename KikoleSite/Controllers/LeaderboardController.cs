@@ -102,27 +102,16 @@ namespace KikoleSite.Controllers
 
             var day = model.LeaderboardDay.Date.Max(firstDate);
 
-            var (token, login) = GetAuthenticationCookie();
-
             var dayleaders = await _apiProvider
                 .GetDayLeadersAsync(day, model.DaySortType)
                 .ConfigureAwait(false);
-
-            var challenge = (await _apiProvider
-                    .GetAcceptedChallengesAsync(token)
-                    .ConfigureAwait(false))
-                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
 
             var leaders = await _apiProvider
                 .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate)
                 .ConfigureAwait(false);
 
-            model.Leaders = model.MaximalDate.IsToday()
-                ? AnonymizeLeaders(leaders, challenge, login)
-                : leaders;
-            model.TodayLeaders = day.IsToday()
-                ? AnonymizeLeaders(dayleaders, challenge, login)
-                : dayleaders;
+            model.Leaders = leaders;
+            model.TodayLeaders = dayleaders;
         }
 
         private async Task<IActionResult> IndexInternal(LeaderboardModel model, bool isLogged)
@@ -148,30 +137,6 @@ namespace KikoleSite.Controllers
             }
 
             return View(model);
-        }
-
-        private IReadOnlyCollection<Leader> AnonymizeLeaders(
-            IReadOnlyCollection<Leader> leaders, Challenge myChallenge, string myLogin)
-        {
-            if (myChallenge == null || leaders.Any(l => l.Login == myLogin))
-                return leaders;
-
-            var keepLeaders = new List<Leader>(leaders.Count);
-            int? excludePosition = null;
-            foreach (var l in leaders)
-            {
-                if (l.Login == myChallenge.OpponentLogin)
-                    excludePosition = l.Position;
-                else
-                {
-                    l.Position = excludePosition.HasValue && l.Position > excludePosition
-                        ? l.Position - 1
-                        : l.Position;
-                    keepLeaders.Add(l);
-                }
-            }
-
-            return keepLeaders;
         }
     }
 }
