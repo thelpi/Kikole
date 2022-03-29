@@ -88,14 +88,24 @@ namespace KikoleApi.Controllers
         }
 
         [HttpGet("{id}/badges")]
-        [AuthenticationLevel(UserTypes.StandardUser)]
+        [AuthenticationLevel]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync(
             [FromRoute] ulong id, [FromQuery] ulong userId)
         {
-            if (id == 0 || userId == 0)
+            if (id == 0)
                 return BadRequest();
+
+            var isAllowedToSeeHiddenBadge = userId == id;
+            if (userId > 0 && userId != id)
+            {
+                var userDto = await _userRepository
+                    .GetUserByIdAsync(userId)
+                    .ConfigureAwait(false);
+
+                isAllowedToSeeHiddenBadge = userDto?.UserTypeId == (ulong)UserTypes.Administrator;
+            }
 
             var badges = await _badgeRepository
                 .GetBadgesAsync(true)
@@ -112,7 +122,7 @@ namespace KikoleApi.Controllers
 
                 if (_clock.Now.Date == dto.GetDate
                     && b.Hidden > 0
-                    && id != userId)
+                    && !isAllowedToSeeHiddenBadge)
                 {
                     continue;
                 }
