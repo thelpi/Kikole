@@ -37,7 +37,7 @@ namespace KikoleSite
 
         Task<UserStats> GetUserStatsAsync(ulong id);
 
-        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId);
+        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, string authToken);
 
         Task<IReadOnlyCollection<Badge>> GetBadgesAsync();
 

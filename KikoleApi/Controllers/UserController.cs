@@ -87,13 +87,14 @@ namespace KikoleApi.Controllers
             return Ok(names);
         }
 
-        [HttpGet("{userId}/badges")]
-        [AuthenticationLevel]
+        [HttpGet("{id}/badges")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync([FromRoute] ulong userId)
+        public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync(
+            [FromRoute] ulong id, [FromQuery] ulong userId)
         {
-            if (userId == 0)
+            if (id == 0 || userId == 0)
                 return BadRequest();
 
             var badges = await _badgeRepository
@@ -101,17 +102,25 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             var dtos = await _badgeRepository
-                .GetUserBadgesAsync(userId)
+                .GetUserBadgesAsync(id)
                 .ConfigureAwait(false);
 
             var badgesFull = new List<UserBadge>();
             foreach (var dto in dtos)
             {
+                var b = badges.Single(_ => _.Id == dto.BadgeId);
+
+                if (_clock.Now.Date == dto.GetDate
+                    && b.Hidden > 0
+                    && id != userId)
+                {
+                    continue;
+                }
+
                 var users = await _badgeRepository
                     .GetUsersWithBadgeAsync(dto.BadgeId)
                     .ConfigureAwait(false);
 
-                var b = badges.Single(_ => _.Id == dto.BadgeId);
                 badgesFull.Add(new UserBadge(b, dto, users.Count));
             }
 

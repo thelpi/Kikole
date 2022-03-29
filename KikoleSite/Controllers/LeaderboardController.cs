@@ -51,7 +51,7 @@ namespace KikoleSite.Controllers
             }
 
             var badges = await _apiProvider
-                .GetUserBadgesAsync(userId)
+                .GetUserBadgesAsync(userId, token)
                 .ConfigureAwait(false);
 
             var allBadges = await _apiProvider
