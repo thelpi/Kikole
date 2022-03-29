@@ -31,7 +31,5 @@ namespace KikoleSite.Models
         public LeaderSort DaySortType { get; set; }
 
         public IReadOnlyCollection<LeaderSort> DaySortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().Where(ls => ls != LeaderSort.SuccessCount).ToList();
-
-        public bool IsLogged { get; set; }
     }
 }

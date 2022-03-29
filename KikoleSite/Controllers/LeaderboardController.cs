@@ -17,12 +17,9 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] ulong userId)
         {
-            var (token, login) = GetAuthenticationCookie();
-            var isLogged = !string.IsNullOrWhiteSpace(token);
-
-            if (userId == 0 || !isLogged)
+            if (userId == 0)
             {
-                return await IndexInternal(null, isLogged).ConfigureAwait(false);
+                return await IndexInternal().ConfigureAwait(false);
             }
 
             var stats = await _apiProvider
@@ -31,8 +28,10 @@ namespace KikoleSite.Controllers
 
             if (stats == null)
             {
-                return await IndexInternal(null, isLogged).ConfigureAwait(false);
+                return await IndexInternal().ConfigureAwait(false);
             }
+
+            var (token, login) = GetAuthenticationCookie();
 
             var today = DateTime.Now.Date;
 
@@ -47,7 +46,7 @@ namespace KikoleSite.Controllers
                     .GetDayLeadersAsync(today, LeaderSort.TotalPoints)
                     .ConfigureAwait(false);
                 if (!todayLeaders.Any(tl => tl.Login == login))
-                    return await IndexInternal(null, isLogged).ConfigureAwait(false);
+                    return await IndexInternal().ConfigureAwait(false);
             }
 
             var badges = await _apiProvider
@@ -73,21 +72,13 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(LeaderboardModel model)
         {
-            var (token, login) = GetAuthenticationCookie();
-            var isLogged = !string.IsNullOrWhiteSpace(token);
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
 
-            model.IsLogged = isLogged;
-
-            if (isLogged)
-            {
-                var chart = await _apiProvider
-                    .GetProposalChartAsync()
-                    .ConfigureAwait(false);
-
-                await SetModelPropertiesAsync(
-                        model, chart.FirstDate)
-                    .ConfigureAwait(false);
-            }
+            await SetModelPropertiesAsync(
+                    model, chart.FirstDate)
+                .ConfigureAwait(false);
 
             return View(model);
         }
@@ -114,27 +105,23 @@ namespace KikoleSite.Controllers
             model.TodayLeaders = dayleaders;
         }
 
-        private async Task<IActionResult> IndexInternal(LeaderboardModel model, bool isLogged)
+        private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
         {
             model = model ?? new LeaderboardModel();
-            model.IsLogged = isLogged;
 
-            if (model.IsLogged)
-            {
-                var chart = await _apiProvider
-                    .GetProposalChartAsync()
-                    .ConfigureAwait(false);
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
 
-                model.MinimalDate = chart.FirstDate.Date;
-                model.MaximalDate = DateTime.Now.Date;
-                model.SortType = LeaderSort.TotalPoints;
-                model.LeaderboardDay = DateTime.Now.Date;
-                model.DaySortType = LeaderSort.BestTime;
+            model.MinimalDate = chart.FirstDate.Date;
+            model.MaximalDate = DateTime.Now.Date;
+            model.SortType = LeaderSort.TotalPoints;
+            model.LeaderboardDay = DateTime.Now.Date;
+            model.DaySortType = LeaderSort.BestTime;
 
-                await SetModelPropertiesAsync(
-                        model, chart.FirstDate)
-                    .ConfigureAwait(false);
-            }
+            await SetModelPropertiesAsync(
+                    model, chart.FirstDate)
+                .ConfigureAwait(false);
 
             return View(model);
         }
