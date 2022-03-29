@@ -16,6 +16,8 @@ namespace KikoleSite.Models
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime MaximalDate { get; set; }
 
+        public string BoardName { get; set; }
+
         public LeaderSort SortType { get; set; }
 
         public IReadOnlyCollection<Leader> Leaders { get; set; }

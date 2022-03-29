@@ -134,5 +134,52 @@ namespace KikoleSite
         {
             return date.Date == DateTime.Now.Date;
         }
+
+        internal static bool IsFirstOfMonth(this DateTime date, DateTime? reference = null)
+        {
+            reference = (reference ?? DateTime.Now).Date;
+            date = date.Date;
+            return date.Year == reference.Value.Year
+                && date.Month == reference.Value.Month
+                && date.Day == 1;
+        }
+
+        internal static bool IsAfterInMonth(this DateTime date, DateTime? reference = null)
+        {
+            reference = (reference ?? DateTime.Now).Date;
+            date = date.Date;
+            return date.Year == reference.Value.Year
+                && date.Month == reference.Value.Month
+                && date.Day >= reference.Value.Day;
+        }
+
+        internal static bool IsEndOfMonth(this DateTime date, DateTime? reference = null)
+        {
+            reference = (reference ?? DateTime.Now).Date;
+            date = date.Date;
+            return date.Year == reference.Value.Year
+                && date.Month == reference.Value.Month
+                && date.AddDays(1).Month > reference.Value.Month;
+        }
+
+        internal static string GetMonthName(this DateTime date)
+        {
+            switch (date.Month)
+            {
+                case 1: return "January";
+                case 2: return "February";
+                case 3: return "March";
+                case 4: return "April";
+                case 5: return "May";
+                case 6: return "June";
+                case 7: return "July";
+                case 8: return "August";
+                case 9: return "September";
+                case 10: return "October";
+                case 11: return "November";
+                case 12: return "December";
+                default: throw new NotImplementedException();
+            }
+        }
     }
 }

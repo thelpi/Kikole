@@ -33,22 +33,6 @@ namespace KikoleSite.Controllers
 
             var (token, login) = GetAuthenticationCookie();
 
-            var today = DateTime.Now.Date;
-
-            var challenge = (await _apiProvider
-                    .GetAcceptedChallengesAsync(token)
-                    .ConfigureAwait(false))
-                .SingleOrDefault(c => c.ChallengeDate == today);
-
-            if (challenge?.OpponentLogin == stats.Login)
-            {
-                var todayLeaders = await _apiProvider
-                    .GetDayLeadersAsync(today, LeaderSort.TotalPoints)
-                    .ConfigureAwait(false);
-                if (!todayLeaders.Any(tl => tl.Login == login))
-                    return await IndexInternal().ConfigureAwait(false);
-            }
-
             var badges = await _apiProvider
                 .GetUserBadgesAsync(userId, token)
                 .ConfigureAwait(false);
@@ -83,12 +67,31 @@ namespace KikoleSite.Controllers
             return View(model);
         }
 
+        private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
+        {
+            model = model ?? new LeaderboardModel();
+
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
+
+            model.MinimalDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            model.MaximalDate = DateTime.Now.Date;
+            model.SortType = LeaderSort.TotalPoints;
+            model.LeaderboardDay = DateTime.Now.Date;
+            model.DaySortType = LeaderSort.BestTime;
+
+            await SetModelPropertiesAsync(
+                    model, chart.FirstDate)
+                .ConfigureAwait(false);
+
+            return View(model);
+        }
+
         private async Task SetModelPropertiesAsync(
             LeaderboardModel model,
             DateTime firstDate)
         {
-            model.MinimalDate = model.MinimalDate.Date.Max(firstDate.Date);
-            model.MaximalDate = model.MaximalDate.Date.Min(DateTime.Now.Date);
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
             var day = model.LeaderboardDay.Date.Max(firstDate);
@@ -103,27 +106,27 @@ namespace KikoleSite.Controllers
 
             model.Leaders = leaders;
             model.TodayLeaders = dayleaders;
-        }
 
-        private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
-        {
-            model = model ?? new LeaderboardModel();
-
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
-
-            model.MinimalDate = chart.FirstDate.Date;
-            model.MaximalDate = DateTime.Now.Date;
-            model.SortType = LeaderSort.TotalPoints;
-            model.LeaderboardDay = DateTime.Now.Date;
-            model.DaySortType = LeaderSort.BestTime;
-
-            await SetModelPropertiesAsync(
-                    model, chart.FirstDate)
-                .ConfigureAwait(false);
-
-            return View(model);
+            model.BoardName = "Custom";
+            var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();
+            var isCurrentMonthEnd = model.MaximalDate.IsAfterInMonth();
+            if (isCurrentMonthStart && isCurrentMonthEnd)
+            {
+                model.BoardName = "This month";
+            }
+            else
+            {
+                var isMonthStart = model.MinimalDate.IsFirstOfMonth(model.MinimalDate);
+                var isMonthEnd = model.MaximalDate.IsEndOfMonth(model.MinimalDate);
+                if (isMonthStart && isMonthEnd)
+                {
+                    model.BoardName = model.MinimalDate.GetMonthName();
+                }
+                else if (model.MaximalDate.Date == DateTime.Now.Date)
+                {
+                    model.BoardName = $"Last {Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))} days";
+                }
+            }
         }
     }
 }

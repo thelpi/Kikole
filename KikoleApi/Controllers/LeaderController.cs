@@ -173,12 +173,6 @@ namespace KikoleApi.Controllers
             if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
                 return BadRequest();
 
-            if (minimalDate.HasValue && minimalDate.Value.Date > _clock.Now.Date)
-                return BadRequest();
-
-            if (maximalDate.HasValue && maximalDate.Value.Date > _clock.Now.Date)
-                return BadRequest();
-
             var leaderDtos = await _leaderRepository
                 .GetLeadersAsync(minimalDate, maximalDate)
                 .ConfigureAwait(false);
