@@ -1,32 +1,21 @@
 ﻿@model HomeModel
 <div>
-    @if (!string.IsNullOrWhiteSpace(Model.Message))
-    {
-        <div style="margin-top: 20px; color:crimson; font-size: large">
-            @Model.Message
-        </div>
-    }
-    @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
-    {
-        <div style="margin-top: 20px; font-size: large">
-            Today's player has been submitted by <span style="color: crimson">@Model.PlayerCreator</span>!
-        </div>
-    }
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         <div style="margin-top: 10px">
-            <span style="color: crimson; font-size: large">"Kikole?"</span> is a very simple game where you have to guess a new football player <span style="color: crimson">every day</span>.<br />
-            Your opponents have the same player to guess, so be the best and you'll appear on our <a href="/Leaderboard">leaderboard</a>!<br />
-            To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.<br />
-            Notice that the player can be active or retired.
+            <p><span style="color: crimson; font-size: large">"Kikole?"</span> is a very simple game where you have to guess a new football player <span style="color: crimson">every day</span>.</p>
+            <p>Your opponents have the same player to guess, so be the best and you'll appear on our <a href="/Leaderboard">leaderboard</a>!</p>
+            <p>To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.</p>
+            <p>Notice that the player can be active or retired, moreover feminine players are possible but quite rare.</p>
+            <p>Fictional players (movies and such) are disallowed. As a rule of thumb, a player is eligible if he has a wikipedia entry in several languages.</p>
         </div>
-        <div style="margin-top: 20px">
+        <div style="margin-top: 40px">
             <label>You are <a href="/Account"><span style="color: crimson">not logged</span></a></label>
         </div>
         <div style="margin-top: 10px">
             An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!
         </div>
-        <div style="margin-top: 60px">
+        <div style="margin-top: 40px">
             Score is computed with following rules:
             <ul>
                 <li>You start with <span style="color: forestgreen; font-size: large">@Model.Chart.BasePoints</span> points</li>
@@ -41,6 +30,18 @@
     }
     else
     {
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div style="margin-top: 20px; color:crimson; font-size: large">
+                @Model.Message
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
+        {
+            <div style="margin-top: 20px; font-size: large">
+                Today's player has been submitted by <span style="color: crimson">@Model.PlayerCreator</span>!
+            </div>
+        }
         <div style="margin-top: 10px">
             <label>You are logged as <span style="color: forestgreen">@Model.LoggedAs</span></label>
         </div>
