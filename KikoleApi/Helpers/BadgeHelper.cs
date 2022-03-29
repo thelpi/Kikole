@@ -52,6 +52,14 @@ namespace KikoleApi.Helpers
                 {
                     Badges.ItsAFuckingDisgrace,
                     p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ItsAFuckingDisgrace
+                },
+                {
+                    Badges.CaptainTsubasa,
+                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.CaptainTsubasa
+                },
+                {
+                    Badges.KikolesCreatorFriend,
+                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.KikolesCreatorFriend
                 }
             };
 

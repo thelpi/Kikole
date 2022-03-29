@@ -24,6 +24,8 @@
         WoodenSpoon,
         ChallengeAccepted,
         GambleAddiction,
-        AllIn
+        AllIn,
+        KikolesCreatorFriend,
+        CaptainTsubasa
     }
 }
