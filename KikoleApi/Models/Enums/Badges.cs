@@ -26,6 +26,7 @@
         GambleAddiction,
         AllIn,
         KikolesCreatorFriend,
-        CaptainTsubasa
+        CaptainTsubasa,
+        DoYouSpeakPatois
     }
 }

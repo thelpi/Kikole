@@ -91,7 +91,7 @@
                     <div>You get the following badges:</div>
                     foreach (var badge in Model.Badges)
                     {
-                        var color = !badge.Hidden ? "transparent" : "gold";
+                        var color = !badge.HiddenOrSpecial ? "transparent" : "gold";
                         <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
                             <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
                             <div style="text-align:center">@badge.Description</div>
@@ -138,6 +138,32 @@
             @if (Model.CurrentDay == 0)
             {
                 <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
+                @if (Model.Badges?.Count > 0)
+                {
+                    <div>You get the following badges:</div>
+                    foreach (var badge in Model.Badges)
+                    {
+                        var color = !badge.HiddenOrSpecial ? "transparent" : "gold";
+                        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+                            <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
+                            <div style="text-align:center">@badge.Description</div>
+                            @if (!badge.Hidden)
+                            {
+                                <div style="text-align:center">Got the @badge.GetDate.ToString("yyyy-MM-dd")</div>
+                            }
+                            @if (@badge.Users == 1)
+                            {
+                                <div style="text-align:center; font-weight: bold">You're the <span style="color: crimson">only one</span> with this badge!</div>
+                            }
+                            else
+                            {
+                                var v = badge.Users - 1;
+                                <div style="text-align:center"><span style="color: crimson">@v</span> other users have this badge</div>
+                            }
+                        </div>
+                    }
+                    <div style="clear: both" />
+                }
             }
             <div style="margin-top: 30px; font-size: larger">
                 Clue of the day: <span style="font-style:italic">@Model.Clue</span>

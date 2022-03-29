@@ -185,7 +185,7 @@ namespace KikoleApi.Controllers
                 playerOfTheDay,
                 playerClubs,
                 playerClubsDetails);
-            
+
             var proposalsAlready = await _proposalRepository
                 .GetProposalsAsync(request.PlayerSubmissionDate, userId)
                 .ConfigureAwait(false);
@@ -279,7 +279,7 @@ namespace KikoleApi.Controllers
                                         })
                                         .ConfigureAwait(false);
                                 }
-                                
+
                                 if (BadgeHelper.LeadersBasedBadgeCondition[badge](leader, leaders))
                                 {
                                     await InsertBadgeIfNotAlreadyAsync(
@@ -321,7 +321,7 @@ namespace KikoleApi.Controllers
                         var badgesDto = await _badgeRepository
                             .GetBadgesAsync(true)
                             .ConfigureAwait(false);
-                        
+
                         foreach (var badge in collectedBadges)
                         {
                             var b = badgesDto.Single(_ => _.Id == (ulong)badge);
@@ -343,7 +343,47 @@ namespace KikoleApi.Controllers
                 }
             }
 
+            await ManageSpecialBadgeAsync(request, userId, response)
+                .ConfigureAwait(false);
+
             return Ok(response);
+        }
+
+        private async Task ManageSpecialBadgeAsync<T>(T request, ulong userId, ProposalResponse response)
+            where T : BaseProposalRequest
+        {
+            if (new string(new[] { nameof(Clock), nameof(StringHelper),
+                nameof(Repositories.InternationalRepository), nameof(Bootstrap.Startup),
+                nameof(CountryProposalRequest), nameof(IMessageRepository) }.Select(
+                (c, i) => c.ToLowerInvariant()[new[] { 18, 24, 10, 18, 12, 6 }[6 - i
+                - 1] / 2]).ToArray()).Equals(request.Value.ToLowerInvariant()))
+            {
+                var addedSpecial = await InsertBadgeIfNotAlreadyAsync(
+                    request, userId, Badges.DoYouSpeakPatois)
+                .ConfigureAwait(false);
+
+                if (addedSpecial)
+                {
+                    var badgesDto = await _badgeRepository
+                        .GetBadgesAsync(true)
+                        .ConfigureAwait(false);
+
+                    var b = badgesDto.Single(_ => _.Id == (ulong)Badges.DoYouSpeakPatois);
+
+                    var ub = new UserBadgeDto
+                    {
+                        BadgeId = (ulong)Badges.DoYouSpeakPatois,
+                        GetDate = request.ProposalDate.Date,
+                        UserId = userId
+                    };
+
+                    var users = await _badgeRepository
+                        .GetUsersWithBadgeAsync((ulong)Badges.DoYouSpeakPatois)
+                        .ConfigureAwait(false);
+
+                    response.AddBadge(new UserBadge(b, ub, users.Count));
+                }
+            }
         }
 
         private async Task<bool> InsertBadgeIfNotAlreadyAsync<T>(T request, ulong userId, Badges badge) where T : BaseProposalRequest

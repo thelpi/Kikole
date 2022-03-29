@@ -11,5 +11,7 @@
         public int Users { get; set; }
 
         public bool Hidden { get; set; }
+
+        public bool HiddenOrSpecial => Hidden || Id == 29;
     }
 }
