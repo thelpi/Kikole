@@ -47,8 +47,7 @@ namespace KikoleSite.Controllers
                     if (success)
                     {
                         this.SetAuthenticationCookie(value, model.LoginSubmission);
-                        model.IsAuthenticated = true;
-                        model.Login = model.LoginSubmission;
+                        return RedirectToAction("Index", "Home");
                     }
                     else
                         model.Error = value;
