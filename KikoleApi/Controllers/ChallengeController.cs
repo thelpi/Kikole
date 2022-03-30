@@ -147,7 +147,7 @@ namespace KikoleApi.Controllers
             }
 
             var hostDates = await _challengeRepository
-                .GetBookedChallengesAsync(userId)
+                .GetBookedChallengesAsync(challenge.HostUserId)
                 .ConfigureAwait(false);
 
             var guestDates = await _challengeRepository
