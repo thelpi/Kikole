@@ -22,5 +22,7 @@ namespace KikoleSite.Api
         public bool SetLatestProposalDate { get; set; }
 
         public string Clue { get; set; }
+
+        public bool HideCreator { get; set; }
     }
 }

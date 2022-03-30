@@ -151,6 +151,10 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="font-size: small">(do NOT set twice a club in case of come-back: ignore the come-back)</div>
 
     <div style="margin-top: 20px">
+        <label>Remains anonymous:</label> @Html.CheckBoxFor(m => m.HideCreator)
+    </div>
+
+    <div style="margin-top: 20px">
         <input type="submit" name="submit-club" value="Submit the player" />
     </div>
 </form>

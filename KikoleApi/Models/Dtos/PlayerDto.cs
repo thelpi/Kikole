@@ -23,5 +23,7 @@ namespace KikoleApi.Models.Dtos
         public ulong CreationUserId { get; set; }
 
         public DateTime? RejectDate { get; set; }
+
+        public byte HideCreator { get; set; }
     }
 }

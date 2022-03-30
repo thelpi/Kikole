@@ -63,5 +63,7 @@ namespace KikoleSite.Models
         public string Clue { get; set; }
 
         public bool DisplayPlayerSubmissionLink { get; set; }
+
+        public bool HideCreator { get; set; }
     }
 }

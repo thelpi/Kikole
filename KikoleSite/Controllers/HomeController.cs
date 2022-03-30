@@ -75,7 +75,7 @@ namespace KikoleSite.Controllers
                 .GetAcceptedChallengesAsync(token)
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings);
+            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings, playerCreator?.CanDisplayCreator == true);
         }
 
         [HttpPost]
@@ -137,15 +137,16 @@ namespace KikoleSite.Controllers
                 .GetAcceptedChallengesAsync(token)
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings);
+            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings, playerCreator?.CanDisplayCreator == true);
         }
 
         private IActionResult ViewWithFullModel(HomeModel model, string login,
             string clue, ProposalChart chart, string message, string creator,
             IReadOnlyCollection<Challenge> acceptedChallenges,
-            IReadOnlyCollection<Challenge> pendingChallenges)
+            IReadOnlyCollection<Challenge> pendingChallenges,
+            bool canDisplayCreator)
         {
-            model.PlayerCreator = creator;
+            model.PlayerCreator = canDisplayCreator ? creator : null;
             model.Message = message;
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }

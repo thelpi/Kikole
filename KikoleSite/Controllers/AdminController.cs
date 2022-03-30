@@ -213,7 +213,8 @@ namespace KikoleSite.Controllers
                 Country = countryId.ToString(),
                 Name = model.Name,
                 Position = positionId.ToString(),
-                YearOfBirth = yearValue
+                YearOfBirth = yearValue,
+                HideCreator = model.HideCreator
             };
 
             var response = await _apiProvider

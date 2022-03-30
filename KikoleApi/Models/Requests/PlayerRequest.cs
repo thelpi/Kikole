@@ -27,6 +27,8 @@ namespace KikoleApi.Models.Requests
 
         public bool SetLatestProposalDate { get; set; }
 
+        public bool HideCreator { get; set; }
+
         internal string IsValid(DateTime now)
         {
             if (string.IsNullOrWhiteSpace(Name))
@@ -70,7 +72,8 @@ namespace KikoleApi.Models.Requests
                 AllowedNames = AllowedNames.SanitizeJoin(Name),
                 Clue = Clue,
                 PositionId = (ulong)Position,
-                CreationUserId = userId
+                CreationUserId = userId,
+                HideCreator = (byte)(HideCreator ? 1 : 0)
             };
         }
 
