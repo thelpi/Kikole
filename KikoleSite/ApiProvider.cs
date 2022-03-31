@@ -153,10 +153,10 @@ namespace KikoleSite
         #region stats, badges and leaderboard
 
         public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
-            LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate)
+            LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp)
         {
             var response = await SendAsync(
-                    $"leaders?maximalDate={maximalDate?.ToString("yyyy-MM-dd")}&minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}",
+                    $"leaders?maximalDate={maximalDate?.ToString("yyyy-MM-dd")}&minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}&includePvp={includePvp}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

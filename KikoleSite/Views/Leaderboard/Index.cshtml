@@ -15,6 +15,10 @@
         @Html.EditorFor(m => m.MaximalDate)
     </div>
     <div style="margin-top: 5px">
+        <label style="width: 100px; text-align: right">PVP ranking:</label>
+        @Html.CheckBoxFor(m => m.IncludePvp)
+    </div>
+    <div style="margin-top: 5px">
         <input type="submit" value="Get ranking" />
     </div>
 
@@ -26,8 +30,11 @@
                 <th style="width: 50px">Pos.</th>
                 <th style="color: crimson; width: 150px">Username</th>
                 <th style="width: 100px">Points</th>
-                <th style="width: 100px">Best time</th>
-                <th>Players found</th>
+                @if (!Model.IncludePvp)
+                {
+                    <th style="width: 100px">Best time</th>
+                    <th>Players found</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -41,8 +48,11 @@
                     <td>@leader.Position</td>
                     <td style="color: crimson"><a href="/Leaderboard?userId=@leader.UserId">@leader.Login</a></td>
                     <td>@leader.TotalPoints</td>
-                    <td>@leader.BestTime.ToString(@"hh\:mm")</td>
-                    <td>@leader.SuccessCount</td>
+                    @if (!Model.IncludePvp)
+                    {
+                        <td>@leader.BestTime.ToString(@"hh\:mm")</td>
+                        <td>@leader.SuccessCount</td>
+                    }
                 </tr>
                 i++;
             }

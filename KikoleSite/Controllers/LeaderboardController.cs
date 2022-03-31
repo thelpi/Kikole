@@ -101,7 +101,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var leaders = await _apiProvider
-                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate)
+                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate, model.IncludePvp)
                 .ConfigureAwait(false);
 
             model.Leaders = leaders;

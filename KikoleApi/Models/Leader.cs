@@ -21,6 +21,15 @@ namespace KikoleApi.Models
 
         public int Position { get; private set; }
 
+        internal Leader(IEnumerable<Leader> group)
+        {
+            Login = group.First().Login;
+            SuccessCount = 0;
+            TotalPoints = group.Sum(g => g.TotalPoints);
+            BestTime = new TimeSpan(23, 59, 59);
+            UserId = group.First().UserId;
+        }
+
         internal Leader(ulong userId, int points,
             IReadOnlyCollection<UserDto> users)
         {

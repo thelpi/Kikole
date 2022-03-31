@@ -65,7 +65,7 @@ namespace KikoleApi.Controllers
                 .GetAcceptedChallengesOfTheDayAsync(day)
                 .ConfigureAwait(false);
 
-            foreach (var challenge in challenges)
+            /*foreach (var challenge in challenges)
             {
                 var hostLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.HostUserId);
                 var guestLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.GuestUserId);
@@ -82,7 +82,7 @@ namespace KikoleApi.Controllers
                     else
                         leaders.Single(l => l.UserId == guestLead.UserId).WithPointsFromChallenge(pointsDelta, false);
                 }
-            }
+            }*/
 
             return Ok(Leader.DoubleSortWithPosition(leaders, sort));
         }
@@ -165,10 +165,16 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetLeadersAsync(
             [FromQuery] DateTime? minimalDate,
             [FromQuery] DateTime? maximalDate,
-            [FromQuery] LeaderSorts leaderSort)
+            [FromQuery] LeaderSorts leaderSort,
+            [FromQuery] bool includePvp)
         {
-            if (!Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                return BadRequest();
+            if (includePvp)
+                leaderSort = LeaderSorts.TotalPoints;
+            else
+            {
+                if (!Enum.IsDefined(typeof(LeaderSorts), leaderSort))
+                    return BadRequest();
+            }
 
             if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
                 return BadRequest();
@@ -193,39 +199,30 @@ namespace KikoleApi.Controllers
                         leaderDtos))
                 .ToList();
 
-            var challenges = await _challengeRepository
-                .GetAcceptedChallengesAsync(minimalDate, maximalDate)
-                .ConfigureAwait(false);
-
-            foreach (var challenge in challenges)
+            if (includePvp)
             {
-                var hostLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.HostUserId && l.ProposalDate == challenge.ChallengeDate);
-                var guestLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.GuestUserId && l.ProposalDate == challenge.ChallengeDate);
-                var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
-                if (pointsDelta != 0)
-                {
-                    if (hostLead == null)
-                    {
-                        var leadMatch = leaders.SingleOrDefault(l => l.UserId == challenge.HostUserId);
-                        if (leadMatch == null)
-                            leaders.Add(new Leader(challenge.HostUserId, pointsDelta, users));
-                        else
-                            leadMatch.WithPointsFromChallenge(pointsDelta, true);
-                    }
-                    else
-                        leaders.Single(l => l.UserId == hostLead.UserId).WithPointsFromChallenge(pointsDelta, true);
+                leaders = new List<Leader>();
 
-                    if (guestLead == null)
+                var challenges = await _challengeRepository
+                    .GetAcceptedChallengesAsync(minimalDate, maximalDate)
+                    .ConfigureAwait(false);
+
+                foreach (var challenge in challenges)
+                {
+                    var hostLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.HostUserId && l.ProposalDate == challenge.ChallengeDate);
+                    var guestLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.GuestUserId && l.ProposalDate == challenge.ChallengeDate);
+                    var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
+                    if (pointsDelta != 0)
                     {
-                        var leadMatch = leaders.SingleOrDefault(l => l.UserId == challenge.GuestUserId);
-                        if (leadMatch == null)
-                            leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta, users));
-                        else
-                            leadMatch.WithPointsFromChallenge(pointsDelta, false);
+                        leaders.Add(new Leader(challenge.HostUserId, pointsDelta + (hostLead?.Points ?? 0), users));
+                        leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta + (guestLead?.Points ?? 0), users));
                     }
-                    else
-                        leaders.Single(l => l.UserId == guestLead.UserId).WithPointsFromChallenge(pointsDelta, false);
                 }
+
+                leaders = leaders
+                    .GroupBy(l => l.UserId)
+                    .Select(l => new Leader(l))
+                    .ToList();
             }
 
             return Ok(Leader.SortWithPosition(leaders, leaderSort));
