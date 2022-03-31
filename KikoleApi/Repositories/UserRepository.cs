@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
@@ -94,6 +95,14 @@ namespace KikoleApi.Repositories
                         question,
                         anwser
                     })
+                .ConfigureAwait(false);
+        }
+
+        public async Task GenerateUserGuidAsync(Guid guid)
+        {
+            await ExecuteInsertAsync(
+                    "user_guids",
+                    ("id", guid.ToString()))
                 .ConfigureAwait(false);
         }
 

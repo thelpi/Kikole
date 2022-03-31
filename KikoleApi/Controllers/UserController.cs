@@ -43,6 +43,25 @@ namespace KikoleApi.Controllers
             _crypter = crypter;
         }
 
+        [HttpPut("/user-guids")]
+        [AuthenticationLevel(UserTypes.Administrator)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Guid>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<Guid>>> GenerateUserGuidsAsync([FromQuery] ushort count)
+        {
+            var guids = new List<Guid>();
+
+            for (var i = 0; i < count; i++)
+            {
+                var guid = Guid.NewGuid();
+                await _userRepository
+                    .GenerateUserGuidAsync(guid)
+                    .ConfigureAwait(false);
+                guids.Add(guid);
+            }
+
+            return Ok(guids);
+        }
+
         [HttpGet]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<User>), (int)HttpStatusCode.OK)]
