@@ -107,6 +107,14 @@ namespace KikoleSite.Controllers
             model.Leaders = leaders;
             model.TodayLeaders = dayleaders;
 
+            // TODO: meilleure solution à venir
+            if (DateTime.Now.Day <= 3)
+            {
+                model.Awards = await _apiProvider
+                    .GetMonthlyAwardsAsync(DateTime.Now.Year, DateTime.Now.Month - 1)
+                    .ConfigureAwait(false);
+            }
+
             model.BoardName = "Custom";
             var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();
             var isCurrentMonthEnd = model.MaximalDate.IsAfterInMonth();

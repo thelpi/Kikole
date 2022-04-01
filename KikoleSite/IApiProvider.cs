@@ -43,6 +43,8 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken);
 
+        Task<Awards> GetMonthlyAwardsAsync(int year, int month);
+
         #endregion stats, badges and leaderboard
 
         #region player creation

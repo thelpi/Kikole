@@ -217,6 +217,18 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
+        public async Task<Awards> GetMonthlyAwardsAsync(int year, int month)
+        {
+            var date = new DateTime(year, month, 1);
+
+            var response = await SendAsync(
+                    $"awards?date={date.ToString("yyyy-MM-dd")}", HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<Awards>(response)
+                .ConfigureAwait(false);
+        }
+
         #endregion stats, badges and leaderboard
 
         #region player creation
