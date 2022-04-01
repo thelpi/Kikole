@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
@@ -168,13 +169,8 @@ namespace KikoleApi.Controllers
             [FromQuery] LeaderSorts leaderSort,
             [FromQuery] bool includePvp)
         {
-            if (includePvp)
-                leaderSort = LeaderSorts.TotalPoints;
-            else
-            {
-                if (!Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                    return BadRequest();
-            }
+            if (!includePvp && !Enum.IsDefined(typeof(LeaderSorts), leaderSort))
+                return BadRequest();
 
             if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
                 return BadRequest();
@@ -187,45 +183,162 @@ namespace KikoleApi.Controllers
                 .GetActiveUsersAsync()
                 .ConfigureAwait(false);
 
-            var players = await _playerRepository
-                .GetPlayersOfTheDayAsync(minimalDate, maximalDate)
+            IReadOnlyCollection<Leader> leaders;
+            if (includePvp)
+            {
+                leaderSort = LeaderSorts.TotalPoints;
+
+                var challenges = await _challengeRepository
+                    .GetAcceptedChallengesAsync(minimalDate, maximalDate)
+                    .ConfigureAwait(false);
+
+                leaders = ComputePvpLeaders(challenges, leaderDtos, users);
+            }
+            else
+            {
+                var players = await _playerRepository
+                    .GetPlayersOfTheDayAsync(minimalDate, maximalDate)
+                    .ConfigureAwait(false);
+
+                leaders = ComputePveLeaders(leaderDtos, users, players);
+            }
+
+            return Ok(Leader.SortWithPosition(leaders, leaderSort));
+        }
+
+        [HttpGet("/awards")]
+        [AuthenticationLevel]
+        [ProducesResponseType(typeof(Awards), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Awards>> GetAwardsOfTheMonthAsync(
+            [FromQuery] DateTime date)
+        {
+            var awards = new Awards
+            {
+                Year = date.Year,
+                Month = date.Month
+            };
+
+            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            var leaderDtos = await _leaderRepository
+                .GetLeadersAsync(firstDayOfMonth, lastDayOfMonth)
                 .ConfigureAwait(false);
 
-            var leaders = leaderDtos
+            var users = await _userRepository
+                .GetActiveUsersAsync()
+                .ConfigureAwait(false);
+
+            var players = await _playerRepository
+                .GetPlayersOfTheDayAsync(firstDayOfMonth, lastDayOfMonth)
+                .ConfigureAwait(false);
+
+            var kikoles = await _leaderRepository
+                .GetKikoleAwardsAsync(firstDayOfMonth, lastDayOfMonth)
+                .ConfigureAwait(false);
+
+            var leaders = ComputePveLeaders(leaderDtos, users, players);
+
+            awards.PointsAwards = ComputeTopThreeLeadersAwards<PointsAward, int>(
+                leaders,
+                (a, l) => a.Points = l.TotalPoints,
+                _ => _.Points,
+                true);
+            awards.TimeAwards = ComputeTopThreeLeadersAwards<TimeAward, TimeSpan>(
+                leaders,
+                (a, l) =>
+                {
+                    a.Time = l.BestTime;
+                    a.PlayerName = players.Single(p =>
+                        l.BestTimeDate.Date == p.ProposalDate.Value.Date).Name;
+                },
+                _ => _.Time,
+                false);
+            awards.CountAwards = ComputeTopThreeLeadersAwards<CountAward, int>(
+                leaders,
+                (a, l) => a.Count = l.SuccessCount,
+                _ => _.Count,
+                true);
+            awards.HardestKikoles = GetTopThreeKikoles(kikoles, false);
+            awards.EasiestKikoles = GetTopThreeKikoles(kikoles, true);
+
+            return Ok(awards);
+        }
+
+        private static IReadOnlyCollection<T> ComputeTopThreeLeadersAwards<T, TProp>(
+            IReadOnlyCollection<Leader> leaders,
+            Action<T, Leader> setAwardPropFunc,
+            Func<T, TProp> getPosKeyFunc,
+            bool descending)
+            where T : BaseAward, new()
+            where TProp : struct
+        {
+            return leaders
+                .Select(_ =>
+                {
+                    var awd = new T
+                    {
+                        Name = _.Login
+                    };
+                    setAwardPropFunc(awd, _);
+                    return awd;
+                })
+                .SetPositions(_ => getPosKeyFunc(_), descending, (_, x) => _.Position = x)
+                .Where(_ => _.Position <= 3)
+                .ToList();
+        }
+
+        private static List<KikoleAward> GetTopThreeKikoles(
+            IReadOnlyCollection<KikoleAwardDto> kikoles, bool descending)
+        {
+            return kikoles
+                .Select(_ => new KikoleAward
+                {
+                    AveragePoints = (int)Math.Round(_.AvgPts),
+                    Name = _.Name
+                })
+                .SetPositions(_ => _.AveragePoints, descending, (_, x) => _.Position = x)
+                .Where(_ => _.Position <= 3)
+                .ToList();
+        }
+
+        private IReadOnlyCollection<Leader> ComputePvpLeaders(
+            IReadOnlyCollection<ChallengeDto> challenges,
+            IReadOnlyCollection<LeaderDto> leaderDtos,
+            IReadOnlyCollection<UserDto> users)
+        {
+            var leaders = new List<Leader>();
+
+            foreach (var challenge in challenges)
+            {
+                var hostLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.HostUserId && l.ProposalDate == challenge.ChallengeDate);
+                var guestLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.GuestUserId && l.ProposalDate == challenge.ChallengeDate);
+                var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
+                if (pointsDelta != 0)
+                {
+                    leaders.Add(new Leader(challenge.HostUserId, pointsDelta + (hostLead?.Points ?? 0), users));
+                    leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta + (guestLead?.Points ?? 0), users));
+                }
+            }
+
+            return leaders
+                .GroupBy(l => l.UserId)
+                .Select(l => new Leader(l))
+                .ToList();
+        }
+
+        private static IReadOnlyCollection<Leader> ComputePveLeaders(
+            IReadOnlyCollection<LeaderDto> leaderDtos,
+            IReadOnlyCollection<UserDto> users,
+            IReadOnlyCollection<PlayerDto> players)
+        {
+            return leaderDtos
                 .GroupBy(leaderDto => leaderDto.UserId)
                 .Select(leaderDto => new Leader(leaderDto, users)
                     .WithPointsFromSubmittedPlayers(
                         players.Where(p => p.CreationUserId == leaderDto.Key).Select(d => d.ProposalDate.Value),
                         leaderDtos))
                 .ToList();
-
-            if (includePvp)
-            {
-                leaders = new List<Leader>();
-
-                var challenges = await _challengeRepository
-                    .GetAcceptedChallengesAsync(minimalDate, maximalDate)
-                    .ConfigureAwait(false);
-
-                foreach (var challenge in challenges)
-                {
-                    var hostLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.HostUserId && l.ProposalDate == challenge.ChallengeDate);
-                    var guestLead = leaderDtos.SingleOrDefault(l => l.UserId == challenge.GuestUserId && l.ProposalDate == challenge.ChallengeDate);
-                    var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
-                    if (pointsDelta != 0)
-                    {
-                        leaders.Add(new Leader(challenge.HostUserId, pointsDelta + (hostLead?.Points ?? 0), users));
-                        leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta + (guestLead?.Points ?? 0), users));
-                    }
-                }
-
-                leaders = leaders
-                    .GroupBy(l => l.UserId)
-                    .Select(l => new Leader(l))
-                    .ToList();
-            }
-
-            return Ok(Leader.SortWithPosition(leaders, leaderSort));
         }
     }
 }

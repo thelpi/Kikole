@@ -72,5 +72,31 @@ namespace KikoleApi.Repositories
 
             return leadersHistory;
         }
+
+        public async Task<IReadOnlyCollection<KikoleAwardDto>> GetKikoleAwardsAsync(DateTime minDate, DateTime maxDate)
+        {
+            return await ExecuteReaderAsync<KikoleAwardDto>(
+                    "SELECT y.name, y.proposal_date, points / users_count AS avg_pts " +
+                    "FROM (" +
+                    "   SELECT proposal_date, SUM(points) AS points, (" +
+                    "       SELECT COUNT(DISTINCT p.user_id) " +
+                    "       FROM proposals AS p " +
+                    "       WHERE p.days_before = 0 " +
+                    "       AND DATE(p.proposal_date) = l.proposal_date" +
+                    "   ) AS users_count " +
+                    "   FROM leaders AS l " +
+                    "   GROUP BY proposal_date" +
+                    ") AS tmp " +
+                    "JOIN players AS y ON tmp.proposal_date = y.proposal_date " +
+                    "WHERE users_count >= 5 " +
+                    "AND y.proposal_date >= @startdate " +
+                    "AND y.proposal_date <= @enddate",
+                    new
+                    {
+                        startdate = minDate.Date,
+                        enddate = maxDate.Date
+                    })
+                .ConfigureAwait(false);
+        }
     }
 }

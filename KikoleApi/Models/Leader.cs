@@ -21,6 +21,8 @@ namespace KikoleApi.Models
 
         public int Position { get; private set; }
 
+        internal DateTime BestTimeDate { get; }
+
         internal Leader(IEnumerable<Leader> group)
         {
             Login = group.First().Login;
@@ -50,6 +52,7 @@ namespace KikoleApi.Models
             TotalPoints = leader.Points;
             BestTime = new TimeSpan(0, leader.Time, 0);
             UserId = user.Id;
+            BestTimeDate = leader.ProposalDate;
         }
 
         internal Leader(IGrouping<ulong, LeaderDto> userDtos,
@@ -61,6 +64,7 @@ namespace KikoleApi.Models
             TotalPoints = userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);
             UserId = user.Id;
+            BestTimeDate = userDtos.First(ud => ud.Time == userDtos.Min(dto => dto.Time)).ProposalDate;
         }
 
         internal Leader WithPointsFromSubmittedPlayers(
