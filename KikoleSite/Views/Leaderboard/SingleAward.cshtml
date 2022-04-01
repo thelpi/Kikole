@@ -1,0 +1,15 @@
+﻿@model (string, IEnumerable<KikoleSite.Api.BaseAward>)
+
+<h4>@Model.Item1</h4>
+@for (var i = 1; i <= 3; i++)
+{
+    var padColor = i == 1 ? "gold" : (i == 2 ? "silver" : "sandybrown");
+    @if (Model.Item2.HasPosition(i))
+    {
+        <div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @padColor">
+            <div style="text-align:center; font-weight: bolder">@Model.Item2.ToListOfNames(i)</div>
+            <div style="text-align:center">@Model.Item2.GetValue(i)</div>
+        </div>
+    }
+}
+<div style="clear: both" />

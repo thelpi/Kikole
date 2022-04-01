@@ -1,81 +1,14 @@
 ﻿@model LeaderboardModel
 
-<h4>Best players of the month by points</h4>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: gold">
-    <div style="text-align:center; font-weight: bolder">carokann33</div>
-    <div style="text-align:center">15375 points</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: silver">
-    <div style="text-align:center; font-weight: bolder">naxou33</div>
-    <div style="text-align:center">13900 points</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: sandybrown">
-    <div style="text-align:center; font-weight: bolder">zzr18</div>
-    <div style="text-align:center">12475 points</div>
-</div>
-<div style="clear: both" />
-
-<h4>Best players of the month by time</h4>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: gold">
-    <div style="text-align:center; font-weight: bolder">hamza</div>
-    <div style="text-align:center">3 minutes (Figo)</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: silver">
-    <div style="text-align:center; font-weight: bolder">carokann33</div>
-    <div style="text-align:center">4 minutes (Loko)</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: sandybrown">
-    <div style="text-align:center; font-weight: bolder">girox64</div>
-    <div style="text-align:center">5 minutes (Bonucci)</div>
-</div>
-<div style="clear: both" />
-
-<h4>Best players of the month by kikolés found</h4>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: gold">
-    <div style="text-align:center; font-weight: bolder">girox64</div>
-    <div style="text-align:center">21 kikolés</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: silver">
-    <div style="text-align:center; font-weight: bolder">dt20</div>
-    <div style="text-align:center">20 kikolés</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: sandybrown">
-    <div style="text-align:center; font-weight: bolder">naxou33 / carokann33</div>
-    <div style="text-align:center">19 kikolés</div>
-</div>
-<div style="clear: both" />
-
-<h4>Hardest kikolés of the month</h4>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: gold">
-    <div style="text-align:center; font-weight: bolder">Abou Diaby</div>
-    <div style="text-align:center">303 pts / player</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: silver">
-    <div style="text-align:center; font-weight: bolder">Sergio Busquets</div>
-    <div style="text-align:center">352 pts / player</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: sandybrown">
-    <div style="text-align:center; font-weight: bolder">Rio Ferdinand</div>
-    <div style="text-align:center">390 pts / player</div>
-</div>
-<div style="clear: both" />
-
-<h4>Easiest kikolés of the month</h4>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: gold">
-    <div style="text-align:center; font-weight: bolder">Luís Figo</div>
-    <div style="text-align:center">934 pts / player</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: silver">
-    <div style="text-align:center; font-weight: bolder">Adriano</div>
-    <div style="text-align:center">812 pts / player</div>
-</div>
-<div style="float: left; margin-top: 5px; width: 250px; min-height: 50px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: sandybrown">
-    <div style="text-align:center; font-weight: bolder">Youri Djorkaeff</div>
-    <div style="text-align:center">802 pts / player</div>
-</div>
-<div style="clear: both" />
-
-<br />
+@if (Model.Awards != null)
+{
+    await Html.RenderPartialAsync("SingleAward", ("Best players of the month by points", Model.Awards.PointsAwards.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", ("Best players of the month by time", Model.Awards.TimeAwards.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", ("Best players of the month by kikolés found", Model.Awards.CountAwards.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", ("Hardest kikolés of the month", Model.Awards.HardestKikoles.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", ("Easiest kikolés of the month", Model.Awards.EasiestKikoles.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
+    <br />
+}
 
 <form action="/Leaderboard" method="post">
     <h3>Customize leaderboard</h3>

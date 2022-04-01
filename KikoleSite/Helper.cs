@@ -10,10 +10,10 @@ namespace KikoleSite
 {
     public static class Helper
     {
-        const string NA = "N/A";
-        const string TimeSpanPattern = @"hh\:mm";
-        const string DateTimePattern = "yyyy-MM-dd";
-        const string Iso8859Code = "ISO-8859-8";
+        public const string NA = "N/A";
+        public const string TimeSpanPattern = @"hh\:mm";
+        public const string DateTimePattern = "yyyy-MM-dd";
+        public const string Iso8859Code = "ISO-8859-8";
 
         static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
 
