@@ -261,9 +261,22 @@ namespace KikoleSite
                     player)
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode
-                ? null
-                : $"StatusCode: {response.StatusCode}";
+            string message = null;
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.Content != null)
+                {
+                    message = await response.Content
+                        .ReadAsStringAsync()
+                        .ConfigureAwait(false);
+                    message = $"Error: {message}";
+                }
+                else
+                    message = $"StatusCode: {response.StatusCode}";
+            }
+            
+
+            return message;
         }
 
         public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
