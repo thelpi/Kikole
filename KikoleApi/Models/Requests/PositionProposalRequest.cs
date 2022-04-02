@@ -11,17 +11,17 @@ namespace KikoleApi.Models.Requests
         internal override string IsValid()
         {
             if (Value == null)
-                return "Invalid value";
+                return SPA.TextResources.InvalidValue;
 
             if (int.TryParse(Value, out var positionId))
             {
                 if (!Enum.GetValues(typeof(Positions)).Cast<int>().Contains(positionId))
-                    return "Invalid value";
+                    return SPA.TextResources.InvalidValue;
             }
             else
             {
                 if (!Enum.IsDefined(typeof(Positions), Value))
-                    return "Invalid value";
+                    return SPA.TextResources.InvalidValue;
             }
 
             return null;

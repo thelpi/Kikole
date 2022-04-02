@@ -32,31 +32,31 @@ namespace KikoleApi.Models.Requests
         internal string IsValid(DateTime now)
         {
             if (string.IsNullOrWhiteSpace(Name))
-                return "Invalid name";
+                return SPA.TextResources.InvalidName;
 
             if (!Enum.IsDefined(typeof(Countries), Country))
-                return "Invalid country";
+                return SPA.TextResources.InvalidCountry;
 
             if (!Enum.IsDefined(typeof(Positions), Position))
-                return "Invalid position";
+                return SPA.TextResources.InvalidPosition;
 
             if (YearOfBirth < 1900 || YearOfBirth > 2100)
-                return "Invalid year of birth";
+                return SPA.TextResources.InvalidBirthYear;
 
             if (!AllowedNames.IsValid())
-                return "Invalid allowed names";
+                return SPA.TextResources.InvalidAllowedNames;
 
             if (Clubs == null || Clubs.Count == 0)
-                return "Empty clubs list";
+                return SPA.TextResources.EmptyClubsList;
 
             if (Clubs.Any(c => c <= 0))
-                return "At least one invalid club";
+                return SPA.TextResources.InvalidClubs;
 
             if (string.IsNullOrWhiteSpace(Clue))
-                return "Invalid clue";
+                return SPA.TextResources.InvalidClue;
 
             if (ProposalDate.HasValue && ProposalDate.Value.Date < now.Date)
-                return "Invalid proposal date";
+                return SPA.TextResources.InvalidProposalDate;
 
             return null;
         }

@@ -27,6 +27,7 @@ namespace KikoleApi.Bootstrap
                 {
                     options.Filters.Add<AuthorizationFilter>();
                     options.Filters.Add<ControllerErrorFilter>();
+                    options.Filters.Add<LanguageFilter>();
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -49,6 +50,7 @@ namespace KikoleApi.Bootstrap
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
+                .AddScoped<TextResources>()
                 .AddHttpContextAccessor();
         }
 
@@ -75,6 +77,8 @@ namespace KikoleApi.Bootstrap
             });
 
             app.UseHttpsRedirection();
+
+            SPA.SetProvider(app.ApplicationServices);
             app.UseMvc();
         }
     }

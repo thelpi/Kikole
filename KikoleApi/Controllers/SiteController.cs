@@ -34,7 +34,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Country>>> GetCountriesAsync([FromQuery] ulong languageId)
         {
             if (!Enum.GetValues(typeof(Languages)).Cast<Languages>().Select(_ => (ulong)_).Contains(languageId))
-                return BadRequest("Invalid language");
+                return BadRequest(SPA.TextResources.InvalidLanguage);
 
             var countries = await _internationalRepository
                 .GetCountriesAsync(languageId)

@@ -118,6 +118,9 @@ namespace KikoleApi.Controllers
             [FromQuery] DateTime proposalDate,
             [FromQuery] ulong userId)
         {
+            if (userId == 0)
+                return BadRequest(SPA.TextResources.InvalidUser);
+
             var datas = await _proposalRepository
                 .GetProposalsAsync(proposalDate, userId)
                 .ConfigureAwait(false);
@@ -154,18 +157,18 @@ namespace KikoleApi.Controllers
             where T : BaseProposalRequest
         {
             if (request == null)
-                return BadRequest("Invalid request: null");
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
 
             var validityRequest = request.IsValid();
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest($"Invalid request: {validityRequest}");
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
 
             var playerOfTheDay = await _playerRepository
                 .GetPlayerOfTheDayAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
             if (playerOfTheDay == null)
-                return BadRequest("Invalid proposal date");
+                return BadRequest(SPA.TextResources.InvalidDate);
 
             var playerClubs = await _playerRepository
                 .GetPlayerClubsAsync(playerOfTheDay.Id)
@@ -352,11 +355,7 @@ namespace KikoleApi.Controllers
         private async Task ManageSpecialBadgeAsync<T>(T request, ulong userId, ProposalResponse response)
             where T : BaseProposalRequest
         {
-            if (new string(new[] { nameof(Clock), nameof(StringHelper),
-                nameof(Repositories.InternationalRepository), nameof(Bootstrap.Startup),
-                nameof(CountryProposalRequest), nameof(IMessageRepository) }.Select(
-                (c, i) => c.ToLowerInvariant()[new[] { 18, 24, 10, 18, 12, 6 }[6 - i
-                - 1] / 2]).ToArray()).Equals(request.Value.ToLowerInvariant()))
+            if ("chouse".Equals(request.Value.ToLowerInvariant()))
             {
                 var addedSpecial = await InsertBadgeIfNotAlreadyAsync(
                     request, userId, Badges.DoYouSpeakPatois)

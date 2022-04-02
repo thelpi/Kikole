@@ -14,16 +14,24 @@ namespace KikoleSite
     {
         private readonly HttpClient _client;
 
+        private Languages _language;
+
         private static Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
-        public ApiProvider(IConfiguration configuration)
+        public ApiProvider(IConfiguration configuration, Languages language)
         {
             _client = new HttpClient
             {
                 BaseAddress = new Uri(configuration.GetValue<string>("BackApiBaseUrl"))
             };
+            _language = language;
+        }
+
+        internal void SetLanguage(Languages language)
+        {
+            _language = language;
         }
 
         #region user accounts
@@ -556,6 +564,8 @@ namespace KikoleSite
 
             if (!string.IsNullOrWhiteSpace(authToken))
                 request.Headers.Add("AuthToken", authToken);
+
+            request.Headers.Add("Language", ((ulong)_language).ToString());
 
             return await _client
                 .SendAsync(request)

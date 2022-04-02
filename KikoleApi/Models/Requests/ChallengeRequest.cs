@@ -9,11 +9,15 @@ namespace KikoleApi.Models.Requests
 
         public byte PointsRate { get; set; }
 
-        internal bool IsValid()
+        internal string IsValid()
         {
-            return GuestUserId > 0
-                && PointsRate > 0
-                && PointsRate <= 100;
+            if (GuestUserId == 0)
+                return SPA.TextResources.InvalidGuestUserId;
+
+            if (PointsRate == 0 || PointsRate > 100)
+                return SPA.TextResources.InvalidPointsRate;
+
+            return null;
         }
 
         internal ChallengeDto ToDto(ulong hostUserId)

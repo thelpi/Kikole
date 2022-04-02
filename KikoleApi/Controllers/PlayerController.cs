@@ -57,12 +57,15 @@ namespace KikoleApi.Controllers
             [FromBody] PlayerRequest request,
             [FromQuery] ulong userId)
         {
+            if (userId == 0)
+                return BadRequest(SPA.TextResources.InvalidUser);
+
             if (request == null)
-                return BadRequest("Invalid request: null");
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
 
             var validityRequest = request.IsValid(_clock.Now);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest($"Invalid request: {validityRequest}");
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
 
             if (!request.ProposalDate.HasValue && request.SetLatestProposalDate)
                 request.ProposalDate = await GetNextDateAsync().ConfigureAwait(false);
@@ -72,7 +75,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             if (playerId == 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Player creation failure");
+                return StatusCode((int)HttpStatusCode.InternalServerError, SPA.TextResources.PlayerCreationFailure);
             
             foreach (var club in request.ToPlayerClubDtos(playerId))
             {
@@ -136,18 +139,22 @@ namespace KikoleApi.Controllers
         public async Task<IActionResult> ValidatePlayerSubmissionAsync(
             [FromBody] PlayerSubmissionValidationRequest request)
         {
-            if (request?.IsValid() != true)
-                return BadRequest();
+            if (request == null)
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
+
+            var validityCheck = request.IsValid();
+            if (!string.IsNullOrWhiteSpace(validityCheck))
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityCheck));
 
             var p = await _playerRepository
                 .GetPlayerByIdAsync(request.PlayerId)
                 .ConfigureAwait(false);
 
             if (p == null)
-                return NotFound();
+                return NotFound(SPA.TextResources.PlayerDoesNotExist);
 
             if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
-                return Conflict();
+                return Conflict(SPA.TextResources.RejectAndProposalDateCombined);
 
             if (request.IsAccepted)
             {

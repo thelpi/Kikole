@@ -43,18 +43,18 @@ namespace KikoleApi.Controllers
         public async Task<IActionResult> CreateClubAsync([FromBody] ClubRequest request)
         {
             if (request == null)
-                return BadRequest("Invalid request: null");
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
 
             var validityRequest = request.IsValid();
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest($"Invalid request: {validityRequest}");
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
 
             var playerId = await _clubRepository
                 .CreateClubAsync(request.ToDto())
                 .ConfigureAwait(false);
 
-            if (playerId <= 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Club creation failure");
+            if (playerId == 0)
+                return StatusCode((int)HttpStatusCode.InternalServerError, SPA.TextResources.ClubCreationFailure);
             
             return Created($"clubs/{playerId}", null);
         }

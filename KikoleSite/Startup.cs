@@ -34,7 +34,7 @@ namespace KikoleSite
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            var apiProvider = new ApiProvider(Configuration);
+            var apiProvider = new ApiProvider(Configuration, Languages.fr);
 
             services.AddSingleton<IApiProvider>(apiProvider);
 

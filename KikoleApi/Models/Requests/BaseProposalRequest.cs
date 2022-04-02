@@ -24,7 +24,7 @@ namespace KikoleApi.Models.Requests
         internal virtual string IsValid()
         {
             if (string.IsNullOrWhiteSpace(Value))
-                return "Invalid value";
+                return SPA.TextResources.InvalidValue;
 
             return null;
         }

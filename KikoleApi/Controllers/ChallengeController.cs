@@ -45,38 +45,45 @@ namespace KikoleApi.Controllers
         public async Task<IActionResult> CreateChallengeAsync(
             [FromBody] ChallengeRequest request, [FromQuery] ulong userId)
         {
-            if (userId == 0 || request?.IsValid() != true)
-                return BadRequest();
+            if (userId == 0)
+                return BadRequest(SPA.TextResources.InvalidUser);
+
+            if (request == null)
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
+
+            var validityRequest = request.IsValid();
+            if (!string.IsNullOrWhiteSpace(validityRequest))
+                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
 
             if (request.GuestUserId == userId)
-                return Conflict("You can't challenge yourself");
+                return Conflict(SPA.TextResources.CantChallengeYourself);
 
             var hostUser = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
             if (hostUser == null)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.ChallengeHostIsInvalid);
 
             if (hostUser.UserTypeId == (ulong)UserTypes.Administrator)
-                return Conflict("Can't create challenge; you're administrator");
+                return Conflict(SPA.TextResources.ChallengeCreatorIsAdmin);
 
             var guestUser = await _userRepository
                 .GetUserByIdAsync(request.GuestUserId)
                 .ConfigureAwait(false);
 
             if (hostUser == null)
-                return Conflict("Can't create challenge; invalid opponent account");
+                return Conflict(SPA.TextResources.ChallengeOpponentIsInvalid);
 
             if (hostUser.UserTypeId == (ulong)UserTypes.Administrator)
-                return Conflict("Can't create challenge; opponent account is administrator");
+                return Conflict(SPA.TextResources.ChallengeOpponentIsAdmin);
 
             var challengeAlready = await _challengeRepository
                 .GetUsersFutureChallengesAsync(userId, request.GuestUserId)
                 .ConfigureAwait(false);
 
             if (challengeAlready.Count > 0)
-                return Conflict("Can't create challenge; a challenge against this opponent is already planned or requested");
+                return Conflict(SPA.TextResources.ChallengeAlreadyExist);
 
             var challengeId = await _challengeRepository
                 .CreateChallengeAsync(request.ToDto(userId))
@@ -98,29 +105,32 @@ namespace KikoleApi.Controllers
             [FromQuery] ulong userId,
             [FromQuery] bool isAccepted)
         {
-            if (id == 0 || userId == 0)
-                return BadRequest();
+            if (id == 0)
+                return BadRequest(SPA.TextResources.InvalidChallengeId);
+
+            if (userId == 0)
+                return BadRequest(SPA.TextResources.InvalidUser);
 
             var challenge = await _challengeRepository
                 .GetChallengeByIdAsync(id)
                 .ConfigureAwait(false);
 
             if (challenge == null)
-                return NotFound();
+                return NotFound(SPA.TextResources.ChallengeNotFound);
 
             var isCancel = challenge.HostUserId == userId;
 
             if (!isCancel && challenge.GuestUserId != userId)
-                return Forbid();
+                return Forbid(SPA.TextResources.CantAutoAcceptChallenge);
 
             if (isCancel && isAccepted)
-                return Forbid();
+                return Forbid(SPA.TextResources.BothAcceptedAndCancelledChallenge);
 
             if (isCancel && challenge.IsAccepted.HasValue)
-                return Conflict("You can't cancel an accepted challenge");
+                return Conflict(SPA.TextResources.ChallengeAlreadyAccepted);
 
             if (!isCancel && challenge.IsAccepted.HasValue)
-                return Conflict("You've already respond to this challenge");
+                return Conflict(SPA.TextResources.ChallengeAlreadyAnswered);
 
             if (!isAccepted)
             {
@@ -143,7 +153,7 @@ namespace KikoleApi.Controllers
                    .RespondToChallengeAsync(id, isAccepted, _clock.Now)
                    .ConfigureAwait(false);
 
-                return Conflict("Opponent is an invalid account");
+                return Conflict(SPA.TextResources.InvalidOpponentAccount);
             }
 
             var hostDates = await _challengeRepository
@@ -213,7 +223,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetChallengesWaitingForResponseAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidUser);
 
             var dtos = await _challengeRepository
                 .GetPendingChallengesByGuestUserAsync(userId)
@@ -240,7 +250,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetRequestedChallengesAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidUser);
 
             var dtos = await _challengeRepository
                 .GetPendingChallengesByHostUserAsync(userId)
@@ -267,7 +277,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetAcceptedChallengeAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidUser);
 
             var dtos = await _challengeRepository
                 .GetAcceptedChallengesAsync(_clock.Now, null)
@@ -303,18 +313,18 @@ namespace KikoleApi.Controllers
             [FromQuery] DateTime? toDate)
         {
             if (userId == 0)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidUser);
 
             var debut = ProposalChart.Default.FirstDate.Date;
             if (fromDate.HasValue && fromDate.Value.Date < debut)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidDateRange);
 
             var yesterday = _clock.Now.AddDays(-1).Date;
             if (toDate.HasValue && toDate.Value.Date < yesterday)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidDateRange);
 
             if (toDate.HasValue && fromDate.HasValue && toDate.Value.Date < fromDate.Value.Date)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidDateRange);
 
             var dateBeginOk = fromDate?.Date ?? debut;
             var dateEndOk = toDate?.Date ?? yesterday;

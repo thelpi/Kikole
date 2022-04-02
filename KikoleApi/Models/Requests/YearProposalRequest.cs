@@ -9,16 +9,18 @@ namespace KikoleApi.Models.Requests
 
         internal override string GetTip(PlayerDto player)
         {
-            return $"The player is {(ushort.Parse(Value) > player.YearOfBirth ? "older" : "younger")}";
+            return ushort.Parse(Value) > player.YearOfBirth
+                ? SPA.TextResources.TipOlderPlayer
+                : SPA.TextResources.TipYoungerPlayer;
         }
 
         internal override string IsValid()
         {
             if (Value == null)
-                return "Invalid value";
+                return SPA.TextResources.InvalidValue;
 
             if (!ushort.TryParse(Value, out _))
-                return "Invalid value";
+                return SPA.TextResources.InvalidValue;
 
             return null;
         }

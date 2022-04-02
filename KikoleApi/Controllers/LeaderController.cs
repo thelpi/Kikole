@@ -48,7 +48,7 @@ namespace KikoleApi.Controllers
             [FromQuery] DateTime day, [FromQuery] LeaderSorts sort)
         {
             if (sort == LeaderSorts.SuccessCount)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.SuccessCountSortForbidden);
 
             var leadersDto = await _leaderRepository
                 .GetLeadersAtDateAsync(day)
@@ -170,10 +170,10 @@ namespace KikoleApi.Controllers
             [FromQuery] bool includePvp)
         {
             if (!includePvp && !Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidSortType);
 
             if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
-                return BadRequest();
+                return BadRequest(SPA.TextResources.InvalidDateRange);
 
             var leaderDtos = await _leaderRepository
                 .GetLeadersAsync(minimalDate, maximalDate)

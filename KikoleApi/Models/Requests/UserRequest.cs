@@ -21,13 +21,13 @@ namespace KikoleApi.Models.Requests
         internal string IsValid()
         {
             if (string.IsNullOrWhiteSpace(Login))
-                return "Empty login";
+                return SPA.TextResources.InvalidLogin;
 
             if (string.IsNullOrWhiteSpace(Password))
-                return "Empty password";
+                return SPA.TextResources.InvalidPassword;
 
             if (Language.HasValue && !Enum.IsDefined(typeof(Languages), Language.Value))
-                return "Invalid language";
+                return SPA.TextResources.InvalidLanguage;
 
             return null;
         }

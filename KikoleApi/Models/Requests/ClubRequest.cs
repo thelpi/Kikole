@@ -15,10 +15,10 @@ namespace KikoleApi.Models.Requests
         internal string IsValid()
         {
             if (string.IsNullOrWhiteSpace(Name))
-                return "Invalid name";
+                return SPA.TextResources.InvalidName;
 
             if (!AllowedNames.IsValid())
-                return "Invalid allowed names";
+                return SPA.TextResources.InvalidAllowedNames;
 
             return null;
         }
