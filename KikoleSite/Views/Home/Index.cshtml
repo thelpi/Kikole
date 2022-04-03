@@ -22,7 +22,7 @@
         @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
         {
             <div style="margin-top: 20px; font-size: large">
-                @localizer["SubmittedBy"] <span style="color: crimson">@Model.PlayerCreator</span>!
+                @Html.Raw(string.Format(localizer["SubmittedBy"].Value, Model.PlayerCreator))
             </div>
         }
         <div style="margin-top: 10px">

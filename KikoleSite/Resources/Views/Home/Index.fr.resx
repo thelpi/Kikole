@@ -184,7 +184,7 @@
     <value>Jour précédent</value>
   </data>
   <data name="SubmittedBy" xml:space="preserve">
-    <value>Le joueur du jour a été proposé par</value>
+    <value>Le joueur du jour a été proposé par  &lt;span style="color: crimson"&gt;{0}&lt;/span&gt; !</value>
   </data>
   <data name="TipAboutNationality" xml:space="preserve">
     <value>nationalité, et non pas la sélection pour laquelle il joue</value>
