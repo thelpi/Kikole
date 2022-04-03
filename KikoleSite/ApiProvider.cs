@@ -16,7 +16,7 @@ namespace KikoleSite
 
         private Languages _language;
 
-        private static Dictionary<ulong, IReadOnlyDictionary<ulong, string>> _countriesCache;
+        private static Dictionary<Languages, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
@@ -62,9 +62,7 @@ namespace KikoleSite
                     })
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode
-                ? null
-                : $"Creation failed: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<(bool, string)> LoginAsync(string login, string password)
@@ -75,14 +73,18 @@ namespace KikoleSite
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
-                return (false, $"Authentication failed: {response.StatusCode}");
+                return (false, await GetNullOrErrorAsync(response).ConfigureAwait(false));
 
             var token = await response.Content
                 .ReadAsStringAsync()
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(token))
-                return (false, $"Authentication failed: invalid token");
+            {
+                return (false, _language == Languages.fr
+                    ? "Echec de l'authentification : jeton invalide"
+                    : "Authentication failed: invalid token");
+            }
 
             return (true, token);
         }
@@ -110,9 +112,7 @@ namespace KikoleSite
                     authToken)
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode
-                ? null
-                : $"Invalid response: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<string> ChangeQAndAAsync(string authToken,
@@ -124,9 +124,7 @@ namespace KikoleSite
                     authToken)
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode
-                ? null
-                : $"Invalid response: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<string> ResetPasswordAsync(string login,
@@ -137,9 +135,7 @@ namespace KikoleSite
                     HttpMethod.Patch)
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode
-                ? null
-                : $"Invalid response: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<(bool, string)> GetLoginQuestionAsync(string login)
@@ -150,7 +146,7 @@ namespace KikoleSite
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
-                return (false, $"Invalid response: {response.StatusCode}");
+                return (false, await GetNullOrErrorAsync(response).ConfigureAwait(false));
 
             return (true, await GetResponseContentAsync<string>(response)
                 .ConfigureAwait(false));
@@ -255,9 +251,7 @@ namespace KikoleSite
                     })
                 .ConfigureAwait(false);
 
-            return response.IsSuccessStatusCode
-                ? null
-                : $"StatusCode: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
@@ -269,22 +263,7 @@ namespace KikoleSite
                     player)
                 .ConfigureAwait(false);
 
-            string message = null;
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.Content != null)
-                {
-                    message = await response.Content
-                        .ReadAsStringAsync()
-                        .ConfigureAwait(false);
-                    message = $"Error: {message}";
-                }
-                else
-                    message = $"StatusCode: {response.StatusCode}";
-            }
-            
-
-            return message;
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
@@ -309,36 +288,33 @@ namespace KikoleSite
                     request)
                 .ConfigureAwait(false);
 
-            if (response.IsSuccessStatusCode)
-                return null;
-
-            return $"Invalid response: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         #endregion player creation
 
         #region site management
 
-        public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId)
+        public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync()
         {
-            if (_countriesCache?.ContainsKey(languageId) != true)
+            if (_countriesCache?.ContainsKey(_language) != true)
             {
                 var response = await SendAsync(
-                    $"countries?languageId={languageId}",
+                    $"countries",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
                 var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
                     .ConfigureAwait(false);
 
-                _countriesCache = _countriesCache ?? new Dictionary<ulong, IReadOnlyDictionary<ulong, string>>();
+                _countriesCache = _countriesCache ?? new Dictionary<Languages, IReadOnlyDictionary<ulong, string>>();
                 _countriesCache.Add(
-                    languageId,
+                    _language,
                     apiCountries
                         .ToDictionary(ac => ac.Code, ac => ac.Name));
             }
 
-            return _countriesCache[languageId];
+            return _countriesCache[_language];
         }
 
         public async Task<ProposalChart> GetProposalChartAsync()
@@ -460,12 +436,7 @@ namespace KikoleSite
                     new { guestUserId, pointsRate })
                 .ConfigureAwait(false);
 
-            if (response.IsSuccessStatusCode)
-                return null;
-            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            else
-                return $"Technical error: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
 
         public async Task<string> RespondToChallengeAsync(ulong id, bool isAccepted, string authToken)
@@ -476,14 +447,9 @@ namespace KikoleSite
                     authToken)
                 .ConfigureAwait(false);
 
-            if (response.IsSuccessStatusCode)
-                return null;
-            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            else
-                return $"Technical error: {response.StatusCode}";
+            return await GetNullOrErrorAsync(response).ConfigureAwait(false);
         }
-        
+
         public async Task<IReadOnlyCollection<Challenge>> GetChallengesWaitingForResponseAsync(string authToken)
         {
             if (string.IsNullOrWhiteSpace(authToken))
@@ -546,6 +512,23 @@ namespace KikoleSite
         #endregion challenges
 
         #region private generic methods
+
+        private static async Task<string> GetNullOrErrorAsync(HttpResponseMessage response)
+        {
+            string result = null;
+            if (!response.IsSuccessStatusCode)
+            {
+                result = response.StatusCode.ToString();
+                if (response.Content != null)
+                {
+                    var locResult = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(locResult))
+                        result = locResult;
+                }
+            }
+
+            return result;
+        }
 
         private async Task<HttpResponseMessage> SendAsync(string route, HttpMethod method,
             string authToken = null, object content = null)

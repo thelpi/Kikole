@@ -176,7 +176,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var countries = await _apiProvider
-                .GetCountriesAsync(DefaultLanguageId)
+                .GetCountriesAsync()
                 .ConfigureAwait(false);
 
             var positions = GetPositions();

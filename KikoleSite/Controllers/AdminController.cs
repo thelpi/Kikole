@@ -148,7 +148,7 @@ namespace KikoleSite.Controllers
             }
 
             var countries = await _apiProvider
-                .GetCountriesAsync(DefaultLanguageId)
+                .GetCountriesAsync()
                 .ConfigureAwait(false);
 
             if (model.Country == null
@@ -304,7 +304,7 @@ namespace KikoleSite.Controllers
                             .ConfigureAwait(false);
 
             var countries = await _apiProvider
-                .GetCountriesAsync(DefaultLanguageId)
+                .GetCountriesAsync()
                 .ConfigureAwait(false);
 
             var players = pls

@@ -45,7 +45,7 @@ namespace KikoleSite
 
             // force cache
             apiProvider.GetClubsAsync().GetAwaiter().GetResult();
-            apiProvider.GetCountriesAsync(DefaultLanguageId).GetAwaiter().GetResult();
+            apiProvider.GetCountriesAsync().GetAwaiter().GetResult();
             apiProvider.GetProposalChartAsync().GetAwaiter().GetResult();
         }
 

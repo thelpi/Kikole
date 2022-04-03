@@ -10,7 +10,6 @@ namespace KikoleSite.Controllers
 {
     public abstract class KikoleBaseController : Controller
     {
-        internal const ulong DefaultLanguageId = 1;
         internal const string _cryptedAuthenticationCookieName = "AccountFormCrypt";
         internal const string CookiePartsSeparator = "§§§";
 
@@ -49,10 +48,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> AutoCompleteCountries(string prefix, ulong languageId = DefaultLanguageId)
+        public async Task<JsonResult> AutoCompleteCountries(string prefix)
         {
             var countries = (await _apiProvider
-                .GetCountriesAsync(DefaultLanguageId)
+                .GetCountriesAsync()
                 .ConfigureAwait(false))
                 .Where(c =>
                     c.Value.Sanitize().Contains(prefix.Sanitize()));

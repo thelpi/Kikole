@@ -61,7 +61,7 @@ namespace KikoleSite
 
         #region site management
 
-        Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(ulong languageId);
+        Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync();
 
         Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false);
 
