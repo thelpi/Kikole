@@ -1,4 +1,6 @@
-﻿using KikoleSite.Api;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using KikoleSite.Api;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,8 +33,11 @@ namespace KikoleSite
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
             });
 
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddMvc()
+                .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
+                .AddDataAnnotationsLocalization()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             var apiProvider = new ApiProvider(Configuration, Languages.fr);
 
@@ -66,6 +71,17 @@ namespace KikoleSite
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            var cultures = new List<CultureInfo> {
+                new CultureInfo("en"),
+                new CultureInfo("fr")
+            };
+
+            app.UseRequestLocalization(options => {
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
+                options.SupportedCultures = cultures;
+                options.SupportedUICultures = cultures;
             });
         }
     }

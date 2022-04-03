@@ -1,13 +1,14 @@
-﻿@model HomeModel
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model HomeModel
 <div>
     @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         await Html.RenderPartialAsync("Partial/Rules", Model.Chart).ConfigureAwait(false);
         <div style="margin-top: 40px">
-            <label>You are <a href="/Account"><span style="color: crimson">not logged</span></a></label>
+            <label>@localizer["YouAreNotLogged"]</label>
         </div>
         <div style="margin-top: 10px">
-            An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!
+            @localizer["AccountMandatory"]
         </div>
     }
     else

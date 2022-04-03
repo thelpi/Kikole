@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -29,9 +30,9 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>-->
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Kikole?</a>
-                <a asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">Account</a>
-                <a asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">Leaderboard</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
+                <a asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
+                <a asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
             </div>
         </div>
     </nav>
@@ -42,9 +43,9 @@
         @RenderBody()
         <hr />
         <footer>
-            <div><span style="color: crimson">NEW!</span> <a href="/Challenge">Challenge someone!</a></div>
-            <div><a href="/Admin">Submit a kikole!</a></div>
-            <p>&copy; @System.DateTime.Now.ToString("yyyy") - Kikole?</p>
+            <div><span style="color: crimson">@localizer["New"]</span> <a href="/Challenge">@localizer["ChallengeSomeone"]</a></div>
+            <div><a href="/Admin">@localizer["SubmitKikole"]</a></div>
+            <p>&copy; @System.DateTime.Now.ToString("yyyy") - @localizer["SiteName"]</p>
             <!--<a href="https://github.com/thelpi" target="_blank">About me</a>-->
         </footer>
     </div>
