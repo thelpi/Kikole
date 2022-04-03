@@ -105,7 +105,7 @@
                 <fieldset style="margin-top: 30px">
                     <div>
                         <div>
-                            <label>Clubs:</label>
+                            <label>@localizer["ClubsTitle"]</label>
                         </div>
                         <script>
                             $(function () {
@@ -135,14 +135,14 @@
                         <div>
                             <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
                             <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> pts if incorrect)</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
-                        <div style="font-size: small">(one club at a time)</div>
+                        <div style="font-size: small">(@localizer["OneClubAtATime"])</div>
                     </div>
                     @if (Model.KnownPlayerClubs?.Count > 0)
                     {
                         <div style="margin-top: 15px">
-                            <label>Career club so far:</label>
+                            <label>@localizer["CareerClubSoFar"]</label>
                             <ul>
                                 @foreach (var club in Model.KnownPlayerClubs)
                                 {
@@ -150,8 +150,8 @@
                                 }
                             </ul>
                         </div>
-                        <div style="font-size: small">(ordered from older to newer)</div>
-                        <div style="font-size: small">(no duplicate in case the player comes back to a club he already played)</div>
+                        <div style="font-size: small">(@localizer["ClubTipOne"])</div>
+                        <div style="font-size: small">(@localizer["ClubTipTwo"])</div>
                     }
                     @if (Model.IncorrectClubs?.Count > 0)
                     {
@@ -168,7 +168,7 @@
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
-                        <label>Nationality:</label>
+                        <label>@localizer["NationalityTitle"]</label>
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.CountryName))
                     {
@@ -180,7 +180,6 @@
                                             url: '/Home/AutoCompleteCountries/',
                                             data: {
                                                 "prefix": request.term
-                                                // add languageID here
                                             },
                                             type: "POST",
                                             success: function (data) {
@@ -202,9 +201,9 @@
                             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
                             <input type="hidden" id="countryId" name="CountryNameSubmission" />
                             <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> pts if incorrect)</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
-                        <div style="font-size: small">(it's the nationality, not the national team he plays or played)</div>
+                        <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
                         @if (Model.IncorrectCountries?.Count > 0)
                         {
                             <div style="margin-top: 10px">
@@ -227,7 +226,7 @@
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
-                        <label>Year of birth:</label>
+                        <label>@localizer["BirthYearTitle"]</label>
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.BirthYear))
                     {
@@ -249,7 +248,7 @@
                             </script>
                             <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
                             <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> pts if incorrect)</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         @if (Model.IncorrectYears?.Count > 0)
                         {
@@ -273,7 +272,7 @@
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
                     <div>
-                        <label>Position:</label>
+                        <label>@localizer["PositionTitle"]</label>
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.Position))
                     {
@@ -289,7 +288,7 @@
                             </script>
                             @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
                             <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> pts if incorrect)</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
@@ -313,14 +312,14 @@
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 60px">
                     <div>
-                        <label style="color:crimson">Submit your player here:</label>
+                        <label style="color:crimson">@localizer["TypePlayerName"]</label>
                     </div>
                     <div>
                         <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" style="width: 300px; border-color: crimson" />
                         <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> pts if incorrect)</span>
+                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> @localizer["PointsIfIncorrect"])</span>
                     </div>
-                    <div style="font-size: small">(lastname or nickname is enough in most cases; as a rule of thumb keep it simple)</div>
+                    <div style="font-size: small">(@localizer["UseWikiTitle"])</div>
                 </div>
                 @if (Model.IncorrectNames?.Count > 0)
                 {

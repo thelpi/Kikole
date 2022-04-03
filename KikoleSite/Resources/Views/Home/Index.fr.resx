@@ -120,8 +120,23 @@
   <data name="AccountMandatory" xml:space="preserve">
     <value>Le compte est nécessaire pour jouer, mais il prend 10 secondes à créer et aucune information personnelle n'est requise !</value>
   </data>
+  <data name="BirthYearTitle" xml:space="preserve">
+    <value>Année de naissance :</value>
+  </data>
+  <data name="CareerClubSoFar" xml:space="preserve">
+    <value>Carrière en club :</value>
+  </data>
   <data name="ChallengeOngoing" xml:space="preserve">
     <value>Vous avez un challenge contre &lt;span style="color: crimson"&gt;{0}&lt;/span&gt; aujourd'hui, pour &lt;span style="color: crimson"&gt;{1}&lt;/span&gt;% de vos points !</value>
+  </data>
+  <data name="ClubsTitle" xml:space="preserve">
+    <value>Clubs :</value>
+  </data>
+  <data name="ClubTipOne" xml:space="preserve">
+    <value>Triés du plus ancien au plus récent</value>
+  </data>
+  <data name="ClubTipTwo" xml:space="preserve">
+    <value>Pas de doublon quand le joueur revient dans un cllub qu'il a déjà connu</value>
   </data>
   <data name="ComeBackTomorrow" xml:space="preserve">
     <value>Revenez demain pour un nouveau joueur !</value>
@@ -141,8 +156,14 @@
   <data name="LoggedAs" xml:space="preserve">
     <value>Vous êtes connecté en tant que</value>
   </data>
+  <data name="NationalityTitle" xml:space="preserve">
+    <value>Nationalité :</value>
+  </data>
   <data name="NextDay" xml:space="preserve">
     <value>Jour suivant</value>
+  </data>
+  <data name="OneClubAtATime" xml:space="preserve">
+    <value>un club à la fois</value>
   </data>
   <data name="PendingChallenges" xml:space="preserve">
     <value>Vous avez des challenges en attente d'une &lt;a href="/Challenge"&gt;réponse&lt;/a&gt;.</value>
@@ -153,11 +174,26 @@
   <data name="PlayerIs" xml:space="preserve">
     <value>Le joueur du jour est</value>
   </data>
+  <data name="PointsIfIncorrect" xml:space="preserve">
+    <value>pts si incorrect</value>
+  </data>
+  <data name="PositionTitle" xml:space="preserve">
+    <value>Position :</value>
+  </data>
   <data name="PreviousDay" xml:space="preserve">
     <value>Jour précédent</value>
   </data>
   <data name="SubmittedBy" xml:space="preserve">
     <value>Le joueur du jour a été proposé par</value>
+  </data>
+  <data name="TipAboutNationality" xml:space="preserve">
+    <value>nationalité, et non pas la sélection pour laquelle il joue</value>
+  </data>
+  <data name="TypePlayerName" xml:space="preserve">
+    <value>Saisissez le nom du joueur ici :</value>
+  </data>
+  <data name="UseWikiTitle" xml:space="preserve">
+    <value>conseil: saisissez le titre de la page Wiki en anglais du joueur</value>
   </data>
   <data name="YouAreNotLogged" xml:space="preserve">
     <value>Vous n'êtes &lt;a href="/Account"&gt;&lt;span style="color: crimson"&gt;pas identifié&lt;/span&gt;&lt;/a&gt;</value>

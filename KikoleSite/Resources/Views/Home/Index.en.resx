@@ -120,8 +120,23 @@
   <data name="AccountMandatory" xml:space="preserve">
     <value>An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!</value>
   </data>
+  <data name="BirthYearTitle" xml:space="preserve">
+    <value>Year of birth:</value>
+  </data>
+  <data name="CareerClubSoFar" xml:space="preserve">
+    <value>Career clubs:</value>
+  </data>
   <data name="ChallengeOngoing" xml:space="preserve">
     <value>You have a challenge against &lt;span style="color: crimson"&gt;{0}&lt;/span&gt; today, for &lt;span style="color: crimson"&gt;{1}&lt;/span&gt;% of your points!</value>
+  </data>
+  <data name="ClubsTitle" xml:space="preserve">
+    <value>Clubs:</value>
+  </data>
+  <data name="ClubTipOne" xml:space="preserve">
+    <value>ordered from older to newer</value>
+  </data>
+  <data name="ClubTipTwo" xml:space="preserve">
+    <value>no duplicate in case the player comes back to a club he already played</value>
   </data>
   <data name="ComeBackTomorrow" xml:space="preserve">
     <value>Come back tomorrow for a new player!</value>
@@ -141,8 +156,14 @@
   <data name="LoggedAs" xml:space="preserve">
     <value>You are logged as</value>
   </data>
+  <data name="NationalityTitle" xml:space="preserve">
+    <value>Nationality:</value>
+  </data>
   <data name="NextDay" xml:space="preserve">
     <value>Next day</value>
+  </data>
+  <data name="OneClubAtATime" xml:space="preserve">
+    <value>one club at a time</value>
   </data>
   <data name="PendingChallenges" xml:space="preserve">
     <value>You have pending challenges waiting for a &lt;a href="/Challenge"&gt;response&lt;/a&gt;.</value>
@@ -153,11 +174,26 @@
   <data name="PlayerIs" xml:space="preserve">
     <value>Today's player is</value>
   </data>
+  <data name="PointsIfIncorrect" xml:space="preserve">
+    <value>pts if incorrect</value>
+  </data>
+  <data name="PositionTitle" xml:space="preserve">
+    <value>Position:</value>
+  </data>
   <data name="PreviousDay" xml:space="preserve">
     <value>Previous day</value>
   </data>
   <data name="SubmittedBy" xml:space="preserve">
     <value>Today's player has been submitted by</value>
+  </data>
+  <data name="TipAboutNationality" xml:space="preserve">
+    <value>it's the nationality, not the national team he plays or played</value>
+  </data>
+  <data name="TypePlayerName" xml:space="preserve">
+    <value>Type the player's name here:</value>
+  </data>
+  <data name="UseWikiTitle" xml:space="preserve">
+    <value>tip: type the title of the player's english Wiki page</value>
   </data>
   <data name="YouAreNotLogged" xml:space="preserve">
     <value>You are &lt;a href="/Account"&gt;&lt;span style="color: crimson"&gt;not logged&lt;/span&gt;&lt;/a&gt;</value>
