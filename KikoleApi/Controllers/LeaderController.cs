@@ -330,7 +330,7 @@ namespace KikoleApi.Controllers
                 .ToList();
         }
 
-        private static IReadOnlyCollection<Leader> ComputePveLeaders(
+        private IReadOnlyCollection<Leader> ComputePveLeaders(
             IReadOnlyCollection<LeaderDto> leaderDtos,
             IReadOnlyCollection<UserDto> users,
             IReadOnlyCollection<PlayerDto> players)
@@ -339,9 +339,16 @@ namespace KikoleApi.Controllers
                 .GroupBy(leaderDto => leaderDto.UserId)
                 .Select(leaderDto => new Leader(leaderDto, users)
                     .WithPointsFromSubmittedPlayers(
-                        players.Where(p => p.CreationUserId == leaderDto.Key).Select(d => d.ProposalDate.Value),
-                        leaderDtos))
+                        GetDatesWithPlayerCreation(players, leaderDto), leaderDtos))
                 .ToList();
+        }
+
+        private IEnumerable<DateTime> GetDatesWithPlayerCreation(IReadOnlyCollection<PlayerDto> players, IGrouping<ulong, LeaderDto> leaderDto)
+        {
+            return players
+                .Where(p => p.CreationUserId == leaderDto.Key
+                    && ((p.ProposalDate.Value < _clock.Now.Date) || p.HideCreator == 0))
+                .Select(d => d.ProposalDate.Value);
         }
     }
 }

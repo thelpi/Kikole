@@ -72,16 +72,20 @@ namespace KikoleApi.Models
             IEnumerable<LeaderDto> datesLeaders)
         {
             foreach (var date in dates)
-            {
-                var leadersCosting = ProposalChart.Default.SubmissionBonusPoints - datesLeaders
+                TotalPoints += GetSubmittedPlayerPoints(datesLeaders, date);
+
+            return this;
+        }
+
+        internal static int GetSubmittedPlayerPoints(IEnumerable<LeaderDto> datesLeaders, DateTime date)
+        {
+            var leadersCosting = ProposalChart.Default.SubmissionBonusPoints
+                - datesLeaders
                     .Where(d => d.ProposalDate.Date == date && d.Points >= ProposalChart.Default.SubmissionThresholdlosePoints)
                     .Sum(d => ProposalChart.Default.SubmissionLosePointsByLeader);
 
-                TotalPoints += ProposalChart.Default.SubmissionBasePoints
-                    + Math.Max(leadersCosting, 0);
-            }
-
-            return this;
+            return ProposalChart.Default.SubmissionBasePoints
+                + Math.Max(leadersCosting, 0);
         }
 
         internal Leader WithPointsFromChallenge(int challengePoints, bool hostWin)

@@ -351,9 +351,13 @@ namespace KikoleApi.Controllers
                     .ConfigureAwait(false);
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
+                
+                var isCreator = (pDay.ProposalDate.Value.Date < now || pDay.HideCreator == 0)
+                    && userId == pDay.CreationUserId;
 
-                var singleStat = new DailyUserStat(userId, currentDate, pDay.Name,
-                    proposals.Count > 0, leaders, meLeader);
+                var singleStat = isCreator
+                    ? new DailyUserStat(currentDate, pDay.Name, leaders)
+                    : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Count > 0, leaders, meLeader);
 
                 stats.Add(singleStat);
                 currentDate = currentDate.AddDays(1);

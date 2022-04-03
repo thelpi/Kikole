@@ -21,6 +21,15 @@ namespace KikoleApi.Models
 
         public int? PointsPosition { get; }
 
+        internal DailyUserStat(DateTime currentDate,
+            string playerName,
+            IReadOnlyCollection<LeaderDto> leaders)
+        {
+            Date = currentDate;
+            Answer = playerName;
+            Points = Leader.GetSubmittedPlayerPoints(leaders, currentDate);
+        }
+
         internal DailyUserStat(ulong userId,
             DateTime currentDate,
             string playerName,
