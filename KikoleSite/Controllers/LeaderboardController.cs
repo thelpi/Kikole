@@ -115,12 +115,12 @@ namespace KikoleSite.Controllers
                     .ConfigureAwait(false);
             }
 
-            model.BoardName = "Custom";
+            model.BoardName = "Custom leaderboard";
             var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();
             var isCurrentMonthEnd = model.MaximalDate.IsAfterInMonth();
             if (isCurrentMonthStart && isCurrentMonthEnd)
             {
-                model.BoardName = "This month";
+                model.BoardName = "This month leaderboard";
             }
             else
             {
@@ -128,11 +128,11 @@ namespace KikoleSite.Controllers
                 var isMonthEnd = model.MaximalDate.IsEndOfMonth(model.MinimalDate);
                 if (isMonthStart && isMonthEnd)
                 {
-                    model.BoardName = model.MinimalDate.GetMonthName();
+                    model.BoardName = model.MinimalDate.GetMonthName() + " leaderboard";
                 }
                 else if (model.MaximalDate.Date == DateTime.Now.Date)
                 {
-                    model.BoardName = $"Last {Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))} days";
+                    model.BoardName = $"Last {Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))} days leaderboard";
                 }
             }
         }

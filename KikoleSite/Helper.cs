@@ -12,7 +12,8 @@ namespace KikoleSite
     {
         public const string NA = "N/A";
         public const string TimeSpanPattern = @"hh\:mm";
-        public const string DateTimePattern = "yyyy-MM-dd";
+        public const string DateTimePatternEn = "yyyy-MM-dd";
+        public const string DateTimePatternFr = "dd/MM/yyyy";
         public const string Iso8859Code = "ISO-8859-8";
 
         static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
@@ -34,19 +35,26 @@ namespace KikoleSite
             return data?.ToString(TimeSpanPattern) ?? NA;
         }
 
-        internal static string ToNaString(this DateTime? data)
+        public static string ToNaString(this TimeSpan data)
         {
-            return data?.ToString(DateTimePattern) ?? NA;
+            return data.ToString(TimeSpanPattern);
         }
 
-        internal static string ToNaString(this DateTime data)
+        internal static string ToNaString(this DateTime? data)
         {
-            return data.ToString(DateTimePattern);
+            return data?.ToString(IsFrench() ? DateTimePatternFr : DateTimePatternEn) ?? NA;
+        }
+
+        public static string ToNaString(this DateTime data)
+        {
+            return data.ToString(IsFrench() ? DateTimePatternFr : DateTimePatternEn);
         }
 
         public static string ToYesNo(this bool data)
         {
-            return data ? "Yes" : "No";
+            return data
+                ? (IsFrench() ? "Oui" : "Yes")
+                : (IsFrench() ? "Non" : "No");
         }
 
         internal static string Encrypt(this string plainText)
@@ -166,20 +174,40 @@ namespace KikoleSite
         {
             switch (date.Month)
             {
-                case 1: return "January";
-                case 2: return "February";
-                case 3: return "March";
-                case 4: return "April";
-                case 5: return "May";
-                case 6: return "June";
-                case 7: return "July";
-                case 8: return "August";
-                case 9: return "September";
-                case 10: return "October";
-                case 11: return "November";
-                case 12: return "December";
+                case 1: return IsFrench() ? "Janvier" : "January";
+                case 2: return IsFrench() ? "Février" : "February";
+                case 3: return IsFrench() ? "Mars" : "March";
+                case 4: return IsFrench() ? "Avril" : "April";
+                case 5: return IsFrench() ? "Mai" : "May";
+                case 6: return IsFrench() ? "Juin" : "June";
+                case 7: return IsFrench() ? "Juillet" : "July";
+                case 8: return IsFrench() ? "Août" : "August";
+                case 9: return IsFrench() ? "Septembre" : "September";
+                case 10: return IsFrench() ? "Octobre" : "October";
+                case 11: return IsFrench() ? "Novembre" : "November";
+                case 12: return IsFrench() ? "Décembre" : "December";
                 default: throw new NotImplementedException();
             }
+        }
+
+        public static string GetLabel(this Api.LeaderSort sort)
+        {
+            switch (sort)
+            {
+                case Api.LeaderSort.BestTime:
+                    return IsFrench() ? "Meilleur temps" : "Best time";
+                case Api.LeaderSort.SuccessCount:
+                    return IsFrench() ? "Nombre de succès" : "Success count";
+                case Api.LeaderSort.TotalPoints:
+                    return IsFrench() ? "Points" : "Points";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private static bool IsFrench()
+        {
+            return System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName == Api.Languages.fr.ToString();
         }
     }
 }
