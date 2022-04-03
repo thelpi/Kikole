@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -207,7 +208,14 @@ namespace KikoleSite
 
         private static bool IsFrench()
         {
-            return System.Globalization.CultureInfo.CurrentCulture.TwoLetterISOLanguageName == Api.Languages.fr.ToString();
+            return GetLanguage() == Api.Languages.fr;
+        }
+
+        internal static Api.Languages GetLanguage()
+        {
+            if (!Enum.TryParse<Api.Languages>(CultureInfo.CurrentCulture.TwoLetterISOLanguageName, out var language))
+                return Api.Languages.en;
+            return language;
         }
     }
 }

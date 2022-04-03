@@ -39,7 +39,7 @@ namespace KikoleSite
                 .AddDataAnnotationsLocalization()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            var apiProvider = new ApiProvider(Configuration, Languages.fr);
+            var apiProvider = new ApiProvider(Configuration, Helper.GetLanguage());
 
             services.AddSingleton<IApiProvider>(apiProvider);
 
