@@ -15,10 +15,13 @@ namespace KikoleApi.Controllers
     public class ClubController : KikoleBaseController
     {
         private readonly IClubRepository _clubRepository;
+        private readonly TextResources _resources;
 
-        public ClubController(IClubRepository clubRepository)
+        public ClubController(IClubRepository clubRepository,
+            TextResources resources)
         {
             _clubRepository = clubRepository;
+            _resources = resources;
         }
 
         [HttpGet]
@@ -43,18 +46,18 @@ namespace KikoleApi.Controllers
         public async Task<IActionResult> CreateClubAsync([FromBody] ClubRequest request)
         {
             if (request == null)
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
 
-            var validityRequest = request.IsValid();
+            var validityRequest = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
 
             var playerId = await _clubRepository
                 .CreateClubAsync(request.ToDto())
                 .ConfigureAwait(false);
 
             if (playerId == 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, SPA.TextResources.ClubCreationFailure);
+                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.ClubCreationFailure);
             
             return Created($"clubs/{playerId}", null);
         }

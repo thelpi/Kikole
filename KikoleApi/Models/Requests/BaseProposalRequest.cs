@@ -16,15 +16,15 @@ namespace KikoleApi.Models.Requests
 
         internal abstract ProposalTypes ProposalType { get; }
 
-        internal virtual string GetTip(PlayerDto player)
+        internal virtual string GetTip(PlayerDto player, TextResources resources)
         {
             return null;
         }
 
-        internal virtual string IsValid()
+        internal virtual string IsValid(TextResources resources)
         {
             if (string.IsNullOrWhiteSpace(Value))
-                return SPA.TextResources.InvalidValue;
+                return resources.InvalidValue;
 
             return null;
         }

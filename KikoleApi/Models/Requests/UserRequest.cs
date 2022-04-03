@@ -18,16 +18,16 @@ namespace KikoleApi.Models.Requests
 
         public Languages? Language { get; set; }
 
-        internal string IsValid()
+        internal string IsValid(TextResources resources)
         {
             if (string.IsNullOrWhiteSpace(Login))
-                return SPA.TextResources.InvalidLogin;
+                return resources.InvalidLogin;
 
             if (string.IsNullOrWhiteSpace(Password))
-                return SPA.TextResources.InvalidPassword;
+                return resources.InvalidPassword;
 
             if (Language.HasValue && !Enum.IsDefined(typeof(Languages), Language.Value))
-                return SPA.TextResources.InvalidLanguage;
+                return resources.InvalidLanguage;
 
             return null;
         }

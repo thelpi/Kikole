@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
-using KikoleApi.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
@@ -16,28 +14,26 @@ namespace KikoleApi.Controllers
         private readonly IInternationalRepository _internationalRepository;
         private readonly IMessageRepository _messageRepository;
         private readonly IClock _clock;
+        private readonly TextResources _resources;
 
         public SiteController(IInternationalRepository internationalRepository,
             IMessageRepository messageRepository,
+            TextResources resources,
             IClock clock)
         {
             _internationalRepository = internationalRepository;
             _messageRepository = messageRepository;
             _clock = clock;
+            _resources = resources;
         }
 
         [HttpGet("countries")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Country>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<IReadOnlyCollection<Country>>> GetCountriesAsync([FromQuery] ulong languageId)
+        public async Task<ActionResult<IReadOnlyCollection<Country>>> GetCountriesAsync()
         {
-            if (!Enum.GetValues(typeof(Languages)).Cast<Languages>().Select(_ => (ulong)_).Contains(languageId))
-                return BadRequest(SPA.TextResources.InvalidLanguage);
-
             var countries = await _internationalRepository
-                .GetCountriesAsync(languageId)
+                .GetCountriesAsync((ulong)_resources.Language)
                 .ConfigureAwait(false);
 
             return Ok(countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList());

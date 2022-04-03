@@ -10,13 +10,13 @@
 
         public string RefusalReason { get; set; }
 
-        internal string IsValid()
+        internal string IsValid(TextResources resources)
         {
             if (PlayerId == 0)
-                return SPA.TextResources.InvalidPlayerId;
+                return resources.InvalidPlayerId;
 
             if (!IsAccepted && string.IsNullOrWhiteSpace(RefusalReason))
-                return SPA.TextResources.RefusalWithoutReason;
+                return resources.RefusalWithoutReason;
 
             return null;
         }

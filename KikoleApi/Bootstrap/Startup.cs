@@ -77,8 +77,7 @@ namespace KikoleApi.Bootstrap
             });
 
             app.UseHttpsRedirection();
-
-            SPA.SetProvider(app.ApplicationServices);
+            
             app.UseMvc();
         }
     }

@@ -12,13 +12,13 @@ namespace KikoleApi.Models.Requests
 
         public IReadOnlyList<string> AllowedNames { get; set; }
 
-        internal string IsValid()
+        internal string IsValid(TextResources resources)
         {
             if (string.IsNullOrWhiteSpace(Name))
-                return SPA.TextResources.InvalidName;
+                return resources.InvalidName;
 
             if (!AllowedNames.IsValid())
-                return SPA.TextResources.InvalidAllowedNames;
+                return resources.InvalidAllowedNames;
 
             return null;
         }

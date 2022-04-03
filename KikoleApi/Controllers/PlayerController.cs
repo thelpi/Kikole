@@ -21,17 +21,20 @@ namespace KikoleApi.Controllers
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IClock _clock;
+        private readonly TextResources _resources;
 
         public PlayerController(IPlayerRepository playerRepository,
             IClock clock,
             IBadgeRepository badgeRepository,
             IUserRepository userRepository,
-            IClubRepository clubRepository)
+            IClubRepository clubRepository,
+            TextResources resources)
         {
             _playerRepository = playerRepository;
             _badgeRepository = badgeRepository;
             _userRepository = userRepository;
             _clubRepository = clubRepository;
+            _resources = resources;
             _clock = clock;
         }
 
@@ -58,14 +61,14 @@ namespace KikoleApi.Controllers
             [FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(SPA.TextResources.InvalidUser);
+                return BadRequest(_resources.InvalidUser);
 
             if (request == null)
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
 
-            var validityRequest = request.IsValid(_clock.Now);
+            var validityRequest = request.IsValid(_clock.Now, _resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
 
             if (!request.ProposalDate.HasValue && request.SetLatestProposalDate)
                 request.ProposalDate = await GetNextDateAsync().ConfigureAwait(false);
@@ -75,7 +78,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             if (playerId == 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, SPA.TextResources.PlayerCreationFailure);
+                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.PlayerCreationFailure);
             
             foreach (var club in request.ToPlayerClubDtos(playerId))
             {
@@ -140,21 +143,21 @@ namespace KikoleApi.Controllers
             [FromBody] PlayerSubmissionValidationRequest request)
         {
             if (request == null)
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
 
-            var validityCheck = request.IsValid();
+            var validityCheck = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityCheck))
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityCheck));
+                return BadRequest(string.Format(_resources.InvalidRequest, validityCheck));
 
             var p = await _playerRepository
                 .GetPlayerByIdAsync(request.PlayerId)
                 .ConfigureAwait(false);
 
             if (p == null)
-                return NotFound(SPA.TextResources.PlayerDoesNotExist);
+                return NotFound(_resources.PlayerDoesNotExist);
 
             if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
-                return Conflict(SPA.TextResources.RejectAndProposalDateCombined);
+                return Conflict(_resources.RejectAndProposalDateCombined);
 
             if (request.IsAccepted)
             {

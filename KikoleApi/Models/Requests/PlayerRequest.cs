@@ -29,34 +29,34 @@ namespace KikoleApi.Models.Requests
 
         public bool HideCreator { get; set; }
 
-        internal string IsValid(DateTime now)
+        internal string IsValid(DateTime now, TextResources resources)
         {
             if (string.IsNullOrWhiteSpace(Name))
-                return SPA.TextResources.InvalidName;
+                return resources.InvalidName;
 
             if (!Enum.IsDefined(typeof(Countries), Country))
-                return SPA.TextResources.InvalidCountry;
+                return resources.InvalidCountry;
 
             if (!Enum.IsDefined(typeof(Positions), Position))
-                return SPA.TextResources.InvalidPosition;
+                return resources.InvalidPosition;
 
             if (YearOfBirth < 1900 || YearOfBirth > 2100)
-                return SPA.TextResources.InvalidBirthYear;
+                return resources.InvalidBirthYear;
 
             if (!AllowedNames.IsValid())
-                return SPA.TextResources.InvalidAllowedNames;
+                return resources.InvalidAllowedNames;
 
             if (Clubs == null || Clubs.Count == 0)
-                return SPA.TextResources.EmptyClubsList;
+                return resources.EmptyClubsList;
 
             if (Clubs.Any(c => c <= 0))
-                return SPA.TextResources.InvalidClubs;
+                return resources.InvalidClubs;
 
             if (string.IsNullOrWhiteSpace(Clue))
-                return SPA.TextResources.InvalidClue;
+                return resources.InvalidClue;
 
             if (ProposalDate.HasValue && ProposalDate.Value.Date < now.Date)
-                return SPA.TextResources.InvalidProposalDate;
+                return resources.InvalidProposalDate;
 
             return null;
         }

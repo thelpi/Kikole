@@ -7,20 +7,20 @@ namespace KikoleApi.Models.Requests
     {
         internal override ProposalTypes ProposalType => ProposalTypes.Year;
 
-        internal override string GetTip(PlayerDto player)
+        internal override string GetTip(PlayerDto player, TextResources resources)
         {
             return ushort.Parse(Value) > player.YearOfBirth
-                ? SPA.TextResources.TipOlderPlayer
-                : SPA.TextResources.TipYoungerPlayer;
+                ? resources.TipOlderPlayer
+                : resources.TipYoungerPlayer;
         }
 
-        internal override string IsValid()
+        internal override string IsValid(TextResources resources)
         {
             if (Value == null)
-                return SPA.TextResources.InvalidValue;
+                return resources.InvalidValue;
 
             if (!ushort.TryParse(Value, out _))
-                return SPA.TextResources.InvalidValue;
+                return resources.InvalidValue;
 
             return null;
         }

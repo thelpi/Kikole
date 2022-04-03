@@ -21,6 +21,7 @@ namespace KikoleApi.Controllers
         private readonly IClubRepository _clubRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
+        private readonly TextResources _resources;
         private readonly IClock _clock;
 
         public LeaderController(ILeaderRepository leaderRepository,
@@ -29,6 +30,7 @@ namespace KikoleApi.Controllers
             IClubRepository clubRepository,
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
+            TextResources resources,
             IClock clock)
         {
             _leaderRepository = leaderRepository;
@@ -37,6 +39,7 @@ namespace KikoleApi.Controllers
             _clubRepository = clubRepository;
             _proposalRepository = proposalRepository;
             _challengeRepository = challengeRepository;
+            _resources = resources;
             _clock = clock;
         }
 
@@ -48,7 +51,7 @@ namespace KikoleApi.Controllers
             [FromQuery] DateTime day, [FromQuery] LeaderSorts sort)
         {
             if (sort == LeaderSorts.SuccessCount)
-                return BadRequest(SPA.TextResources.SuccessCountSortForbidden);
+                return BadRequest(_resources.SuccessCountSortForbidden);
 
             var leadersDto = await _leaderRepository
                 .GetLeadersAtDateAsync(day)
@@ -170,10 +173,10 @@ namespace KikoleApi.Controllers
             [FromQuery] bool includePvp)
         {
             if (!includePvp && !Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                return BadRequest(SPA.TextResources.InvalidSortType);
+                return BadRequest(_resources.InvalidSortType);
 
             if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
-                return BadRequest(SPA.TextResources.InvalidDateRange);
+                return BadRequest(_resources.InvalidDateRange);
 
             var leaderDtos = await _leaderRepository
                 .GetLeadersAsync(minimalDate, maximalDate)

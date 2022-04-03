@@ -9,13 +9,13 @@ namespace KikoleApi.Models.Requests
 
         public byte PointsRate { get; set; }
 
-        internal string IsValid()
+        internal string IsValid(TextResources resources)
         {
             if (GuestUserId == 0)
-                return SPA.TextResources.InvalidGuestUserId;
+                return resources.InvalidGuestUserId;
 
             if (PointsRate == 0 || PointsRate > 100)
-                return SPA.TextResources.InvalidPointsRate;
+                return resources.InvalidPointsRate;
 
             return null;
         }

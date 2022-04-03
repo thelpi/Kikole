@@ -23,6 +23,7 @@ namespace KikoleApi.Controllers
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IClock _clock;
+        private readonly TextResources _resources;
 
         public ProposalController(IProposalRepository proposalRepository,
             IPlayerRepository playerRepository,
@@ -30,6 +31,7 @@ namespace KikoleApi.Controllers
             ILeaderRepository leaderRepository,
             IBadgeRepository badgeRepository,
             IUserRepository userRepository,
+            TextResources resources,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
@@ -38,6 +40,7 @@ namespace KikoleApi.Controllers
             _leaderRepository = leaderRepository;
             _badgeRepository = badgeRepository;
             _userRepository = userRepository;
+            _resources = resources;
             _clock = clock;
         }
 
@@ -119,7 +122,7 @@ namespace KikoleApi.Controllers
             [FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(SPA.TextResources.InvalidUser);
+                return BadRequest(_resources.InvalidUser);
 
             var datas = await _proposalRepository
                 .GetProposalsAsync(proposalDate, userId)
@@ -157,18 +160,18 @@ namespace KikoleApi.Controllers
             where T : BaseProposalRequest
         {
             if (request == null)
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
 
-            var validityRequest = request.IsValid();
+            var validityRequest = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(SPA.TextResources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
 
             var playerOfTheDay = await _playerRepository
                 .GetPlayerOfTheDayAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
             if (playerOfTheDay == null)
-                return BadRequest(SPA.TextResources.InvalidDate);
+                return BadRequest(_resources.InvalidDate);
 
             var playerClubs = await _playerRepository
                 .GetPlayerClubsAsync(playerOfTheDay.Id)
@@ -187,7 +190,8 @@ namespace KikoleApi.Controllers
                 request,
                 playerOfTheDay,
                 playerClubs,
-                playerClubsDetails);
+                playerClubsDetails,
+                _resources);
 
             var proposalsAlready = await _proposalRepository
                 .GetProposalsAsync(request.PlayerSubmissionDate, userId)

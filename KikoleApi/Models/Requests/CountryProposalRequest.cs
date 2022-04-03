@@ -8,20 +8,20 @@ namespace KikoleApi.Models.Requests
     {
         internal override ProposalTypes ProposalType => ProposalTypes.Country;
 
-        internal override string IsValid()
+        internal override string IsValid(TextResources resources)
         {
             if (Value == null)
-                return SPA.TextResources.InvalidValue;
+                return resources.InvalidValue;
 
             if (int.TryParse(Value, out var countryId))
             {
                 if (!Enum.GetValues(typeof(Countries)).Cast<int>().Contains(countryId))
-                    return SPA.TextResources.InvalidValue;
+                    return resources.InvalidValue;
             }
             else
             {
                 if (!Enum.IsDefined(typeof(Countries), Value))
-                    return SPA.TextResources.InvalidValue;
+                    return resources.InvalidValue;
             }
 
             return null;

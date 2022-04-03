@@ -9,6 +9,13 @@ namespace KikoleApi.Controllers.Filters
     {
         const string LanguageHeader = "Language";
 
+        private readonly TextResources _resources;
+
+        public LanguageFilter(TextResources resources)
+        {
+            _resources = resources;
+        }
+
         public void OnResourceExecuted(ResourceExecutedContext context)
         {
             // does nothing
@@ -16,24 +23,18 @@ namespace KikoleApi.Controllers.Filters
 
         public void OnResourceExecuting(ResourceExecutingContext context)
         {
-            var resources = SPA.TextResources;
-            if (resources == null)
-                return;
-
-            SPA.TextResources.Language = Languages.en;
+            _resources.Language = Languages.en;
             if (context.HttpContext.Request.Headers.ContainsKey(LanguageHeader))
             {
                 var values = context.HttpContext.Request.Headers[LanguageHeader];
                 if (values.Count == 1)
                 {
                     var value = values[0];
-                    if (int.TryParse(value, out var languageId))
-                    {
-                        if (Enum.GetValues(typeof(Languages)).Cast<int>().Contains(languageId))
-                            SPA.TextResources.Language = (Languages)languageId;
-                    }
+                    if (int.TryParse(value, out var languageId)
+                        && Enum.GetValues(typeof(Languages)).Cast<int>().Contains(languageId))
+                        _resources.Language = (Languages)languageId;
                     else if (Enum.IsDefined(typeof(Languages), value))
-                        SPA.TextResources.Language = Enum.Parse<Languages>(value);
+                        _resources.Language = Enum.Parse<Languages>(value);
                 }
             }
         }

@@ -92,10 +92,11 @@ namespace KikoleApi.Models
         internal ProposalResponse(BaseProposalRequest request,
             PlayerDto player,
             IReadOnlyList<PlayerClubDto> playerClubs,
-            IReadOnlyList<ClubDto> clubs)
+            IReadOnlyList<ClubDto> clubs,
+            TextResources resources)
             : this(request.ProposalType, request.Value, null, player, playerClubs, clubs)
         {
-            Tip = request.GetTip(player);
+            Tip = request.GetTip(player, resources);
         }
 
         internal ProposalResponse(ProposalDto dto,
