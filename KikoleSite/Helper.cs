@@ -25,7 +25,7 @@ namespace KikoleSite
                 : settings.GetType().GetProperty(name) != null;
         }
 
-        internal static string ToNaString(this object data)
+        public static string ToNaString(this object data)
         {
             return data?.ToString() ?? NA;
         }
