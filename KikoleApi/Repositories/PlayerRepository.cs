@@ -137,5 +137,15 @@ namespace KikoleApi.Repositories
                     new { playerId })
                 .ConfigureAwait(false);
         }
+
+        public async Task<string> GetClueAsync(ulong playerId, ulong languageId)
+        {
+            return await ExecuteScalarAsync<string>(
+                    "SELECT clue FROM player_clue_translations " +
+                    "WHERE player_id = @playerId " +
+                    "AND language_id = @languageId",
+                    new { playerId, languageId })
+                .ConfigureAwait(false);
+        }
     }
 }

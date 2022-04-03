@@ -47,7 +47,15 @@ namespace KikoleApi.Controllers
                 .GetPlayerOfTheDayAsync(proposalDate)
                 .ConfigureAwait(false);
 
-            return Ok(player.Clue);
+            var clue = player.Clue;
+            if (_resources.Language != Languages.en)
+            {
+                clue = await _playerRepository
+                    .GetClueAsync(player.Id, (ulong)_resources.Language)
+                    .ConfigureAwait(false);
+            }
+
+            return Ok(clue);
         }
 
         [HttpPost]
