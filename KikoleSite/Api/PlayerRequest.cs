@@ -21,7 +21,9 @@ namespace KikoleSite.Api
 
         public bool SetLatestProposalDate { get; set; }
 
-        public string Clue { get; set; }
+        public string ClueEn { get; set; }
+
+        public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; }
 
         public bool HideCreator { get; set; }
     }

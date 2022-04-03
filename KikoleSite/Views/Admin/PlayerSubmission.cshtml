@@ -84,9 +84,12 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         <div style="margin-top: 20px">
             <label>Accept the player (clue override)</label>
             <div>
-                <input type="text" name="ClueOverwrite" style="width: 300px" />
-                <input type="submit" value="OK" name="submit-accepted" />
+                <input type="text" name="ClueOverwriteEn" style="width: 300px" /> (EN)
             </div>
+            <div>
+                <input type="text" name="ClueOverwriteFr" style="width: 300px" /> (FR)
+            </div>
+            <input type="submit" value="OK" name="submit-accepted" />
         </div>
         <div style="margin-top: 20px">
             <label>Refuse the player (reason of reject)</label>

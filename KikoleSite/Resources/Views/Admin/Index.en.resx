@@ -186,4 +186,10 @@
   <data name="YearOfBirth" xml:space="preserve">
     <value>Year of birth</value>
   </data>
+  <data name="ClueEn" xml:space="preserve">
+    <value>English clue</value>
+  </data>
+  <data name="ClueFr" xml:space="preserve">
+    <value>French clue</value>
+  </data>
 </root>

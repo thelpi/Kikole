@@ -60,7 +60,9 @@ namespace KikoleSite.Models
 
         public IReadOnlyList<SelectListItem> Positions { get; set; }
 
-        public string Clue { get; set; }
+        public string ClueFr { get; set; }
+
+        public string ClueEn { get; set; }
 
         public bool DisplayPlayerSubmissionLink { get; set; }
 

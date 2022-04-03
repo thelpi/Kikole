@@ -87,7 +87,18 @@ namespace KikoleApi.Controllers
 
             if (playerId == 0)
                 return StatusCode((int)HttpStatusCode.InternalServerError, _resources.PlayerCreationFailure);
-            
+
+            if (request.ClueLanguages?.Count > 0)
+            {
+                var languagesClues = new Dictionary<ulong, string>();
+                foreach (var kvp in request.ClueLanguages)
+                    languagesClues.Add((ulong)kvp.Key, kvp.Value.Trim());
+
+                await _playerRepository
+                    .InsertPlayerCluesByLanguageAsync(playerId, languagesClues)
+                    .ConfigureAwait(false);
+            }
+
             foreach (var club in request.ToPlayerClubDtos(playerId))
             {
                 await _playerRepository
@@ -169,14 +180,22 @@ namespace KikoleApi.Controllers
 
             if (request.IsAccepted)
             {
-                var clue = string.IsNullOrWhiteSpace(request.ClueEdit)
+                var clueEn = string.IsNullOrWhiteSpace(request.ClueEditEn)
                     ? p.Clue
-                    : request.ClueEdit.Trim();
+                    : request.ClueEditEn.Trim();
 
                 var latestDate = await GetNextDateAsync().ConfigureAwait(false);
 
                 await _playerRepository
-                    .ValidatePlayerProposalAsync(request.PlayerId, clue, latestDate)
+                    .ValidatePlayerProposalAsync(request.PlayerId, clueEn, latestDate)
+                    .ConfigureAwait(false);
+
+                var languagesClues = new Dictionary<ulong, string>();
+                foreach (var kvp in request.ClueEditLangugages)
+                    languagesClues.Add((ulong)kvp.Key, kvp.Value.Trim());
+
+                await _playerRepository
+                    .InsertPlayerCluesByLanguageAsync(request.PlayerId, languagesClues)
                     .ConfigureAwait(false);
 
                 var hasBadge = await _badgeRepository

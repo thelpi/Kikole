@@ -186,4 +186,10 @@
   <data name="YearOfBirth" xml:space="preserve">
     <value>Année de naissance</value>
   </data>
+  <data name="ClueEn" xml:space="preserve">
+    <value>Indice en anglais</value>
+  </data>
+  <data name="ClueFr" xml:space="preserve">
+    <value>Indice en français</value>
+  </data>
 </root>

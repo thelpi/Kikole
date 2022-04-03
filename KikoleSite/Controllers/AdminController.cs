@@ -67,7 +67,11 @@ namespace KikoleSite.Controllers
                     .ValidatePlayerSubmissionAsync(
                         new PlayerSubmissionValidationRequest
                         {
-                            ClueEdit = model.ClueOverwrite,
+                            ClueEditLangugages = new Dictionary<Languages, string>
+                            {
+                                { Languages.fr, model.ClueOverwriteFr }
+                            },
+                            ClueEditEn = model.ClueOverwriteEn,
                             IsAccepted = action == "accepted",
                             PlayerId = model.SelectedId,
                             RefusalReason = model.RefusalReason
@@ -140,7 +144,7 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            if (string.IsNullOrWhiteSpace(model.Clue))
+            if (string.IsNullOrWhiteSpace(model.ClueEn))
             {
                 model.ErrorMessage = "Clue is mandatory";
                 SetPositionsOnModel(model);
@@ -209,7 +213,11 @@ namespace KikoleSite.Controllers
                 SetLatestProposalDate = isAdmin,
                 AllowedNames = names,
                 Clubs = clubs,
-                Clue = model.Clue,
+                ClueEn = model.ClueEn,
+                ClueLanguages = new Dictionary<Languages, string>
+                {
+                    { Languages.fr, model.ClueFr }
+                },
                 Country = countryId.ToString(),
                 Name = model.Name,
                 Position = positionId.ToString(),

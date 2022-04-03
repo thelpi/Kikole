@@ -21,7 +21,9 @@ namespace KikoleApi.Models.Requests
 
         public IReadOnlyList<ulong> Clubs { get; set; }
 
-        public string Clue { get; set; }
+        public string ClueEn { get; set; }
+
+        public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; }
 
         public Positions Position { get; set; }
 
@@ -52,7 +54,7 @@ namespace KikoleApi.Models.Requests
             if (Clubs.Any(c => c <= 0))
                 return resources.InvalidClubs;
 
-            if (string.IsNullOrWhiteSpace(Clue))
+            if (string.IsNullOrWhiteSpace(ClueEn))
                 return resources.InvalidClue;
 
             if (ProposalDate.HasValue && ProposalDate.Value.Date < now.Date)
@@ -70,7 +72,7 @@ namespace KikoleApi.Models.Requests
                 ProposalDate = ProposalDate,
                 YearOfBirth = YearOfBirth,
                 AllowedNames = AllowedNames.SanitizeJoin(Name),
-                Clue = Clue,
+                Clue = ClueEn,
                 PositionId = (ulong)Position,
                 CreationUserId = userId,
                 HideCreator = (byte)(HideCreator ? 1 : 0)

@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Api
+﻿using System.Collections.Generic;
+
+namespace KikoleSite.Api
 {
     public class PlayerSubmissionValidationRequest
     {
@@ -6,7 +8,9 @@
 
         public bool IsAccepted { get; set; }
 
-        public string ClueEdit { get; set; }
+        public IReadOnlyDictionary<Languages, string> ClueEditLangugages { get; set; }
+
+        public string ClueEditEn { get; set; }
 
         public string RefusalReason { get; set; }
     }

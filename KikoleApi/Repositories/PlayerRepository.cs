@@ -105,19 +105,32 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task ValidatePlayerProposalAsync(ulong playerId, string clue, DateTime date)
+        public async Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, DateTime date)
         {
             await ExecuteNonQueryAsync(
                     "UPDATE players " +
-                    "SET proposal_date = @date, clue = @clue " +
+                    "SET proposal_date = @date, clue = @clueEn " +
                     "WHERE id = @playerId",
                     new
                     {
                         playerId,
-                        clue,
+                        clueEn,
                         date.Date
                     })
                 .ConfigureAwait(false);
+        }
+
+        public async Task InsertPlayerCluesByLanguageAsync(ulong playerId, IReadOnlyDictionary<ulong, string> cluesByLanguage)
+        {
+            foreach (var languageId in cluesByLanguage.Keys)
+            {
+                await ExecuteInsertAsync(
+                        "player_clue_translations",
+                        ("player_id", playerId),
+                        ("language_id", languageId),
+                        ("clue", cluesByLanguage[languageId]))
+                    .ConfigureAwait(false);
+            }
         }
 
         public async Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync()
