@@ -217,5 +217,41 @@ namespace KikoleSite
                 return Api.Languages.en;
             return language;
         }
+
+        internal static string GetLabel(this Api.ProposalType type, bool withFrenchDe)
+        {
+            switch (type)
+            {
+                case Api.ProposalType.Name:
+                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}nom" : "name";
+                case Api.ProposalType.Club:
+                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}club" : "club";
+                case Api.ProposalType.Year:
+                    return IsFrench() ? $"{(withFrenchDe ? "d'" : "")}année" : "year";
+                case Api.ProposalType.Country:
+                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}nationalité" : "country";
+                case Api.ProposalType.Position:
+                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}position" : "position";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static string GetLabel(this Api.Position position)
+        {
+            switch (position)
+            {
+                case Api.Position.Defender:
+                    return IsFrench() ? "Défenseur" : "Defender";
+                case Api.Position.Forward:
+                    return IsFrench() ? "Attaquant" : "Forward";
+                case Api.Position.Goalkeeper:
+                    return IsFrench() ? "Gardien de but" : "Goalkeeper";
+                case Api.Position.Midfielder:
+                    return IsFrench() ? "Milieu de terrain" : "Midfielder";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 }

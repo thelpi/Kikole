@@ -5,15 +5,21 @@ using System.Threading.Tasks;
 using KikoleSite.Api;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
     public class HomeController : KikoleBaseController
     {
-        public HomeController(IApiProvider apiProvider)
+        private readonly IStringLocalizer<HomeController> _localizer;
+
+        public HomeController(IApiProvider apiProvider, IStringLocalizer<HomeController> localizer)
             : base(apiProvider)
-        { }
+        {
+            _localizer = localizer;
+        }
 
         [HttpGet]
         public IActionResult Error()
@@ -26,7 +32,7 @@ namespace KikoleSite.Controllers
         public async Task<IActionResult> Index(
             [FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
-            var (token, login) = this.GetAuthenticationCookie();
+            var (token, login) = GetAuthenticationCookie();
 
             var chart = await _apiProvider
                 .GetProposalChartAsync()
@@ -93,7 +99,7 @@ namespace KikoleSite.Controllers
             var value = model.GetValueFromProposalType(proposalType);
             if (string.IsNullOrWhiteSpace(value))
             {
-                return await Index(model.CurrentDay, "Invalid request")
+                return await Index(model.CurrentDay, _localizer["InvalidRequest"].Value)
                     .ConfigureAwait(false);
             }
 
@@ -106,9 +112,9 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;
-            model.MessageToDisplay = (response.Successful
-                ? $"Valid {proposalType} guess"
-                : $"Invalid {proposalType} guess{(!string.IsNullOrWhiteSpace(response.Tip) ? $"; {response.Tip}" : "")}");
+            model.MessageToDisplay = response.Successful
+                ? string.Format(_localizer["ValidGuess"].Value, proposalType.GetLabel(true))
+                : string.Format(_localizer["InvalidGuess"].Value, proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : "");
 
             model.Badges = response.CollectedBadges;
 

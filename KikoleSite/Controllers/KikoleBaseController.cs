@@ -64,7 +64,7 @@ namespace KikoleSite.Controllers
             return Enum
                 .GetValues(typeof(Position))
                 .Cast<Position>()
-                .ToDictionary(_ => (ulong)_, _ => _.ToString());
+                .ToDictionary(_ => (ulong)_, _ => _.GetLabel());
         }
 
         protected (string token, string login) GetAuthenticationCookie()

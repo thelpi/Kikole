@@ -40,20 +40,20 @@
                 <label>@localizer["PendingChallenges"]</label>
             </div>
         }
-        <div style="margin-top: 10px">
-            @if (!Model.NoPreviousDay)
-            {
-                <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
-            }
-            @if (Model.CurrentDay > 1)
-            {
-                <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
-            }
-            else if (Model.CurrentDay == 1)
-            {
-                <a href="/?day=@Model.NextDay">@localizer["CurrentDay"]</a>
-            }
-        </div>
+            <div style="margin-top: 10px">
+                @if (!Model.NoPreviousDay)
+                {
+                    <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
+                }
+                @if (Model.CurrentDay > 0)
+                {
+                    @if (!Model.NoPreviousDay)
+                    {
+                        <span>| </span>
+                    }
+                    <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
+                }
+            </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
         {
             if (Model.IsCreator)
