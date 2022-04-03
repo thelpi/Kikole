@@ -23,6 +23,15 @@ namespace KikoleApi.Models
 
         internal DateTime BestTimeDate { get; }
 
+        internal Leader(UserDto user, DateTime date,
+            IReadOnlyCollection<LeaderDto> leaders)
+        {
+            UserId = user.Id;
+            Login = user.Login;
+            BestTime = new TimeSpan(23, 59, 59);
+            TotalPoints = GetSubmittedPlayerPoints(leaders, date);
+        }
+
         internal Leader(IEnumerable<Leader> group)
         {
             Login = group.First().Login;

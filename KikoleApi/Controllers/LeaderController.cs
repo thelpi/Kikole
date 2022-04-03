@@ -53,6 +53,10 @@ namespace KikoleApi.Controllers
             if (sort == LeaderSorts.SuccessCount)
                 return BadRequest(_resources.SuccessCountSortForbidden);
 
+            var pDay = await _playerRepository
+                .GetPlayerOfTheDayAsync(day)
+                .ConfigureAwait(false);
+
             var leadersDto = await _leaderRepository
                 .GetLeadersAtDateAsync(day)
                 .ConfigureAwait(false);
@@ -65,11 +69,15 @@ namespace KikoleApi.Controllers
                 .Select(dto => new Leader(dto, users))
                 .ToList();
 
-            var challenges = await _challengeRepository
+            var userCreator = users.SingleOrDefault(u => u.Id == pDay.CreationUserId);
+            if (userCreator != null && pDay.HideCreator == 0)
+                leaders.Add(new Leader(userCreator, day, leadersDto));
+
+            /*var challenges = await _challengeRepository
                 .GetAcceptedChallengesOfTheDayAsync(day)
                 .ConfigureAwait(false);
 
-            /*foreach (var challenge in challenges)
+            foreach (var challenge in challenges)
             {
                 var hostLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.HostUserId);
                 var guestLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.GuestUserId);
