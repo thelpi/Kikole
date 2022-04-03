@@ -1,4 +1,5 @@
-﻿@model ChallengeModel
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model ChallengeModel
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {

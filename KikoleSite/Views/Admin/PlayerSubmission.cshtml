@@ -1,4 +1,5 @@
-﻿@model PlayerSubmissionsModel
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model PlayerSubmissionsModel
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {

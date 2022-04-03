@@ -1,4 +1,5 @@
-﻿@model AccountModel
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model AccountModel
 
 @if (!string.IsNullOrWhiteSpace(Model.Error))
 {

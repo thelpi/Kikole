@@ -1,4 +1,5 @@
-﻿@model (string, IEnumerable<KikoleSite.Api.BaseAward>)
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model (string, IEnumerable<KikoleSite.Api.BaseAward>)
 
 <h4>@Model.Item1</h4>
 @for (var i = 1; i <= 3; i++)
