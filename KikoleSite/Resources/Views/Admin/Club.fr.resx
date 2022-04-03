@@ -130,7 +130,7 @@
     <value>Créer le club</value>
   </data>
   <data name="DontMindDiacritics" xml:space="preserve">
-    <value>Ne pas se soucier des accents, ils seront ignorés</value>
+    <value>ne pas se soucier des accents, ils seront ignorés</value>
   </data>
   <data name="MainName" xml:space="preserve">
     <value>Nom principal</value>
@@ -139,6 +139,6 @@
     <value>Chercher si le club n'existe pas déjà :</value>
   </data>
   <data name="UseWikiName" xml:space="preserve">
-    <value>Utilisez le titre de la page Wikipédia en anglais</value>
+    <value>utilisez le titre de la page Wikipédia en anglais</value>
   </data>
 </root>

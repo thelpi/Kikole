@@ -3,7 +3,7 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div style="color:crimson; margin-top: 10px">Error: @Model.ErrorMessage</div>
+    <div style="color:crimson; margin-top: 10px">@Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
@@ -12,19 +12,19 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 
 @if (Model.DisplayPlayerSubmissionLink)
 {
-    <div style="margin-top: 10px"><a href="/Admin/PlayerSubmission">Check submitted players</a></div>
+    <div style="margin-top: 10px"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
 }
 
-<h3>Submit a player</h3>
+<h3>@localizer["SubmitPlayerTitle"]</h3>
 <form method="post" action="/Admin">
     <div style="margin-top: 20px">
-        <div><label>Name</label></div>
+        <div><label>@localizer["Name"]</label></div>
         <input type="text" name="Name" style="width: 250px" />
-        <div style="font-size: small">(use english Wikipedia page title)</div>
+        <div style="font-size: small">(@localizer["WikiPlayerName"])</div>
     </div>
 
     <div style="margin-top: 20px">
-        <label>Alternative names</label>
+        <label>@localizer["AlternativeNames"]</label>
     </div>
     @for (var i = 0; i < 5; i++)
     {
@@ -33,12 +33,12 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             <input type="text" name="@name" style="width: 250px" />
         </div>
     }
-    <div style="font-size: small">(at least the last name without the first name, and few alternatives of your choice)</div>
-    <div style="font-size: small">(don't mind diacritics, it will be considered equal)</div>
+    <div style="font-size: small">(@localizer["AltNameTip1"])</div>
+    <div style="font-size: small">(@localizer["AltNameTip2"])</div>
 
     <div style="margin-top: 20px">
         <div>
-            <label>Year of birth</label>
+            <label>@localizer["YearOfBirth"]</label>
         </div>
         <script>
             $(function () {
@@ -59,7 +59,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 
     <div style="margin-top: 20px">
         <div>
-            <label>Nationality</label>
+            <label>@localizer["Nationality"]</label>
         </div>
         <script>
             $(function () {
@@ -69,7 +69,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                             url: '/Admin/AutoCompleteCountries/',
                             data: {
                                 "prefix": request.term
-                                // add languageID here
                             },
                             type: "POST",
                             success: function (data) {
@@ -91,31 +90,32 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
             <input type="hidden" id="countryId" name="Country" />
         </div>
-        <div style="font-size: small">(keep in mind it's the country, not the international selection)</div>
+        <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
     </div>
 
     <div style="margin-top: 20px">
         <div>
-            <label>Clue</label>
+            <label>@localizer["Clue"]</label>
         </div>
         <input type="text" name="Clue" style="width: 300px" />
-        <div style="font-size: small">(might be override by the administrator)</div>
+        <div style="font-size: small">(@localizer["AcceptedLanguages"])</div>
+        <div style="font-size: small">(@localizer["AdminOverrideClue"])</div>
     </div>
 
     <div style="margin-top: 20px">
-        <div><label>Position</label></div>
+        <div><label>@localizer["Position"]</label></div>
         @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px" })
-        <div style="font-size: small">(as a rule of thumb, avoid players with ambiguous position)</div>
+        <div style="font-size: small">(@localizer["AvoidAmbiguousPos"])</div>
     </div>
 
     <div style="margin-top: 20px">
         <div>
-            <label>Clubs career</label>
+            <label>@localizer["ClubsCareer"]</label>
         </div>
         <div>
-            <a href="/Admin/Club" target="_blank">Add club (open a new tab)</a>
+            <a href="/Admin/Club" target="_blank">@localizer["AddClubTab"]</a>
         </div>
-        <div style="font-size: small">(in chronological order, senior career only)</div>
+        <div style="font-size: small">(@localizer["ClubsTip1"])</div>
         @for (var i = 0; i < 10; i++)
         {
             var name = $"Club{i}";
@@ -148,14 +148,15 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             </div>
         }
     </div>
-    <div style="font-size: small">(if more than 10 clubs, reconsider your player or ignore pointless clubs)</div>
-    <div style="font-size: small">(do NOT set twice a club in case of come-back: ignore the come-back)</div>
+    <div style="font-size: small">(@localizer["ClubsTip2"])</div>
+    <div style="font-size: small">(@localizer["ClubsTip3"])</div>
 
     <div style="margin-top: 20px">
-        <label>Remains anonymous:</label> @Html.CheckBoxFor(m => m.HideCreator)
+        <label>@localizer["RemainsAnonymous"]</label> @Html.CheckBoxFor(m => m.HideCreator)
     </div>
+    <div style="font-size: small">(@localizer["RemainsAnonymousTip"])</div>
 
     <div style="margin-top: 20px">
-        <input type="submit" name="submit-club" value="Submit the player" />
+        <input type="submit" name="submit-club" value="@localizer["SubmitPlayerGo"]" />
     </div>
 </form>
