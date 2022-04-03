@@ -120,6 +120,45 @@
   <data name="AccountMandatory" xml:space="preserve">
     <value>An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!</value>
   </data>
+  <data name="ChallengeOngoing" xml:space="preserve">
+    <value>You have a challenge against &lt;span style="color: crimson"&gt;{0}&lt;/span&gt; today, for &lt;span style="color: crimson"&gt;{1}&lt;/span&gt;% of your points!</value>
+  </data>
+  <data name="ComeBackTomorrow" xml:space="preserve">
+    <value>Come back tomorrow for a new player!</value>
+  </data>
+  <data name="CurrentDay" xml:space="preserve">
+    <value>Current day</value>
+  </data>
+  <data name="CurrentScore" xml:space="preserve">
+    <value>Your current score: &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt; points.</value>
+  </data>
+  <data name="DayClue" xml:space="preserve">
+    <value>Clue of the day:</value>
+  </data>
+  <data name="FinalScore" xml:space="preserve">
+    <value>Your final score: &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt; points.</value>
+  </data>
+  <data name="LoggedAs" xml:space="preserve">
+    <value>You are logged as</value>
+  </data>
+  <data name="NextDay" xml:space="preserve">
+    <value>Next day</value>
+  </data>
+  <data name="PendingChallenges" xml:space="preserve">
+    <value>You have pending challenges waiting for a &lt;a href="/Challenge"&gt;response&lt;/a&gt;.</value>
+  </data>
+  <data name="PlayerFoundCongrats" xml:space="preserve">
+    <value>Congratulations! The player was &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt;.</value>
+  </data>
+  <data name="PlayerIs" xml:space="preserve">
+    <value>Today's player is</value>
+  </data>
+  <data name="PreviousDay" xml:space="preserve">
+    <value>Previous day</value>
+  </data>
+  <data name="SubmittedBy" xml:space="preserve">
+    <value>Today's player has been submitted by</value>
+  </data>
   <data name="YouAreNotLogged" xml:space="preserve">
     <value>You are &lt;a href="/Account"&gt;&lt;span style="color: crimson"&gt;not logged&lt;/span&gt;&lt;/a&gt;</value>
   </data>

@@ -22,37 +22,36 @@
         @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
         {
             <div style="margin-top: 20px; font-size: large">
-                Today's player has been submitted by <span style="color: crimson">@Model.PlayerCreator</span>!
+                @localizer["SubmittedBy"] <span style="color: crimson">@Model.PlayerCreator</span>!
             </div>
         }
         <div style="margin-top: 10px">
-            <label>You are logged as <span style="color: forestgreen">@Model.LoggedAs</span></label>
+            <label>@localizer["LoggedAs"] <span style="color: forestgreen">@Model.LoggedAs</span></label>
         </div>
         @if (Model.TodayChallenge != null)
         {
             <div style="margin-top: 10px">
-                <label>You have a challenge against <span style="color: crimson">@Model.TodayChallenge.OpponentLogin</span> today, for <span style="color: crimson">@Model.TodayChallenge.PointsRate</span>% of your points!</label>
+                <label>@Html.Raw(string.Format(localizer["ChallengeOngoing"].Value, Model.TodayChallenge.OpponentLogin, Model.TodayChallenge.PointsRate))</label>
             </div>
         }
         @if (Model.HasPendingChallenges)
         {
-
             <div style="margin-top: 10px">
-                <label>You have pending challenges waiting for a <a href="/Challenge">response</a>.</label>
+                <label>@localizer["PendingChallenges"]</label>
             </div>
         }
         <div style="margin-top: 10px">
             @if (!Model.NoPreviousDay)
             {
-                <a href="/?day=@Model.PreviousDay">Previous day</a>
+                <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
             }
             @if (Model.CurrentDay > 1)
             {
-                <a href="/?day=@Model.NextDay">Next day</a>
+                <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
             }
             else if (Model.CurrentDay == 1)
             {
-                <a href="/?day=@Model.NextDay">Current day</a>
+                <a href="/?day=@Model.NextDay">@localizer["CurrentDay"]</a>
             }
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
@@ -60,46 +59,21 @@
             if (Model.IsCreator)
             {
                 <div style="margin-top: 5px">
-                    <label>Today's player is <span style="font-style: italic; color:crimson">@Model.PlayerName</span></label>
+                    <label>@localizer["PlayerIs"] <span style="font-style: italic; color:crimson">@Model.PlayerName</span></label>
                 </div>
             }
             else if (Model.CurrentDay == 0)
             {
                 <div style="margin-top: 5px">
-                    <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>. Come back tomorrow for a new player!</label>
+                    <label>@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</label>
                 </div>
-                <div>Your final score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
-                @if (Model.Badges?.Count > 0)
-                {
-                    <div>You get the following badges:</div>
-                    foreach (var badge in Model.Badges)
-                    {
-                        var color = !badge.HiddenOrSpecial ? "transparent" : "gold";
-                        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
-                            <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
-                            <div style="text-align:center">@badge.Description</div>
-                            @if (!badge.Hidden)
-                            {
-                                <div style="text-align:center">Got the @badge.GetDate.ToString("yyyy-MM-dd")</div>
-                            }
-                            @if (@badge.Users == 1)
-                            {
-                                <div style="text-align:center; font-weight: bold">You're the <span style="color: crimson">only one</span> with this badge!</div>
-                            }
-                            else
-                            {
-                                var v = badge.Users - 1;
-                                <div style="text-align:center"><span style="color: crimson">@v</span> other users have this badge</div>
-                            }
-                        </div>
-                    }
-                    <div style="clear: both" />
-                }
+                <div>@Html.Raw(string.Format(localizer["FinalScore"].Value, Model.Points))</div>
+                await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
             }
             else
             {
                 <div style="margin-top: 5px">
-                    <label>Congratulations! The player was <span style="font-style: italic; color:crimson">@Model.PlayerName</span>.</label>
+                    <label>@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName))</label>
                 </div>
             }
         }
@@ -120,36 +94,11 @@
             }
             @if (Model.CurrentDay == 0)
             {
-                <div style="margin-top: 5px">Your current score: <span style="font-style: italic; color:crimson">@Model.Points</span> points</div>
-                @if (Model.Badges?.Count > 0)
-                {
-                    <div>You get the following badges:</div>
-                    foreach (var badge in Model.Badges)
-                    {
-                        var color = !badge.HiddenOrSpecial ? "transparent" : "gold";
-                        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
-                            <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
-                            <div style="text-align:center">@badge.Description</div>
-                            @if (!badge.Hidden)
-                            {
-                                <div style="text-align:center">Got the @badge.GetDate.ToString("yyyy-MM-dd")</div>
-                            }
-                            @if (@badge.Users == 1)
-                            {
-                                <div style="text-align:center; font-weight: bold">You're the <span style="color: crimson">only one</span> with this badge!</div>
-                            }
-                            else
-                            {
-                                var v = badge.Users - 1;
-                                <div style="text-align:center"><span style="color: crimson">@v</span> other users have this badge</div>
-                            }
-                        </div>
-                    }
-                    <div style="clear: both" />
-                }
+                <div style="margin-top: 5px">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
+                await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
             }
             <div style="margin-top: 30px; font-size: larger">
-                Clue of the day: <span style="font-style:italic">@Model.Clue</span>
+                @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
             </div>
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)

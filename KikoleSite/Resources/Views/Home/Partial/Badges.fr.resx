@@ -117,49 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccountMandatory" xml:space="preserve">
-    <value>Le compte est nécessaire pour jouer, mais il prend 10 secondes à créer et aucune information personnelle n'est requise !</value>
+  <data name="BadgeGotThe" xml:space="preserve">
+    <value>Acquis le</value>
   </data>
-  <data name="ChallengeOngoing" xml:space="preserve">
-    <value>Vous avez un challenge contre &lt;span style="color: crimson"&gt;{0}&lt;/span&gt; aujourd'hui, pour &lt;span style="color: crimson"&gt;{1}&lt;/span&gt;% de vos points !</value>
+  <data name="BadgesAcquired" xml:space="preserve">
+    <value>Vous récupérez les badges suivants :</value>
   </data>
-  <data name="ComeBackTomorrow" xml:space="preserve">
-    <value>Revenez demain pour un nouveau joueur !</value>
+  <data name="MultipleWithBadge" xml:space="preserve">
+    <value>autres utilisateurs ont ce badge.</value>
   </data>
-  <data name="CurrentDay" xml:space="preserve">
-    <value>Jour courant</value>
+  <data name="SingleWithBadge" xml:space="preserve">
+    <value>autre utilisateur a ce badge.</value>
   </data>
-  <data name="CurrentScore" xml:space="preserve">
-    <value>Votre score actuel : &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt; points.</value>
-  </data>
-  <data name="DayClue" xml:space="preserve">
-    <value>Indice du jour :</value>
-  </data>
-  <data name="FinalScore" xml:space="preserve">
-    <value>Votre score final : &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt; points.</value>
-  </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>Vous êtes connecté en tant que</value>
-  </data>
-  <data name="NextDay" xml:space="preserve">
-    <value>Jour suivant</value>
-  </data>
-  <data name="PendingChallenges" xml:space="preserve">
-    <value>Vous avez des challenges en attente d'une &lt;a href="/Challenge"&gt;réponse&lt;/a&gt;.</value>
-  </data>
-  <data name="PlayerFoundCongrats" xml:space="preserve">
-    <value>Félicitations ! Le joueur était &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt;.</value>
-  </data>
-  <data name="PlayerIs" xml:space="preserve">
-    <value>Le joueur du jour est</value>
-  </data>
-  <data name="PreviousDay" xml:space="preserve">
-    <value>Jour précédent</value>
-  </data>
-  <data name="SubmittedBy" xml:space="preserve">
-    <value>Le joueur du jour a été proposé par</value>
-  </data>
-  <data name="YouAreNotLogged" xml:space="preserve">
-    <value>Vous n'êtes &lt;a href="/Account"&gt;&lt;span style="color: crimson"&gt;pas identifié&lt;/span&gt;&lt;/a&gt;</value>
+  <data name="SoloWithBadge" xml:space="preserve">
+    <value>Vous êtes &lt;span style="color: crimson"&gt;le seul&lt;/span&gt; à avoir ce badge !</value>
   </data>
 </root>

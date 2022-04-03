@@ -1,0 +1,28 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model IReadOnlyCollection<KikoleSite.Api.UserBadge>
+@if (Model?.Count > 0)
+{
+    <div>@localizer["BadgesAcquired"]</div>
+    foreach (var badge in Model)
+    {
+        var color = !badge.HiddenOrSpecial ? "transparent" : "gold";
+        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+            <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
+            <div style="text-align:center">@badge.Description</div>
+            @if (!badge.Hidden)
+            {
+                <div style="text-align:center">@localizer["BadgeGotThe"] @badge.GetDate.ToString("yyyy-MM-dd")</div>
+            }
+            @if (@badge.Users == 1)
+            {
+                <div style="text-align:center; font-weight: bold">@localizer["SoloWithBadge"]</div>
+            }
+            else
+            {
+                var v = badge.Users - 1;
+                <div style="text-align:center"><span style="color: crimson">@v</span> @localizer[v == 1 ? "SingleWithBadge" : "MultipleWithBadge"]</div>
+            }
+        </div>
+    }
+    <div style="clear: both" />
+}
