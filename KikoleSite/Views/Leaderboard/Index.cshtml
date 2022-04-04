@@ -61,7 +61,7 @@
                     <td>@leader.TotalPoints</td>
                     @if (!Model.IncludePvp)
                     {
-                        <td>@leader.BestTime.ToString(@"hh\:mm")</td>
+                        <td>@leader.BestTime.ToNaString()</td>
                         <td>@leader.SuccessCount</td>
                     }
                 </tr>
