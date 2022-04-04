@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using KikoleSite.Api;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 

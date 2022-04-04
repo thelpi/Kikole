@@ -3,14 +3,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
     public class ChallengeController : KikoleBaseController
     {
-        public ChallengeController(IApiProvider apiProvider)
+        private readonly IStringLocalizer<ChallengeController> _localizer;
+
+        public ChallengeController(IApiProvider apiProvider, IStringLocalizer<ChallengeController> localizer)
             : base(apiProvider)
-        { }
+        {
+            _localizer = localizer;
+        }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -37,18 +42,18 @@ namespace KikoleSite.Controllers
             if (action == "createchallenge")
             {
                 if (model.SelectedUserId == 0)
-                    model.ErrorMessage = "Invalid user selected";
+                    model.ErrorMessage = _localizer["InvalidUserSelected"];
                 else if (model.PointsRate <= 0 || model.PointsRate > 100)
-                    model.ErrorMessage = "Invalid points rate";
+                    model.ErrorMessage = _localizer["InvalidPointsRate"];
                 else
                 {
                     var result = await _apiProvider
                         .CreateChallengeAsync(model.SelectedUserId, model.PointsRate, token)
                         .ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(result))
-                        model.InfoMessage = "Success! Challenge sent to your opponent";
+                        model.InfoMessage = _localizer["ChallengeSent"];
                     else
-                        model.ErrorMessage = $"Error: {result}";
+                        model.ErrorMessage = result;
                 }
             }
             else if (action == "cancelchallenge" || action == "refusechallenge" || action == "acceptchallenge")
@@ -57,16 +62,23 @@ namespace KikoleSite.Controllers
                 var isAccepted = action == "acceptchallenge";
 
                 if (model.SelectedChallengeId == 0)
-                    model.ErrorMessage = "Invalid challenge selected";
+                    model.ErrorMessage = _localizer["InvalidChallengeSelected"];
                 else
                 {
                     var result = await _apiProvider
                         .RespondToChallengeAsync(model.SelectedChallengeId, isAccepted, token)
                         .ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(result))
-                        model.InfoMessage = $"Success! Challenge has been {(isRefusal ? "refused" : (isAccepted ? "accepted" : "cancelled"))}";
+                    {
+                        if (isRefusal)
+                            model.InfoMessage = _localizer["ChallengeRefused"];
+                        else if (isAccepted)
+                            model.InfoMessage = _localizer["ChallengeAccepted"];
+                        else
+                            model.InfoMessage = _localizer["ChallengeCancelled"];
+                    }
                     else
-                        model.ErrorMessage = $"Error: {result}";
+                        model.ErrorMessage = result;
                 }
             }
 
