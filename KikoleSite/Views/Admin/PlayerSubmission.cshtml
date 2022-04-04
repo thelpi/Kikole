@@ -15,42 +15,42 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <form method="post" action="/Admin/PlayerSubmission">
         <div style="margin-top: 20px">
             <div>
-                <label>Creator login</label>
+                <label>@localizer["CreatorLogin"]</label>
                 <div>@Model.SelectedPlayer.Login</div>
             </div>
             <div style="margin-top: 10px">
-                <label>Name</label>
+                <label>@localizer["Name"]</label>
                 <div>@Model.SelectedPlayer.Name</div>
             </div>
             <div style="margin-top: 10px">
-                <label>AllowedNames</label>
+                <label>@localizer["AllowedNames"]</label>
                 <div>@Model.SelectedPlayer.AllowedNames</div>
             </div>
             <div style="margin-top: 10px">
-                <label>YearOfBirth</label>
+                <label>@localizer["YearOfBirth"]</label>
                 <div>@Model.SelectedPlayer.YearOfBirth</div>
             </div>
             <div style="margin-top: 10px">
-                <label>Country</label>
+                <label>@localizer["Country"]</label>
                 <div>@Model.SelectedPlayer.Country</div>
             </div>
             <div style="margin-top: 10px">
-                <label>Clue</label>
+                <label>@localizer["Clue"]</label>
                 <div>@Model.SelectedPlayer.Clue</div>
             </div>
             <div style="margin-top: 10px">
-                <label>Position</label>
+                <label>@localizer["Position"]</label>
                 <div>@Model.SelectedPlayer.Position</div>
             </div>
             <div style="margin-top: 10px">
-                <label>Clubs</label>
+                <label>@localizer["Clubs"]</label>
                 @foreach (var club in Model.SelectedPlayer.Clubs.OrderBy(x => x.HistoryPosition))
                 {
                     <div>@club.HistoryPosition - @club.Name</div>
                 }
             </div>
             <div style="margin-top: 5px">
-                <label>Check club by name:</label>
+                <label>@localizer["CheckClubName"]</label>
                 <script>
                     $(function () {
                         $("#clubName").autocomplete({
@@ -82,20 +82,20 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         </div>
         @Html.HiddenFor(m => m.SelectedId)
         <div style="margin-top: 20px">
-            <label>Accept the player (clue override)</label>
+            <label>@localizer["AcceptPlayer"]</label>
             <div>
-                <input type="text" name="ClueOverwriteEn" style="width: 300px" /> (EN)
+                <input type="text" name="ClueOverwriteEn" style="width: 300px" /> (@localizer["EnShort"])
             </div>
             <div>
-                <input type="text" name="ClueOverwriteFr" style="width: 300px" /> (FR)
+                <input type="text" name="ClueOverwriteFr" style="width: 300px" /> (@localizer["FrShort"])
             </div>
-            <input type="submit" value="OK" name="submit-accepted" />
+            <input type="submit" value="@localizer["Ok"]" name="submit-accepted" />
         </div>
         <div style="margin-top: 20px">
-            <label>Refuse the player (reason of reject)</label>
+            <label>@localizer["RefusePlayer"]</label>
             <div>
                 <input type="text" name="RefusalReason" style="width: 300px" />
-                <input type="submit" value="KO" name="submit-refusal" />
+                <input type="submit" value="@localizer["Ko"]" name="submit-refusal" />
             </div>
         </div>
     </form>
@@ -105,14 +105,14 @@ else
     if (Model.Players.Count == 0)
     {
         <div style="margin-top: 20px">
-            <label>No player to validate</label>
+            <label>@localizer["NoPlayerToValidate"]</label>
         </div>
     }
     else
     {
         <form method="post" action="/Admin/PlayerSubmission">
             <div style="margin-top: 20px">
-                <label>Select a player</label>
+                <label>@localizer["SelectPlayer"]</label>
                 <div>
                     @Html.DropDownListFor(m => m.SelectedId, Model.Players.Select(p => new SelectListItem(p.Name, p.Id.ToString())))
                 </div>
