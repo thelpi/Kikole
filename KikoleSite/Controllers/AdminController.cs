@@ -6,19 +6,24 @@ using KikoleSite.Api;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
     public class AdminController : KikoleBaseController
     {
-        public AdminController(IApiProvider apiProvider)
+        private readonly IStringLocalizer<AdminController> _localizer;
+
+        public AdminController(IApiProvider apiProvider, IStringLocalizer<AdminController> localizer)
             : base(apiProvider)
-        { }
+        {
+            _localizer = localizer;
+        }
 
         [HttpGet]
         public async Task<IActionResult> PlayerSubmission()
         {
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
@@ -92,7 +97,7 @@ namespace KikoleSite.Controllers
             {
                 if (model.SelectedPlayer == null)
                 {
-                    model.ErrorMessage = "Invalid selected player";
+                    model.ErrorMessage = _localizer["InvalidSelectedPlayer"];
                     model.SelectedId = 0;
                 }
             }
@@ -132,21 +137,21 @@ namespace KikoleSite.Controllers
 
             if (string.IsNullOrWhiteSpace(model.Name))
             {
-                model.ErrorMessage = "Name is mandatory";
+                model.ErrorMessage = _localizer["MandatName"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
 
             if (model.YearOfBirth == null || !ushort.TryParse(model.YearOfBirth, out var yearValue))
             {
-                model.ErrorMessage = "Year is invalid";
+                model.ErrorMessage = _localizer["InvalidYear"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
 
             if (string.IsNullOrWhiteSpace(model.ClueEn))
             {
-                model.ErrorMessage = "Clue is mandatory";
+                model.ErrorMessage = _localizer["MandatClue"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
@@ -159,7 +164,7 @@ namespace KikoleSite.Controllers
                 || !ulong.TryParse(model.Country, out var countryId)
                 || !countries.Any(c => countryId == c.Key))
             {
-                model.ErrorMessage = "Country is mandatory";
+                model.ErrorMessage = _localizer["InvalidCountry"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
@@ -168,7 +173,7 @@ namespace KikoleSite.Controllers
                 || !ulong.TryParse(model.Position, out var positionId)
                 || !GetPositions().Any(p => p.Key == positionId))
             {
-                model.ErrorMessage = "Position is mandatory";
+                model.ErrorMessage = _localizer["InvalidPosition"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
@@ -183,7 +188,9 @@ namespace KikoleSite.Controllers
             };
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
 
-            var clubsReferential = await _apiProvider.GetClubsAsync().ConfigureAwait(false);
+            var clubsReferential = await _apiProvider
+                .GetClubsAsync()
+                .ConfigureAwait(false);
 
             var clubs = new List<ulong>();
             AddClubIfValid(clubs, model.Club0, clubsReferential);
@@ -199,13 +206,13 @@ namespace KikoleSite.Controllers
 
             if (clubs.Count == 0)
             {
-                model.ErrorMessage = "One club is mandatory";
+                model.ErrorMessage = _localizer["OneClubMin"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
             else if (clubs.Count != clubs.Distinct().Count())
             {
-                model.ErrorMessage = "At least one club duplicated";
+                model.ErrorMessage = _localizer["DuplicateClub"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
@@ -237,17 +244,19 @@ namespace KikoleSite.Controllers
 
             if (!string.IsNullOrWhiteSpace(response))
             {
-                model.ErrorMessage = $"Error while creating: {response}";
+                model.ErrorMessage = _localizer["CreatingError", response];
                 SetPositionsOnModel(model);
                 return View(model);
             }
 
             model = new PlayerCreationModel
             {
-                InfoMessage = "Player created!"
+                InfoMessage = _localizer["PlayerOk"]
             };
             SetPositionsOnModel(model);
-            model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
+            model.DisplayPlayerSubmissionLink = await _apiProvider
+                .IsAdminUserAsync(token)
+                .ConfigureAwait(false);
             return View(model);
         }
 
@@ -276,7 +285,7 @@ namespace KikoleSite.Controllers
 
             if (string.IsNullOrWhiteSpace(model.MainName))
             {
-                model.ErrorMessage = "Main name is mandatory";
+                model.ErrorMessage = _localizer["ClubNameMiss"];
                 return View("Club", model);
             }
 
@@ -297,7 +306,7 @@ namespace KikoleSite.Controllers
 
             if (!string.IsNullOrWhiteSpace(response))
             {
-                model.ErrorMessage = $"Error while creating: {response}";
+                model.ErrorMessage = _localizer["CreatingError", response];
                 return View("Club", model);
             }
 
@@ -306,7 +315,7 @@ namespace KikoleSite.Controllers
 
             model = new ClubCreationModel
             {
-                InfoMessage = "Club created!"
+                InfoMessage = _localizer["ClubOk"]
             };
             return View("Club", model);
         }
@@ -314,14 +323,14 @@ namespace KikoleSite.Controllers
         private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList(string token)
         {
             var pls = await _apiProvider
-                            .GetPlayerSubmissionsAsync(token)
-                            .ConfigureAwait(false);
+                .GetPlayerSubmissionsAsync(token)
+                .ConfigureAwait(false);
 
             var countries = await _apiProvider
                 .GetCountriesAsync()
                 .ConfigureAwait(false);
 
-            var players = pls
+            return pls
                 .Select(p => new PlayerSubmissionModel
                 {
                     AllowedNames = string.Join(';', p.AllowedNames),
@@ -335,7 +344,6 @@ namespace KikoleSite.Controllers
                     YearOfBirth = p.YearOfBirth
                 })
                 .ToList();
-            return players;
         }
 
         private void AddClubIfValid(List<ulong> clubs, string value, IReadOnlyCollection<Club> clubsReferential)

@@ -99,7 +99,7 @@ namespace KikoleSite.Controllers
             var value = model.GetValueFromProposalType(proposalType);
             if (string.IsNullOrWhiteSpace(value))
             {
-                return await Index(model.CurrentDay, _localizer["InvalidRequest"].Value)
+                return await Index(model.CurrentDay, _localizer["InvalidRequest"])
                     .ConfigureAwait(false);
             }
 
@@ -113,8 +113,8 @@ namespace KikoleSite.Controllers
 
             model.IsErrorMessage = !response.Successful;
             model.MessageToDisplay = response.Successful
-                ? string.Format(_localizer["ValidGuess"].Value, proposalType.GetLabel(true))
-                : string.Format(_localizer["InvalidGuess"].Value, proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : "");
+                ? _localizer["ValidGuess", proposalType.GetLabel(true)]
+                : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
 
             model.Badges = response.CollectedBadges;
 
