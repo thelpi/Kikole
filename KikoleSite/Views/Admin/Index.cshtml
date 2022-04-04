@@ -178,4 +178,8 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="margin-top: 20px">
         <input type="submit" name="submit-club" value="@localizer["SubmitPlayerGo"]" />
     </div>
+
+    <div style="margin-top: 20px">
+        @Html.Raw(string.Format(localizer["ChartLaius"].Value, Model.Chart.SubmissionMaxPoints, Model.Chart.SubmissionLosePointsByLeader, Model.Chart.SubmissionThresholdlosePoints, Model.Chart.SubmissionBasePoints))
+    </div>
 </form>

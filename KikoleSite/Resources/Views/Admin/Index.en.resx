@@ -192,4 +192,11 @@
   <data name="ClueFr" xml:space="preserve">
     <value>French clue</value>
   </data>
+  <data name="ChartLaius" xml:space="preserve">
+    <value>&lt;p&gt;If your kikole is accepted by the moderator, he'll be scheduled for the next available day.&lt;/p&gt;
+&lt;p&gt;On this day, you won't be able to play but you'll win points, as following:&lt;/p&gt;
+&lt;p&gt;{0} points by default.&lt;/p&gt;
+&lt;p&gt;Then -{1} points every time someone finds your kikole with a score of {2} or better.&lt;/p&gt;
+&lt;p&gt;{3} points is the lowest you can have.&lt;/p&gt;</value>
+  </data>
 </root>

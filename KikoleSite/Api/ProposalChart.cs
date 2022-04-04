@@ -12,5 +12,15 @@ namespace KikoleSite.Api
         public int ChallengeWithdrawalPoints = 1000;
 
         public IReadOnlyDictionary<ProposalType, int> ProposalTypesCost { get; set; }
+
+        public int SubmissionBasePoints { get; set; }
+
+        public int SubmissionBonusPoints { get; set; }
+
+        public int SubmissionMaxPoints => SubmissionBasePoints + SubmissionBonusPoints;
+
+        public int SubmissionLosePointsByLeader { get; set; }
+
+        public int SubmissionThresholdlosePoints { get; set; }
     }
 }

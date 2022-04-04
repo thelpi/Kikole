@@ -192,4 +192,11 @@
   <data name="ClueFr" xml:space="preserve">
     <value>Indice en français</value>
   </data>
+  <data name="ChartLaius" xml:space="preserve">
+    <value>&lt;p&gt;Si votre kikolé est accepté par le modérateur, il sera programmé pour le prochain jour disponible.&lt;/p&gt;
+&lt;p&gt;Ce jour là, vous ne pourrez pas jouer mais vous gagnerez quand même des points :&lt;/p&gt;
+&lt;p&gt;{0} points en base de départ.&lt;/p&gt;
+&lt;p&gt;Puis -{1} points chaque fois que quelqu'un trouvera votre kikolé avec un score de {2} ou supérieur.&lt;/p&gt;
+&lt;p&gt;Au minimum, vous gagnerez {3} points.&lt;/p&gt;</value>
+  </data>
 </root>

@@ -67,5 +67,7 @@ namespace KikoleSite.Models
         public bool DisplayPlayerSubmissionLink { get; set; }
 
         public bool HideCreator { get; set; }
+
+        public Api.ProposalChart Chart { get; set; }
     }
 }

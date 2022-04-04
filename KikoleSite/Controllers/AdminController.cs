@@ -119,8 +119,12 @@ namespace KikoleSite.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
+
             var model = new PlayerCreationModel();
-            SetPositionsOnModel(model);
+            SetPositionsOnModel(model, chart);
             model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
             return View(model);
         }
@@ -135,24 +139,28 @@ namespace KikoleSite.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            var chart = await _apiProvider
+                .GetProposalChartAsync()
+                .ConfigureAwait(false);
+
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 model.ErrorMessage = _localizer["MandatName"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
 
             if (model.YearOfBirth == null || !ushort.TryParse(model.YearOfBirth, out var yearValue))
             {
                 model.ErrorMessage = _localizer["InvalidYear"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
 
             if (string.IsNullOrWhiteSpace(model.ClueEn))
             {
                 model.ErrorMessage = _localizer["MandatClue"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
 
@@ -165,7 +173,7 @@ namespace KikoleSite.Controllers
                 || !countries.Any(c => countryId == c.Key))
             {
                 model.ErrorMessage = _localizer["InvalidCountry"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
 
@@ -174,7 +182,7 @@ namespace KikoleSite.Controllers
                 || !GetPositions().Any(p => p.Key == positionId))
             {
                 model.ErrorMessage = _localizer["InvalidPosition"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
             
@@ -207,13 +215,13 @@ namespace KikoleSite.Controllers
             if (clubs.Count == 0)
             {
                 model.ErrorMessage = _localizer["OneClubMin"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
             else if (clubs.Count != clubs.Distinct().Count())
             {
                 model.ErrorMessage = _localizer["DuplicateClub"];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
 
@@ -245,7 +253,7 @@ namespace KikoleSite.Controllers
             if (!string.IsNullOrWhiteSpace(response))
             {
                 model.ErrorMessage = _localizer["CreatingError", response];
-                SetPositionsOnModel(model);
+                SetPositionsOnModel(model, chart);
                 return View(model);
             }
 
@@ -253,7 +261,7 @@ namespace KikoleSite.Controllers
             {
                 InfoMessage = _localizer["PlayerOk"]
             };
-            SetPositionsOnModel(model);
+            SetPositionsOnModel(model, chart);
             model.DisplayPlayerSubmissionLink = await _apiProvider
                 .IsAdminUserAsync(token)
                 .ConfigureAwait(false);
@@ -353,12 +361,13 @@ namespace KikoleSite.Controllers
                 clubs.Add(id.Value);
         }
 
-        private void SetPositionsOnModel(PlayerCreationModel model)
+        private void SetPositionsOnModel(PlayerCreationModel model, Api.ProposalChart chart)
         {
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
+            model.Chart = chart;
         }
     }
 }
