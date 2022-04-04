@@ -220,7 +220,24 @@ namespace KikoleApi.Controllers
                         })
                         .ConfigureAwait(false);
                 }
+                else
+                {
+                    var players = await _playerRepository
+                        .GetPlayersByCreatorAsync(p.CreationUserId, true)
+                        .ConfigureAwait(false);
 
+                    if (players.Count == 5)
+                    {
+                        await _badgeRepository
+                            .InsertUserBadgeAsync(new UserBadgeDto
+                            {
+                                BadgeId = (ulong)Badges.WeAreKikole,
+                                GetDate = _clock.Now.Date,
+                                UserId = p.CreationUserId
+                            })
+                            .ConfigureAwait(false);
+                    }
+                }
                 // TODO: notify (+ badge)
             }
             else

@@ -160,5 +160,19 @@ namespace KikoleApi.Repositories
                     new { playerId, languageId })
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted)
+        {
+            return await ExecuteReaderAsync<PlayerDto>(
+                    "SELECT * FROM players " +
+                    "WHERE creation_user_id = @userId " +
+                    "AND (" +
+                    "(@type = 1 AND proposal_date IS NOT NULL) " +
+                    "OR (@type = 2 AND reject_date IS NOT NULL) " +
+                    "OR @type = 0 " +
+                    ")",
+                    new { userId, type = (accepted.HasValue ? (accepted.Value ? 1 : 2) : 0) })
+                .ConfigureAwait(false);
+        }
     }
 }

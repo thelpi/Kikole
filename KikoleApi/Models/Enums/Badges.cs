@@ -27,6 +27,7 @@
         AllIn,
         KikolesCreatorFriend,
         CaptainTsubasa,
-        DoYouSpeakPatois
+        DoYouSpeakPatois,
+        WeAreKikole
     }
 }

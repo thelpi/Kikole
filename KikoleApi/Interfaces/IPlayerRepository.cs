@@ -34,5 +34,7 @@ namespace KikoleApi.Interfaces
         Task RefusePlayerProposalAsync(ulong playerId);
 
         Task<string> GetClueAsync(ulong playerId, ulong languageId);
+
+        Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
     }
 }
