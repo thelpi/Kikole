@@ -88,5 +88,15 @@ namespace KikoleApi.Repositories
                     new { badgeId })
                 .ConfigureAwait(false);
         }
+
+        public async Task<string> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId)
+        {
+            return await ExecuteScalarAsync<string>(
+                    "SELECT description FROM badge_translations " +
+                    "WHERE badge_id = @badgeId " +
+                    "AND language_id = @languageId",
+                    new { badgeId, languageId })
+                .ConfigureAwait(false);
+        }
     }
 }

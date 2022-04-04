@@ -7,8 +7,8 @@ namespace KikoleApi.Models
     {
         public DateTime GetDate { get; }
 
-        internal UserBadge(BadgeDto badgeDto, UserBadgeDto userBadgeDto, int usersCount)
-            : base(badgeDto, usersCount)
+        internal UserBadge(BadgeDto badgeDto, UserBadgeDto userBadgeDto, int usersCount, string description)
+            : base(badgeDto, usersCount, description)
         {
             GetDate = userBadgeDto.GetDate;
         }

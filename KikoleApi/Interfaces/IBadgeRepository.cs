@@ -22,5 +22,7 @@ namespace KikoleApi.Interfaces
         Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadgesAsync(ulong userId);
 
         Task ResetBadgeDatasAsync(ulong badgeId);
+
+        Task<string> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId);
     }
 }

@@ -344,7 +344,15 @@ namespace KikoleApi.Controllers
                                 .GetUsersWithBadgeAsync((ulong)badge)
                                 .ConfigureAwait(false);
 
-                            response.AddBadge(new UserBadge(b, ub, users.Count));
+                            string description = null;
+                            if (_resources.Language != Languages.en)
+                            {
+                                description = await _badgeRepository
+                                    .GetBadgeDescriptionAsync(b.Id, (ulong)_resources.Language)
+                                    .ConfigureAwait(false);
+                            }
+
+                            response.AddBadge(new UserBadge(b, ub, users.Count, description));
                         }
                     }
                 }
@@ -384,7 +392,15 @@ namespace KikoleApi.Controllers
                         .GetUsersWithBadgeAsync((ulong)Badges.DoYouSpeakPatois)
                         .ConfigureAwait(false);
 
-                    response.AddBadge(new UserBadge(b, ub, users.Count));
+                    string description = null;
+                    if (_resources.Language != Languages.en)
+                    {
+                        description = await _badgeRepository
+                            .GetBadgeDescriptionAsync(b.Id, (ulong)_resources.Language)
+                            .ConfigureAwait(false);
+                    }
+
+                    response.AddBadge(new UserBadge(b, ub, users.Count, description));
                 }
             }
         }

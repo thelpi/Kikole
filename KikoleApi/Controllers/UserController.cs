@@ -153,7 +153,15 @@ namespace KikoleApi.Controllers
                     .GetUsersWithBadgeAsync(dto.BadgeId)
                     .ConfigureAwait(false);
 
-                badgesFull.Add(new UserBadge(b, dto, users.Count));
+                string description = null;
+                if (_resources.Language != Languages.en)
+                {
+                    description = await _badgeRepository
+                        .GetBadgeDescriptionAsync(b.Id, (ulong)_resources.Language)
+                        .ConfigureAwait(false);
+                }
+
+                badgesFull.Add(new UserBadge(b, dto, users.Count, description));
             }
 
             badgesFull = badgesFull
@@ -382,7 +390,15 @@ namespace KikoleApi.Controllers
                    .GetUsersWithBadgeAsync(dto.Id)
                    .ConfigureAwait(false);
 
-                badges.Add(new Badge(dto, users.Count));
+                string description = null;
+                if (_resources.Language != Languages.en)
+                {
+                    description = await _badgeRepository
+                        .GetBadgeDescriptionAsync(dto.Id, (ulong)_resources.Language)
+                        .ConfigureAwait(false);
+                }
+
+                badges.Add(new Badge(dto, users.Count, description));
             }
 
             badges = badges
