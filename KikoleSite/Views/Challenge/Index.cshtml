@@ -3,32 +3,32 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div style="color:crimson; margin-top: 10px">Error: @Model.ErrorMessage</div>
+    <div style="color:crimson; margin-top: 10px">@Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
     <div style="color:forestgreen; margin-top: 10px">@Model.InfoMessage</div>
 }
 
-<h3>Challenge in progress</h3>
+<h3>@localizer["ChallengeProgress"]</h3>
 @if (Model.TodayChallenge != null)
 {
-    <div>You have a challenge against <span style="color: crimson">@Model.TodayChallenge.OpponentLogin</span> today, for <span style="color: crimson">@Model.TodayChallenge.PointsRate</span>% of your points!</div>
+    <div>@Html.Raw(string.Format(localizer["ChallengeAgainst"].Value, Model.TodayChallenge.OpponentLogin, Model.TodayChallenge.PointsRate))</div>
 }
 else
 {
-    <div>No challenge today.</div>
+    <div>@localizer["NoChallengeToday"]</div>
 }
 
-<h3>Scheduled challenges</h3>
+<h3>@localizer["ChallengeSchedule"]</h3>
 @if (Model.AcceptedChallenges?.Count > 0)
 {
     <table style="margin-top: 10px">
         <thead>
             <tr>
-                <th style="width: 100px">Date</th>
-                <th style="width: 180px">Opponent</th>
-                <th style="width: 80px">Initiated?</th>
+                <th style="width: 100px">@localizer["Date"]</th>
+                <th style="width: 180px">@localizer["Opponent"]</th>
+                <th style="width: 80px">@localizer["Initiated"]</th>
             </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@ else
             {
                 var background = i % 2 == 0 ? "white" : "azure";
                 <tr style="background-color: @background">
-                    <td>@c.ChallengeDate.Value.ToString("yyyy-MM-dd")</td>
+                    <td>@c.ChallengeDate.Value.ToNaString()</td>
                     <td style="font: bold">@c.OpponentLogin</td>
                     <td>@c.Initiated.ToYesNo()</td>
                 </tr>
@@ -50,83 +50,71 @@ else
 }
 else
 {
-    <div>No challenge are scheduled</div>
+    <div>@localizer["NoChallengeSchedule"]</div>
 }
 
-<h3>Opponents who have requested to challenge you</h3>
+<h3>@localizer["ChallengeOppose"]</h3>
 @if (Model.WaitingForResponseChallenges?.Count > 0)
 {
     <form method="post" action="/Challenge">
         <div>
-            @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
-            <input value="Accept" type="submit" name="submit-acceptchallenge" />
-            <input value="Refuse" type="submit" name="submit-refusechallenge" />
+            @Html.DropDownListFor(m => m.SelectedChallengeId, Model.WaitingForResponseChallenges.Select(m => new SelectListItem(string.Format(localizer["ChallengeResume"].Value, m.OpponentLogin, m.PointsRate), m.Id.ToString())), new { @style = "width: 200px" })
+            <input value="@localizer["Accept"]" type="submit" name="submit-acceptchallenge" />
+            <input value="@localizer["Refuse"]" type="submit" name="submit-refusechallenge" />
         </div>
     </form>
 }
 else
 {
-    <div>Nobody has requested to challenge you</div>
+    <div>@localizer["NoChallengeOppose"]</div>
 }
 
-<h3>Challenges you've requested</h3>
+<h3>@localizer["ChallengeRequest"]</h3>
 @if (Model.RequestedChallenges?.Count > 0)
 {
     <form method="post" action="/Challenge">
         <div>
-            @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem($"{m.OpponentLogin} for {m.PointsRate}% of points", m.Id.ToString())), new { @style = "width: 200px" })
-            <input value="Cancel" type="submit" name="submit-cancelchallenge" />
+            @Html.DropDownListFor(m => m.SelectedChallengeId, Model.RequestedChallenges.Select(m => new SelectListItem(string.Format(localizer["ChallengeResume"].Value, m.OpponentLogin, m.PointsRate), m.Id.ToString())), new { @style = "width: 200px" })
+            <input value="@localizer["Cancel"]" type="submit" name="submit-cancelchallenge" />
         </div>
     </form>
 }
 else
 {
-    <div>You've challenged nobody</div>
+    <div>@localizer["NoChallengeRequest"]</div>
 }
 
-<h3>Challenge someone</h3>
+<h3>@localizer["DoChallenge"]</h3>
 <form method="post" action="/Challenge">
     <div>
         <div style="margin-top: 5px">
-            <label style="width: 100px">Opponent:</label>
+            <label style="width: 100px">@localizer["OpponentSet"]</label>
             @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 100px">Points rate:</label>
+            <label style="width: 100px">@localizer["PointsRate"]</label>
             @Html.DropDownListFor(m => m.PointsRate, Enumerable.Range(1, 10).Select(i => new SelectListItem((i * 10).ToString(), (i * 10).ToString())), new { @style = "width: 75px" })
-            <span style="font-size: small">(% of your tomorrow score you're willing to gamble)</span>
+            <span style="font-size: small">(@localizer["GambleTip"])</span>
         </div>
         <div style="margin-top: 5px">
-            <input value="Challenge" type="submit" name="submit-createchallenge" />
+            <input value="@localizer["Challenge"]" type="submit" name="submit-createchallenge" />
         </div>
     </div>
 </form>
 
-<h3>How challenge works?</h3>
-<p>You target an opponent you think you can <span style="color:crimson">beat</span> (ie more points than him/her).</p>
-<p>You have to set the percentage of points you <span style="color:crimson">gamble</span> in the challenge (see example below).</p>
-<p>If he/she accepts the challenge, you're on!</p>
-<p>The challenge is scheduled for the next day where you and your opponent are free of any other challenge.</p>
-<p>Also, challenge cannot occurs a day where you or your opponent have submitted the daily player.</p>
-<p>Points won/lost during a challenge are computed <span style="color:crimson">after both users</span> have submitted the correct answer for the day.</p>
-<p>In case of withdrawal (ie the opponent don't find the player in time), the winner double his score, loser lose the same amount.</p>
-<p>If both users withdraw, have the same score, or have both 0 points, nothing happens.</p>
-<p>Example of score:</p>
-<p>user X challenges Y for 40% of his/her score</p>
-<p>The next day, X scores 800 points and Y 900 points, so Y wins.</p>
-<p>Y final score is 1260 points (900 + 900 * 0.4)</p>
-<p>X final score is 440 points (800 - 900 * 0.4)</p>
+<h3>@localizer["HowToChallenge"]</h3>
+@Html.Raw(localizer["ChallengeLaius"].Value)
 
-<h3>Challenges history</h3>
+<h3>@localizer["ChallengeHistory"]</h3>
 @if (Model.ChallengesHistory?.Count > 0)
 {
     <table style="margin-top: 10px">
         <thead>
             <tr>
-                <th style="width: 100px">Date</th>
-                <th style="width: 180px">Opponent</th>
-                <th style="width: 80px">Initiated?</th>
-                <th style="width: 80px">Results</th>
+                <th style="width: 100px">@localizer["Date"]</th>
+                <th style="width: 180px">@localizer["Opponent"]</th>
+                <th style="width: 80px">@localizer["Initiated"]</th>
+                <th style="width: 80px">@localizer["Results"]</th>
             </tr>
         </thead>
         <tbody>
@@ -140,10 +128,10 @@ else
                     ? (c.HostPointsDelta > 0 ? "forestgreen" : "crimson")
                     : "black";
                 <tr style="background-color: @background">
-                    <td>@c.ChallengeDate.Value.ToString("yyyy-MM-dd")</td>
+                    <td>@c.ChallengeDate.Value.ToNaString()</td>
                     <td style="font: bold">@c.OpponentLogin</td>
                     <td>@c.Initiated.ToYesNo()</td>
-                    <td style="font: bold; color: @color">@c.HostPointsDelta pts</td>
+                    <td style="font: bold; color: @color">@c.HostPointsDelta</td>
                 </tr>
                 i++;
             }
@@ -152,5 +140,5 @@ else
 }
 else
 {
-    <div>You have no history of challenges!</div>
+    <div>@localizer["NoChallengeHistory"]</div>
 }
