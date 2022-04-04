@@ -5,14 +5,19 @@ using System.Threading.Tasks;
 using KikoleSite.Api;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
     public class LeaderboardController : KikoleBaseController
     {
-        public LeaderboardController(IApiProvider apiProvider)
+        private readonly IStringLocalizer<LeaderboardController> _localizer;
+
+        public LeaderboardController(IApiProvider apiProvider, IStringLocalizer<LeaderboardController> localizer)
             : base(apiProvider)
-        { }
+        {
+            _localizer = localizer;
+        }
         
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] ulong userId)
@@ -115,12 +120,12 @@ namespace KikoleSite.Controllers
                     .ConfigureAwait(false);
             }
 
-            model.BoardName = "Custom leaderboard";
+            model.BoardName = _localizer["CustomLeaderboard"];
             var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();
             var isCurrentMonthEnd = model.MaximalDate.IsAfterInMonth();
             if (isCurrentMonthStart && isCurrentMonthEnd)
             {
-                model.BoardName = "This month leaderboard";
+                model.BoardName = _localizer["MonthLeaderboard"];
             }
             else
             {
@@ -128,11 +133,11 @@ namespace KikoleSite.Controllers
                 var isMonthEnd = model.MaximalDate.IsEndOfMonth(model.MinimalDate);
                 if (isMonthStart && isMonthEnd)
                 {
-                    model.BoardName = model.MinimalDate.GetMonthName() + " leaderboard";
+                    model.BoardName = _localizer["MonthNameLeaderboard", model.MinimalDate.GetMonthName()];
                 }
                 else if (model.MaximalDate.Date == DateTime.Now.Date)
                 {
-                    model.BoardName = $"Last {Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))} days leaderboard";
+                    model.BoardName = _localizer["LastDaysLeaderboard", Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))];
                 }
             }
         }
