@@ -30,6 +30,7 @@
         DoYouSpeakPatois,
         WeAreKikole,
         WikipediaScreenshot,
-        PassportCheck
+        PassportCheck,
+        EverythingNotLost
     }
 }

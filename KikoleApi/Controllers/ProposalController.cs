@@ -343,6 +343,15 @@ namespace KikoleApi.Controllers
                                 collectedBadges.Add(Badges.PassportCheck);
                         }
 
+                        if (proposalsAlready.Count > 0 && proposalsAlready.All(ep => ep.Successful == 0))
+                        {
+                            var added = await InsertBadgeIfNotAlreadyAsync(
+                                    request, userId, Badges.EverythingNotLost)
+                                .ConfigureAwait(false);
+                            if (added)
+                                collectedBadges.Add(Badges.EverythingNotLost);
+                        }
+
                         var badgesDto = await _badgeRepository
                             .GetBadgesAsync(true)
                             .ConfigureAwait(false);
