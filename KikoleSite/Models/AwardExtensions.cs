@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.Localization;
 
 namespace KikoleSite.Models
 {
@@ -15,40 +16,40 @@ namespace KikoleSite.Models
             return string.Join(" / ", awards.Where(pa => pa.Position == position).Select(pa => pa.Name));
         }
 
-        public static string GetValue(this IEnumerable<Api.BaseAward> awards, int position)
+        public static string GetValue(this IEnumerable<Api.BaseAward> awards, int position, IViewLocalizer localizer)
         {
-            var type = awards.First().GetType();
+            var awd = awards.First(pa => pa.Position == position);
+            var type = awd.GetType();
             if (type == typeof(Api.PointsAward))
-                return awards.Cast<Api.PointsAward>().GetValue(position);
+                return (awd as Api.PointsAward).GetValue(localizer);
             else if (type == typeof(Api.TimeAward))
-                return awards.Cast<Api.TimeAward>().GetValue(position);
+                return (awd as Api.TimeAward).GetValue(localizer);
             else if (type == typeof(Api.CountAward))
-                return awards.Cast<Api.CountAward>().GetValue(position);
+                return (awd as Api.CountAward).GetValue(localizer);
             else if (type == typeof(Api.KikoleAward))
-                return awards.Cast<Api.KikoleAward>().GetValue(position);
+                return (awd as Api.KikoleAward).GetValue(localizer);
             else
                 throw new System.NotImplementedException();
         }
 
-        private static string GetValue(this IEnumerable<Api.PointsAward> awards, int position)
+        private static string GetValue(this Api.PointsAward awd, IViewLocalizer localizer)
         {
-            return $"{awards.First(pa => pa.Position == position).Points} points";
+            return string.Format(localizer["Points"].Value, awd.Points);
         }
 
-        private static string GetValue(this IEnumerable<Api.TimeAward> awards, int position)
+        private static string GetValue(this Api.TimeAward awd, IViewLocalizer localizer)
         {
-            var firstPos = awards.First(pa => pa.Position == position);
-            return $"{firstPos.Time.ToString(Helper.TimeSpanPattern)} ({firstPos.PlayerName})";
+            return $"{awd.Time.ToNaString()} ({awd.PlayerName})";
         }
 
-        private static string GetValue(this IEnumerable<Api.CountAward> awards, int position)
+        private static string GetValue(this Api.CountAward awd, IViewLocalizer localizer)
         {
-            return $"{awards.First(pa => pa.Position == position).Count} kikolés";
+            return string.Format(localizer["KikolesCount"].Value, awd.Count);
         }
 
-        private static string GetValue(this IEnumerable<Api.KikoleAward> awards, int position)
+        private static string GetValue(this Api.KikoleAward awd, IViewLocalizer localizer)
         {
-            return $"{awards.First(pa => pa.Position == position).AveragePoints} pts / player";
+            return string.Format(localizer["PtsByPlayer"].Value, awd.AveragePoints);
         }
     }
 }
