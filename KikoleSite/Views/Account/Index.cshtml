@@ -3,7 +3,7 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.Error))
 {
-    <div style="color:crimson; margin-top: 10px; font-weight: bold">Error: @Model.Error</div>
+    <div style="color:crimson; margin-top: 10px; font-weight: bold">@Model.Error</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
 {
@@ -12,127 +12,127 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
 
 @if (Model.IsAuthenticated)
 {
-    <h3>Log out</h3>
+    <h3>@localizer["LogOut"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">You're logged as:</label>
+            <label style="width: 150px; text-align: right">@localizer["LoggedAs"]</label>
             <label style="width: 200px; color: crimson">@Model.Login</label>
         </div>
         <label style="width: 150px;"></label>
-        <input type="submit" value="Log out" name="submit-logoff" style="margin-top: 5px" />
+        <input type="submit" value="@localizer["LogOut"]" name="submit-logoff" style="margin-top: 5px" />
     </form>
 
-    <h3>Change password</h3>
+    <h3>@localizer["ChangePassword"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Current password:</label>
+            <label style="width: 150px; text-align: right">@localizer["CurrentPwd"]</label>
             @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">New password:</label>
+            <label style="width: 150px; text-align: right">@localizer["NewPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Repeat password:</label>
+            <label style="width: 150px; text-align: right">@localizer["RepeatPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
-        <input type="submit" value="Update" name="submit-changepassword" style="margin-top: 5px" />
+        <input type="submit" value="@localizer["Update"]" name="submit-changepassword" style="margin-top: 5px" />
     </form>
 
-    <h3>Change recovery question and answer</h3>
+    <h3>@localizer["ChangeQAndA"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Recovery question:</label>
+            <label style="width: 150px; text-align: right">@localizer["RecQuestion"]</label>
             @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Recovery answer:</label>
+            <label style="width: 150px; text-align: right">@localizer["RecAnswer"]</label>
             @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
-        <input type="submit" value="Update" name="submit-resetqanda" style="margin-top: 5px" />
+        <input type="submit" value="@localizer["Update"]" name="submit-resetqanda" style="margin-top: 5px" />
     </form>
 }
 else
 {
-    <h3>Log in</h3>
+    <h3>@localizer["LogIn"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Login:</label>
+            <label style="width: 150px; text-align: right">@localizer["SetLogin"]</label>
             @Html.TextBoxFor(m => m.LoginSubmission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Password:</label>
+            <label style="width: 150px; text-align: right">@localizer["SetPwd"]</label>
             @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
-        <input type="submit" value="Login" name="submit-login" style="margin-top: 5px" />
+        <input type="submit" value="@localizer["LogIn"]" name="submit-login" style="margin-top: 5px" />
     </form>
 
-    <h3>Create an account</h3>
+    <h3>@localizer["CreateAccount"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Login:</label>
+            <label style="width: 150px; text-align: right">@localizer["SetLogin"]</label>
             @Html.TextBoxFor(m => m.LoginCreateSubmission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Password:</label>
+            <label style="width: 150px; text-align: right">@localizer["SetPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Repeat password:</label>
+            <label style="width: 150px; text-align: right">@localizer["RepeatPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
         </div>
-        <div style="font-size: small; margin-top: 5px">Fields below are optionnal, but if you lose your password, the answer to this question might save you!</div>
+        <div style="font-size: small; margin-top: 5px">@localizer["TipRecovery"]</div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Recovery question:</label>
+            <label style="width: 150px; text-align: right">@localizer["RecQuestion"]</label>
             @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">Recovery answer:</label>
+            <label style="width: 150px; text-align: right">@localizer["RecAnswer"]</label>
             @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
-        <input type="submit" value="Create" name="submit-create" style="margin-top: 5px" />
+        <input type="submit" value="@localizer["Create"]" name="submit-create" style="margin-top: 5px" />
     </form>
 
-    <h3>Change forgotten password with secret question</h3>
+    <h3>@localizer["GetPwdByQuestion"]</h3>
     <form method="post" action="/Account">
         @if (string.IsNullOrWhiteSpace(Model.QuestionRecovery))
         {
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">Login to recover:</label>
+                <label style="width: 150px; text-align: right">@localizer["LoginRecover"]</label>
                 @Html.TextBoxFor(m => m.LoginRecoverySubmission, new { @style = "width: 200px" })
             </div>
             <label style="width: 150px;"></label>
-            <input type="submit" value="Update" name="submit-getloginquestion" style="margin-top: 5px; visibility: hidden" />
+            <input type="submit" value="@localizer["Update"]" name="submit-getloginquestion" style="margin-top: 5px; visibility: hidden" />
         }
         else
         {
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">Login to recover:</label>
+                <label style="width: 150px; text-align: right">@localizer["LoginRecover"]</label>
                 <label style="width: 200px; color: crimson">@Model.LoginRecoverySubmission</label>
                 @Html.HiddenFor(m => m.LoginRecoverySubmission)
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">Recovery question:</label>
+                <label style="width: 150px; text-align: right">@localizer["RecQuestion"]</label>
                 <label style="width: 200px">@Model.QuestionRecovery</label>
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">Recovery answer:</label>
+                <label style="width: 150px; text-align: right">@localizer["RecAnswer"]</label>
                 @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">New password:</label>
+                <label style="width: 150px; text-align: right">@localizer["NewPwd"]</label>
                 @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">Repeat password:</label>
+                <label style="width: 150px; text-align: right">@localizer["RepeatPwd"]</label>
                 @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
             </div>
             <label style="width: 150px;"></label>
-            <input type="submit" value="Update" name="submit-resetpassword" style="margin-top: 5px" />
+            <input type="submit" value="@localizer["Update"]" name="submit-resetpassword" style="margin-top: 5px" />
         }
     </form>
 }
