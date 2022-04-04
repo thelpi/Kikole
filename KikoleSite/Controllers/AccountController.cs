@@ -1,14 +1,19 @@
 ﻿using System.Threading.Tasks;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
     public class AccountController : KikoleBaseController
     {
-        public AccountController(IApiProvider apiProvider)
+        private readonly IStringLocalizer<AccountController> _localizer;
+
+        public AccountController(IApiProvider apiProvider, IStringLocalizer<AccountController> localizer)
              : base(apiProvider)
-        { }
+        {
+            _localizer = localizer;
+        }
 
         [HttpGet]
         public IActionResult Index()
@@ -37,7 +42,7 @@ namespace KikoleSite.Controllers
                 if (string.IsNullOrWhiteSpace(model.LoginSubmission)
                     || string.IsNullOrWhiteSpace(model.PasswordSubmission))
                 {
-                    model.Error = "Invalid form values";
+                    model.Error = _localizer["InvalidForm"];
                 }
                 else
                 {
@@ -57,7 +62,7 @@ namespace KikoleSite.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.LoginRecoverySubmission))
                 {
-                    model.Error = "Invalid form values";
+                    model.Error = _localizer["InvalidForm"];
                 }
                 else
                 {
@@ -78,7 +83,7 @@ namespace KikoleSite.Controllers
                     || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
                     || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
                 {
-                    model.Error = "Invalid form values";
+                    model.Error = _localizer["InvalidForm"];
                 }
                 else
                 {
@@ -88,7 +93,7 @@ namespace KikoleSite.Controllers
                     if (!string.IsNullOrWhiteSpace(response))
                         model.Error = response;
                     else
-                        model.SuccessInfo = "Password has been reset";
+                        model.SuccessInfo = _localizer["PasswordReset"];
                 }
             }
             else if (submitFrom == "resetqanda")
@@ -96,7 +101,7 @@ namespace KikoleSite.Controllers
                 if (string.IsNullOrWhiteSpace(model.RecoveryQCreate)
                     || string.IsNullOrWhiteSpace(model.RecoveryACreate))
                 {
-                    model.Error = "Invalid form values";
+                    model.Error = _localizer["InvalidForm"];
                 }
                 else
                 {
@@ -108,7 +113,7 @@ namespace KikoleSite.Controllers
                         model.Error = response;
                     else
                     {
-                        model.SuccessInfo = "Q and A updated";
+                        model.SuccessInfo = _localizer["QandAUpdated"];
                         model.IsAuthenticated = true;
                         model.Login = login;
                     }
@@ -120,7 +125,7 @@ namespace KikoleSite.Controllers
                     || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
                     || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
                 {
-                    model.Error = "Invalid form values";
+                    model.Error = _localizer["InvalidForm"];
                 }
                 else
                 {
@@ -151,7 +156,7 @@ namespace KikoleSite.Controllers
                     || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
                     || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
                 {
-                    model.Error = "Invalid form values";
+                    model.Error = _localizer["InvalidForm"];
                 }
                 else
                 {
@@ -165,7 +170,7 @@ namespace KikoleSite.Controllers
                     {
                         model.IsAuthenticated = true;
                         model.Login = login;
-                        model.SuccessInfo = "Your password has been changed";
+                        model.SuccessInfo = _localizer["PasswordChanged"];
                     }
                 }
             }
