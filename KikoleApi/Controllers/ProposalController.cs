@@ -325,6 +325,24 @@ namespace KikoleApi.Controllers
                             }
                         }
 
+                        if (!proposalsAlready.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club))
+                        {
+                            var added = await InsertBadgeIfNotAlreadyAsync(
+                                    request, userId, Badges.WikipediaScreenshot)
+                                .ConfigureAwait(false);
+                            if (added)
+                                collectedBadges.Add(Badges.WikipediaScreenshot);
+                        }
+
+                        if (!proposalsAlready.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club))
+                        {
+                            var added = await InsertBadgeIfNotAlreadyAsync(
+                                    request, userId, Badges.PassportCheck)
+                                .ConfigureAwait(false);
+                            if (added)
+                                collectedBadges.Add(Badges.PassportCheck);
+                        }
+
                         var badgesDto = await _badgeRepository
                             .GetBadgesAsync(true)
                             .ConfigureAwait(false);

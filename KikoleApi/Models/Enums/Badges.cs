@@ -28,6 +28,8 @@
         KikolesCreatorFriend,
         CaptainTsubasa,
         DoYouSpeakPatois,
-        WeAreKikole
+        WeAreKikole,
+        WikipediaScreenshot,
+        PassportCheck
     }
 }
