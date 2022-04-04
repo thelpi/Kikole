@@ -203,6 +203,12 @@ namespace KikoleSite.Controllers
                 SetPositionsOnModel(model);
                 return View(model);
             }
+            else if (clubs.Count != clubs.Distinct().Count())
+            {
+                model.ErrorMessage = "At least one club duplicated";
+                SetPositionsOnModel(model);
+                return View(model);
+            }
 
             var isAdmin = await _apiProvider
                 .IsAdminUserAsync(token)
