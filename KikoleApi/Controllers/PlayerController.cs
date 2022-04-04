@@ -88,12 +88,19 @@ namespace KikoleApi.Controllers
             if (playerId == 0)
                 return StatusCode((int)HttpStatusCode.InternalServerError, _resources.PlayerCreationFailure);
 
-            if (request.ClueLanguages?.Count > 0)
+            var languagesClues = new Dictionary<ulong, string>();
+            if (request.ClueLanguages != null)
             {
-                var languagesClues = new Dictionary<ulong, string>();
                 foreach (var kvp in request.ClueLanguages)
-                    languagesClues.Add((ulong)kvp.Key, kvp.Value.Trim());
+                {
+                    var actualValue = kvp.Value?.Trim();
+                    if(!string.IsNullOrWhiteSpace(actualValue))
+                        languagesClues.Add((ulong)kvp.Key, actualValue);
+                }
+            }
 
+            if (languagesClues.Count > 0)
+            {
                 await _playerRepository
                     .InsertPlayerCluesByLanguageAsync(playerId, languagesClues)
                     .ConfigureAwait(false);

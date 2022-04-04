@@ -24,9 +24,12 @@ namespace KikoleApi.Models.Requests
             if (!IsAccepted && string.IsNullOrWhiteSpace(RefusalReason))
                 return resources.RefusalWithoutReason;
 
-            if (ClueEditLangugages?.ContainsKey(Languages.fr) != true
-                || ClueEditLangugages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
-                return resources.InvalidClue;
+            if (IsAccepted)
+            {
+                if (ClueEditLangugages?.ContainsKey(Languages.fr) != true
+                    || ClueEditLangugages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
+                    return resources.InvalidClue;
+            }
 
             return null;
         }
