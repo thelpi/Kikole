@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Requests;
@@ -49,5 +50,17 @@ namespace KikoleApi.Interfaces
         /// <param name="currentClue">The current clue on the player (en).</param>
         /// <returns>Nothing.</returns>
         Task AcceptSubmittedPlayerAsync(PlayerSubmissionValidationRequest request, string currentClue);
+
+        /// <summary>
+        /// Computes a challenge date by checking player submissions by host and guest.
+        /// </summary>
+        /// <param name="challenge">Challenge info</param>
+        /// <param name="hostDates">Host non available dates.</param>
+        /// <param name="guestDates">Guest non available dates.</param>
+        /// <returns>First date when the challenge is possible.</returns>
+        Task<DateTime> ComputeAvailableChallengeDateAsync(
+            ChallengeDto challenge,
+            IReadOnlyCollection<DateTime> hostDates,
+            IReadOnlyCollection<DateTime> guestDates);
     }
 }

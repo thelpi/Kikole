@@ -14,24 +14,24 @@ namespace KikoleApi.Controllers
 {
     public class ChallengeController : KikoleBaseController
     {
-        private readonly IBadgeService _badgeService;
         private readonly IChallengeRepository _challengeRepository;
-        private readonly IClock _clock;
-        private readonly IPlayerRepository _playerRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILeaderRepository _leaderRepository;
+        private readonly IPlayerService _playerService;
+        private readonly IBadgeService _badgeService;
         private readonly TextResources _resources;
+        private readonly IClock _clock;
 
         public ChallengeController(IChallengeRepository challengeRepository,
-            IPlayerRepository playerRepository,
             IUserRepository userRepository,
             ILeaderRepository leaderRepository,
             IBadgeService badgeService,
+            IPlayerService playerService,
             TextResources resources,
             IClock clock)
         {
             _challengeRepository = challengeRepository;
-            _playerRepository = playerRepository;
+            _playerService = playerService;
             _userRepository = userRepository;
             _leaderRepository = leaderRepository;
             _badgeService = badgeService;
@@ -167,20 +167,9 @@ namespace KikoleApi.Controllers
                 .GetBookedChallengesAsync(challenge.GuestUserId)
                 .ConfigureAwait(false);
 
-            var challengeDate = _clock.Now.Date;
-            Models.Dtos.PlayerDto p;
-            do
-            {
-                challengeDate = challengeDate.AddDays(1);
-
-                p = await _playerRepository
-                    .GetPlayerOfTheDayAsync(challengeDate)
-                    .ConfigureAwait(false);
-            }
-            while (hostDates.Contains(challengeDate)
-                || guestDates.Contains(challengeDate)
-                || p.CreationUserId == challenge.GuestUserId
-                || p.CreationUserId == challenge.HostUserId);
+            var challengeDate = await _playerService
+                .ComputeAvailableChallengeDateAsync(challenge, hostDates, guestDates)
+                .ConfigureAwait(false);
 
             await _challengeRepository
                 .RespondToChallengeAsync(id, isAccepted, challengeDate)
@@ -317,8 +306,8 @@ namespace KikoleApi.Controllers
             if (userId == 0)
                 return BadRequest(_resources.InvalidUser);
 
-            var debut = await _playerRepository
-                .GetFirstDateAsync()
+            var debut = await _playerService
+                .GetFirstSubmittedPlayerDateAsync()
                 .ConfigureAwait(false);
 
             if (fromDate.HasValue && fromDate.Value.Date < debut.Date)

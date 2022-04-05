@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
@@ -13,14 +14,17 @@ namespace KikoleApi.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
         private readonly TextResources _resources;
+        private readonly IClock _clock;
 
         public PlayerService(IPlayerRepository playerRepository,
             IClubRepository clubRepository,
-            TextResources resources)
+            TextResources resources,
+            IClock clock)
         {
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
             _resources = resources;
+            _clock = clock;
         }
 
         /// <inheritdoc />
@@ -141,6 +145,30 @@ namespace KikoleApi.Services
             await _playerRepository
                 .InsertPlayerCluesByLanguageAsync(request.PlayerId, languagesClues)
                 .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<DateTime> ComputeAvailableChallengeDateAsync(
+            ChallengeDto challenge,
+            IReadOnlyCollection<DateTime> hostDates,
+            IReadOnlyCollection<DateTime> guestDates)
+        {
+            var challengeDate = _clock.Now.Date;
+            PlayerDto p;
+            do
+            {
+                challengeDate = challengeDate.AddDays(1);
+
+                p = await _playerRepository
+                    .GetPlayerOfTheDayAsync(challengeDate)
+                    .ConfigureAwait(false);
+            }
+            while (hostDates.Contains(challengeDate)
+                || guestDates.Contains(challengeDate)
+                || p.CreationUserId == challenge.GuestUserId
+                || p.CreationUserId == challenge.HostUserId);
+
+            return challengeDate;
         }
 
         private async Task<DateTime> GetNextDateAsync()
