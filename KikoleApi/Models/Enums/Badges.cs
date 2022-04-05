@@ -32,6 +32,6 @@
         WikipediaScreenshot,
         PassportCheck,
         EverythingNotLost,
-        TheEnd
+        B34
     }
 }

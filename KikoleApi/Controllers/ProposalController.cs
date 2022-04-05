@@ -216,7 +216,7 @@ namespace KikoleApi.Controllers
                     .CreateProposalAsync(request.ToDto(userId, response.Successful))
                     .ConfigureAwait(false);
 
-                if (response.IsWin && request.DaysBefore == 0)
+                if (response.IsWin)
                 {
                     var user = await _userRepository
                         .GetUserByIdAsync(userId)
@@ -224,139 +224,156 @@ namespace KikoleApi.Controllers
 
                     if (user.UserTypeId != (ulong)UserTypes.Administrator)
                     {
-                        var leader = new LeaderDto
-                        {
-                            Points = (ushort)response.TotalPoints,
-                            ProposalDate = request.ProposalDate,
-                            Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
-                            UserId = userId
-                        };
-
-                        await _leaderRepository
-                            .CreateLeaderAsync(leader)
-                            .ConfigureAwait(false);
-
-                        var firstDate = await _playerRepository
-                            .GetFirstDateAsync()
-                            .ConfigureAwait(false);
-
-                        var leadersHistory = await _leaderRepository
-                            .GetLeadersHistoryAsync(request.ProposalDate.Date, firstDate.Date)
-                            .ConfigureAwait(false);
-
                         var collectedBadges = new List<Badges>();
-
-                        foreach (var badge in BadgeHelper.LeaderBasedBadgeCondition.Keys)
+                        if (request.DaysBefore == 0)
                         {
-                            if (BadgeHelper.LeaderBasedBadgeCondition[badge](leader, leadersHistory))
+                            var leader = new LeaderDto
                             {
-                                var added = await InsertBadgeIfNotAlreadyAsync(
-                                        request, userId, badge)
-                                    .ConfigureAwait(false);
-                                if (added)
-                                    collectedBadges.Add(badge);
-                            }
-                        }
+                                Points = (ushort)response.TotalPoints,
+                                ProposalDate = request.ProposalDate,
+                                Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
+                                UserId = userId
+                            };
 
-                        foreach (var badge in BadgeHelper.PlayerBasedBadgeCondition.Keys)
-                        {
-                            if (BadgeHelper.PlayerBasedBadgeCondition[badge](playerOfTheDay))
+                            await _leaderRepository
+                                .CreateLeaderAsync(leader)
+                                .ConfigureAwait(false);
+
+                            var firstDate = await _playerRepository
+                                .GetFirstDateAsync()
+                                .ConfigureAwait(false);
+
+                            var leadersHistory = await _leaderRepository
+                                .GetLeadersHistoryAsync(request.ProposalDate.Date, firstDate.Date)
+                                .ConfigureAwait(false);
+
+                            foreach (var badge in BadgeHelper.LeaderBasedBadgeCondition.Keys)
                             {
-                                var added = await InsertBadgeIfNotAlreadyAsync(
-                                         request, userId, badge)
-                                     .ConfigureAwait(false);
-                                if (added)
-                                    collectedBadges.Add(badge);
-                            }
-                        }
-
-                        var leaders = await _leaderRepository
-                            .GetLeadersAtDateAsync(request.ProposalDate.Date)
-                            .ConfigureAwait(false);
-
-                        foreach (var badge in BadgeHelper.LeadersBasedBadgeCondition.Keys)
-                        {
-                            var hasBadgeNotAlone = BadgeHelper.LeadersBasedBadgeNonUniqueCondition[badge](leader, leaders);
-                            if (hasBadgeNotAlone)
-                            {
-                                var badgeOwners = await _badgeRepository
-                                    .GetUsersOfTheDayWithBadgeAsync((ulong)badge, request.ProposalDate)
-                                    .ConfigureAwait(false);
-
-                                foreach (var bo in badgeOwners)
+                                if (BadgeHelper.LeaderBasedBadgeCondition[badge](leader, leadersHistory))
                                 {
-                                    await _badgeRepository
-                                        .RemoveUserBadgeAsync(new UserBadgeDto
-                                        {
-                                            BadgeId = (ulong)badge,
-                                            UserId = bo.UserId
-                                        })
+                                    var added = await InsertBadgeIfNotAlreadyAsync(
+                                            request, userId, badge)
                                         .ConfigureAwait(false);
+                                    if (added)
+                                        collectedBadges.Add(badge);
                                 }
+                            }
 
-                                if (BadgeHelper.LeadersBasedBadgeCondition[badge](leader, leaders))
+                            foreach (var badge in BadgeHelper.PlayerBasedBadgeCondition.Keys)
+                            {
+                                if (BadgeHelper.PlayerBasedBadgeCondition[badge](playerOfTheDay))
                                 {
-                                    await InsertBadgeIfNotAlreadyAsync(
+                                    var added = await InsertBadgeIfNotAlreadyAsync(
                                              request, userId, badge)
                                          .ConfigureAwait(false);
+                                    if (added)
+                                        collectedBadges.Add(badge);
                                 }
                             }
-                        }
 
-                        // TODO: duplicate code
-                        // and not a good way to filter history
-                        var myHistory = leadersHistory
-                            .SelectMany(lh => lh)
-                            .Where(lh => lh.UserId == leader.UserId)
-                            .ToList();
-
-                        var playersHistory = new List<PlayerDto>();
-                        foreach (var mh in myHistory)
-                        {
-                            var p = await _playerRepository
-                                .GetPlayerOfTheDayAsync(mh.ProposalDate.Date)
+                            var leaders = await _leaderRepository
+                                .GetLeadersAtDateAsync(request.ProposalDate.Date)
                                 .ConfigureAwait(false);
-                            playersHistory.Add(p);
-                        }
-                        playersHistory.Add(playerOfTheDay);
 
-                        foreach (var badge in BadgeHelper.PlayersHistoryBadgeCondition.Keys)
-                        {
-                            if (BadgeHelper.PlayersHistoryBadgeCondition[badge](playersHistory))
+                            foreach (var badge in BadgeHelper.LeadersBasedBadgeCondition.Keys)
+                            {
+                                var hasBadgeNotAlone = BadgeHelper.LeadersBasedBadgeNonUniqueCondition[badge](leader, leaders);
+                                if (hasBadgeNotAlone)
+                                {
+                                    var badgeOwners = await _badgeRepository
+                                        .GetUsersOfTheDayWithBadgeAsync((ulong)badge, request.ProposalDate)
+                                        .ConfigureAwait(false);
+
+                                    foreach (var bo in badgeOwners)
+                                    {
+                                        await _badgeRepository
+                                            .RemoveUserBadgeAsync(new UserBadgeDto
+                                            {
+                                                BadgeId = (ulong)badge,
+                                                UserId = bo.UserId
+                                            })
+                                            .ConfigureAwait(false);
+                                    }
+
+                                    if (BadgeHelper.LeadersBasedBadgeCondition[badge](leader, leaders))
+                                    {
+                                        await InsertBadgeIfNotAlreadyAsync(
+                                                 request, userId, badge)
+                                             .ConfigureAwait(false);
+                                    }
+                                }
+                            }
+
+                            // TODO: duplicate code
+                            // and not a good way to filter history
+                            var myHistory = leadersHistory
+                                .SelectMany(lh => lh)
+                                .Where(lh => lh.UserId == leader.UserId)
+                                .ToList();
+
+                            var playersHistory = new List<PlayerDto>();
+                            foreach (var mh in myHistory)
+                            {
+                                var p = await _playerRepository
+                                    .GetPlayerOfTheDayAsync(mh.ProposalDate.Date)
+                                    .ConfigureAwait(false);
+                                playersHistory.Add(p);
+                            }
+                            playersHistory.Add(playerOfTheDay);
+
+                            foreach (var badge in BadgeHelper.PlayersHistoryBadgeCondition.Keys)
+                            {
+                                if (BadgeHelper.PlayersHistoryBadgeCondition[badge](playersHistory))
+                                {
+                                    var added = await InsertBadgeIfNotAlreadyAsync(
+                                            request, userId, badge)
+                                        .ConfigureAwait(false);
+                                    if (added)
+                                        collectedBadges.Add(badge);
+                                }
+                            }
+
+                            if (!proposalsAlready.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club))
                             {
                                 var added = await InsertBadgeIfNotAlreadyAsync(
-                                        request, userId, badge)
+                                        request, userId, Badges.WikipediaScreenshot)
                                     .ConfigureAwait(false);
                                 if (added)
-                                    collectedBadges.Add(badge);
+                                    collectedBadges.Add(Badges.WikipediaScreenshot);
+                            }
+
+                            if (!proposalsAlready.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club))
+                            {
+                                var added = await InsertBadgeIfNotAlreadyAsync(
+                                        request, userId, Badges.PassportCheck)
+                                    .ConfigureAwait(false);
+                                if (added)
+                                    collectedBadges.Add(Badges.PassportCheck);
+                            }
+
+                            if (proposalsAlready.Count > 0 && proposalsAlready.All(ep => ep.Successful == 0))
+                            {
+                                var added = await InsertBadgeIfNotAlreadyAsync(
+                                        request, userId, Badges.EverythingNotLost)
+                                    .ConfigureAwait(false);
+                                if (added)
+                                    collectedBadges.Add(Badges.EverythingNotLost);
                             }
                         }
 
-                        if (!proposalsAlready.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club))
+                        if (playerOfTheDay.Id == Player.ImportantId)
                         {
-                            var added = await InsertBadgeIfNotAlreadyAsync(
-                                    request, userId, Badges.WikipediaScreenshot)
+                            var badge = await _badgeRepository
+                                .GetUsersWithBadgeAsync((ulong)Badges.B34)
                                 .ConfigureAwait(false);
-                            if (added)
-                                collectedBadges.Add(Badges.WikipediaScreenshot);
-                        }
-
-                        if (!proposalsAlready.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club))
-                        {
-                            var added = await InsertBadgeIfNotAlreadyAsync(
-                                    request, userId, Badges.PassportCheck)
-                                .ConfigureAwait(false);
-                            if (added)
-                                collectedBadges.Add(Badges.PassportCheck);
-                        }
-
-                        if (proposalsAlready.Count > 0 && proposalsAlready.All(ep => ep.Successful == 0))
-                        {
-                            var added = await InsertBadgeIfNotAlreadyAsync(
-                                    request, userId, Badges.EverythingNotLost)
-                                .ConfigureAwait(false);
-                            if (added)
-                                collectedBadges.Add(Badges.EverythingNotLost);
+                            if (badge.Count == 0)
+                            {
+                                var added = await InsertBadgeIfNotAlreadyAsync(
+                                        request, userId, Badges.B34)
+                                    .ConfigureAwait(false);
+                                if (added)
+                                    collectedBadges.Add(Badges.B34);
+                            }
                         }
 
                         var badgesDto = await _badgeRepository
