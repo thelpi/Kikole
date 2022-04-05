@@ -182,7 +182,8 @@ namespace KikoleApi.Repositories
         public async Task<DateTime> GetFirstDateAsync()
         {
             return await ExecuteScalarAsync<DateTime>(
-                    "SELECT MIN(proposal_date) FROM players " +
+                    "SELECT DATE_ADD(MIN(proposal_date), INTERVAL 1 DAY) " +
+                    "FROM players " +
                     "WHERE proposal_date IS NOT NULL",
                     new object())
                 .ConfigureAwait(false);
