@@ -160,7 +160,7 @@ namespace KikoleApi.Services
             if (playerOfTheDay.Id == TheEndPlayerId)
             {
                 await InsertBadgeIfNotAlreadyAsync(
-                        leader.ProposalDate, leader.UserId, Badges.B34, collectedBadges, allBadges)
+                        leader.ProposalDate, leader.UserId, Badges.TheEnd, collectedBadges, allBadges)
                     .ConfigureAwait(false);
             }
 
