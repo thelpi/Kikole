@@ -32,6 +32,7 @@
         WikipediaScreenshot,
         PassportCheck,
         EverythingNotLost,
-        TheEnd
+        TheEnd,
+        TheEndConsolationPrize
     }
 }

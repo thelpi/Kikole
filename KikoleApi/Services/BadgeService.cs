@@ -159,9 +159,18 @@ namespace KikoleApi.Services
 
             if (playerOfTheDay.Id == TheEndPlayerId)
             {
+                var oldCount = collectedBadges.Count;
                 await InsertBadgeIfNotAlreadyAsync(
                         leader.ProposalDate, leader.UserId, Badges.TheEnd, collectedBadges, allBadges)
                     .ConfigureAwait(false);
+
+                // Does not insert the consolation prize
+                if (collectedBadges.Count == oldCount)
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                            leader.ProposalDate, leader.UserId, Badges.TheEndConsolationPrize, collectedBadges, allBadges)
+                        .ConfigureAwait(false);
+                }
             }
 
             return await GetUserBadgesAsync(
