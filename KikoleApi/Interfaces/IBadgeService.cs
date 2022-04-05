@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Interfaces
@@ -17,7 +18,8 @@ namespace KikoleApi.Interfaces
         /// <param name="isActualTodayleader"><c>True</c> if the player found is from today.</param>
         /// <returns>Collection of <see cref="UserBadge"/>.</returns>
         Task<IReadOnlyCollection<UserBadge>> PrepareNewLeaderBadgesAsync(
-            LeaderDto leader, PlayerDto playerOfTheDay,
+            LeaderDto leader,
+            PlayerDto playerOfTheDay,
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
             bool isActualTodayleader);
 
@@ -28,6 +30,17 @@ namespace KikoleApi.Interfaces
         /// <param name="request">Proposal request.</param>
         /// <returns>Collection of <see cref="UserBadge"/>.</returns>
         Task<IReadOnlyCollection<UserBadge>> PrepareNonLeaderBadgesAsync(
-            ulong userId, BaseProposalRequest request);
+            ulong userId,
+            BaseProposalRequest request);
+
+        /// <summary>
+        /// Add a badge to a user, if the user does not have the badge already and the badge is not unique.
+        /// </summary>
+        /// <param name="badge">Badge to add.</param>
+        /// <param name="userId">User who get the badge.</param>
+        /// <returns>Nothing</returns>
+        Task AddBadgeToUserAsync(
+            Badges badge,
+            ulong userId);
     }
 }

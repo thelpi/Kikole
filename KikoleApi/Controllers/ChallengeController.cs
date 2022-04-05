@@ -14,7 +14,7 @@ namespace KikoleApi.Controllers
 {
     public class ChallengeController : KikoleBaseController
     {
-        private readonly IBadgeRepository _badgeRepository;
+        private readonly IBadgeService _badgeService;
         private readonly IChallengeRepository _challengeRepository;
         private readonly IClock _clock;
         private readonly IPlayerRepository _playerRepository;
@@ -26,7 +26,7 @@ namespace KikoleApi.Controllers
             IPlayerRepository playerRepository,
             IUserRepository userRepository,
             ILeaderRepository leaderRepository,
-            IBadgeRepository badgeRepository,
+            IBadgeService badgeService,
             TextResources resources,
             IClock clock)
         {
@@ -34,7 +34,7 @@ namespace KikoleApi.Controllers
             _playerRepository = playerRepository;
             _userRepository = userRepository;
             _leaderRepository = leaderRepository;
-            _badgeRepository = badgeRepository;
+            _badgeService = badgeService;
             _clock = clock;
             _resources = resources;
         }
@@ -188,29 +188,28 @@ namespace KikoleApi.Controllers
 
             if (isAccepted)
             {
-                await AddBadgesIfEligibleAsync(
-                        Badges.ChallengeAccepted, challenge)
-                    .ConfigureAwait(false);
-
-                if (challenge.PointsRate >= 80)
+                foreach (var user in new[] { challenge.HostUserId, challenge.GuestUserId })
                 {
-                    await AddBadgesIfEligibleAsync(
-                           Badges.AllIn, challenge)
-                       .ConfigureAwait(false);
+                    await _badgeService
+                        .AddBadgeToUserAsync(Badges.ChallengeAccepted, user)
+                        .ConfigureAwait(false);
+
+                    if (challenge.PointsRate >= 80)
+                    {
+                        await _badgeService
+                            .AddBadgeToUserAsync(Badges.AllIn, user)
+                            .ConfigureAwait(false);
+                    }
                 }
 
                 var allAccepted = await _challengeRepository
                     .GetAcceptedChallengesAsync(null, null)
                     .ConfigureAwait(false);
-                
+
                 if (allAccepted.Count(ac => ac.HostUserId == challenge.HostUserId) >= 5)
                 {
-                    var usersBadged = await _badgeRepository
-                       .GetUsersWithBadgeAsync((ulong)Badges.GambleAddiction)
-                       .ConfigureAwait(false);
-
-                    await AddBadgeIfEligibleAsync(
-                            challenge, usersBadged, Badges.GambleAddiction, c => c.HostUserId)
+                    await _badgeService
+                        .AddBadgeToUserAsync(Badges.GambleAddiction, challenge.HostUserId)
                         .ConfigureAwait(false);
                 }
             }
@@ -380,38 +379,6 @@ namespace KikoleApi.Controllers
                 }
 
                 challenges.Add(new Challenge(c, usersCache[opponentUserId], userId, leaders));
-            }
-        }
-
-        private async Task AddBadgesIfEligibleAsync(Badges badge, Models.Dtos.ChallengeDto challenge)
-        {
-            var usersBadged = await _badgeRepository
-                   .GetUsersWithBadgeAsync((ulong)badge)
-                   .ConfigureAwait(false);
-
-            await AddBadgeIfEligibleAsync(
-                    challenge, usersBadged, badge, c => c.GuestUserId)
-                .ConfigureAwait(false);
-            await AddBadgeIfEligibleAsync(
-                    challenge, usersBadged, badge, c => c.HostUserId)
-                .ConfigureAwait(false);
-        }
-
-        private async Task AddBadgeIfEligibleAsync(Models.Dtos.ChallengeDto challenge,
-            IEnumerable<Models.Dtos.UserBadgeDto> usersBadged,
-            Badges badge,
-            Func<Models.Dtos.ChallengeDto, ulong> userFunc)
-        {
-            if (!usersBadged.Any(ub => ub.UserId == userFunc(challenge)))
-            {
-                await _badgeRepository
-                    .InsertUserBadgeAsync(new Models.Dtos.UserBadgeDto
-                    {
-                        GetDate = _clock.Now.Date,
-                        BadgeId = (ulong)badge,
-                        UserId = userFunc(challenge)
-                    })
-                    .ConfigureAwait(false);
             }
         }
     }

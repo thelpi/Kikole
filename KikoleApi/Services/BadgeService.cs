@@ -191,6 +191,18 @@ namespace KikoleApi.Services
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
+        public async Task AddBadgeToUserAsync(Badges badge, ulong userId)
+        {
+            var allBadges = await _badgeRepository
+                .GetBadgesAsync(true)
+                .ConfigureAwait(false);
+
+            await InsertBadgeIfNotAlreadyAsync(
+                    _clock.Now, userId, badge, new List<Badges>(), allBadges)
+                .ConfigureAwait(false);
+        }
+
         private async Task InsertBadgeIfNotAlreadyAsync(DateTime proposalDate,
             ulong userId, Badges badge, List<Badges> collectedBadges,
             IReadOnlyCollection<BadgeDto> allBadges)
