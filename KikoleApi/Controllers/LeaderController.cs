@@ -345,7 +345,7 @@ namespace KikoleApi.Controllers
             return Ok(badges);
         }
 
-        [HttpGet("/users{id}/badges")]
+        [HttpGet("/users/{id}/badges")]
         [AuthenticationLevel]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
