@@ -50,6 +50,7 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IChallengeRepository, ChallengeRepository>()
                 // services (scoped allow resources)
                 .AddScoped<IBadgeService, BadgeService>()
+                .AddScoped<IPlayerService, PlayerService>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()

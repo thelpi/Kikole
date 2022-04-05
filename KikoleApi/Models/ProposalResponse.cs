@@ -31,9 +31,7 @@ namespace KikoleApi.Models
         private ProposalResponse(ProposalTypes proposalType,
             string sourceValue,
             bool? success,
-            PlayerDto player,
-            IReadOnlyList<PlayerClubDto> playerClubs,
-            IReadOnlyList<ClubDto> clubs)
+            PlayerFullDto player)
         {
             ProposalType = proposalType;
 
@@ -44,42 +42,42 @@ namespace KikoleApi.Models
             {
                 case ProposalTypes.Name:
                     if (!success.HasValue)
-                        Successful = player.AllowedNames.ContainsSanitized(sourceValue);
+                        Successful = player.Player.AllowedNames.ContainsSanitized(sourceValue);
                     Value = Successful
-                        ? player.Name
+                        ? player.Player.Name
                         : sourceValue;
                     break;
 
                 case ProposalTypes.Club:
-                    var c = clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
+                    var c = player.Clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
                     if (!success.HasValue)
                         Successful = c != null;
                     Value = Successful
-                        ? new PlayerClub(c, playerClubs)
+                        ? new PlayerClub(c, player.PlayerClubs)
                         : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Country:
                     if (!success.HasValue)
-                        Successful = player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
+                        Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
                     Value = Successful
-                        ? player.CountryId
+                        ? player.Player.CountryId
                         : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Position:
                     if (!success.HasValue)
-                        Successful = player.PositionId == ulong.Parse(sourceValue);
+                        Successful = player.Player.PositionId == ulong.Parse(sourceValue);
                     Value = Successful
-                        ? player.PositionId
+                        ? player.Player.PositionId
                         : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Year:
                     if (!success.HasValue)
-                        Successful = ushort.Parse(sourceValue) == player.YearOfBirth;
+                        Successful = ushort.Parse(sourceValue) == player.Player.YearOfBirth;
                     Value = Successful
-                        ? player.YearOfBirth.ToString()
+                        ? player.Player.YearOfBirth.ToString()
                         : sourceValue;
                     break;
             }
@@ -89,21 +87,14 @@ namespace KikoleApi.Models
                 : ProposalChart.Default.ProposalTypesCost[ProposalType];
         }
 
-        internal ProposalResponse(BaseProposalRequest request,
-            PlayerDto player,
-            IReadOnlyList<PlayerClubDto> playerClubs,
-            IReadOnlyList<ClubDto> clubs,
-            TextResources resources)
-            : this(request.ProposalType, request.Value, null, player, playerClubs, clubs)
+        internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, TextResources resources)
+            : this(request.ProposalType, request.Value, null, player)
         {
-            Tip = request.GetTip(player, resources);
+            Tip = request.GetTip(player.Player, resources);
         }
 
-        internal ProposalResponse(ProposalDto dto,
-            PlayerDto player,
-            IReadOnlyList<PlayerClubDto> playerClubs,
-            IReadOnlyList<ClubDto> clubs)
-            : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, playerClubs, clubs)
+        internal ProposalResponse(ProposalDto dto, PlayerFullDto player)
+            : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player)
         { }
 
         internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)

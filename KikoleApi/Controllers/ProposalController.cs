@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
-using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
@@ -16,27 +15,24 @@ namespace KikoleApi.Controllers
 {
     public class ProposalController : KikoleBaseController
     {
+        private readonly IPlayerService _playerService;
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
-        private readonly IPlayerRepository _playerRepository;
-        private readonly IClubRepository _clubRepository;
         private readonly IBadgeService _badgeService;
         private readonly IClock _clock;
         private readonly TextResources _resources;
 
         public ProposalController(IProposalRepository proposalRepository,
-            IPlayerRepository playerRepository,
-            IClubRepository clubRepository,
             ILeaderRepository leaderRepository,
             IBadgeService badgeService,
+            IPlayerService playerService,
             TextResources resources,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
-            _playerRepository = playerRepository;
-            _clubRepository = clubRepository;
             _leaderRepository = leaderRepository;
             _badgeService = badgeService;
+            _playerService = playerService;
             _resources = resources;
             _clock = clock;
         }
@@ -46,8 +42,8 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(ProposalChart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ProposalChart>> GetProposalChartAsync()
         {
-            ProposalChart.Default.FirstDate = await _playerRepository
-                .GetFirstDateAsync()
+            ProposalChart.Default.FirstDate = await _playerService
+                .GetFirstSubmittedPlayerDateAsync()
                 .ConfigureAwait(false);
             return ProposalChart.Default;
         }
@@ -131,28 +127,11 @@ namespace KikoleApi.Controllers
             if (datas.Count == 0)
                 return Ok(new List<ProposalResponse>(0));
 
-            var playerOfTheDay = await _playerRepository
-                .GetPlayerOfTheDayAsync(proposalDate)
+            var pInfo = await _playerService
+                .GetPlayerInfoAsync(proposalDate)
                 .ConfigureAwait(false);
 
-            var playerClubs = await _playerRepository
-                .GetPlayerClubsAsync(playerOfTheDay.Id)
-                .ConfigureAwait(false);
-
-            var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
-            foreach (var pc in playerClubs)
-            {
-                var c = await _clubRepository
-                    .GetClubAsync(pc.ClubId)
-                    .ConfigureAwait(false);
-                playerClubsDetails.Add(c);
-            }
-
-            return Ok(GetProposalResponsesWithPoints(datas,
-                playerOfTheDay,
-                playerClubs,
-                playerClubsDetails,
-                out _));
+            return Ok(GetProposalResponsesWithPoints(datas, pInfo, out _));
         }
 
         private async Task<ActionResult<ProposalResponse>> SubmitProposalAsync<T>(T request,
@@ -166,32 +145,18 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
 
-            var playerOfTheDay = await _playerRepository
-                .GetPlayerOfTheDayAsync(request.PlayerSubmissionDate)
+            var firstDate = await _playerService
+                .GetFirstSubmittedPlayerDateAsync()
                 .ConfigureAwait(false);
 
-            if (playerOfTheDay == null)
+            if (request.PlayerSubmissionDate.Date < firstDate.Date || request.PlayerSubmissionDate.Date > _clock.Now.Date)
                 return BadRequest(_resources.InvalidDate);
 
-            var playerClubs = await _playerRepository
-                .GetPlayerClubsAsync(playerOfTheDay.Id)
+            var pInfo = await _playerService
+                .GetPlayerInfoAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
-            var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
-            foreach (var pc in playerClubs)
-            {
-                var c = await _clubRepository
-                    .GetClubAsync(pc.ClubId)
-                    .ConfigureAwait(false);
-                playerClubsDetails.Add(c);
-            }
-
-            var response = new ProposalResponse(
-                request,
-                playerOfTheDay,
-                playerClubs,
-                playerClubsDetails,
-                _resources);
+            var response = new ProposalResponse(request, pInfo, _resources);
 
             var proposalsAlready = await _proposalRepository
                 .GetProposalsAsync(request.PlayerSubmissionDate, userId)
@@ -199,11 +164,7 @@ namespace KikoleApi.Controllers
 
             var proposalMade = request.MatchAny(proposalsAlready);
 
-            GetProposalResponsesWithPoints(proposalsAlready,
-                playerOfTheDay,
-                playerClubs,
-                playerClubsDetails,
-                out int sourcePoints);
+            GetProposalResponsesWithPoints(proposalsAlready, pInfo, out int sourcePoints);
 
             response = response.WithTotalPoints(sourcePoints, proposalMade);
 
@@ -232,7 +193,7 @@ namespace KikoleApi.Controllers
                     }
 
                     var leaderBadges = await _badgeService
-                        .PrepareNewLeaderBadgesAsync(leader, playerOfTheDay, proposalsAlready, isToday)
+                        .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, isToday)
                         .ConfigureAwait(false);
 
                     foreach (var b in leaderBadges)
@@ -252,9 +213,7 @@ namespace KikoleApi.Controllers
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(
             IEnumerable<ProposalDto> proposalDtos,
-            PlayerDto playerOfTheDay,
-            IReadOnlyList<PlayerClubDto> playerClubs,
-            IReadOnlyList<ClubDto> playerClubsDetails,
+            PlayerFullDto player,
             out int points)
         {
             var totalPoints = ProposalChart.Default.BasePoints;
@@ -264,11 +223,7 @@ namespace KikoleApi.Controllers
                 .OrderBy(pDto => pDto.CreationDate)
                 .Select(pDto =>
                 {
-                    var pr = new ProposalResponse(
-                            pDto,
-                            playerOfTheDay,
-                            playerClubs,
-                            playerClubsDetails)
+                    var pr = new ProposalResponse(pDto, player)
                         .WithTotalPoints(totalPoints, false);
                     totalPoints = pr.TotalPoints;
                     if (pr.IsWin && !indexOfEnd.HasValue)
