@@ -14,6 +14,7 @@ CREATE TABLE `badges` (
   `name` varchar(255) COLLATE utf8_bin NOT NULL,
   `description` text COLLATE utf8_bin NOT NULL,
   `hidden` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  `is_unique` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
   `creation_date` datetime NOT NULL,
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
