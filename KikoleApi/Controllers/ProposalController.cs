@@ -49,9 +49,10 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(ProposalChart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ProposalChart>> GetProposalChartAsync()
         {
-            ProposalChart.Default.FirstDate = await _playerRepository
+            ProposalChart.Default.FirstDate = (await _playerRepository
                 .GetFirstDateAsync()
-                .ConfigureAwait(false);
+                .ConfigureAwait(false))
+                .AddDays(1);
             return ProposalChart.Default;
         }
 

@@ -89,10 +89,14 @@ namespace KikoleApi.Repositories
         public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
         {
             return await ExecuteReaderAsync<string>(
-                    "SELECT y.name FROM players AS y " +
+                    "SELECT DISTINCT y.name " +
+                    "FROM players AS y " +
                     "LEFT JOIN proposals AS p ON y.proposal_date = DATE(DATE_ADD(p.proposal_date, INTERVAL -p.days_before DAY)) " +
-                    "WHERE (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1) " +
-                    "OR y.creation_user_id = @userId",
+                    "WHERE (" +
+                    "   (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1) " +
+                    "   OR y.creation_user_id = @userId" +
+                    ") AND y.proposal_date IS NOT NULL " +
+                    "AND y.proposal_date <= DATE(NOW())",
                     new { userId })
                 .ConfigureAwait(false);
         }

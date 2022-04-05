@@ -41,14 +41,39 @@ namespace KikoleSite.Controllers
             
             if (day.HasValue
                 && model.CurrentDay != day.Value
-                && day.Value >= 0
-                && DateTime.Now.Date.AddDays(-day.Value) >= chart.FirstDate)
+                && day.Value >= 0)
             {
-                model = new HomeModel
+                var dt = DateTime.Now.Date.AddDays(-day.Value);
+                if (dt >= chart.FirstDate.Date)
                 {
-                    Points = chart.BasePoints,
-                    CurrentDay = day.Value
-                };
+                    model = new HomeModel
+                    {
+                        Points = chart.BasePoints,
+                        CurrentDay = day.Value
+                    };
+                }
+                else if (dt == chart.FirstDate.Date.AddDays(-1))
+                {
+                    var known = await _apiProvider
+                        .GetUserKnownPlayersAsync(token)
+                        .ConfigureAwait(false);
+                    if (known.Count == ((DateTime.Now.Date - chart.FirstDate.Date).Days + 1))
+                    {
+                        model = new HomeModel
+                        {
+                            Points = chart.BasePoints,
+                            CurrentDay = day.Value
+                        };
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction("Index");
+                }
             }
 
             var proposalDate = DateTime.Now.Date.AddDays(-model.CurrentDay);
