@@ -2,6 +2,7 @@
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Repositories;
+using KikoleApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -47,6 +48,8 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IBadgeRepository, BadgeRepository>()
                 .AddSingleton<IMessageRepository, MessageRepository>()
                 .AddSingleton<IChallengeRepository, ChallengeRepository>()
+                // services (scoped allow resources)
+                .AddScoped<IBadgeService, BadgeService>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()

@@ -9,8 +9,6 @@ namespace KikoleApi.Models
 {
     public class Player : PlayerCreator
     {
-        internal const ulong ImportantId = 81;
-
         public ulong Id { get; }
 
         public IReadOnlyCollection<PlayerClub> Clubs { get; }
