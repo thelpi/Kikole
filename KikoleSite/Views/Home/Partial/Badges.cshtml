@@ -5,8 +5,10 @@
     <div>@localizer["BadgesAcquired"]</div>
     foreach (var badge in Model)
     {
-        var color = !badge.HiddenOrSpecial ? "transparent" : "gold";
-        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+        var color = !badge.HiddenOrSpecial && !badge.Unique ? "transparent" : "gold";
+        var borderColor = badge.Unique ? "crimson" : "black";
+        var borderPx = badge.Unique ? "5px" : "1px";
+        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid @borderPx; border-color: @borderColor; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
             <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
             <div style="text-align:center">@badge.Description</div>
             @if (!badge.Hidden)
