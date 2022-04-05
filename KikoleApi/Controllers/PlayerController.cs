@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
@@ -16,10 +17,10 @@ namespace KikoleApi.Controllers
     [Route("players")]
     public class PlayerController : KikoleBaseController
     {
+        private readonly IPlayerService _playerService;
         private readonly IBadgeService _badgeService;
         private readonly IUserRepository _userRepository;
         private readonly IPlayerRepository _playerRepository;
-        private readonly IClubRepository _clubRepository;
         private readonly IClock _clock;
         private readonly TextResources _resources;
 
@@ -27,13 +28,13 @@ namespace KikoleApi.Controllers
             IClock clock,
             IBadgeService badgeService,
             IUserRepository userRepository,
-            IClubRepository clubRepository,
+            IPlayerService playerService,
             TextResources resources)
         {
             _playerRepository = playerRepository;
             _badgeService = badgeService;
             _userRepository = userRepository;
-            _clubRepository = clubRepository;
+            _playerService = playerService;
             _resources = resources;
             _clock = clock;
         }
@@ -43,17 +44,9 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<string>> GetPlayerOfTheDayClueAsync([FromQuery][Required] DateTime proposalDate)
         {
-            var player = await _playerRepository
-                .GetPlayerOfTheDayAsync(proposalDate)
+            var clue = await _playerService
+                .GetPlayerClueAsync(proposalDate)
                 .ConfigureAwait(false);
-
-            var clue = player.Clue;
-            if (_resources.Language != Languages.en)
-            {
-                clue = await _playerRepository
-                    .GetClueAsync(player.Id, (ulong)_resources.Language)
-                    .ConfigureAwait(false);
-            }
 
             return Ok(clue);
         }
@@ -78,43 +71,13 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
 
-            if (!request.ProposalDate.HasValue && request.SetLatestProposalDate)
-                request.ProposalDate = await GetNextDateAsync().ConfigureAwait(false);
-
-            var playerId = await _playerRepository
-                .CreatePlayerAsync(request.ToDto(userId))
+            var playerId = await _playerService
+                .CreatePlayerAsync(request, userId)
                 .ConfigureAwait(false);
-
-            if (playerId == 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.PlayerCreationFailure);
-
-            var languagesClues = new Dictionary<ulong, string>();
-            if (request.ClueLanguages != null)
-            {
-                foreach (var kvp in request.ClueLanguages)
-                {
-                    var actualValue = kvp.Value?.Trim();
-                    if(!string.IsNullOrWhiteSpace(actualValue))
-                        languagesClues.Add((ulong)kvp.Key, actualValue);
-                }
-            }
-
-            if (languagesClues.Count > 0)
-            {
-                await _playerRepository
-                    .InsertPlayerCluesByLanguageAsync(playerId, languagesClues)
-                    .ConfigureAwait(false);
-            }
-
-            foreach (var club in request.ToPlayerClubDtos(playerId))
-            {
-                await _playerRepository
-                    .CreatePlayerClubsAsync(club)
-                    .ConfigureAwait(false);
-            }
 
             return Created($"players/{playerId}", null);
         }
+
 
         [HttpGet("/player-submissions")]
         [AuthenticationLevel(UserTypes.Administrator)]
@@ -126,33 +89,23 @@ namespace KikoleApi.Controllers
                 .GetPendingValidationPlayersAsync()
                 .ConfigureAwait(false);
 
-            var usersCache = new Dictionary<ulong, UserDto>();
+            var users = new Dictionary<ulong, UserDto>();
+            foreach (var usrId in dtos.Select(dto => dto.CreationUserId).Distinct())
+            {
+                var user = await _userRepository
+                    .GetUserByIdAsync(usrId)
+                    .ConfigureAwait(false);
+                users.Add(usrId, user);
+            }
 
             var players = new List<Player>(dtos.Count);
             foreach (var p in dtos)
             {
-                if (!usersCache.ContainsKey(p.CreationUserId))
-                {
-                    var user = await _userRepository
-                        .GetUserByIdAsync(p.CreationUserId)
-                        .ConfigureAwait(false);
-                    usersCache.Add(p.CreationUserId, user);
-                }
-
-                var playerClubs = await _playerRepository
-                    .GetPlayerClubsAsync(p.Id)
+                var pInfo = await _playerService
+                    .GetPlayerInfoAsync(p)
                     .ConfigureAwait(false);
 
-                var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
-                foreach (var pc in playerClubs)
-                {
-                    var c = await _clubRepository
-                        .GetClubAsync(pc.ClubId)
-                        .ConfigureAwait(false);
-                    playerClubsDetails.Add(c);
-                }
-
-                players.Add(new Player(p, usersCache.Values, playerClubs, playerClubsDetails));
+                players.Add(new Player(pInfo, users.Values));
             }
 
             return Ok(players);
@@ -187,22 +140,8 @@ namespace KikoleApi.Controllers
 
             if (request.IsAccepted)
             {
-                var clueEn = string.IsNullOrWhiteSpace(request.ClueEditEn)
-                    ? p.Clue
-                    : request.ClueEditEn.Trim();
-
-                var latestDate = await GetNextDateAsync().ConfigureAwait(false);
-
-                await _playerRepository
-                    .ValidatePlayerProposalAsync(request.PlayerId, clueEn, latestDate)
-                    .ConfigureAwait(false);
-
-                var languagesClues = new Dictionary<ulong, string>();
-                foreach (var kvp in request.ClueEditLangugages)
-                    languagesClues.Add((ulong)kvp.Key, kvp.Value.Trim());
-
-                await _playerRepository
-                    .InsertPlayerCluesByLanguageAsync(request.PlayerId, languagesClues)
+                await _playerService
+                    .AcceptSubmittedPlayerAsync(request, p.Clue)
                     .ConfigureAwait(false);
 
                 var added = await _badgeService
@@ -224,7 +163,7 @@ namespace KikoleApi.Controllers
                             .ConfigureAwait(false);
                     }
                 }
-                
+
                 // TODO: notify (+ badge)
             }
             else
@@ -251,14 +190,6 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             return Ok(names);
-        }
-
-        private async Task<DateTime> GetNextDateAsync()
-        {
-            var latestDate = await _playerRepository
-                .GetLatestProposalDateAsync()
-                .ConfigureAwait(false);
-            return latestDate.AddDays(1).Date;
         }
     }
 }

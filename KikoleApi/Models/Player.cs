@@ -29,24 +29,21 @@ namespace KikoleApi.Models
 
         public DateTime? RejectDate { get; }
 
-        internal Player(PlayerDto p,
-            IEnumerable<UserDto> users,
-            IEnumerable<PlayerClubDto> playerClubs,
-            IEnumerable<ClubDto> playerClubsDetails)
-            : base(users.Single(u => u.Id == p.CreationUserId), p)
+        internal Player(PlayerFullDto p, IEnumerable<UserDto> users)
+            : base(users.Single(u => u.Id == p.Player.CreationUserId), p.Player)
         {
-            Id = p.Id;
-            ProposalDate = p.ProposalDate;
-            RejectDate = p.RejectDate;
-            AllowedNames = p.AllowedNames.Disjoin();
-            Badge = (Badges?)p.BadgeId;
-            Clubs = playerClubsDetails
-                .Select(c => new PlayerClub(c, playerClubs))
+            Id = p.Player.Id;
+            ProposalDate = p.Player.ProposalDate;
+            RejectDate = p.Player.RejectDate;
+            AllowedNames = p.Player.AllowedNames.Disjoin();
+            Badge = (Badges?)p.Player.BadgeId;
+            Clubs = p.Clubs
+                .Select(c => new PlayerClub(c, p.PlayerClubs))
                 .ToList();
-            Clue = p.Clue;
-            Country = (Countries)p.CountryId;
-            Position = (Positions)p.PositionId;
-            YearOfBirth = p.YearOfBirth;
+            Clue = p.Player.Clue;
+            Country = (Countries)p.Player.CountryId;
+            Position = (Positions)p.Player.PositionId;
+            YearOfBirth = p.Player.YearOfBirth;
         }
     }
 }
