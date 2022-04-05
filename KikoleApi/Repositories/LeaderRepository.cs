@@ -58,11 +58,11 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>> GetLeadersHistoryAsync(DateTime date)
+        public async Task<IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>> GetLeadersHistoryAsync(DateTime date, DateTime firstDate)
         {
             var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
 
-            while (date.Date > Models.ProposalChart.Default.FirstDate.Date)
+            while (date.Date > firstDate.Date)
             {
                 date = date.AddDays(-1);
                 var leadersBefore = await GetLeadersAtDateAsync(date)

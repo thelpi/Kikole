@@ -174,5 +174,14 @@ namespace KikoleApi.Repositories
                     new { userId, type = (accepted.HasValue ? (accepted.Value ? 1 : 2) : 0) })
                 .ConfigureAwait(false);
         }
+
+        public async Task<DateTime> GetFirstDateAsync()
+        {
+            return await ExecuteScalarAsync<DateTime>(
+                    "SELECT MIN(proposal_date) FROM players " +
+                    "WHERE proposal_date IS NOT NULL",
+                    new object())
+                .ConfigureAwait(false);
+        }
     }
 }

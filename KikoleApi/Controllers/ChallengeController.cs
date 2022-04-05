@@ -318,8 +318,11 @@ namespace KikoleApi.Controllers
             if (userId == 0)
                 return BadRequest(_resources.InvalidUser);
 
-            var debut = ProposalChart.Default.FirstDate.Date;
-            if (fromDate.HasValue && fromDate.Value.Date < debut)
+            var debut = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+
+            if (fromDate.HasValue && fromDate.Value.Date < debut.Date)
                 return BadRequest(_resources.InvalidDateRange);
 
             var yesterday = _clock.Now.AddDays(-1).Date;
@@ -329,7 +332,7 @@ namespace KikoleApi.Controllers
             if (toDate.HasValue && fromDate.HasValue && toDate.Value.Date < fromDate.Value.Date)
                 return BadRequest(_resources.InvalidDateRange);
 
-            var dateBeginOk = fromDate?.Date ?? debut;
+            var dateBeginOk = fromDate?.Date ?? debut.Date;
             var dateEndOk = toDate?.Date ?? yesterday;
 
             var hostChallenges = await _challengeRepository

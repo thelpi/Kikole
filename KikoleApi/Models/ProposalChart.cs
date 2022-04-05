@@ -12,18 +12,18 @@ namespace KikoleApi.Models
 
         private ProposalChart() { }
 
-        public int BasePoints = 1000;
+        public int BasePoints => 1000;
 
-        public int SubmissionBasePoints = 500;
+        public int SubmissionBasePoints => 500;
 
-        public int SubmissionBonusPoints = 1000;
+        public int SubmissionBonusPoints => 1000;
 
-        public int SubmissionLosePointsByLeader = 100;
+        public int SubmissionLosePointsByLeader => 100;
 
-        public int SubmissionThresholdlosePoints = 750;
+        public int SubmissionThresholdlosePoints => 750;
 
         public IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
-            = new Dictionary<ProposalTypes, int>
+            => new Dictionary<ProposalTypes, int>
             {
                 { ProposalTypes.Club, 50 },
                 { ProposalTypes.Country, 25 },
@@ -31,8 +31,7 @@ namespace KikoleApi.Models
                 { ProposalTypes.Position, 200 },
                 { ProposalTypes.Year, 25 },
             };
-
-        // TODO: binds to database (if possible)
-        public DateTime FirstDate = new DateTime(2022, 03, 05);
+        
+        public DateTime FirstDate { get; internal set; }
     }
 }

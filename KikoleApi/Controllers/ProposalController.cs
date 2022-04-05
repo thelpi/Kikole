@@ -47,8 +47,11 @@ namespace KikoleApi.Controllers
         [HttpGet("proposal-charts")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(ProposalChart), (int)HttpStatusCode.OK)]
-        public ActionResult<ProposalChart> GetProposalChart()
+        public async Task<ActionResult<ProposalChart>> GetProposalChartAsync()
         {
+            ProposalChart.Default.FirstDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
             return ProposalChart.Default;
         }
 
@@ -233,8 +236,12 @@ namespace KikoleApi.Controllers
                             .CreateLeaderAsync(leader)
                             .ConfigureAwait(false);
 
+                        var firstDate = await _playerRepository
+                            .GetFirstDateAsync()
+                            .ConfigureAwait(false);
+
                         var leadersHistory = await _leaderRepository
-                            .GetLeadersHistoryAsync(request.ProposalDate.Date)
+                            .GetLeadersHistoryAsync(request.ProposalDate.Date, firstDate.Date)
                             .ConfigureAwait(false);
 
                         var collectedBadges = new List<Badges>();

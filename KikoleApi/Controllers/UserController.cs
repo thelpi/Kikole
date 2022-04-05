@@ -342,7 +342,11 @@ namespace KikoleApi.Controllers
 
             var stats = new List<DailyUserStat>();
 
-            var currentDate = ProposalChart.Default.FirstDate.Date;
+            var currentDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+            currentDate = currentDate.Date;
+
             var now = _clock.Now.Date;
             while (currentDate <= now)
             {
@@ -428,7 +432,11 @@ namespace KikoleApi.Controllers
             var playersCache = new Dictionary<DateTime, PlayerDto>();
             var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
 
-            var currentDate = ProposalChart.Default.FirstDate.Date;
+            var currentDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+            currentDate = currentDate.Date;
+
             while (currentDate <= _clock.Now.Date)
             {
                 var leaders = await _leaderRepository

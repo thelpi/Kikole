@@ -36,5 +36,7 @@ namespace KikoleApi.Interfaces
         Task<string> GetClueAsync(ulong playerId, ulong languageId);
 
         Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
+
+        Task<DateTime> GetFirstDateAsync();
     }
 }

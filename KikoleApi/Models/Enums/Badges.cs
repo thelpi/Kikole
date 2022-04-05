@@ -31,6 +31,7 @@
         WeAreKikole,
         WikipediaScreenshot,
         PassportCheck,
-        EverythingNotLost
+        EverythingNotLost,
+        TheEnd
     }
 }
