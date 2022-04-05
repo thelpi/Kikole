@@ -8,7 +8,6 @@ using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
-using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -412,106 +411,6 @@ namespace KikoleApi.Controllers
             return Ok(badges);
         }
 
-        [HttpPut("/badges")]
-        [AuthenticationLevel(UserTypes.Administrator)]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> RecomputeBadgesAsync([FromQuery] Badges[] badges)
-        {
-            badges = badges?.Length > 0
-                ? badges
-                : Enum.GetValues(typeof(Badges)).Cast<Badges>().ToArray();
-
-            foreach (var badge in badges)
-            {
-                await _badgeRepository
-                    .ResetBadgeDatasAsync((ulong)badge)
-                    .ConfigureAwait(false);
-            }
-
-            var playersCache = new Dictionary<DateTime, PlayerDto>();
-            var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
-
-            var currentDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-            currentDate = currentDate.Date;
-
-            while (currentDate <= _clock.Now.Date)
-            {
-                var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(currentDate)
-                    .ConfigureAwait(false);
-
-                var playerOfTheDay = await GetPlayerOfTheDayFromCacheAsync(
-                        playersCache, currentDate)
-                    .ConfigureAwait(false);
-
-                foreach (var badge in badges.Where(b => BadgeHelper.PlayerBasedBadgeCondition.ContainsKey(b)))
-                {
-                    await CheckBadgeInternalAsync(
-                            badge, currentDate, leaders, leadersHistory, (l, lh) => BadgeHelper.PlayerBasedBadgeCondition[badge](playerOfTheDay))
-                        .ConfigureAwait(false);
-                }
-
-                foreach (var badge in badges.Where(b => BadgeHelper.LeadersBasedBadgeCondition.ContainsKey(b)))
-                {
-                    await CheckBadgeInternalAsync(
-                            badge, currentDate, leaders, leadersHistory, (l, lh) => BadgeHelper.LeadersBasedBadgeCondition[badge](l, leaders))
-                        .ConfigureAwait(false);
-                }
-
-                foreach (var badge in badges.Where(b => BadgeHelper.LeaderBasedBadgeCondition.ContainsKey(b)))
-                {
-                    await CheckBadgeInternalAsync(
-                            badge, currentDate, leaders, leadersHistory, BadgeHelper.LeaderBasedBadgeCondition[badge])
-                        .ConfigureAwait(false);
-                }
-
-                foreach (var leader in leaders)
-                {
-                    var myHistory = leadersHistory
-                        .SelectMany(lh => lh)
-                        .Where(lh => lh.UserId == leader.UserId)
-                        .ToList();
-
-                    var playersHistory = new List<PlayerDto>();
-                    foreach (var mh in myHistory)
-                    {
-                        var p = await GetPlayerOfTheDayFromCacheAsync(
-                                playersCache, mh.ProposalDate.Date)
-                            .ConfigureAwait(false);
-                        playersHistory.Add(p);
-                    }
-                    playersHistory.Add(playerOfTheDay);
-
-                    foreach (var badge in badges.Where(b => BadgeHelper.PlayersHistoryBadgeCondition.ContainsKey(b)))
-                    {
-                        var hasBadge = await _badgeRepository
-                            .CheckUserHasBadgeAsync(leader.UserId, (ulong)badge)
-                            .ConfigureAwait(false);
-
-                        if (!hasBadge && BadgeHelper.PlayersHistoryBadgeCondition[badge](playersHistory))
-                        {
-                            await _badgeRepository
-                                .InsertUserBadgeAsync(new UserBadgeDto
-                                {
-                                    GetDate = currentDate,
-                                    BadgeId = (ulong)badge,
-                                    UserId = leader.UserId
-                                })
-                                .ConfigureAwait(false);
-                        }
-                    }
-                }
-
-                leadersHistory.Insert(0, leaders);
-                currentDate = currentDate.AddDays(1).Date;
-            }
-
-            return NoContent();
-        }
-
         [HttpGet("/user-types")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -547,45 +446,6 @@ namespace KikoleApi.Controllers
                 return NotFound(_resources.UserDoesNotExist);
 
             return Ok(user.PasswordResetQuestion);
-        }
-
-        private async Task<PlayerDto> GetPlayerOfTheDayFromCacheAsync(Dictionary<DateTime, PlayerDto> playersCache, DateTime currentDate)
-        {
-            if (playersCache.ContainsKey(currentDate))
-            {
-                return playersCache[currentDate];
-            }
-
-            var playerOfTheDay = await _playerRepository
-                .GetPlayerOfTheDayAsync(currentDate)
-                .ConfigureAwait(false);
-            playersCache.Add(currentDate, playerOfTheDay);
-            return playerOfTheDay;
-        }
-
-        private async Task CheckBadgeInternalAsync(Badges badge,
-            DateTime currentDate, IReadOnlyCollection<LeaderDto> leaders,
-            IReadOnlyCollection<IReadOnlyCollection<LeaderDto>> leadersHistory,
-            Func<LeaderDto, IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>, bool> conditionToCheck)
-        {
-            foreach (var leader in leaders.Where(l => conditionToCheck(l, leadersHistory)))
-            {
-                var hasBadge = await _badgeRepository
-                    .CheckUserHasBadgeAsync(leader.UserId, (ulong)badge)
-                    .ConfigureAwait(false);
-
-                if (!hasBadge)
-                {
-                    await _badgeRepository
-                        .InsertUserBadgeAsync(new UserBadgeDto
-                        {
-                            GetDate = currentDate,
-                            BadgeId = (ulong)badge,
-                            UserId = leader.UserId
-                        })
-                        .ConfigureAwait(false);
-                }
-            }
         }
     }
 }
