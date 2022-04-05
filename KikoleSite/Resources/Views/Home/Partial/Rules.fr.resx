@@ -118,22 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BadGuessClub" xml:space="preserve">
-    <value>Une proposition incorrecte pour un des clubs coüte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour un des clubs coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessCountry" xml:space="preserve">
-    <value>Une proposition incorrecte pour la nationalité coüte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour la nationalité coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessName" xml:space="preserve">
-    <value>Une proposition incorrecte pour le nom du joueur coüte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour le nom du joueur coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessPosition" xml:space="preserve">
-    <value>Une proposition incorrecte pour la position coüte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour la position coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessYear" xml:space="preserve">
-    <value>Une proposition incorrecte pour l'année de naissance coüte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour l'année de naissance coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="GoodGuess" xml:space="preserve">
-    <value>Une proposition correcte dans n'importe quelle catégorie ne coüte &lt;span style="color: forestgreen; font-size: large"&gt;aucun point&lt;/span&gt;.</value>
+    <value>Une proposition correcte dans n'importe quelle catégorie ne coûte &lt;span style="color: forestgreen; font-size: large"&gt;aucun point&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
     <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu très simple où vous devez deviner un nouveau footballeur &lt;span style="color: crimson"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;

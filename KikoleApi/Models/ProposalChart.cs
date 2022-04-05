@@ -28,7 +28,8 @@ namespace KikoleApi.Models
                 { ProposalTypes.Club, 50 },
                 { ProposalTypes.Country, 25 },
                 { ProposalTypes.Name, 400 },
-                { ProposalTypes.Position, 200 },
+                // TODO: remove asap
+                { ProposalTypes.Position, DateTime.Now.Date <= new DateTime(2022, 04, 05) ? 200 : 75 },
                 { ProposalTypes.Year, 25 },
             };
         
