@@ -15,6 +15,7 @@ namespace KikoleApi.Controllers
 {
     public class LeaderController : KikoleBaseController
     {
+        private readonly IBadgeService _badgeService;
         private readonly IChallengeRepository _challengeRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly IPlayerRepository _playerRepository;
@@ -30,6 +31,7 @@ namespace KikoleApi.Controllers
             IClubRepository clubRepository,
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
+            IBadgeService badgeService,
             TextResources resources,
             IClock clock)
         {
@@ -40,6 +42,7 @@ namespace KikoleApi.Controllers
             _proposalRepository = proposalRepository;
             _challengeRepository = challengeRepository;
             _resources = resources;
+            _badgeService = badgeService;
             _clock = clock;
         }
 
@@ -274,6 +277,117 @@ namespace KikoleApi.Controllers
             awards.EasiestKikoles = GetTopThreeKikoles(kikoles, true);
 
             return Ok(awards);
+        }
+
+        [HttpGet("/users/{userId}/stats")]
+        [ProducesResponseType(typeof(UserStat), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<ActionResult<UserStat>> GetUserStatsAsync(ulong userId)
+        {
+            if (userId == 0)
+                return BadRequest(_resources.InvalidUser);
+
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return NotFound(_resources.UserDoesNotExist);
+
+            var stats = new List<DailyUserStat>();
+
+            var currentDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+            currentDate = currentDate.Date;
+
+            var now = _clock.Now.Date;
+            while (currentDate <= now)
+            {
+                var pDay = await _playerRepository
+                    .GetPlayerOfTheDayAsync(currentDate)
+                    .ConfigureAwait(false);
+
+                var proposals = await _proposalRepository
+                    .GetProposalsDateExactAsync(currentDate, userId)
+                    .ConfigureAwait(false);
+
+                var leaders = await _leaderRepository
+                    .GetLeadersAtDateAsync(currentDate)
+                    .ConfigureAwait(false);
+
+                var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
+
+                var isCreator = (pDay.ProposalDate.Value.Date < now || pDay.HideCreator == 0)
+                    && userId == pDay.CreationUserId;
+
+                var singleStat = isCreator
+                    ? new DailyUserStat(currentDate, pDay.Name, leaders)
+                    : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Count > 0, leaders, meLeader);
+
+                stats.Add(singleStat);
+                currentDate = currentDate.AddDays(1);
+            }
+
+            return Ok(new UserStat(stats, user.Login));
+        }
+
+        [HttpGet("/badges")]
+        [AuthenticationLevel]
+        [ProducesResponseType(typeof(IReadOnlyCollection<Badge>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<Badge>>> GetBadgesAsync()
+        {
+            var badges = await _badgeService
+                .GetAllBadgesAsync()
+                .ConfigureAwait(false);
+
+            return Ok(badges);
+        }
+
+        [HttpGet("/users{id}/badges")]
+        [AuthenticationLevel]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync(
+            [FromRoute] ulong id, [FromQuery] ulong userId)
+        {
+            if (id == 0)
+                return BadRequest(_resources.InvalidUser);
+
+            var isAllowedToSeeHiddenBadge = userId == id;
+            if (userId > 0 && userId != id)
+            {
+                var userDto = await _userRepository
+                    .GetUserByIdAsync(userId)
+                    .ConfigureAwait(false);
+
+                isAllowedToSeeHiddenBadge = userDto?.UserTypeId == (ulong)UserTypes.Administrator;
+            }
+
+            var badgesFull = await _badgeService
+                 .GetUserBadgesAsync(id, isAllowedToSeeHiddenBadge)
+                 .ConfigureAwait(false);
+
+            return Ok(badgesFull);
+        }
+
+        [HttpGet("/player-of-the-day-users")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(PlayerCreator), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<ActionResult<PlayerCreator>> GetPlayerOfTheDayFromUserAsync(
+            [FromQuery] ulong userId, [FromQuery] DateTime proposalDate)
+        {
+            var p = await _playerRepository
+                .GetPlayerOfTheDayAsync(proposalDate.Date)
+                .ConfigureAwait(false);
+
+            var u = await _userRepository
+                .GetUserByIdAsync(p.CreationUserId)
+                .ConfigureAwait(false);
+
+            return base.Ok(new PlayerCreator(userId, p, u));
         }
 
         private static IReadOnlyCollection<T> ComputeTopThreeLeadersAwards<T, TProp>(

@@ -16,7 +16,7 @@ namespace KikoleApi.Controllers
     [Route("players")]
     public class PlayerController : KikoleBaseController
     {
-        private readonly IBadgeRepository _badgeRepository;
+        private readonly IBadgeService _badgeService;
         private readonly IUserRepository _userRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
@@ -25,13 +25,13 @@ namespace KikoleApi.Controllers
 
         public PlayerController(IPlayerRepository playerRepository,
             IClock clock,
-            IBadgeRepository badgeRepository,
+            IBadgeService badgeService,
             IUserRepository userRepository,
             IClubRepository clubRepository,
             TextResources resources)
         {
             _playerRepository = playerRepository;
-            _badgeRepository = badgeRepository;
+            _badgeService = badgeService;
             _userRepository = userRepository;
             _clubRepository = clubRepository;
             _resources = resources;
@@ -205,22 +205,13 @@ namespace KikoleApi.Controllers
                     .InsertPlayerCluesByLanguageAsync(request.PlayerId, languagesClues)
                     .ConfigureAwait(false);
 
-                var hasBadge = await _badgeRepository
-                    .CheckUserHasBadgeAsync(p.CreationUserId, (ulong)Badges.DoItYourself)
+                var added = await _badgeService
+                    .AddBadgeToUserAsync(Badges.DoItYourself, p.CreationUserId)
                     .ConfigureAwait(false);
 
-                if (!hasBadge)
-                {
-                    await _badgeRepository
-                        .InsertUserBadgeAsync(new UserBadgeDto
-                        {
-                            BadgeId = (ulong)Badges.DoItYourself,
-                            GetDate = _clock.Now.Date,
-                            UserId = p.CreationUserId
-                        })
-                        .ConfigureAwait(false);
-                }
-                else
+                // if the badge for the first submission is added,
+                // the badge for the 5th submission can't be added too
+                if (!added)
                 {
                     var players = await _playerRepository
                         .GetPlayersByCreatorAsync(p.CreationUserId, true)
@@ -228,16 +219,12 @@ namespace KikoleApi.Controllers
 
                     if (players.Count == 5)
                     {
-                        await _badgeRepository
-                            .InsertUserBadgeAsync(new UserBadgeDto
-                            {
-                                BadgeId = (ulong)Badges.WeAreKikole,
-                                GetDate = _clock.Now.Date,
-                                UserId = p.CreationUserId
-                            })
+                        await _badgeService
+                            .AddBadgeToUserAsync(Badges.WeAreKikole, p.CreationUserId)
                             .ConfigureAwait(false);
                     }
                 }
+                
                 // TODO: notify (+ badge)
             }
             else
@@ -250,6 +237,20 @@ namespace KikoleApi.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpGet("/users/known-players")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<string>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<string>>> GetKnownPlayersAsync(
+            [FromQuery] ulong userId)
+        {
+            var names = await _playerRepository
+                .GetKnownPlayerNamesAsync(userId)
+                .ConfigureAwait(false);
+
+            return Ok(names);
         }
 
         private async Task<DateTime> GetNextDateAsync()

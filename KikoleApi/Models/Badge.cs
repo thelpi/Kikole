@@ -14,6 +14,8 @@ namespace KikoleApi.Models
 
         public bool Hidden { get; }
 
+        public bool Unique { get; }
+
         internal Badge(BadgeDto dto, int usersCount, string description)
         {
             Id = dto.Id;
@@ -21,6 +23,7 @@ namespace KikoleApi.Models
             Description = description ?? dto.Description;
             Users = usersCount;
             Hidden = dto.Hidden > 0;
+            Unique = dto.IsUnique > 0;
         }
     }
 }

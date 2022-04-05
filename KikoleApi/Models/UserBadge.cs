@@ -1,16 +1,29 @@
 ﻿using System;
-using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
 {
-    public class UserBadge : Badge
+    public class UserBadge
     {
+        private readonly Badge _badge;
+
+        public ulong Id => _badge.Id;
+
+        public string Name => _badge.Name;
+
+        public string Description => _badge.Description;
+
+        public int Users => _badge.Users;
+
+        public bool Hidden => _badge.Hidden;
+
+        public bool Unique => _badge.Unique;
+
         public DateTime GetDate { get; }
 
-        internal UserBadge(BadgeDto badgeDto, UserBadgeDto userBadgeDto, int usersCount, string description)
-            : base(badgeDto, usersCount, description)
+        internal UserBadge(Badge badge, DateTime getDate)
         {
-            GetDate = userBadgeDto.GetDate;
+            _badge = badge;
+            GetDate = getDate;
         }
     }
 }

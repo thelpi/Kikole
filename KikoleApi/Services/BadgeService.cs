@@ -165,7 +165,7 @@ namespace KikoleApi.Services
             }
 
             return await GetUserBadgesAsync(
-                    collectedBadges, leader.UserId, leader.ProposalDate, allBadges)
+                    collectedBadges, leader.ProposalDate, allBadges)
                 .ConfigureAwait(false);
         }
 
@@ -187,24 +187,91 @@ namespace KikoleApi.Services
             }
 
             return await GetUserBadgesAsync(
-                    collectedBadges, userId, request.ProposalDate, allBadges)
+                    collectedBadges, request.ProposalDate, allBadges)
                 .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task AddBadgeToUserAsync(Badges badge, ulong userId)
+        public async Task<bool> AddBadgeToUserAsync(Badges badge, ulong userId)
         {
             var allBadges = await _badgeRepository
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
+            var collectedBadges = new List<Badges>();
+
             await InsertBadgeIfNotAlreadyAsync(
-                    _clock.Now, userId, badge, new List<Badges>(), allBadges)
+                    _clock.Now, userId, badge, collectedBadges, allBadges)
                 .ConfigureAwait(false);
+
+            return collectedBadges.Count > 0;
         }
 
-        private async Task InsertBadgeIfNotAlreadyAsync(DateTime proposalDate,
-            ulong userId, Badges badge, List<Badges> collectedBadges,
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync()
+        {
+            var dtos = await _badgeRepository
+                .GetBadgesAsync(false)
+                .ConfigureAwait(false);
+
+            var badges = new List<Badge>(dtos.Count);
+            foreach (var dto in dtos)
+            {
+                var b = await GetBadgeAsync(
+                        (Badges)dto.Id, dtos)
+                    .ConfigureAwait(false);
+                badges.Add(b);
+            }
+
+            return badges
+                .OrderByDescending(b => b.Users)
+                .ToList();
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
+            ulong userId,
+            bool isAllowedToSeeHiddenBadge)
+        {
+            var badges = await _badgeRepository
+               .GetBadgesAsync(true)
+               .ConfigureAwait(false);
+
+            var dtos = await _badgeRepository
+                .GetUserBadgesAsync(userId)
+                .ConfigureAwait(false);
+
+            var badgesFull = new List<UserBadge>();
+            foreach (var dto in dtos)
+            {
+                var b = badges.Single(_ => _.Id == dto.BadgeId);
+
+                if (_clock.Now.Date == dto.GetDate
+                    && b.Hidden > 0
+                    && !isAllowedToSeeHiddenBadge)
+                {
+                    continue;
+                }
+
+                var ub = await GetUserBadgeAsync(
+                        (Badges)dto.BadgeId, badges, dto.GetDate)
+                    .ConfigureAwait(false);
+
+                badgesFull.Add(ub);
+            }
+
+            return badgesFull
+                .OrderByDescending(b => b.Unique)
+                .ThenByDescending(b => b.Hidden)
+                .ThenBy(b => b.Users)
+                .ToList();
+        }
+
+        private async Task InsertBadgeIfNotAlreadyAsync(
+            DateTime proposalDate,
+            ulong userId,
+            Badges badge,
+            List<Badges> collectedBadges,
             IReadOnlyCollection<BadgeDto> allBadges)
         {
             var hasBadge = await _badgeRepository
@@ -242,7 +309,8 @@ namespace KikoleApi.Services
         }
 
         private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
-            List<Badges> collectedBadges, ulong userId, DateTime proposalDate,
+            List<Badges> collectedBadges,
+            DateTime proposalDate,
             IReadOnlyCollection<BadgeDto> allBadges)
         {
             var collectedUserBadges = new List<UserBadge>();
@@ -250,7 +318,7 @@ namespace KikoleApi.Services
             foreach (var badge in collectedBadges)
             {
                 var ub = await GetUserBadgeAsync(
-                        badge, allBadges, proposalDate, userId)
+                        badge, allBadges, proposalDate)
                     .ConfigureAwait(false);
 
                 collectedUserBadges.Add(ub);
@@ -259,10 +327,20 @@ namespace KikoleApi.Services
             return collectedUserBadges;
         }
 
-        private async Task<UserBadge> GetUserBadgeAsync(Badges badge,
+        private async Task<UserBadge> GetUserBadgeAsync(
+            Badges badge,
             IReadOnlyCollection<BadgeDto> badgesDto,
-            DateTime proposalDate,
-            ulong userId)
+            DateTime proposalDate)
+        {
+            var b = await GetBadgeAsync(
+                    badge, badgesDto)
+                .ConfigureAwait(false);
+            return new UserBadge(b, proposalDate);
+        }
+
+        private async Task<Badge> GetBadgeAsync(
+            Badges badge,
+            IReadOnlyCollection<BadgeDto> badgesDto)
         {
             string description = null;
             if (_resources.Language != Languages.en)
@@ -276,16 +354,7 @@ namespace KikoleApi.Services
                 .GetUsersWithBadgeAsync((ulong)badge)
                 .ConfigureAwait(false);
 
-            return new UserBadge(
-                badgesDto.Single(_ => _.Id == (ulong)badge),
-                new UserBadgeDto
-                {
-                    BadgeId = (ulong)badge,
-                    GetDate = proposalDate,
-                    UserId = userId
-                },
-                users.Count,
-                description);
+            return new Badge(badgesDto.Single(_ => _.Id == (ulong)badge), users.Count, description);
         }
     }
 }

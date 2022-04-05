@@ -38,9 +38,25 @@ namespace KikoleApi.Interfaces
         /// </summary>
         /// <param name="badge">Badge to add.</param>
         /// <param name="userId">User who get the badge.</param>
-        /// <returns>Nothing</returns>
-        Task AddBadgeToUserAsync(
+        /// <returns><c>True</c> if badge added.</returns>
+        Task<bool> AddBadgeToUserAsync(
             Badges badge,
             ulong userId);
+
+        /// <summary>
+        /// Gets all badges.
+        /// </summary>
+        /// <returns>Collection of <see cref="Badge"/> sorted by <see cref="Badge.Users"/> descending.</returns>
+        Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync();
+
+        /// <summary>
+        /// Gets every badge of a user.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <param name="isAllowedToSeeHiddenBadge"><c>True</c> if the user can see hidden badges.</param>
+        /// <returns>Collection of <see cref="UserBadge"/> sorted by rareness.</returns>
+        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
+            ulong userId,
+            bool isAllowedToSeeHiddenBadge);
     }
 }

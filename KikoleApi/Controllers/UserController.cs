@@ -17,30 +17,15 @@ namespace KikoleApi.Controllers
     [Route("users")]
     public class UserController : KikoleBaseController
     {
-        private readonly IBadgeRepository _badgeRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IProposalRepository _proposalRepository;
-        private readonly ILeaderRepository _leaderRepository;
-        private readonly IPlayerRepository _playerRepository;
         private readonly ICrypter _crypter;
-        private readonly IClock _clock;
         private readonly TextResources _resources;
 
         public UserController(IUserRepository userRepository,
-            IProposalRepository proposalRepository,
-            ILeaderRepository leaderRepository,
             ICrypter crypter,
-            IPlayerRepository playerRepository,
-            IBadgeRepository badgeRepository,
-            TextResources resources,
-            IClock clock)
+            TextResources resources)
         {
             _userRepository = userRepository;
-            _badgeRepository = badgeRepository;
-            _proposalRepository = proposalRepository;
-            _leaderRepository = leaderRepository;
-            _playerRepository = playerRepository;
-            _clock = clock;
             _crypter = crypter;
             _resources = resources;
         }
@@ -74,101 +59,6 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             return Ok(users.Select(u => new User(u)).ToList());
-        }
-
-        [HttpGet("/player-of-the-day-users")]
-        [AuthenticationLevel(UserTypes.StandardUser)]
-        [ProducesResponseType(typeof(PlayerCreator), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<ActionResult<PlayerCreator>> GetPlayerOfTheDayFromUserAsync(
-            [FromQuery] ulong userId, [FromQuery] DateTime proposalDate)
-        {
-            var p = await _playerRepository
-                .GetPlayerOfTheDayAsync(proposalDate.Date)
-                .ConfigureAwait(false);
-
-            var u = await _userRepository
-                .GetUserByIdAsync(p.CreationUserId)
-                .ConfigureAwait(false);
-
-            return base.Ok(new PlayerCreator(userId, p, u));
-        }
-
-        [HttpGet("known-players")]
-        [AuthenticationLevel(UserTypes.StandardUser)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(IReadOnlyCollection<string>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<string>>> GetKnownPlayersAsync(
-            [FromQuery] ulong userId)
-        {
-            var names = await _playerRepository
-                .GetKnownPlayerNamesAsync(userId)
-                .ConfigureAwait(false);
-
-            return Ok(names);
-        }
-
-        [HttpGet("{id}/badges")]
-        [AuthenticationLevel]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(IReadOnlyCollection<UserBadge>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<UserBadge>>> GetUserBadgesAsync(
-            [FromRoute] ulong id, [FromQuery] ulong userId)
-        {
-            if (id == 0)
-                return BadRequest(_resources.InvalidUser);
-
-            var isAllowedToSeeHiddenBadge = userId == id;
-            if (userId > 0 && userId != id)
-            {
-                var userDto = await _userRepository
-                    .GetUserByIdAsync(userId)
-                    .ConfigureAwait(false);
-
-                isAllowedToSeeHiddenBadge = userDto?.UserTypeId == (ulong)UserTypes.Administrator;
-            }
-
-            var badges = await _badgeRepository
-                .GetBadgesAsync(true)
-                .ConfigureAwait(false);
-
-            var dtos = await _badgeRepository
-                .GetUserBadgesAsync(id)
-                .ConfigureAwait(false);
-
-            var badgesFull = new List<UserBadge>();
-            foreach (var dto in dtos)
-            {
-                var b = badges.Single(_ => _.Id == dto.BadgeId);
-
-                if (_clock.Now.Date == dto.GetDate
-                    && b.Hidden > 0
-                    && !isAllowedToSeeHiddenBadge)
-                {
-                    continue;
-                }
-
-                var users = await _badgeRepository
-                    .GetUsersWithBadgeAsync(dto.BadgeId)
-                    .ConfigureAwait(false);
-
-                string description = null;
-                if (_resources.Language != Languages.en)
-                {
-                    description = await _badgeRepository
-                        .GetBadgeDescriptionAsync(b.Id, (ulong)_resources.Language)
-                        .ConfigureAwait(false);
-                }
-
-                badgesFull.Add(new UserBadge(b, dto, users.Count, description));
-            }
-
-            badgesFull = badgesFull
-                .OrderByDescending(b => b.Hidden)
-                .ThenBy(b => b.Users)
-                .ToList();
-
-            return Ok(badgesFull);
         }
 
         [HttpPost]
@@ -321,94 +211,6 @@ namespace KikoleApi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, _resources.ResetPasswordError);
 
             return NoContent();
-        }
-
-        [HttpGet("{userId}/stats")]
-        [ProducesResponseType(typeof(UserStat), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<UserStat>> GetUserStatsAsync(ulong userId)
-        {
-            if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
-            
-            var user = await _userRepository
-                .GetUserByIdAsync(userId)
-                .ConfigureAwait(false);
-
-            if (user == null)
-                return NotFound(_resources.UserDoesNotExist);
-
-            var stats = new List<DailyUserStat>();
-
-            var currentDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-            currentDate = currentDate.Date;
-
-            var now = _clock.Now.Date;
-            while (currentDate <= now)
-            {
-                var pDay = await _playerRepository
-                    .GetPlayerOfTheDayAsync(currentDate)
-                    .ConfigureAwait(false);
-
-                var proposals = await _proposalRepository
-                    .GetProposalsDateExactAsync(currentDate, userId)
-                    .ConfigureAwait(false);
-
-                var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(currentDate)
-                    .ConfigureAwait(false);
-
-                var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
-                
-                var isCreator = (pDay.ProposalDate.Value.Date < now || pDay.HideCreator == 0)
-                    && userId == pDay.CreationUserId;
-
-                var singleStat = isCreator
-                    ? new DailyUserStat(currentDate, pDay.Name, leaders)
-                    : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Count > 0, leaders, meLeader);
-
-                stats.Add(singleStat);
-                currentDate = currentDate.AddDays(1);
-            }
-
-            return Ok(new UserStat(stats, user.Login));
-        }
-
-        [HttpGet("/badges")]
-        [AuthenticationLevel]
-        [ProducesResponseType(typeof(IReadOnlyCollection<Badge>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<IReadOnlyCollection<Badge>>> GetBadgesAsync()
-        {
-            var dtos = await _badgeRepository
-                .GetBadgesAsync(false)
-                .ConfigureAwait(false);
-
-            var badges = new List<Badge>(dtos.Count);
-            foreach (var dto in dtos)
-            {
-                var users = await _badgeRepository
-                   .GetUsersWithBadgeAsync(dto.Id)
-                   .ConfigureAwait(false);
-
-                string description = null;
-                if (_resources.Language != Languages.en)
-                {
-                    description = await _badgeRepository
-                        .GetBadgeDescriptionAsync(dto.Id, (ulong)_resources.Language)
-                        .ConfigureAwait(false);
-                }
-
-                badges.Add(new Badge(dto, users.Count, description));
-            }
-
-            badges = badges
-                .OrderByDescending(b => b.Users)
-                .ToList();
-
-            return Ok(badges);
         }
 
         [HttpGet("/user-types")]
