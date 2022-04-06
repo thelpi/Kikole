@@ -100,6 +100,7 @@ else
     }
     <div style="clear: both" />
 }
+
 <h4>@localizer["BadgeYouDontOwn"]</h4>
 @if (Model.MissingBadges.Count == 0)
 {
@@ -109,18 +110,43 @@ else
 {
     foreach (var badge in Model.MissingBadges)
     {
-    <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
-        <div style="text-align:center; color: crimson; font-size: large">@badge.Name</div>
-        <div style="text-align:center">@badge.Description</div>
-        @if (badge.Users == 0)
-        {
-            <div style="text-align:center; font-weight: bold"><span style="color: crimson">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
-        }
-        else
-        {
-            <div style="text-align:center; font-weight: bold"><span style="color: crimson">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
-        }
-    </div>
+        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
+            <div style="text-align:center; color: crimson; font-size: large">@badge.Name</div>
+            <div style="text-align:center">@badge.Description</div>
+            @if (badge.Users == 0)
+            {
+                <div style="text-align:center; font-weight: bold"><span style="color: crimson">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
+            }
+            else
+            {
+                <div style="text-align:center; font-weight: bold"><span style="color: crimson">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
+            }
+        </div>
+    }
+    <div style="clear: both" />
+}
+
+<h4>@localizer["ImpossibleBadge"]</h4>
+@if (Model.UnableBadges.Count == 0)
+{
+    <div>@localizer["EveryEveryBadge"]</div>
+}
+else
+{
+    foreach (var badge in Model.UnableBadges)
+    {
+        <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
+            <div style="text-align:center; color: crimson; font-size: large">@badge.Name</div>
+            <div style="text-align:center">@badge.Description</div>
+            @if (badge.Users == 0)
+            {
+                <div style="text-align:center; font-weight: bold"><span style="color: crimson">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
+            }
+            else
+            {
+                <div style="text-align:center; font-weight: bold"><span style="color: crimson">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
+            }
+        </div>
     }
     <div style="clear: both" />
 }

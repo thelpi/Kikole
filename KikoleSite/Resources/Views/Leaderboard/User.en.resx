@@ -172,13 +172,13 @@
     <value>Badges</value>
   </data>
   <data name="BadgeYouDontOwn" xml:space="preserve">
-    <value>You miss</value>
+    <value>Not owned yet</value>
   </data>
   <data name="BadgeYouOwn" xml:space="preserve">
-    <value>You own</value>
+    <value>Owned</value>
   </data>
   <data name="EveryBadge" xml:space="preserve">
-    <value>Congratulations, you have every badge!</value>
+    <value>Congratulations, you have every badge possible!</value>
   </data>
   <data name="GeneralInfo" xml:space="preserve">
     <value>General information</value>
@@ -209,5 +209,11 @@
   </data>
   <data name="UsersBadges" xml:space="preserve">
     <value>users have this badge</value>
+  </data>
+  <data name="EveryEveryBadge" xml:space="preserve">
+    <value>You haven't miss a single unique badge!</value>
+  </data>
+  <data name="ImpossibleBadge" xml:space="preserve">
+    <value>Impossible to own</value>
   </data>
 </root>
