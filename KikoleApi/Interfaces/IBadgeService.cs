@@ -58,5 +58,18 @@ namespace KikoleApi.Interfaces
         Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
             ulong userId,
             bool isAllowedToSeeHiddenBadge);
+
+        /// <summary>
+        /// Resets and recomputes datas on every badge.
+        /// </summary>
+        /// <returns>Nothing.</returns>
+        Task ResetBadgesAsync();
+
+        /// <summary>
+        /// Resets and recomputes datas on a single badge.
+        /// </summary>
+        /// <param name="badge">Badge to reset.</param>
+        /// <returns>Nothing.</returns>
+        Task ResetBadgeAsync(Badges badge);
     }
 }

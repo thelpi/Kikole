@@ -43,6 +43,18 @@ namespace KikoleApi.Controllers
             _clock = clock;
         }
 
+        [HttpGet("/recompute-badges")]
+        [AuthenticationLevel(UserTypes.Administrator)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ResetBadgesAsync()
+        {
+            await _badgeService
+                .ResetBadgesAsync()
+                .ConfigureAwait(false);
+
+            return NoContent();
+        }
+
         [HttpGet("day-leaders")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(IReadOnlyCollection<Leader>), (int)HttpStatusCode.OK)]

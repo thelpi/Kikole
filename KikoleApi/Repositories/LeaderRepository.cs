@@ -62,12 +62,12 @@ namespace KikoleApi.Repositories
         {
             var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
 
-            while (date.Date > firstDate.Date)
+            while (date.Date >= firstDate.Date)
             {
-                date = date.AddDays(-1);
                 var leadersBefore = await GetLeadersAtDateAsync(date)
                     .ConfigureAwait(false);
                 leadersHistory.Add(leadersBefore);
+                date = date.AddDays(-1);
             }
 
             return leadersHistory;
