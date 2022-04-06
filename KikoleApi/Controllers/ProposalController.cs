@@ -179,7 +179,7 @@ namespace KikoleApi.Controllers
                     var leader = new LeaderDto
                     {
                         Points = (ushort)response.TotalPoints,
-                        ProposalDate = request.ProposalDate,
+                        ProposalDate = request.ProposalDate.Date,
                         Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
                         UserId = userId
                     };
