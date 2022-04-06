@@ -64,12 +64,5 @@ namespace KikoleApi.Interfaces
         /// </summary>
         /// <returns>Nothing.</returns>
         Task ResetBadgesAsync();
-
-        /// <summary>
-        /// Resets and recomputes datas on a single badge.
-        /// </summary>
-        /// <param name="badge">Badge to reset.</param>
-        /// <returns>Nothing.</returns>
-        Task ResetBadgeAsync(Badges badge);
     }
 }

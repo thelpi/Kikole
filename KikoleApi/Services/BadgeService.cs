@@ -200,53 +200,68 @@ namespace KikoleApi.Services
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
-            foreach (var badge in allBadges)
-                await ResetBadgeAsync((Badges)badge.Id).ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public async Task ResetBadgeAsync(Badges badge)
-        {
-            if (NonRecomputableBadges.Contains(badge))
-                return;
-
             var firstDate = await _playerRepository
                 .GetFirstDateAsync()
                 .ConfigureAwait(false);
+            
+            var endDate = _clock.Now.Date;
 
-            await _badgeRepository
-                .ResetBadgeDatasAsync((ulong)badge)
+            var playersHistoryFull = await _playerRepository
+                .GetPlayersOfTheDayAsync(firstDate.Date, endDate)
                 .ConfigureAwait(false);
 
-            var date = firstDate.Date;
-            var endDate = _clock.Now.Date;
-            while (date <= endDate)
+            var leadersHistoryFull = await GetLeadersHistoryAsync(
+                    endDate, firstDate.Date)
+                .ConfigureAwait(false);
+
+            var proposalsCache = new Dictionary<(ulong, DateTime), IReadOnlyCollection<ProposalDto>>();
+
+            foreach (var badge in allBadges.Where(b => !NonRecomputableBadges.Contains((Badges)b.Id)))
             {
-                var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(date)
+                await _badgeRepository
+                    .ResetBadgeDatasAsync(badge.Id)
                     .ConfigureAwait(false);
 
-                var pDay = await _playerRepository
-                    .GetPlayerOfTheDayAsync(date)
-                    .ConfigureAwait(false);
-
-                foreach (var leader in leaders)
+                var date = firstDate.Date;
+                while (date <= endDate)
                 {
-                    var proposals = await _proposalRepository
-                        .GetProposalsAsync(date, leader.UserId)
-                        .ConfigureAwait(false);
+                    var leaders = leadersHistoryFull
+                        .Where(lhf => lhf.ProposalDate == date);
 
-                    // remove the final name proposal
-                    proposals = proposals
-                        .Where(p => p.Successful == 0 || p.ProposalTypeId != (ulong)ProposalTypes.Name)
+                    var leadersHistory = leadersHistoryFull
+                        .Where(lhf => lhf.ProposalDate <= date)
                         .ToList();
 
-                    await PrepareNewLeaderBadgesAsync(
-                            leader, pDay, proposals, true)
-                        .ConfigureAwait(false);
-                }
+                    foreach (var leader in leaders)
+                    {
+                        if (!proposalsCache.ContainsKey((leader.UserId, date)))
+                        {
+                            var proposals = await _proposalRepository
+                               .GetProposalsAsync(date, leader.UserId)
+                               .ConfigureAwait(false);
 
-                date = date.AddDays(1);
+                            // remove the final name proposal
+                            proposals = proposals
+                                .Where(p => p.Successful == 0 || p.ProposalTypeId != (ulong)ProposalTypes.Name)
+                                .ToList();
+
+                            proposalsCache.Add((leader.UserId, date), proposals);
+                        }
+
+                        var pDay = playersHistoryFull.Single(phl => phl.ProposalDate == date);
+
+                        var playersHistory = playersHistoryFull
+                            .Where(phl => phl.ProposalDate <= date)
+                            .ToList();
+
+                        await PrepareNewLeaderBadgesInternalAsync(
+                                leader, pDay, proposalsCache[(leader.UserId, date)], true,
+                                allBadges, date, leadersHistory, playersHistory)
+                            .ConfigureAwait(false);
+                    }
+
+                    date = date.AddDays(1);
+                }
             }
         }
 
