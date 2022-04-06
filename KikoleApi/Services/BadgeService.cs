@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
@@ -16,24 +15,168 @@ namespace KikoleApi.Services
         private const string SpecialWord = "chouse";
         private const ulong TheEndPlayerId = 81;
 
-        private static readonly Badges[] NonRecomputableBadges = new[]
-        {
-            Badges.DoYouSpeakPatois,
-            Badges.TheEndConsolationPrize,
-            Badges.TheEnd,
-            Badges.DoItYourself,
-            Badges.WeAreKikole,
-            Badges.AllIn,
-            Badges.GambleAddiction,
-            Badges.ChallengeAccepted
-        };
-
         private readonly IBadgeRepository _badgeRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly TextResources _resources;
         private readonly IClock _clock;
+
+        private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
+            = new List<Badges>
+            {
+                Badges.DoYouSpeakPatois,
+                Badges.TheEndConsolationPrize,
+                Badges.TheEnd,
+                Badges.DoItYourself,
+                Badges.WeAreKikole,
+                Badges.AllIn,
+                Badges.GambleAddiction,
+                Badges.ChallengeAccepted
+            };
+
+        private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>> LeadersBasedBadgeCondition
+            = new Dictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>>
+            {
+                {
+                    Badges.OverTheTopPart1,
+                    (l, ls) => l.Time == ls.Min(_ => _.Time) && ls.Count(_ => _.Time == l.Time) == 1
+                },
+                {
+                    Badges.OverTheTopPart2,
+                    (l, ls) => l.Points == ls.Max(_ => _.Points) && ls.Count(_ => _.Points == l.Points) == 1
+                }
+            };
+
+        private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>> LeadersBasedBadgeNonUniqueCondition
+            = new Dictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>>
+            {
+                {
+                    Badges.OverTheTopPart1,
+                    (l, ls) => l.Time == ls.Min(_ => _.Time)
+                },
+                {
+                    Badges.OverTheTopPart2,
+                    (l, ls) => l.Points == ls.Max(_ => _.Points)
+                }
+            };
+
+        private static readonly IReadOnlyDictionary<Badges, Func<PlayerDto, bool>> PlayerBasedBadgeCondition
+            = new Dictionary<Badges, Func<PlayerDto, bool>>
+            {
+                {
+                    Badges.Archaeology,
+                    p => p.YearOfBirth < 1970
+                },
+                {
+                    Badges.WorldWarTwo,
+                    p => p.YearOfBirth < 1940
+                },
+                {
+                    Badges.ThirdWaveFeminism,
+                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ThirdWaveFeminism
+                },
+                {
+                    Badges.ItsAFuckingDisgrace,
+                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ItsAFuckingDisgrace
+                },
+                {
+                    Badges.CaptainTsubasa,
+                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.CaptainTsubasa
+                },
+                {
+                    Badges.KikolesCreatorFriend,
+                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.KikolesCreatorFriend
+                }
+            };
+
+        private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, bool>> PlayersHistoryBadgeCondition
+            = new Dictionary<Badges, Func<IEnumerable<PlayerDto>, bool>>
+            {
+                {
+                    Badges.FourFourtwo,
+                    ph => ph.Count(p => p.PositionId == (ulong)Positions.Goalkeeper) > 0
+                        && ph.Count(p => p.PositionId == (ulong)Positions.Defender) > 3
+                        && ph.Count(p => p.PositionId == (ulong)Positions.Midfielder) > 3
+                        && ph.Count(p => p.PositionId == (ulong)Positions.Forward) > 1
+                },
+                {
+                    Badges.AroundTheWorld,
+                    ph => ph.Select(p => p.CountryId).Distinct().Count() >= 20
+                }
+            };
+
+        // Notice "IEnumerable<ProposalDto>" in this context should not contain the final proposal
+        private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<ProposalDto>, bool>> ProposalsBasedBadgeCondition
+            = new Dictionary<Badges, Func<IEnumerable<ProposalDto>, bool>>
+            {
+                {
+                    Badges.WikipediaScreenshot,
+                    ph => !ph.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club)
+                },
+                {
+                    Badges.PassportCheck,
+                    ph => !ph.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club)
+                },
+                {
+                    Badges.EverythingNotLost,
+                    ph => ph.Any() && ph.All(ep => ep.Successful == 0)
+                },
+            };
+
+        private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, bool>> LeaderBasedBadgeCondition
+            = new Dictionary<Badges, Func<LeaderDto, bool>>
+            {
+                {
+                    Badges.CacaCaféClopeKikolé,
+                    l => new TimeSpan(0, l.Time, 0).Hours >= 5 && new TimeSpan(0, l.Time, 0).Hours < 8
+                },
+                {
+                    Badges.HalfwayToTheTop,
+                    l => l.Points >= 500
+                },
+                {
+                    Badges.ItsOver900,
+                    l => l.Points >= 900
+                },
+                {
+                    Badges.SavedByTheBell,
+                    l => new TimeSpan(0, l.Time, 0).Hours == 23
+                },
+                {
+                    Badges.StayUpLate,
+                    l => new TimeSpan(0, l.Time, 0).Hours < 2
+                },
+                {
+                    Badges.WoodenSpoon,
+                    l => l.Points == 0
+                },
+                {
+                    Badges.YourFirstSuccess,
+                    l => true
+                }
+            };
+
+        private static readonly IReadOnlyDictionary<Badges, (int, Func<LeaderDto, bool>, bool)> LeaderRunBasedBadgeCondition
+            = new Dictionary<Badges, (int, Func<LeaderDto, bool>, bool)>
+            {
+                {
+                    Badges.ThreeInARow,
+                    (3, l => true, false)
+                },
+                {
+                    Badges.AWeekInARow,
+                    (7, l => true, false)
+                },
+                {
+                    Badges.LegendTier,
+                    (30, l => true, false)
+                },
+                {
+                    Badges.MakeItDouble,
+                    (2, l => l.Points == 1000, false)
+                }
+            };
 
         public BadgeService(IBadgeRepository badgeRepository,
             ILeaderRepository leaderRepository,
@@ -114,146 +257,25 @@ namespace KikoleApi.Services
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
             bool isActualTodayleader)
         {
-            var collectedBadges = new List<Badges>();
-
             var allBadges = await _badgeRepository
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
-            // Badges you can got only if you find the player today
-            if (isActualTodayleader)
-            {
-                var firstDate = await _playerRepository
-                    .GetFirstDateAsync()
-                    .ConfigureAwait(false);
-                
-                var leadersHistory = await _leaderRepository
-                    .GetLeadersHistoryAsync(leader.ProposalDate, firstDate.Date)
-                    .ConfigureAwait(false);
-                
-                var playersHistory = await _playerRepository
-                    .GetPlayersOfTheDayAsync(firstDate.Date, leader.ProposalDate)
-                    .ConfigureAwait(false);
+            var firstDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
 
-                var leaders = leadersHistory
-                    .SelectMany(lh => lh)
-                    .Where(lh => lh.ProposalDate == leader.ProposalDate);
+            var leadersHistory = await GetLeadersHistoryAsync(
+                    leader.ProposalDate, firstDate.Date)
+                .ConfigureAwait(false);
 
-                var myHistory = leadersHistory
-                    .SelectMany(lh => lh)
-                    .Where(lh => lh.UserId == leader.UserId);
+            var playersHistory = await _playerRepository
+                .GetPlayersOfTheDayAsync(firstDate.Date, leader.ProposalDate)
+                .ConfigureAwait(false);
 
-                var myPlayerHistory = playersHistory
-                    .Where(p => myHistory.Any(h => h.ProposalDate == p.ProposalDate));
-
-                var myCreatedPlayers = playersHistory
-                    .Where(p => p.CreationUserId == leader.UserId);
-
-                foreach (var badge in LeaderBasedBadgeCondition.Keys)
-                {
-                    if (LeaderBasedBadgeCondition[badge](leader))
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                foreach (var badge in LeaderRunBasedBadgeCondition.Keys)
-                {
-                    var conditions = LeaderRunBasedBadgeCondition[badge];
-
-                    bool respectConditions = RespectLeadersRunConditions(leader, 
-                        myHistory, myCreatedPlayers,
-                        conditions.Item1, conditions.Item2, conditions.Item3);
-
-                    if (respectConditions)
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                foreach (var badge in PlayerBasedBadgeCondition.Keys)
-                {
-                    if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                 leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
-                             .ConfigureAwait(false);
-                    }
-                }
-
-                foreach (var badge in LeadersBasedBadgeCondition.Keys)
-                {
-                    var hasBadgeNotAlone = LeadersBasedBadgeNonUniqueCondition[badge](leader, leaders);
-                    if (hasBadgeNotAlone)
-                    {
-                        var badgeOwners = await _badgeRepository
-                            .GetUsersOfTheDayWithBadgeAsync((ulong)badge, leader.ProposalDate)
-                            .ConfigureAwait(false);
-
-                        foreach (var bo in badgeOwners)
-                        {
-                            await _badgeRepository
-                                .RemoveUserBadgeAsync(new UserBadgeDto
-                                {
-                                    BadgeId = (ulong)badge,
-                                    UserId = bo.UserId
-                                })
-                                .ConfigureAwait(false);
-                        }
-
-                        if (LeadersBasedBadgeCondition[badge](leader, leaders))
-                        {
-                            await InsertBadgeIfNotAlreadyAsync(
-                                     leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
-                                 .ConfigureAwait(false);
-                        }
-                    }
-                }
-
-                foreach (var badge in PlayersHistoryBadgeCondition.Keys)
-                {
-                    if (PlayersHistoryBadgeCondition[badge](myPlayerHistory))
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                foreach (var badge in ProposalsBasedBadgeCondition.Keys)
-                {
-                    if (ProposalsBasedBadgeCondition[badge](proposalsBeforeWin))
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
-                            .ConfigureAwait(false);
-                    }
-                }
-            }
-
-            // Not generic (special badge)
-            if (playerOfTheDay.Id == TheEndPlayerId)
-            {
-                var oldCount = collectedBadges.Count;
-                await InsertBadgeIfNotAlreadyAsync(
-                        leader.ProposalDate, leader.UserId, Badges.TheEnd, collectedBadges, allBadges)
-                    .ConfigureAwait(false);
-
-                // Inserts the consolation prize ONLY if no "TheEnd" badge got
-                if (collectedBadges.Count == oldCount)
-                {
-                    await InsertBadgeIfNotAlreadyAsync(
-                            leader.ProposalDate, leader.UserId, Badges.TheEndConsolationPrize, collectedBadges, allBadges)
-                        .ConfigureAwait(false);
-                }
-            }
-
-            return await GetUserBadgesAsync(
-                    collectedBadges, leader.ProposalDate, allBadges)
+            return await PrepareNewLeaderBadgesInternalAsync(
+                    leader, playerOfTheDay, proposalsBeforeWin, isActualTodayleader,
+                    allBadges, firstDate, leadersHistory, playersHistory)
                 .ConfigureAwait(false);
         }
 
@@ -354,6 +376,141 @@ namespace KikoleApi.Services
                 .ThenByDescending(b => b.Hidden)
                 .ThenBy(b => b.Users)
                 .ToList();
+        }
+
+        private async Task<IReadOnlyCollection<UserBadge>> PrepareNewLeaderBadgesInternalAsync(
+            LeaderDto leader,
+            PlayerDto playerOfTheDay,
+            IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
+            bool isActualTodayleader,
+            IReadOnlyCollection<BadgeDto> allBadges,
+            DateTime firstDate,
+            IReadOnlyCollection<LeaderDto> leadersHistory,
+            IReadOnlyCollection<PlayerDto> playersHistory)
+        {
+            var collectedBadges = new List<Badges>();
+
+            // Badges you can got only if you find the player today
+            if (isActualTodayleader)
+            {
+                var leaders = leadersHistory
+                    .Where(lh => lh.ProposalDate == leader.ProposalDate);
+
+                var myHistory = leadersHistory
+                    .Where(lh => lh.UserId == leader.UserId);
+
+                var myPlayerHistory = playersHistory
+                    .Where(p => myHistory.Any(h => h.ProposalDate == p.ProposalDate));
+
+                var myCreatedPlayers = playersHistory
+                    .Where(p => p.CreationUserId == leader.UserId);
+
+                foreach (var badge in LeaderBasedBadgeCondition.Keys)
+                {
+                    if (LeaderBasedBadgeCondition[badge](leader))
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                foreach (var badge in LeaderRunBasedBadgeCondition.Keys)
+                {
+                    var conditions = LeaderRunBasedBadgeCondition[badge];
+
+                    bool respectConditions = RespectLeadersRunConditions(leader,
+                        myHistory, myCreatedPlayers,
+                        conditions.Item1, conditions.Item2, conditions.Item3);
+
+                    if (respectConditions)
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                foreach (var badge in PlayerBasedBadgeCondition.Keys)
+                {
+                    if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                 leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                             .ConfigureAwait(false);
+                    }
+                }
+
+                foreach (var badge in LeadersBasedBadgeCondition.Keys)
+                {
+                    var hasBadgeNotAlone = LeadersBasedBadgeNonUniqueCondition[badge](leader, leaders);
+                    if (hasBadgeNotAlone)
+                    {
+                        var badgeOwners = await _badgeRepository
+                            .GetUsersOfTheDayWithBadgeAsync((ulong)badge, leader.ProposalDate)
+                            .ConfigureAwait(false);
+
+                        foreach (var bo in badgeOwners)
+                        {
+                            await _badgeRepository
+                                .RemoveUserBadgeAsync(new UserBadgeDto
+                                {
+                                    BadgeId = (ulong)badge,
+                                    UserId = bo.UserId
+                                })
+                                .ConfigureAwait(false);
+                        }
+
+                        if (LeadersBasedBadgeCondition[badge](leader, leaders))
+                        {
+                            await InsertBadgeIfNotAlreadyAsync(
+                                     leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                 .ConfigureAwait(false);
+                        }
+                    }
+                }
+
+                foreach (var badge in PlayersHistoryBadgeCondition.Keys)
+                {
+                    if (PlayersHistoryBadgeCondition[badge](myPlayerHistory))
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                foreach (var badge in ProposalsBasedBadgeCondition.Keys)
+                {
+                    if (ProposalsBasedBadgeCondition[badge](proposalsBeforeWin))
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                            .ConfigureAwait(false);
+                    }
+                }
+            }
+
+            // Not generic (special badge)
+            if (playerOfTheDay.Id == TheEndPlayerId)
+            {
+                var oldCount = collectedBadges.Count;
+                await InsertBadgeIfNotAlreadyAsync(
+                        leader.ProposalDate, leader.UserId, Badges.TheEnd, collectedBadges, allBadges)
+                    .ConfigureAwait(false);
+
+                // Inserts the consolation prize ONLY if no "TheEnd" badge got
+                if (collectedBadges.Count == oldCount)
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                            leader.ProposalDate, leader.UserId, Badges.TheEndConsolationPrize, collectedBadges, allBadges)
+                        .ConfigureAwait(false);
+                }
+            }
+
+            return await GetUserBadgesAsync(
+                    collectedBadges, leader.ProposalDate, allBadges)
+                .ConfigureAwait(false);
         }
 
         private static bool RespectLeadersRunConditions(LeaderDto leader,
@@ -476,147 +633,22 @@ namespace KikoleApi.Services
             return new Badge(badgesDto.Single(_ => _.Id == (ulong)badge), users.Count, description);
         }
 
-        internal static IReadOnlyDictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>> LeadersBasedBadgeCondition
-            = new Dictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>>
-            {
-                {
-                    Badges.OverTheTopPart1,
-                    (l, ls) => l.Time == ls.Min(_ => _.Time) && ls.Count(_ => _.Time == l.Time) == 1
-                },
-                {
-                    Badges.OverTheTopPart2,
-                    (l, ls) => l.Points == ls.Max(_ => _.Points) && ls.Count(_ => _.Points == l.Points) == 1
-                }
-            };
+        private async Task<IReadOnlyCollection<LeaderDto>> GetLeadersHistoryAsync(
+            DateTime date,
+            DateTime firstDate)
+        {
+            var leadersHistory = new List<LeaderDto>();
 
-        internal static IReadOnlyDictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>> LeadersBasedBadgeNonUniqueCondition
-            = new Dictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>>
+            while (date.Date >= firstDate.Date)
             {
-                {
-                    Badges.OverTheTopPart1,
-                    (l, ls) => l.Time == ls.Min(_ => _.Time)
-                },
-                {
-                    Badges.OverTheTopPart2,
-                    (l, ls) => l.Points == ls.Max(_ => _.Points)
-                }
-            };
+                var leadersBefore = await _leaderRepository
+                    .GetLeadersAtDateAsync(date)
+                    .ConfigureAwait(false);
+                leadersHistory.AddRange(leadersBefore);
+                date = date.AddDays(-1);
+            }
 
-        internal static IReadOnlyDictionary<Badges, Func<PlayerDto, bool>> PlayerBasedBadgeCondition
-            = new Dictionary<Badges, Func<PlayerDto, bool>>
-            {
-                {
-                    Badges.Archaeology,
-                    p => p.YearOfBirth < 1970
-                },
-                {
-                    Badges.WorldWarTwo,
-                    p => p.YearOfBirth < 1940
-                },
-                {
-                    Badges.ThirdWaveFeminism,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ThirdWaveFeminism
-                },
-                {
-                    Badges.ItsAFuckingDisgrace,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ItsAFuckingDisgrace
-                },
-                {
-                    Badges.CaptainTsubasa,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.CaptainTsubasa
-                },
-                {
-                    Badges.KikolesCreatorFriend,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.KikolesCreatorFriend
-                }
-            };
-
-        internal static IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, bool>> PlayersHistoryBadgeCondition
-            = new Dictionary<Badges, Func<IEnumerable<PlayerDto>, bool>>
-            {
-                {
-                    Badges.FourFourtwo,
-                    ph => ph.Count(p => p.PositionId == (ulong)Positions.Goalkeeper) > 0
-                        && ph.Count(p => p.PositionId == (ulong)Positions.Defender) > 3
-                        && ph.Count(p => p.PositionId == (ulong)Positions.Midfielder) > 3
-                        && ph.Count(p => p.PositionId == (ulong)Positions.Forward) > 1
-                },
-                {
-                    Badges.AroundTheWorld,
-                    ph => ph.Select(p => p.CountryId).Distinct().Count() >= 20
-                }
-            };
-
-        // Notice "IEnumerable<ProposalDto>" does not contain the final proposal
-        internal static IReadOnlyDictionary<Badges, Func<IEnumerable<ProposalDto>, bool>> ProposalsBasedBadgeCondition
-            = new Dictionary<Badges, Func<IEnumerable<ProposalDto>, bool>>
-            {
-                {
-                    Badges.WikipediaScreenshot,
-                    ph => !ph.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club)
-                },
-                {
-                    Badges.PassportCheck,
-                    ph => !ph.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club)
-                },
-                {
-                    Badges.EverythingNotLost,
-                    ph => ph.Any() && ph.All(ep => ep.Successful == 0)
-                },
-            };
-
-        internal static IReadOnlyDictionary<Badges, Func<LeaderDto, bool>> LeaderBasedBadgeCondition
-            = new Dictionary<Badges, Func<LeaderDto, bool>>
-            {
-                {
-                    Badges.CacaCaféClopeKikolé,
-                    l => new TimeSpan(0, l.Time, 0).Hours >= 5 && new TimeSpan(0, l.Time, 0).Hours < 8
-                },
-                {
-                    Badges.HalfwayToTheTop,
-                    l => l.Points >= 500
-                },
-                {
-                    Badges.ItsOver900,
-                    l => l.Points >= 900
-                },
-                {
-                    Badges.SavedByTheBell,
-                    l => new TimeSpan(0, l.Time, 0).Hours == 23
-                },
-                {
-                    Badges.StayUpLate,
-                    l => new TimeSpan(0, l.Time, 0).Hours < 2
-                },
-                {
-                    Badges.WoodenSpoon,
-                    l => l.Points == 0
-                },
-                {
-                    Badges.YourFirstSuccess,
-                    l => true
-                }
-            };
-
-        internal static IReadOnlyDictionary<Badges, (int, Func<LeaderDto, bool>, bool)> LeaderRunBasedBadgeCondition
-            = new Dictionary<Badges, (int, Func<LeaderDto, bool>, bool)>
-            {
-                {
-                    Badges.ThreeInARow,
-                    (3, l => true, false)
-                },
-                {
-                    Badges.AWeekInARow,
-                    (7, l => true, false)
-                },
-                {
-                    Badges.LegendTier,
-                    (30, l => true, false)
-                },
-                {
-                    Badges.MakeItDouble,
-                    (2, l => l.Points == 1000, false)
-                }
-            };
+            return leadersHistory;
+        }
     }
 }

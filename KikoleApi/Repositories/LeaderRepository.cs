@@ -58,21 +58,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>> GetLeadersHistoryAsync(DateTime date, DateTime firstDate)
-        {
-            var leadersHistory = new List<IReadOnlyCollection<LeaderDto>>();
-
-            while (date.Date >= firstDate.Date)
-            {
-                var leadersBefore = await GetLeadersAtDateAsync(date)
-                    .ConfigureAwait(false);
-                leadersHistory.Add(leadersBefore);
-                date = date.AddDays(-1);
-            }
-
-            return leadersHistory;
-        }
-
         public async Task<IReadOnlyCollection<KikoleAwardDto>> GetKikoleAwardsAsync(DateTime minDate, DateTime maxDate)
         {
             return await ExecuteReaderAsync<KikoleAwardDto>(

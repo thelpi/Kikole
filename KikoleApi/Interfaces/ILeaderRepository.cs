@@ -15,8 +15,6 @@ namespace KikoleApi.Interfaces
 
         Task DeleteLeadersAsync(DateTime proposalDate);
 
-        Task<IReadOnlyCollection<IReadOnlyCollection<LeaderDto>>> GetLeadersHistoryAsync(DateTime date, DateTime firstDate);
-
         Task<IReadOnlyCollection<KikoleAwardDto>> GetKikoleAwardsAsync(DateTime minDate, DateTime maxDate);
     }
 }
