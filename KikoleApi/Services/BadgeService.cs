@@ -20,7 +20,12 @@ namespace KikoleApi.Services
         {
             Badges.DoYouSpeakPatois,
             Badges.TheEndConsolationPrize,
-            Badges.TheEnd
+            Badges.TheEnd,
+            Badges.DoItYourself,
+            Badges.WeAreKikole,
+            Badges.AllIn,
+            Badges.GambleAddiction,
+            Badges.ChallengeAccepted
         };
 
         private readonly IBadgeRepository _badgeRepository;
