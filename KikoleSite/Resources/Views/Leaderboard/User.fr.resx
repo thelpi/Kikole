@@ -214,6 +214,6 @@
     <value>Vous n'avez pas loupé de badge unique !</value>
   </data>
   <data name="ImpossibleBadge" xml:space="preserve">
-    <value>Impossible à avoir</value>
+    <value>Impossible à obtenir</value>
   </data>
 </root>
