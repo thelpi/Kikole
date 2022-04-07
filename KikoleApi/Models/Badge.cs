@@ -16,6 +16,8 @@ namespace KikoleApi.Models
 
         public bool Unique { get; }
 
+        public ulong? SubBadgeId { get; }
+
         internal Badge(BadgeDto dto, int usersCount, string description)
         {
             Id = dto.Id;
@@ -24,6 +26,7 @@ namespace KikoleApi.Models
             Users = usersCount;
             Hidden = dto.Hidden > 0;
             Unique = dto.IsUnique > 0;
+            SubBadgeId = dto.SubBadgeId;
         }
     }
 }

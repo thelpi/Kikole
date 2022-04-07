@@ -13,7 +13,6 @@ namespace KikoleApi.Services
     public class BadgeService : IBadgeService
     {
         private const string SpecialWord = "chouse";
-        private const ulong TheEndPlayerId = 81;
 
         private readonly IBadgeRepository _badgeRepository;
         private readonly ILeaderRepository _leaderRepository;
@@ -504,20 +503,11 @@ namespace KikoleApi.Services
             }
 
             // Not generic (special badge)
-            if (playerOfTheDay.Id == TheEndPlayerId)
+            if (playerOfTheDay.BadgeId == (ulong)Badges.TheEnd)
             {
-                var oldCount = collectedBadges.Count;
                 await InsertBadgeIfNotAlreadyAsync(
                         leader.ProposalDate, leader.UserId, Badges.TheEnd, collectedBadges, allBadges)
                     .ConfigureAwait(false);
-
-                // Inserts the consolation prize ONLY if no "TheEnd" badge got
-                if (collectedBadges.Count == oldCount)
-                {
-                    await InsertBadgeIfNotAlreadyAsync(
-                            leader.ProposalDate, leader.UserId, Badges.TheEndConsolationPrize, collectedBadges, allBadges)
-                        .ConfigureAwait(false);
-                }
             }
 
             return await GetUserBadgesAsync(
@@ -568,16 +558,40 @@ namespace KikoleApi.Services
             {
                 var badgeMatch = allBadges.Single(b => b.Id == (ulong)badge);
 
-                // the badge need to be created BEFORE
-                // avoid getting badges during recomputation
+                // badge can apply only after the creation date of the badge
                 var allowed = badgeMatch.CreationDate.Date <= proposalDate.Date;
+
                 if (allowed && badgeMatch.IsUnique != 0)
                 {
+                    // badge is unique: check if another user already has the badge
                     var users = await _badgeRepository
                         .GetUsersWithBadgeAsync(badgeMatch.Id)
                         .ConfigureAwait(false);
-                    if (users.Count > 0)
-                        allowed = false;
+
+                    allowed = users.Count == 0;
+
+                    // tries to add the substitution badge if exists
+                    if (!allowed && badgeMatch.SubBadgeId.HasValue)
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                proposalDate, userId, (Badges)badgeMatch.SubBadgeId.Value, collectedBadges, allBadges)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                if (allowed)
+                {
+                    // the badge we try to attach to the user is a substitution badge
+                    var sourceBadgeofSub = allBadges.SingleOrDefault(b => b.SubBadgeId == (ulong)badge);
+                    if (sourceBadgeofSub != null)
+                    {
+                        var hasSourceBadge = await _badgeRepository
+                            .CheckUserHasBadgeAsync(userId, sourceBadgeofSub.Id)
+                            .ConfigureAwait(false);
+
+                        // for a better badge the user already has
+                        allowed = !hasSourceBadge && sourceBadgeofSub.CreationDate.Date <= proposalDate.Date;
+                    }
                 }
 
                 if (allowed)
