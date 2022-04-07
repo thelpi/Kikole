@@ -18,6 +18,8 @@ namespace KikoleApi.Models
 
         public bool Unique => _badge.Unique;
 
+        public ulong? SubBadgeId => _badge.SubBadgeId;
+
         public DateTime GetDate { get; }
 
         internal UserBadge(Badge badge, DateTime getDate)

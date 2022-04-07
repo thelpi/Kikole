@@ -17,5 +17,7 @@
         public bool HiddenOrSpecial => Hidden || Id == SpeakPatoisBadgeId;
 
         public bool Unique { get; set; }
+
+        public ulong? SubBadgeId { get; set; }
     }
 }

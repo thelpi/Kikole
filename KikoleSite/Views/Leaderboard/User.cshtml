@@ -51,7 +51,7 @@
         }
         @foreach (var stat in Model.Stats)
         {
-            var background = i % 2 == 0 ? "white" : "azure";
+            var background = stat.IsCreator ? "lavender" : (i % 2 == 0 ? "white" : "azure");
             <tr style="background-color: @background">
                 <td>@stat.Date.ToNaString()</td>
                 <td>@stat.Answer</td>

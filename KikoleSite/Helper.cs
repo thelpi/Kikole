@@ -58,6 +58,13 @@ namespace KikoleSite
                 : (IsFrench() ? "Non" : "No");
         }
 
+        public static string ToYesNo(this bool? data)
+        {
+            return !data.HasValue
+                ? NA
+                : data.Value.ToYesNo();
+        }
+
         internal static string Encrypt(this string plainText)
         {
             try

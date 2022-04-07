@@ -9,9 +9,9 @@ namespace KikoleSite.Models
 
         public string Answer { get; set; }
 
-        public bool Attempt { get; set; }
+        public bool? Attempt { get; set; }
 
-        public bool Success { get; set; }
+        public bool? Success { get; set; }
 
         public TimeSpan? Time { get; set; }
 
@@ -21,16 +21,25 @@ namespace KikoleSite.Models
 
         public int? PointsPosition { get; set; }
 
+        public bool IsCreator { get; set; }
+
         public SingleUserStatModel(SingleUserStat apiStat, bool knowPlayer)
         {
             Answer = knowPlayer ? apiStat.Answer : "***";
-            Attempt = apiStat.Attempt;
             Date = apiStat.Date;
             Points = apiStat.Points;
             PointsPosition = apiStat.PointsPosition;
-            Success = apiStat.Time.HasValue;
             Time = apiStat.Time;
             TimePosition = apiStat.TimePosition;
+            Attempt = apiStat.Attempt;
+            Success = apiStat.Time.HasValue;
+
+            if (apiStat.Points.HasValue && !apiStat.Time.HasValue)
+            {
+                Attempt = null;
+                Success = null;
+                IsCreator = true;
+            }
         }
     }
 }

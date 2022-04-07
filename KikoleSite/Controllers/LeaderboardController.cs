@@ -42,9 +42,12 @@ namespace KikoleSite.Controllers
                 .GetUserBadgesAsync(userId, token)
                 .ConfigureAwait(false);
 
-            var allBadges = await _apiProvider
+            var allBadges = (await _apiProvider
                 .GetBadgesAsync()
-                .ConfigureAwait(false);
+                .ConfigureAwait(false))
+                .ToList();
+
+            CleanSubBadges(badges, allBadges);
 
             var knownAnswers = new List<string>();
             if (!string.IsNullOrWhiteSpace(token))
@@ -140,6 +143,17 @@ namespace KikoleSite.Controllers
                     model.BoardName = _localizer["LastDaysLeaderboard", Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))];
                 }
             }
+        }
+
+        // TODO: That's something we should do in API
+        private static void CleanSubBadges(IReadOnlyCollection<UserBadge> ownBadges,
+            List<Badge> allBadges)
+        {
+            foreach (var b in ownBadges.Where(_ => _.SubBadgeId.HasValue))
+                allBadges.RemoveAll(_ => _.Id == b.SubBadgeId.Value);
+
+            foreach (var b in allBadges.Where(_ => _.Unique && _.Users == 0 && _.SubBadgeId.HasValue))
+                allBadges.RemoveAll(_ => _.Id == b.SubBadgeId.Value);
         }
     }
 }
