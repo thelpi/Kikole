@@ -64,5 +64,12 @@ namespace KikoleApi.Interfaces
         /// </summary>
         /// <returns>Nothing.</returns>
         Task ResetBadgesAsync();
+
+        /// <summary>
+        /// Manages badges related to a new challenge accepted.
+        /// </summary>
+        /// <param name="challenge">Challenge just accepted that triggers this call.</param>
+        /// <returns>Nothing.</returns>
+        Task ManageChallengesBasedBadgesAsync(ChallengeDto challenge);
     }
 }

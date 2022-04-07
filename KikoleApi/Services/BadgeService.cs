@@ -18,6 +18,7 @@ namespace KikoleApi.Services
         private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IProposalRepository _proposalRepository;
+        private readonly IChallengeRepository _challengeRepository;
         private readonly TextResources _resources;
         private readonly IClock _clock;
 
@@ -89,7 +90,7 @@ namespace KikoleApi.Services
                 }
             };
 
-        private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, bool>> PlayersHistoryBadgeCondition
+        private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, bool>> PlayersHistoryBasedBadgeCondition
             = new Dictionary<Badges, Func<IEnumerable<PlayerDto>, bool>>
             {
                 {
@@ -181,10 +182,28 @@ namespace KikoleApi.Services
                 }
             };
 
+        private static readonly IReadOnlyDictionary<Badges, Func<ChallengeDto, IReadOnlyCollection<ChallengeDto>, bool>> ChallengeBasedBadgeCondition
+            = new Dictionary<Badges, Func<ChallengeDto, IReadOnlyCollection<ChallengeDto>, bool>>
+            {
+                {
+                    Badges.GambleAddiction,
+                    (c, ch) => ch.Count(ac => ac.HostUserId == c.HostUserId) >= 5
+                },
+                {
+                    Badges.AllIn,
+                    (c, ch) => c.PointsRate >= 80
+                },
+                {
+                    Badges.ChallengeAccepted,
+                    (c, ch) => true
+                }
+            };
+
         public BadgeService(IBadgeRepository badgeRepository,
             ILeaderRepository leaderRepository,
             IPlayerRepository playerRepository,
             IProposalRepository proposalRepository,
+            IChallengeRepository challengeRepository,
             TextResources resources,
             IClock clock)
         {
@@ -192,8 +211,42 @@ namespace KikoleApi.Services
             _leaderRepository = leaderRepository;
             _playerRepository = playerRepository;
             _proposalRepository = proposalRepository;
+            _challengeRepository = challengeRepository;
             _resources = resources;
             _clock = clock;
+        }
+
+        /// <inheritdoc />
+        public async Task ManageChallengesBasedBadgesAsync(ChallengeDto challenge)
+        {
+            var allAccepted = await _challengeRepository
+               .GetAcceptedChallengesAsync(null, null)
+               .ConfigureAwait(false);
+
+            foreach (var user in new[] { challenge.HostUserId, challenge.GuestUserId })
+            {
+                if (ChallengeBasedBadgeCondition[Badges.ChallengeAccepted](challenge, allAccepted))
+                {
+                    await AddBadgeToUserAsync(
+                            Badges.ChallengeAccepted, user)
+                        .ConfigureAwait(false);
+                }
+                
+
+                if (ChallengeBasedBadgeCondition[Badges.AllIn](challenge, allAccepted))
+                {
+                    await AddBadgeToUserAsync(
+                            Badges.AllIn, user)
+                        .ConfigureAwait(false);
+                }
+            }
+
+            if (ChallengeBasedBadgeCondition[Badges.GambleAddiction](challenge, allAccepted))
+            {
+                await AddBadgeToUserAsync(
+                        Badges.GambleAddiction, challenge.HostUserId)
+                    .ConfigureAwait(false);
+            }
         }
 
         /// <inheritdoc />
@@ -481,9 +534,9 @@ namespace KikoleApi.Services
                     }
                 }
 
-                foreach (var badge in PlayersHistoryBadgeCondition.Keys)
+                foreach (var badge in PlayersHistoryBasedBadgeCondition.Keys)
                 {
-                    if (PlayersHistoryBadgeCondition[badge](myPlayerHistory))
+                    if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory))
                     {
                         await InsertBadgeIfNotAlreadyAsync(
                                 leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)

@@ -135,28 +135,20 @@ namespace KikoleApi.Controllers
             if (!isCancel && challenge.IsAccepted.HasValue)
                 return Conflict(_resources.ChallengeAlreadyAnswered);
 
-            if (!isAccepted)
-            {
-                // date is irrelevant in this case
-                await _challengeRepository
-                   .RespondToChallengeAsync(id, isAccepted, _clock.Now)
-                   .ConfigureAwait(false);
-
-                return NoContent();
-            }
-
             var hostUser = await _userRepository
                 .GetUserByIdAsync(challenge.HostUserId)
                 .ConfigureAwait(false);
 
-            if (hostUser == null)
+            if (!isAccepted || hostUser == null)
             {
-                // date is irrelevant in this case
+                // date is irrelevant in those cases
                 await _challengeRepository
-                   .RespondToChallengeAsync(id, isAccepted, _clock.Now)
+                   .RespondToChallengeAsync(id, false, _clock.Now)
                    .ConfigureAwait(false);
 
-                return Conflict(_resources.InvalidOpponentAccount);
+                return hostUser == null
+                    ? Conflict(_resources.InvalidOpponentAccount)
+                    : (IActionResult)NoContent();
             }
 
             var hostDates = await _challengeRepository
@@ -175,33 +167,9 @@ namespace KikoleApi.Controllers
                 .RespondToChallengeAsync(id, isAccepted, challengeDate)
                 .ConfigureAwait(false);
 
-            if (isAccepted)
-            {
-                foreach (var user in new[] { challenge.HostUserId, challenge.GuestUserId })
-                {
-                    await _badgeService
-                        .AddBadgeToUserAsync(Badges.ChallengeAccepted, user)
-                        .ConfigureAwait(false);
-
-                    if (challenge.PointsRate >= 80)
-                    {
-                        await _badgeService
-                            .AddBadgeToUserAsync(Badges.AllIn, user)
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                var allAccepted = await _challengeRepository
-                    .GetAcceptedChallengesAsync(null, null)
-                    .ConfigureAwait(false);
-
-                if (allAccepted.Count(ac => ac.HostUserId == challenge.HostUserId) >= 5)
-                {
-                    await _badgeService
-                        .AddBadgeToUserAsync(Badges.GambleAddiction, challenge.HostUserId)
-                        .ConfigureAwait(false);
-                }
-            }
+            await _badgeService
+                .ManageChallengesBasedBadgesAsync(challenge)
+                .ConfigureAwait(false);
 
             return NoContent();
         }
