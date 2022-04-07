@@ -122,6 +122,10 @@ namespace KikoleApi.Services
                     Badges.EverythingNotLost,
                     ph => ph.Any() && ph.All(ep => ep.Successful == 0)
                 },
+                {
+                    Badges.ImFeelingLucky,
+                    ph => !ph.Any()
+                }
             };
 
         private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, bool>> LeaderBasedBadgeCondition

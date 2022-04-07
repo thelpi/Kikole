@@ -33,6 +33,7 @@
         PassportCheck,
         EverythingNotLost,
         TheEnd,
-        TheEndConsolationPrize
+        TheEndConsolationPrize,
+        ImFeelingLucky
     }
 }
