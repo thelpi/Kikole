@@ -201,4 +201,7 @@
   <data name="PlayerWas" xml:space="preserve">
     <value>Le joueur du {1} était &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt;.</value>
   </data>
+  <data name="AlmostThere" xml:space="preserve">
+    <value>Si proche du but ! Il vous manque cependant quelque chose pour être à 100%...</value>
+  </data>
 </root>

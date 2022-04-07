@@ -11,6 +11,7 @@ namespace KikoleSite.Models
         public string Message { get; set; }
         public string PlayerCreator { get; set; }
 
+        public bool AlmostThere { get; set; }
         public IReadOnlyCollection<UserBadge> Badges { get; set; }
         public ProposalChart Chart { get; set; }
         public int Points { get; set; }

@@ -1,7 +1,13 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model HomeModel
 <div>
-    @if (string.IsNullOrWhiteSpace(Model.LoggedAs))
+    @if (Model.AlmostThere)
+    {
+        <div style="margin-top: 20px; color:crimson; font-size: large">
+            @localizer["AlmostThere"]
+        </div>
+    }
+    else if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         await Html.RenderPartialAsync("Partial/Rules", Model.Chart).ConfigureAwait(false);
         <div style="margin-top: 40px">

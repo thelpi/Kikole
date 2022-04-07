@@ -67,7 +67,8 @@ namespace KikoleSite.Controllers
                     }
                     else
                     {
-                        return RedirectToAction("Index");
+                        model = new HomeModel { AlmostThere = true };
+                        return View(model);
                     }
                 }
                 else
