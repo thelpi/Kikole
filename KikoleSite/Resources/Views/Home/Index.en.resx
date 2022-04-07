@@ -198,4 +198,7 @@
   <data name="YouAreNotLogged" xml:space="preserve">
     <value>You are &lt;a href="/Account"&gt;&lt;span style="color: crimson"&gt;not logged&lt;/span&gt;&lt;/a&gt;</value>
   </data>
+  <data name="PlayerWas" xml:space="preserve">
+    <value>The player of {1} was &lt;span style="font-style: italic; color:crimson"&gt;{0}&lt;/span&gt;.</value>
+  </data>
 </root>

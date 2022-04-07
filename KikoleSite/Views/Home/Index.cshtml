@@ -40,29 +40,23 @@
                 <label>@localizer["PendingChallenges"]</label>
             </div>
         }
-            <div style="margin-top: 10px">
+        <div style="margin-top: 10px">
+            @if (!Model.NoPreviousDay)
+            {
+                <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
+            }
+            @if (Model.CurrentDay > 0)
+            {
                 @if (!Model.NoPreviousDay)
                 {
-                    <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
+                    <span>| </span>
                 }
-                @if (Model.CurrentDay > 0)
-                {
-                    @if (!Model.NoPreviousDay)
-                    {
-                        <span>| </span>
-                    }
-                    <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
-                }
-            </div>
+                <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
+            }
+        </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
         {
-            if (Model.IsCreator)
-            {
-                <div style="margin-top: 5px">
-                    <label>@localizer["PlayerIs"] <span style="font-style: italic; color:crimson">@Model.PlayerName</span></label>
-                </div>
-            }
-            else if (Model.CurrentDay == 0)
+            if (Model.CurrentDay == 0 && !Model.IsCreator)
             {
                 <div style="margin-top: 5px">
                     <label>@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</label>
@@ -70,10 +64,16 @@
                 <div>@Html.Raw(string.Format(localizer["FinalScore"].Value, Model.Points))</div>
                 await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
             }
+            else if (Model.CurrentDay == 0)
+            {
+                <div style="margin-top: 5px">
+                    <label>@localizer["PlayerIs"] <span style="font-style: italic; color:crimson">@Model.PlayerName</span></label>
+                </div>
+            }
             else
             {
                 <div style="margin-top: 5px">
-                    <label>@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName))</label>
+                    <label>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, DateTime.Now.AddDays(-Model.CurrentDay).ToNaString()))</label>
                 </div>
             }
         }
