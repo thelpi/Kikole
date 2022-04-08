@@ -267,7 +267,7 @@ namespace KikoleApi.Services
                 .GetFirstDateAsync()
                 .ConfigureAwait(false);
             
-            var endDate = _clock.Now.Date;
+            var endDate = _clock.Today;
 
             var playersHistoryFull = await _playerRepository
                 .GetPlayersOfTheDayAsync(firstDate.Date, endDate)
@@ -421,7 +421,7 @@ namespace KikoleApi.Services
             {
                 var b = badges.Single(_ => _.Id == dto.BadgeId);
 
-                if (_clock.Now.Date == dto.GetDate
+                if (_clock.Today == dto.GetDate
                     && b.Hidden > 0
                     && !isAllowedToSeeHiddenBadge)
                 {

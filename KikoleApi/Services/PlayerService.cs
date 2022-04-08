@@ -153,7 +153,7 @@ namespace KikoleApi.Services
             IReadOnlyCollection<DateTime> hostDates,
             IReadOnlyCollection<DateTime> guestDates)
         {
-            var challengeDate = _clock.Now.Date;
+            var challengeDate = _clock.Today;
             PlayerDto p;
             do
             {

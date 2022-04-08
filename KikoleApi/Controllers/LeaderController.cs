@@ -82,31 +82,8 @@ namespace KikoleApi.Controllers
                 .ToList();
 
             var userCreator = users.SingleOrDefault(u => u.Id == pDay.CreationUserId);
-            if (userCreator != null && pDay.HideCreator == 0)
+            if (userCreator != null && (pDay.HideCreator == 0 || day.Date < _clock.Today))
                 leaders.Add(new Leader(userCreator, day, leadersDto));
-
-            /*var challenges = await _challengeRepository
-                .GetAcceptedChallengesOfTheDayAsync(day)
-                .ConfigureAwait(false);
-
-            foreach (var challenge in challenges)
-            {
-                var hostLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.HostUserId);
-                var guestLead = leadersDto.SingleOrDefault(l => l.UserId == challenge.GuestUserId);
-                var pointsDelta = Models.Challenge.ComputeHostPoints(challenge, hostLead, guestLead);
-                if (pointsDelta != 0)
-                {
-                    if (hostLead == null)
-                        leaders.Add(new Leader(challenge.HostUserId, pointsDelta, users));
-                    else
-                        leaders.Single(l => l.UserId == hostLead.UserId).WithPointsFromChallenge(pointsDelta, true);
-
-                    if (guestLead == null)
-                        leaders.Add(new Leader(challenge.GuestUserId, -pointsDelta, users));
-                    else
-                        leaders.Single(l => l.UserId == guestLead.UserId).WithPointsFromChallenge(pointsDelta, false);
-                }
-            }*/
 
             return Ok(Leader.DoubleSortWithPosition(leaders, sort));
         }
@@ -240,7 +217,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
             currentDate = currentDate.Date;
 
-            var now = _clock.Now.Date;
+            var now = _clock.Today;
             while (currentDate <= now)
             {
                 var pDay = await _playerRepository
@@ -407,7 +384,7 @@ namespace KikoleApi.Controllers
         {
             return players
                 .Where(p => p.CreationUserId == leaderDto.Key
-                    && ((p.ProposalDate.Value < _clock.Now.Date) || p.HideCreator == 0))
+                    && ((p.ProposalDate.Value < _clock.Today) || p.HideCreator == 0))
                 .Select(d => d.ProposalDate.Value);
         }
     }

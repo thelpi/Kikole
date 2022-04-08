@@ -67,7 +67,7 @@ namespace KikoleApi.Controllers
             if (request == null)
                 return BadRequest(string.Format(_resources.InvalidRequest, "null"));
 
-            var validityRequest = request.IsValid(_clock.Now, _resources);
+            var validityRequest = request.IsValid(_clock.Today, _resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
                 return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
 

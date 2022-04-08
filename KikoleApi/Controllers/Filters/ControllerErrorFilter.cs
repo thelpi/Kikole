@@ -29,7 +29,7 @@ namespace KikoleApi.Controllers.Filters
                     var logFileName = string.Format(_logsFilePathFormat, now.ToString("yyyyMMdd"));
                     using (var sw = new StreamWriter(logFileName, true))
                     {
-                        sw.WriteLine($"Exception timestamp: {now.ToString("hh:mm:ss")}");
+                        sw.WriteLine($"Exception timestamp: {now.ToString("HH:mm:ss")}");
                         sw.WriteLine(context.Exception.Message);
                         sw.WriteLine(context.Exception.StackTrace);
                         sw.WriteLine(sw.NewLine);

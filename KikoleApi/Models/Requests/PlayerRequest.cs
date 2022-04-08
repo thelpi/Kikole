@@ -31,7 +31,7 @@ namespace KikoleApi.Models.Requests
 
         public bool HideCreator { get; set; }
 
-        internal string IsValid(DateTime now, TextResources resources)
+        internal string IsValid(DateTime today, TextResources resources)
         {
             if (string.IsNullOrWhiteSpace(Name))
                 return resources.InvalidName;
@@ -57,7 +57,7 @@ namespace KikoleApi.Models.Requests
             if (string.IsNullOrWhiteSpace(ClueEn))
                 return resources.InvalidClue;
 
-            if (ProposalDate.HasValue && ProposalDate.Value.Date < now.Date)
+            if (ProposalDate.HasValue && ProposalDate.Value.Date < today)
                 return resources.InvalidProposalDate;
 
             return null;
