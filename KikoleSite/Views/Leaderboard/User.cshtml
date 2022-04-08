@@ -77,7 +77,7 @@ else
 {
     foreach (var badge in Model.Badges)
     {
-        var color = !badge.HiddenOrSpecial && !badge.Unique ? "transparent" : "gold";
+        var color = !badge.Hidden && !badge.Unique ? "transparent" : "gold";
         var borderColor = badge.Unique ? "crimson" : "black";
         var borderPx = badge.Unique ? "5px" : "1px";
         <div style="float: left; margin-top: 5px; width: 350px; min-height: 100px; border: solid @borderPx; border-color: @borderColor; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">

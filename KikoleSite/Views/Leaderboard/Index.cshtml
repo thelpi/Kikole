@@ -89,7 +89,7 @@
             }
             @foreach (var leader in Model.TodayLeaders)
             {
-                var background = i % 2 == 0 ? "white" : "azure";
+                var background = leader.SuccessCount == 0 ? "lavender" : (i % 2 == 0 ? "white" : "azure");
                 <tr style="background-color: @background">
                     <td>@leader.Position</td>
                     <td style="color: crimson"><a href="/Leaderboard?userId=@leader.UserId">@leader.Login</a></td>
