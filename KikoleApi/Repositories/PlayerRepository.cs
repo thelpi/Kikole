@@ -94,11 +94,11 @@ namespace KikoleApi.Repositories
                     "FROM players AS y " +
                     "LEFT JOIN proposals AS p ON y.proposal_date = DATE(DATE_ADD(p.proposal_date, INTERVAL -p.days_before DAY)) " +
                     "WHERE (" +
-                    "   (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = 1) " +
+                    "   (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = @pType) " +
                     "   OR y.creation_user_id = @userId" +
                     ") AND y.proposal_date IS NOT NULL " +
                     "AND y.proposal_date <= DATE(NOW())",
-                    new { userId })
+                    new { userId, pType = (ulong)Models.Enums.ProposalTypes.Name })
                 .ConfigureAwait(false);
         }
 
