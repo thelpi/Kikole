@@ -114,7 +114,7 @@ namespace KikoleApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<ActionResult<ProposalResponse>> SubmitClueProposalAsync(
-            [FromBody] PositionProposalRequest request,
+            [FromBody] ClueProposalRequest request,
             [FromQuery] ulong userId)
         {
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
