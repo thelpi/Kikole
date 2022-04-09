@@ -134,6 +134,7 @@ namespace KikoleApi.Repositories
                         "player_clue_translations",
                         ("player_id", playerId),
                         ("language_id", languageId),
+                        ("is_easy", isEasy),
                         ("clue", cluesByLanguage[languageId]))
                     .ConfigureAwait(false);
             }
