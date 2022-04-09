@@ -106,6 +106,22 @@
             <div style="margin-top: 30px; font-size: larger">
                 @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
             </div>
+            @if (!string.IsNullOrWhiteSpace(Model.EasyClue))
+            {
+                <div style="margin-top: 30px; font-size: larger">
+                    @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
+                </div>
+            }
+            else
+            {
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <div style="margin-top: 15px">
+                        <input type="submit" value="I need another clue" name="submit-Clue" style="width: 150px; margin-right: 20px" />
+                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Clue]</span> @localizer["Points"])</span>
+                    </div>
+                </form>
+            }
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
                 <fieldset style="margin-top: 30px">
@@ -240,7 +256,7 @@
                             <script>
                                 $(function () {
                                     var availableTags = [];
-                                    for (var i = 1900; i <= 2010; i++)
+                                    for (var i = 1850; i <= 2010; i++)
                                         availableTags.push(i.toString());
                                     $("#birthYearValue").autocomplete({
                                         source: availableTags,

@@ -72,7 +72,7 @@ namespace KikoleSite.Controllers
                     .ValidatePlayerSubmissionAsync(
                         new PlayerSubmissionValidationRequest
                         {
-                            ClueEditLangugages = new Dictionary<Languages, string>
+                            ClueEditLanguages = new Dictionary<Languages, string>
                             {
                                 { Languages.fr, model.ClueOverwriteFr }
                             },

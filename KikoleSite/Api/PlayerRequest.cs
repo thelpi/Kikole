@@ -23,7 +23,11 @@ namespace KikoleSite.Api
 
         public string ClueEn { get; set; }
 
+        public string EasyClueEn { get; set; }
+
         public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; }
+
+        public IReadOnlyDictionary<Languages, string> EasyClueLanguages { get; set; }
 
         public bool HideCreator { get; set; }
     }

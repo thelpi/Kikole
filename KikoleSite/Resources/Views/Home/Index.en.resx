@@ -204,4 +204,10 @@
   <data name="AlmostThere" xml:space="preserve">
     <value>So close ! You're missing something to be at 100%....</value>
   </data>
+  <data name="EasyDayClue" xml:space="preserve">
+    <value>Easy clue of the day:</value>
+  </data>
+  <data name="Points" xml:space="preserve">
+    <value>pts</value>
+  </data>
 </root>

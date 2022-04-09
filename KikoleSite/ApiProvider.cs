@@ -398,10 +398,10 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<string> GetClueAsync(DateTime proposalDate)
+        public async Task<string> GetClueAsync(DateTime proposalDate, bool isEasy)
         {
             var response = await SendAsync(
-                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}",
+                    $"player-clues?proposalDate={proposalDate.ToString("yyyy-MM-dd")}&isEasy={isEasy}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 

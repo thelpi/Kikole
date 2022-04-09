@@ -8,6 +8,7 @@ namespace KikoleSite.Models
     public class HomeModel
     {
         public string Clue { get; set; }
+        public string EasyClue { get; set; }
         public string Message { get; set; }
         public string PlayerCreator { get; set; }
 
@@ -55,6 +56,7 @@ namespace KikoleSite.Models
                 case ProposalType.Name: return PlayerNameSubmission;
                 case ProposalType.Year: return BirthYearSubmission;
                 case ProposalType.Position: return PositionSubmission;
+                case ProposalType.Clue: return "GetClue"; // anything not empty
                 default: return null;
             }
         }
@@ -67,11 +69,15 @@ namespace KikoleSite.Models
 
         internal void SetPropertiesFromProposal(ProposalResponse response,
             IReadOnlyDictionary<ulong, string> countries,
-            IReadOnlyDictionary<ulong, string> positions)
+            IReadOnlyDictionary<ulong, string> positions,
+            string easyClue)
         {
             Points = response.TotalPoints;
             switch (response.ProposalType)
             {
+                case ProposalType.Clue:
+                    EasyClue = easyClue;
+                    break;
                 case ProposalType.Club:
                     if (response.Successful)
                     {

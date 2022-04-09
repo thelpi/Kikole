@@ -83,10 +83,12 @@ namespace KikoleSite.Controllers
                 .IsPlayerOfTheDayUser(proposalDate, token)
                 .ConfigureAwait(false);
 
-            if (!string.IsNullOrWhiteSpace(token))
-                await SetModelFromApiAsync(model, proposalDate, token, playerCreator).ConfigureAwait(false);
+            var clue = await _apiProvider.GetClueAsync(proposalDate, false).ConfigureAwait(false);
 
-            var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
+            var easyClue = await _apiProvider.GetClueAsync(proposalDate, true).ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(token))
+                await SetModelFromApiAsync(model, proposalDate, token, playerCreator, easyClue).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(errorMessageForced))
             {
@@ -137,10 +139,15 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;
-            model.MessageToDisplay = response.Successful
-                ? _localizer["ValidGuess", proposalType.GetLabel(true)]
-                : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
-
+            if (proposalType == ProposalType.Clue)
+                model.MessageToDisplay = response.Tip;
+            else
+            {
+                model.MessageToDisplay = response.Successful
+                    ? _localizer["ValidGuess", proposalType.GetLabel(true)]
+                    : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
+            }
+            
             model.Badges = response.CollectedBadges;
 
             var proposalDate = now.Date.AddDays(-model.CurrentDay);
@@ -149,10 +156,12 @@ namespace KikoleSite.Controllers
                 .IsPlayerOfTheDayUser(proposalDate, token)
                 .ConfigureAwait(false);
 
-            await SetModelFromApiAsync(model, proposalDate, token, playerCreator)
-                .ConfigureAwait(false);
+            var clue = await _apiProvider.GetClueAsync(proposalDate, false).ConfigureAwait(false);
 
-            var clue = await _apiProvider.GetClueAsync(proposalDate).ConfigureAwait(false);
+            var easyClue = await _apiProvider.GetClueAsync(proposalDate, true).ConfigureAwait(false);
+
+            await SetModelFromApiAsync(model, proposalDate, token, playerCreator, easyClue)
+                .ConfigureAwait(false);
 
             var chart = await _apiProvider.GetProposalChartAsync().ConfigureAwait(false);
 
@@ -194,7 +203,7 @@ namespace KikoleSite.Controllers
         }
 
         private async Task SetModelFromApiAsync(HomeModel model,
-            DateTime proposalDate, string authToken, PlayerCreator pc)
+            DateTime proposalDate, string authToken, PlayerCreator pc, string easyClue)
         {
             if (!string.IsNullOrWhiteSpace(pc?.Name))
             {
@@ -213,9 +222,7 @@ namespace KikoleSite.Controllers
             var positions = GetPositions();
 
             foreach (var p in proposals)
-            {
-                model.SetPropertiesFromProposal(p, countries, positions);
-            }
+                model.SetPropertiesFromProposal(p, countries, positions, easyClue);
         }
     }
 }

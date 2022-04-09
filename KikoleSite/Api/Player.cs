@@ -19,6 +19,8 @@ namespace KikoleSite.Api
 
         public string Clue { get; set; }
 
+        public string EasyClue { get; set; }
+
         public ulong? Badge { get; set; }
 
         public ulong Position { get; set; }

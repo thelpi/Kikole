@@ -77,7 +77,7 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken);
 
-        Task<string> GetClueAsync(DateTime proposalDate);
+        Task<string> GetClueAsync(DateTime proposalDate, bool isEasy);
 
         Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate, string authToken);
         
