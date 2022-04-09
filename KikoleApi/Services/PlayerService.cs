@@ -177,12 +177,13 @@ namespace KikoleApi.Services
             return latestDate.AddDays(1).Date;
         }
 
-        private async Task InsertLanguageCluesAsync(IReadOnlyDictionary<Languages, string> clues,
+        private async Task InsertLanguageCluesAsync(IReadOnlyDictionary<string, string> clues,
             ulong playerId, bool isEasy)
         {
             var languagesClues = clues?
-                .Where(_ => !string.IsNullOrWhiteSpace(_.Value))
-                .ToDictionary(_ => (ulong)_.Key, _ => _.Value.Trim())
+                .Where(_ => !string.IsNullOrWhiteSpace(_.Value)
+                    && Enum.TryParse<Languages>(_.Key, out var lng))
+                .ToDictionary(_ => (ulong)Enum.Parse<Languages>(_.Key), _ => _.Value.Trim())
                 ?? new Dictionary<ulong, string>();
 
             if (languagesClues.Count > 0)

@@ -10,9 +10,9 @@ namespace KikoleApi.Models.Requests
 
         public bool IsAccepted { get; set; }
 
-        public IReadOnlyDictionary<Languages, string> ClueEditLanguages { get; set; }
+        public IReadOnlyDictionary<string, string> ClueEditLanguages { get; set; }
 
-        public IReadOnlyDictionary<Languages, string> EasyClueEditLanguages { get; set; }
+        public IReadOnlyDictionary<string, string> EasyClueEditLanguages { get; set; }
 
         public string ClueEditEn { get; set; }
 
@@ -30,11 +30,11 @@ namespace KikoleApi.Models.Requests
 
             if (IsAccepted)
             {
-                if (ClueEditLanguages?.ContainsKey(Languages.fr) != true
+                if (ClueEditLanguages?.ContainsKey("fr") != true
                     || ClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
                     return resources.InvalidClue;
 
-                if (EasyClueEditLanguages?.ContainsKey(Languages.fr) != true
+                if (EasyClueEditLanguages?.ContainsKey("fr") != true
                     || EasyClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
                     return resources.InvalidClue;
             }

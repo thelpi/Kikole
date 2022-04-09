@@ -72,14 +72,14 @@ namespace KikoleSite.Controllers
                     .ValidatePlayerSubmissionAsync(
                         new PlayerSubmissionValidationRequest
                         {
-                            ClueEditLanguages = new Dictionary<Languages, string>
+                            ClueEditLanguages = new Dictionary<string, string>
                             {
-                                { Languages.fr, model.ClueOverwriteFr }
+                                { "fr", model.ClueOverwriteFr }
                             },
                             ClueEditEn = model.ClueOverwriteEn,
-                            EasyClueEditLanguages = new Dictionary<Languages, string>
+                            EasyClueEditLanguages = new Dictionary<string, string>
                             {
-                                { Languages.fr, model.EasyClueOverwriteFr }
+                                { "fr", model.EasyClueOverwriteFr }
                             },
                             EasyClueEditEn = model.EasyClueOverwriteEn,
                             IsAccepted = action == "accepted",
@@ -248,13 +248,13 @@ namespace KikoleSite.Controllers
                 Clubs = clubs,
                 ClueEn = model.ClueEn,
                 EasyClueEn = model.EasyClueEn,
-                ClueLanguages = new Dictionary<Languages, string>
+                ClueLanguages = new Dictionary<string, string>
                 {
-                    { Languages.fr, model.ClueFr }
+                    { "fr", model.ClueFr }
                 },
-                EasyClueLanguages = new Dictionary<Languages, string>
+                EasyClueLanguages = new Dictionary<string, string>
                 {
-                    { Languages.fr, model.EasyClueFr }
+                    { "fr", model.EasyClueFr }
                 },
                 Country = countryId.ToString(),
                 Name = model.Name,

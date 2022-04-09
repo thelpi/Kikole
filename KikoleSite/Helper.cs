@@ -215,14 +215,7 @@ namespace KikoleSite
 
         private static bool IsFrench()
         {
-            return GetLanguage() == Api.Languages.fr;
-        }
-
-        internal static Api.Languages GetLanguage()
-        {
-            if (!Enum.TryParse<Api.Languages>(CultureInfo.CurrentCulture.TwoLetterISOLanguageName, out var language))
-                return Api.Languages.en;
-            return language;
+            return CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr";
         }
 
         internal static string GetLabel(this Api.ProposalType type, bool withFrenchDe)

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using KikoleSite.Api;
@@ -14,24 +16,16 @@ namespace KikoleSite
     {
         private readonly HttpClient _client;
 
-        private Languages _language;
-
-        private static Dictionary<Languages, IReadOnlyDictionary<ulong, string>> _countriesCache;
+        private static Dictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
-        public ApiProvider(IConfiguration configuration, Languages language)
+        public ApiProvider(IConfiguration configuration)
         {
             _client = new HttpClient
             {
                 BaseAddress = new Uri(configuration.GetValue<string>("BackApiBaseUrl"))
             };
-            _language = language;
-        }
-
-        internal void SetLanguage(Languages language)
-        {
-            _language = language;
         }
 
         #region user accounts
@@ -81,7 +75,7 @@ namespace KikoleSite
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                return (false, _language == Languages.fr
+                return (false, CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"
                     ? "Echec de l'authentification : jeton invalide"
                     : "Authentication failed: invalid token");
             }
@@ -297,7 +291,7 @@ namespace KikoleSite
 
         public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync()
         {
-            if (_countriesCache?.ContainsKey(_language) != true)
+            if (_countriesCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
             {
                 var response = await SendAsync(
                     $"countries",
@@ -307,14 +301,14 @@ namespace KikoleSite
                 var apiCountries = await GetResponseContentAsync<IReadOnlyCollection<Country>>(response)
                     .ConfigureAwait(false);
 
-                _countriesCache = _countriesCache ?? new Dictionary<Languages, IReadOnlyDictionary<ulong, string>>();
+                _countriesCache = _countriesCache ?? new Dictionary<string, IReadOnlyDictionary<ulong, string>>();
                 _countriesCache.Add(
-                    _language,
+                    CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
                     apiCountries
                         .ToDictionary(ac => ac.Code, ac => ac.Name));
             }
 
-            return _countriesCache[_language];
+            return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
         }
 
         public async Task<ProposalChart> GetProposalChartAsync()
@@ -548,7 +542,9 @@ namespace KikoleSite
             if (!string.IsNullOrWhiteSpace(authToken))
                 request.Headers.Add("AuthToken", authToken);
 
-            request.Headers.Add("Language", ((ulong)_language).ToString());
+            request.Headers.AcceptLanguage.Clear();
+            request.Headers.AcceptLanguage.Add(
+                new StringWithQualityHeaderValue(CultureInfo.CurrentCulture.TwoLetterISOLanguageName));
 
             return await _client
                 .SendAsync(request)
