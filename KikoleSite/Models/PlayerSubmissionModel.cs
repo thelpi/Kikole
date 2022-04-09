@@ -21,6 +21,8 @@ namespace KikoleSite.Models
 
         public string Clue { get; set; }
 
+        public string EasyClue { get; set; }
+
         public string Position { get; set; }
     }
 }

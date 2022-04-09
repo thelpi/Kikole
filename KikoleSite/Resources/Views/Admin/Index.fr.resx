@@ -199,4 +199,13 @@
 &lt;p&gt;Puis -{1} points chaque fois que quelqu'un trouvera votre kikolé avec un score de {2} ou supérieur.&lt;/p&gt;
 &lt;p&gt;Au minimum, vous gagnerez {3} points.&lt;/p&gt;</value>
   </data>
+  <data name="EasyClue" xml:space="preserve">
+    <value>Indice facile</value>
+  </data>
+  <data name="EasyClueEn" xml:space="preserve">
+    <value>Indice facile en anglais</value>
+  </data>
+  <data name="EasyClueFr" xml:space="preserve">
+    <value>Indice facile en français</value>
+  </data>
 </root>

@@ -108,6 +108,20 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             </div>
             <input type="text" name="ClueFr" style="width: 300px" />
         </div>
+
+        <div style="margin-top: 20px">
+            <div>
+                <label>@localizer["EasyClueEn"]</label>
+            </div>
+            <input type="text" name="EasyClueEn" style="width: 300px" />
+        </div>
+
+        <div style="margin-top: 20px">
+            <div>
+                <label>@localizer["EasyClueFr"]</label>
+            </div>
+            <input type="text" name="EasyClueFr" style="width: 300px" />
+        </div>
     }
     else
     {
@@ -116,6 +130,15 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                 <label>@localizer["Clue"]</label>
             </div>
             <input type="text" name="ClueEn" style="width: 300px" />
+            <div style="font-size: small">(@localizer["AcceptedLanguages"])</div>
+            <div style="font-size: small">(@localizer["AdminOverrideClue"])</div>
+        </div>
+
+        <div style="margin-top: 20px">
+            <div>
+                <label>@localizer["EasyClue"]</label>
+            </div>
+            <input type="text" name="EasyClueEn" style="width: 300px" />
             <div style="font-size: small">(@localizer["AcceptedLanguages"])</div>
             <div style="font-size: small">(@localizer["AdminOverrideClue"])</div>
         </div>

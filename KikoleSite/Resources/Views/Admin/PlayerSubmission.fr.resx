@@ -138,6 +138,9 @@
   <data name="CreatorLogin" xml:space="preserve">
     <value>Identifiant du créateur</value>
   </data>
+  <data name="EasyClue" xml:space="preserve">
+    <value>Indice facile</value>
+  </data>
   <data name="EnShort" xml:space="preserve">
     <value>EN</value>
   </data>

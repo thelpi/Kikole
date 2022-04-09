@@ -199,4 +199,13 @@
 &lt;p&gt;Then -{1} points every time someone finds your kikole with a score of {2} or better.&lt;/p&gt;
 &lt;p&gt;{3} points is the lowest you can have.&lt;/p&gt;</value>
   </data>
+  <data name="EasyClue" xml:space="preserve">
+    <value>Easy clue</value>
+  </data>
+  <data name="EasyClueEn" xml:space="preserve">
+    <value>English easy clue</value>
+  </data>
+  <data name="EasyClueFr" xml:space="preserve">
+    <value>French easy clue</value>
+  </data>
 </root>

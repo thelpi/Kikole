@@ -39,6 +39,10 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                 <div>@Model.SelectedPlayer.Clue</div>
             </div>
             <div style="margin-top: 10px">
+                <label>@localizer["EasyClue"]</label>
+                <div>@Model.SelectedPlayer.EasyClue</div>
+            </div>
+            <div style="margin-top: 10px">
                 <label>@localizer["Position"]</label>
                 <div>@Model.SelectedPlayer.Position</div>
             </div>
@@ -88,6 +92,13 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             </div>
             <div>
                 <input type="text" name="ClueOverwriteFr" style="width: 300px" /> (@localizer["FrShort"])
+            </div>
+            <div>@localizer["EasyClue"]</div>
+            <div>
+                <input type="text" name="EasyClueOverwriteEn" style="width: 300px" /> (@localizer["EnShort"])
+            </div>
+            <div>
+                <input type="text" name="EasyClueOverwriteFr" style="width: 300px" /> (@localizer["FrShort"])
             </div>
             <input type="submit" value="@localizer["Ok"]" name="submit-accepted" />
         </div>

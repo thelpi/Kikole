@@ -144,6 +144,9 @@
   <data name="MandatClue" xml:space="preserve">
     <value>L'indice est obligatoire</value>
   </data>
+  <data name="MandatEasyClue" xml:space="preserve">
+    <value>L'indice facile est obligatoire</value>
+  </data>
   <data name="MandatName" xml:space="preserve">
     <value>Le nom est obligatoire</value>
   </data>

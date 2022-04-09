@@ -77,6 +77,11 @@ namespace KikoleSite.Controllers
                                 { Languages.fr, model.ClueOverwriteFr }
                             },
                             ClueEditEn = model.ClueOverwriteEn,
+                            EasyClueEditLanguages = new Dictionary<Languages, string>
+                            {
+                                { Languages.fr, model.EasyClueOverwriteFr }
+                            },
+                            EasyClueEditEn = model.EasyClueOverwriteEn,
                             IsAccepted = action == "accepted",
                             PlayerId = model.SelectedId,
                             RefusalReason = model.RefusalReason
@@ -164,6 +169,13 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
+            if (string.IsNullOrWhiteSpace(model.EasyClueEn))
+            {
+                model.ErrorMessage = _localizer["MandatClue"];
+                SetPositionsOnModel(model, chart);
+                return View(model);
+            }
+
             var countries = await _apiProvider
                 .GetCountriesAsync()
                 .ConfigureAwait(false);
@@ -235,9 +247,14 @@ namespace KikoleSite.Controllers
                 AllowedNames = names,
                 Clubs = clubs,
                 ClueEn = model.ClueEn,
+                EasyClueEn = model.EasyClueEn,
                 ClueLanguages = new Dictionary<Languages, string>
                 {
                     { Languages.fr, model.ClueFr }
+                },
+                EasyClueLanguages = new Dictionary<Languages, string>
+                {
+                    { Languages.fr, model.EasyClueFr }
                 },
                 Country = countryId.ToString(),
                 Name = model.Name,
@@ -344,6 +361,7 @@ namespace KikoleSite.Controllers
                     AllowedNames = string.Join(';', p.AllowedNames),
                     Clubs = p.Clubs,
                     Clue = p.Clue,
+                    EasyClue = p.EasyClue,
                     Country = countries[p.Country],
                     Id = p.Id,
                     Login = p.Login,

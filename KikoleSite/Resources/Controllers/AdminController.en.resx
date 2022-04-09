@@ -144,6 +144,9 @@
   <data name="MandatClue" xml:space="preserve">
     <value>Clue is mandatory</value>
   </data>
+  <data name="MandatEasyClue" xml:space="preserve">
+    <value>Easy clue is mandatory</value>
+  </data>
   <data name="MandatName" xml:space="preserve">
     <value>Name is mandatory</value>
   </data>

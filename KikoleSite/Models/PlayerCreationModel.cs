@@ -64,6 +64,10 @@ namespace KikoleSite.Models
 
         public string ClueEn { get; set; }
 
+        public string EasyClueFr { get; set; }
+
+        public string EasyClueEn { get; set; }
+
         public bool DisplayPlayerSubmissionLink { get; set; }
 
         public bool HideCreator { get; set; }

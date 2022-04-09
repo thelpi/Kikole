@@ -19,6 +19,10 @@ namespace KikoleSite.Models
 
         public string ClueOverwriteFr { get; set; }
 
+        public string EasyClueOverwriteEn { get; set; }
+
+        public string EasyClueOverwriteFr { get; set; }
+
         public string RefusalReason { get; set; }
     }
 }
