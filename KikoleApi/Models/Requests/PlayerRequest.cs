@@ -46,7 +46,7 @@ namespace KikoleApi.Models.Requests
             if (!Enum.IsDefined(typeof(Positions), Position))
                 return resources.InvalidPosition;
 
-            if (YearOfBirth < 1900 || YearOfBirth > 2100)
+            if (YearOfBirth < 1850 || YearOfBirth > 2100)
                 return resources.InvalidBirthYear;
 
             if (!AllowedNames.IsValid())
