@@ -11,6 +11,7 @@ using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
@@ -22,14 +23,14 @@ namespace KikoleApi.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IClock _clock;
-        private readonly TextResources _resources;
+        private readonly IStringLocalizer<Translations> _resources;
 
         public PlayerController(IPlayerRepository playerRepository,
             IClock clock,
             IBadgeService badgeService,
             IUserRepository userRepository,
             IPlayerService playerService,
-            TextResources resources)
+            IStringLocalizer<Translations> resources)
         {
             _playerRepository = playerRepository;
             _badgeService = badgeService;
@@ -64,14 +65,14 @@ namespace KikoleApi.Controllers
             [FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             if (request == null)
-                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources["InvalidRequest"], "null"));
 
             var validityRequest = request.IsValid(_clock.Today, _resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources["InvalidRequest"], validityRequest));
 
             var playerId = await _playerService
                 .CreatePlayerAsync(request, userId)
@@ -124,21 +125,21 @@ namespace KikoleApi.Controllers
             [FromBody] PlayerSubmissionValidationRequest request)
         {
             if (request == null)
-                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources["InvalidRequest"], "null"));
 
             var validityCheck = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityCheck))
-                return BadRequest(string.Format(_resources.InvalidRequest, validityCheck));
+                return BadRequest(string.Format(_resources["InvalidRequest"], validityCheck));
 
             var p = await _playerRepository
                 .GetPlayerByIdAsync(request.PlayerId)
                 .ConfigureAwait(false);
 
             if (p == null)
-                return NotFound(_resources.PlayerDoesNotExist);
+                return NotFound(_resources["PlayerDoesNotExist"]);
 
             if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
-                return Conflict(_resources.RejectAndProposalDateCombined);
+                return Conflict(_resources["RejectAndProposalDateCombined"]);
 
             if (request.IsAccepted)
             {

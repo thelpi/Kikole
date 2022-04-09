@@ -10,6 +10,7 @@ using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
@@ -20,13 +21,13 @@ namespace KikoleApi.Controllers
         private readonly ILeaderRepository _leaderRepository;
         private readonly IBadgeService _badgeService;
         private readonly IClock _clock;
-        private readonly TextResources _resources;
+        private readonly IStringLocalizer<Translations> _resources;
 
         public ProposalController(IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
             IBadgeService badgeService,
             IPlayerService playerService,
-            TextResources resources,
+            IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
@@ -130,7 +131,7 @@ namespace KikoleApi.Controllers
             [FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var datas = await _proposalRepository
                 .GetProposalsAsync(proposalDate, userId)
@@ -151,18 +152,18 @@ namespace KikoleApi.Controllers
             where T : BaseProposalRequest
         {
             if (request == null)
-                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources["InvalidRequest"], "null"));
 
             var validityRequest = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources["InvalidRequest"], validityRequest));
 
             var firstDate = await _playerService
                 .GetFirstSubmittedPlayerDateAsync()
                 .ConfigureAwait(false);
 
             if (request.PlayerSubmissionDate.Date < firstDate.Date || request.PlayerSubmissionDate.Date > _clock.Today)
-                return BadRequest(_resources.InvalidDate);
+                return BadRequest(_resources["InvalidDate"]);
 
             var pInfo = await _playerService
                 .GetPlayerInfoAsync(request.PlayerSubmissionDate)

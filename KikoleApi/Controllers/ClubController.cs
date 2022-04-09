@@ -8,6 +8,7 @@ using KikoleApi.Models;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
@@ -15,10 +16,10 @@ namespace KikoleApi.Controllers
     public class ClubController : KikoleBaseController
     {
         private readonly IClubRepository _clubRepository;
-        private readonly TextResources _resources;
+        private readonly IStringLocalizer<Translations> _resources;
 
         public ClubController(IClubRepository clubRepository,
-            TextResources resources)
+            IStringLocalizer<Translations> resources)
         {
             _clubRepository = clubRepository;
             _resources = resources;
@@ -46,18 +47,18 @@ namespace KikoleApi.Controllers
         public async Task<IActionResult> CreateClubAsync([FromBody] ClubRequest request)
         {
             if (request == null)
-                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources["InvalidRequest"], "null"));
 
             var validityRequest = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources["InvalidRequest"], validityRequest));
 
             var playerId = await _clubRepository
                 .CreateClubAsync(request.ToDto())
                 .ConfigureAwait(false);
 
             if (playerId == 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.ClubCreationFailure);
+                return StatusCode((int)HttpStatusCode.InternalServerError, _resources["ClubCreationFailure"]);
             
             return Created($"clubs/{playerId}", null);
         }

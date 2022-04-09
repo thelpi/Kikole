@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models.Requests
 {
@@ -16,15 +17,15 @@ namespace KikoleApi.Models.Requests
 
         internal abstract ProposalTypes ProposalType { get; }
 
-        internal virtual string GetTip(PlayerDto player, TextResources resources)
+        internal virtual string GetTip(PlayerDto player, IStringLocalizer resources)
         {
             return null;
         }
 
-        internal virtual string IsValid(TextResources resources)
+        internal virtual string IsValid(IStringLocalizer resources)
         {
             if (string.IsNullOrWhiteSpace(Value))
-                return resources.InvalidValue;
+                return resources["InvalidValue"];
 
             return null;
         }

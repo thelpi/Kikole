@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using KikoleApi.Models.Enums;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models.Requests
 {
@@ -20,23 +21,23 @@ namespace KikoleApi.Models.Requests
 
         public string RefusalReason { get; set; }
 
-        internal string IsValid(TextResources resources)
+        internal string IsValid(IStringLocalizer resources)
         {
             if (PlayerId == 0)
-                return resources.InvalidPlayerId;
+                return resources["InvalidPlayerId"];
 
             if (!IsAccepted && string.IsNullOrWhiteSpace(RefusalReason))
-                return resources.RefusalWithoutReason;
+                return resources["RefusalWithoutReason"];
 
             if (IsAccepted)
             {
                 if (ClueEditLanguages?.ContainsKey("fr") != true
                     || ClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
-                    return resources.InvalidClue;
+                    return resources["InvalidClue"];
 
                 if (EasyClueEditLanguages?.ContainsKey("fr") != true
                     || EasyClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
-                    return resources.InvalidClue;
+                    return resources["InvalidClue"];
             }
 
             return null;

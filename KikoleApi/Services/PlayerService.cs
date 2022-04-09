@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
+using Microsoft.AspNetCore.Http;
 
 namespace KikoleApi.Services
 {
@@ -13,17 +15,17 @@ namespace KikoleApi.Services
     {
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
-        private readonly TextResources _resources;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
 
         public PlayerService(IPlayerRepository playerRepository,
             IClubRepository clubRepository,
-            TextResources resources,
+            IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
-            _resources = resources;
+            _httpContextAccessor = httpContextAccessor;
             _clock = clock;
         }
 
@@ -107,10 +109,12 @@ namespace KikoleApi.Services
             var clue = isEasy
                 ? player.EasyClue
                 : player.Clue;
-            if (_resources.Language != Languages.en)
+
+            var lng = _httpContextAccessor.ExtractLanguage();
+            if (lng != Languages.en)
             {
                 clue = await _playerRepository
-                    .GetClueAsync(player.Id, (byte)(isEasy ? 1 : 0), (ulong)_resources.Language)
+                    .GetClueAsync(player.Id, (byte)(isEasy ? 1 : 0), (ulong)lng)
                     .ConfigureAwait(false);
             }
 

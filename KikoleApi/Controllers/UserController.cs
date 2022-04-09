@@ -11,6 +11,7 @@ using KikoleApi.Models;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
@@ -19,11 +20,11 @@ namespace KikoleApi.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly ICrypter _crypter;
-        private readonly TextResources _resources;
+        private readonly IStringLocalizer<Translations> _resources;
 
         public UserController(IUserRepository userRepository,
             ICrypter crypter,
-            TextResources resources)
+            IStringLocalizer<Translations> resources)
         {
             _userRepository = userRepository;
             _crypter = crypter;
@@ -70,25 +71,25 @@ namespace KikoleApi.Controllers
         public async Task<IActionResult> CreateUserAsync([FromBody] UserRequest request)
         {
             if (request == null)
-                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources["InvalidRequest"], "null"));
 
             var validityRequest = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources["InvalidRequest"], validityRequest));
             
             var existingUser = await _userRepository
                 .GetUserByLoginAsync(request.Login.Sanitize())
                 .ConfigureAwait(false);
 
             if (existingUser != null)
-                return Conflict(_resources.AlreadyExistsAccount);
+                return Conflict(_resources["AlreadyExistsAccount"]);
 
             var userId = await _userRepository
                 .CreateUserAsync(request.ToDto(_crypter))
                 .ConfigureAwait(false);
 
             if (userId == 0)
-                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.UserCreationFailure);
+                return StatusCode((int)HttpStatusCode.InternalServerError, _resources["UserCreationFailure"]);
 
             return Created($"users/{userId}", null);
         }
@@ -104,20 +105,20 @@ namespace KikoleApi.Controllers
             [FromQuery][Required] string password)
         {
             if (string.IsNullOrWhiteSpace(login))
-                return BadRequest(_resources.InvalidLogin);
+                return BadRequest(_resources["InvalidLogin"]);
 
             if (string.IsNullOrWhiteSpace(password))
-                return BadRequest(_resources.InvalidPassword);
+                return BadRequest(_resources["InvalidPassword"]);
 
             var existingUser = await _userRepository
                 .GetUserByLoginAsync(login.Sanitize())
                 .ConfigureAwait(false);
 
             if (existingUser == null)
-                return NotFound(_resources.UserDoesNotExist);
+                return NotFound(_resources["UserDoesNotExist"]);
 
             if (!_crypter.Encrypt(password).Equals(existingUser.Password))
-                return StatusCode((int)HttpStatusCode.Unauthorized, _resources.PasswordDoesNotMatch);
+                return StatusCode((int)HttpStatusCode.Unauthorized, _resources["PasswordDoesNotMatch"]);
 
             var value = $"{existingUser.Id}_{existingUser.UserTypeId}";
 
@@ -135,17 +136,17 @@ namespace KikoleApi.Controllers
             [FromQuery] string oldp, [FromQuery] string newp)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             if (string.IsNullOrWhiteSpace(oldp) || string.IsNullOrWhiteSpace(newp))
-                return BadRequest(_resources.InvalidPassword);
+                return BadRequest(_resources["InvalidPassword"]);
 
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
             if (user == null)
-                return NotFound(_resources.UserDoesNotExist);
+                return NotFound(_resources["UserDoesNotExist"]);
 
             var success = await _userRepository
                 .ResetUserKnownPasswordAsync(
@@ -155,7 +156,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             if (!success)
-                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.ResetPasswordError);
+                return StatusCode((int)HttpStatusCode.InternalServerError, _resources["ResetPasswordError"]);
 
             return NoContent();
         }
@@ -170,11 +171,11 @@ namespace KikoleApi.Controllers
             [FromQuery] string answer)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             if (string.IsNullOrWhiteSpace(question)
                 || string.IsNullOrWhiteSpace(answer))
-                return BadRequest(_resources.InvalidQOrA);
+                return BadRequest(_resources["InvalidQOrA"]);
 
             await _userRepository
                 .ResetUserQAndAAsync(userId, question, _crypter.Encrypt(answer))
@@ -192,13 +193,13 @@ namespace KikoleApi.Controllers
             [FromQuery] string answer, [FromQuery] string newPassword)
         {
             if (string.IsNullOrWhiteSpace(login))
-                return BadRequest(_resources.InvalidLogin);
+                return BadRequest(_resources["InvalidLogin"]);
 
             if (string.IsNullOrWhiteSpace(answer))
-                return BadRequest(_resources.InvalidQOrA);
+                return BadRequest(_resources["InvalidQOrA"]);
 
             if (string.IsNullOrWhiteSpace(newPassword))
-                return BadRequest(_resources.InvalidPassword);
+                return BadRequest(_resources["InvalidPassword"]);
 
             var response = await _userRepository
                 .ResetUserUnknownPasswordAsync(
@@ -208,7 +209,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             if (!response)
-                return StatusCode((int)HttpStatusCode.InternalServerError, _resources.ResetPasswordError);
+                return StatusCode((int)HttpStatusCode.InternalServerError, _resources["ResetPasswordError"]);
 
             return NoContent();
         }
@@ -225,7 +226,7 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             if (user == null)
-                return NotFound(_resources.UserDoesNotExist);
+                return NotFound(_resources["UserDoesNotExist"]);
 
             return Ok((UserTypes)user.UserTypeId);
         }
@@ -238,14 +239,14 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<string>> GetLoginQuestionAsync([FromRoute] string login)
         {
             if (string.IsNullOrWhiteSpace(login))
-                return BadRequest(_resources.InvalidLogin);
+                return BadRequest(_resources["InvalidLogin"]);
 
             var user = await _userRepository
                 .GetUserByLoginAsync(login)
                 .ConfigureAwait(false);
 
             if (user == null)
-                return NotFound(_resources.UserDoesNotExist);
+                return NotFound(_resources["UserDoesNotExist"]);
 
             return Ok(user.PasswordResetQuestion);
         }

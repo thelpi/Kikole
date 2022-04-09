@@ -5,6 +5,7 @@ using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models
 {
@@ -93,7 +94,7 @@ namespace KikoleApi.Models
                 : ProposalChart.Default.ProposalTypesCost[ProposalType];
         }
 
-        internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, TextResources resources)
+        internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
             : this(request.ProposalType, request.Value, null, player)
         {
             Tip = request.GetTip(player.Player, resources);

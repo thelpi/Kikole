@@ -3,8 +3,10 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleApi.Controllers
@@ -14,17 +16,17 @@ namespace KikoleApi.Controllers
         private readonly IInternationalRepository _internationalRepository;
         private readonly IMessageRepository _messageRepository;
         private readonly IClock _clock;
-        private readonly TextResources _resources;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public SiteController(IInternationalRepository internationalRepository,
             IMessageRepository messageRepository,
-            TextResources resources,
+            IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _internationalRepository = internationalRepository;
             _messageRepository = messageRepository;
             _clock = clock;
-            _resources = resources;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("countries")]
@@ -33,7 +35,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Country>>> GetCountriesAsync()
         {
             var countries = await _internationalRepository
-                .GetCountriesAsync((ulong)_resources.Language)
+                .GetCountriesAsync((ulong)(_httpContextAccessor.ExtractLanguage()))
                 .ConfigureAwait(false);
 
             return Ok(countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList());

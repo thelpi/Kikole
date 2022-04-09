@@ -9,6 +9,7 @@ using KikoleApi.Models;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
@@ -19,7 +20,7 @@ namespace KikoleApi.Controllers
         private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerService _playerService;
         private readonly IBadgeService _badgeService;
-        private readonly TextResources _resources;
+        private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
 
         public ChallengeController(IChallengeRepository challengeRepository,
@@ -27,7 +28,7 @@ namespace KikoleApi.Controllers
             ILeaderRepository leaderRepository,
             IBadgeService badgeService,
             IPlayerService playerService,
-            TextResources resources,
+            IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _challengeRepository = challengeRepository;
@@ -49,44 +50,44 @@ namespace KikoleApi.Controllers
             [FromBody] ChallengeRequest request, [FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             if (request == null)
-                return BadRequest(string.Format(_resources.InvalidRequest, "null"));
+                return BadRequest(string.Format(_resources["InvalidRequest"], "null"));
 
             var validityRequest = request.IsValid(_resources);
             if (!string.IsNullOrWhiteSpace(validityRequest))
-                return BadRequest(string.Format(_resources.InvalidRequest, validityRequest));
+                return BadRequest(string.Format(_resources["InvalidRequest"], validityRequest));
 
             if (request.GuestUserId == userId)
-                return Conflict(_resources.CantChallengeYourself);
+                return Conflict(_resources["CantChallengeYourself"]);
 
             var hostUser = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
             if (hostUser == null)
-                return BadRequest(_resources.ChallengeHostIsInvalid);
+                return BadRequest(_resources["ChallengeHostIsInvalid"]);
 
             if (hostUser.UserTypeId == (ulong)UserTypes.Administrator)
-                return Conflict(_resources.ChallengeCreatorIsAdmin);
+                return Conflict(_resources["ChallengeCreatorIsAdmin"]);
 
             var guestUser = await _userRepository
                 .GetUserByIdAsync(request.GuestUserId)
                 .ConfigureAwait(false);
 
             if (hostUser == null)
-                return Conflict(_resources.ChallengeOpponentIsInvalid);
+                return Conflict(_resources["ChallengeOpponentIsInvalid"]);
 
             if (hostUser.UserTypeId == (ulong)UserTypes.Administrator)
-                return Conflict(_resources.ChallengeOpponentIsAdmin);
+                return Conflict(_resources["ChallengeOpponentIsAdmin"]);
 
             var challengeAlready = await _challengeRepository
                 .GetUsersFutureChallengesAsync(userId, request.GuestUserId)
                 .ConfigureAwait(false);
 
             if (challengeAlready.Count > 0)
-                return Conflict(_resources.ChallengeAlreadyExist);
+                return Conflict(_resources["ChallengeAlreadyExist"]);
 
             var challengeId = await _challengeRepository
                 .CreateChallengeAsync(request.ToDto(userId))
@@ -109,31 +110,31 @@ namespace KikoleApi.Controllers
             [FromQuery] bool isAccepted)
         {
             if (id == 0)
-                return BadRequest(_resources.InvalidChallengeId);
+                return BadRequest(_resources["InvalidChallengeId"]);
 
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var challenge = await _challengeRepository
                 .GetChallengeByIdAsync(id)
                 .ConfigureAwait(false);
 
             if (challenge == null)
-                return NotFound(_resources.ChallengeNotFound);
+                return NotFound(_resources["ChallengeNotFound"]);
 
             var isCancel = challenge.HostUserId == userId;
 
             if (!isCancel && challenge.GuestUserId != userId)
-                return Forbid(_resources.CantAutoAcceptChallenge);
+                return Forbid(_resources["CantAutoAcceptChallenge"]);
 
             if (isCancel && isAccepted)
-                return Forbid(_resources.BothAcceptedAndCancelledChallenge);
+                return Forbid(_resources["BothAcceptedAndCancelledChallenge"]);
 
             if (isCancel && challenge.IsAccepted.HasValue)
-                return Conflict(_resources.ChallengeAlreadyAccepted);
+                return Conflict(_resources["ChallengeAlreadyAccepted"]);
 
             if (!isCancel && challenge.IsAccepted.HasValue)
-                return Conflict(_resources.ChallengeAlreadyAnswered);
+                return Conflict(_resources["ChallengeAlreadyAnswered"]);
 
             var hostUser = await _userRepository
                 .GetUserByIdAsync(challenge.HostUserId)
@@ -147,7 +148,7 @@ namespace KikoleApi.Controllers
                    .ConfigureAwait(false);
 
                 return hostUser == null
-                    ? Conflict(_resources.InvalidOpponentAccount)
+                    ? Conflict(_resources["InvalidOpponentAccount"])
                     : (IActionResult)NoContent();
             }
 
@@ -182,7 +183,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetChallengesWaitingForResponseAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var dtos = await _challengeRepository
                 .GetPendingChallengesByGuestUserAsync(userId)
@@ -209,7 +210,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetRequestedChallengesAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var dtos = await _challengeRepository
                 .GetPendingChallengesByHostUserAsync(userId)
@@ -236,7 +237,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<Challenge>>> GetAcceptedChallengeAsync([FromQuery] ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var dtos = await _challengeRepository
                 .GetAcceptedChallengesAsync(_clock.Now, null)
@@ -272,21 +273,21 @@ namespace KikoleApi.Controllers
             [FromQuery] DateTime? toDate)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var debut = await _playerService
                 .GetFirstSubmittedPlayerDateAsync()
                 .ConfigureAwait(false);
 
             if (fromDate.HasValue && fromDate.Value.Date < debut.Date)
-                return BadRequest(_resources.InvalidDateRange);
+                return BadRequest(_resources["InvalidDateRange"]);
 
             var yesterday = _clock.Now.AddDays(-1).Date;
             if (toDate.HasValue && toDate.Value.Date < yesterday)
-                return BadRequest(_resources.InvalidDateRange);
+                return BadRequest(_resources["InvalidDateRange"]);
 
             if (toDate.HasValue && fromDate.HasValue && toDate.Value.Date < fromDate.Value.Date)
-                return BadRequest(_resources.InvalidDateRange);
+                return BadRequest(_resources["InvalidDateRange"]);
 
             var dateBeginOk = fromDate?.Date ?? debut.Date;
             var dateEndOk = toDate?.Date ?? yesterday;

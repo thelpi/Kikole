@@ -1,4 +1,6 @@
-﻿using KikoleApi.Controllers.Filters;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Repositories;
@@ -28,7 +30,6 @@ namespace KikoleApi.Bootstrap
                 {
                     options.Filters.Add<AuthorizationFilter>();
                     options.Filters.Add<ControllerErrorFilter>();
-                    options.Filters.Add<LanguageFilter>();
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -54,8 +55,8 @@ namespace KikoleApi.Bootstrap
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
-                .AddScoped<TextResources>()
-                .AddHttpContextAccessor();
+                .AddHttpContextAccessor()
+                .AddLocalization(options => options.ResourcesPath = "Resources");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -83,6 +84,17 @@ namespace KikoleApi.Bootstrap
             app.UseHttpsRedirection();
             
             app.UseMvc();
+
+            var cultures = new List<CultureInfo> {
+                new CultureInfo("en"),
+                new CultureInfo("fr")
+            };
+
+            app.UseRequestLocalization(options => {
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
+                options.SupportedCultures = cultures;
+                options.SupportedUICultures = cultures;
+            });
         }
     }
 }

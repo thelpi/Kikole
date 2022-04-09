@@ -3,6 +3,7 @@ using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models.Requests
 {
@@ -18,16 +19,16 @@ namespace KikoleApi.Models.Requests
 
         public Languages? Language { get; set; }
 
-        internal string IsValid(TextResources resources)
+        internal string IsValid(IStringLocalizer resources)
         {
             if (string.IsNullOrWhiteSpace(Login))
-                return resources.InvalidLogin;
+                return resources["InvalidLogin"];
 
             if (string.IsNullOrWhiteSpace(Password))
-                return resources.InvalidPassword;
+                return resources["InvalidPassword"];
 
             if (Language.HasValue && !Enum.IsDefined(typeof(Languages), Language.Value))
-                return resources.InvalidLanguage;
+                return resources["InvalidLanguage"];
 
             return null;
         }

@@ -1,5 +1,6 @@
 ﻿using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models.Requests
 {
@@ -7,20 +8,20 @@ namespace KikoleApi.Models.Requests
     {
         internal override ProposalTypes ProposalType => ProposalTypes.Year;
 
-        internal override string GetTip(PlayerDto player, TextResources resources)
+        internal override string GetTip(PlayerDto player, IStringLocalizer resources)
         {
             return ushort.Parse(Value) > player.YearOfBirth
-                ? resources.TipOlderPlayer
-                : resources.TipYoungerPlayer;
+                ? resources["TipOlderPlayer"]
+                : resources["TipYoungerPlayer"];
         }
 
-        internal override string IsValid(TextResources resources)
+        internal override string IsValid(IStringLocalizer resources)
         {
             if (Value == null)
-                return resources.InvalidValue;
+                return resources["InvalidValue"];
 
             if (!ushort.TryParse(Value, out _))
-                return resources.InvalidValue;
+                return resources["InvalidValue"];
 
             return null;
         }

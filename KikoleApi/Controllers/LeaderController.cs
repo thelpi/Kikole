@@ -10,6 +10,7 @@ using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
@@ -21,7 +22,7 @@ namespace KikoleApi.Controllers
         private readonly IPlayerRepository _playerRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
-        private readonly TextResources _resources;
+        private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
 
         public LeaderController(ILeaderRepository leaderRepository,
@@ -30,7 +31,7 @@ namespace KikoleApi.Controllers
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
             IBadgeService badgeService,
-            TextResources resources,
+            IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _leaderRepository = leaderRepository;
@@ -63,7 +64,7 @@ namespace KikoleApi.Controllers
             [FromQuery] DateTime day, [FromQuery] LeaderSorts sort)
         {
             if (sort == LeaderSorts.SuccessCount)
-                return BadRequest(_resources.SuccessCountSortForbidden);
+                return BadRequest(_resources["SuccessCountSortForbidden"]);
 
             var pDay = await _playerRepository
                 .GetPlayerOfTheDayAsync(day)
@@ -99,10 +100,10 @@ namespace KikoleApi.Controllers
             [FromQuery] bool includePvp)
         {
             if (!includePvp && !Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                return BadRequest(_resources.InvalidSortType);
+                return BadRequest(_resources["InvalidSortType"]);
 
             if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
-                return BadRequest(_resources.InvalidDateRange);
+                return BadRequest(_resources["InvalidDateRange"]);
 
             var leaderDtos = await _leaderRepository
                 .GetLeadersAsync(minimalDate, maximalDate)
@@ -201,14 +202,14 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<UserStat>> GetUserStatsAsync(ulong userId)
         {
             if (userId == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
             if (user == null)
-                return NotFound(_resources.UserDoesNotExist);
+                return NotFound(_resources["UserDoesNotExist"]);
 
             var stats = new List<DailyUserStat>();
 
@@ -268,7 +269,7 @@ namespace KikoleApi.Controllers
             [FromRoute] ulong id, [FromQuery] ulong userId)
         {
             if (id == 0)
-                return BadRequest(_resources.InvalidUser);
+                return BadRequest(_resources["InvalidUser"]);
 
             var isAllowedToSeeHiddenBadge = userId == id;
             if (userId > 0 && userId != id)

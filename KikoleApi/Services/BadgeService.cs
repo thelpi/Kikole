@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
+using Microsoft.AspNetCore.Http;
 
 namespace KikoleApi.Services
 {
@@ -19,7 +21,7 @@ namespace KikoleApi.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly IChallengeRepository _challengeRepository;
-        private readonly TextResources _resources;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
 
         private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
@@ -204,7 +206,7 @@ namespace KikoleApi.Services
             IPlayerRepository playerRepository,
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
-            TextResources resources,
+            IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _badgeRepository = badgeRepository;
@@ -212,7 +214,7 @@ namespace KikoleApi.Services
             _playerRepository = playerRepository;
             _proposalRepository = proposalRepository;
             _challengeRepository = challengeRepository;
-            _resources = resources;
+            _httpContextAccessor = httpContextAccessor;
             _clock = clock;
         }
 
@@ -698,10 +700,12 @@ namespace KikoleApi.Services
             IReadOnlyCollection<BadgeDto> badgesDto)
         {
             string description = null;
-            if (_resources.Language != Languages.en)
+
+            var lng = _httpContextAccessor.ExtractLanguage();
+            if (lng != Languages.en)
             {
                 description = await _badgeRepository
-                    .GetBadgeDescriptionAsync((ulong)badge, (ulong)_resources.Language)
+                    .GetBadgeDescriptionAsync((ulong)badge, (ulong)lng)
                     .ConfigureAwait(false);
             }
 

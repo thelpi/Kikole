@@ -4,6 +4,7 @@ using System.Linq;
 using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models.Requests
 {
@@ -35,34 +36,34 @@ namespace KikoleApi.Models.Requests
 
         public bool HideCreator { get; set; }
 
-        internal string IsValid(DateTime today, TextResources resources)
+        internal string IsValid(DateTime today, IStringLocalizer resources)
         {
             if (string.IsNullOrWhiteSpace(Name))
-                return resources.InvalidName;
+                return resources["InvalidName"];
 
             if (!Enum.IsDefined(typeof(Countries), Country))
-                return resources.InvalidCountry;
+                return resources["InvalidCountry"];
 
             if (!Enum.IsDefined(typeof(Positions), Position))
-                return resources.InvalidPosition;
+                return resources["InvalidPosition"];
 
             if (YearOfBirth < 1850 || YearOfBirth > 2100)
-                return resources.InvalidBirthYear;
+                return resources["InvalidBirthYear"];
 
             if (!AllowedNames.IsValid())
-                return resources.InvalidAllowedNames;
+                return resources["InvalidAllowedNames"];
 
             if (Clubs == null || Clubs.Count == 0)
-                return resources.EmptyClubsList;
+                return resources["EmptyClubsList"];
 
             if (Clubs.Any(c => c <= 0))
-                return resources.InvalidClubs;
+                return resources["InvalidClubs"];
 
             if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
-                return resources.InvalidClue;
+                return resources["InvalidClue"];
 
             if (ProposalDate.HasValue && ProposalDate.Value.Date < today)
-                return resources.InvalidProposalDate;
+                return resources["InvalidProposalDate"];
 
             return null;
         }
