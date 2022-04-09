@@ -24,6 +24,7 @@ namespace KikoleApi.Repositories
                     ("proposal_date", player.ProposalDate),
                     ("creation_date", Clock.Now),
                     ("clue", player.Clue),
+                    ("easy_clue", player.EasyClue),
                     ("position_id", player.PositionId),
                     ("creation_user_id", player.CreationUserId),
                     ("hide_creator", player.HideCreator))
@@ -109,22 +110,23 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, DateTime date)
+        public async Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, string easyClueEn, DateTime date)
         {
             await ExecuteNonQueryAsync(
                     "UPDATE players " +
-                    "SET proposal_date = @date, clue = @clueEn " +
+                    "SET proposal_date = @date, clue = @clueEn, easy_clue = @easyClueEn " +
                     "WHERE id = @playerId",
                     new
                     {
                         playerId,
                         clueEn,
-                        date.Date
+                        date.Date,
+                        easyClueEn
                     })
                 .ConfigureAwait(false);
         }
 
-        public async Task InsertPlayerCluesByLanguageAsync(ulong playerId, IReadOnlyDictionary<ulong, string> cluesByLanguage)
+        public async Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage)
         {
             foreach (var languageId in cluesByLanguage.Keys)
             {
@@ -155,13 +157,14 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<string> GetClueAsync(ulong playerId, ulong languageId)
+        public async Task<string> GetClueAsync(ulong playerId, byte isEasy, ulong languageId)
         {
             return await ExecuteScalarAsync<string>(
                     "SELECT clue FROM player_clue_translations " +
                     "WHERE player_id = @playerId " +
-                    "AND language_id = @languageId",
-                    new { playerId, languageId })
+                    "AND language_id = @languageId " +
+                    "AND is_easy = @isEasy",
+                    new { playerId, languageId, isEasy })
                 .ConfigureAwait(false);
         }
 

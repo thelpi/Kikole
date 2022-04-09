@@ -42,10 +42,12 @@ namespace KikoleApi.Controllers
         [HttpGet("/player-clues")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<string>> GetPlayerOfTheDayClueAsync([FromQuery][Required] DateTime proposalDate)
+        public async Task<ActionResult<string>> GetPlayerOfTheDayClueAsync(
+            [FromQuery][Required] DateTime proposalDate,
+            [FromQuery] bool isEasy)
         {
             var clue = await _playerService
-                .GetPlayerClueAsync(proposalDate)
+                .GetPlayerClueAsync(proposalDate, isEasy)
                 .ConfigureAwait(false);
 
             return Ok(clue);
@@ -141,7 +143,7 @@ namespace KikoleApi.Controllers
             if (request.IsAccepted)
             {
                 await _playerService
-                    .AcceptSubmittedPlayerAsync(request, p.Clue)
+                    .AcceptSubmittedPlayerAsync(request, p.Clue, p.EasyClue)
                     .ConfigureAwait(false);
 
                 var added = await _badgeService

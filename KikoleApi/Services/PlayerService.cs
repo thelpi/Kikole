@@ -79,23 +79,13 @@ namespace KikoleApi.Services
                 .CreatePlayerAsync(request.ToDto(userId))
                 .ConfigureAwait(false);
 
-            var languagesClues = new Dictionary<ulong, string>();
-            if (request.ClueLanguages != null)
-            {
-                foreach (var kvp in request.ClueLanguages)
-                {
-                    var actualValue = kvp.Value?.Trim();
-                    if (!string.IsNullOrWhiteSpace(actualValue))
-                        languagesClues.Add((ulong)kvp.Key, actualValue);
-                }
-            }
+            await InsertLanguageCluesAsync(
+                    request.ClueLanguages, playerId, false)
+                .ConfigureAwait(false);
 
-            if (languagesClues.Count > 0)
-            {
-                await _playerRepository
-                    .InsertPlayerCluesByLanguageAsync(playerId, languagesClues)
-                    .ConfigureAwait(false);
-            }
+            await InsertLanguageCluesAsync(
+                    request.EasyClueLanguages, playerId, true)
+                .ConfigureAwait(false);
 
             foreach (var club in request.ToPlayerClubDtos(playerId))
             {
@@ -108,17 +98,19 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<string> GetPlayerClueAsync(DateTime proposalDate)
+        public async Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy)
         {
             var player = await _playerRepository
                 .GetPlayerOfTheDayAsync(proposalDate)
                 .ConfigureAwait(false);
 
-            var clue = player.Clue;
+            var clue = isEasy
+                ? player.EasyClue
+                : player.Clue;
             if (_resources.Language != Languages.en)
             {
                 clue = await _playerRepository
-                    .GetClueAsync(player.Id, (ulong)_resources.Language)
+                    .GetClueAsync(player.Id, (byte)(isEasy ? 1 : 0), (ulong)_resources.Language)
                     .ConfigureAwait(false);
             }
 
@@ -126,24 +118,29 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task AcceptSubmittedPlayerAsync(PlayerSubmissionValidationRequest request, string currentClue)
+        public async Task AcceptSubmittedPlayerAsync(PlayerSubmissionValidationRequest request,
+            string currentClue, string currentEasyClue)
         {
             var clueEn = string.IsNullOrWhiteSpace(request.ClueEditEn)
                 ? currentClue
                 : request.ClueEditEn.Trim();
 
+            var easyClueEn = string.IsNullOrWhiteSpace(request.EasyClueEditEn)
+                ? currentEasyClue
+                : request.EasyClueEditEn.Trim();
+
             var latestDate = await GetNextDateAsync().ConfigureAwait(false);
 
             await _playerRepository
-                .ValidatePlayerProposalAsync(request.PlayerId, clueEn, latestDate)
+                .ValidatePlayerProposalAsync(request.PlayerId, clueEn, easyClueEn, latestDate)
                 .ConfigureAwait(false);
 
-            var languagesClues = new Dictionary<ulong, string>();
-            foreach (var kvp in request.ClueEditLangugages)
-                languagesClues.Add((ulong)kvp.Key, kvp.Value.Trim());
+            await InsertLanguageCluesAsync(
+                    request.ClueEditLanguages, request.PlayerId, false)
+                .ConfigureAwait(false);
 
-            await _playerRepository
-                .InsertPlayerCluesByLanguageAsync(request.PlayerId, languagesClues)
+            await InsertLanguageCluesAsync(
+                    request.EasyClueEditLanguages, request.PlayerId, true)
                 .ConfigureAwait(false);
         }
 
@@ -178,6 +175,22 @@ namespace KikoleApi.Services
                 .ConfigureAwait(false);
 
             return latestDate.AddDays(1).Date;
+        }
+
+        private async Task InsertLanguageCluesAsync(IReadOnlyDictionary<Languages, string> clues,
+            ulong playerId, bool isEasy)
+        {
+            var languagesClues = clues?
+                .Where(_ => !string.IsNullOrWhiteSpace(_.Value))
+                .ToDictionary(_ => (ulong)_.Key, _ => _.Value.Trim())
+                ?? new Dictionary<ulong, string>();
+
+            if (languagesClues.Count > 0)
+            {
+                await _playerRepository
+                    .InsertPlayerCluesByLanguageAsync(playerId, (byte)(isEasy ? 1 : 0), languagesClues)
+                    .ConfigureAwait(false);
+            }
         }
     }
 }

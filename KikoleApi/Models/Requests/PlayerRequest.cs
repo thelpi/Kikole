@@ -23,7 +23,11 @@ namespace KikoleApi.Models.Requests
 
         public string ClueEn { get; set; }
 
+        public string EasyClueEn { get; set; }
+
         public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; }
+
+        public IReadOnlyDictionary<Languages, string> EasyClueLanguages { get; set; }
 
         public Positions Position { get; set; }
 
@@ -54,7 +58,7 @@ namespace KikoleApi.Models.Requests
             if (Clubs.Any(c => c <= 0))
                 return resources.InvalidClubs;
 
-            if (string.IsNullOrWhiteSpace(ClueEn))
+            if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
                 return resources.InvalidClue;
 
             if (ProposalDate.HasValue && ProposalDate.Value.Date < today)
@@ -73,6 +77,7 @@ namespace KikoleApi.Models.Requests
                 YearOfBirth = YearOfBirth,
                 AllowedNames = AllowedNames.SanitizeJoin(Name),
                 Clue = ClueEn,
+                EasyClue = EasyClueEn,
                 PositionId = (ulong)Position,
                 CreationUserId = userId,
                 HideCreator = (byte)(HideCreator ? 1 : 0)

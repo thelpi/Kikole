@@ -40,16 +40,18 @@ namespace KikoleApi.Interfaces
         /// Gets the club, in the proper language related to the player at the specified date.
         /// </summary>
         /// <param name="proposalDate">Date of player proposal.</param>
+        /// <param name="isEasy"><c>True</c> to get easy clue; otherwise normal clue.</param>
         /// <returns>Clue.</returns>
-        Task<string> GetPlayerClueAsync(DateTime proposalDate);
+        Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy);
 
         /// <summary>
         /// Accepts a player submission.
         /// </summary>
         /// <param name="request">The submittion request.</param>
         /// <param name="currentClue">The current clue on the player (en).</param>
+        /// <param name="currentEasyClue">The current easy clue on the player (en).</param>
         /// <returns>Nothing.</returns>
-        Task AcceptSubmittedPlayerAsync(PlayerSubmissionValidationRequest request, string currentClue);
+        Task AcceptSubmittedPlayerAsync(PlayerSubmissionValidationRequest request, string currentClue, string currentEasyClue);
 
         /// <summary>
         /// Computes a challenge date by checking player submissions by host and guest.

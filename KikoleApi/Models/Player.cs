@@ -23,6 +23,8 @@ namespace KikoleApi.Models
 
         public string Clue { get; }
 
+        public string EasyClue { get; }
+
         public Badges? Badge { get; }
 
         public Positions Position { get; }
@@ -41,6 +43,7 @@ namespace KikoleApi.Models
                 .Select(c => new PlayerClub(c, p.PlayerClubs))
                 .ToList();
             Clue = p.Player.Clue;
+            EasyClue = p.Player.EasyClue;
             Country = (Countries)p.Player.CountryId;
             Position = (Positions)p.Player.PositionId;
             YearOfBirth = p.Player.YearOfBirth;

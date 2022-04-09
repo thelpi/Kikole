@@ -25,15 +25,15 @@ namespace KikoleApi.Interfaces
 
         Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId);
 
-        Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, DateTime date);
+        Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, string easyClueEn, DateTime date);
 
-        Task InsertPlayerCluesByLanguageAsync(ulong playerId, IReadOnlyDictionary<ulong, string> cluesByLanguage);
+        Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage);
 
         Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync();
 
         Task RefusePlayerProposalAsync(ulong playerId);
 
-        Task<string> GetClueAsync(ulong playerId, ulong languageId);
+        Task<string> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
 
         Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
 
