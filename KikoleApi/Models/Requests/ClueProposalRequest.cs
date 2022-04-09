@@ -5,7 +5,7 @@ namespace KikoleApi.Models.Requests
 {
     public class ClueProposalRequest : BaseProposalRequest
     {
-        internal override ProposalTypes ProposalType => ProposalTypes.Club;
+        internal override ProposalTypes ProposalType => ProposalTypes.Clue;
 
         internal override string IsValid(TextResources resources)
         {
