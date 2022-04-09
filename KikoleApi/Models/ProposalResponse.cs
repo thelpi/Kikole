@@ -38,7 +38,7 @@ namespace KikoleApi.Models
             if (success.HasValue)
                 Successful = success.Value;
 
-            switch (proposalType)
+            switch (ProposalType)
             {
                 case ProposalTypes.Name:
                     if (!success.HasValue)
@@ -88,7 +88,7 @@ namespace KikoleApi.Models
                     break;
             }
             
-            LostPoints = Successful
+            LostPoints = Successful && ProposalType != ProposalTypes.Clue
                 ? 0
                 : ProposalChart.Default.ProposalTypesCost[ProposalType];
         }
