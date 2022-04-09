@@ -15,6 +15,7 @@ CREATE TABLE `badges` (
   `description` text COLLATE utf8_bin NOT NULL,
   `hidden` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
   `is_unique` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  `sub_badge_id` bigint(20) UNSIGNED DEFAULT NULL,
   `creation_date` datetime NOT NULL,
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -847,6 +848,7 @@ CREATE TABLE `players` (
   `country_id` bigint(20) UNSIGNED NOT NULL,
   `proposal_date` date DEFAULT NULL,
   `clue` varchar(255) COLLATE utf8_bin NOT NULL,
+  `easy_clue` varchar(255) COLLATE utf8_bin NOT NULL,
   `position_id` bigint(20) UNSIGNED NOT NULL,
   `badge_id` bigint(20) UNSIGNED DEFAULT NULL,
   `creation_user_id` bigint(20) UNSIGNED NOT NULL,
@@ -865,6 +867,7 @@ CREATE TABLE `player_clubs` (
 CREATE TABLE `player_clue_translations` (
   `player_id` bigint(20) UNSIGNED NOT NULL,
   `language_id` bigint(20) UNSIGNED NOT NULL,
+  `is_easy` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
   `clue` varchar(255) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -885,7 +888,7 @@ CREATE TABLE `proposals` (
   `proposal_type_id` bigint(20) UNSIGNED NOT NULL,
   `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `successful` tinyint(3) UNSIGNED NOT NULL,
-  `proposal_date` datetime NOT NULL,
+  `proposal_date` date NOT NULL,
   `days_before` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `creation_date` datetime NOT NULL,
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -902,6 +905,7 @@ INSERT INTO `proposal_types` (`id`, `name`, `description`) VALUES
 (2, 'Club', 'A club in the player\'s career has been proposed'),
 (3, 'Year', 'The player\'s year of the birth has been proposed'),
 (4, 'Country', 'The player\'s nationality has been proposed'),
+(5, 'Clue', 'A new clue has been requested'),
 (6, 'Position', 'The player\'s position has been proposed');
 
 CREATE TABLE `users` (
@@ -935,7 +939,8 @@ INSERT INTO `user_types` (`id`, `name`) VALUES
 
 
 ALTER TABLE `badges`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sub_badge_id` (`sub_badge_id`);
 
 ALTER TABLE `badge_translations`
   ADD PRIMARY KEY (`badge_id`,`language_id`),
@@ -987,9 +992,10 @@ ALTER TABLE `player_clubs`
   ADD KEY `club_id` (`club_id`);
 
 ALTER TABLE `player_clue_translations`
-  ADD PRIMARY KEY (`player_id`,`language_id`),
-  ADD UNIQUE KEY `player_id` (`player_id`),
-  ADD KEY `language_id` (`language_id`);
+  ADD PRIMARY KEY (`player_id`,`language_id`,`is_easy`),
+  ADD KEY `language_id` (`language_id`),
+  ADD KEY `is_easy` (`is_easy`),
+  ADD KEY `player_id` (`player_id`) USING BTREE;
 
 ALTER TABLE `positions`
   ADD PRIMARY KEY (`id`);
