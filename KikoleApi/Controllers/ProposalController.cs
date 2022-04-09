@@ -108,6 +108,18 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        [HttpPut("clue-proposals")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<ProposalResponse>> SubmitClueProposalAsync(
+            [FromBody] PositionProposalRequest request,
+            [FromQuery] ulong userId)
+        {
+            return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
+        }
+
         [HttpGet("proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -217,8 +229,6 @@ namespace KikoleApi.Controllers
             out int points)
         {
             var totalPoints = ProposalChart.Default.BasePoints;
-            int? indexOfEnd = null;
-            int currentIndex = 0;
             var proposals = proposalDtos
                 .OrderBy(pDto => pDto.CreationDate)
                 .Select(pDto =>
@@ -226,20 +236,9 @@ namespace KikoleApi.Controllers
                     var pr = new ProposalResponse(pDto, player)
                         .WithTotalPoints(totalPoints, false);
                     totalPoints = pr.TotalPoints;
-                    if (pr.IsWin && !indexOfEnd.HasValue)
-                    {
-                        indexOfEnd = currentIndex;
-                    }
-                    currentIndex++;
                     return pr;
                 })
                 .ToList();
-
-            if (indexOfEnd.HasValue)
-            {
-                for (var i = proposals.Count - 1; i > indexOfEnd.Value; i--)
-                    proposals.RemoveAt(i);
-            }
 
             points = totalPoints;
             return proposals;

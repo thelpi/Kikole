@@ -80,6 +80,12 @@ namespace KikoleApi.Models
                         ? player.Player.YearOfBirth.ToString()
                         : sourceValue;
                     break;
+
+                case ProposalTypes.Clue:
+                    if (!success.HasValue)
+                        Successful = true;
+                    Value = null;
+                    break;
             }
             
             LostPoints = Successful

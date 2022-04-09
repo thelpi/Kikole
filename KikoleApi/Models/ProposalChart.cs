@@ -30,6 +30,7 @@ namespace KikoleApi.Models
                 { ProposalTypes.Name, 400 },
                 { ProposalTypes.Position, 75 },
                 { ProposalTypes.Year, 25 },
+                { ProposalTypes.Clue, 250 }
             };
         
         public DateTime FirstDate { get; internal set; }

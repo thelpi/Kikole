@@ -197,5 +197,9 @@ namespace KikoleApi
         internal string ChallengeAlreadyExist => Language == Languages.fr
             ? "Impossible de créer le challenge ; un challenge accepté ou en attente existe déjà avec l'adversaire"
             : "Can't create challenge; a challenge against this opponent is already planned or requested";
+
+        internal string ClueAvailable => Language == Languages.fr
+            ? "Un nouvel indice est disponible"
+            : "A new clue is available";
     }
 }
