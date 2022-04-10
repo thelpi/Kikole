@@ -54,6 +54,7 @@ namespace KikoleApi.Bootstrap
                 // services
                 .AddSingleton<IBadgeService, BadgeService>()
                 .AddSingleton<IPlayerService, PlayerService>()
+                .AddSingleton<ILeaderService, LeaderService>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()

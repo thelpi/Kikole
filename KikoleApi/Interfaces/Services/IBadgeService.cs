@@ -53,11 +53,9 @@ namespace KikoleApi.Interfaces.Services
         /// Gets every badge of a user.
         /// </summary>
         /// <param name="userId">User identifier.</param>
-        /// <param name="isAllowedToSeeHiddenBadge"><c>True</c> if the user can see hidden badges.</param>
+        /// <param name="connectedUserId">User identifier who request information.</param>
         /// <returns>Collection of <see cref="UserBadge"/> sorted by rareness.</returns>
-        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
-            ulong userId,
-            bool isAllowedToSeeHiddenBadge);
+        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, ulong connectedUserId);
 
         /// <summary>
         /// Resets and recomputes datas on every badge.

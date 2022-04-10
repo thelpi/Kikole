@@ -6,6 +6,7 @@ using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Interfaces.Services;
+using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
@@ -17,16 +18,19 @@ namespace KikoleApi.Services
     {
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
 
         public PlayerService(IPlayerRepository playerRepository,
             IClubRepository clubRepository,
+            IUserRepository userRepository,
             IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
+            _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
             _clock = clock;
         }
@@ -172,6 +176,22 @@ namespace KikoleApi.Services
                 || p.CreationUserId == challenge.HostUserId);
 
             return challengeDate;
+        }
+
+        /// <inheritdoc />
+        public async Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(
+            ulong userId,
+            DateTime proposalDate)
+        {
+            var p = await _playerRepository
+                .GetPlayerOfTheDayAsync(proposalDate.Date)
+                .ConfigureAwait(false);
+
+            var u = await _userRepository
+                .GetUserByIdAsync(p.CreationUserId)
+                .ConfigureAwait(false);
+
+            return new PlayerCreator(userId, p, u);
         }
 
         private async Task<DateTime> GetNextDateAsync()

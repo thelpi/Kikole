@@ -23,6 +23,7 @@ namespace KikoleApi.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly IChallengeRepository _challengeRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
 
@@ -210,6 +211,7 @@ namespace KikoleApi.Services
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
             IHttpContextAccessor httpContextAccessor,
+            IUserRepository userRepository,
             IClock clock)
         {
             _badgeRepository = badgeRepository;
@@ -217,6 +219,7 @@ namespace KikoleApi.Services
             _playerRepository = playerRepository;
             _proposalRepository = proposalRepository;
             _challengeRepository = challengeRepository;
+            _userRepository = userRepository;
             _httpContextAccessor = httpContextAccessor;
             _clock = clock;
         }
@@ -438,10 +441,18 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
-            ulong userId,
-            bool isAllowedToSeeHiddenBadge)
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong id, ulong userId)
         {
+            var isAllowedToSeeHiddenBadge = userId == id;
+            if (userId > 0 && !isAllowedToSeeHiddenBadge)
+            {
+                var userDto = await _userRepository
+                    .GetUserByIdAsync(userId)
+                    .ConfigureAwait(false);
+
+                isAllowedToSeeHiddenBadge = userDto?.UserTypeId == (ulong)UserTypes.Administrator;
+            }
+
             var badges = await _badgeRepository
                .GetBadgesAsync(true)
                .ConfigureAwait(false);

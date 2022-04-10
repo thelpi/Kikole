@@ -196,5 +196,23 @@ namespace KikoleApi.Controllers
 
             return Ok(names);
         }
+
+        [HttpGet("/player-of-the-day-users")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(PlayerCreator), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<ActionResult<PlayerCreator>> GetPlayerOfTheDayFromUserPovAsync(
+            [FromQuery] ulong userId, [FromQuery] DateTime proposalDate)
+        {
+            if (userId == 0)
+                return BadRequest(_resources["InvalidUser"]);
+
+            var p = await _playerService
+                .GetPlayerOfTheDayFromUserPovAsync(userId, proposalDate)
+                .ConfigureAwait(false);
+
+            return base.Ok(p);
+        }
     }
 }

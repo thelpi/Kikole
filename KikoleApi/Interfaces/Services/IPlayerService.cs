@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Requests;
 
@@ -64,5 +65,13 @@ namespace KikoleApi.Interfaces.Services
             ChallengeDto challenge,
             IReadOnlyCollection<DateTime> hostDates,
             IReadOnlyCollection<DateTime> guestDates);
+
+        /// <summary>
+        /// Gets <see cref="PlayerCreator"/> at a specified date from the point of view of a specified user.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <param name="proposalDate">Date of the player.</param>
+        /// <returns>Instance of <see cref="PlayerCreator"/>.</returns>
+        Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(ulong userId, DateTime proposalDate);
     }
 }
