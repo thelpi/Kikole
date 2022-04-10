@@ -19,18 +19,21 @@ namespace KikoleApi.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IBadgeService _badgeService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
 
         public PlayerService(IPlayerRepository playerRepository,
             IClubRepository clubRepository,
             IUserRepository userRepository,
+            IBadgeService badgeService,
             IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
             _userRepository = userRepository;
+            _badgeService = badgeService;
             _httpContextAccessor = httpContextAccessor;
             _clock = clock;
         }
@@ -192,6 +195,95 @@ namespace KikoleApi.Services
                 .ConfigureAwait(false);
 
             return new PlayerCreator(userId, p, u);
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync()
+        {
+            var dtos = await _playerRepository
+                .GetPendingValidationPlayersAsync()
+                .ConfigureAwait(false);
+
+            var users = new Dictionary<ulong, UserDto>();
+            foreach (var usrId in dtos.Select(dto => dto.CreationUserId).Distinct())
+            {
+                var user = await _userRepository
+                    .GetUserByIdAsync(usrId)
+                    .ConfigureAwait(false);
+                users.Add(usrId, user);
+            }
+
+            var players = new List<Player>(dtos.Count);
+            foreach (var p in dtos)
+            {
+                var pInfo = await GetPlayerInfoAsync(p)
+                    .ConfigureAwait(false);
+
+                players.Add(new Player(pInfo, users.Values));
+            }
+
+            return players;
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
+        {
+            return await _playerRepository
+                .GetKnownPlayerNamesAsync(userId)
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<PlayerSubmissionErrors> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
+        {
+            var p = await _playerRepository
+                .GetPlayerByIdAsync(request.PlayerId)
+                .ConfigureAwait(false);
+
+            if (p == null)
+                return PlayerSubmissionErrors.PlayerNotFound;
+
+            if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
+                return PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused;
+
+            if (request.IsAccepted)
+            {
+                await AcceptSubmittedPlayerAsync(
+                        request, p.Clue, p.EasyClue)
+                    .ConfigureAwait(false);
+
+                var added = await _badgeService
+                    .AddBadgeToUserAsync(Badges.DoItYourself, p.CreationUserId)
+                    .ConfigureAwait(false);
+
+                // if the badge for the first submission is added,
+                // the badge for the 5th submission can't be added too
+                if (!added)
+                {
+                    var players = await _playerRepository
+                        .GetPlayersByCreatorAsync(p.CreationUserId, true)
+                        .ConfigureAwait(false);
+
+                    if (players.Count == 5)
+                    {
+                        await _badgeService
+                            .AddBadgeToUserAsync(Badges.WeAreKikole, p.CreationUserId)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                // TODO: notify (+ badge)
+            }
+            else
+            {
+                await _playerRepository
+                    .RefusePlayerProposalAsync(request.PlayerId)
+                    .ConfigureAwait(false);
+
+                // TODO: notify refusal
+            }
+
+            return PlayerSubmissionErrors.NoError;
         }
 
         private async Task<DateTime> GetNextDateAsync()

@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
-using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Interfaces.Services;
 using KikoleApi.Models;
-using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -21,22 +18,13 @@ namespace KikoleApi.Controllers
     public class PlayerController : KikoleBaseController
     {
         private readonly IPlayerService _playerService;
-        private readonly IBadgeService _badgeService;
-        private readonly IUserRepository _userRepository;
-        private readonly IPlayerRepository _playerRepository;
         private readonly IClock _clock;
         private readonly IStringLocalizer<Translations> _resources;
 
-        public PlayerController(IPlayerRepository playerRepository,
-            IClock clock,
-            IBadgeService badgeService,
-            IUserRepository userRepository,
+        public PlayerController(IClock clock,
             IPlayerService playerService,
             IStringLocalizer<Translations> resources)
         {
-            _playerRepository = playerRepository;
-            _badgeService = badgeService;
-            _userRepository = userRepository;
             _playerService = playerService;
             _resources = resources;
             _clock = clock;
@@ -90,28 +78,9 @@ namespace KikoleApi.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<Player>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IReadOnlyCollection<Player>>> GetPlayerSubmissionsAsync()
         {
-            var dtos = await _playerRepository
-                .GetPendingValidationPlayersAsync()
+            var players = await _playerService
+                .GetPlayerSubmissionsAsync()
                 .ConfigureAwait(false);
-
-            var users = new Dictionary<ulong, UserDto>();
-            foreach (var usrId in dtos.Select(dto => dto.CreationUserId).Distinct())
-            {
-                var user = await _userRepository
-                    .GetUserByIdAsync(usrId)
-                    .ConfigureAwait(false);
-                users.Add(usrId, user);
-            }
-
-            var players = new List<Player>(dtos.Count);
-            foreach (var p in dtos)
-            {
-                var pInfo = await _playerService
-                    .GetPlayerInfoAsync(p)
-                    .ConfigureAwait(false);
-
-                players.Add(new Player(pInfo, users.Values));
-            }
 
             return Ok(players);
         }
@@ -133,52 +102,15 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityCheck))
                 return BadRequest(string.Format(_resources["InvalidRequest"], validityCheck));
 
-            var p = await _playerRepository
-                .GetPlayerByIdAsync(request.PlayerId)
+            var result = await _playerService
+                .ValidatePlayerSubmissionAsync(request)
                 .ConfigureAwait(false);
 
-            if (p == null)
+            if (result == PlayerSubmissionErrors.PlayerNotFound)
                 return NotFound(_resources["PlayerDoesNotExist"]);
 
-            if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
+            if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
                 return Conflict(_resources["RejectAndProposalDateCombined"]);
-
-            if (request.IsAccepted)
-            {
-                await _playerService
-                    .AcceptSubmittedPlayerAsync(request, p.Clue, p.EasyClue)
-                    .ConfigureAwait(false);
-
-                var added = await _badgeService
-                    .AddBadgeToUserAsync(Badges.DoItYourself, p.CreationUserId)
-                    .ConfigureAwait(false);
-
-                // if the badge for the first submission is added,
-                // the badge for the 5th submission can't be added too
-                if (!added)
-                {
-                    var players = await _playerRepository
-                        .GetPlayersByCreatorAsync(p.CreationUserId, true)
-                        .ConfigureAwait(false);
-
-                    if (players.Count == 5)
-                    {
-                        await _badgeService
-                            .AddBadgeToUserAsync(Badges.WeAreKikole, p.CreationUserId)
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                // TODO: notify (+ badge)
-            }
-            else
-            {
-                await _playerRepository
-                    .RefusePlayerProposalAsync(request.PlayerId)
-                    .ConfigureAwait(false);
-
-                // TODO: notify refusal
-            }
 
             return NoContent();
         }
@@ -190,7 +122,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<IReadOnlyCollection<string>>> GetKnownPlayersAsync(
             [FromQuery] ulong userId)
         {
-            var names = await _playerRepository
+            var names = await _playerService
                 .GetKnownPlayerNamesAsync(userId)
                 .ConfigureAwait(false);
 

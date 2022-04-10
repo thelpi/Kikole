@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Models;
 using KikoleApi.Models.Dtos;
+using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Interfaces.Services
@@ -73,5 +74,25 @@ namespace KikoleApi.Interfaces.Services
         /// <param name="proposalDate">Date of the player.</param>
         /// <returns>Instance of <see cref="PlayerCreator"/>.</returns>
         Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(ulong userId, DateTime proposalDate);
+
+        /// <summary>
+        /// Gets pending player submissions.
+        /// </summary>
+        /// <returns>Collection of <see cref="Player"/>.</returns>
+        Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync();
+
+        /// <summary>
+        /// Gets known player names for a user.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of player' names.</returns>
+        Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId);
+
+        /// <summary>
+        /// Valides a player submission.
+        /// </summary>
+        /// <param name="request">Request.</param>
+        /// <returns>Error value.</returns>
+        Task<PlayerSubmissionErrors> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request);
     }
 }
