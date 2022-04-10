@@ -48,19 +48,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        private async Task<IReadOnlyCollection<ProposalDto>> GetProposalsInternalAsync(
-            string where, DateTime proposalDate, ulong userId)
-        {
-            return await ExecuteReaderAsync<ProposalDto>(
-                    $"SELECT * FROM proposals WHERE user_id = @user_id AND {where}",
-                    new
-                    {
-                        user_id = userId,
-                        real_proposal_date = proposalDate.Date
-                    })
-                .ConfigureAwait(false);
-        }
-
         public async Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime proposalDate)
         {
             return await ExecuteReaderAsync<ProposalDto>(
@@ -73,6 +60,28 @@ namespace KikoleApi.Repositories
                     {
                         proposal_type_id = (ulong)ProposalTypes.Name,
                         proposal_date = proposalDate.Date
+                    })
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ProposalDto>> GetAllProposalsDateExactAsync(ulong userId)
+        {
+            return await GetDtosAsync<ProposalDto>(
+                    "proposals",
+                    ("user_id", userId),
+                    ("days_before", 0))
+                .ConfigureAwait(false);
+        }
+
+        private async Task<IReadOnlyCollection<ProposalDto>> GetProposalsInternalAsync(
+            string where, DateTime proposalDate, ulong userId)
+        {
+            return await ExecuteReaderAsync<ProposalDto>(
+                    $"SELECT * FROM proposals WHERE user_id = @user_id AND {where}",
+                    new
+                    {
+                        user_id = userId,
+                        real_proposal_date = proposalDate.Date
                     })
                 .ConfigureAwait(false);
         }

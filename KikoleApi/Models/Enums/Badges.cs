@@ -34,6 +34,7 @@
         EverythingNotLost,
         TheEnd,
         TheEndConsolationPrize,
-        ImFeelingLucky
+        ImFeelingLucky,
+        Dedicated
     }
 }

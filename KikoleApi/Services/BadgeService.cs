@@ -34,7 +34,8 @@ namespace KikoleApi.Services
                 Badges.WeAreKikole,
                 Badges.AllIn,
                 Badges.GambleAddiction,
-                Badges.ChallengeAccepted
+                Badges.ChallengeAccepted,
+                Badges.Dedicated
             };
 
         private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>> LeadersBasedBadgeCondition
@@ -361,6 +362,35 @@ namespace KikoleApi.Services
                 await InsertBadgeIfNotAlreadyAsync(
                         request.ProposalDate, userId, Badges.DoYouSpeakPatois, collectedBadges, allBadges)
                     .ConfigureAwait(false);
+            }
+
+            if (request.DaysBefore == 0)
+            {
+                var proposals = await _proposalRepository
+                    .GetAllProposalsDateExactAsync(userId)
+                    .ConfigureAwait(false);
+
+                var playersCreated = await _playerRepository
+                    .GetPlayersByCreatorAsync(userId, true)
+                    .ConfigureAwait(false);
+
+                var i = 1;
+                var date = _clock.Today;
+                while (i < 30)
+                {
+                    date = date.AddDays(-1);
+                    if (!proposals.Any(p => p.ProposalDate == date)
+                        && !playersCreated.Any(p => p.ProposalDate == date))
+                        break;
+                    i++;
+                }
+
+                if (i == 30)
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                            request.ProposalDate, userId, Badges.Dedicated, collectedBadges, allBadges)
+                        .ConfigureAwait(false);
+                }
             }
 
             return await GetUserBadgesAsync(
