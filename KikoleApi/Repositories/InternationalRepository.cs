@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 

@@ -5,7 +5,7 @@ using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
 
-namespace KikoleApi.Interfaces
+namespace KikoleApi.Interfaces.Services
 {
     public interface IBadgeService
     {

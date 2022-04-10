@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using KikoleApi.Models.Dtos;
 using KikoleApi.Models.Requests;
 
-namespace KikoleApi.Interfaces
+namespace KikoleApi.Interfaces.Services
 {
     public interface IPlayerService
     {

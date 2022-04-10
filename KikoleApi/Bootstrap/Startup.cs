@@ -3,6 +3,8 @@ using System.Globalization;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Repositories;
+using KikoleApi.Interfaces.Services;
 using KikoleApi.Repositories;
 using KikoleApi.Services;
 using Microsoft.AspNetCore.Builder;
@@ -49,9 +51,9 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IBadgeRepository, BadgeRepository>()
                 .AddSingleton<IMessageRepository, MessageRepository>()
                 .AddSingleton<IChallengeRepository, ChallengeRepository>()
-                // services (scoped allow resources)
-                .AddScoped<IBadgeService, BadgeService>()
-                .AddScoped<IPlayerService, PlayerService>()
+                // services
+                .AddSingleton<IBadgeService, BadgeService>()
+                .AddSingleton<IPlayerService, PlayerService>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()

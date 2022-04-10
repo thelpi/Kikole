@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Models;
 using KikoleApi.Models.Enums;
 using KikoleApi.Models.Requests;
