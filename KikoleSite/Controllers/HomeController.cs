@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
@@ -23,13 +22,12 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public IActionResult Error()
         {
-            this.ResetAuthenticationCookie();
+            ResetAuthenticationCookie();
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(
-            [FromQuery] int? day, [FromQuery] string errorMessageForced)
+        public async Task<IActionResult> Index([FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
             var (token, login) = GetAuthenticationCookie();
 
@@ -38,7 +36,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var model = new HomeModel { Points = chart.BasePoints };
-            
+
             if (day.HasValue
                 && model.CurrentDay != day.Value
                 && day.Value >= 0)
@@ -77,44 +75,20 @@ namespace KikoleSite.Controllers
                 }
             }
 
-            var proposalDate = DateTime.Now.Date.AddDays(-model.CurrentDay);
-
-            var playerCreator = await _apiProvider
-                .IsPlayerOfTheDayUser(proposalDate, token)
-                .ConfigureAwait(false);
-
-            var clue = await _apiProvider.GetClueAsync(proposalDate, false).ConfigureAwait(false);
-
-            var easyClue = await _apiProvider.GetClueAsync(proposalDate, true).ConfigureAwait(false);
-
-            if (!string.IsNullOrWhiteSpace(token))
-                await SetModelFromApiAsync(model, proposalDate, token, playerCreator, easyClue).ConfigureAwait(false);
-
-            if (!string.IsNullOrWhiteSpace(errorMessageForced))
-            {
-                model.IsErrorMessage = true;
-                model.MessageToDisplay = errorMessageForced;
-            }
-
-            var msg = await _apiProvider
-                .GetCurrentMessageAsync()
-                .ConfigureAwait(false);
-
-            var pendings = await _apiProvider
-                .GetChallengesWaitingForResponseAsync(token)
-                .ConfigureAwait(false);
-
-            var accepteds = await _apiProvider
-                .GetAcceptedChallengesAsync(token)
-                .ConfigureAwait(false);
-
-            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings, playerCreator?.CanDisplayCreator == true);
+            return await SetAndGetViewModelAsync(
+                    errorMessageForced,
+                    token,
+                    login,
+                    chart,
+                    model,
+                    DateTime.Now.Date.AddDays(-model.CurrentDay)
+                ).ConfigureAwait(false);
         }
 
         [HttpPost]
         public async Task<IActionResult> Index(HomeModel model)
         {
-            var (token, login) = this.GetAuthenticationCookie();
+            var (token, login) = GetAuthenticationCookie();
 
             if (model == null
                 || !Enum.TryParse<ProposalType>(GetSubmitAction(), out var proposalType)
@@ -150,8 +124,24 @@ namespace KikoleSite.Controllers
             
             model.Badges = response.CollectedBadges;
 
-            var proposalDate = now.Date.AddDays(-model.CurrentDay);
+            return await SetAndGetViewModelAsync(
+                    null,
+                    token,
+                    login,
+                    await _apiProvider.GetProposalChartAsync().ConfigureAwait(false),
+                    model,
+                    now.Date.AddDays(-model.CurrentDay))
+                .ConfigureAwait(false);
+        }
 
+        private async Task<IActionResult> SetAndGetViewModelAsync(
+            string errorMessageForced,
+            string token,
+            string login,
+            ProposalChart chart,
+            HomeModel model,
+            DateTime proposalDate)
+        {
             var playerCreator = await _apiProvider
                 .IsPlayerOfTheDayUser(proposalDate, token)
                 .ConfigureAwait(false);
@@ -160,10 +150,34 @@ namespace KikoleSite.Controllers
 
             var easyClue = await _apiProvider.GetClueAsync(proposalDate, true).ConfigureAwait(false);
 
-            await SetModelFromApiAsync(model, proposalDate, token, playerCreator, easyClue)
-                .ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                if (!string.IsNullOrWhiteSpace(playerCreator?.Name))
+                {
+                    model.SetFinalFormIsUserIsCreator(playerCreator.Name);
+                }
+                else
+                {
+                    var proposals = await _apiProvider
+                        .GetProposalsAsync(proposalDate, token)
+                        .ConfigureAwait(false);
 
-            var chart = await _apiProvider.GetProposalChartAsync().ConfigureAwait(false);
+                    var countries = await _apiProvider
+                        .GetCountriesAsync()
+                        .ConfigureAwait(false);
+
+                    var positions = GetPositions();
+
+                    foreach (var p in proposals)
+                        model.SetPropertiesFromProposal(p, countries, positions, easyClue);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(errorMessageForced))
+            {
+                model.IsErrorMessage = true;
+                model.MessageToDisplay = errorMessageForced;
+            }
 
             var msg = await _apiProvider
                 .GetCurrentMessageAsync()
@@ -177,17 +191,8 @@ namespace KikoleSite.Controllers
                 .GetAcceptedChallengesAsync(token)
                 .ConfigureAwait(false);
 
-            return ViewWithFullModel(model, login, clue, chart, msg, playerCreator?.Login, accepteds, pendings, playerCreator?.CanDisplayCreator == true);
-        }
-
-        private IActionResult ViewWithFullModel(HomeModel model, string login,
-            string clue, ProposalChart chart, string message, string creator,
-            IReadOnlyCollection<Challenge> acceptedChallenges,
-            IReadOnlyCollection<Challenge> pendingChallenges,
-            bool canDisplayCreator)
-        {
-            model.PlayerCreator = canDisplayCreator ? creator : null;
-            model.Message = message;
+            model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
+            model.Message = msg;
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()
@@ -196,33 +201,10 @@ namespace KikoleSite.Controllers
             model.Chart = chart;
             model.Clue = clue;
             model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
-            model.TodayChallenge = acceptedChallenges
+            model.TodayChallenge = accepteds
                 .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
-            model.HasPendingChallenges = pendingChallenges.Count > 0;
+            model.HasPendingChallenges = pendings.Count > 0;
             return View(model);
-        }
-
-        private async Task SetModelFromApiAsync(HomeModel model,
-            DateTime proposalDate, string authToken, PlayerCreator pc, string easyClue)
-        {
-            if (!string.IsNullOrWhiteSpace(pc?.Name))
-            {
-                model.SetFinalFormIsUserIsCreator(pc.Name);
-                return;
-            }
-
-            var proposals = await _apiProvider
-                .GetProposalsAsync(proposalDate, authToken)
-                .ConfigureAwait(false);
-
-            var countries = await _apiProvider
-                .GetCountriesAsync()
-                .ConfigureAwait(false);
-
-            var positions = GetPositions();
-
-            foreach (var p in proposals)
-                model.SetPropertiesFromProposal(p, countries, positions, easyClue);
         }
     }
 }
