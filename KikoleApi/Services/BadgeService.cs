@@ -441,13 +441,13 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong id, ulong userId)
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, ulong connectedUserId)
         {
-            var isAllowedToSeeHiddenBadge = userId == id;
-            if (userId > 0 && !isAllowedToSeeHiddenBadge)
+            var isAllowedToSeeHiddenBadge = connectedUserId == userId;
+            if (connectedUserId > 0 && !isAllowedToSeeHiddenBadge)
             {
                 var userDto = await _userRepository
-                    .GetUserByIdAsync(userId)
+                    .GetUserByIdAsync(connectedUserId)
                     .ConfigureAwait(false);
 
                 isAllowedToSeeHiddenBadge = userDto?.UserTypeId == (ulong)UserTypes.Administrator;
