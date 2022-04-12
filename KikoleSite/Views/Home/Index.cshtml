@@ -194,31 +194,6 @@
                     </div>
                     @if (string.IsNullOrWhiteSpace(Model.CountryName))
                     {
-                        <script>
-                            $(function () {
-                                $("#countryName").autocomplete({
-                                    source: function (request, response) {
-                                        $.ajax({
-                                            url: '/Home/AutoCompleteCountries/',
-                                            data: {
-                                                "prefix": request.term
-                                            },
-                                            type: "POST",
-                                            success: function (data) {
-                                                response($.map(data, function (item) {
-                                                    return item;
-                                                }))
-                                            }
-                                        });
-                                    },
-                                    select: function (e, i) {
-                                        $("#countryId").val(i.item.key);
-                                        $("#submitCountry").click();
-                                    },
-                                    minLength: 1
-                                });
-                            });
-                        </script>
                         <div>
                             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
                             <input type="hidden" id="countryId" name="CountryNameSubmission" />
@@ -253,21 +228,6 @@
                     @if (string.IsNullOrWhiteSpace(Model.BirthYear))
                     {
                         <div>
-                            <script>
-                                $(function () {
-                                    var availableTags = [];
-                                    for (var i = 1850; i <= 2010; i++)
-                                        availableTags.push(i.toString());
-                                    $("#birthYearValue").autocomplete({
-                                        source: availableTags,
-                                        select: function (e, i) {
-                                            $("#birthYearValue").val(i.item.value);
-                                            $("#submitYear").click();
-                                        },
-                                        minLength: 1
-                                    });
-                                });
-                            </script>
                             <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
                             <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
                             <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> @localizer["PointsIfIncorrect"])</span>
@@ -299,15 +259,6 @@
                     @if (string.IsNullOrWhiteSpace(Model.Position))
                     {
                         <div>
-                            <script>
-                                $(function () {
-                                    $("#positionSubmission").on("change", function (e) {
-                                        if ($("#positionSubmission").val() != "0") {
-                                            $("#submitPosition").click();
-                                        }
-                                    });
-                                });
-                            </script>
                             @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
                             <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
                             <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> @localizer["PointsIfIncorrect"])</span>

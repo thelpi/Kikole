@@ -40,20 +40,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         <div>
             <label>@localizer["YearOfBirth"]</label>
         </div>
-        <script>
-            $(function () {
-                var availableTags = [];
-                for (var i = 1850; i <= 2010; i++)
-                    availableTags.push(i.toString());
-                $("#birthYearValue").autocomplete({
-                    source: availableTags,
-                    select: function (e, i) {
-                        $("#birthYearValue").val(i.item.value);
-                    },
-                    minLength: 1
-                });
-            });
-        </script>
         <input type="text" id="birthYearValue" name="YearOfBirth" style="width: 100px" />
     </div>
 
@@ -61,31 +47,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         <div>
             <label>@localizer["Nationality"]</label>
         </div>
-        <script>
-            $(function () {
-                $("#countryName").autocomplete({
-                    source: function (request, response) {
-                        $.ajax({
-                            url: '/Admin/AutoCompleteCountries/',
-                            data: {
-                                "prefix": request.term
-                            },
-                            type: "POST",
-                            success: function (data) {
-                                response($.map(data, function (item) {
-                                    return item;
-                                }))
-                            }
-                        });
-                    },
-                    select: function (e, i) {
-                        $("#countryId").val(i.item.key);
-                        $("#submitCountry").click();
-                    },
-                    minLength: 1
-                });
-            });
-        </script>
         <div>
             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
             <input type="hidden" id="countryId" name="Country" />
