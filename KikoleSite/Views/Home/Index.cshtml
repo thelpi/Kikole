@@ -117,7 +117,7 @@
                 <form method="post" action="/">
                     @Html.HiddenFor(m => m.CurrentDay)
                     <div style="margin-top: 15px">
-                        <input type="submit" value="I need another clue" name="submit-Clue" style="width: 150px; margin-right: 20px" />
+                        <input type="submit" value="@localizer["NeedAnotherClue"]" name="submit-Clue" style="width: 200px; margin-right: 20px" />
                         <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Clue]</span> @localizer["Points"])</span>
                     </div>
                 </form>

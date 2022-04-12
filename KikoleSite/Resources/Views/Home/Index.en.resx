@@ -210,4 +210,7 @@
   <data name="Points" xml:space="preserve">
     <value>pts</value>
   </data>
+  <data name="NeedAnotherClue" xml:space="preserve">
+    <value>I need another clue</value>
+  </data>
 </root>
