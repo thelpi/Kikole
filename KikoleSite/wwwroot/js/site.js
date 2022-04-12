@@ -6,6 +6,7 @@ $(function () {
         }
     });
 });
+
 /* years autocompletion */
 $(function () {
     var availableTags = [];
@@ -22,6 +23,7 @@ $(function () {
         minLength: 1
     });
 });
+
 /* countries autocompletion */
 $(function () {
     $("#countryName").autocomplete({
@@ -47,4 +49,44 @@ $(function () {
         },
         minLength: 1
     });
+});
+
+/* clubs autocompletion */
+var autocompleteClubs = function (clubIdName, submit) {
+    $(clubIdName).autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '/Home/AutoCompleteClubs/',
+                data: {
+                    "prefix": request.term
+                },
+                type: "POST",
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return item;
+                    }))
+                }
+            });
+        },
+        select: function (e, i) {
+            $(clubIdName).val(i.item.value);
+            if (submit && $("#submitClub").length > 0) {
+                $("#submitClub").click();
+            }
+        },
+        minLength: 1
+    });
+};
+$(function() {
+    autocompleteClubs("#clubName", true);
+    autocompleteClubs("#Club0", false);
+    autocompleteClubs("#Club1", false);
+    autocompleteClubs("#Club2", false);
+    autocompleteClubs("#Club3", false);
+    autocompleteClubs("#Club4", false);
+    autocompleteClubs("#Club5", false);
+    autocompleteClubs("#Club6", false);
+    autocompleteClubs("#Club7", false);
+    autocompleteClubs("#Club8", false);
+    autocompleteClubs("#Club9", false);
 });

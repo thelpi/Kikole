@@ -129,31 +129,6 @@
                         <div>
                             <label>@localizer["ClubsTitle"]</label>
                         </div>
-                        <script>
-                            $(function () {
-                                $("#clubName").autocomplete({
-                                    source: function (request, response) {
-                                        $.ajax({
-                                            url: '/Home/AutoCompleteClubs/',
-                                            data: {
-                                                "prefix": request.term
-                                            },
-                                            type: "POST",
-                                            success: function (data) {
-                                                response($.map(data, function (item) {
-                                                    return item;
-                                                }))
-                                            }
-                                        });
-                                    },
-                                    select: function (e, i) {
-                                        $("#clubName").val(i.item.value);
-                                        $("#submitClub").click();
-                                    },
-                                    minLength: 1
-                                });
-                            });
-                        </script>
                         <div>
                             <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
                             <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
