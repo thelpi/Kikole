@@ -73,11 +73,13 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<DateTime> GetFirstSubmittedPlayerDateAsync()
+        public async Task<DateTime> GetFirstSubmittedPlayerDateAsync(bool withFirst)
         {
-            return await _playerRepository
+            var date = await _playerRepository
                 .GetFirstDateAsync()
                 .ConfigureAwait(false);
+
+            return withFirst ? date.AddDays(-1) : date;
         }
 
         /// <inheritdoc />

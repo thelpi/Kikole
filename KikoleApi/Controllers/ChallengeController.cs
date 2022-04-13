@@ -188,7 +188,7 @@ namespace KikoleApi.Controllers
                 return BadRequest(_resources["InvalidUser"]);
 
             var debut = await _playerService
-                .GetFirstSubmittedPlayerDateAsync()
+                .GetFirstSubmittedPlayerDateAsync(false)
                 .ConfigureAwait(false);
 
             if (fromDate.HasValue && fromDate.Value.Date < debut.Date)

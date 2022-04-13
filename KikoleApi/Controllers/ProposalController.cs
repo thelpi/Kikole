@@ -37,7 +37,7 @@ namespace KikoleApi.Controllers
         public async Task<ActionResult<ProposalChart>> GetProposalChartAsync()
         {
             ProposalChart.Default.FirstDate = await _playerService
-                .GetFirstSubmittedPlayerDateAsync()
+                .GetFirstSubmittedPlayerDateAsync(false)
                 .ConfigureAwait(false);
             return ProposalChart.Default;
         }
@@ -145,7 +145,7 @@ namespace KikoleApi.Controllers
                 return BadRequest(string.Format(_resources["InvalidRequest"], validityRequest));
 
             var firstDate = await _playerService
-                .GetFirstSubmittedPlayerDateAsync()
+                .GetFirstSubmittedPlayerDateAsync(true)
                 .ConfigureAwait(false);
 
             if (request.PlayerSubmissionDate.Date < firstDate.Date || request.PlayerSubmissionDate.Date > _clock.Today)
