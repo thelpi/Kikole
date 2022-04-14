@@ -1,7 +1,7 @@
-﻿using System;
+﻿using KikoleApi.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleApi.Helpers;
 
 namespace KikoleApi.Models
 {
@@ -17,9 +17,13 @@ namespace KikoleApi.Models
 
         public int? BestPoints { get; }
 
-        public TimeSpan? AverageTime { get; }
+        internal TimeSpan? AverageTime { get; }
 
-        public TimeSpan? BestTime { get; }
+        public int? AverageTimeSec => AverageTime.ToSeconds();
+
+        internal TimeSpan? BestTime { get; }
+
+        public int? BestTimeSec => BestTime.ToSeconds();
 
         public IReadOnlyCollection<DailyUserStat> Stats { get; }
 

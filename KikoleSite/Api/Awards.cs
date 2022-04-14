@@ -34,7 +34,9 @@ namespace KikoleSite.Api
 
     public class TimeAward : BaseAward
     {
-        public TimeSpan Time { get; set; }
+        public TimeSpan Time => new TimeSpan(0, 0, TimeSec);
+
+        public int TimeSec { get; set; }
 
         public string PlayerName { get; set; }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleApi.Helpers;
 using KikoleApi.Models.Dtos;
 
 namespace KikoleApi.Models
@@ -13,7 +14,9 @@ namespace KikoleApi.Models
 
         public bool Attempt { get; }
 
-        public TimeSpan? Time { get; }
+        internal TimeSpan? Time { get; }
+
+        public int? TimeSec => Time.ToSeconds();
 
         public int? Points { get; }
 

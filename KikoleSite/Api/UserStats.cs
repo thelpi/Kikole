@@ -15,9 +15,13 @@ namespace KikoleSite.Api
 
         public int? BestPoints { get; set; }
 
-        public TimeSpan? AverageTime { get; set; }
+        public TimeSpan? AverageTime => AverageTimeSec.HasValue ? new TimeSpan(0, 0, AverageTimeSec.Value) : default(TimeSpan?);
 
-        public TimeSpan? BestTime { get; set; }
+        public int? AverageTimeSec { get; set; }
+
+        public TimeSpan? BestTime => BestTimeSec.HasValue ? new TimeSpan(0, 0, BestTimeSec.Value) : default(TimeSpan?);
+
+        public int? BestTimeSec { get; set; }
 
         public IReadOnlyCollection<SingleUserStat> Stats { get; set; }
     }

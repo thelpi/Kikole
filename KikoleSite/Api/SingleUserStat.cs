@@ -10,7 +10,9 @@ namespace KikoleSite.Api
 
         public bool Attempt { get; set; }
 
-        public TimeSpan? Time { get; set; }
+        public TimeSpan? Time => TimeSec.HasValue ? new TimeSpan(0, 0, TimeSec.Value) : default(TimeSpan?);
+
+        public int? TimeSec { get; set; }
 
         public int? Points { get; set; }
 

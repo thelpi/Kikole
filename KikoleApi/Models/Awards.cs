@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KikoleApi.Helpers;
+using System;
 using System.Collections.Generic;
 
 namespace KikoleApi.Models
@@ -34,7 +35,9 @@ namespace KikoleApi.Models
 
     public class TimeAward : BaseAward
     {
-        public TimeSpan Time { get; set; }
+        internal TimeSpan Time { get; set; }
+
+        public int TimeSec => Time.ToSeconds();
 
         public string PlayerName { get; set; }
     }

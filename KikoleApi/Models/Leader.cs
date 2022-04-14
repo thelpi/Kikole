@@ -1,9 +1,8 @@
-﻿using System;
+﻿using KikoleApi.Helpers;
+using KikoleApi.Models.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleApi.Helpers;
-using KikoleApi.Models.Dtos;
-using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Models
 {
@@ -13,7 +12,9 @@ namespace KikoleApi.Models
 
         public string Login { get; }
 
-        public TimeSpan BestTime { get; }
+        internal TimeSpan BestTime { get; }
+
+        public int BestTimeSec => BestTime.ToSeconds();
 
         public int SuccessCount { get; }
 
