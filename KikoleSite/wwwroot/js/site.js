@@ -36,13 +36,16 @@ $(function () {
                 type: "POST",
                 success: function (data) {
                     response($.map(data, function (item) {
-                        return item;
+                        return {
+                            label: item.Value,
+                            value: item.Key
+                        };
                     }))
                 }
             });
         },
         select: function (e, i) {
-            $("#countryId").val(i.item.key);
+            $("#countryId").val(i.item.value);
             if ($("#submitCountry").length > 0) {
                 $("#submitCountry").click();
             }

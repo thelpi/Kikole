@@ -1,6 +1,7 @@
-﻿using System;
+﻿using KikoleApi.Models.Enums;
+using System;
 using System.Collections.Generic;
-using KikoleApi.Models.Enums;
+using System.Linq;
 
 namespace KikoleApi.Models
 {
@@ -8,7 +9,7 @@ namespace KikoleApi.Models
     {
         private static ProposalChart _default;
 
-        public static ProposalChart Default => _default ?? (_default = new ProposalChart());
+        public static ProposalChart Default => _default ??= new ProposalChart();
 
         private ProposalChart() { }
 
@@ -22,8 +23,8 @@ namespace KikoleApi.Models
 
         public int SubmissionThresholdlosePoints => 750;
 
-        public IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
-            => new Dictionary<ProposalTypes, int>
+        internal readonly IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
+            = new Dictionary<ProposalTypes, int>
             {
                 { ProposalTypes.Club, 50 },
                 { ProposalTypes.Country, 25 },
@@ -32,7 +33,10 @@ namespace KikoleApi.Models
                 { ProposalTypes.Year, 25 },
                 { ProposalTypes.Clue, 400 }
             };
-        
+
+        public IReadOnlyDictionary<string, int> ProposalTypesCostString
+            => ProposalTypesCost.ToDictionary(x =>x.Key.ToString(), x => x.Value);
+
         public DateTime FirstDate { get; internal set; }
     }
 }

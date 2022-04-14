@@ -39,7 +39,7 @@ namespace KikoleApi.Controllers
             ProposalChart.Default.FirstDate = await _playerService
                 .GetFirstSubmittedPlayerDateAsync(false)
                 .ConfigureAwait(false);
-            return ProposalChart.Default;
+            return Ok(ProposalChart.Default);
         }
 
         [HttpPut("club-proposals")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KikoleSite.Api
 {
@@ -11,7 +12,10 @@ namespace KikoleSite.Api
 
         public int ChallengeWithdrawalPoints = 1000;
 
-        public IReadOnlyDictionary<ProposalType, int> ProposalTypesCost { get; set; }
+        public IReadOnlyDictionary<string, int> ProposalTypesCostString { get; set; }
+
+        public IReadOnlyDictionary<ProposalType, int> ProposalTypesCost
+            => ProposalTypesCostString.ToDictionary(x => Enum.Parse<ProposalType>(x.Key), x => x.Value);
 
         public int SubmissionBasePoints { get; set; }
 
