@@ -188,6 +188,15 @@ namespace KikoleApi.Services
                 }
             };
 
+        private static readonly IReadOnlyDictionary<Badges, (object, int, Func<LeaderDto, object, object>, Func<object, bool>)> LeaderRunAggBasedBadgeCondition
+            = new Dictionary<Badges, (object, int, Func<LeaderDto, object, object>, Func<object, bool>)>
+            {
+                {
+                    Badges.HellOfAWeek,
+                    (0, 7, (l, p) => ((int)p) + l.Points, p => (int)p >= 6666)
+                }
+            };
+
         private static readonly IReadOnlyDictionary<Badges, Func<ChallengeDto, IReadOnlyCollection<ChallengeDto>, bool>> ChallengeBasedBadgeCondition
             = new Dictionary<Badges, Func<ChallengeDto, IReadOnlyCollection<ChallengeDto>, bool>>
             {
@@ -313,8 +322,7 @@ namespace KikoleApi.Services
                         .ToList();
 
                     await PrepareNewLeaderBadgesInternalAsync(
-                            leader, pDay, proposals, true,
-                            allBadges, date, leadersHistory, playersHistory)
+                            leader, pDay, proposals, true, allBadges, leadersHistory, playersHistory)
                         .ConfigureAwait(false);
                 }
 
@@ -346,8 +354,7 @@ namespace KikoleApi.Services
                 .ConfigureAwait(false);
 
             return await PrepareNewLeaderBadgesInternalAsync(
-                    leader, playerOfTheDay, proposalsBeforeWin, isActualTodayleader,
-                    allBadges, firstDate, leadersHistory, playersHistory)
+                    leader, playerOfTheDay, proposalsBeforeWin, isActualTodayleader, allBadges, leadersHistory, playersHistory)
                 .ConfigureAwait(false);
         }
 
@@ -493,7 +500,6 @@ namespace KikoleApi.Services
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
             bool isActualTodayleader,
             IReadOnlyCollection<BadgeDto> allBadges,
-            DateTime firstDate,
             IReadOnlyCollection<LeaderDto> leadersHistory,
             IReadOnlyCollection<PlayerDto> playersHistory)
         {
@@ -526,11 +532,27 @@ namespace KikoleApi.Services
 
                 foreach (var badge in LeaderRunBasedBadgeCondition.Keys)
                 {
-                    var conditions = LeaderRunBasedBadgeCondition[badge];
+                    var (runCount, checkFunc, incPlayerSubmission) = LeaderRunBasedBadgeCondition[badge];
 
-                    bool respectConditions = RespectLeadersRunConditions(leader,
+                    var respectConditions = RespectLeadersRunConditions(leader,
                         myHistory, myCreatedPlayers,
-                        conditions.Item1, conditions.Item2, conditions.Item3);
+                        runCount, checkFunc, incPlayerSubmission);
+
+                    if (respectConditions)
+                    {
+                        await InsertBadgeIfNotAlreadyAsync(
+                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                            .ConfigureAwait(false);
+                    }
+                }
+
+                foreach (var badge in LeaderRunAggBasedBadgeCondition.Keys)
+                {
+                    var (initialValue, runCount, aggFunc, checkFunc) = LeaderRunAggBasedBadgeCondition[badge];
+
+                    var respectConditions = RespectLeadersRunConditions(leader,
+                        myHistory, myCreatedPlayers,
+                        initialValue, runCount, aggFunc, checkFunc);
 
                     if (respectConditions)
                     {
@@ -639,6 +661,35 @@ namespace KikoleApi.Services
             }
             while (i < runLength);
             return i == runLength;
+        }
+
+        private static bool RespectLeadersRunConditions(LeaderDto leader,
+            IEnumerable<LeaderDto> myHistory,
+            IEnumerable<PlayerDto> myCreatedPlayers,
+            object initialValue,
+            int runLength,
+            Func<LeaderDto, object, object> aggFunc,
+            Func<object, bool> checkFunc)
+        {
+            object agg = initialValue;
+            var i = 0;
+            var dateToConsider = leader.ProposalDate;
+            do
+            {
+                var isCreator = myCreatedPlayers.Any(mcp => mcp.ProposalDate == dateToConsider);
+
+                if (!isCreator)
+                {
+                    var dateMeLeader = myHistory.FirstOrDefault(mh => mh.ProposalDate == dateToConsider);
+                    if (dateMeLeader == null)
+                        break;
+                    agg = aggFunc(dateMeLeader, agg);
+                    i++;
+                }
+                dateToConsider = dateToConsider.AddDays(-1);
+            }
+            while (i < runLength);
+            return i == runLength && checkFunc(agg);
         }
 
         private async Task InsertBadgeIfNotAlreadyAsync(

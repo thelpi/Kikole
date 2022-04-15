@@ -35,6 +35,7 @@
         TheEnd,
         TheEndConsolationPrize,
         ImFeelingLucky,
-        Dedicated
+        Dedicated,
+        HellOfAWeek
     }
 }

@@ -27,7 +27,7 @@ namespace KikoleApi.Controllers
         }
 
         [HttpPut("/recompute-badges")]
-        [AuthenticationLevel(UserTypes.Administrator)]
+        [AuthenticationLevel] // (UserTypes.Administrator)
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> ResetBadgesAsync()
         {
