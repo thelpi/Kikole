@@ -36,6 +36,8 @@
         TheEndConsolationPrize,
         ImFeelingLucky,
         Dedicated,
-        HellOfAWeek
+        HellOfAWeek,
+        TheBreakfastClub,
+        MetroBoulotKikoleDodo
     }
 }

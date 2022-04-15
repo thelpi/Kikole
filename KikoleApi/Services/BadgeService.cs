@@ -185,6 +185,14 @@ namespace KikoleApi.Services
                 {
                     Badges.MakeItDouble,
                     (2, l => l.Points == 1000, false)
+                },
+                {
+                    Badges.TheBreakfastClub,
+                    (7, l => l.Time < 540, false)
+                },
+                {
+                    Badges.MetroBoulotKikoleDodo,
+                    (7, l => l.Time >= 1260, false)
                 }
             };
 
