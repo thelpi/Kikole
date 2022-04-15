@@ -95,5 +95,12 @@ namespace KikoleApi.Interfaces.Services
         /// <param name="request">Request.</param>
         /// <returns>Error value.</returns>
         Task<PlayerSubmissionErrors> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request);
+
+        /// <summary>
+        /// Randomize the assignement of every player's proposal date, starting tomorrow.
+        /// </summary>
+        /// <remarks>Nothing happens if tomorrow is in less than 30 minutes.</remarks>
+        /// <returns>Asynchronous.</returns>
+        Task ReassignPlayersOfTheDayAsync();
     }
 }

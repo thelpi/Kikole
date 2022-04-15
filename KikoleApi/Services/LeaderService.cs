@@ -208,7 +208,7 @@ namespace KikoleApi.Services
             else
             {
                 var players = await _playerRepository
-                    .GetPlayersOfTheDayAsync(minimalDate, maximalDate)
+                    .GetPlayersOfTheDayAsync(minimalDate, maximalDate.GetValueOrDefault(_clock.Today))
                     .ConfigureAwait(false);
 
                 leaders = ComputePveLeaders(leaderDtos, users, players);

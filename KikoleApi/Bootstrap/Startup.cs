@@ -1,4 +1,7 @@
-﻿using KikoleApi.Controllers.Filters;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using KikoleApi.Controllers.Filters;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Repositories;
@@ -10,22 +13,39 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Collections.Generic;
-using System.Globalization;
+
 namespace KikoleApi.Bootstrap
 {
+    /// <summary>
+    /// Startup.
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="configuration"><see cref="Configuration"/>.</param>
+        /// <param name="environment"><see cref="Environment"/>.</param>
         public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
             Environment = environment;
         }
 
+        /// <summary>
+        /// Configuration.
+        /// </summary>
         public IConfiguration Configuration { get; }
+
+        /// <summary>
+        /// Environment.
+        /// </summary>
         public IWebHostEnvironment Environment { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services">Services collection.</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services
@@ -61,10 +81,14 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
                 .AddHttpContextAccessor()
-                .AddLocalization(options => options.ResourcesPath = "Resources");
+                .AddLocalization(options => options.ResourcesPath = "Resources")
+                .AddSingleton(new Random());
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">App builder.</param>
         public void Configure(IApplicationBuilder app)
         {
             if (Environment.IsDevelopment())

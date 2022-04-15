@@ -22,13 +22,15 @@ namespace KikoleApi.Services
         private readonly IBadgeService _badgeService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
+        private readonly Random _randomizer;
 
         public PlayerService(IPlayerRepository playerRepository,
             IClubRepository clubRepository,
             IUserRepository userRepository,
             IBadgeService badgeService,
             IHttpContextAccessor httpContextAccessor,
-            IClock clock)
+            IClock clock,
+            Random randomizer)
         {
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
@@ -36,6 +38,7 @@ namespace KikoleApi.Services
             _badgeService = badgeService;
             _httpContextAccessor = httpContextAccessor;
             _clock = clock;
+            _randomizer = randomizer;
         }
 
         /// <inheritdoc />
@@ -286,6 +289,28 @@ namespace KikoleApi.Services
             }
 
             return PlayerSubmissionErrors.NoError;
+        }
+
+        /// <inheritdoc />
+        public async Task ReassignPlayersOfTheDayAsync()
+        {
+            if (_clock.IsTomorrowIn(30))
+                return;
+
+            var randomizedPlayers = (await _playerRepository
+                .GetPlayersOfTheDayAsync(_clock.Tomorrow, null)
+                .ConfigureAwait(false))
+                .OrderBy(_ => _randomizer.Next())
+                .ToList();
+
+            var i = 0;
+            foreach (var p in randomizedPlayers)
+            {
+                await _playerRepository
+                    .ChangePlayerProposalDateAsync(p.Id, _clock.Tomorrow.AddDays(i))
+                    .ConfigureAwait(false);
+                i++;
+            }
         }
 
         private async Task<DateTime> GetNextDateAsync()

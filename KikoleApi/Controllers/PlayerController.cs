@@ -14,6 +14,10 @@ using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
+    /// <summary>
+    /// Player controller.
+    /// </summary>
+    /// <seealso cref="KikoleBaseController"/>
     [Route("players")]
     public class PlayerController : KikoleBaseController
     {
@@ -21,6 +25,12 @@ namespace KikoleApi.Controllers
         private readonly IClock _clock;
         private readonly IStringLocalizer<Translations> _resources;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="clock">Clock service.</param>
+        /// <param name="playerService">Player service.</param>
+        /// <param name="resources">Translation resources.</param>
         public PlayerController(IClock clock,
             IPlayerService playerService,
             IStringLocalizer<Translations> resources)
@@ -30,6 +40,12 @@ namespace KikoleApi.Controllers
             _clock = clock;
         }
 
+        /// <summary>
+        /// Gets the clue of a player at a specified date.
+        /// </summary>
+        /// <param name="proposalDate">Proposal date.</param>
+        /// <param name="isEasy"><c>True</c> for easy clue.</param>
+        /// <returns>The clue.</returns>
         [HttpGet("/player-clues")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
@@ -44,6 +60,12 @@ namespace KikoleApi.Controllers
             return Ok(clue);
         }
 
+        /// <summary>
+        /// Creates a player.
+        /// </summary>
+        /// <param name="request">Player creation request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Created content.</returns>
         [HttpPost]
         [AuthenticationLevel(UserTypes.PowerUser)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
@@ -71,7 +93,10 @@ namespace KikoleApi.Controllers
             return Created($"players/{playerId}", null);
         }
 
-
+        /// <summary>
+        /// Gets every submission of players to manage by the administrator. 
+        /// </summary>
+        /// <returns>Collection of players.</returns>
         [HttpGet("/player-submissions")]
         [AuthenticationLevel(UserTypes.Administrator)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -85,6 +110,11 @@ namespace KikoleApi.Controllers
             return Ok(players);
         }
 
+        /// <summary>
+        /// Validates a player submission.
+        /// </summary>
+        /// <param name="request">Validation request.</param>
+        /// <returns>Created content.</returns>
         [HttpPost("/player-submissions")]
         [AuthenticationLevel(UserTypes.Administrator)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
@@ -115,6 +145,11 @@ namespace KikoleApi.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Get names of every player known by a user.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of names.</returns>
         [HttpGet("/users/known-players")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
@@ -129,6 +164,12 @@ namespace KikoleApi.Controllers
             return Ok(names);
         }
 
+        /// <summary>
+        /// Gets the view on a player's name from the point of view of a specified user.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <param name="proposalDate">Proposal date.</param>
+        /// <returns>Instance of <see cref="PlayerCreator"/>.</returns>
         [HttpGet("/player-of-the-day-users")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(PlayerCreator), (int)HttpStatusCode.OK)]
@@ -145,6 +186,23 @@ namespace KikoleApi.Controllers
                 .ConfigureAwait(false);
 
             return base.Ok(p);
+        }
+
+        /// <summary>
+        /// Reassign player' dates starting tomorrow.
+        /// </summary>
+        /// <returns>No content.</returns>
+        [HttpPut("/players-dates")]
+        [AuthenticationLevel(UserTypes.Administrator)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> ReassignPlayersOfTheDayAsync()
+        {
+            await _playerService
+                .ReassignPlayersOfTheDayAsync()
+                .ConfigureAwait(false);
+
+            return NoContent();
         }
     }
 }

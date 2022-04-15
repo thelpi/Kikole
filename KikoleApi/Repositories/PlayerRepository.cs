@@ -8,12 +8,23 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
+    /// <summary>
+    /// Player repository implementation.
+    /// </summary>
+    /// <seealso cref="BaseRepository"/>
+    /// <seealso cref="IPlayerRepository"/>
     public class PlayerRepository : BaseRepository, IPlayerRepository
     {
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="clock">Clock.</param>
         public PlayerRepository(IConfiguration configuration, IClock clock)
             : base(configuration, clock)
         { }
 
+        /// <inheritdoc />
         public async Task<ulong> CreatePlayerAsync(PlayerDto player)
         {
             return await ExecuteInsertAsync(
@@ -32,6 +43,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task CreatePlayerClubsAsync(PlayerClubDto playerClub)
         {
             await ExecuteInsertAsync(
@@ -42,6 +54,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date)
         {
             return await GetDtoAsync<PlayerDto>(
@@ -50,6 +63,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(
             DateTime? minimalDate, DateTime? maximalDate)
         {
@@ -57,7 +71,7 @@ namespace KikoleApi.Repositories
                     "SELECT * FROM players " +
                     "WHERE proposal_date IS NOT NULL " +
                     "AND (@min_date IS NULL OR proposal_date >= @min_date) " +
-                    "AND (proposal_date <= IFNULL(@max_date, DATE(NOW())))",
+                    "AND (@max_date IS NULL OR proposal_date <= @max_date)",
                     new
                     {
                         min_date = minimalDate?.Date,
@@ -66,6 +80,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId)
         {
             return await GetDtosAsync<PlayerClubDto>(
@@ -74,6 +89,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<DateTime> GetLatestProposalDateAsync()
         {
             return await ExecuteScalarAsync<DateTime>(
@@ -81,13 +97,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayerDto>> GetProposedPlayersAsync()
-        {
-            return await ExecuteReaderAsync<PlayerDto>(
-                    "SELECT * FROM players WHERE proposal_date <= DATE(NOW())", null)
-                .ConfigureAwait(false);
-        }
-
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
         {
             return await ExecuteReaderAsync<string>(
@@ -103,6 +113,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<PlayerDto> GetPlayerByIdAsync(ulong id)
         {
             return await GetDtoAsync<PlayerDto>(
@@ -111,6 +122,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, string easyClueEn, DateTime date)
         {
             await ExecuteNonQueryAsync(
@@ -127,6 +139,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage)
         {
             foreach (var languageId in cluesByLanguage.Keys)
@@ -141,6 +154,7 @@ namespace KikoleApi.Repositories
             }
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync()
         {
             return await ExecuteReaderAsync<PlayerDto>(
@@ -151,6 +165,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task RefusePlayerProposalAsync(ulong playerId)
         {
             await ExecuteNonQueryAsync(
@@ -170,6 +185,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted)
         {
             return await ExecuteReaderAsync<PlayerDto>(
@@ -184,6 +200,7 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<DateTime> GetFirstDateAsync()
         {
             return await ExecuteScalarAsync<DateTime>(
@@ -191,6 +208,17 @@ namespace KikoleApi.Repositories
                     "FROM players " +
                     "WHERE proposal_date IS NOT NULL",
                     new object())
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE players " +
+                    "SET proposal_date = @proposalDate " +
+                    "WHERE id = @playerId",
+                    new { playerId, proposalDate = date.Date })
                 .ConfigureAwait(false);
         }
     }
