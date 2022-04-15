@@ -37,10 +37,13 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<Badge> UnableBadges { get; set; }
 
+        public bool IsHimself { get; set; }
+
         public UserStatsModel(UserStats apiStat,
             IReadOnlyCollection<UserBadge> badges,
             IReadOnlyCollection<Badge> allBadges,
-            IReadOnlyCollection<string> knownAnswers)
+            IReadOnlyCollection<string> knownAnswers,
+            bool isHimself)
         {
             Login = apiStat.Login;
             Attempts = apiStat.Attempts;
@@ -59,6 +62,7 @@ namespace KikoleSite.Models
             UnableBadges = allBadges
                 .Where(b => !badges.Any(_ => _.Id == b.Id) && b.Unique && b.Users > 0)
                 .ToList();
+            IsHimself = isHimself;
         }
     }
 }

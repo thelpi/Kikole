@@ -216,4 +216,10 @@
   <data name="ImpossibleBadge" xml:space="preserve">
     <value>Impossible to own</value>
   </data>
+  <data name="OnlyOneNotMe" xml:space="preserve">
+    <value>&lt;span style="color: crimson"&gt;Only one&lt;/span&gt; with this badge!</value>
+  </data>
+  <data name="OtherUsersNotMe" xml:space="preserve">
+    <value>users have this badge</value>
+  </data>
 </root>

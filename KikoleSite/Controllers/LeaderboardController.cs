@@ -58,7 +58,7 @@ namespace KikoleSite.Controllers
                     .ToList();
             }
 
-            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers));
+            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, login == stats.Login));
         }
 
         [HttpPost]
