@@ -642,25 +642,8 @@ namespace KikoleApi.Services
             Func<LeaderDto, bool> funcConditionOnLeader,
             bool creatorIncludeInRun)
         {
-            var i = 0;
-            var dateToConsider = leader.ProposalDate;
-            do
-            {
-                var isCreator = myCreatedPlayers.Any(mcp => mcp.ProposalDate == dateToConsider);
-
-                if (!isCreator)
-                {
-                    var dateMeLeader = myHistory.FirstOrDefault(mh => mh.ProposalDate == dateToConsider);
-                    if (dateMeLeader == null || !funcConditionOnLeader(dateMeLeader))
-                        break;
-                    i++;
-                }
-                else if (creatorIncludeInRun)
-                    i++;
-                dateToConsider = dateToConsider.AddDays(-1);
-            }
-            while (i < runLength);
-            return i == runLength;
+            return RespectLeadersRunConditionsInternal(leader, myHistory, myCreatedPlayers, runLength,
+                funcConditionOnLeader, creatorIncludeInRun, null, null, null);
         }
 
         private static bool RespectLeadersRunConditions(LeaderDto leader,
@@ -668,6 +651,20 @@ namespace KikoleApi.Services
             IEnumerable<PlayerDto> myCreatedPlayers,
             object initialValue,
             int runLength,
+            Func<LeaderDto, object, object> aggFunc,
+            Func<object, bool> checkFunc)
+        {
+            return RespectLeadersRunConditionsInternal(leader, myHistory, myCreatedPlayers, runLength,
+                null, false, initialValue, aggFunc, checkFunc);
+        }
+
+        private static bool RespectLeadersRunConditionsInternal(LeaderDto leader,
+            IEnumerable<LeaderDto> myHistory,
+            IEnumerable<PlayerDto> myCreatedPlayers,
+            int runLength,
+            Func<LeaderDto, bool> funcConditionOnLeader,
+            bool creatorIncludeInRun,
+            object initialValue,
             Func<LeaderDto, object, object> aggFunc,
             Func<object, bool> checkFunc)
         {
@@ -681,15 +678,18 @@ namespace KikoleApi.Services
                 if (!isCreator)
                 {
                     var dateMeLeader = myHistory.FirstOrDefault(mh => mh.ProposalDate == dateToConsider);
-                    if (dateMeLeader == null)
+                    if (dateMeLeader == null || (funcConditionOnLeader != null && !funcConditionOnLeader(dateMeLeader)))
                         break;
-                    agg = aggFunc(dateMeLeader, agg);
+                    if (aggFunc != null)
+                        agg = aggFunc(dateMeLeader, agg);
                     i++;
                 }
+                else if (creatorIncludeInRun)
+                    i++;
                 dateToConsider = dateToConsider.AddDays(-1);
             }
             while (i < runLength);
-            return i == runLength && checkFunc(agg);
+            return i == runLength && (checkFunc == null || checkFunc(agg));
         }
 
         private async Task InsertBadgeIfNotAlreadyAsync(
