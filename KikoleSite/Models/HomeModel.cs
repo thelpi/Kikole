@@ -82,26 +82,20 @@ namespace KikoleSite.Models
                     if (response.Successful)
                     {
                         var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
-                        if (!clubSubmissions.Any(cs => cs.Name == response.Value.name.ToString()))
+                        var club = response.GetPlayerClubValue();
+                        if (!clubSubmissions.Any(cs => cs.Name == club.Name))
                         {
-                            clubSubmissions.Add(new PlayerClub
-                            {
-                                HistoryPosition = response.Value.historyPosition,
-                                Name = response.Value.name.ToString()
-                            });
+                            clubSubmissions.Add(club);
                         }
                         KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                     }
                     else
                     {
-                        var clValue = response.Value.ToString();
-                        if (Helper.IsPropertyExist(response.Value, "name"))
-                            clValue = response.Value.name;
-                        IncorrectClubs = AddToList(IncorrectClubs, clValue);
+                        IncorrectClubs = AddToList(IncorrectClubs, response.Value);
                     }
                     break;
                 case ProposalType.Country:
-                    var cValue = response.Value.ToString();
+                    var cValue = response.Value;
                     if (response.Successful)
                         CountryName = countries[ulong.Parse(cValue)];
                     else
@@ -113,7 +107,7 @@ namespace KikoleSite.Models
                     }
                     break;
                 case ProposalType.Position:
-                    var pValue = response.Value.ToString();
+                    var pValue = response.Value;
                     if (response.Successful)
                         Position = positions[ulong.Parse(pValue)];
                     else
@@ -125,14 +119,14 @@ namespace KikoleSite.Models
                     }
                     break;
                 case ProposalType.Name:
-                    var nValue = response.Value.ToString();
+                    var nValue = response.Value;
                     if (response.Successful)
                         PlayerName = nValue;
                     else
                         IncorrectNames = AddToList(IncorrectNames, nValue);
                     break;
                 case ProposalType.Year:
-                    var yValue = response.Value.ToString();
+                    var yValue = response.Value;
                     if (response.Successful)
                         BirthYear = yValue;
                     else

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using KikoleSite.Api;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace KikoleSite
 {
@@ -532,7 +532,7 @@ namespace KikoleSite
                 Content = content == null
                     ? null
                     : new StringContent(
-                            JsonConvert.SerializeObject(content),
+                            JsonSerializer.Serialize(content),
                             Encoding.UTF8,
                             "application/json"),
                 Method = method,
@@ -563,9 +563,15 @@ namespace KikoleSite
                 .ReadAsStringAsync()
                 .ConfigureAwait(false);
 
-            return typeof(T) == typeof(string)
-                ? (T)Convert.ChangeType(content, typeof(T))
-                : JsonConvert.DeserializeObject<T>(content);
+            if (typeof(T) == typeof(string))
+                return (T)Convert.ChangeType(content, typeof(T));
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            return JsonSerializer.Deserialize<T>(content, options);
         }
 
         private async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)

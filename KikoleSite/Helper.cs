@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
@@ -18,13 +16,6 @@ namespace KikoleSite
         public const string Iso8859Code = "ISO-8859-8";
 
         static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
-
-        internal static bool IsPropertyExist(dynamic settings, string name)
-        {
-            return settings is ExpandoObject
-                ? ((IDictionary<string, object>)settings).ContainsKey(name)
-                : settings.GetType().GetProperty(name) != null;
-        }
 
         public static string ToNaString(this object data)
         {

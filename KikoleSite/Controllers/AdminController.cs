@@ -256,9 +256,9 @@ namespace KikoleSite.Controllers
                 {
                     { "fr", model.EasyClueFr }
                 },
-                Country = countryId.ToString(),
+                CountryString = countryId.ToString(),
                 Name = model.Name,
-                Position = positionId.ToString(),
+                PositionString = Enum.GetValues(typeof(Position)).Cast<Position>().Single(v => (ulong)v == positionId).ToString(),
                 YearOfBirth = yearValue,
                 HideCreator = model.HideCreator
             };

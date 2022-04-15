@@ -15,7 +15,7 @@ namespace KikoleApi.Models
 
         public bool Successful { get; }
 
-        public object Value { get; }
+        public string Value { get; }
 
         public string Tip { get; }
 
@@ -54,24 +54,24 @@ namespace KikoleApi.Models
                     if (!success.HasValue)
                         Successful = c != null;
                     Value = Successful
-                        ? new PlayerClub(c, player.PlayerClubs)
-                        : (object)sourceValue;
+                        ? System.Text.Json.JsonSerializer.Serialize(new PlayerClub(c, player.PlayerClubs))
+                        : sourceValue;
                     break;
 
                 case ProposalTypes.Country:
                     if (!success.HasValue)
                         Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
                     Value = Successful
-                        ? player.Player.CountryId
-                        : (object)sourceValue;
+                        ? player.Player.CountryId.ToString()
+                        : sourceValue;
                     break;
 
                 case ProposalTypes.Position:
                     if (!success.HasValue)
                         Successful = player.Player.PositionId == ulong.Parse(sourceValue);
                     Value = Successful
-                        ? player.Player.PositionId
-                        : (object)sourceValue;
+                        ? player.Player.PositionId.ToString()
+                        : sourceValue;
                     break;
 
                 case ProposalTypes.Year:

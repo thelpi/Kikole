@@ -9,7 +9,7 @@ namespace KikoleSite.Api
 
         public ushort YearOfBirth { get; set; }
         
-        public string Country { get; set; }
+        public string CountryString { get; set; }
 
         public DateTime? ProposalDate { get; set; }
 
@@ -17,7 +17,7 @@ namespace KikoleSite.Api
 
         public IReadOnlyList<ulong> Clubs { get; set; }
 
-        public string Position { get; set; }
+        public string PositionString { get; set; }
 
         public bool SetLatestProposalDate { get; set; }
 

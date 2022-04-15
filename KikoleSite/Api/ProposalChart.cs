@@ -14,9 +14,6 @@ namespace KikoleSite.Api
 
         public IReadOnlyDictionary<string, int> ProposalTypesCostString { get; set; }
 
-        public IReadOnlyDictionary<ProposalType, int> ProposalTypesCost
-            => ProposalTypesCostString.ToDictionary(x => Enum.Parse<ProposalType>(x.Key), x => x.Value);
-
         public int SubmissionBasePoints { get; set; }
 
         public int SubmissionBonusPoints { get; set; }
@@ -26,5 +23,10 @@ namespace KikoleSite.Api
         public int SubmissionLosePointsByLeader { get; set; }
 
         public int SubmissionThresholdlosePoints { get; set; }
+
+        public int GetProposalTypesCost(ProposalType proposalType)
+        {
+            return ProposalTypesCostString[proposalType.ToString()];
+        }
     }
 }

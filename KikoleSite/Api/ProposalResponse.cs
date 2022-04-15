@@ -6,7 +6,7 @@ namespace KikoleSite.Api
     {
         public bool Successful { get; set; }
 
-        public dynamic Value { get; set; }
+        public string Value { get; set; }
 
         public string Tip { get; set; }
 
@@ -17,5 +17,10 @@ namespace KikoleSite.Api
         public ProposalType ProposalType { get; set; }
 
         public IReadOnlyCollection<UserBadge> CollectedBadges { get; set; }
+
+        internal PlayerClub GetPlayerClubValue()
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<PlayerClub>(Value);
+        }
     }
 }

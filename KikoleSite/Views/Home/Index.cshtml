@@ -118,7 +118,7 @@
                     @Html.HiddenFor(m => m.CurrentDay)
                     <div style="margin-top: 15px">
                         <input type="submit" value="@localizer["NeedAnotherClue"]" name="submit-Clue" style="width: 200px; margin-right: 20px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Clue]</span> @localizer["Points"])</span>
+                        <span>(-<span style="color: crimson">@Model.Chart.GetProposalTypesCost(KikoleSite.Api.ProposalType.Clue)</span> @localizer["Points"])</span>
                     </div>
                 </form>
             }
@@ -132,7 +132,7 @@
                         <div>
                             <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
                             <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Club]</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.GetProposalTypesCost(KikoleSite.Api.ProposalType.Club)</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         <div style="font-size: small">(@localizer["OneClubAtATime"])</div>
                     </div>
@@ -173,7 +173,7 @@
                             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
                             <input type="hidden" id="countryId" name="CountryNameSubmission" />
                             <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Country]</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.GetProposalTypesCost(KikoleSite.Api.ProposalType.Country)</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
                         @if (Model.IncorrectCountries?.Count > 0)
@@ -205,7 +205,7 @@
                         <div>
                             <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
                             <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Year]</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.GetProposalTypesCost(KikoleSite.Api.ProposalType.Year)</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         @if (Model.IncorrectYears?.Count > 0)
                         {
@@ -236,7 +236,7 @@
                         <div>
                             @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
                             <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Position]</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span style="color: crimson">@Model.Chart.GetProposalTypesCost(KikoleSite.Api.ProposalType.Position)</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
@@ -265,7 +265,7 @@
                     <div>
                         <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" style="width: 300px; border-color: crimson" />
                         <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.ProposalType.Name]</span> @localizer["PointsIfIncorrect"])</span>
+                        <span>(-<span style="color: crimson">@Model.Chart.GetProposalTypesCost(KikoleSite.Api.ProposalType.Name)</span> @localizer["PointsIfIncorrect"])</span>
                     </div>
                     <div style="font-size: small">(@localizer["UseWikiTitle"])</div>
                 </div>
