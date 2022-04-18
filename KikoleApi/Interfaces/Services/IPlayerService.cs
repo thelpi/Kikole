@@ -8,6 +8,9 @@ using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Interfaces.Services
 {
+    /// <summary>
+    /// Player service interface.
+    /// </summary>
     public interface IPlayerService
     {
         /// <summary>
@@ -102,5 +105,13 @@ namespace KikoleApi.Interfaces.Services
         /// <remarks>Nothing happens if tomorrow is in less than 30 minutes.</remarks>
         /// <returns>Asynchronous.</returns>
         Task ReassignPlayersOfTheDayAsync();
+
+        /// <summary>
+        /// Gets statistics about players until today.
+        /// </summary>
+        /// <param name="userId">Identifier of user who does the request.</param>
+        /// <param name="sorts">Collection of sort options.</param>
+        /// <returns>Collection of statistics; some info might be anonymised.</returns>
+        Task<IReadOnlyCollection<PlayerStat>> GetPlayersStatisticsAsync(ulong userId, params (PlayerStatSorts, bool)[] sorts);
     }
 }

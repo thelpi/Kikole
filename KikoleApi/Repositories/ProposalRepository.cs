@@ -9,12 +9,23 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
+    /// <summary>
+    /// Proposal repository implementation.
+    /// </summary>
+    /// <seealso cref="BaseRepository"/>
+    /// <seealso cref="IProposalRepository"/>
     public class ProposalRepository : BaseRepository, IProposalRepository
     {
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="clock">Clock service.</param>
         public ProposalRepository(IConfiguration configuration, IClock clock)
             : base(configuration, clock)
         { }
 
+        /// <inheritdoc />
         public async Task<ulong> CreateProposalAsync(ProposalDto proposal)
         {
             return await ExecuteInsertAsync(
@@ -29,27 +40,30 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(
-            DateTime proposalDate, ulong userId)
+            DateTime playerProposalDate, ulong userId)
         {
             return await GetProposalsInternalAsync(
                     "DATE(DATE_ADD(proposal_date, INTERVAL -days_before DAY)) = @real_proposal_date",
-                    proposalDate,
+                    playerProposalDate,
                     userId)
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsDateExactAsync(
-            DateTime proposalDate, ulong userId)
+            DateTime playerProposalDate, ulong userId)
         {
             return await GetProposalsInternalAsync(
                     "days_before = 0 AND DATE(proposal_date) = @real_proposal_date",
-                    proposalDate,
+                    playerProposalDate,
                     userId)
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime proposalDate)
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime playerProposalDate)
         {
             return await ExecuteReaderAsync<ProposalDto>(
                     "SELECT * FROM proposals " +
@@ -60,17 +74,33 @@ namespace KikoleApi.Repositories
                     new
                     {
                         proposal_type_id = (ulong)ProposalTypes.Name,
-                        proposal_date = proposalDate.Date
+                        proposal_date = playerProposalDate.Date
                     })
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetAllProposalsDateExactAsync(ulong userId)
         {
             return await GetDtosAsync<ProposalDto>(
                     "proposals",
                     ("user_id", userId),
                     ("days_before", 0))
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate)
+        {
+            return await ExecuteReaderAsync<ProposalDto>(
+                    "SELECT * FROM proposals " +
+                    "WHERE days_before = 0 " +
+                    "AND DATE(proposal_date) = @proposal_date " +
+                    $"AND user_id IN ({SubSqlValidUsers})",
+                    new
+                    {
+                        proposal_date = playerProposalDate.Date
+                    })
                 .ConfigureAwait(false);
         }
 

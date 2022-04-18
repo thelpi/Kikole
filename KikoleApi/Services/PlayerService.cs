@@ -14,19 +14,38 @@ using Microsoft.AspNetCore.Http;
 
 namespace KikoleApi.Services
 {
+    /// <summary>
+    /// Player service implementation.
+    /// </summary>
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository _playerRepository;
         private readonly IClubRepository _clubRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ILeaderRepository _leaderRepository;
+        private readonly IProposalRepository _proposalRepository;
         private readonly IBadgeService _badgeService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
         private readonly Random _randomizer;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="playerRepository">Player repository.</param>
+        /// <param name="clubRepository">Club repository.</param>
+        /// <param name="userRepository">User repository.</param>
+        /// <param name="leaderRepository">Leader repository.</param>
+        /// <param name="proposalRepository">Proposal repository.</param>
+        /// <param name="badgeService">Badge service.</param>
+        /// <param name="httpContextAccessor">Http context accessor.</param>
+        /// <param name="clock">Clock service.</param>
+        /// <param name="randomizer">Randomizer.</param>
         public PlayerService(IPlayerRepository playerRepository,
             IClubRepository clubRepository,
             IUserRepository userRepository,
+            ILeaderRepository leaderRepository,
+            IProposalRepository proposalRepository,
             IBadgeService badgeService,
             IHttpContextAccessor httpContextAccessor,
             IClock clock,
@@ -35,6 +54,8 @@ namespace KikoleApi.Services
             _playerRepository = playerRepository;
             _clubRepository = clubRepository;
             _userRepository = userRepository;
+            _leaderRepository = leaderRepository;
+            _proposalRepository = proposalRepository;
             _badgeService = badgeService;
             _httpContextAccessor = httpContextAccessor;
             _clock = clock;
@@ -311,6 +332,84 @@ namespace KikoleApi.Services
                     .ConfigureAwait(false);
                 i++;
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<PlayerStat>> GetPlayersStatisticsAsync(ulong userId, params (PlayerStatSorts, bool)[] sorts)
+        {
+            var usersCache = new Dictionary<ulong, UserDto>();
+
+            async Task<UserDto> GetUserAsync(ulong id)
+            {
+                if (!usersCache.ContainsKey(id))
+                {
+                    var user = await _userRepository
+                        .GetUserByIdAsync(userId)
+                        .ConfigureAwait(false);
+                    usersCache.Add(id, user);
+                }
+                return usersCache[id];
+            }
+
+            var user = await GetUserAsync(userId).ConfigureAwait(false);
+
+            var isAdmin = user.UserTypeId == (ulong)UserTypes.Administrator;
+
+            var firstDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+
+            var players = await _playerRepository
+                .GetPlayersOfTheDayAsync(firstDate, _clock.Today)
+                .ConfigureAwait(false);
+
+            var playersStats = new List<PlayerStat>();
+            foreach (var p in players)
+            {
+                var leaders = await _leaderRepository
+                    .GetLeadersAtDateAsync(p.ProposalDate.Value)
+                    .ConfigureAwait(false);
+
+                var anonymise = !isAdmin && !leaders.Any(l => l.UserId == userId);
+
+                var pCreator = await GetUserAsync(p.CreationUserId).ConfigureAwait(false);
+
+                var creatorLogin = pCreator == null || !(isAdmin || p.ProposalDate.Value < _clock.Today || pCreator.Id == user.Id)
+                    ? null
+                    : pCreator.Login;
+
+                var proposals = await _proposalRepository
+                    .GetProposalsAsync(p.ProposalDate.Value)
+                    .ConfigureAwait(false);
+
+                var proposalsCount = proposals.Select(_ => _.UserId).Distinct().Count();
+
+                playersStats.Add(new PlayerStat(p, creatorLogin, anonymise, leaders, proposalsCount));
+            }
+
+            var orderedPlayerStates = playersStats.OrderBy(_ => _.Name);
+            if (sorts?.Length > 0)
+            {
+                var first = true;
+                foreach (var (sortType, descending) in sorts)
+                {
+                    if (first)
+                    {
+                        orderedPlayerStates = descending
+                            ? orderedPlayerStates.OrderByDescending(_ => _.GetSortValue(sortType.ToString()))
+                            : orderedPlayerStates.OrderBy(_ => _.GetSortValue(sortType.ToString()));
+                        first = false;
+                    }
+                    else
+                    {
+                        orderedPlayerStates = descending
+                            ? orderedPlayerStates.ThenByDescending(_ => _.GetSortValue(sortType.ToString()))
+                            : orderedPlayerStates.ThenBy(_ => _.GetSortValue(sortType.ToString()));
+                    }
+                }
+            }
+
+            return orderedPlayerStates.ToList();
         }
 
         private async Task<DateTime> GetNextDateAsync()

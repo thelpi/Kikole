@@ -204,5 +204,37 @@ namespace KikoleApi.Controllers
 
             return NoContent();
         }
+
+        /// <summary>
+        /// Gets statistics about players until today.
+        /// </summary>
+        /// <param name="userId">Identifier of user who does the request.</param>
+        /// <param name="sortTypes">Collection of sort options.</param>
+        /// <param name="sortDesc">For each <paramref name="sortTypes"/>, indicates if descending sort.</param>
+        /// <returns>Collection of statistics; some info might be anonymised.</returns>
+        [HttpGet("/player-statistics")]
+        [AuthenticationLevel(UserTypes.StandardUser)]
+        [ProducesResponseType(typeof(IReadOnlyCollection<PlayerStat>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<PlayerStat>>> GetPlayersStatisticsAsync(
+            [FromQuery] ulong userId,
+            [FromQuery] string[] sortTypes,
+            [FromQuery] bool[] sortDesc)
+        {
+            var parsedSorts = new List<(PlayerStatSorts, bool)>(sortTypes?.Length ?? 0);
+            if (sortTypes != null)
+            {
+                for (var i = 0; i < sortTypes.Length; i++)
+                {
+                    if (Enum.TryParse<PlayerStatSorts>(sortTypes[i], out var sortType))
+                        parsedSorts.Add((sortType, sortDesc?.Length > i && sortDesc[i]));
+                }
+            }
+
+            var stats = await _playerService
+                .GetPlayersStatisticsAsync(userId, parsedSorts?.ToArray())
+                .ConfigureAwait(false);
+
+            return Ok(stats);
+        }
     }
 }
