@@ -148,7 +148,7 @@
     <value>in chronological order, senior career only, without B teams</value>
   </data>
   <data name="ClubsTip2" xml:space="preserve">
-    <value>if more than 10 clubs, reconsider your player or ignore pointless clubs</value>
+    <value>if more than 10 clubs, set the first ten and the administrator will complete; please create all the club</value>
   </data>
   <data name="ClubsTip3" xml:space="preserve">
     <value>do NOT set twice a club in case of come-back: ignore the come-back</value>

@@ -133,7 +133,7 @@
     <value>Clubs :</value>
   </data>
   <data name="ClubTipOne" xml:space="preserve">
-    <value>Triés du plus ancien au plus récent (10 max.)</value>
+    <value>Triés du plus ancien au plus récent</value>
   </data>
   <data name="ClubTipTwo" xml:space="preserve">
     <value>Pas de doublon quand le joueur revient dans un club qu'il a déjà connu</value>
