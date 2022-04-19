@@ -213,4 +213,13 @@
   <data name="NeedAnotherClue" xml:space="preserve">
     <value>I need another clue</value>
   </data>
+  <data name="CreateClubIsGood" xml:space="preserve">
+    <value>If the lack of a club eliminate some potential players, add it to make the game harder for your opponents !</value>
+  </data>
+  <data name="HelpToCreateClub" xml:space="preserve">
+    <value>Add a new club to the database</value>
+  </data>
+  <data name="NewTab" xml:space="preserve">
+    <value>new tab</value>
+  </data>
 </root>

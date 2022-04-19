@@ -121,7 +121,7 @@
     <value>Noms alternatifs</value>
   </data>
   <data name="AlternativeTip" xml:space="preserve">
-    <value>nom en français si différent, et 2 ou 3 alternatives pertinentes</value>
+    <value>si très différent du nom EN ou FR</value>
   </data>
   <data name="CreateClubTitle" xml:space="preserve">
     <value>Créer un club</value>
@@ -132,13 +132,13 @@
   <data name="DontMindDiacritics" xml:space="preserve">
     <value>ne pas se soucier des accents, ils seront ignorés</value>
   </data>
-  <data name="MainName" xml:space="preserve">
-    <value>Nom principal</value>
+  <data name="MainNameEn" xml:space="preserve">
+    <value>Nom principal (titre page wiki anglais)</value>
+  </data>
+  <data name="MainNameFr" xml:space="preserve">
+    <value>Nom alternatif (titre page wiki français</value>
   </data>
   <data name="SearchAlreadyExists" xml:space="preserve">
     <value>Chercher si le club n'existe pas déjà :</value>
-  </data>
-  <data name="UseWikiName" xml:space="preserve">
-    <value>utilisez le titre de la page Wikipédia en anglais</value>
   </data>
 </root>

@@ -7,6 +7,7 @@ namespace KikoleSite.Models
 {
     public class HomeModel
     {
+        public bool CanCreateClub { get; set; }
         public string Clue { get; set; }
         public string EasyClue { get; set; }
         public string Message { get; set; }

@@ -159,6 +159,13 @@
                             }
                         </div>
                     }
+                    @if (Model.CanCreateClub)
+                    {
+                        <div style="margin-top: 10px">
+                            <a href="/Admin/Club" target="_blank">@localizer["HelpToCreateClub"]</a> (@localizer["NewTab"])
+                        </div>
+                        <div style="font-size: small">(@localizer["CreateClubIsGood"])</div>
+                    }
                 </fieldset>
             </form>
             <form method="post" action="/">

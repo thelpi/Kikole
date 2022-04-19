@@ -21,13 +21,16 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         </div>
     </div>
     <div style="margin-top: 20px">
-        <div><label>@localizer["MainName"]</label></div>
+        <div><label>@localizer["MainNameEn"]</label></div>
         <input type="text" name="MainName" style="width: 250px" />
     </div>
-    <div style="font-size: small">(@localizer["UseWikiName"])</div>
+    <div style="margin-top: 20px">
+        <div><label>@localizer["MainNameFr"]</label></div>
+        <input type="text" name="AlternativeName0" style="width: 250px" />
+    </div>
 
     <div style="margin-top: 20px"><label>@localizer["AlternativeNames"]</label></div>
-    @for (var i = 0; i < 10; i++)
+    @for (var i = 1; i < 4; i++)
     {
         var name = $"AlternativeName{i}";
         <div style="margin-top: 5px">

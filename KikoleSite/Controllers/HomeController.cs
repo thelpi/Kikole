@@ -191,6 +191,10 @@ namespace KikoleSite.Controllers
                 .GetAcceptedChallengesAsync(token)
                 .ConfigureAwait(false);
 
+            var isPowerUser = await _apiProvider
+                .IsPowerUserAsync(token)
+                .ConfigureAwait(false);
+
             model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
             model.Message = msg;
             model.LoggedAs = login;
@@ -204,6 +208,7 @@ namespace KikoleSite.Controllers
             model.TodayChallenge = accepteds
                 .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
             model.HasPendingChallenges = pendings.Count > 0;
+            model.CanCreateClub = isPowerUser;
             return View(model);
         }
     }
