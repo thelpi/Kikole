@@ -214,7 +214,7 @@
     <value>J'ai besoin d'un autre indice</value>
   </data>
   <data name="CreateClubIsGood" xml:space="preserve">
-    <value>Si l'absence du club élimine des joueurs potentiels, ajouter le cub peut rendre le jeu plus difficile pour vos adversaires !</value>
+    <value>Si l'absence du club élimine des joueurs potentiels, ajouter le club peut rendre le jeu plus difficile pour vos adversaires !</value>
   </data>
   <data name="HelpToCreateClub" xml:space="preserve">
     <value>Ajouter un club à la base de données</value>
