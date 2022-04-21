@@ -88,7 +88,7 @@ namespace KikoleApi.Services
                         UserId = userId
                     };
 
-                    var isToday = request.DaysBefore == 0;
+                    var isToday = request.IsTodayPlayer;
                     if (isToday)
                     {
                         await _leaderRepository

@@ -357,9 +357,8 @@ namespace KikoleSite
 
         #region main game
 
-        public async Task<ProposalResponse> SubmitProposalAsync(DateTime proposalDate,
-            string value,
-            int daysBefore,
+        public async Task<ProposalResponse> SubmitProposalAsync(string value,
+            int daysBeforeNow,
             ProposalType proposalType,
             string authToken)
         {
@@ -369,9 +368,8 @@ namespace KikoleSite
                     authToken,
                     new
                     {
-                        proposalDate,
                         value,
-                        daysBefore
+                        daysBeforeNow
                     })
                 .ConfigureAwait(false);
 

@@ -38,7 +38,7 @@ namespace KikoleApi.Repositories
         {
             return await ExecuteReaderAsync<LeaderDto>(
                     "SELECT * FROM leaders " +
-                    "WHERE DATE(proposal_date) = @date " +
+                    "WHERE proposal_date = @date " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new { date.Date })
                 .ConfigureAwait(false);
@@ -67,8 +67,8 @@ namespace KikoleApi.Repositories
                     "   SELECT proposal_date, SUM(points) AS points, (" +
                     "       SELECT COUNT(DISTINCT p.user_id) " +
                     "       FROM proposals AS p " +
-                    "       WHERE p.days_before = 0 " +
-                    "       AND DATE(p.proposal_date) = l.proposal_date" +
+                    "       WHERE DATE(p.creation_date) = p.proposal_date " +
+                    "       AND p.proposal_date = l.proposal_date" +
                     "   ) AS users_count " +
                     "   FROM leaders AS l " +
                     "   GROUP BY proposal_date" +

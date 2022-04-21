@@ -35,7 +35,6 @@ namespace KikoleApi.Repositories
                     ("value", proposal.Value),
                     ("successful", proposal.Successful),
                     ("proposal_date", proposal.ProposalDate.Date),
-                    ("days_before", proposal.DaysBefore),
                     ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
         }
@@ -45,7 +44,7 @@ namespace KikoleApi.Repositories
             DateTime playerProposalDate, ulong userId)
         {
             return await GetProposalsInternalAsync(
-                    "DATE(DATE_ADD(proposal_date, INTERVAL -days_before DAY)) = @real_proposal_date",
+                    "proposal_date = @real_proposal_date",
                     playerProposalDate,
                     userId)
                 .ConfigureAwait(false);
@@ -56,7 +55,7 @@ namespace KikoleApi.Repositories
             DateTime playerProposalDate, ulong userId)
         {
             return await GetProposalsInternalAsync(
-                    "days_before = 0 AND DATE(proposal_date) = @real_proposal_date",
+                    "proposal_date = DATE(creation_date) AND proposal_date = @real_proposal_date",
                     playerProposalDate,
                     userId)
                 .ConfigureAwait(false);
@@ -68,8 +67,8 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<ProposalDto>(
                     "SELECT * FROM proposals " +
                     "WHERE proposal_type_id = @proposal_type_id " +
-                    "AND successful > 0 AND days_before = 0 " +
-                    "AND DATE(proposal_date) = @proposal_date " +
+                    "AND successful > 0 AND proposal_date = DATE(creation_date) " +
+                    "AND proposal_date = @proposal_date " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new
                     {
@@ -82,10 +81,10 @@ namespace KikoleApi.Repositories
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetAllProposalsDateExactAsync(ulong userId)
         {
-            return await GetDtosAsync<ProposalDto>(
-                    "proposals",
-                    ("user_id", userId),
-                    ("days_before", 0))
+            return await ExecuteReaderAsync<ProposalDto>(
+                    "SELECT * FROM proposals " +
+                    "WHERE user_id = @userId AND proposal_date = DATE(creation_date)",
+                    new { userId })
                 .ConfigureAwait(false);
         }
 
@@ -94,8 +93,8 @@ namespace KikoleApi.Repositories
         {
             return await ExecuteReaderAsync<ProposalDto>(
                     "SELECT * FROM proposals " +
-                    "WHERE days_before = 0 " +
-                    "AND DATE(proposal_date) = @proposal_date " +
+                    "WHERE proposal_date = DATE(creation_date) " +
+                    "AND proposal_date = @proposal_date " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new
                     {

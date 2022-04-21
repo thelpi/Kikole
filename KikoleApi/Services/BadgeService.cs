@@ -384,7 +384,7 @@ namespace KikoleApi.Services
                     .ConfigureAwait(false);
             }
 
-            if (request.DaysBefore == 0)
+            if (request.IsTodayPlayer)
             {
                 var proposals = await _proposalRepository
                     .GetAllProposalsDateExactAsync(userId)

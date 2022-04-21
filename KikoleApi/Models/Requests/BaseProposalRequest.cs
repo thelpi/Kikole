@@ -7,15 +7,33 @@ using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Models.Requests
 {
+    /// <summary>
+    /// Base class for each type of proposal request
+    /// </summary>
     public abstract class BaseProposalRequest
     {
-        public DateTime ProposalDate { get; set; }
+        private protected BaseProposalRequest()
+        {
+            ProposalDate = DateTime.Now;
+        }
 
-        public uint DaysBefore { get; set; }
+        /// <summary>
+        /// Index of the day to substract from now to get the player ralated to this proposal
+        /// </summary>
+        public uint DaysBeforeNow { get; set; }
 
+        /// <summary>
+        /// The submitted value.
+        /// </summary>
         public string Value { get; set; }
 
+        internal bool IsTodayPlayer => DaysBeforeNow == 0;
+
         internal abstract ProposalTypes ProposalType { get; }
+
+        internal DateTime ProposalDate { get; }
+
+        internal DateTime PlayerSubmissionDate => ProposalDate.AddDays(-DaysBeforeNow);
 
         internal virtual string GetTip(PlayerDto player, IStringLocalizer resources)
         {
@@ -34,16 +52,13 @@ namespace KikoleApi.Models.Requests
         {
             return new ProposalDto
             {
-                ProposalDate = ProposalDate,
+                ProposalDate = PlayerSubmissionDate,
                 Successful = (byte)(successful ? 1 : 0),
                 UserId = userId,
                 Value = Value?.ToString(),
-                ProposalTypeId = (ulong)ProposalType,
-                DaysBefore = DaysBefore
+                ProposalTypeId = (ulong)ProposalType
             };
         }
-
-        internal DateTime PlayerSubmissionDate => ProposalDate.AddDays(-DaysBefore);
 
         internal bool MatchAny(IEnumerable<ProposalDto> proposals)
         {

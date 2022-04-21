@@ -107,7 +107,7 @@ namespace KikoleSite.Controllers
             var now = DateTime.Now;
 
             var response = await _apiProvider
-                .SubmitProposalAsync(now, value, model.CurrentDay,
+                .SubmitProposalAsync(value, model.CurrentDay,
                     proposalType,
                     token)
                 .ConfigureAwait(false);

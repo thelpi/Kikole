@@ -103,7 +103,7 @@ namespace KikoleApi.Repositories
             return await ExecuteReaderAsync<string>(
                     "SELECT DISTINCT y.name " +
                     "FROM players AS y " +
-                    "LEFT JOIN proposals AS p ON y.proposal_date = DATE(DATE_ADD(p.proposal_date, INTERVAL -p.days_before DAY)) " +
+                    "LEFT JOIN proposals AS p ON y.proposal_date = p.proposal_date " +
                     "WHERE (" +
                     "   (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = @pType) " +
                     "   OR y.creation_user_id = @userId" +
