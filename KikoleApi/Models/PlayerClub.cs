@@ -10,12 +10,13 @@ namespace KikoleApi.Models
 
         public string Name { get; }
 
-        internal PlayerClub(ClubDto club, IEnumerable<PlayerClubDto> playerClubs)
+        public bool IsLoan { get; }
+
+        internal PlayerClub(PlayerClubDto playerClub, IEnumerable<ClubDto> clubs)
         {
-            Name = club.Name;
-            HistoryPosition = playerClubs
-                .First(pc => pc.ClubId == club.Id)
-                .HistoryPosition;
+            Name = clubs.Single(c => c.Id == playerClub.ClubId).Name;
+            HistoryPosition = playerClub.HistoryPosition;
+            IsLoan = playerClub.IsLoan > 0;
         }
     }
 }

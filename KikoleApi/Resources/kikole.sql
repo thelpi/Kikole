@@ -1,52 +1,52 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
-CREATE DATABASE IF NOT EXISTS `kikole` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
-USE `kikole`;
+CREATE DATABASE IF NOT EXISTS kikole DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+USE kikole;
 
-CREATE TABLE `badges` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL,
-  `description` text COLLATE utf8_bin NOT NULL,
-  `hidden` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-  `is_unique` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-  `sub_badge_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE badges (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL,
+  description text COLLATE utf8_bin NOT NULL,
+  hidden tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  is_unique tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  sub_badge_id bigint(20) UNSIGNED DEFAULT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `badge_translations` (
-  `badge_id` bigint(20) UNSIGNED NOT NULL,
-  `language_id` bigint(20) UNSIGNED NOT NULL,
-  `description` text COLLATE utf8_bin NOT NULL
+CREATE TABLE badge_translations (
+  badge_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  description text COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `challenges` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `host_user_id` bigint(20) UNSIGNED NOT NULL,
-  `guest_user_id` bigint(20) UNSIGNED NOT NULL,
-  `is_accepted` tinyint(1) UNSIGNED DEFAULT NULL,
-  `challenge_date` date DEFAULT NULL,
-  `points_rate` tinyint(3) UNSIGNED NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE challenges (
+  id bigint(20) UNSIGNED NOT NULL,
+  host_user_id bigint(20) UNSIGNED NOT NULL,
+  guest_user_id bigint(20) UNSIGNED NOT NULL,
+  is_accepted tinyint(1) UNSIGNED DEFAULT NULL,
+  challenge_date date DEFAULT NULL,
+  points_rate tinyint(3) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `clubs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL,
-  `allowed_names` text COLLATE utf8_bin NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE clubs (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL,
+  allowed_names text COLLATE utf8_bin NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `countries` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `code` char(2) COLLATE utf8_bin NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE countries (
+  id bigint(20) UNSIGNED NOT NULL,
+  code char(2) COLLATE utf8_bin NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `countries` (`id`, `code`, `creation_date`, `update_date`) VALUES
+INSERT INTO countries (id, `code`, creation_date, update_date) VALUES
 (1, 'AF', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (2, 'AX', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (3, 'AL', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
@@ -297,13 +297,13 @@ INSERT INTO `countries` (`id`, `code`, `creation_date`, `update_date`) VALUES
 (248, 'ZM', '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
 (249, 'ZW', '2022-03-03 22:17:42', '2022-03-03 21:17:42');
 
-CREATE TABLE `country_translations` (
-  `country_id` bigint(20) UNSIGNED NOT NULL,
-  `language_id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL
+CREATE TABLE country_translations (
+  country_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `country_translations` (`country_id`, `language_id`, `name`) VALUES
+INSERT INTO country_translations (country_id, language_id, `name`) VALUES
 (1, 1, 'Afghanistan'),
 (1, 2, 'Afghanistan'),
 (2, 1, 'Åland Islands'),
@@ -803,97 +803,98 @@ INSERT INTO `country_translations` (`country_id`, `language_id`, `name`) VALUES
 (249, 1, 'Zimbabwe'),
 (249, 2, 'Zimbabwe');
 
-CREATE TABLE `languages` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `code` char(2) COLLATE utf8_bin NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE languages (
+  id bigint(20) UNSIGNED NOT NULL,
+  code char(2) COLLATE utf8_bin NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `languages` (`id`, `code`, `name`, `creation_date`, `update_date`) VALUES
+INSERT INTO languages (id, `code`, `name`, creation_date, update_date) VALUES
 (1, 'en', 'English', '2022-03-03 00:00:00', '2022-03-03 21:03:16'),
 (2, 'fr', 'Français', '2022-03-03 00:00:00', '2022-03-03 21:03:16');
 
-CREATE TABLE `leaders` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `proposal_date` date NOT NULL,
-  `points` smallint(5) UNSIGNED NOT NULL,
-  `time` smallint(5) UNSIGNED NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE leaders (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  proposal_date date NOT NULL,
+  points smallint(5) UNSIGNED NOT NULL,
+  time smallint(5) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `messages` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `message` text COLLATE utf8_bin NOT NULL,
-  `display_from` datetime DEFAULT NULL,
-  `display_to` datetime DEFAULT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE messages (
+  id bigint(20) UNSIGNED NOT NULL,
+  message text COLLATE utf8_bin NOT NULL,
+  display_from datetime DEFAULT NULL,
+  display_to datetime DEFAULT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `players` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL,
-  `allowed_names` text COLLATE utf8_bin NOT NULL,
-  `year_of_birth` smallint(5) UNSIGNED NOT NULL,
-  `country_id` bigint(20) UNSIGNED NOT NULL,
-  `proposal_date` date DEFAULT NULL,
-  `clue` varchar(255) COLLATE utf8_bin NOT NULL,
-  `easy_clue` varchar(255) COLLATE utf8_bin NOT NULL,
-  `position_id` bigint(20) UNSIGNED NOT NULL,
-  `badge_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `creation_user_id` bigint(20) UNSIGNED NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `reject_date` datetime DEFAULT NULL,
-  `hide_creator` tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
+CREATE TABLE players (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL,
+  allowed_names text COLLATE utf8_bin NOT NULL,
+  year_of_birth smallint(5) UNSIGNED NOT NULL,
+  country_id bigint(20) UNSIGNED NOT NULL,
+  proposal_date date DEFAULT NULL,
+  clue varchar(255) COLLATE utf8_bin NOT NULL,
+  easy_clue varchar(255) COLLATE utf8_bin NOT NULL,
+  position_id bigint(20) UNSIGNED NOT NULL,
+  badge_id bigint(20) UNSIGNED DEFAULT NULL,
+  creation_user_id bigint(20) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  reject_date datetime DEFAULT NULL,
+  hide_creator tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `player_clubs` (
-  `player_id` bigint(20) UNSIGNED NOT NULL,
-  `club_id` bigint(20) UNSIGNED NOT NULL,
-  `history_position` tinyint(3) UNSIGNED NOT NULL
+CREATE TABLE player_clubs (
+  player_id bigint(20) UNSIGNED NOT NULL,
+  club_id bigint(20) UNSIGNED NOT NULL,
+  history_position tinyint(3) UNSIGNED NOT NULL,
+  is_loan tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `player_clue_translations` (
-  `player_id` bigint(20) UNSIGNED NOT NULL,
-  `language_id` bigint(20) UNSIGNED NOT NULL,
-  `is_easy` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-  `clue` varchar(255) COLLATE utf8_bin NOT NULL
+CREATE TABLE player_clue_translations (
+  player_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  is_easy tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  clue varchar(255) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `positions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL
+CREATE TABLE positions (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `positions` (`id`, `name`) VALUES
+INSERT INTO positions (id, `name`) VALUES
 (1, 'Goalkeeper'),
 (2, 'Defender'),
 (3, 'Midfielder'),
 (4, 'Forward');
 
-CREATE TABLE `proposals` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `proposal_type_id` bigint(20) UNSIGNED NOT NULL,
-  `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `successful` tinyint(3) UNSIGNED NOT NULL,
-  `proposal_date` date NOT NULL,
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE proposals (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  proposal_type_id bigint(20) UNSIGNED NOT NULL,
+  value varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  successful tinyint(3) UNSIGNED NOT NULL,
+  proposal_date date NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `proposal_types` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL,
-  `description` text COLLATE utf8_bin NOT NULL
+CREATE TABLE proposal_types (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL,
+  description text COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `proposal_types` (`id`, `name`, `description`) VALUES
+INSERT INTO proposal_types (id, `name`, description) VALUES
 (1, 'Name', 'The player\'s name has been proposed'),
 (2, 'Club', 'A club in the player\'s career has been proposed'),
 (3, 'Year', 'The player\'s year of the birth has been proposed'),
@@ -901,142 +902,141 @@ INSERT INTO `proposal_types` (`id`, `name`, `description`) VALUES
 (5, 'Clue', 'A new clue has been requested'),
 (6, 'Position', 'The player\'s position has been proposed');
 
-CREATE TABLE `users` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `login` varchar(255) COLLATE utf8_bin NOT NULL,
-  `password` char(64) COLLATE utf8_bin NOT NULL,
-  `password_reset_question` varchar(255) COLLATE utf8_bin NOT NULL,
-  `password_reset_answer` char(64) COLLATE utf8_bin NOT NULL,
-  `language_id` bigint(20) UNSIGNED NOT NULL,
-  `user_type_id` bigint(20) UNSIGNED NOT NULL,
-  `is_disabled` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-  `creation_date` datetime NOT NULL,
-  `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE users (
+  id bigint(20) UNSIGNED NOT NULL,
+  login varchar(255) COLLATE utf8_bin NOT NULL,
+  password char(64) COLLATE utf8_bin NOT NULL,
+  password_reset_question varchar(255) COLLATE utf8_bin NOT NULL,
+  password_reset_answer char(64) COLLATE utf8_bin NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  user_type_id bigint(20) UNSIGNED NOT NULL,
+  is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `user_badges` (
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `badge_id` bigint(20) UNSIGNED NOT NULL,
-  `get_date` date NOT NULL
+CREATE TABLE user_badges (
+  user_id bigint(20) UNSIGNED NOT NULL,
+  badge_id bigint(20) UNSIGNED NOT NULL,
+  get_date date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE `user_types` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8_bin NOT NULL
+CREATE TABLE user_types (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-INSERT INTO `user_types` (`id`, `name`) VALUES
+INSERT INTO user_types (id, `name`) VALUES
 (1, 'Standard user'),
 (2, 'Power user'),
 (3, 'Administrator');
 
 
-ALTER TABLE `badges`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `sub_badge_id` (`sub_badge_id`);
+ALTER TABLE badges
+  ADD PRIMARY KEY (id),
+  ADD KEY sub_badge_id (sub_badge_id);
 
-ALTER TABLE `badge_translations`
-  ADD PRIMARY KEY (`badge_id`,`language_id`),
-  ADD UNIQUE KEY `badge_id` (`badge_id`),
-  ADD KEY `language_id` (`language_id`);
+ALTER TABLE badge_translations
+  ADD PRIMARY KEY (badge_id,language_id),
+  ADD UNIQUE KEY badge_id (badge_id),
+  ADD KEY language_id (language_id);
 
-ALTER TABLE `challenges`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `host_user_id` (`host_user_id`),
-  ADD KEY `guest_user_id` (`guest_user_id`);
+ALTER TABLE challenges
+  ADD PRIMARY KEY (id),
+  ADD KEY host_user_id (host_user_id),
+  ADD KEY guest_user_id (guest_user_id);
 
-ALTER TABLE `clubs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
+ALTER TABLE clubs
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY name (name);
 
-ALTER TABLE `countries`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`);
+ALTER TABLE countries
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY code (code);
 
-ALTER TABLE `country_translations`
-  ADD PRIMARY KEY (`country_id`,`language_id`),
-  ADD KEY `country_id` (`country_id`),
-  ADD KEY `language_id` (`language_id`);
+ALTER TABLE country_translations
+  ADD PRIMARY KEY (country_id,language_id),
+  ADD KEY country_id (country_id),
+  ADD KEY language_id (language_id);
 
-ALTER TABLE `languages`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`);
+ALTER TABLE languages
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY code (code);
 
-ALTER TABLE `leaders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `proposal_date` (`proposal_date`);
+ALTER TABLE leaders
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id),
+  ADD KEY proposal_date (proposal_date);
 
-ALTER TABLE `messages`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE messages
+  ADD PRIMARY KEY (id);
 
-ALTER TABLE `players`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `country_id` (`country_id`) USING BTREE,
-  ADD KEY `position_id` (`position_id`),
-  ADD KEY `badge_id` (`badge_id`),
-  ADD KEY `creation_user_id` (`creation_user_id`),
-  ADD KEY `reject_date` (`reject_date`);
+ALTER TABLE players
+  ADD PRIMARY KEY (id),
+  ADD KEY country_id (country_id) USING BTREE,
+  ADD KEY position_id (position_id),
+  ADD KEY badge_id (badge_id),
+  ADD KEY creation_user_id (creation_user_id),
+  ADD KEY reject_date (reject_date);
 
-ALTER TABLE `player_clubs`
-  ADD PRIMARY KEY (`player_id`,`club_id`) USING BTREE,
-  ADD UNIQUE KEY `player_id_2` (`player_id`,`history_position`),
-  ADD KEY `player_id` (`player_id`),
-  ADD KEY `club_id` (`club_id`);
+ALTER TABLE player_clubs
+  ADD PRIMARY KEY (player_id,history_position),
+  ADD KEY player_id (player_id),
+  ADD KEY club_id (club_id);
 
-ALTER TABLE `player_clue_translations`
-  ADD PRIMARY KEY (`player_id`,`language_id`,`is_easy`),
-  ADD KEY `language_id` (`language_id`),
-  ADD KEY `is_easy` (`is_easy`),
-  ADD KEY `player_id` (`player_id`) USING BTREE;
+ALTER TABLE player_clue_translations
+  ADD PRIMARY KEY (player_id,language_id,is_easy),
+  ADD KEY language_id (language_id),
+  ADD KEY is_easy (is_easy),
+  ADD KEY player_id (player_id) USING BTREE;
 
-ALTER TABLE `positions`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE positions
+  ADD PRIMARY KEY (id);
 
-ALTER TABLE `proposals`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `proposal_type_id` (`proposal_type_id`);
+ALTER TABLE proposals
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id),
+  ADD KEY proposal_type_id (proposal_type_id);
 
-ALTER TABLE `proposal_types`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE proposal_types
+  ADD PRIMARY KEY (id);
 
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `lang_id` (`language_id`),
-  ADD KEY `is_disabled` (`is_disabled`),
-  ADD KEY `user_type_id` (`user_type_id`);
+ALTER TABLE users
+  ADD PRIMARY KEY (id),
+  ADD KEY lang_id (language_id),
+  ADD KEY is_disabled (is_disabled),
+  ADD KEY user_type_id (user_type_id);
 
-ALTER TABLE `user_badges`
-  ADD PRIMARY KEY (`user_id`,`badge_id`);
+ALTER TABLE user_badges
+  ADD PRIMARY KEY (user_id,badge_id);
 
-ALTER TABLE `user_types`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE user_types
+  ADD PRIMARY KEY (id);
 
 
-ALTER TABLE `badges`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `challenges`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `clubs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `countries`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `languages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `leaders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `players`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `positions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `proposals`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `proposal_types`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE `user_types`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE badges
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE challenges
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE clubs
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE countries
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE languages
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE leaders
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE messages
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE players
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE positions
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE proposals
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE proposal_types
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE users
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE user_types
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;

@@ -83,11 +83,10 @@ namespace KikoleSite.Models
                     if (response.Successful)
                     {
                         var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
-                        var club = response.GetPlayerClubValue();
-                        if (!clubSubmissions.Any(cs => cs.Name == club.Name))
-                        {
-                            clubSubmissions.Add(club);
-                        }
+                        var newClubs = response.GetPlayerClubsValue();
+                        clubSubmissions.AddRange(
+                            newClubs.Where(nc =>
+                                !clubSubmissions.Any(cs => cs.HistoryPosition == nc.HistoryPosition)));
                         KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                     }
                     else

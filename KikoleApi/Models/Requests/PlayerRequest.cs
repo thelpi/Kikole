@@ -22,7 +22,7 @@ namespace KikoleApi.Models.Requests
 
         public IReadOnlyList<string> AllowedNames { get; set; }
 
-        public IReadOnlyList<ulong> Clubs { get; set; }
+        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
 
         public string ClueEn { get; set; }
 
@@ -61,7 +61,13 @@ namespace KikoleApi.Models.Requests
             if (Clubs == null || Clubs.Count == 0)
                 return resources["EmptyClubsList"];
 
-            if (Clubs.Any(c => c <= 0))
+            if (Clubs.Any(c => c.ClubId == 0))
+                return resources["InvalidClubs"];
+
+            var historyCheck = Clubs.Select(c => c.HistoryPosition);
+            if (historyCheck.Distinct().Count() != Clubs.Count
+                || historyCheck.Min() != 1
+                || historyCheck.Max() - Clubs.Count != 0)
                 return resources["InvalidClubs"];
 
             if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
@@ -93,12 +99,7 @@ namespace KikoleApi.Models.Requests
         internal IReadOnlyList<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
         {
             return Clubs
-                .Select((c, i) => new PlayerClubDto
-                {
-                    HistoryPosition = (byte)(i + 1),
-                    ClubId = c,
-                    PlayerId = playerId
-                })
+                .Select(c => c.ToPlayerClubDto(playerId))
                 .ToList();
         }
     }

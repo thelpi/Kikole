@@ -50,7 +50,14 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                 <label>@localizer["Clubs"]</label>
                 @foreach (var club in Model.SelectedPlayer.Clubs.OrderBy(x => x.HistoryPosition))
                 {
-                    <div>@club.HistoryPosition - @club.Name</div>
+                    if (club.IsLoan)
+                    {
+                        <div>@club.HistoryPosition - @club.Name - (@localizer["LoanInitial"])</div>
+                    }
+                    else
+                    {
+                        <div>@club.HistoryPosition - @club.Name</div>
+                    }
                 }
             </div>
             <div style="margin-top: 5px">

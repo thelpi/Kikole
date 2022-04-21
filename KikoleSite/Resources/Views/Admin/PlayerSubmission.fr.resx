@@ -150,6 +150,9 @@
   <data name="Ko" xml:space="preserve">
     <value>KO</value>
   </data>
+  <data name="LoanInitial" xml:space="preserve">
+    <value>p</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
   </data>

@@ -18,9 +18,9 @@ namespace KikoleSite.Api
 
         public IReadOnlyCollection<UserBadge> CollectedBadges { get; set; }
 
-        internal PlayerClub GetPlayerClubValue()
+        internal IReadOnlyCollection<PlayerClub> GetPlayerClubsValue()
         {
-            return System.Text.Json.JsonSerializer.Deserialize<PlayerClub>(Value);
+            return System.Text.Json.JsonSerializer.Deserialize<IReadOnlyCollection<PlayerClub>>(Value);
         }
     }
 }

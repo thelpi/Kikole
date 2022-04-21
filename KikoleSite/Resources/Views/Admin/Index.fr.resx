@@ -150,9 +150,6 @@
   <data name="ClubsTip2" xml:space="preserve">
     <value>si plus de 10 clubs, mettre les 10 premiers et l'administrateur complètera ; merci de créer les clubs</value>
   </data>
-  <data name="ClubsTip3" xml:space="preserve">
-    <value>ne PAS mettre deux fois un club en cas de come-back, ignorez simplement le come-back</value>
-  </data>
   <data name="Clue" xml:space="preserve">
     <value>Indice</value>
   </data>
@@ -207,5 +204,8 @@
   </data>
   <data name="EasyClueFr" xml:space="preserve">
     <value>Indice facile en français</value>
+  </data>
+  <data name="IsLoan" xml:space="preserve">
+    <value>Prêt ?</value>
   </data>
 </root>

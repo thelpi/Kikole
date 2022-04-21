@@ -56,6 +56,26 @@ namespace KikoleSite.Models
 
         public string Club9 { get; set; }
 
+        public bool IsLoan0 { get; set; }
+
+        public bool IsLoan1 { get; set; }
+
+        public bool IsLoan2 { get; set; }
+
+        public bool IsLoan3 { get; set; }
+
+        public bool IsLoan4 { get; set; }
+
+        public bool IsLoan5 { get; set; }
+
+        public bool IsLoan6 { get; set; }
+
+        public bool IsLoan7 { get; set; }
+
+        public bool IsLoan8 { get; set; }
+
+        public bool IsLoan9 { get; set; }
+
         public string Position { get; set; }
 
         public IReadOnlyList<SelectListItem> Positions { get; set; }

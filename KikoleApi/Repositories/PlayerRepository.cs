@@ -50,7 +50,8 @@ namespace KikoleApi.Repositories
                     "player_clubs",
                     ("player_id", playerClub.PlayerId),
                     ("club_id", playerClub.ClubId),
-                    ("history_position", playerClub.HistoryPosition))
+                    ("history_position", playerClub.HistoryPosition),
+                    ("is_loan", playerClub.IsLoan))
                 .ConfigureAwait(false);
         }
 

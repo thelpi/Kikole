@@ -212,27 +212,22 @@ namespace KikoleSite.Controllers
                 .GetClubsAsync()
                 .ConfigureAwait(false);
 
-            var clubs = new List<ulong>();
-            AddClubIfValid(clubs, model.Club0, clubsReferential);
-            AddClubIfValid(clubs, model.Club1, clubsReferential);
-            AddClubIfValid(clubs, model.Club2, clubsReferential);
-            AddClubIfValid(clubs, model.Club3, clubsReferential);
-            AddClubIfValid(clubs, model.Club4, clubsReferential);
-            AddClubIfValid(clubs, model.Club5, clubsReferential);
-            AddClubIfValid(clubs, model.Club6, clubsReferential);
-            AddClubIfValid(clubs, model.Club7, clubsReferential);
-            AddClubIfValid(clubs, model.Club8, clubsReferential);
-            AddClubIfValid(clubs, model.Club9, clubsReferential);
+            byte iPos = 1;
+            var clubs = new List<PlayerClubRequest>();
+            AddClubIfValid(clubs, model.Club0, clubsReferential, ref iPos, model.IsLoan0);
+            AddClubIfValid(clubs, model.Club1, clubsReferential, ref iPos, model.IsLoan1);
+            AddClubIfValid(clubs, model.Club2, clubsReferential, ref iPos, model.IsLoan2);
+            AddClubIfValid(clubs, model.Club3, clubsReferential, ref iPos, model.IsLoan3);
+            AddClubIfValid(clubs, model.Club4, clubsReferential, ref iPos, model.IsLoan4);
+            AddClubIfValid(clubs, model.Club5, clubsReferential, ref iPos, model.IsLoan5);
+            AddClubIfValid(clubs, model.Club6, clubsReferential, ref iPos, model.IsLoan6);
+            AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7);
+            AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8);
+            AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9);
 
             if (clubs.Count == 0)
             {
                 model.ErrorMessage = _localizer["OneClubMin"];
-                SetPositionsOnModel(model, chart);
-                return View(model);
-            }
-            else if (clubs.Count != clubs.Distinct().Count())
-            {
-                model.ErrorMessage = _localizer["DuplicateClub"];
                 SetPositionsOnModel(model, chart);
                 return View(model);
             }
@@ -372,11 +367,14 @@ namespace KikoleSite.Controllers
                 .ToList();
         }
 
-        private void AddClubIfValid(List<ulong> clubs, string value, IReadOnlyCollection<Club> clubsReferential)
+        private void AddClubIfValid(List<PlayerClubRequest> clubs, string value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
         {
             ulong? id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
             if (id.HasValue)
-                clubs.Add(id.Value);
+            {
+                clubs.Add(new PlayerClubRequest { ClubId = id.Value, HistoryPosition = i, IsLoan = isLoan });
+                i++;
+            }
         }
 
         private void SetPositionsOnModel(PlayerCreationModel model, Api.ProposalChart chart)

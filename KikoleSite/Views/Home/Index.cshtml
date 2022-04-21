@@ -143,12 +143,11 @@
                             <ul>
                                 @foreach (var club in Model.KnownPlayerClubs)
                                 {
-                                    <li>@string.Format("{0} - {1}", club.HistoryPosition, club.Name)</li>
+                                    <li>@string.Format("{0} - {1}{2}", club.HistoryPosition, club.Name, club.IsLoan ? $" ({localizer["LoanInitial"].Value})" : "")</li>
                                 }
                             </ul>
                         </div>
                         <div style="font-size: small">(@localizer["ClubTipOne"])</div>
-                        <div style="font-size: small">(@localizer["ClubTipTwo"])</div>
                     }
                     @if (Model.IncorrectClubs?.Count > 0)
                     {

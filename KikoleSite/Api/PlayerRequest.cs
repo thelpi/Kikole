@@ -15,7 +15,7 @@ namespace KikoleSite.Api
 
         public IReadOnlyList<string> AllowedNames { get; set; }
 
-        public IReadOnlyList<ulong> Clubs { get; set; }
+        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
 
         public string PositionString { get; set; }
 

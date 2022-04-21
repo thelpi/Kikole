@@ -222,4 +222,7 @@
   <data name="NewTab" xml:space="preserve">
     <value>nouvel onglet</value>
   </data>
+  <data name="LoanInitial" xml:space="preserve">
+    <value>p</value>
+  </data>
 </root>

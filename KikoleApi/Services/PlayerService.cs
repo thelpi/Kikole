@@ -79,18 +79,21 @@ namespace KikoleApi.Services
                 .GetPlayerClubsAsync(p.Id)
                 .ConfigureAwait(false);
 
-            var playerClubsDetails = new List<ClubDto>(playerClubs.Count);
+            var playerClubsDetails = new Dictionary<ulong, ClubDto>(playerClubs.Count);
             foreach (var pc in playerClubs)
             {
-                var c = await _clubRepository
-                    .GetClubAsync(pc.ClubId)
-                    .ConfigureAwait(false);
-                playerClubsDetails.Add(c);
+                if (!playerClubsDetails.ContainsKey(pc.ClubId))
+                {
+                    var c = await _clubRepository
+                        .GetClubAsync(pc.ClubId)
+                        .ConfigureAwait(false);
+                    playerClubsDetails.Add(pc.ClubId, c);
+                }
             }
 
             return new PlayerFullDto
             {
-                Clubs = playerClubsDetails,
+                Clubs = playerClubsDetails.Values.ToList(),
                 Player = p,
                 PlayerClubs = playerClubs
             };

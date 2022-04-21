@@ -39,8 +39,8 @@ namespace KikoleApi.Models
             RejectDate = p.Player.RejectDate;
             AllowedNames = p.Player.AllowedNames.Disjoin();
             Badge = (Badges?)p.Player.BadgeId;
-            Clubs = p.Clubs
-                .Select(c => new PlayerClub(c, p.PlayerClubs))
+            Clubs = p.PlayerClubs
+                .Select(c => new PlayerClub(c, p.Clubs))
                 .ToList();
             Clue = p.Player.Clue;
             EasyClue = p.Player.EasyClue;

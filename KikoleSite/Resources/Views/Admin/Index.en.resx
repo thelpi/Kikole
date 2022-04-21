@@ -150,9 +150,6 @@
   <data name="ClubsTip2" xml:space="preserve">
     <value>if more than 10 clubs, set the first ten and the administrator will complete; please create all the club</value>
   </data>
-  <data name="ClubsTip3" xml:space="preserve">
-    <value>do NOT set twice a club in case of come-back: ignore the come-back</value>
-  </data>
   <data name="Clue" xml:space="preserve">
     <value>Clue</value>
   </data>
@@ -207,5 +204,8 @@
   </data>
   <data name="EasyClueFr" xml:space="preserve">
     <value>French easy clue</value>
+  </data>
+  <data name="IsLoan" xml:space="preserve">
+    <value>Loan?</value>
   </data>
 </root>

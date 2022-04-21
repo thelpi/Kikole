@@ -53,9 +53,16 @@ namespace KikoleApi.Models
                     var c = player.Clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
                     if (!success.HasValue)
                         Successful = c != null;
-                    Value = Successful
-                        ? System.Text.Json.JsonSerializer.Serialize(new PlayerClub(c, player.PlayerClubs))
-                        : sourceValue;
+                    if (Successful)
+                    {
+                        Value = System.Text.Json.JsonSerializer.Serialize(
+                            player.PlayerClubs
+                                .Where(_ => _.ClubId == c.Id)
+                                .Select(_ => new PlayerClub(_, player.Clubs))
+                                .ToList());
+                    }
+                    else
+                        Value = sourceValue;
                     break;
 
                 case ProposalTypes.Country:
