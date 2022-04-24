@@ -39,7 +39,8 @@ namespace KikoleApi.Models
                 : default(TimeSpan?);
             Login = login;
             Stats = stats;
-            Successes = stats.Count(s => s.Points.HasValue);
+            // player creation does not count
+            Successes = stats.Count(s => s.Points.HasValue && s.Attempt);
             TotalPoints = stats.Sum(s => s.Points.GetValueOrDefault(0));
         }
     }
