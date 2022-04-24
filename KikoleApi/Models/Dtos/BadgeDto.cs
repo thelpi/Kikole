@@ -7,9 +7,5 @@
         public string Description { get; set; }
 
         public byte Hidden { get; set; }
-
-        public byte IsUnique { get; set; }
-
-        public ulong? SubBadgeId { get; set; }
     }
 }

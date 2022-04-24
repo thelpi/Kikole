@@ -31,7 +31,6 @@ namespace KikoleApi.Services
             = new List<Badges>
             {
                 Badges.DoYouSpeakPatois,
-                Badges.TheEndConsolationPrize,
                 Badges.TheEnd,
                 Badges.DoItYourself,
                 Badges.WeAreKikole,
@@ -496,8 +495,7 @@ namespace KikoleApi.Services
             }
 
             return badgesFull
-                .OrderByDescending(b => b.Unique)
-                .ThenByDescending(b => b.Hidden)
+                .OrderByDescending(b => b.Hidden)
                 .ThenBy(b => b.Users)
                 .ToList();
         }
@@ -716,42 +714,7 @@ namespace KikoleApi.Services
                 var badgeMatch = allBadges.Single(b => b.Id == (ulong)badge);
 
                 // badge can apply only after the creation date of the badge
-                var allowed = badgeMatch.CreationDate.Date <= proposalDate.Date;
-
-                if (allowed && badgeMatch.IsUnique != 0)
-                {
-                    // badge is unique: check if another user already has the badge
-                    var users = await _badgeRepository
-                        .GetUsersWithBadgeAsync(badgeMatch.Id)
-                        .ConfigureAwait(false);
-
-                    allowed = users.Count == 0;
-
-                    // tries to add the substitution badge if exists
-                    if (!allowed && badgeMatch.SubBadgeId.HasValue)
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                proposalDate, userId, (Badges)badgeMatch.SubBadgeId.Value, collectedBadges, allBadges)
-                            .ConfigureAwait(false);
-                    }
-                }
-
-                if (allowed)
-                {
-                    // the badge we try to attach to the user is a substitution badge
-                    var sourceBadgeofSub = allBadges.SingleOrDefault(b => b.SubBadgeId == (ulong)badge);
-                    if (sourceBadgeofSub != null)
-                    {
-                        var hasSourceBadge = await _badgeRepository
-                            .CheckUserHasBadgeAsync(userId, sourceBadgeofSub.Id)
-                            .ConfigureAwait(false);
-
-                        // for a better badge the user already has
-                        allowed = !hasSourceBadge && sourceBadgeofSub.CreationDate.Date <= proposalDate.Date;
-                    }
-                }
-
-                if (allowed)
+                if (badgeMatch.CreationDate.Date <= proposalDate.Date)
                 {
                     await _badgeRepository
                         .InsertUserBadgeAsync(new UserBadgeDto

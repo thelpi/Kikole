@@ -35,8 +35,6 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<Badge> MissingBadges { get; set; }
 
-        public IReadOnlyCollection<Badge> UnableBadges { get; set; }
-
         public bool IsHimself { get; set; }
 
         public UserStatsModel(UserStats apiStat,
@@ -57,10 +55,7 @@ namespace KikoleSite.Models
                 .ToList();
             Badges = badges;
             MissingBadges = allBadges
-                .Where(b => !badges.Any(_ => _.Id == b.Id) && (!b.Unique || b.Users == 0))
-                .ToList();
-            UnableBadges = allBadges
-                .Where(b => !badges.Any(_ => _.Id == b.Id) && b.Unique && b.Users > 0)
+                .Where(b => !badges.Any(_ => _.Id == b.Id))
                 .ToList();
             IsHimself = isHimself;
         }
