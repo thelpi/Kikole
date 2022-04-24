@@ -26,6 +26,8 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<Leader> TodayLeaders { get; set; }
 
+        public int TodayAttemps { get; set; }
+
         public IReadOnlyCollection<LeaderSort> SortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().ToList();
 
         [DataType(DataType.Date, ErrorMessage = "Date only")]

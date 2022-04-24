@@ -13,6 +13,10 @@ using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
+    /// <summary>
+    /// Proposals controller.
+    /// </summary>
+    /// <seealso cref="KikoleBaseController"/>
     public class ProposalController : KikoleBaseController
     {
         private readonly IProposalService _proposalService;
@@ -20,6 +24,13 @@ namespace KikoleApi.Controllers
         private readonly IClock _clock;
         private readonly IStringLocalizer<Translations> _resources;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="proposalService">Instance of <see cref="IProposalService"/>.</param>
+        /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
+        /// <param name="resources">Translation resources.</param>
+        /// <param name="clock">Clock service.</param>
         public ProposalController(IProposalService proposalService,
             IPlayerService playerService,
             IStringLocalizer<Translations> resources,
@@ -31,6 +42,27 @@ namespace KikoleApi.Controllers
             _clock = clock;
         }
 
+        /// <summary>
+        /// Gets users with at least one proposal on the specified date.
+        /// </summary>
+        /// <param name="proposalDate">Proposal date.</param>
+        /// <returns>Collection of users.</returns>
+        [HttpGet("active-users")]
+        [AuthenticationLevel]
+        [ProducesResponseType(typeof(IReadOnlyCollection<User>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IReadOnlyCollection<User>>> GetUsersWithProposalAsync([FromQuery] DateTime date)
+        {
+            var users = await _proposalService
+                .GetUsersWithProposalAsync(date)
+                .ConfigureAwait(false);
+
+            return Ok(users);
+        }
+
+        /// <summary>
+        /// Gets the score chart for proposals.
+        /// </summary>
+        /// <returns>The score chart.</returns>
         [HttpGet("proposal-charts")]
         [AuthenticationLevel]
         [ProducesResponseType(typeof(ProposalChart), (int)HttpStatusCode.OK)]
@@ -42,6 +74,12 @@ namespace KikoleApi.Controllers
             return Ok(ProposalChart.Default);
         }
 
+        /// <summary>
+        /// Proposes a club.
+        /// </summary>
+        /// <param name="request">Proposal request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Proposal response.</returns>
         [HttpPut("club-proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -54,6 +92,12 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Proposes a year.
+        /// </summary>
+        /// <param name="request">Proposal request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Proposal response.</returns>
         [HttpPut("year-proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -66,6 +110,12 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Proposes a name.
+        /// </summary>
+        /// <param name="request">Proposal request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Proposal response.</returns>
         [HttpPut("name-proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -78,6 +128,12 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Proposes a country.
+        /// </summary>
+        /// <param name="request">Proposal request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Proposal response.</returns>
         [HttpPut("country-proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -89,7 +145,13 @@ namespace KikoleApi.Controllers
         {
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
-        
+
+        /// <summary>
+        /// Proposes a position.
+        /// </summary>
+        /// <param name="request">Proposal request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Proposal response.</returns>
         [HttpPut("position-proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -102,6 +164,12 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Requests a clue.
+        /// </summary>
+        /// <param name="request">Proposal request.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Proposal response.</returns>
         [HttpPut("clue-proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]
@@ -114,6 +182,12 @@ namespace KikoleApi.Controllers
             return await SubmitProposalAsync(request, userId).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Gets proposals for a specific date and user.
+        /// </summary>
+        /// <param name="proposalDate">Proposal date.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of proposals.</returns>
         [HttpGet("proposals")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(ProposalResponse), (int)HttpStatusCode.OK)]

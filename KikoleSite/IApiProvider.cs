@@ -31,6 +31,8 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
+        Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime date);
+
         Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp);
 
         Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort);

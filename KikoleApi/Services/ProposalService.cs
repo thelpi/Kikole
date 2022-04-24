@@ -12,17 +12,33 @@ using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Services
 {
+    /// <summary>
+    /// Proposal service implementation.
+    /// </summary>
+    /// <seealso cref="IProposalService"/>
     public class ProposalService : IProposalService
     {
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IBadgeService _badgeService;
         private readonly IPlayerService _playerService;
         private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
+        /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
+        /// <param name="resources">Translation resources.</param>
+        /// <param name="clock">Clock service.</param>
         public ProposalService(IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
+            IUserRepository userRepository,
             IBadgeService badgeService,
             IPlayerService playerService,
             IStringLocalizer<Translations> resources,
@@ -30,6 +46,7 @@ namespace KikoleApi.Services
         {
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
+            _userRepository = userRepository;
             _badgeService = badgeService;
             _playerService = playerService;
             _resources = resources;
@@ -113,6 +130,32 @@ namespace KikoleApi.Services
                 response.AddBadge(b);
 
             return response;
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime proposalDate)
+        {
+            var proposals = await _proposalRepository
+                .GetProposalsAsync(proposalDate)
+                .ConfigureAwait(false);
+
+            var userIds = proposals
+                .Select(p => p.UserId)
+                .Distinct()
+                .ToList();
+
+            var users = new List<User>(userIds.Count);
+
+            foreach (var userId in userIds)
+            {
+                var user = await _userRepository
+                    .GetUserByIdAsync(userId)
+                    .ConfigureAwait(false);
+
+                users.Add(new User(user));
+            }
+
+            return users;
         }
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(

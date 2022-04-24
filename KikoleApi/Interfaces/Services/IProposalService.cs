@@ -7,6 +7,9 @@ using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Interfaces.Services
 {
+    /// <summary>
+    /// Proposal service interface.
+    /// </summary>
     public interface IProposalService
     {
         /// <summary>
@@ -21,11 +24,18 @@ namespace KikoleApi.Interfaces.Services
             where T : BaseProposalRequest;
 
         /// <summary>
-        /// 
+        /// Gets proposals for a specific date and user.
         /// </summary>
-        /// <param name="proposalDate"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
+        /// <param name="proposalDate">Proposal date.</param>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of proposals.</returns>
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
+
+        /// <summary>
+        /// Gets users with at least one proposal on the specified date.
+        /// </summary>
+        /// <param name="proposalDate">Proposal date.</param>
+        /// <returns>Collection of users.</returns>
+        Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime proposalDate);
     }
 }

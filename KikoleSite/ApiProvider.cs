@@ -165,7 +165,7 @@ namespace KikoleSite
         public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort)
         {
             var response = await SendAsync(
-                    $"day-leaders?sort={(ulong)sort}&day={day.ToString("yyyy-MM-dd")}",
+                    $"day-leaders?sort={(ulong)sort}&day={day:yyyy-MM-dd}",
                     HttpMethod.Get)
                 .ConfigureAwait(false);
 
@@ -220,10 +220,21 @@ namespace KikoleSite
             var date = new DateTime(year, month, 1);
 
             var response = await SendAsync(
-                    $"awards?date={date.ToString("yyyy-MM-dd")}", HttpMethod.Get)
+                    $"awards?date={date:yyyy-MM-dd}", HttpMethod.Get)
                 .ConfigureAwait(false);
 
             return await GetResponseContentAsync<Awards>(response)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime date)
+        {
+            var response = await SendAsync(
+                    $"active-users?date={date:yyyy-MM-dd}",
+                    HttpMethod.Get)
+                .ConfigureAwait(false);
+
+            return await GetResponseContentAsync<IReadOnlyCollection<User>>(response)
                 .ConfigureAwait(false);
         }
 

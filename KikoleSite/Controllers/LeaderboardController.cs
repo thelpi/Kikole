@@ -112,8 +112,13 @@ namespace KikoleSite.Controllers
                 .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate, model.IncludePvp)
                 .ConfigureAwait(false);
 
+            var users = await _apiProvider
+                .GetUsersWithProposalAsync(day)
+                .ConfigureAwait(false);
+
             model.Leaders = leaders;
             model.TodayLeaders = dayleaders;
+            model.TodayAttemps = users.Count;
 
             // TODO: meilleure solution à venir
             if (DateTime.Now.Day <= 3)
