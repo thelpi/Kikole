@@ -123,9 +123,14 @@
   <data name="AboutCountryDetails" xml:space="preserve">
     <value>&lt;p&gt;The game does not manage sportive nationality. Only administratives nationalities are considered, based on &lt;a target="_blank" href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes"&gt;this norm&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Exemple : Ryan Giggs's nationality is "United Kingdom" and not "Wales".&lt;/p&gt;
-&lt;p&gt;There's only one nationality per player.&lt;/p&gt;
-&lt;p&gt;Exemple : only the nationality "Ivory Coast" is considered for Didier Drogba ("France" will be incorrect).&lt;/p&gt;
-&lt;p&gt;Finally, nationalities from the past are substitued by closest current nationalities.&lt;/p&gt;
+&lt;p&gt;There's only one nationality per player. When the sportive nationality matches the administrative nationalité, it's the one chosen.&lt;/p&gt;
+&lt;p&gt;It's possible, although very rare, that the choice is arbitrary by the administrator. Here's several complex cases:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Edouard Mendy is Senegalese, as he has chosen this federation; this case is legit as it respects the rule above.&lt;/li&gt;
+&lt;li&gt;Jean-Claude Darcheville is French: choice made by the administrator, due to the fact that the Guyane's federation is not recognized by the FIFA.&lt;/li&gt;
+&lt;li&gt;Xavi Simons is Dutch: choice made by the administrator at the current date, it might still possible for him to pick the Spanish selection.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Finally, nationalities from the past are substitued by closest current nationalities (which might be arbitrary once again).&lt;/p&gt;
 &lt;p&gt;Exemple : Lev Yachine is Russian, because "Soviet Union" is not available.&lt;/p&gt;</value>
   </data>
   <data name="BadGuessClub" xml:space="preserve">
