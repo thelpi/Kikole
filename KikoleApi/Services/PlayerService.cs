@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Handlers;
 using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Interfaces.Services;
 using KikoleApi.Models;
@@ -20,8 +21,8 @@ namespace KikoleApi.Services
     /// <seealso cref="IPlayerService"/>
     public class PlayerService : IPlayerService
     {
+        private readonly IPlayerHandler _playerHandler;
         private readonly IPlayerRepository _playerRepository;
-        private readonly IClubRepository _clubRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IProposalRepository _proposalRepository;
@@ -32,16 +33,16 @@ namespace KikoleApi.Services
         /// <summary>
         /// Ctor.
         /// </summary>
-        /// <param name="playerRepository">Player repository.</param>
-        /// <param name="clubRepository">Club repository.</param>
-        /// <param name="userRepository">User repository.</param>
-        /// <param name="leaderRepository">Leader repository.</param>
-        /// <param name="proposalRepository">Proposal repository.</param>
+        /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
+        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="httpContextAccessor">Http context accessor.</param>
         /// <param name="clock">Clock service.</param>
         /// <param name="randomizer">Randomizer.</param>
-        public PlayerService(IPlayerRepository playerRepository,
-            IClubRepository clubRepository,
+        public PlayerService(IPlayerHandler playerHandler,
+            IPlayerRepository playerRepository,
             IUserRepository userRepository,
             ILeaderRepository leaderRepository,
             IProposalRepository proposalRepository,
@@ -49,8 +50,8 @@ namespace KikoleApi.Services
             IClock clock,
             Random randomizer)
         {
+            _playerHandler = playerHandler;
             _playerRepository = playerRepository;
-            _clubRepository = clubRepository;
             _userRepository = userRepository;
             _leaderRepository = leaderRepository;
             _proposalRepository = proposalRepository;
@@ -60,40 +61,11 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<PlayerFullDto> GetPlayerInfoAsync(DateTime date)
+        public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date)
         {
-            var playerOfTheDay = await _playerRepository
-                .GetPlayerOfTheDayAsync(date)
+            return await _playerHandler
+                .GetPlayerOfTheDayFullInfoAsync(date)
                 .ConfigureAwait(false);
-
-            return await GetPlayerInfoAsync(playerOfTheDay).ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public async Task<PlayerFullDto> GetPlayerInfoAsync(PlayerDto p)
-        {
-            var playerClubs = await _playerRepository
-                .GetPlayerClubsAsync(p.Id)
-                .ConfigureAwait(false);
-
-            var playerClubsDetails = new Dictionary<ulong, ClubDto>(playerClubs.Count);
-            foreach (var pc in playerClubs)
-            {
-                if (!playerClubsDetails.ContainsKey(pc.ClubId))
-                {
-                    var c = await _clubRepository
-                        .GetClubAsync(pc.ClubId)
-                        .ConfigureAwait(false);
-                    playerClubsDetails.Add(pc.ClubId, c);
-                }
-            }
-
-            return new PlayerFullDto
-            {
-                Clubs = playerClubsDetails.Values.ToList(),
-                Player = p,
-                PlayerClubs = playerClubs
-            };
         }
 
         /// <inheritdoc />
@@ -218,7 +190,8 @@ namespace KikoleApi.Services
             var players = new List<Player>(dtos.Count);
             foreach (var p in dtos)
             {
-                var pInfo = await GetPlayerInfoAsync(p)
+                var pInfo = await _playerHandler
+                    .GetPlayerFullInfoAsync(p)
                     .ConfigureAwait(false);
 
                 players.Add(new Player(pInfo, users.Values));

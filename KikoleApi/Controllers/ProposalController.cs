@@ -231,22 +231,28 @@ namespace KikoleApi.Controllers
                 return BadRequest(_resources["InvalidDate"]);
 
             var pInfo = await _playerService
-                .GetPlayerInfoAsync(request.PlayerSubmissionDate)
+                .GetPlayerOfTheDayFullInfoAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
             var (response, proposalsAlready, leader) = await _proposalService
                 .ManageProposalResponseAsync(request, userId, pInfo)
                 .ConfigureAwait(false);
 
-            var leaderBadges = await _badgeService
-                .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, request.IsTodayPlayer)
-                .ConfigureAwait(false);
+            if (leader != null)
+            {
+                var leaderBadges = await _badgeService
+                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, request.IsTodayPlayer)
+                    .ConfigureAwait(false);
+
+                foreach (var b in leaderBadges)
+                    response.AddBadge(b);
+            }
 
             var proposalBadges = await _badgeService
                 .PrepareNonLeaderBadgesAsync(userId, request)
                 .ConfigureAwait(false);
 
-            foreach (var b in leaderBadges.Concat(proposalBadges))
+            foreach (var b in proposalBadges)
                 response.AddBadge(b);
 
             return Ok(response);

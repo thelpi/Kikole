@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using KikoleApi.Controllers.Filters;
+using KikoleApi.Handlers;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Handlers;
 using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Interfaces.Services;
 using KikoleApi.Repositories;
@@ -60,6 +62,13 @@ namespace KikoleApi.Bootstrap
 
             Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
+            /* Reminder:
+             * Controllers SHOULD reference only services, or only repositories (no mix, no handlers; it will work though)
+             * Services MUST reference only handlers and repositories (NO services)
+             * Handlers MUST reference only repositories
+             * Repositories MUST have no reference
+             */
+
             services
                 // repositories
                 .AddSingleton<IPlayerRepository, PlayerRepository>()
@@ -71,6 +80,8 @@ namespace KikoleApi.Bootstrap
                 .AddSingleton<IBadgeRepository, BadgeRepository>()
                 .AddSingleton<IMessageRepository, MessageRepository>()
                 .AddSingleton<IChallengeRepository, ChallengeRepository>()
+                // handlers
+                .AddSingleton<IPlayerHandler, PlayerHandler>()
                 // services
                 .AddSingleton<IBadgeService, BadgeService>()
                 .AddSingleton<IPlayerService, PlayerService>()

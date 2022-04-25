@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Handlers;
 using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Interfaces.Services;
 using KikoleApi.Models;
@@ -21,7 +22,7 @@ namespace KikoleApi.Services
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IPlayerService _playerService;
+        private readonly IPlayerHandler _playerHandler;
         private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
 
@@ -31,20 +32,20 @@ namespace KikoleApi.Services
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
-        /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
+        /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
         /// <param name="resources">Translation resources.</param>
         /// <param name="clock">Clock service.</param>
         public ProposalService(IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
             IUserRepository userRepository,
-            IPlayerService playerService,
+            IPlayerHandler playerHandler,
             IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
             _userRepository = userRepository;
-            _playerService = playerService;
+            _playerHandler = playerHandler;
             _resources = resources;
             _clock = clock;
         }
@@ -59,8 +60,8 @@ namespace KikoleApi.Services
             var r = new List<ProposalResponse>(0);
             if (datas.Count > 0)
             {
-                var pInfo = await _playerService
-                    .GetPlayerInfoAsync(proposalDate)
+                var pInfo = await _playerHandler
+                    .GetPlayerOfTheDayFullInfoAsync(proposalDate)
                     .ConfigureAwait(false);
 
                 r = GetProposalResponsesWithPoints(datas, pInfo, out _);

@@ -14,18 +14,11 @@ namespace KikoleApi.Interfaces.Services
     public interface IPlayerService
     {
         /// <summary>
-        /// Gets every information about a player.
+        /// Gets the player proposed at a specified date, with full info.
         /// </summary>
-        /// <param name="date">Date of player proposal.</param>
-        /// <returns>Information about the player.</returns>
-        Task<PlayerFullDto> GetPlayerInfoAsync(DateTime date);
-
-        /// <summary>
-        /// Gets every information about a player.
-        /// </summary>
-        /// <param name="p">Player base information.</param>
-        /// <returns>Information about the player.</returns>
-        Task<PlayerFullDto> GetPlayerInfoAsync(PlayerDto p);
+        /// <param name="date">Proposed date.</param>
+        /// <returns>Player with full info.</returns>
+        Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date);
 
         /// <summary>
         /// Gets the date of the first player submitted.
