@@ -22,6 +22,7 @@ namespace KikoleApi.Controllers
     public class PlayerController : KikoleBaseController
     {
         private readonly IPlayerService _playerService;
+        private readonly IBadgeService _badgeService;
         private readonly IClock _clock;
         private readonly IStringLocalizer<Translations> _resources;
 
@@ -29,13 +30,16 @@ namespace KikoleApi.Controllers
         /// Ctor.
         /// </summary>
         /// <param name="clock">Clock service.</param>
-        /// <param name="playerService">Player service.</param>
+        /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
+        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
         /// <param name="resources">Translation resources.</param>
         public PlayerController(IClock clock,
             IPlayerService playerService,
+            IBadgeService badgeService,
             IStringLocalizer<Translations> resources)
         {
             _playerService = playerService;
+            _badgeService = badgeService;
             _resources = resources;
             _clock = clock;
         }
@@ -132,7 +136,7 @@ namespace KikoleApi.Controllers
             if (!string.IsNullOrWhiteSpace(validityCheck))
                 return BadRequest(string.Format(_resources["InvalidRequest"], validityCheck));
 
-            var result = await _playerService
+            var (result, userId, badges) = await _playerService
                 .ValidatePlayerSubmissionAsync(request)
                 .ConfigureAwait(false);
 
@@ -141,6 +145,13 @@ namespace KikoleApi.Controllers
 
             if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
                 return Conflict(_resources["RejectAndProposalDateCombined"]);
+
+            foreach (var badge in badges)
+            {
+                await _badgeService
+                    .AddBadgeToUserAsync(badge, userId)
+                    .ConfigureAwait(false);
+            }
 
             return NoContent();
         }

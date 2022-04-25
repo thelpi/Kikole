@@ -84,8 +84,8 @@ namespace KikoleApi.Interfaces.Services
         /// Valides a player submission.
         /// </summary>
         /// <param name="request">Request.</param>
-        /// <returns>Error value.</returns>
-        Task<PlayerSubmissionErrors> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request);
+        /// <returns>Error value, user involved and collection of badges to manage (if no error).</returns>
+        Task<(PlayerSubmissionErrors, ulong, IReadOnlyCollection<Badges>)> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request);
 
         /// <summary>
         /// Randomize the assignement of every player's proposal date, starting tomorrow.

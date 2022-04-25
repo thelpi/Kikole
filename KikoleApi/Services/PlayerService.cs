@@ -17,6 +17,7 @@ namespace KikoleApi.Services
     /// <summary>
     /// Player service implementation.
     /// </summary>
+    /// <seealso cref="IPlayerService"/>
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository _playerRepository;
@@ -24,7 +25,6 @@ namespace KikoleApi.Services
         private readonly IUserRepository _userRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IProposalRepository _proposalRepository;
-        private readonly IBadgeService _badgeService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
         private readonly Random _randomizer;
@@ -37,7 +37,6 @@ namespace KikoleApi.Services
         /// <param name="userRepository">User repository.</param>
         /// <param name="leaderRepository">Leader repository.</param>
         /// <param name="proposalRepository">Proposal repository.</param>
-        /// <param name="badgeService">Badge service.</param>
         /// <param name="httpContextAccessor">Http context accessor.</param>
         /// <param name="clock">Clock service.</param>
         /// <param name="randomizer">Randomizer.</param>
@@ -46,7 +45,6 @@ namespace KikoleApi.Services
             IUserRepository userRepository,
             ILeaderRepository leaderRepository,
             IProposalRepository proposalRepository,
-            IBadgeService badgeService,
             IHttpContextAccessor httpContextAccessor,
             IClock clock,
             Random randomizer)
@@ -56,7 +54,6 @@ namespace KikoleApi.Services
             _userRepository = userRepository;
             _leaderRepository = leaderRepository;
             _proposalRepository = proposalRepository;
-            _badgeService = badgeService;
             _httpContextAccessor = httpContextAccessor;
             _clock = clock;
             _randomizer = randomizer;
@@ -239,17 +236,19 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<PlayerSubmissionErrors> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
+        public async Task<(PlayerSubmissionErrors, ulong, IReadOnlyCollection<Badges>)> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
         {
+            var badges = new List<Badges>();
+
             var p = await _playerRepository
                 .GetPlayerByIdAsync(request.PlayerId)
                 .ConfigureAwait(false);
 
             if (p == null)
-                return PlayerSubmissionErrors.PlayerNotFound;
+                return (PlayerSubmissionErrors.PlayerNotFound, 0, badges);
 
             if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
-                return PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused;
+                return (PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused, 0, badges);
 
             if (request.IsAccepted)
             {
@@ -257,25 +256,14 @@ namespace KikoleApi.Services
                         request, p.Clue, p.EasyClue)
                     .ConfigureAwait(false);
 
-                var added = await _badgeService
-                    .AddBadgeToUserAsync(Badges.DoItYourself, p.CreationUserId)
+                badges.Add(Badges.DoItYourself);
+
+                var players = await _playerRepository
+                    .GetPlayersByCreatorAsync(p.CreationUserId, true)
                     .ConfigureAwait(false);
 
-                // if the badge for the first submission is added,
-                // the badge for the 5th submission can't be added too
-                if (!added)
-                {
-                    var players = await _playerRepository
-                        .GetPlayersByCreatorAsync(p.CreationUserId, true)
-                        .ConfigureAwait(false);
-
-                    if (players.Count == 5)
-                    {
-                        await _badgeService
-                            .AddBadgeToUserAsync(Badges.WeAreKikole, p.CreationUserId)
-                            .ConfigureAwait(false);
-                    }
-                }
+                if (players.Count == 5)
+                    badges.Add(Badges.WeAreKikole);
 
                 // TODO: notify (+ badge)
             }
@@ -288,7 +276,7 @@ namespace KikoleApi.Services
                 // TODO: notify refusal
             }
 
-            return PlayerSubmissionErrors.NoError;
+            return (PlayerSubmissionErrors.NoError, p.CreationUserId, badges);
         }
 
         /// <inheritdoc />
