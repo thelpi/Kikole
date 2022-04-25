@@ -12,6 +12,10 @@ using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Services
 {
+    /// <summary>
+    /// Leader service implementation.
+    /// </summary>
+    /// <seealso cref="ILeaderService"/>
     public class LeaderService : ILeaderService
     {
         private readonly IPlayerRepository _playerRepository;
@@ -21,6 +25,15 @@ namespace KikoleApi.Services
         private readonly IProposalRepository _proposalRepository;
         private readonly IClock _clock;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
+        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
+        /// <param name="clock">Clock service.</param>
         public LeaderService(IPlayerRepository playerRepository,
             ILeaderRepository leaderRepository,
             IUserRepository userRepository,

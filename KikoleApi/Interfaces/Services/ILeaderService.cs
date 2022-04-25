@@ -6,6 +6,9 @@ using KikoleApi.Models.Enums;
 
 namespace KikoleApi.Interfaces.Services
 {
+    /// <summary>
+    /// Leader service interface.
+    /// </summary>
     public interface ILeaderService
     {
         /// <summary>
