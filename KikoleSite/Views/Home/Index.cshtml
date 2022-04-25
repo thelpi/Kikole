@@ -122,6 +122,7 @@
                     </div>
                 </form>
             }
+            <!-- clubs -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
                 <fieldset style="margin-top: 30px">
@@ -167,6 +168,7 @@
                     }
                 </fieldset>
             </form>
+            <!-- nationality -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
@@ -200,6 +202,7 @@
                     }
                 </div>
             </form>
+            <!-- year -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
@@ -216,9 +219,9 @@
                         @if (Model.IncorrectYears?.Count > 0)
                         {
                             <div style="margin-top: 10px">
-                                @foreach (var iYear in Model.IncorrectYears)
+                                @foreach (var (iYear, iTip) in Model.IncorrectYears)
                                 {
-                                    <div style="font-size: small; text-decoration: line-through">@iYear</div>
+                                    <div style="font-size: small"><span style="text-decoration: line-through">@iYear</span> (@iTip)</div>
                                 }
                             </div>
                         }
@@ -231,6 +234,7 @@
                     }
                 </div>
             </form>
+            <!-- position -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 30px">
@@ -262,6 +266,7 @@
                     }
                 </div>
             </form>
+            <!-- name -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
                 <div style="margin-top: 60px">

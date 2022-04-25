@@ -107,9 +107,17 @@ namespace KikoleApi.Models
             Tip = request.GetTip(player.Player, resources);
         }
 
-        internal ProposalResponse(ProposalDto dto, PlayerFullDto player)
+        internal ProposalResponse(ProposalDto dto, PlayerFullDto player, IStringLocalizer resources)
             : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player)
-        { }
+        {
+            // a bit ugly, ngl
+            if ((ProposalTypes)dto.ProposalTypeId == ProposalTypes.Year)
+            {
+                Tip = ushort.Parse(Value) > player.Player.YearOfBirth
+                    ? resources["TipOlderPlayerShort"]
+                    : resources["TipYoungerPlayerShort"];
+            }
+        }
 
         internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)
         {

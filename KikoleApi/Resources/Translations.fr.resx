@@ -255,8 +255,14 @@
   <data name="TipOlderPlayer" xml:space="preserve">
     <value>Le joueur est plus vieux</value>
   </data>
+  <data name="TipOlderPlayerShort" xml:space="preserve">
+    <value>plus vieux</value>
+  </data>
   <data name="TipYoungerPlayer" xml:space="preserve">
     <value>Le joueur est plus jeune</value>
+  </data>
+  <data name="TipYoungerPlayerShort" xml:space="preserve">
+    <value>plus jeune</value>
   </data>
   <data name="UserCreationFailure" xml:space="preserve">
     <value>Echec de la création du compte</value>

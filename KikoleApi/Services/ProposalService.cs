@@ -168,7 +168,7 @@ namespace KikoleApi.Services
                 .OrderBy(pDto => pDto.CreationDate)
                 .Select(pDto =>
                 {
-                    var pr = new ProposalResponse(pDto, player)
+                    var pr = new ProposalResponse(pDto, player, _resources)
                         .WithTotalPoints(totalPoints, false);
                     totalPoints = pr.TotalPoints;
                     return pr;

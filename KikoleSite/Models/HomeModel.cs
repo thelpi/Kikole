@@ -39,7 +39,7 @@ namespace KikoleSite.Models
 
         public IReadOnlyList<string> IncorrectClubs { get; set; }
         public IReadOnlyList<string> IncorrectCountries { get; set; }
-        public IReadOnlyList<string> IncorrectYears { get; set; }
+        public IReadOnlyList<(string, string)> IncorrectYears { get; set; }
         public IReadOnlyList<string> IncorrectPositions { get; set; }
         public IReadOnlyList<string> IncorrectNames { get; set; }
 
@@ -130,14 +130,14 @@ namespace KikoleSite.Models
                     if (response.Successful)
                         BirthYear = yValue;
                     else
-                        IncorrectYears = AddToList(IncorrectYears, yValue);
+                        IncorrectYears = AddToList(IncorrectYears, (yValue, response.Tip));
                     break;
             }
         }
 
-        private IReadOnlyList<string> AddToList(IReadOnlyList<string> baseList, string value)
+        private IReadOnlyList<T> AddToList<T>(IReadOnlyList<T> baseList, T value)
         {
-            var list = (baseList ?? new List<string>(1)).ToList();
+            var list = (baseList ?? new List<T>(1)).ToList();
             list.Add(value);
             return list;
         }
