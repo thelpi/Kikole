@@ -7,6 +7,9 @@ using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Interfaces.Services
 {
+    /// <summary>
+    /// Challenge service interface.
+    /// </summary>
     public interface IChallengeService
     {
         /// <summary>

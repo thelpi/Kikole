@@ -12,26 +12,39 @@ using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Services
 {
+    /// <summary>
+    /// Challenge service implementation.
+    /// </summary>
+    /// <seealso cref="IChallengeService"/>
     public class ChallengeService : IChallengeService
     {
-        private readonly IPlayerService _playerService;
         private readonly IBadgeService _badgeService;
         private readonly IChallengeRepository _challengeRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IPlayerRepository _playerRepository;
         private readonly IClock _clock;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
+        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
+        /// <param name="clock">Clock service.</param>
         public ChallengeService(IChallengeRepository challengeRepository,
             ILeaderRepository leaderRepository,
             IUserRepository userRepository,
-            IPlayerService playerService,
+            IPlayerRepository playerRepository,
             IBadgeService badgeService,
             IClock clock)
         {
             _challengeRepository = challengeRepository;
             _leaderRepository = leaderRepository;
             _userRepository = userRepository;
-            _playerService = playerService;
+            _playerRepository = playerRepository;
             _badgeService = badgeService;
             _clock = clock;
         }
@@ -184,8 +197,8 @@ namespace KikoleApi.Services
                 .GetBookedChallengesAsync(challenge.GuestUserId)
                 .ConfigureAwait(false);
 
-            var challengeDate = await _playerService
-                .ComputeAvailableChallengeDateAsync(challenge, hostDates, guestDates)
+            var challengeDate = await ComputeAvailableChallengeDateAsync(
+                    challenge, hostDates, guestDates)
                 .ConfigureAwait(false);
 
             await _challengeRepository
@@ -260,6 +273,29 @@ namespace KikoleApi.Services
 
                 challenges.Add(new Challenge(c, usersCache[opponentUserId], userId, leaders));
             }
+        }
+
+        private async Task<DateTime> ComputeAvailableChallengeDateAsync(
+            ChallengeDto challenge,
+            IReadOnlyCollection<DateTime> hostDates,
+            IReadOnlyCollection<DateTime> guestDates)
+        {
+            var challengeDate = _clock.Today;
+            PlayerDto p;
+            do
+            {
+                challengeDate = challengeDate.AddDays(1);
+
+                p = await _playerRepository
+                    .GetPlayerOfTheDayAsync(challengeDate)
+                    .ConfigureAwait(false);
+            }
+            while (hostDates.Contains(challengeDate)
+                || guestDates.Contains(challengeDate)
+                || p.CreationUserId == challenge.GuestUserId
+                || p.CreationUserId == challenge.HostUserId);
+
+            return challengeDate;
         }
     }
 }

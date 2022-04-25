@@ -187,30 +187,6 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<DateTime> ComputeAvailableChallengeDateAsync(
-            ChallengeDto challenge,
-            IReadOnlyCollection<DateTime> hostDates,
-            IReadOnlyCollection<DateTime> guestDates)
-        {
-            var challengeDate = _clock.Today;
-            PlayerDto p;
-            do
-            {
-                challengeDate = challengeDate.AddDays(1);
-
-                p = await _playerRepository
-                    .GetPlayerOfTheDayAsync(challengeDate)
-                    .ConfigureAwait(false);
-            }
-            while (hostDates.Contains(challengeDate)
-                || guestDates.Contains(challengeDate)
-                || p.CreationUserId == challenge.GuestUserId
-                || p.CreationUserId == challenge.HostUserId);
-
-            return challengeDate;
-        }
-
-        /// <inheritdoc />
         public async Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(
             ulong userId,
             DateTime proposalDate)
