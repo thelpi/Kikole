@@ -117,6 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AboutCountry" xml:space="preserve">
+    <value>About the nationality</value>
+  </data>
+  <data name="AboutCountryDetails" xml:space="preserve">
+    <value>&lt;p&gt;The game does not manage sportive nationality. Only administratives nationalities are considered, based on &lt;a target="_blank" href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes"&gt;this norm&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Exemple : Ryan Giggs's nationality is "United Kingdom" and not "Wales".&lt;/p&gt;
+&lt;p&gt;There's only one nationality per player.&lt;/p&gt;
+&lt;p&gt;Exemple : only the nationality "Ivory Coast" is considered for Didier Drogba ("France" will be incorrect).&lt;/p&gt;
+&lt;p&gt;Finally, nationalities from the past are substitued by closest current nationalities.&lt;/p&gt;
+&lt;p&gt;Exemple : Lev Yachine is Russian, because "Soviet Union" is not available.&lt;/p&gt;</value>
+  </data>
   <data name="BadGuessClub" xml:space="preserve">
     <value>An incorrect club proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
