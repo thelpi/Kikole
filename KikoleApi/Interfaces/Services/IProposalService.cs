@@ -19,8 +19,8 @@ namespace KikoleApi.Interfaces.Services
         /// <param name="request">Proposal request.</param>
         /// <param name="userId">User idenfifier.</param>
         /// <param name="pInfo">Information about the player of the request.</param>
-        /// <returns>Instance of <see cref="ProposalResponse"/>.</returns>
-        Task<ProposalResponse> ManageProposalResponseAsync<T>(T request, ulong userId, PlayerFullDto pInfo)
+        /// <returns>Instance of <see cref="ProposalResponse"/>, proposals already made and leader info in case of win.</returns>
+        Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto)> ManageProposalResponseAsync<T>(T request, ulong userId, PlayerFullDto pInfo)
             where T : BaseProposalRequest;
 
         /// <summary>

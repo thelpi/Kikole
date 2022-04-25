@@ -21,7 +21,6 @@ namespace KikoleApi.Services
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IBadgeService _badgeService;
         private readonly IPlayerService _playerService;
         private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
@@ -32,14 +31,12 @@ namespace KikoleApi.Services
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
-        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
         /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
         /// <param name="resources">Translation resources.</param>
         /// <param name="clock">Clock service.</param>
         public ProposalService(IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
             IUserRepository userRepository,
-            IBadgeService badgeService,
             IPlayerService playerService,
             IStringLocalizer<Translations> resources,
             IClock clock)
@@ -47,7 +44,6 @@ namespace KikoleApi.Services
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
             _userRepository = userRepository;
-            _badgeService = badgeService;
             _playerService = playerService;
             _resources = resources;
             _clock = clock;
@@ -74,9 +70,11 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<ProposalResponse> ManageProposalResponseAsync<T>(T request, ulong userId, PlayerFullDto pInfo)
+        public async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto)> ManageProposalResponseAsync<T>(T request, ulong userId, PlayerFullDto pInfo)
             where T : BaseProposalRequest
         {
+            LeaderDto leader = null;
+
             var response = new ProposalResponse(request, pInfo, _resources);
 
             var proposalsAlready = await _proposalRepository
@@ -97,7 +95,7 @@ namespace KikoleApi.Services
 
                 if (response.IsWin)
                 {
-                    var leader = new LeaderDto
+                    leader = new LeaderDto
                     {
                         Points = (ushort)response.TotalPoints,
                         ProposalDate = request.ProposalDate.Date,
@@ -105,31 +103,16 @@ namespace KikoleApi.Services
                         UserId = userId
                     };
 
-                    var isToday = request.IsTodayPlayer;
-                    if (isToday)
+                    if (request.IsTodayPlayer)
                     {
                         await _leaderRepository
                             .CreateLeaderAsync(leader)
                             .ConfigureAwait(false);
                     }
-
-                    var leaderBadges = await _badgeService
-                        .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, isToday)
-                        .ConfigureAwait(false);
-
-                    foreach (var b in leaderBadges)
-                        response.AddBadge(b);
                 }
             }
 
-            var proposalBadges = await _badgeService
-                .PrepareNonLeaderBadgesAsync(userId, request)
-                .ConfigureAwait(false);
-
-            foreach (var b in proposalBadges)
-                response.AddBadge(b);
-
-            return response;
+            return (response, proposalsAlready, leader);
         }
 
         /// <inheritdoc />

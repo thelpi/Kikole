@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using KikoleApi.Controllers.Filters;
@@ -21,6 +22,7 @@ namespace KikoleApi.Controllers
     {
         private readonly IProposalService _proposalService;
         private readonly IPlayerService _playerService;
+        private readonly IBadgeService _badgeService;
         private readonly IClock _clock;
         private readonly IStringLocalizer<Translations> _resources;
 
@@ -29,15 +31,18 @@ namespace KikoleApi.Controllers
         /// </summary>
         /// <param name="proposalService">Instance of <see cref="IProposalService"/>.</param>
         /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
+        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
         /// <param name="resources">Translation resources.</param>
         /// <param name="clock">Clock service.</param>
         public ProposalController(IProposalService proposalService,
             IPlayerService playerService,
+            IBadgeService badgeService,
             IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _proposalService = proposalService;
             _playerService = playerService;
+            _badgeService = badgeService;
             _resources = resources;
             _clock = clock;
         }
@@ -229,9 +234,20 @@ namespace KikoleApi.Controllers
                 .GetPlayerInfoAsync(request.PlayerSubmissionDate)
                 .ConfigureAwait(false);
 
-            var response = await _proposalService
+            var (response, proposalsAlready, leader) = await _proposalService
                 .ManageProposalResponseAsync(request, userId, pInfo)
                 .ConfigureAwait(false);
+
+            var leaderBadges = await _badgeService
+                .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, request.IsTodayPlayer)
+                .ConfigureAwait(false);
+
+            var proposalBadges = await _badgeService
+                .PrepareNonLeaderBadgesAsync(userId, request)
+                .ConfigureAwait(false);
+
+            foreach (var b in leaderBadges.Concat(proposalBadges))
+                response.AddBadge(b);
 
             return Ok(response);
         }
