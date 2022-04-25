@@ -14,6 +14,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace KikoleApi.Services
 {
+    /// <summary>
+    /// Badge service implementation.
+    /// </summary>
+    /// <seealso cref="IBadgeService"/>
     public class BadgeService : IBadgeService
     {
         private const string SpecialWord = "chouse";
@@ -221,13 +225,24 @@ namespace KikoleApi.Services
                 }
             };
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="badgeRepository">Instance of <see cref="IBadgeRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
+        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
+        /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="httpContextAccessor">HTTP context accessor.</param>
+        /// <param name="clock">Clock service.</param>
         public BadgeService(IBadgeRepository badgeRepository,
             ILeaderRepository leaderRepository,
             IPlayerRepository playerRepository,
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
-            IHttpContextAccessor httpContextAccessor,
             IUserRepository userRepository,
+            IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _badgeRepository = badgeRepository;
@@ -241,8 +256,12 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task ManageChallengesBasedBadgesAsync(ChallengeDto challenge)
+        public async Task ManageChallengesBasedBadgesAsync(ulong challengeId)
         {
+            var challenge = await _challengeRepository
+                .GetChallengeByIdAsync(challengeId)
+                .ConfigureAwait(false);
+
             var allAccepted = await _challengeRepository
                .GetAcceptedChallengesAsync(null, null)
                .ConfigureAwait(false);

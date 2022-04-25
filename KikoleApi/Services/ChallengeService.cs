@@ -18,7 +18,6 @@ namespace KikoleApi.Services
     /// <seealso cref="IChallengeService"/>
     public class ChallengeService : IChallengeService
     {
-        private readonly IBadgeService _badgeService;
         private readonly IChallengeRepository _challengeRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
@@ -32,20 +31,17 @@ namespace KikoleApi.Services
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
         /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
-        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
         /// <param name="clock">Clock service.</param>
         public ChallengeService(IChallengeRepository challengeRepository,
             ILeaderRepository leaderRepository,
             IUserRepository userRepository,
             IPlayerRepository playerRepository,
-            IBadgeService badgeService,
             IClock clock)
         {
             _challengeRepository = challengeRepository;
             _leaderRepository = leaderRepository;
             _userRepository = userRepository;
             _playerRepository = playerRepository;
-            _badgeService = badgeService;
             _clock = clock;
         }
 
@@ -203,10 +199,6 @@ namespace KikoleApi.Services
 
             await _challengeRepository
                 .RespondToChallengeAsync(id, isAccepted, challengeDate)
-                .ConfigureAwait(false);
-
-            await _badgeService
-                .ManageChallengesBasedBadgesAsync(challenge)
                 .ConfigureAwait(false);
 
             return ChallengeResponseError.NoError;

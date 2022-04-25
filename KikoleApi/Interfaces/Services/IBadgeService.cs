@@ -7,6 +7,9 @@ using KikoleApi.Models.Requests;
 
 namespace KikoleApi.Interfaces.Services
 {
+    /// <summary>
+    /// Badge service interface.
+    /// </summary>
     public interface IBadgeService
     {
         /// <summary>
@@ -66,8 +69,8 @@ namespace KikoleApi.Interfaces.Services
         /// <summary>
         /// Manages badges related to a new challenge accepted.
         /// </summary>
-        /// <param name="challenge">Challenge just accepted that triggers this call.</param>
+        /// <param name="challengeId">Challenge identifier involved.</param>
         /// <returns>Nothing.</returns>
-        Task ManageChallengesBasedBadgesAsync(ChallengeDto challenge);
+        Task ManageChallengesBasedBadgesAsync(ulong challengeId);
     }
 }

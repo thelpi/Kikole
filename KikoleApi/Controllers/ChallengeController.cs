@@ -13,24 +13,45 @@ using Microsoft.Extensions.Localization;
 
 namespace KikoleApi.Controllers
 {
+    /// <summary>
+    /// Challenge controller.
+    /// </summary>
+    /// <seealso cref="KikoleBaseController"/>
     public class ChallengeController : KikoleBaseController
     {
+        private readonly IBadgeService _badgeService;
         private readonly IChallengeService _challengeService;
         private readonly IPlayerService _playerService;
         private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
 
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="challengeService">Instance of <see cref="IChallengeService"/>.</param>
+        /// <param name="playerService">Instance of <see cref="IPlayerService"/>.</param>
+        /// <param name="badgeService">Instance of <see cref="IBadgeService"/>.</param>
+        /// <param name="resources">Translation resources.</param>
+        /// <param name="clock">Clock service.</param>
         public ChallengeController(IChallengeService challengeService,
             IPlayerService playerService,
+            IBadgeService badgeService,
             IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _challengeService = challengeService;
             _playerService = playerService;
+            _badgeService = badgeService;
             _clock = clock;
             _resources = resources;
         }
 
+        /// <summary>
+        /// Initiates a challenge.
+        /// </summary>
+        /// <param name="request">Challenge request.</param>
+        /// <param name="userId">User who initiates.</param>
+        /// <returns>201 - Created.</returns>
         [HttpPost("challenges")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.Created)]
@@ -76,6 +97,13 @@ namespace KikoleApi.Controllers
             return StatusCode((int)HttpStatusCode.Created);
         }
 
+        /// <summary>
+        /// Responds to a challenge.
+        /// </summary>
+        /// <param name="id">Challenge identifier.</param>
+        /// <param name="userId">User who respond.</param>
+        /// <param name="isAccepted">Challenge accepted y/n.</param>
+        /// <returns>204 - No content.</returns>
         [HttpPatch("challenges/{id}")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -117,9 +145,18 @@ namespace KikoleApi.Controllers
             if (response == ChallengeResponseError.InvalidOpponentAccount)
                 return Conflict(_resources["InvalidOpponentAccount"]);
 
+            await _badgeService
+                .ManageChallengesBasedBadgesAsync(id)
+                .ConfigureAwait(false);
+
             return NoContent();
         }
 
+        /// <summary>
+        /// Gets challenges waiting for a response, from the point of view of the user who has to respond.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of challenges.</returns>
         [HttpGet("waiting-challenges")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(IReadOnlyCollection<Challenge>), (int)HttpStatusCode.OK)]
@@ -138,6 +175,11 @@ namespace KikoleApi.Controllers
             return Ok(challenges);
         }
 
+        /// <summary>
+        /// Gets challenges waiting for a response, from the point of view of the user who initiates.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of challenges.</returns>
         [HttpGet("requested-challenges")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(IReadOnlyCollection<Challenge>), (int)HttpStatusCode.OK)]
@@ -156,6 +198,11 @@ namespace KikoleApi.Controllers
             return Ok(challenges);
         }
 
+        /// <summary>
+        /// Gets accepted challenges for a user, starting from today.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <returns>Collection of challenges.</returns>
         [HttpGet("accepted-challenges")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(IReadOnlyCollection<Challenge>), (int)HttpStatusCode.OK)]
@@ -174,6 +221,13 @@ namespace KikoleApi.Controllers
             return Ok(challenges);
         }
 
+        /// <summary>
+        /// Gets accepted challenges for a user in a range of dates.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <param name="fromDate">Start date.</param>
+        /// <param name="toDate">End date.</param>
+        /// <returns>Collection of challenges.</returns>
         [HttpGet("history-challenges")]
         [AuthenticationLevel(UserTypes.StandardUser)]
         [ProducesResponseType(typeof(Challenge), (int)HttpStatusCode.OK)]
