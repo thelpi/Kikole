@@ -96,12 +96,14 @@ namespace KikoleApi.Services
 
                 if (response.IsWin)
                 {
+                    var now = _clock.Now;
                     leader = new LeaderDto
                     {
                         Points = (ushort)response.TotalPoints,
                         ProposalDate = request.ProposalDate.Date,
-                        Time = Convert.ToUInt16(Math.Ceiling((_clock.Now - request.ProposalDate.Date).TotalMinutes)),
-                        UserId = userId
+                        Time = Convert.ToUInt16(Math.Ceiling((now - request.ProposalDate.Date).TotalMinutes)),
+                        UserId = userId,
+                        CreationDate = now
                     };
 
                     if (request.IsTodayPlayer)

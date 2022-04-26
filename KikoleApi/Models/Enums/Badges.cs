@@ -37,6 +37,7 @@
         Dedicated,
         HellOfAWeek,
         TheBreakfastClub,
-        MetroBoulotKikoleDodo
+        MetroBoulotKikoleDodo,
+        OneMinuteChrono
     }
 }

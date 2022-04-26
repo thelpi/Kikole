@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
+using KikoleApi.Interfaces.Handlers;
 using KikoleApi.Interfaces.Repositories;
 using KikoleApi.Interfaces.Services;
 using KikoleApi.Models;
@@ -22,6 +23,7 @@ namespace KikoleApi.Services
     {
         private const string SpecialWord = "chouse";
 
+        private readonly IPlayerHandler _playerHandler;
         private readonly IBadgeRepository _badgeRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerRepository _playerRepository;
@@ -30,6 +32,39 @@ namespace KikoleApi.Services
         private readonly IUserRepository _userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
+
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
+        /// <param name="badgeRepository">Instance of <see cref="IBadgeRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
+        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
+        /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="httpContextAccessor">HTTP context accessor.</param>
+        /// <param name="clock">Clock service.</param>
+        public BadgeService(IPlayerHandler playerHandler,
+            IBadgeRepository badgeRepository,
+            ILeaderRepository leaderRepository,
+            IPlayerRepository playerRepository,
+            IProposalRepository proposalRepository,
+            IChallengeRepository challengeRepository,
+            IUserRepository userRepository,
+            IHttpContextAccessor httpContextAccessor,
+            IClock clock)
+        {
+            _playerHandler = playerHandler;
+            _badgeRepository = badgeRepository;
+            _leaderRepository = leaderRepository;
+            _playerRepository = playerRepository;
+            _proposalRepository = proposalRepository;
+            _challengeRepository = challengeRepository;
+            _userRepository = userRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _clock = clock;
+        }
 
         private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
             = new List<Badges>
@@ -116,24 +151,48 @@ namespace KikoleApi.Services
             };
 
         // Notice "IEnumerable<ProposalDto>" in this context should not contain the final proposal
-        private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<ProposalDto>, bool>> ProposalsBasedBadgeCondition
-            = new Dictionary<Badges, Func<IEnumerable<ProposalDto>, bool>>
+        private static readonly IReadOnlyDictionary<Badges, Func<DateTime, PlayerFullDto, IEnumerable<ProposalDto>, bool>> ProposalsBasedBadgeCondition
+            = new Dictionary<Badges, Func<DateTime, PlayerFullDto, IEnumerable<ProposalDto>, bool>>
             {
                 {
                     Badges.WikipediaScreenshot,
-                    ph => !ph.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club)
+                    (d, p, ph) => !ph.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club)
                 },
                 {
                     Badges.PassportCheck,
-                    ph => !ph.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club)
+                    (d, p, ph) => !ph.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club)
                 },
                 {
                     Badges.EverythingNotLost,
-                    ph => ph.Any() && ph.All(ep => ep.Successful == 0)
+                    (d, p, ph) => ph.Any() && ph.All(ep => ep.Successful == 0)
                 },
                 {
                     Badges.ImFeelingLucky,
-                    ph => !ph.Any()
+                    (d, p, ph) => !ph.Any()
+                },
+                {
+                    Badges.OneMinuteChrono,
+                    (d, p, ph) =>
+                    {
+                        // More than 5 clubs in the career to be eligibile
+                        if (p.Clubs.Count < 5)
+                            return false;
+
+                        // Every proposal is correct
+                        // Year, nationality and position are filled
+                        // Easy clue is not requested
+                        // Same count of club proposals than career clubs
+                        if (ph.Any(_ => _.Successful == 0)
+                            || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Year)
+                            || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Position)
+                            || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Country)
+                            || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Clue)
+                            || ph.Count(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Club) != p.Clubs.Count)
+                            return false;
+
+                        // Less than 60 seconds
+                        return (d - ph.Min(_ => _.CreationDate)).TotalSeconds < 60;
+                    }
                 }
             };
 
@@ -224,36 +283,6 @@ namespace KikoleApi.Services
                     (c, ch) => true
                 }
             };
-
-        /// <summary>
-        /// Ctor.
-        /// </summary>
-        /// <param name="badgeRepository">Instance of <see cref="IBadgeRepository"/>.</param>
-        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
-        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
-        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
-        /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
-        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
-        /// <param name="httpContextAccessor">HTTP context accessor.</param>
-        /// <param name="clock">Clock service.</param>
-        public BadgeService(IBadgeRepository badgeRepository,
-            ILeaderRepository leaderRepository,
-            IPlayerRepository playerRepository,
-            IProposalRepository proposalRepository,
-            IChallengeRepository challengeRepository,
-            IUserRepository userRepository,
-            IHttpContextAccessor httpContextAccessor,
-            IClock clock)
-        {
-            _badgeRepository = badgeRepository;
-            _leaderRepository = leaderRepository;
-            _playerRepository = playerRepository;
-            _proposalRepository = proposalRepository;
-            _challengeRepository = challengeRepository;
-            _userRepository = userRepository;
-            _httpContextAccessor = httpContextAccessor;
-            _clock = clock;
-        }
 
         /// <inheritdoc />
         public async Task ManageChallengesBasedBadgesAsync(ulong challengeId)
@@ -545,6 +574,10 @@ namespace KikoleApi.Services
                 var myCreatedPlayers = playersHistory
                     .Where(p => p.CreationUserId == leader.UserId);
 
+                var playerFull = await _playerHandler
+                    .GetPlayerFullInfoAsync(playerOfTheDay)
+                    .ConfigureAwait(false);
+
                 foreach (var badge in LeaderBasedBadgeCondition.Keys)
                 {
                     if (LeaderBasedBadgeCondition[badge](leader))
@@ -638,7 +671,7 @@ namespace KikoleApi.Services
 
                 foreach (var badge in ProposalsBasedBadgeCondition.Keys)
                 {
-                    if (ProposalsBasedBadgeCondition[badge](proposalsBeforeWin))
+                    if (ProposalsBasedBadgeCondition[badge](leader.CreationDate, playerFull, proposalsBeforeWin))
                     {
                         await InsertBadgeIfNotAlreadyAsync(
                                 leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
