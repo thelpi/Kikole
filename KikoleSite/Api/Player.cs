@@ -21,8 +21,6 @@ namespace KikoleSite.Api
 
         public string EasyClue { get; set; }
 
-        public ulong? Badge { get; set; }
-
         public ulong Position { get; set; }
 
         public DateTime? RejectDate { get; set; }

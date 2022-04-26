@@ -25,8 +25,6 @@ namespace KikoleApi.Models
 
         public string EasyClue { get; }
 
-        public Badges? Badge { get; }
-
         public Positions Position { get; }
 
         public DateTime? RejectDate { get; }
@@ -38,7 +36,6 @@ namespace KikoleApi.Models
             ProposalDate = p.Player.ProposalDate;
             RejectDate = p.Player.RejectDate;
             AllowedNames = p.Player.AllowedNames.Disjoin();
-            Badge = (Badges?)p.Player.BadgeId;
             Clubs = p.PlayerClubs
                 .Select(c => new PlayerClub(c, p.Clubs))
                 .ToList();

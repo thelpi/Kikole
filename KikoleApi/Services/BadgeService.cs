@@ -115,22 +115,6 @@ namespace KikoleApi.Services
                 {
                     Badges.WorldWarTwo,
                     p => p.YearOfBirth < 1940
-                },
-                {
-                    Badges.ThirdWaveFeminism,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ThirdWaveFeminism
-                },
-                {
-                    Badges.ItsAFuckingDisgrace,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.ItsAFuckingDisgrace
-                },
-                {
-                    Badges.CaptainTsubasa,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.CaptainTsubasa
-                },
-                {
-                    Badges.KikolesCreatorFriend,
-                    p => p.BadgeId.HasValue && p.BadgeId == (ulong)Badges.KikolesCreatorFriend
                 }
             };
 
@@ -156,11 +140,11 @@ namespace KikoleApi.Services
             {
                 {
                     Badges.WikipediaScreenshot,
-                    (d, p, ph) => !ph.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club)
+                    (d, p, ph) => ph.Any() && !ph.Any(ep => ep.ProposalTypeId != (ulong)ProposalTypes.Club)
                 },
                 {
                     Badges.PassportCheck,
-                    (d, p, ph) => !ph.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club)
+                    (d, p, ph) => ph.Any() && !ph.Any(ep => ep.ProposalTypeId == (ulong)ProposalTypes.Club)
                 },
                 {
                     Badges.EverythingNotLost,
@@ -417,7 +401,7 @@ namespace KikoleApi.Services
         public async Task<IReadOnlyCollection<UserBadge>> PrepareNonLeaderBadgesAsync(
             ulong userId, BaseProposalRequest request)
         {
-            var collectedBadges = new List<Badges>();
+            var collectedBadges = new List<ulong>();
 
             var allBadges = await _badgeRepository
                 .GetBadgesAsync(true)
@@ -427,7 +411,7 @@ namespace KikoleApi.Services
             if (SpecialWord.Equals(request.Value.ToLowerInvariant()))
             {
                 await InsertBadgeIfNotAlreadyAsync(
-                        request.ProposalDate, userId, Badges.DoYouSpeakPatois, collectedBadges, allBadges)
+                        request.ProposalDate, userId, (ulong)Badges.DoYouSpeakPatois, collectedBadges, allBadges)
                     .ConfigureAwait(false);
             }
 
@@ -455,7 +439,7 @@ namespace KikoleApi.Services
                 if (i == 30)
                 {
                     await InsertBadgeIfNotAlreadyAsync(
-                            request.ProposalDate, userId, Badges.Dedicated, collectedBadges, allBadges)
+                            request.ProposalDate, userId, (ulong)Badges.Dedicated, collectedBadges, allBadges)
                         .ConfigureAwait(false);
                 }
             }
@@ -472,10 +456,10 @@ namespace KikoleApi.Services
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
-            var collectedBadges = new List<Badges>();
+            var collectedBadges = new List<ulong>();
 
             await InsertBadgeIfNotAlreadyAsync(
-                    _clock.Now, userId, badge, collectedBadges, allBadges)
+                    _clock.Now, userId, (ulong)badge, collectedBadges, allBadges)
                 .ConfigureAwait(false);
 
             return collectedBadges.Count > 0;
@@ -492,7 +476,7 @@ namespace KikoleApi.Services
             foreach (var dto in dtos)
             {
                 var b = await GetBadgeAsync(
-                        (Badges)dto.Id, dtos)
+                        dto.Id, dtos)
                     .ConfigureAwait(false);
                 badges.Add(b);
             }
@@ -536,7 +520,7 @@ namespace KikoleApi.Services
                 }
 
                 var ub = await GetUserBadgeAsync(
-                        (Badges)dto.BadgeId, badges, dto.GetDate)
+                        dto.BadgeId, badges, dto.GetDate)
                     .ConfigureAwait(false);
 
                 badgesFull.Add(ub);
@@ -557,7 +541,7 @@ namespace KikoleApi.Services
             IReadOnlyCollection<LeaderDto> leadersHistory,
             IReadOnlyCollection<PlayerDto> playersHistory)
         {
-            var collectedBadges = new List<Badges>();
+            var collectedBadges = new List<ulong>();
 
             // Badges you can got only if you find the player today
             if (isActualTodayleader)
@@ -583,7 +567,7 @@ namespace KikoleApi.Services
                     if (LeaderBasedBadgeCondition[badge](leader))
                     {
                         await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                             .ConfigureAwait(false);
                     }
                 }
@@ -599,7 +583,7 @@ namespace KikoleApi.Services
                     if (respectConditions)
                     {
                         await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                             .ConfigureAwait(false);
                     }
                 }
@@ -615,7 +599,7 @@ namespace KikoleApi.Services
                     if (respectConditions)
                     {
                         await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                             .ConfigureAwait(false);
                     }
                 }
@@ -625,7 +609,7 @@ namespace KikoleApi.Services
                     if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
                     {
                         await InsertBadgeIfNotAlreadyAsync(
-                                 leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                 leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                              .ConfigureAwait(false);
                     }
                 }
@@ -653,7 +637,7 @@ namespace KikoleApi.Services
                         if (LeadersBasedBadgeCondition[badge](leader, leaders))
                         {
                             await InsertBadgeIfNotAlreadyAsync(
-                                     leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                     leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                                  .ConfigureAwait(false);
                         }
                     }
@@ -664,7 +648,7 @@ namespace KikoleApi.Services
                     if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory))
                     {
                         await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                             .ConfigureAwait(false);
                     }
                 }
@@ -674,9 +658,16 @@ namespace KikoleApi.Services
                     if (ProposalsBasedBadgeCondition[badge](leader.CreationDate, playerFull, proposalsBeforeWin))
                     {
                         await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, badge, collectedBadges, allBadges)
+                                leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                             .ConfigureAwait(false);
                     }
+                }
+
+                if (playerOfTheDay.BadgeId.HasValue)
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                            leader.ProposalDate, leader.UserId, playerOfTheDay.BadgeId.Value, collectedBadges, allBadges)
+                        .ConfigureAwait(false);
                 }
             }
 
@@ -684,7 +675,7 @@ namespace KikoleApi.Services
             if (playerOfTheDay.BadgeId == (ulong)Badges.TheEnd)
             {
                 await InsertBadgeIfNotAlreadyAsync(
-                        leader.ProposalDate, leader.UserId, Badges.TheEnd, collectedBadges, allBadges)
+                        leader.ProposalDate, leader.UserId, (ulong)Badges.TheEnd, collectedBadges, allBadges)
                     .ConfigureAwait(false);
             }
 
@@ -753,17 +744,17 @@ namespace KikoleApi.Services
         private async Task InsertBadgeIfNotAlreadyAsync(
             DateTime proposalDate,
             ulong userId,
-            Badges badge,
-            List<Badges> collectedBadges,
+            ulong badge,
+            List<ulong> collectedBadges,
             IReadOnlyCollection<BadgeDto> allBadges)
         {
             var hasBadge = await _badgeRepository
-                .CheckUserHasBadgeAsync(userId, (ulong)badge)
+                .CheckUserHasBadgeAsync(userId, badge)
                 .ConfigureAwait(false);
 
             if (!hasBadge)
             {
-                var badgeMatch = allBadges.Single(b => b.Id == (ulong)badge);
+                var badgeMatch = allBadges.Single(b => b.Id == badge);
 
                 // badge can apply only after the creation date of the badge
                 if (badgeMatch.CreationDate.Date <= proposalDate.Date)
@@ -772,7 +763,7 @@ namespace KikoleApi.Services
                         .InsertUserBadgeAsync(new UserBadgeDto
                         {
                             GetDate = proposalDate.Date,
-                            BadgeId = (ulong)badge,
+                            BadgeId = badge,
                             UserId = userId
                         })
                         .ConfigureAwait(false);
@@ -783,7 +774,7 @@ namespace KikoleApi.Services
         }
 
         private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
-            List<Badges> collectedBadges,
+            List<ulong> collectedBadges,
             DateTime proposalDate,
             IReadOnlyCollection<BadgeDto> allBadges)
         {
@@ -802,7 +793,7 @@ namespace KikoleApi.Services
         }
 
         private async Task<UserBadge> GetUserBadgeAsync(
-            Badges badge,
+            ulong badge,
             IReadOnlyCollection<BadgeDto> badgesDto,
             DateTime proposalDate)
         {
@@ -813,7 +804,7 @@ namespace KikoleApi.Services
         }
 
         private async Task<Badge> GetBadgeAsync(
-            Badges badge,
+            ulong badge,
             IReadOnlyCollection<BadgeDto> badgesDto)
         {
             string description = null;
@@ -822,15 +813,15 @@ namespace KikoleApi.Services
             if (lng != Languages.en)
             {
                 description = await _badgeRepository
-                    .GetBadgeDescriptionAsync((ulong)badge, (ulong)lng)
+                    .GetBadgeDescriptionAsync(badge, (ulong)lng)
                     .ConfigureAwait(false);
             }
 
             var users = await _badgeRepository
-                .GetUsersWithBadgeAsync((ulong)badge)
+                .GetUsersWithBadgeAsync(badge)
                 .ConfigureAwait(false);
 
-            return new Badge(badgesDto.Single(_ => _.Id == (ulong)badge), users.Count, description);
+            return new Badge(badgesDto.Single(_ => _.Id == badge), users.Count, description);
         }
 
         private async Task<IReadOnlyCollection<LeaderDto>> GetLeadersHistoryAsync(
