@@ -59,12 +59,7 @@ namespace KikoleApi.Handlers
                 }
             }
 
-            return new PlayerFullDto
-            {
-                Clubs = playerClubsDetails.Values.ToList(),
-                Player = p,
-                PlayerClubs = playerClubs
-            };
+            return new PlayerFullDto(p, playerClubs, playerClubsDetails.Values.ToList());
         }
     }
 }

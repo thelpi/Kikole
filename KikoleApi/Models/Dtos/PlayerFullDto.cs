@@ -4,10 +4,19 @@ namespace KikoleApi.Models.Dtos
 {
     public class PlayerFullDto
     {
-        internal PlayerDto Player { get; set; }
+        public PlayerDto Player { get; }
 
-        internal IReadOnlyList<PlayerClubDto> PlayerClubs { get; set; }
+        public IReadOnlyList<PlayerClubDto> PlayerClubs { get; }
 
-        internal IReadOnlyList<ClubDto> Clubs { get; set; }
+        public IReadOnlyList<ClubDto> Clubs { get; }
+
+        internal PlayerFullDto(PlayerDto player,
+            IReadOnlyList<PlayerClubDto> playerClubs,
+            IReadOnlyList<ClubDto> clubs)
+        {
+            Player = player;
+            PlayerClubs = playerClubs;
+            Clubs = clubs;
+        }
     }
 }
