@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Repositories;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
+    [ExcludeFromCodeCoverage]
     public class LeaderRepository : BaseRepository, ILeaderRepository
     {
         public LeaderRepository(IConfiguration configuration, IClock clock)

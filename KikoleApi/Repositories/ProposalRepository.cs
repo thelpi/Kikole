@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Repositories;
@@ -9,23 +10,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
-    /// <summary>
-    /// Proposal repository implementation.
-    /// </summary>
-    /// <seealso cref="BaseRepository"/>
-    /// <seealso cref="IProposalRepository"/>
+    [ExcludeFromCodeCoverage]
     public class ProposalRepository : BaseRepository, IProposalRepository
     {
-        /// <summary>
-        /// Ctor.
-        /// </summary>
-        /// <param name="configuration">Configuration.</param>
-        /// <param name="clock">Clock service.</param>
         public ProposalRepository(IConfiguration configuration, IClock clock)
             : base(configuration, clock)
         { }
 
-        /// <inheritdoc />
         public async Task<ulong> CreateProposalAsync(ProposalDto proposal)
         {
             return await ExecuteInsertAsync(
@@ -39,7 +30,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(
             DateTime playerProposalDate, ulong userId)
         {
@@ -50,7 +40,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsDateExactAsync(
             DateTime playerProposalDate, ulong userId)
         {
@@ -61,7 +50,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime playerProposalDate)
         {
             return await ExecuteReaderAsync<ProposalDto>(
@@ -78,7 +66,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetAllProposalsDateExactAsync(ulong userId)
         {
             return await ExecuteReaderAsync<ProposalDto>(
@@ -88,7 +75,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate)
         {
             return await ExecuteReaderAsync<ProposalDto>(

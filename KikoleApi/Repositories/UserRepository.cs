@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Repositories;
@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
+    [ExcludeFromCodeCoverage]
     public class UserRepository : BaseRepository, IUserRepository
     {
         public UserRepository(IConfiguration configuration, IClock clock)
@@ -96,14 +97,6 @@ namespace KikoleApi.Repositories
                         question,
                         anwser
                     })
-                .ConfigureAwait(false);
-        }
-
-        public async Task GenerateUserGuidAsync(Guid guid)
-        {
-            await ExecuteInsertAsync(
-                    "user_guids",
-                    ("id", guid.ToString()))
                 .ConfigureAwait(false);
         }
 

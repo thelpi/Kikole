@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
+    [ExcludeFromCodeCoverage]
     public class BadgeRepository : BaseRepository, IBadgeRepository
     {
         public BadgeRepository(IConfiguration configuration, IClock clock)

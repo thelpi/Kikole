@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Repositories;
@@ -8,23 +9,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleApi.Repositories
 {
-    /// <summary>
-    /// Player repository implementation.
-    /// </summary>
-    /// <seealso cref="BaseRepository"/>
-    /// <seealso cref="IPlayerRepository"/>
+    [ExcludeFromCodeCoverage]
     public class PlayerRepository : BaseRepository, IPlayerRepository
     {
-        /// <summary>
-        /// Ctor.
-        /// </summary>
-        /// <param name="configuration">Configuration.</param>
-        /// <param name="clock">Clock.</param>
         public PlayerRepository(IConfiguration configuration, IClock clock)
             : base(configuration, clock)
         { }
 
-        /// <inheritdoc />
         public async Task<ulong> CreatePlayerAsync(PlayerDto player)
         {
             return await ExecuteInsertAsync(
@@ -43,7 +34,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task CreatePlayerClubsAsync(PlayerClubDto playerClub)
         {
             await ExecuteInsertAsync(
@@ -55,7 +45,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date)
         {
             return await GetDtoAsync<PlayerDto>(
@@ -64,7 +53,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(
             DateTime? minimalDate, DateTime? maximalDate)
         {
@@ -81,7 +69,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId)
         {
             return await GetDtosAsync<PlayerClubDto>(
@@ -90,7 +77,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<DateTime> GetLatestProposalDateAsync()
         {
             return await ExecuteScalarAsync<DateTime>(
@@ -98,7 +84,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
         {
             return await ExecuteReaderAsync<string>(
@@ -114,7 +99,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<PlayerDto> GetPlayerByIdAsync(ulong id)
         {
             return await GetDtoAsync<PlayerDto>(
@@ -123,7 +107,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, string easyClueEn, DateTime date)
         {
             await ExecuteNonQueryAsync(
@@ -140,7 +123,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage)
         {
             foreach (var languageId in cluesByLanguage.Keys)
@@ -155,7 +137,6 @@ namespace KikoleApi.Repositories
             }
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync()
         {
             return await ExecuteReaderAsync<PlayerDto>(
@@ -166,7 +147,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task RefusePlayerProposalAsync(ulong playerId)
         {
             await ExecuteNonQueryAsync(
@@ -186,7 +166,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted)
         {
             return await ExecuteReaderAsync<PlayerDto>(
@@ -201,7 +180,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task<DateTime> GetFirstDateAsync()
         {
             return await ExecuteScalarAsync<DateTime>(
@@ -212,7 +190,6 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
         public async Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date)
         {
             await ExecuteNonQueryAsync(

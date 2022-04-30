@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleApi.Models.Dtos;
 
@@ -22,7 +21,5 @@ namespace KikoleApi.Interfaces.Repositories
         Task<UserDto> GetUserByIdAsync(ulong userId);
 
         Task ResetUserQAndAAsync(ulong userId, string question, string anwser);
-
-        Task GenerateUserGuidAsync(Guid guid);
     }
 }

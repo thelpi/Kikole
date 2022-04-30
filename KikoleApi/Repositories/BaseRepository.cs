@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
@@ -10,6 +11,7 @@ using MySql.Data.MySqlClient;
 
 namespace KikoleApi.Repositories
 {
+    [ExcludeFromCodeCoverage]
     public abstract class BaseRepository
     {
         protected readonly IClock Clock;
@@ -29,36 +31,32 @@ namespace KikoleApi.Repositories
 
         protected async Task<ulong> ExecuteNonQueryAndGetInsertedIdAsync(string sql, object parameters)
         {
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                await connection
-                    .QueryAsync(
-                        sql,
-                        parameters,
-                        commandType: CommandType.Text)
-                    .ConfigureAwait(false);
+            using var connection = new MySqlConnection(_connectionString);
+            await connection
+                .QueryAsync(
+                    sql,
+                    parameters,
+                    commandType: CommandType.Text)
+                .ConfigureAwait(false);
 
-                var results = await connection
-                    .QueryAsync<ulong>(
-                        "SELECT LAST_INSERT_ID()",
-                        commandType: CommandType.Text)
-                    .ConfigureAwait(false);
+            var results = await connection
+                .QueryAsync<ulong>(
+                    "SELECT LAST_INSERT_ID()",
+                    commandType: CommandType.Text)
+                .ConfigureAwait(false);
 
-                return results.FirstOrDefault();
-            }
+            return results.FirstOrDefault();
         }
 
         protected async Task ExecuteNonQueryAsync(string sql, object parameters)
         {
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                await connection
-                    .QueryAsync(
-                        sql,
-                        parameters,
-                        commandType: CommandType.Text)
-                    .ConfigureAwait(false);
-            }
+            using var connection = new MySqlConnection(_connectionString);
+            await connection
+                .QueryAsync(
+                    sql,
+                    parameters,
+                    commandType: CommandType.Text)
+                .ConfigureAwait(false);
         }
 
         protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters, T defaultValue = default(T))
@@ -83,15 +81,13 @@ namespace KikoleApi.Repositories
 
         protected async Task<IReadOnlyList<T>> ExecuteReaderAsync<T>(string sql, object parameters)
         {
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                return (await connection
-                    .QueryAsync<T>(
-                        sql,
-                        parameters,
-                        commandType: CommandType.Text)
-                    .ConfigureAwait(false)).ToList();
-            }
+            using var connection = new MySqlConnection(_connectionString);
+            return (await connection
+                .QueryAsync<T>(
+                    sql,
+                    parameters,
+                    commandType: CommandType.Text)
+                .ConfigureAwait(false)).ToList();
         }
 
         protected async Task<ulong> ExecuteInsertAsync(string table, params (string column, object value)[] columns)

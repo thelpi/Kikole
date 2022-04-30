@@ -59,7 +59,12 @@ namespace KikoleApiUnitTests.Handlers
                 .Setup(_ => _.GetClubAsync(4))
                 .ReturnsAsync(cDtos[2]);
 
-            var expected = new PlayerFullDto(pDto, pcDtos, cDtos);
+            var expected = new PlayerFullDto
+            {
+                Clubs = cDtos,
+                Player = pDto,
+                PlayerClubs = pcDtos
+            };
 
             var result = await _playerHandler
                 .GetPlayerFullInfoAsync(pDto)
@@ -110,7 +115,12 @@ namespace KikoleApiUnitTests.Handlers
                 .Setup(_ => _.GetClubAsync(4))
                 .ReturnsAsync(cDtos[2]);
 
-            var expected = new PlayerFullDto(pDto, pcDtos, cDtos);
+            var expected = new PlayerFullDto
+            {
+                Clubs = cDtos,
+                Player = pDto,
+                PlayerClubs = pcDtos
+            };
 
             var result = await _playerHandler
                 .GetPlayerOfTheDayFullInfoAsync(dt)
