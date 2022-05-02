@@ -121,8 +121,6 @@ namespace KikoleApi.Bootstrap
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
