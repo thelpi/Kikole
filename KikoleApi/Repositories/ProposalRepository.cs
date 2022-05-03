@@ -60,7 +60,7 @@ namespace KikoleApi.Repositories
                     "AND proposal_date = @proposal_date " +
                     "AND NOT EXISTS (" +
                     "   SELECT 1 FROM leaders AS l " +
-                    "   WHERE L.user_id = p.user_id " +
+                    "   WHERE l.user_id = p.user_id " +
                     "   AND l.proposal_date = p.proposal_date " +
                     $") AND user_id IN ({SubSqlValidUsers})",
                     new
