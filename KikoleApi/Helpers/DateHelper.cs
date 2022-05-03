@@ -22,5 +22,10 @@ namespace KikoleApi.Helpers
         {
             return (int)Math.Floor(ts.TotalSeconds);
         }
+
+        internal static int ToRoundMinutes(this TimeSpan ts)
+        {
+            return (int)Math.Ceiling(ts.TotalMinutes);
+        }
     }
 }

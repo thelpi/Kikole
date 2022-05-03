@@ -818,7 +818,7 @@ CREATE TABLE leaders (
   user_id bigint(20) UNSIGNED NOT NULL,
   proposal_date date NOT NULL,
   points smallint(5) UNSIGNED NOT NULL,
-  time smallint(5) UNSIGNED NOT NULL,
+  time int(10) UNSIGNED NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;

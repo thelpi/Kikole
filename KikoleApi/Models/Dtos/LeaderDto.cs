@@ -10,6 +10,6 @@ namespace KikoleApi.Models.Dtos
 
         public ushort Points { get; set; }
 
-        public ushort Time { get; set; }
+        public int Time { get; set; }
     }
 }

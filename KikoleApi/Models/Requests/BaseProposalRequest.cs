@@ -14,7 +14,7 @@ namespace KikoleApi.Models.Requests
     {
         private protected BaseProposalRequest()
         {
-            ProposalDate = DateTime.Now;
+            ProposalDateTime = DateTime.Now;
         }
 
         /// <summary>
@@ -31,9 +31,9 @@ namespace KikoleApi.Models.Requests
 
         internal abstract ProposalTypes ProposalType { get; }
 
-        internal DateTime ProposalDate { get; }
+        internal DateTime ProposalDateTime { get; }
 
-        internal DateTime PlayerSubmissionDate => ProposalDate.AddDays(-DaysBeforeNow);
+        internal DateTime PlayerSubmissionDate => ProposalDateTime.AddDays(-DaysBeforeNow).Date;
 
         internal virtual string GetTip(PlayerDto player, IStringLocalizer resources)
         {

@@ -92,7 +92,7 @@ namespace KikoleApi.Models
                 AveragePoints = (int)leaders.Average(_ => _.Points);
                 MinPoints = leaders.Min(_ => _.Points);
                 MaxPoints = leaders.Max(_ => _.Points);
-                AverageTime = new TimeSpan(0, (int)Math.Floor(leaders.Average(_ => _.Time)), 0);
+                AverageTime = new TimeSpan(0, (int)Math.Ceiling(leaders.Average(_ => _.Time)), 0);
                 MinTime = new TimeSpan(0, leaders.Min(_ => _.Time), 0);
                 MaxTime = new TimeSpan(0, leaders.Max(_ => _.Time), 0);
             }

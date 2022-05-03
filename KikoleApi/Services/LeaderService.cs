@@ -57,7 +57,7 @@ namespace KikoleApi.Services
                 .ConfigureAwait(false);
 
             var leadersDto = await _leaderRepository
-                .GetLeadersAtDateAsync(day)
+                .GetLeadersAtDateAsync(day, true)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
@@ -106,7 +106,7 @@ namespace KikoleApi.Services
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
             var leaderDtos = await _leaderRepository
-                .GetLeadersAsync(firstDayOfMonth, lastDayOfMonth)
+                .GetLeadersAsync(firstDayOfMonth, lastDayOfMonth, true)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
@@ -178,7 +178,7 @@ namespace KikoleApi.Services
                     .ConfigureAwait(false);
 
                 var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(currentDate)
+                    .GetLeadersAtDateAsync(currentDate, true)
                     .ConfigureAwait(false);
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
@@ -200,7 +200,7 @@ namespace KikoleApi.Services
         private async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, LeaderSorts leaderSort, bool includePvp)
         {
             var leaderDtos = await _leaderRepository
-                .GetLeadersAsync(minimalDate, maximalDate)
+                .GetLeadersAsync(minimalDate, maximalDate, true)
                 .ConfigureAwait(false);
 
             var users = await _userRepository

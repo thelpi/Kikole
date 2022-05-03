@@ -12,6 +12,8 @@ namespace KikoleApi.Repositories
     [ExcludeFromCodeCoverage]
     public class LeaderRepository : BaseRepository, ILeaderRepository
     {
+        private const int _firstDayMinutes = 1440;
+
         public LeaderRepository(IConfiguration configuration, IClock clock)
             : base(configuration, clock)
         { }
@@ -28,30 +30,24 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task DeleteLeadersAsync(DateTime proposalDate)
-        {
-            await ExecuteNonQueryAsync(
-                    "DELETE FROM leaders WHERE proposal_date = @proposal_date",
-                    new { proposal_date = proposalDate.Date })
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date)
+        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date, bool onTimeOnly)
         {
             return await ExecuteReaderAsync<LeaderDto>(
                     "SELECT * FROM leaders " +
                     "WHERE proposal_date = @date " +
+                    $"AND {(onTimeOnly ? $"time <= {_firstDayMinutes}" : "1 = 1")} " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new { date.Date })
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate)
+        public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, bool onTimeOnly)
         {
             return await ExecuteReaderAsync<LeaderDto>(
                     "SELECT * FROM leaders " +
                     "WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
                     "AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
+                    $"AND {(onTimeOnly ? $"time <= {_firstDayMinutes}" : "1 = 1")} " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new
                     {
@@ -73,6 +69,7 @@ namespace KikoleApi.Repositories
                     "       AND p.proposal_date = l.proposal_date" +
                     "   ) AS users_count " +
                     "   FROM leaders AS l " +
+                    $"   WHERE l.time <= {_firstDayMinutes} " +
                     "   GROUP BY proposal_date" +
                     ") AS tmp " +
                     "JOIN players AS y ON tmp.proposal_date = y.proposal_date " +

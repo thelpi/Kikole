@@ -251,7 +251,7 @@ namespace KikoleApi.Services
             {
                 // ChallengeDate.Value is safe here
                 var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(c.ChallengeDate.Value)
+                    .GetLeadersAtDateAsync(c.ChallengeDate.Value, true)
                     .ConfigureAwait(false);
 
                 var opponentUserId = getOpponentUserIdFunc(c);

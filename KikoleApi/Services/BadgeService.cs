@@ -411,7 +411,7 @@ namespace KikoleApi.Services
             if (SpecialWord.Equals(request.Value.ToLowerInvariant()))
             {
                 await InsertBadgeIfNotAlreadyAsync(
-                        request.ProposalDate, userId, (ulong)Badges.DoYouSpeakPatois, collectedBadges, allBadges)
+                        request.ProposalDateTime, userId, (ulong)Badges.DoYouSpeakPatois, collectedBadges, allBadges)
                     .ConfigureAwait(false);
             }
 
@@ -439,13 +439,13 @@ namespace KikoleApi.Services
                 if (i == 30)
                 {
                     await InsertBadgeIfNotAlreadyAsync(
-                            request.ProposalDate, userId, (ulong)Badges.Dedicated, collectedBadges, allBadges)
+                            request.ProposalDateTime, userId, (ulong)Badges.Dedicated, collectedBadges, allBadges)
                         .ConfigureAwait(false);
                 }
             }
 
             return await GetUserBadgesAsync(
-                    collectedBadges, request.ProposalDate, allBadges)
+                    collectedBadges, request.ProposalDateTime, allBadges)
                 .ConfigureAwait(false);
         }
 
@@ -833,7 +833,7 @@ namespace KikoleApi.Services
             while (date.Date >= firstDate.Date)
             {
                 var leadersBefore = await _leaderRepository
-                    .GetLeadersAtDateAsync(date)
+                    .GetLeadersAtDateAsync(date, true)
                     .ConfigureAwait(false);
                 leadersHistory.AddRange(leadersBefore);
                 date = date.AddDays(-1);

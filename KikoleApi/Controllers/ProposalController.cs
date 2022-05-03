@@ -227,7 +227,7 @@ namespace KikoleApi.Controllers
                 .GetFirstSubmittedPlayerDateAsync(true)
                 .ConfigureAwait(false);
 
-            if (request.PlayerSubmissionDate.Date < firstDate.Date || request.PlayerSubmissionDate.Date > _clock.Today)
+            if (request.PlayerSubmissionDate < firstDate.Date || request.PlayerSubmissionDate > _clock.Today)
                 return BadRequest(_resources["InvalidDate"]);
 
             var pInfo = await _playerService

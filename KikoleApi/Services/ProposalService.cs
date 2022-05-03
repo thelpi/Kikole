@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleApi.Helpers;
 using KikoleApi.Interfaces;
 using KikoleApi.Interfaces.Handlers;
 using KikoleApi.Interfaces.Repositories;
@@ -96,22 +97,16 @@ namespace KikoleApi.Services
 
                 if (response.IsWin)
                 {
-                    var now = _clock.Now;
-                    leader = new LeaderDto
-                    {
-                        Points = (ushort)response.TotalPoints,
-                        ProposalDate = request.ProposalDate.Date,
-                        Time = Convert.ToUInt16(Math.Ceiling((now - request.ProposalDate.Date).TotalMinutes)),
-                        UserId = userId,
-                        CreationDate = now
-                    };
-
-                    if (request.IsTodayPlayer)
-                    {
-                        await _leaderRepository
-                            .CreateLeaderAsync(leader)
-                            .ConfigureAwait(false);
-                    }
+                    await _leaderRepository
+                        .CreateLeaderAsync(new LeaderDto
+                        {
+                            Points = (ushort)response.TotalPoints,
+                            ProposalDate = request.PlayerSubmissionDate,
+                            Time = (_clock.Now - request.PlayerSubmissionDate).ToRoundMinutes(),
+                            UserId = userId,
+                            CreationDate = _clock.Now
+                        })
+                        .ConfigureAwait(false);
                 }
             }
 

@@ -307,7 +307,7 @@ namespace KikoleApi.Services
             foreach (var p in players)
             {
                 var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(p.ProposalDate.Value)
+                    .GetLeadersAtDateAsync(p.ProposalDate.Value, true)
                     .ConfigureAwait(false);
 
                 var anonymise = !isAdmin && !leaders.Any(l => l.UserId == userId);
