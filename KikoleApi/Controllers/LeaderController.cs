@@ -26,6 +26,18 @@ namespace KikoleApi.Controllers
             _badgeService = badgeService;
         }
 
+        [HttpPut("missing-leaders")]
+        [AuthenticationLevel(UserTypes.Administrator)]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ComputeMissingLeadersAsync()
+        {
+            await _leaderService
+                .ComputeMissingLeadersAsync()
+                .ConfigureAwait(false);
+
+            return NoContent();
+        }
+
         [HttpPut("/recompute-badges")]
         [AuthenticationLevel(UserTypes.Administrator)]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]

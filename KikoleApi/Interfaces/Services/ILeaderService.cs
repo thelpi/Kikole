@@ -50,5 +50,11 @@ namespace KikoleApi.Interfaces.Services
         /// <param name="userId">User identifier.</param>
         /// <returns>User statistics; <c>Null</c> if user doesn't exist.</returns>
         Task<UserStat> GetUserStatisticsAsync(ulong userId);
+
+        /// <summary>
+        /// Computes missing leaders (administration tool).
+        /// </summary>
+        /// <returns>Nothing.</returns>
+        Task ComputeMissingLeadersAsync();
     }
 }

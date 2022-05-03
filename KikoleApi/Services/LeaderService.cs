@@ -197,6 +197,53 @@ namespace KikoleApi.Services
             return new UserStat(stats, user.Login);
         }
 
+        /// <inheritdoc />
+        public async Task ComputeMissingLeadersAsync()
+        {
+            var players = await _playerRepository
+                .GetPlayersOfTheDayAsync(null, _clock.Today)
+                .ConfigureAwait(false);
+
+            foreach (var playerOfTheDay in players)
+            {
+                var usersId = await _proposalRepository
+                    .GetMissingUsersAsLeaderAsync(playerOfTheDay.ProposalDate.Value)
+                    .ConfigureAwait(false);
+
+                foreach (var userId in usersId)
+                {
+                    var proposals = await _proposalRepository
+                        .GetProposalsAsync(playerOfTheDay.ProposalDate.Value, userId)
+                        .ConfigureAwait(false);
+
+                    var points = ProposalChart.Default.BasePoints;
+
+                    foreach (var proposal in proposals.OrderBy(p => p.CreationDate))
+                    {
+                        var minusPoints = ProposalChart.Default.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
+                        if (proposal.Successful == 0)
+                            points -= minusPoints;
+
+                        if (proposal.Successful > 0 && (ProposalTypes)proposal.ProposalTypeId == ProposalTypes.Name)
+                        {
+                            await _leaderRepository
+                                .CreateLeaderAsync(new LeaderDto
+                                {
+                                    Points = (ushort)(points < 0 ? 0 : points),
+                                    ProposalDate = playerOfTheDay.ProposalDate.Value,
+                                    Time = (proposal.CreationDate - playerOfTheDay.ProposalDate.Value).ToRoundMinutes(),
+                                    UserId = userId,
+                                    CreationDate = proposal.CreationDate
+                                })
+                                .ConfigureAwait(false);
+                            // we had for a while a bug of proposals after the player has been found
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         private async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, LeaderSorts leaderSort, bool includePvp)
         {
             var leaderDtos = await _leaderRepository

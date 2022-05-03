@@ -50,14 +50,19 @@ namespace KikoleApi.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<ProposalDto>> GetWiningProposalsAsync(DateTime playerProposalDate)
+        public async Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateTime playerProposalDate)
         {
-            return await ExecuteReaderAsync<ProposalDto>(
-                    "SELECT * FROM proposals " +
+            return await ExecuteReaderAsync<ulong>(
+                    "SELECT DISTINCT user_id " +
+                    "FROM proposals AS p " +
                     "WHERE proposal_type_id = @proposal_type_id " +
-                    "AND successful > 0 AND proposal_date = DATE(creation_date) " +
+                    "AND successful > 0 " +
                     "AND proposal_date = @proposal_date " +
-                    $"AND user_id IN ({SubSqlValidUsers})",
+                    "AND NOT EXISTS (" +
+                    "   SELECT 1 FROM leaders AS l " +
+                    "   WHERE L.user_id = p.user_id " +
+                    "   AND l.proposal_date = p.proposal_date " +
+                    $") AND user_id IN ({SubSqlValidUsers})",
                     new
                     {
                         proposal_type_id = (ulong)ProposalTypes.Name,
