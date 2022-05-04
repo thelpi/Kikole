@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using KikoleSite.Api.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Models
@@ -92,6 +93,6 @@ namespace KikoleSite.Models
 
         public bool HideCreator { get; set; }
 
-        public Api.ProposalChart Chart { get; set; }
+        public ProposalChart Chart { get; set; }
     }
 }

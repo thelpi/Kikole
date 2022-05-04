@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite
@@ -174,44 +175,44 @@ namespace KikoleSite
 
         internal static string GetMonthName(this DateTime date)
         {
-            switch (date.Month)
+            return date.Month switch
             {
-                case 1: return IsFrench() ? "Janvier" : "January";
-                case 2: return IsFrench() ? "Février" : "February";
-                case 3: return IsFrench() ? "Mars" : "March";
-                case 4: return IsFrench() ? "Avril" : "April";
-                case 5: return IsFrench() ? "Mai" : "May";
-                case 6: return IsFrench() ? "Juin" : "June";
-                case 7: return IsFrench() ? "Juillet" : "July";
-                case 8: return IsFrench() ? "Août" : "August";
-                case 9: return IsFrench() ? "Septembre" : "September";
-                case 10: return IsFrench() ? "Octobre" : "October";
-                case 11: return IsFrench() ? "Novembre" : "November";
-                case 12: return IsFrench() ? "Décembre" : "December";
-                default: throw new NotImplementedException();
-            }
-        }
-
-        public static string GetLabel(this Api.LeaderSort sort)
-        {
-            return sort switch
-            {
-                Api.LeaderSort.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
-                Api.LeaderSort.SuccessCount => IsFrench() ? "Nombre de succès" : "Success count",
-                Api.LeaderSort.TotalPoints => IsFrench() ? "Points" : "Points",
-                Api.LeaderSort.SuccessCountOverall => IsFrench() ? "Nombre de succès (inc. hors-délai)" : "Success count (inc. out of time)",
-                Api.LeaderSort.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+                1 => IsFrench() ? "Janvier" : "January",
+                2 => IsFrench() ? "Février" : "February",
+                3 => IsFrench() ? "Mars" : "March",
+                4 => IsFrench() ? "Avril" : "April",
+                5 => IsFrench() ? "Mai" : "May",
+                6 => IsFrench() ? "Juin" : "June",
+                7 => IsFrench() ? "Juillet" : "July",
+                8 => IsFrench() ? "Août" : "August",
+                9 => IsFrench() ? "Septembre" : "September",
+                10 => IsFrench() ? "Octobre" : "October",
+                11 => IsFrench() ? "Novembre" : "November",
+                12 => IsFrench() ? "Décembre" : "December",
                 _ => throw new NotImplementedException(),
             };
         }
 
-        public static string GetLabel(this Api.DayLeaderSort sort)
+        public static string GetLabel(this LeaderSorts sort)
         {
             return sort switch
             {
-                Api.DayLeaderSort.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
-                Api.DayLeaderSort.TotalPoints => IsFrench() ? "Points" : "Points",
-                Api.DayLeaderSort.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+                LeaderSorts.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
+                LeaderSorts.SuccessCount => IsFrench() ? "Nombre de succès" : "Success count",
+                LeaderSorts.TotalPoints => IsFrench() ? "Points" : "Points",
+                LeaderSorts.SuccessCountOverall => IsFrench() ? "Nombre de succès (inc. hors-délai)" : "Success count (inc. out of time)",
+                LeaderSorts.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        public static string GetLabel(this DayLeaderSorts sort)
+        {
+            return sort switch
+            {
+                DayLeaderSorts.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
+                DayLeaderSorts.TotalPoints => IsFrench() ? "Points" : "Points",
+                DayLeaderSorts.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
                 _ => throw new NotImplementedException(),
             };
         }
@@ -221,40 +222,29 @@ namespace KikoleSite
             return CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr";
         }
 
-        internal static string GetLabel(this Api.ProposalType type, bool withFrenchDe)
+        internal static string GetLabel(this ProposalTypes type, bool withFrenchDe)
         {
-            switch (type)
+            return type switch
             {
-                case Api.ProposalType.Name:
-                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}nom" : "name";
-                case Api.ProposalType.Club:
-                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}club" : "club";
-                case Api.ProposalType.Year:
-                    return IsFrench() ? $"{(withFrenchDe ? "d'" : "")}année" : "year";
-                case Api.ProposalType.Country:
-                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}nationalité" : "country";
-                case Api.ProposalType.Position:
-                    return IsFrench() ? $"{(withFrenchDe ? "de " : "")}position" : "position";
-                default:
-                    throw new NotImplementedException();
-            }
+                ProposalTypes.Name => IsFrench() ? $"{(withFrenchDe ? "de " : "")}nom" : "name",
+                ProposalTypes.Club => IsFrench() ? $"{(withFrenchDe ? "de " : "")}club" : "club",
+                ProposalTypes.Year => IsFrench() ? $"{(withFrenchDe ? "d'" : "")}année" : "year",
+                ProposalTypes.Country => IsFrench() ? $"{(withFrenchDe ? "de " : "")}nationalité" : "country",
+                ProposalTypes.Position => IsFrench() ? $"{(withFrenchDe ? "de " : "")}position" : "position",
+                _ => throw new NotImplementedException(),
+            };
         }
 
-        internal static string GetLabel(this Api.Position position)
+        internal static string GetLabel(this Positions position)
         {
-            switch (position)
+            return position switch
             {
-                case Api.Position.Defender:
-                    return IsFrench() ? "Défenseur" : "Defender";
-                case Api.Position.Forward:
-                    return IsFrench() ? "Attaquant" : "Forward";
-                case Api.Position.Goalkeeper:
-                    return IsFrench() ? "Gardien de but" : "Goalkeeper";
-                case Api.Position.Midfielder:
-                    return IsFrench() ? "Milieu de terrain" : "Midfielder";
-                default:
-                    throw new NotImplementedException();
-            }
+                Positions.Defender => IsFrench() ? "Défenseur" : "Defender",
+                Positions.Forward => IsFrench() ? "Attaquant" : "Forward",
+                Positions.Goalkeeper => IsFrench() ? "Gardien de but" : "Goalkeeper",
+                Positions.Midfielder => IsFrench() ? "Milieu de terrain" : "Midfielder",
+                _ => throw new NotImplementedException(),
+            };
         }
     }
 }

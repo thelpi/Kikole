@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
 
 namespace KikoleSite.Models
 {
@@ -37,7 +37,7 @@ namespace KikoleSite.Models
 
         public bool IsHimself { get; set; }
 
-        public UserStatsModel(UserStats apiStat,
+        public UserStatsModel(UserStat apiStat,
             IReadOnlyCollection<UserBadge> badges,
             IReadOnlyCollection<Badge> allBadges,
             IReadOnlyCollection<string> knownAnswers,

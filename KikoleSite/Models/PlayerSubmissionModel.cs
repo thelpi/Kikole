@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
 
 namespace KikoleSite.Models
 {

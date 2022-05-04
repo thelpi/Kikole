@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
+using KikoleSite.Api.Models.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Models
@@ -48,18 +49,18 @@ namespace KikoleSite.Models
 
         public HomeModel() { }
 
-        internal string GetValueFromProposalType(ProposalType proposalType)
+        internal string GetValueFromProposalType(ProposalTypes proposalType)
         {
-            switch (proposalType)
+            return proposalType switch
             {
-                case ProposalType.Club: return ClubNameSubmission;
-                case ProposalType.Country: return CountryNameSubmission;
-                case ProposalType.Name: return PlayerNameSubmission;
-                case ProposalType.Year: return BirthYearSubmission;
-                case ProposalType.Position: return PositionSubmission;
-                case ProposalType.Clue: return "GetClue"; // anything not empty
-                default: return null;
-            }
+                ProposalTypes.Club => ClubNameSubmission,
+                ProposalTypes.Country => CountryNameSubmission,
+                ProposalTypes.Name => PlayerNameSubmission,
+                ProposalTypes.Year => BirthYearSubmission,
+                ProposalTypes.Position => PositionSubmission,
+                ProposalTypes.Clue => "GetClue",// anything not empty
+                _ => null,
+            };
         }
 
         internal void SetFinalFormIsUserIsCreator(string playerName)
@@ -76,14 +77,14 @@ namespace KikoleSite.Models
             Points = response.TotalPoints;
             switch (response.ProposalType)
             {
-                case ProposalType.Clue:
+                case ProposalTypes.Clue:
                     EasyClue = easyClue;
                     break;
-                case ProposalType.Club:
+                case ProposalTypes.Club:
                     if (response.Successful)
                     {
                         var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
-                        var newClubs = response.GetPlayerClubsValue();
+                        var newClubs = GetPlayerClubsValue(response);
                         clubSubmissions.AddRange(
                             newClubs.Where(nc =>
                                 !clubSubmissions.Any(cs => cs.HistoryPosition == nc.HistoryPosition)));
@@ -94,7 +95,7 @@ namespace KikoleSite.Models
                         IncorrectClubs = AddToList(IncorrectClubs, response.Value);
                     }
                     break;
-                case ProposalType.Country:
+                case ProposalTypes.Country:
                     var cValue = response.Value;
                     if (response.Successful)
                         CountryName = countries[ulong.Parse(cValue)];
@@ -106,7 +107,7 @@ namespace KikoleSite.Models
                         IncorrectCountries = AddToList(IncorrectCountries, cValue);
                     }
                     break;
-                case ProposalType.Position:
+                case ProposalTypes.Position:
                     var pValue = response.Value;
                     if (response.Successful)
                         Position = positions[ulong.Parse(pValue)];
@@ -118,14 +119,14 @@ namespace KikoleSite.Models
                         IncorrectPositions = AddToList(IncorrectPositions, pValue);
                     }
                     break;
-                case ProposalType.Name:
+                case ProposalTypes.Name:
                     var nValue = response.Value;
                     if (response.Successful)
                         PlayerName = nValue;
                     else
                         IncorrectNames = AddToList(IncorrectNames, nValue);
                     break;
-                case ProposalType.Year:
+                case ProposalTypes.Year:
                     var yValue = response.Value;
                     if (response.Successful)
                         BirthYear = yValue;
@@ -140,6 +141,11 @@ namespace KikoleSite.Models
             var list = (baseList ?? new List<T>(1)).ToList();
             list.Add(value);
             return list;
+        }
+
+        private static IReadOnlyCollection<PlayerClub> GetPlayerClubsValue(ProposalResponse response)
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<IReadOnlyCollection<PlayerClub>>(response.Value);
         }
     }
 }

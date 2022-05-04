@@ -1,5 +1,5 @@
 ﻿using System;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
 
 namespace KikoleSite.Models
 {
@@ -23,7 +23,7 @@ namespace KikoleSite.Models
 
         public bool IsCreator { get; set; }
 
-        public SingleUserStatModel(SingleUserStat apiStat, bool knowPlayer)
+        public SingleUserStatModel(DailyUserStat apiStat, bool knowPlayer)
         {
             Answer = knowPlayer ? apiStat.Answer : "***";
             Date = apiStat.Date;

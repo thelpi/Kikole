@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
+using KikoleSite.Api.Models.Enums;
 
 namespace KikoleSite.Models
 {
@@ -20,7 +21,7 @@ namespace KikoleSite.Models
 
         public string BoardName { get; set; }
 
-        public LeaderSort SortType { get; set; }
+        public LeaderSorts SortType { get; set; }
 
         public IReadOnlyCollection<Leader> Leaders { get; set; }
 
@@ -28,20 +29,20 @@ namespace KikoleSite.Models
 
         public int TodayAttemps { get; set; }
 
-        public IReadOnlyCollection<LeaderSort> SortTypes { get; }
-            = Enum.GetValues(typeof(LeaderSort))
-                .Cast<LeaderSort>()
+        public IReadOnlyCollection<LeaderSorts> SortTypes { get; }
+            = Enum.GetValues(typeof(LeaderSorts))
+                .Cast<LeaderSorts>()
                 .ToList();
 
         [DataType(DataType.Date, ErrorMessage = "Date only")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime LeaderboardDay { get; set; }
 
-        public DayLeaderSort DaySortType { get; set; }
+        public DayLeaderSorts DaySortType { get; set; }
 
-        public IReadOnlyCollection<DayLeaderSort> DaySortTypes { get; }
-            = Enum.GetValues(typeof(DayLeaderSort))
-                .Cast<DayLeaderSort>()
+        public IReadOnlyCollection<DayLeaderSorts> DaySortTypes { get; }
+            = Enum.GetValues(typeof(DayLeaderSorts))
+                .Cast<DayLeaderSorts>()
                 .ToList();
 
         public Awards Awards { get; set; }

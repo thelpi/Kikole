@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
+using KikoleSite.Api.Models.Enums;
+using KikoleSite.Api.Models.Requests;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -253,7 +255,7 @@ namespace KikoleSite.Controllers
                 },
                 CountryString = countryId.ToString(),
                 Name = model.Name,
-                PositionString = Enum.GetValues(typeof(Position)).Cast<Position>().Single(v => (ulong)v == positionId).ToString(),
+                PositionString = Enum.GetValues(typeof(Positions)).Cast<Positions>().Single(v => (ulong)v == positionId).ToString(),
                 YearOfBirth = yearValue,
                 HideCreator = model.HideCreator
             };
@@ -361,7 +363,7 @@ namespace KikoleSite.Controllers
                     Id = p.Id,
                     Login = p.Login,
                     Name = p.Name,
-                    Position = Enum.GetValues(typeof(Position)).Cast<Position>().First(pp => (ulong)pp == p.Position).ToString(),
+                    Position = Enum.GetValues(typeof(Positions)).Cast<Positions>().First(pp => (ulong)pp == p.Position).ToString(),
                     YearOfBirth = p.YearOfBirth
                 })
                 .ToList();
@@ -377,7 +379,7 @@ namespace KikoleSite.Controllers
             }
         }
 
-        private void SetPositionsOnModel(PlayerCreationModel model, Api.ProposalChart chart)
+        private void SetPositionsOnModel(PlayerCreationModel model, ProposalChart chart)
         {
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()

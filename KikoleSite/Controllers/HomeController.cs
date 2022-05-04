@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
+using KikoleSite.Api.Models.Enums;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -91,7 +92,7 @@ namespace KikoleSite.Controllers
             var (token, login) = GetAuthenticationCookie();
 
             if (model == null
-                || !Enum.TryParse<ProposalType>(GetSubmitAction(), out var proposalType)
+                || !Enum.TryParse<ProposalTypes>(GetSubmitAction(), out var proposalType)
                 || string.IsNullOrWhiteSpace(token))
             {
                 return Redirect("/");
@@ -113,7 +114,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;
-            if (proposalType == ProposalType.Clue)
+            if (proposalType == ProposalTypes.Clue)
                 model.MessageToDisplay = response.Tip;
             else
             {
