@@ -249,9 +249,6 @@
   <data name="ResetPasswordError" xml:space="preserve">
     <value>Erreur lors de la réinitalisation du mot de passe</value>
   </data>
-  <data name="SuccessCountSortForbidden" xml:space="preserve">
-    <value>Impossible de trier par nombre de succès</value>
-  </data>
   <data name="TipOlderPlayer" xml:space="preserve">
     <value>Le joueur est plus vieux</value>
   </data>

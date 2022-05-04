@@ -50,14 +50,14 @@ namespace KikoleApi.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<Leader>> GetLeadersOfTheDayAsync(DateTime day, LeaderSorts sort)
+        public async Task<IReadOnlyCollection<Leader>> GetLeadersOfTheDayAsync(DateTime day, DayLeaderSorts sort)
         {
             var pDay = await _playerRepository
                 .GetPlayerOfTheDayAsync(day)
                 .ConfigureAwait(false);
 
             var leadersDto = await _leaderRepository
-                .GetLeadersAtDateAsync(day, true)
+                .GetLeadersAtDateAsync(day, sort == DayLeaderSorts.TotalPoints)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
@@ -72,9 +72,9 @@ namespace KikoleApi.Services
             if (userCreator != null && (pDay.HideCreator == 0 || day.Date < _clock.Today))
                 leaders.Add(new Leader(userCreator, day, leadersDto));
 
-            return sort == LeaderSorts.TotalPoints
-                ? leaders.SetPositions(l => l.TotalPoints, l => l.BestTime.TotalMinutes, true, false, (l, i) => l.Position = i)
-                : leaders.SetPositions(l => l.BestTime.TotalMinutes, l => l.TotalPoints, false, true, (l, i) => l.Position = i);
+            return sort == DayLeaderSorts.BestTime
+                ? leaders.SetPositions(l => l.BestTime.TotalMinutes, l => l.TotalPoints, false, true, (l, i) => l.Position = i)
+                : leaders.SetPositions(l => l.TotalPoints, l => l.BestTime.TotalMinutes, true, false, (l, i) => l.Position = i);
         }
 
         /// <inheritdoc />
@@ -246,8 +246,11 @@ namespace KikoleApi.Services
 
         private async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, LeaderSorts leaderSort, bool includePvp)
         {
+            var onTimeOnly = leaderSort != LeaderSorts.TotalPointsOverall
+                && leaderSort != LeaderSorts.SuccessCountOverall;
+
             var leaderDtos = await _leaderRepository
-                .GetLeadersAsync(minimalDate, maximalDate, true)
+                .GetLeadersAsync(minimalDate, maximalDate, onTimeOnly)
                 .ConfigureAwait(false);
 
             var users = await _userRepository
@@ -320,12 +323,14 @@ namespace KikoleApi.Services
             switch (sort)
             {
                 case LeaderSorts.SuccessCount:
+                case LeaderSorts.SuccessCountOverall:
                     leaders = leaders.SetPositions(l => l.SuccessCount, true, (l, i) => l.Position = i);
                     break;
                 case LeaderSorts.BestTime:
                     leaders = leaders.SetPositions(l => l.BestTime, false, (l, i) => l.Position = i);
                     break;
                 case LeaderSorts.TotalPoints:
+                case LeaderSorts.TotalPointsOverall:
                     leaders = leaders.SetPositions(l => l.TotalPoints, true, (l, i) => l.Position = i);
                     break;
             }

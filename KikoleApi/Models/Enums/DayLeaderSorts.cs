@@ -1,11 +1,9 @@
 ﻿namespace KikoleApi.Models.Enums
 {
-    public enum LeaderSorts
+    public enum DayLeaderSorts
     {
-        SuccessCount,
         BestTime,
         TotalPoints,
-        SuccessCountOverall,
         TotalPointsOverall
     }
 }

@@ -56,11 +56,8 @@ namespace KikoleApi.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<IReadOnlyCollection<Leader>>> GetDayLeadersAsync(
             [FromQuery] DateTime day,
-            [FromQuery] LeaderSorts sort)
+            [FromQuery] DayLeaderSorts sort)
         {
-            if (sort == LeaderSorts.SuccessCount)
-                return BadRequest(_resources["SuccessCountSortForbidden"]);
-
             var dayLeaders = await _leaderService
                 .GetLeadersOfTheDayAsync(day, sort)
                 .ConfigureAwait(false);

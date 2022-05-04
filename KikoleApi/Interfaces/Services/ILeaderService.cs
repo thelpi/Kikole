@@ -17,7 +17,7 @@ namespace KikoleApi.Interfaces.Services
         /// <param name="day">The requested day.</param>
         /// <param name="sort">Th expected sort.</param>
         /// <returns>Collection of sorted leaders for the day.</returns>
-        Task<IReadOnlyCollection<Leader>> GetLeadersOfTheDayAsync(DateTime day, LeaderSorts sort);
+        Task<IReadOnlyCollection<Leader>> GetLeadersOfTheDayAsync(DateTime day, DayLeaderSorts sort);
 
         /// <summary>
         /// Gets challenge leaders for a given period.

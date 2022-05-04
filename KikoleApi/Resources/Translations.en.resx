@@ -249,9 +249,6 @@
   <data name="ResetPasswordError" xml:space="preserve">
     <value>Error while reseting the password</value>
   </data>
-  <data name="SuccessCountSortForbidden" xml:space="preserve">
-    <value>Can't sort by success count</value>
-  </data>
   <data name="TipOlderPlayer" xml:space="preserve">
     <value>The player is older</value>
   </data>
