@@ -40,8 +40,9 @@ namespace KikoleSite.Api.Interfaces.Services
         /// </summary>
         /// <param name="proposalDate">Date of player proposal.</param>
         /// <param name="isEasy"><c>True</c> to get easy clue; otherwise normal clue.</param>
+        /// <param name="language">The language.</param>
         /// <returns>Clue.</returns>
-        Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy);
+        Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language);
 
         /// <summary>
         /// Accepts a player submission.

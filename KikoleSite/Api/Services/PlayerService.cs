@@ -26,7 +26,6 @@ namespace KikoleSite.Api.Services
         private readonly IUserRepository _userRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IProposalRepository _proposalRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
         private readonly Random _randomizer;
 
@@ -38,7 +37,6 @@ namespace KikoleSite.Api.Services
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
-        /// <param name="httpContextAccessor">Http context accessor.</param>
         /// <param name="clock">Clock service.</param>
         /// <param name="randomizer">Randomizer.</param>
         public PlayerService(IPlayerHandler playerHandler,
@@ -55,7 +53,6 @@ namespace KikoleSite.Api.Services
             _userRepository = userRepository;
             _leaderRepository = leaderRepository;
             _proposalRepository = proposalRepository;
-            _httpContextAccessor = httpContextAccessor;
             _clock = clock;
             _randomizer = randomizer;
         }
@@ -107,7 +104,7 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy)
+        public async Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language)
         {
             var player = await _playerRepository
                 .GetPlayerOfTheDayAsync(proposalDate)
@@ -117,11 +114,10 @@ namespace KikoleSite.Api.Services
                 ? player.EasyClue
                 : player.Clue;
 
-            var lng = _httpContextAccessor.ExtractLanguage();
-            if (lng != Languages.en)
+            if (language != Languages.en)
             {
                 clue = await _playerRepository
-                    .GetClueAsync(player.Id, (byte)(isEasy ? 1 : 0), (ulong)lng)
+                    .GetClueAsync(player.Id, (byte)(isEasy ? 1 : 0), (ulong)language)
                     .ConfigureAwait(false);
             }
 

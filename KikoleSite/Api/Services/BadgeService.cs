@@ -11,7 +11,6 @@ using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Api.Models.Requests;
-using Microsoft.AspNetCore.Http;
 
 namespace KikoleSite.Api.Services
 {
@@ -30,7 +29,6 @@ namespace KikoleSite.Api.Services
         private readonly IProposalRepository _proposalRepository;
         private readonly IChallengeRepository _challengeRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClock _clock;
 
         /// <summary>
@@ -43,7 +41,6 @@ namespace KikoleSite.Api.Services
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
-        /// <param name="httpContextAccessor">HTTP context accessor.</param>
         /// <param name="clock">Clock service.</param>
         public BadgeService(IPlayerHandler playerHandler,
             IBadgeRepository badgeRepository,
@@ -52,7 +49,6 @@ namespace KikoleSite.Api.Services
             IProposalRepository proposalRepository,
             IChallengeRepository challengeRepository,
             IUserRepository userRepository,
-            IHttpContextAccessor httpContextAccessor,
             IClock clock)
         {
             _playerHandler = playerHandler;
@@ -62,7 +58,6 @@ namespace KikoleSite.Api.Services
             _proposalRepository = proposalRepository;
             _challengeRepository = challengeRepository;
             _userRepository = userRepository;
-            _httpContextAccessor = httpContextAccessor;
             _clock = clock;
         }
 
@@ -306,7 +301,7 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task ResetBadgesAsync()
+        public async Task ResetBadgesAsync(Languages language)
         {
             var allBadges = await _badgeRepository
                 .GetBadgesAsync(true)
@@ -361,7 +356,7 @@ namespace KikoleSite.Api.Services
                         .ToList();
 
                     await PrepareNewLeaderBadgesInternalAsync(
-                            leader, pDay, proposals, true, allBadges, leadersHistory, playersHistory)
+                            leader, pDay, proposals, true, allBadges, leadersHistory, playersHistory, language)
                         .ConfigureAwait(false);
                 }
 
@@ -374,7 +369,8 @@ namespace KikoleSite.Api.Services
             LeaderDto leader,
             PlayerDto playerOfTheDay,
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
-            bool isActualTodayleader)
+            bool isActualTodayleader,
+            Languages language)
         {
             var allBadges = await _badgeRepository
                 .GetBadgesAsync(true)
@@ -393,13 +389,13 @@ namespace KikoleSite.Api.Services
                 .ConfigureAwait(false);
 
             return await PrepareNewLeaderBadgesInternalAsync(
-                    leader, playerOfTheDay, proposalsBeforeWin, isActualTodayleader, allBadges, leadersHistory, playersHistory)
+                    leader, playerOfTheDay, proposalsBeforeWin, isActualTodayleader, allBadges, leadersHistory, playersHistory, language)
                 .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<UserBadge>> PrepareNonLeaderBadgesAsync(
-            ulong userId, BaseProposalRequest request)
+            ulong userId, BaseProposalRequest request, Languages language)
         {
             var collectedBadges = new List<ulong>();
 
@@ -445,7 +441,7 @@ namespace KikoleSite.Api.Services
             }
 
             return await GetUserBadgesAsync(
-                    collectedBadges, request.ProposalDateTime, allBadges)
+                    collectedBadges, request.ProposalDateTime, allBadges, language)
                 .ConfigureAwait(false);
         }
 
@@ -466,7 +462,7 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync()
+        public async Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync(Languages language)
         {
             var dtos = await _badgeRepository
                 .GetBadgesAsync(false)
@@ -476,7 +472,7 @@ namespace KikoleSite.Api.Services
             foreach (var dto in dtos)
             {
                 var b = await GetBadgeAsync(
-                        dto.Id, dtos)
+                        dto.Id, dtos, language)
                     .ConfigureAwait(false);
                 badges.Add(b);
             }
@@ -487,7 +483,10 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, ulong connectedUserId)
+        public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
+            ulong userId,
+            ulong connectedUserId,
+            Languages language)
         {
             var isAllowedToSeeHiddenBadge = connectedUserId == userId;
             if (connectedUserId > 0 && !isAllowedToSeeHiddenBadge)
@@ -520,7 +519,7 @@ namespace KikoleSite.Api.Services
                 }
 
                 var ub = await GetUserBadgeAsync(
-                        dto.BadgeId, badges, dto.GetDate)
+                        dto.BadgeId, badges, dto.GetDate, language)
                     .ConfigureAwait(false);
 
                 badgesFull.Add(ub);
@@ -539,7 +538,8 @@ namespace KikoleSite.Api.Services
             bool isActualTodayleader,
             IReadOnlyCollection<BadgeDto> allBadges,
             IReadOnlyCollection<LeaderDto> leadersHistory,
-            IReadOnlyCollection<PlayerDto> playersHistory)
+            IReadOnlyCollection<PlayerDto> playersHistory,
+            Languages language)
         {
             var collectedBadges = new List<ulong>();
 
@@ -680,7 +680,7 @@ namespace KikoleSite.Api.Services
             }
 
             return await GetUserBadgesAsync(
-                    collectedBadges, leader.ProposalDate, allBadges)
+                    collectedBadges, leader.ProposalDate, allBadges, language)
                 .ConfigureAwait(false);
         }
 
@@ -776,14 +776,15 @@ namespace KikoleSite.Api.Services
         private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
             List<ulong> collectedBadges,
             DateTime proposalDate,
-            IReadOnlyCollection<BadgeDto> allBadges)
+            IReadOnlyCollection<BadgeDto> allBadges,
+            Languages language)
         {
             var collectedUserBadges = new List<UserBadge>();
 
             foreach (var badge in collectedBadges)
             {
                 var ub = await GetUserBadgeAsync(
-                        badge, allBadges, proposalDate)
+                        badge, allBadges, proposalDate, language)
                     .ConfigureAwait(false);
 
                 collectedUserBadges.Add(ub);
@@ -795,25 +796,26 @@ namespace KikoleSite.Api.Services
         private async Task<UserBadge> GetUserBadgeAsync(
             ulong badge,
             IReadOnlyCollection<BadgeDto> badgesDto,
-            DateTime proposalDate)
+            DateTime proposalDate,
+            Languages language)
         {
             var b = await GetBadgeAsync(
-                    badge, badgesDto)
+                    badge, badgesDto, language)
                 .ConfigureAwait(false);
             return new UserBadge(b, proposalDate);
         }
 
         private async Task<Badge> GetBadgeAsync(
             ulong badge,
-            IReadOnlyCollection<BadgeDto> badgesDto)
+            IReadOnlyCollection<BadgeDto> badgesDto,
+            Languages language)
         {
             string description = null;
 
-            var lng = _httpContextAccessor.ExtractLanguage();
-            if (lng != Languages.en)
+            if (language != Languages.en)
             {
                 description = await _badgeRepository
-                    .GetBadgeDescriptionAsync(badge, (ulong)lng)
+                    .GetBadgeDescriptionAsync(badge, (ulong)language)
                     .ConfigureAwait(false);
             }
 

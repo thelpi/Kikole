@@ -77,7 +77,7 @@ namespace KikoleSite
 
         #region main game
 
-        Task<ProposalResponse> SubmitProposalAsync(string value, int daysBeforeNow, ProposalTypes proposalType, string authToken);
+        Task<ProposalResponse> SubmitProposalAsync(string value, uint daysBeforeNow, ProposalTypes proposalType, string authToken);
 
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken);
 

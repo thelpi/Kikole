@@ -50,9 +50,7 @@ namespace KikoleSite
                 .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization();
 
-            var apiProvider = new ApiProvider(Configuration);
-
-            services.AddSingleton<IApiProvider>(apiProvider);
+            services.AddSingleton<IApiProvider, ApiProvider>();
 
             services
                 // repositories
@@ -77,11 +75,6 @@ namespace KikoleSite
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton(new Random());
-
-            // force cache
-            apiProvider.GetClubsAsync().GetAwaiter().GetResult();
-            apiProvider.GetCountriesAsync().GetAwaiter().GetResult();
-            apiProvider.GetProposalChartAsync().GetAwaiter().GetResult();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
