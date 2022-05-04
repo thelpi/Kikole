@@ -112,6 +112,9 @@ namespace KikoleSite
                 options.SupportedCultures = cultures;
                 options.SupportedUICultures = cultures;
             });
+
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("fr");
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("fr");
         }
     }
 }
