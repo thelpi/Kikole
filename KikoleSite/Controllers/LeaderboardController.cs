@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api;
+using KikoleSite.Api.Models.Enums;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -83,9 +83,9 @@ namespace KikoleSite.Controllers
 
             model.MinimalDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             model.MaximalDate = DateTime.Now.Date;
-            model.SortType = LeaderSort.TotalPoints;
+            model.SortType = LeaderSorts.TotalPoints;
             model.LeaderboardDay = DateTime.Now.Date;
-            model.DaySortType = DayLeaderSort.BestTime;
+            model.DaySortType = DayLeaderSorts.BestTime;
 
             await SetModelPropertiesAsync(
                     model, chart.FirstDate)

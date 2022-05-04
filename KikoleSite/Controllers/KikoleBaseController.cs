@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api;
+using KikoleSite.Api.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,8 +63,8 @@ namespace KikoleSite.Controllers
         protected IReadOnlyDictionary<ulong, string> GetPositions()
         {
             return Enum
-                .GetValues(typeof(Position))
-                .Cast<Position>()
+                .GetValues(typeof(Positions))
+                .Cast<Positions>()
                 .ToDictionary(_ => (ulong)_, _ => _.GetLabel());
         }
 

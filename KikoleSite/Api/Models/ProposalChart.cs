@@ -38,5 +38,12 @@ namespace KikoleSite.Api.Models
             => ProposalTypesCost.ToDictionary(x =>x.Key.ToString(), x => x.Value);
 
         public DateTime FirstDate { get; internal set; }
+
+        public int GetProposalTypesCost(ProposalTypes proposalType)
+        {
+            return ProposalTypesCostString[proposalType.ToString()];
+        }
+
+        public int SubmissionMaxPoints => SubmissionBasePoints + SubmissionBonusPoints;
     }
 }

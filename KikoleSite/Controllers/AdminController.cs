@@ -359,11 +359,11 @@ namespace KikoleSite.Controllers
                     Clubs = p.Clubs,
                     Clue = p.Clue,
                     EasyClue = p.EasyClue,
-                    Country = countries[p.Country],
+                    Country = countries[(ulong)p.Country],
                     Id = p.Id,
                     Login = p.Login,
                     Name = p.Name,
-                    Position = Enum.GetValues(typeof(Positions)).Cast<Positions>().First(pp => (ulong)pp == p.Position).ToString(),
+                    Position = Enum.GetValues(typeof(Positions)).Cast<Positions>().First(pp => pp == p.Position).ToString(),
                     YearOfBirth = p.YearOfBirth
                 })
                 .ToList();

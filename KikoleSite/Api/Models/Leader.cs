@@ -12,7 +12,7 @@ namespace KikoleSite.Api.Models
 
         public string Login { get; }
 
-        internal TimeSpan BestTime { get; }
+        public TimeSpan BestTime { get; }
 
         public int BestTimeSec => BestTime.ToSeconds();
 

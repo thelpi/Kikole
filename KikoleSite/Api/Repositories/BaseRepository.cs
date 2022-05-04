@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 

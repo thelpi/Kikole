@@ -7,7 +7,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
+using KikoleSite.Api.Models.Enums;
+using KikoleSite.Api.Models.Requests;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite
@@ -151,7 +153,7 @@ namespace KikoleSite
         #region stats, badges and leaderboard
 
         public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
-            LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp)
+            LeaderSorts leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp)
         {
             var response = await SendAsync(
                     $"leaders?maximalDate={maximalDate?.ToString("yyyy-MM-dd")}&minimalDate={minimalDate?.ToString("yyyy-MM-dd")}&leaderSort={(int)leaderSort}&includePvp={includePvp}",
@@ -162,7 +164,7 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSort sort)
+        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort)
         {
             var response = await SendAsync(
                     $"day-leaders?sort={(ulong)sort}&day={day:yyyy-MM-dd}",
@@ -173,12 +175,12 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<UserStats> GetUserStatsAsync(ulong id)
+        public async Task<UserStat> GetUserStatsAsync(ulong id)
         {
             var response = await SendAsync($"users/{id}/stats", HttpMethod.Get)
                 .ConfigureAwait(false);
 
-            return await GetResponseContentAsync<UserStats>(response, () => null)
+            return await GetResponseContentAsync<UserStat>(response, () => null)
                 .ConfigureAwait(false);
         }
 
@@ -316,7 +318,7 @@ namespace KikoleSite
                 _countriesCache.Add(
                     CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
                     apiCountries
-                        .ToDictionary(ac => ac.Code, ac => ac.Name));
+                        .ToDictionary(ac => (ulong)ac.Code, ac => ac.Name));
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
@@ -370,7 +372,7 @@ namespace KikoleSite
 
         public async Task<ProposalResponse> SubmitProposalAsync(string value,
             int daysBeforeNow,
-            ProposalType proposalType,
+            ProposalTypes proposalType,
             string authToken)
         {
             var response = await SendAsync(

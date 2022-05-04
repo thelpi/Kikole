@@ -3,11 +3,11 @@
 
 @if (Model.Awards != null)
 {
-    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthPoints"].Value, Model.Awards.PointsAwards.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthTime"].Value, Model.Awards.TimeAwards.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthCount"].Value, Model.Awards.CountAwards.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["HardKikoleMonth"].Value, Model.Awards.HardestKikoles.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["EasyKikoleMonth"].Value, Model.Awards.EasiestKikoles.Cast<KikoleSite.Api.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthPoints"].Value, Model.Awards.PointsAwards.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthTime"].Value, Model.Awards.TimeAwards.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthCount"].Value, Model.Awards.CountAwards.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", (localizer["HardKikoleMonth"].Value, Model.Awards.HardestKikoles.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
+    await Html.RenderPartialAsync("SingleAward", (localizer["EasyKikoleMonth"].Value, Model.Awards.EasiestKikoles.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
     <br />
 }
 

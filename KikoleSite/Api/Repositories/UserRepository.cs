@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
 using KikoleSite.Api.Models.Dtos;
+using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Api.Repositories

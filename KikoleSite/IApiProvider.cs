@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KikoleSite.Api;
+using KikoleSite.Api.Models;
+using KikoleSite.Api.Models.Enums;
+using KikoleSite.Api.Models.Requests;
 
 namespace KikoleSite
 {
@@ -33,11 +35,11 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime date);
 
-        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp);
+        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSorts leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp);
 
-        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSort sort);
+        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort);
 
-        Task<UserStats> GetUserStatsAsync(ulong id);
+        Task<UserStat> GetUserStatsAsync(ulong id);
 
         Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, string authToken);
 
@@ -75,7 +77,7 @@ namespace KikoleSite
 
         #region main game
 
-        Task<ProposalResponse> SubmitProposalAsync(string value, int daysBeforeNow, ProposalType proposalType, string authToken);
+        Task<ProposalResponse> SubmitProposalAsync(string value, int daysBeforeNow, ProposalTypes proposalType, string authToken);
 
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken);
 
