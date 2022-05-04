@@ -1,10 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using KikoleSite.Api;
+using KikoleSite.Api.Handlers;
+using KikoleSite.Api.Helpers;
+using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Interfaces.Handlers;
+using KikoleSite.Api.Interfaces.Repositories;
+using KikoleSite.Api.Interfaces.Services;
+using KikoleSite.Api.Repositories;
+using KikoleSite.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,6 +36,8 @@ namespace KikoleSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -37,13 +46,37 @@ namespace KikoleSite
             });
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
-            services.AddMvc()
+            services.AddMvc(options => options.Filters.Add<ControllerErrorFilter>())
                 .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization();
 
             var apiProvider = new ApiProvider(Configuration);
 
             services.AddSingleton<IApiProvider>(apiProvider);
+
+            services
+                // repositories
+                .AddSingleton<IPlayerRepository, PlayerRepository>()
+                .AddSingleton<IClubRepository, ClubRepository>()
+                .AddSingleton<IProposalRepository, ProposalRepository>()
+                .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<IInternationalRepository, InternationalRepository>()
+                .AddSingleton<ILeaderRepository, LeaderRepository>()
+                .AddSingleton<IBadgeRepository, BadgeRepository>()
+                .AddSingleton<IMessageRepository, MessageRepository>()
+                .AddSingleton<IChallengeRepository, ChallengeRepository>()
+                // handlers
+                .AddSingleton<IPlayerHandler, PlayerHandler>()
+                // services
+                .AddSingleton<IBadgeService, BadgeService>()
+                .AddSingleton<IPlayerService, PlayerService>()
+                .AddSingleton<ILeaderService, LeaderService>()
+                .AddSingleton<IProposalService, ProposalService>()
+                .AddSingleton<IChallengeService, ChallengeService>()
+                // helpers
+                .AddSingleton<ICrypter, Crypter>()
+                .AddSingleton<IClock, Clock>()
+                .AddSingleton(new Random());
 
             // force cache
             apiProvider.GetClubsAsync().GetAwaiter().GetResult();
