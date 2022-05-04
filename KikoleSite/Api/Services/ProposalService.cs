@@ -97,15 +97,17 @@ namespace KikoleSite.Api.Services
 
                 if (response.IsWin)
                 {
+                    leader = new LeaderDto
+                    {
+                        Points = (ushort)response.TotalPoints,
+                        ProposalDate = request.PlayerSubmissionDate,
+                        Time = (_clock.Now - request.PlayerSubmissionDate).ToRoundMinutes(),
+                        UserId = userId,
+                        CreationDate = _clock.Now
+                    };
+
                     await _leaderRepository
-                        .CreateLeaderAsync(new LeaderDto
-                        {
-                            Points = (ushort)response.TotalPoints,
-                            ProposalDate = request.PlayerSubmissionDate,
-                            Time = (_clock.Now - request.PlayerSubmissionDate).ToRoundMinutes(),
-                            UserId = userId,
-                            CreationDate = _clock.Now
-                        })
+                        .CreateLeaderAsync(leader)
                         .ConfigureAwait(false);
                 }
             }

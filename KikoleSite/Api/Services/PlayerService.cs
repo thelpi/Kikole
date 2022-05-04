@@ -11,7 +11,6 @@ using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Api.Models.Requests;
-using Microsoft.AspNetCore.Http;
 
 namespace KikoleSite.Api.Services
 {
@@ -44,7 +43,6 @@ namespace KikoleSite.Api.Services
             IUserRepository userRepository,
             ILeaderRepository leaderRepository,
             IProposalRepository proposalRepository,
-            IHttpContextAccessor httpContextAccessor,
             IClock clock,
             Random randomizer)
         {
