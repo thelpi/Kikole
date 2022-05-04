@@ -1,11 +1,9 @@
 ﻿namespace KikoleSite.Api
 {
-    public enum LeaderSort
+    public enum DayLeaderSort
     {
-        SuccessCount,
         BestTime,
         TotalPoints,
-        SuccessCountOverall,
         TotalPointsOverall
     }
 }

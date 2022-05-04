@@ -85,7 +85,7 @@ namespace KikoleSite.Controllers
             model.MaximalDate = DateTime.Now.Date;
             model.SortType = LeaderSort.TotalPoints;
             model.LeaderboardDay = DateTime.Now.Date;
-            model.DaySortType = LeaderSort.BestTime;
+            model.DaySortType = DayLeaderSort.BestTime;
 
             await SetModelPropertiesAsync(
                     model, chart.FirstDate)
@@ -100,7 +100,7 @@ namespace KikoleSite.Controllers
         {
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
-            var day = model.LeaderboardDay.Date.Max(firstDate);
+            var day = model.LeaderboardDay.Date.Max(firstDate.AddDays(-1)); // inc. secret
 
             var dayleaders = await _apiProvider
                 .GetDayLeadersAsync(day, model.DaySortType)

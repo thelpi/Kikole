@@ -24,11 +24,14 @@ namespace KikoleSite
 
         internal static string ToNaString(this TimeSpan? data)
         {
-            return data?.ToString(TimeSpanPattern) ?? NA;
+            return data?.ToNaString() ?? NA;
         }
 
         public static string ToNaString(this TimeSpan data)
         {
+            if (data.TotalHours >= 24)
+                return $"{(int)Math.Floor(data.TotalDays)} {(IsFrench() ? "jours" : "days")}";
+
             return data.ToString(TimeSpanPattern);
         }
 
@@ -191,17 +194,26 @@ namespace KikoleSite
 
         public static string GetLabel(this Api.LeaderSort sort)
         {
-            switch (sort)
+            return sort switch
             {
-                case Api.LeaderSort.BestTime:
-                    return IsFrench() ? "Meilleur temps" : "Best time";
-                case Api.LeaderSort.SuccessCount:
-                    return IsFrench() ? "Nombre de succès" : "Success count";
-                case Api.LeaderSort.TotalPoints:
-                    return IsFrench() ? "Points" : "Points";
-                default:
-                    throw new NotImplementedException();
-            }
+                Api.LeaderSort.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
+                Api.LeaderSort.SuccessCount => IsFrench() ? "Nombre de succès" : "Success count",
+                Api.LeaderSort.TotalPoints => IsFrench() ? "Points" : "Points",
+                Api.LeaderSort.SuccessCountOverall => IsFrench() ? "Nombre de succès (inc. hors-délai)" : "Success count (inc. out of time)",
+                Api.LeaderSort.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        public static string GetLabel(this Api.DayLeaderSort sort)
+        {
+            return sort switch
+            {
+                Api.DayLeaderSort.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
+                Api.DayLeaderSort.TotalPoints => IsFrench() ? "Points" : "Points",
+                Api.DayLeaderSort.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+                _ => throw new NotImplementedException(),
+            };
         }
 
         private static bool IsFrench()

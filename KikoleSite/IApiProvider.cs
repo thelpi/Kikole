@@ -35,7 +35,7 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSort leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp);
 
-        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort);
+        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSort sort);
 
         Task<UserStats> GetUserStatsAsync(ulong id);
 

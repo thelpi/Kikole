@@ -162,7 +162,7 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, LeaderSort sort)
+        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSort sort)
         {
             var response = await SendAsync(
                     $"day-leaders?sort={(ulong)sort}&day={day:yyyy-MM-dd}",

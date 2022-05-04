@@ -28,15 +28,21 @@ namespace KikoleSite.Models
 
         public int TodayAttemps { get; set; }
 
-        public IReadOnlyCollection<LeaderSort> SortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().ToList();
+        public IReadOnlyCollection<LeaderSort> SortTypes { get; }
+            = Enum.GetValues(typeof(LeaderSort))
+                .Cast<LeaderSort>()
+                .ToList();
 
         [DataType(DataType.Date, ErrorMessage = "Date only")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime LeaderboardDay { get; set; }
 
-        public LeaderSort DaySortType { get; set; }
+        public DayLeaderSort DaySortType { get; set; }
 
-        public IReadOnlyCollection<LeaderSort> DaySortTypes { get; } = Enum.GetValues(typeof(LeaderSort)).Cast<LeaderSort>().Where(ls => ls != LeaderSort.SuccessCount).ToList();
+        public IReadOnlyCollection<DayLeaderSort> DaySortTypes { get; }
+            = Enum.GetValues(typeof(DayLeaderSort))
+                .Cast<DayLeaderSort>()
+                .ToList();
 
         public Awards Awards { get; set; }
     }
