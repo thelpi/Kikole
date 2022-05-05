@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Localization;
@@ -12,13 +13,13 @@ namespace KikoleSite.Api.Models.Requests
     /// </summary>
     public abstract class BaseProposalRequest
     {
-        private protected BaseProposalRequest()
+        private protected BaseProposalRequest(IClock clock)
         {
-            ProposalDateTime = DateTime.Now;
+            ProposalDateTime = clock.Now;
         }
 
         /// <summary>
-        /// Index of the day to substract from now to get the player ralated to this proposal
+        /// Index of the day to substract from now to get the player related to this proposal
         /// </summary>
         public uint DaysBeforeNow { get; set; }
 

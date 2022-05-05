@@ -14,9 +14,7 @@ namespace KikoleSite.Api.Models.Requests
 
         public ushort YearOfBirth { get; set; }
 
-        internal Countries Country => Enum.GetValues(typeof(Countries)).Cast<Countries>().Single(_ => (ulong)_ == ulong.Parse(CountryString));
-
-        public string CountryString { get; set; }
+        public Countries Country { get; set; }
 
         public DateTime? ProposalDate { get; set; }
 
@@ -28,13 +26,11 @@ namespace KikoleSite.Api.Models.Requests
 
         public string EasyClueEn { get; set; }
 
-        public IReadOnlyDictionary<string, string> ClueLanguages { get; set; }
+        public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; }
 
-        public IReadOnlyDictionary<string, string> EasyClueLanguages { get; set; }
+        public IReadOnlyDictionary<Languages, string> EasyClueLanguages { get; set; }
 
-        internal Positions Position => Enum.Parse<Positions>(PositionString);
-
-        public string PositionString { get; set; }
+        internal Positions Position { get; set; }
 
         public bool SetLatestProposalDate { get; set; }
 
@@ -44,13 +40,6 @@ namespace KikoleSite.Api.Models.Requests
         {
             if (string.IsNullOrWhiteSpace(Name))
                 return resources["InvalidName"];
-
-            var countries = Enum.GetValues(typeof(Countries)).Cast<Countries>();
-            if (!ulong.TryParse(CountryString, out var countryId) || !countries.Any(_ => (ulong)_ == countryId))
-                return resources["InvalidCountry"];
-
-            if (!Enum.TryParse<Positions>(PositionString, out _))
-                return resources["InvalidPosition"];
 
             if (YearOfBirth < 1850 || YearOfBirth > 2100)
                 return resources["InvalidBirthYear"];

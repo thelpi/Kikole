@@ -26,9 +26,6 @@ namespace KikoleSite.Api.Models.Requests
             if (string.IsNullOrWhiteSpace(Password))
                 return resources["InvalidPassword"];
 
-            if (Language.HasValue && !Enum.IsDefined(typeof(Languages), Language.Value))
-                return resources["InvalidLanguage"];
-
             return null;
         }
 

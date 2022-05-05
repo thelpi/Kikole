@@ -74,14 +74,14 @@ namespace KikoleSite.Controllers
                     .ValidatePlayerSubmissionAsync(
                         new PlayerSubmissionValidationRequest
                         {
-                            ClueEditLanguages = new Dictionary<string, string>
+                            ClueEditLanguages = new Dictionary<Languages, string>
                             {
-                                { "fr", model.ClueOverwriteFr }
+                                { Languages.fr, model.ClueOverwriteFr }
                             },
                             ClueEditEn = model.ClueOverwriteEn,
-                            EasyClueEditLanguages = new Dictionary<string, string>
+                            EasyClueEditLanguages = new Dictionary<Languages, string>
                             {
-                                { "fr", model.EasyClueOverwriteFr }
+                                { Languages.fr, model.EasyClueOverwriteFr }
                             },
                             EasyClueEditEn = model.EasyClueOverwriteEn,
                             IsAccepted = action == "accepted",
@@ -245,17 +245,17 @@ namespace KikoleSite.Controllers
                 Clubs = clubs,
                 ClueEn = model.ClueEn,
                 EasyClueEn = model.EasyClueEn,
-                ClueLanguages = new Dictionary<string, string>
+                ClueLanguages = new Dictionary<Languages, string>
                 {
-                    { "fr", model.ClueFr }
+                    { Languages.fr, model.ClueFr }
                 },
-                EasyClueLanguages = new Dictionary<string, string>
+                EasyClueLanguages = new Dictionary<Languages, string>
                 {
-                    { "fr", model.EasyClueFr }
+                    { Languages.fr, model.EasyClueFr }
                 },
-                CountryString = countryId.ToString(),
+                Country = (Countries)countryId,
                 Name = model.Name,
-                PositionString = Enum.GetValues(typeof(Positions)).Cast<Positions>().Single(v => (ulong)v == positionId).ToString(),
+                Position = (Positions)positionId,
                 YearOfBirth = yearValue,
                 HideCreator = model.HideCreator
             };

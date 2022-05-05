@@ -519,22 +519,22 @@ namespace KikoleSite
             switch (proposalType)
             {
                 case ProposalTypes.Club:
-                    request = new ClubProposalRequest { Value = value, DaysBeforeNow = daysBeforeNow };
+                    request = new ClubProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
                     break;
                 case ProposalTypes.Clue:
-                    request = new ClueProposalRequest { Value = value, DaysBeforeNow = daysBeforeNow };
+                    request = new ClueProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
                     break;
                 case ProposalTypes.Country:
-                    request = new CountryProposalRequest { Value = value, DaysBeforeNow = daysBeforeNow };
+                    request = new CountryProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
                     break;
                 case ProposalTypes.Position:
-                    request = new PositionProposalRequest { Value = value, DaysBeforeNow = daysBeforeNow };
+                    request = new PositionProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
                     break;
                 case ProposalTypes.Name:
-                    request = new NameProposalRequest { Value = value, DaysBeforeNow = daysBeforeNow };
+                    request = new NameProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
                     break;
                 case ProposalTypes.Year:
-                    request = new YearProposalRequest { Value = value, DaysBeforeNow = daysBeforeNow };
+                    request = new YearProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
                     break;
             }
 

@@ -1,4 +1,5 @@
-﻿using KikoleSite.Api.Models.Dtos;
+﻿using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Localization;
 
@@ -6,6 +7,9 @@ namespace KikoleSite.Api.Models.Requests
 {
     public class YearProposalRequest : BaseProposalRequest
     {
+        public YearProposalRequest(IClock clock)
+            : base(clock) { }
+
         internal override ProposalTypes ProposalType => ProposalTypes.Year;
 
         internal override string GetTip(PlayerDto player, IStringLocalizer resources)
