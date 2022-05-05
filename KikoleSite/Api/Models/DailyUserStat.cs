@@ -14,9 +14,7 @@ namespace KikoleSite.Api.Models
 
         public bool Attempt { get; }
 
-        internal TimeSpan? Time { get; }
-
-        public int? TimeSec => Time.ToSeconds();
+        public TimeSpan? Time { get; }
 
         public int? Points { get; }
 

@@ -1,7 +1,6 @@
-﻿using KikoleSite.Api.Models.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using KikoleSite.Api.Models.Enums;
 
 namespace KikoleSite.Api.Models
 {
@@ -23,7 +22,7 @@ namespace KikoleSite.Api.Models
 
         public int SubmissionThresholdlosePoints => 750;
 
-        internal readonly IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
+        public readonly IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
             = new Dictionary<ProposalTypes, int>
             {
                 { ProposalTypes.Club, 50 },
@@ -34,15 +33,7 @@ namespace KikoleSite.Api.Models
                 { ProposalTypes.Clue, 400 }
             };
 
-        public IReadOnlyDictionary<string, int> ProposalTypesCostString
-            => ProposalTypesCost.ToDictionary(x =>x.Key.ToString(), x => x.Value);
-
         public DateTime FirstDate { get; internal set; }
-
-        public int GetProposalTypesCost(ProposalTypes proposalType)
-        {
-            return ProposalTypesCostString[proposalType.ToString()];
-        }
 
         public int SubmissionMaxPoints => SubmissionBasePoints + SubmissionBonusPoints;
     }

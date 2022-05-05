@@ -17,13 +17,9 @@ namespace KikoleSite.Api.Models
 
         public int? BestPoints { get; }
 
-        internal TimeSpan? AverageTime { get; }
+        public TimeSpan? AverageTime { get; }
 
-        public int? AverageTimeSec => AverageTime.ToSeconds();
-
-        internal TimeSpan? BestTime { get; }
-
-        public int? BestTimeSec => BestTime.ToSeconds();
+        public TimeSpan? BestTime { get; }
 
         public IReadOnlyCollection<DailyUserStat> Stats { get; }
 

@@ -14,8 +14,6 @@ namespace KikoleSite.Api.Models
 
         public TimeSpan BestTime { get; }
 
-        public int BestTimeSec => BestTime.ToSeconds();
-
         public int SuccessCount { get; }
 
         public int TotalPoints { get; private set; }

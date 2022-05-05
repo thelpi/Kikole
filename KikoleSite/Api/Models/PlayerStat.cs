@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Helpers;
+using KikoleSite.Api.Models.Dtos;
 
 namespace KikoleSite.Api.Models
 {
@@ -59,21 +59,17 @@ namespace KikoleSite.Api.Models
         /// <summary>
         /// Average time to found (<c>null</c> if no one found).
         /// </summary>
-        public int? AverageTimeSec => AverageTime.ToSeconds();
+        public TimeSpan? AverageTime { get; }
 
         /// <summary>
         /// Minimal time to found (<c>null</c> if no one found).
         /// </summary>
-        public int? MinTimeSec => MinTime.ToSeconds();
+        public TimeSpan? MinTime { get; }
 
         /// <summary>
         /// Maximal time to found (<c>null</c> if no one found).
         /// </summary>
-        public int? MaxTimeSec => MaxTime.ToSeconds();
-
-        internal TimeSpan? AverageTime { get; }
-        internal TimeSpan? MinTime { get; }
-        internal TimeSpan? MaxTime { get; }
+        public TimeSpan? MaxTime { get; }
 
         // "creatorLogin" should be null if it's today's player and "HideCreator" is true
         internal PlayerStat(PlayerDto player,
