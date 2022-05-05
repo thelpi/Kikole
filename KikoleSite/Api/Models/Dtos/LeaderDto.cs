@@ -11,5 +11,7 @@ namespace KikoleSite.Api.Models.Dtos
         public ushort Points { get; set; }
 
         public int Time { get; set; }
+
+        internal bool IsCurrentDay => ProposalDate.Date == CreationDate.Date;
     }
 }

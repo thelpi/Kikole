@@ -580,7 +580,7 @@ namespace KikoleSite
             if (leader != null)
             {
                 var leaderBadges = await _badgeService
-                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, request.IsTodayPlayer, GetLanguage())
+                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, GetLanguage())
                     .ConfigureAwait(false);
 
                 foreach (var b in leaderBadges)

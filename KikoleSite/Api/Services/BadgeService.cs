@@ -64,7 +64,6 @@ namespace KikoleSite.Api.Services
             = new List<Badges>
             {
                 Badges.DoYouSpeakPatois,
-                Badges.TheEnd,
                 Badges.DoItYourself,
                 Badges.WeAreKikole,
                 Badges.AllIn,
@@ -355,7 +354,7 @@ namespace KikoleSite.Api.Services
                         .ToList();
 
                     await PrepareNewLeaderBadgesInternalAsync(
-                            leader, pDay, proposals, true, allBadges, leadersHistory, playersHistory, language)
+                            leader, pDay, proposals, allBadges, leadersHistory, playersHistory, language)
                         .ConfigureAwait(false);
                 }
 
@@ -368,7 +367,6 @@ namespace KikoleSite.Api.Services
             LeaderDto leader,
             PlayerDto playerOfTheDay,
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
-            bool isActualTodayleader,
             Languages language)
         {
             var allBadges = await _badgeRepository
@@ -388,7 +386,7 @@ namespace KikoleSite.Api.Services
                 .ConfigureAwait(false);
 
             return await PrepareNewLeaderBadgesInternalAsync(
-                    leader, playerOfTheDay, proposalsBeforeWin, isActualTodayleader, allBadges, leadersHistory, playersHistory, language)
+                    leader, playerOfTheDay, proposalsBeforeWin, allBadges, leadersHistory, playersHistory, language)
                 .ConfigureAwait(false);
         }
 
@@ -534,7 +532,6 @@ namespace KikoleSite.Api.Services
             LeaderDto leader,
             PlayerDto playerOfTheDay,
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
-            bool isActualTodayleader,
             IReadOnlyCollection<BadgeDto> allBadges,
             IReadOnlyCollection<LeaderDto> leadersHistory,
             IReadOnlyCollection<PlayerDto> playersHistory,
@@ -542,24 +539,24 @@ namespace KikoleSite.Api.Services
         {
             var collectedBadges = new List<ulong>();
 
+            var myPlayerHistory = playersHistory
+                .Where(p => leadersHistory.Any(h => h.UserId == leader.UserId && h.ProposalDate == p.ProposalDate));
+
+            var myCreatedPlayers = playersHistory
+                .Where(p => p.CreationUserId == leader.UserId);
+
+            var playerFull = await _playerHandler
+                .GetPlayerFullInfoAsync(playerOfTheDay)
+                .ConfigureAwait(false);
+
             // Badges you can got only if you find the player today
-            if (isActualTodayleader)
+            if (leader.IsCurrentDay)
             {
                 var leaders = leadersHistory
-                    .Where(lh => lh.ProposalDate == leader.ProposalDate);
+                    .Where(lh => lh.ProposalDate == leader.ProposalDate && lh.IsCurrentDay);
 
-                var myHistory = leadersHistory
-                    .Where(lh => lh.UserId == leader.UserId);
-
-                var myPlayerHistory = playersHistory
-                    .Where(p => myHistory.Any(h => h.ProposalDate == p.ProposalDate));
-
-                var myCreatedPlayers = playersHistory
-                    .Where(p => p.CreationUserId == leader.UserId);
-
-                var playerFull = await _playerHandler
-                    .GetPlayerFullInfoAsync(playerOfTheDay)
-                    .ConfigureAwait(false);
+                var myDay1History = leadersHistory
+                    .Where(lh => lh.UserId == leader.UserId && lh.IsCurrentDay);
 
                 foreach (var badge in LeaderBasedBadgeCondition.Keys)
                 {
@@ -576,7 +573,7 @@ namespace KikoleSite.Api.Services
                     var (runCount, checkFunc, incPlayerSubmission) = LeaderRunBasedBadgeCondition[badge];
 
                     var respectConditions = RespectLeadersRunConditions(leader,
-                        myHistory, myCreatedPlayers,
+                        myDay1History, myCreatedPlayers,
                         runCount, checkFunc, incPlayerSubmission);
 
                     if (respectConditions)
@@ -592,7 +589,7 @@ namespace KikoleSite.Api.Services
                     var (initialValue, runCount, aggFunc, checkFunc) = LeaderRunAggBasedBadgeCondition[badge];
 
                     var respectConditions = RespectLeadersRunConditions(leader,
-                        myHistory, myCreatedPlayers,
+                        myDay1History, myCreatedPlayers,
                         initialValue, runCount, aggFunc, checkFunc);
 
                     if (respectConditions)
@@ -600,16 +597,6 @@ namespace KikoleSite.Api.Services
                         await InsertBadgeIfNotAlreadyAsync(
                                 leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                             .ConfigureAwait(false);
-                    }
-                }
-
-                foreach (var badge in PlayerBasedBadgeCondition.Keys)
-                {
-                    if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                 leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
-                             .ConfigureAwait(false);
                     }
                 }
 
@@ -642,16 +629,6 @@ namespace KikoleSite.Api.Services
                     }
                 }
 
-                foreach (var badge in PlayersHistoryBasedBadgeCondition.Keys)
-                {
-                    if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory))
-                    {
-                        await InsertBadgeIfNotAlreadyAsync(
-                                leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
-                            .ConfigureAwait(false);
-                    }
-                }
-
                 foreach (var badge in ProposalsBasedBadgeCondition.Keys)
                 {
                     if (ProposalsBasedBadgeCondition[badge](leader.CreationDate, playerFull, proposalsBeforeWin))
@@ -661,20 +638,32 @@ namespace KikoleSite.Api.Services
                             .ConfigureAwait(false);
                     }
                 }
+            }
 
-                if (playerOfTheDay.BadgeId.HasValue)
+            foreach (var badge in PlayerBasedBadgeCondition.Keys)
+            {
+                if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
                 {
                     await InsertBadgeIfNotAlreadyAsync(
-                            leader.ProposalDate, leader.UserId, playerOfTheDay.BadgeId.Value, collectedBadges, allBadges)
+                             leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
+                         .ConfigureAwait(false);
+                }
+            }
+
+            foreach (var badge in PlayersHistoryBasedBadgeCondition.Keys)
+            {
+                if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory))
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                            leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges)
                         .ConfigureAwait(false);
                 }
             }
 
-            // Not generic (special badge)
-            if (playerOfTheDay.BadgeId == (ulong)Badges.TheEnd)
+            if (playerOfTheDay.BadgeId.HasValue)
             {
                 await InsertBadgeIfNotAlreadyAsync(
-                        leader.ProposalDate, leader.UserId, (ulong)Badges.TheEnd, collectedBadges, allBadges)
+                        leader.ProposalDate, leader.UserId, playerOfTheDay.BadgeId.Value, collectedBadges, allBadges)
                     .ConfigureAwait(false);
             }
 
@@ -834,7 +823,7 @@ namespace KikoleSite.Api.Services
             while (date.Date >= firstDate.Date)
             {
                 var leadersBefore = await _leaderRepository
-                    .GetLeadersAtDateAsync(date, true)
+                    .GetLeadersAtDateAsync(date, false)
                     .ConfigureAwait(false);
                 leadersHistory.AddRange(leadersBefore);
                 date = date.AddDays(-1);

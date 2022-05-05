@@ -18,14 +18,12 @@ namespace KikoleSite.Api.Interfaces.Services
         /// <param name="leader">The leader instance related to the user and player (fake it if the player found is not from today).</param>
         /// <param name="playerOfTheDay">The player found.</param>
         /// <param name="proposalsBeforeWin">Proposals made by the user BEFORE finding the player.</param>
-        /// <param name="isActualTodayleader"><c>True</c> if the player found is from today.</param>
         /// <param name="language">User language.</param>
         /// <returns>Collection of <see cref="UserBadge"/>.</returns>
         Task<IReadOnlyCollection<UserBadge>> PrepareNewLeaderBadgesAsync(
             LeaderDto leader,
             PlayerDto playerOfTheDay,
             IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
-            bool isActualTodayleader,
             Languages language);
 
         /// <summary>
