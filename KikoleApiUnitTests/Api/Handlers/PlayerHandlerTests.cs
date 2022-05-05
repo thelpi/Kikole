@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
-using KikoleApi.Handlers;
-using KikoleApi.Interfaces.Repositories;
-using KikoleApi.Models.Dtos;
+using KikoleSite.Api.Handlers;
+using KikoleSite.Api.Interfaces.Repositories;
+using KikoleSite.Api.Models.Dtos;
 using Moq;
 using Xunit;
 
-namespace KikoleApiUnitTests.Handlers
+namespace KikoleSiteUnitTests.Api.Handlers
 {
     public class PlayerHandlerTests
     {
