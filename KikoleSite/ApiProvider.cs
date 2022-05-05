@@ -31,6 +31,7 @@ namespace KikoleSite
         private readonly IBadgeService _badgeService;
         private readonly IChallengeService _challengeService;
         private readonly ILeaderService _leaderService;
+        private readonly IDiscussionRepository _discussionRepository;
 
         public ApiProvider(IUserRepository userRepository,
             ICrypter crypter,
@@ -43,7 +44,8 @@ namespace KikoleSite
             IProposalService proposalService,
             IBadgeService badgeService,
             IChallengeService challengeService,
-            ILeaderService leaderService)
+            ILeaderService leaderService,
+            IDiscussionRepository discussionRepository)
         {
             _userRepository = userRepository;
             _crypter = crypter;
@@ -57,6 +59,7 @@ namespace KikoleSite
             _badgeService = badgeService;
             _challengeService = challengeService;
             _leaderService = leaderService;
+            _discussionRepository = discussionRepository;
         }
 
         #region user accounts
@@ -449,7 +452,7 @@ namespace KikoleSite
 
                 var apiCountries = countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList();
 
-                _countriesCache = _countriesCache ?? new Dictionary<string, IReadOnlyDictionary<ulong, string>>();
+                _countriesCache ??= new Dictionary<string, IReadOnlyDictionary<ulong, string>>();
                 _countriesCache.Add(
                     CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
                     apiCountries
@@ -457,13 +460,6 @@ namespace KikoleSite
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
-        }
-
-        private static Languages GetLanguage()
-        {
-            return CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"
-                                ? Languages.fr
-                                : Languages.en;
         }
 
         public async Task<ProposalChart> GetProposalChartAsync()
@@ -501,6 +497,25 @@ namespace KikoleSite
                 .ConfigureAwait(false);
 
             return message?.Message;
+        }
+
+        public async Task<string> CreateDiscussionAsync(string email, string message, string authToken)
+        {
+            var userId = ExtractUserIdFromToken(authToken);
+
+            if (userId == 0)
+                return _resources["InvalidUser"];
+
+            await _discussionRepository
+                .CreateDiscussionAsync(new Api.Models.Dtos.DiscussionDto
+                {
+                    Email = email,
+                    UserId = userId,
+                    Message = message
+                })
+                .ConfigureAwait(false);
+
+            return null;
         }
 
         #endregion site management
@@ -823,6 +838,13 @@ namespace KikoleSite
                 return 0;
 
             return userId;
+        }
+
+        private static Languages GetLanguage()
+        {
+            return CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"
+                ? Languages.fr
+                : Languages.en;
         }
 
         #endregion private generic methods

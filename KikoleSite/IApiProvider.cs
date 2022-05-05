@@ -73,6 +73,8 @@ namespace KikoleSite
 
         Task<ProposalChart> GetProposalChartAsync();
 
+        Task<string> CreateDiscussionAsync(string email, string message, string authToken);
+
         #endregion site management
 
         #region main game

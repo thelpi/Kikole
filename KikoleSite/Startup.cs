@@ -63,6 +63,7 @@ namespace KikoleSite
                 .AddSingleton<IBadgeRepository, BadgeRepository>()
                 .AddSingleton<IMessageRepository, MessageRepository>()
                 .AddSingleton<IChallengeRepository, ChallengeRepository>()
+                .AddSingleton<IDiscussionRepository, DiscussionRepository>()
                 // handlers
                 .AddSingleton<IPlayerHandler, PlayerHandler>()
                 // services
