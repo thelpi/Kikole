@@ -89,15 +89,8 @@ else
     <div>
         <script>
             $(function () {
-                var model = '@Html.Raw(Json.Serialize(Model.Users))';
-                var data = JSON.parse(model);
-                $("#selectedUserLogin").autocomplete({
-                    source: data,
-                    select: function (e, i) {
-                        $("#selectedUserLogin").val(i.item.value);
-                    },
-                    minLength: 1
-                });
+                var data = JSON.parse('@Html.Raw(Json.Serialize(Model.Users))');
+                autocompleteLogins(data, "#selectedUserLogin")
             });
         </script>
         <div style="margin-top: 5px">

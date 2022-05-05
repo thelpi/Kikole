@@ -93,3 +93,14 @@ $(function() {
     autocompleteClubs("#Club8", false);
     autocompleteClubs("#Club9", false);
 });
+
+/* logins autocompletion */
+var autocompleteLogins = function (logins, fieldId) {
+    $(fieldId).autocomplete({
+        source: logins,
+        select: function (e, i) {
+            $(fieldId).val(i.item.value);
+        },
+        minLength: 1
+    });
+};
