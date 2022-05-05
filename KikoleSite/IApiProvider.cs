@@ -84,19 +84,19 @@ namespace KikoleSite
         Task<string> GetClueAsync(DateTime proposalDate, bool isEasy);
 
         Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate, string authToken);
-        
+
         #endregion main game
 
         #region challenges
-        
+
         Task<string> CreateChallengeAsync(ulong guestUserId, byte pointsRate, string authToken);
-        
+
         Task<string> RespondToChallengeAsync(ulong id, bool isAccepted, string authToken);
-        
+
         Task<IReadOnlyCollection<Challenge>> GetChallengesWaitingForResponseAsync(string authToken);
-        
+
         Task<IReadOnlyCollection<Challenge>> GetRequestedChallengesAsync(string authToken);
-        
+
         Task<IReadOnlyCollection<Challenge>> GetAcceptedChallengesAsync(string authToken);
 
         Task<IReadOnlyCollection<Challenge>> GetChallengesHistoryAsync(DateTime? fromDate, DateTime? toDate, string authToken);

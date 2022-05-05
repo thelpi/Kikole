@@ -18,7 +18,7 @@ namespace KikoleSite.Controllers
         {
             _localizer = localizer;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] ulong userId)
         {

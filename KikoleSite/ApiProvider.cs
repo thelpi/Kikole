@@ -725,7 +725,7 @@ namespace KikoleSite
 
             return challenges;
         }
-        
+
         public async Task<IReadOnlyCollection<Challenge>> GetRequestedChallengesAsync(string authToken)
         {
             var userId = ExtractUserIdFromToken(authToken);
@@ -739,7 +739,7 @@ namespace KikoleSite
 
             return challenges;
         }
-        
+
         public async Task<IReadOnlyCollection<Challenge>> GetAcceptedChallengesAsync(string authToken)
         {
             if (string.IsNullOrWhiteSpace(authToken))

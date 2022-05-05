@@ -18,7 +18,7 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var (token, login) = this.GetAuthenticationCookie();
+            var (token, login) = GetAuthenticationCookie();
 
             return View(new AccountModel
             {
@@ -34,7 +34,7 @@ namespace KikoleSite.Controllers
 
             if (submitFrom == "logoff")
             {
-                this.ResetAuthenticationCookie();
+                ResetAuthenticationCookie();
                 model = new AccountModel();
             }
             else if (submitFrom == "login" || model.ForceLoginAction)
@@ -51,7 +51,7 @@ namespace KikoleSite.Controllers
                         .ConfigureAwait(false);
                     if (success)
                     {
-                        this.SetAuthenticationCookie(value, model.LoginSubmission);
+                        SetAuthenticationCookie(value, model.LoginSubmission);
                         return RedirectToAction("Index", "Home");
                     }
                     else
@@ -105,7 +105,7 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var (token, login) = this.GetAuthenticationCookie();
+                    var (token, login) = GetAuthenticationCookie();
                     var response = await _apiProvider
                         .ChangeQAndAAsync(token, model.RecoveryQCreate, model.RecoveryACreate)
                         .ConfigureAwait(false);
@@ -160,7 +160,7 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var (token, login) = this.GetAuthenticationCookie();
+                    var (token, login) = GetAuthenticationCookie();
                     var response = await _apiProvider
                         .ChangePasswordAsync(token, model.PasswordSubmission, model.PasswordCreate1Submission)
                         .ConfigureAwait(false);

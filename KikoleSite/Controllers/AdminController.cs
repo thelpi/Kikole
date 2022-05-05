@@ -46,7 +46,7 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
         {
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
@@ -119,7 +119,7 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
@@ -139,7 +139,7 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(PlayerCreationModel model)
         {
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
@@ -199,7 +199,7 @@ namespace KikoleSite.Controllers
                 SetPositionsOnModel(model, chart);
                 return View(model);
             }
-            
+
             var names = new List<string>
             {
                 model.AlternativeName0, model.AlternativeName1,
@@ -285,7 +285,7 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Club()
         {
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
@@ -298,7 +298,7 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Club(ClubCreationModel model)
         {
-            var (token, _) = this.GetAuthenticationCookie();
+            var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {

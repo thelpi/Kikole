@@ -107,7 +107,8 @@ namespace KikoleSite
                 new CultureInfo("fr")
             };
 
-            app.UseRequestLocalization(options => {
+            app.UseRequestLocalization(options =>
+            {
                 options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
                 options.SupportedCultures = cultures;
                 options.SupportedUICultures = cultures;

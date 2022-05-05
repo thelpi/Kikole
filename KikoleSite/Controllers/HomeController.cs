@@ -122,7 +122,7 @@ namespace KikoleSite.Controllers
                     ? _localizer["ValidGuess", proposalType.GetLabel(true)]
                     : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
             }
-            
+
             model.Badges = response.CollectedBadges;
 
             return await SetAndGetViewModelAsync(
