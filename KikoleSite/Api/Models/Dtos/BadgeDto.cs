@@ -7,7 +7,5 @@
         public string Description { get; set; }
 
         public byte Hidden { get; set; }
-
-        public byte Retroactive { get; set; }
     }
 }
