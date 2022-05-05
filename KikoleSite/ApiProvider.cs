@@ -297,9 +297,6 @@ namespace KikoleSite
         {
             var connectedUserId = ExtractUserIdFromToken(authToken);
 
-            if (connectedUserId == 0)
-                return null;
-
             var badgesFull = await _badgeService
                  .GetUserBadgesAsync(userId, connectedUserId, GetLanguage())
                  .ConfigureAwait(false);
