@@ -31,7 +31,13 @@ namespace KikoleSite
         public static string ToNaString(this TimeSpan data)
         {
             if (data.TotalHours >= 24)
-                return $"{(int)Math.Floor(data.TotalDays)} {(IsFrench() ? "jours" : "days")}";
+            {
+                var days = (int)Math.Floor(data.TotalDays);
+                var label = IsFrench() ? "jour" : "day";
+                if (days > 1)
+                    label += "s";
+                return $"{days} {label}";
+            }
 
             return data.ToString(TimeSpanPattern);
         }
