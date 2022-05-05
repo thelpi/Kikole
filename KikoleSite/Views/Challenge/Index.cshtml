@@ -87,9 +87,22 @@ else
 <h3>@localizer["DoChallenge"]</h3>
 <form method="post" action="/Challenge">
     <div>
+        <script>
+            $(function () {
+                var model = '@Html.Raw(Json.Serialize(Model.Users))';
+                var data = JSON.parse(model);
+                $("#selectedUserLogin").autocomplete({
+                    source: data,
+                    select: function (e, i) {
+                        $("#selectedUserLogin").val(i.item.value);
+                    },
+                    minLength: 1
+                });
+            });
+        </script>
         <div style="margin-top: 5px">
             <label style="width: 100px">@localizer["OpponentSet"]</label>
-            @Html.DropDownListFor(m => m.SelectedUserId, Model.Users.Select(m => new SelectListItem(m.Login, m.Id.ToString())), new { @style = "width: 200px" })
+            <input type="text" id="selectedUserLogin" name="SelectedUserLogin" style="width: 200px" />
         </div>
         <div style="margin-top: 5px">
             <label style="width: 100px">@localizer["PointsRate"]</label>

@@ -41,19 +41,30 @@ namespace KikoleSite.Controllers
             var action = GetSubmitAction();
             if (action == "createchallenge")
             {
-                if (model.SelectedUserId == 0)
+                if (string.IsNullOrWhiteSpace(model.SelectedUserLogin))
                     model.ErrorMessage = _localizer["InvalidUserSelected"];
                 else if (model.PointsRate <= 0 || model.PointsRate > 100)
                     model.ErrorMessage = _localizer["InvalidPointsRate"];
                 else
                 {
-                    var result = await _apiProvider
-                        .CreateChallengeAsync(model.SelectedUserId, model.PointsRate, token)
+                    var u = await _apiProvider
+                        .GetActiveUsersAsync()
                         .ConfigureAwait(false);
-                    if (string.IsNullOrWhiteSpace(result))
-                        model.InfoMessage = _localizer["ChallengeSent"];
+
+                    var uId = u.FirstOrDefault(_ => _.Login.Sanitize().Equals(model.SelectedUserLogin));
+
+                    if (uId == null)
+                        model.ErrorMessage = _localizer["InvalidUserSelected"];
                     else
-                        model.ErrorMessage = result;
+                    {
+                        var result = await _apiProvider
+                            .CreateChallengeAsync(uId.Id, model.PointsRate, token)
+                            .ConfigureAwait(false);
+                        if (string.IsNullOrWhiteSpace(result))
+                            model.InfoMessage = _localizer["ChallengeSent"];
+                        else
+                            model.ErrorMessage = result;
+                    }
                 }
             }
             else if (action == "cancelchallenge" || action == "refusechallenge" || action == "acceptchallenge")
@@ -116,6 +127,7 @@ namespace KikoleSite.Controllers
                     && !accepteds.Any(r => r.ChallengeDate > DateTime.Now.Date
                         && r.OpponentLogin == u.Login)
                     && myLogin != u.Login)
+                .Select(u => u.Login.Sanitize())
                 .ToList();
 
             model.RequestedChallenges = requests;
