@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Api.Helpers;
 using KikoleSite.Api.Models.Dtos;
 
 namespace KikoleSite.Api.Models

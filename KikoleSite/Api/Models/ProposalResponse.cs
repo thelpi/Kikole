@@ -94,7 +94,7 @@ namespace KikoleSite.Api.Models
                     Value = null;
                     break;
             }
-            
+
             LostPoints = Successful && ProposalType != ProposalTypes.Clue
                 ? 0
                 : ProposalChart.Default.ProposalTypesCost[ProposalType];

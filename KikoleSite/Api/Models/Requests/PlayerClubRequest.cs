@@ -30,7 +30,7 @@ namespace KikoleSite.Api.Models.Requests
                 ClubId = ClubId,
                 PlayerId = playerId,
                 IsLoan = (byte)(IsLoan ? 1 : 0)
-             };
+            };
         }
     }
 }

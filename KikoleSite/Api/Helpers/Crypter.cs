@@ -32,7 +32,7 @@ namespace KikoleSite.Api.Helpers
             var hashBytes = _sha256.ComputeHash(_encoding.GetBytes($"{data.Trim()}{_encryptionKey}"));
             foreach (var b in hashBytes)
                 sb.Append(b.ToString("x2"));
-            
+
             return sb.ToString();
         }
 

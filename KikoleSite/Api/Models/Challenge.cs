@@ -7,7 +7,7 @@ namespace KikoleSite.Api.Models
 {
     public class Challenge
     {
-        private ChallengeDto _dto;
+        private readonly ChallengeDto _dto;
 
         public ulong Id => _dto.Id;
 

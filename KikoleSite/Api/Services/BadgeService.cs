@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api.Helpers;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Handlers;
 using KikoleSite.Api.Interfaces.Repositories;
@@ -282,7 +281,7 @@ namespace KikoleSite.Api.Services
                             Badges.ChallengeAccepted, user)
                         .ConfigureAwait(false);
                 }
-                
+
 
                 if (ChallengeBasedBadgeCondition[Badges.AllIn](challenge, allAccepted))
                 {
@@ -317,7 +316,7 @@ namespace KikoleSite.Api.Services
             var firstDate = await _playerRepository
                 .GetFirstDateAsync()
                 .ConfigureAwait(false);
-            
+
             var endDate = _clock.Today;
 
             var playersHistoryFull = await _playerRepository
