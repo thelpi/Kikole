@@ -6,11 +6,11 @@ namespace KikoleSite.Api.Models
 {
     public class PlayerClub
     {
-        public byte HistoryPosition { get; set; }
+        public byte HistoryPosition { get; }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public bool IsLoan { get; set; }
+        public bool IsLoan { get; }
 
         internal PlayerClub(PlayerClubDto playerClub, IEnumerable<ClubDto> clubs)
         {
@@ -18,8 +18,5 @@ namespace KikoleSite.Api.Models
             HistoryPosition = playerClub.HistoryPosition;
             IsLoan = playerClub.IsLoan > 0;
         }
-
-        // mandatory for json
-        public PlayerClub() { }
     }
 }

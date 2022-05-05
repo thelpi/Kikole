@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
@@ -84,7 +85,7 @@ namespace KikoleSite.Models
                     if (response.Successful)
                     {
                         var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
-                        var newClubs = GetPlayerClubsValue(response);
+                        var newClubs = response.Value as IReadOnlyCollection<PlayerClub>;
                         clubSubmissions.AddRange(
                             newClubs.Where(nc =>
                                 !clubSubmissions.Any(cs => cs.HistoryPosition == nc.HistoryPosition)));
@@ -92,29 +93,27 @@ namespace KikoleSite.Models
                     }
                     else
                     {
-                        IncorrectClubs = AddToList(IncorrectClubs, response.Value);
+                        IncorrectClubs = AddToList(IncorrectClubs, response.Value.ToString());
                     }
                     break;
                 case ProposalTypes.Country:
-                    var cValue = response.Value;
+                    var cValue = response.Value.ToString();
                     if (response.Successful)
                         CountryName = countries[ulong.Parse(cValue)];
                     else
                     {
-                        if (ulong.TryParse(cValue, out ulong cId)
-                            && countries.ContainsKey(cId))
+                        if (ulong.TryParse(cValue, out ulong cId) && countries.ContainsKey(cId))
                             cValue = countries[cId];
                         IncorrectCountries = AddToList(IncorrectCountries, cValue);
                     }
                     break;
                 case ProposalTypes.Position:
-                    var pValue = response.Value;
+                    var pValue = response.Value.ToString();
                     if (response.Successful)
-                        Position = positions[ulong.Parse(pValue)];
+                        Position = positions[Convert.ToUInt16(pValue)];
                     else
                     {
-                        if (ulong.TryParse(pValue, out ulong pId)
-                            && positions.ContainsKey(pId))
+                        if (ulong.TryParse(pValue, out ulong pId) && positions.ContainsKey(pId))
                             pValue = positions[pId];
                         IncorrectPositions = AddToList(IncorrectPositions, pValue);
                     }
@@ -122,12 +121,12 @@ namespace KikoleSite.Models
                 case ProposalTypes.Name:
                     var nValue = response.Value;
                     if (response.Successful)
-                        PlayerName = nValue;
+                        PlayerName = nValue.ToString();
                     else
-                        IncorrectNames = AddToList(IncorrectNames, nValue);
+                        IncorrectNames = AddToList(IncorrectNames, nValue.ToString());
                     break;
                 case ProposalTypes.Year:
-                    var yValue = response.Value;
+                    var yValue = response.Value.ToString();
                     if (response.Successful)
                         BirthYear = yValue;
                     else
@@ -141,11 +140,6 @@ namespace KikoleSite.Models
             var list = (baseList ?? new List<T>(1)).ToList();
             list.Add(value);
             return list;
-        }
-
-        private static IReadOnlyCollection<PlayerClub> GetPlayerClubsValue(ProposalResponse response)
-        {
-            return System.Text.Json.JsonSerializer.Deserialize<IReadOnlyCollection<PlayerClub>>(response.Value);
         }
     }
 }

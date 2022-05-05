@@ -15,7 +15,7 @@ namespace KikoleSite.Api.Models
 
         public bool Successful { get; }
 
-        public string Value { get; }
+        public object Value { get; }
 
         public string Tip { get; }
 
@@ -55,11 +55,10 @@ namespace KikoleSite.Api.Models
                         Successful = c != null;
                     if (Successful)
                     {
-                        Value = System.Text.Json.JsonSerializer.Serialize(
-                            player.PlayerClubs
-                                .Where(_ => _.ClubId == c.Id)
-                                .Select(_ => new PlayerClub(_, player.Clubs))
-                                .ToList());
+                        Value = player.PlayerClubs
+                            .Where(_ => _.ClubId == c.Id)
+                            .Select(_ => new PlayerClub(_, player.Clubs))
+                            .ToList();
                     }
                     else
                         Value = sourceValue;
@@ -69,24 +68,24 @@ namespace KikoleSite.Api.Models
                     if (!success.HasValue)
                         Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
                     Value = Successful
-                        ? player.Player.CountryId.ToString()
-                        : sourceValue;
+                        ? player.Player.CountryId
+                        : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Position:
                     if (!success.HasValue)
                         Successful = player.Player.PositionId == ulong.Parse(sourceValue);
                     Value = Successful
-                        ? player.Player.PositionId.ToString()
-                        : sourceValue;
+                        ? player.Player.PositionId
+                        : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Year:
                     if (!success.HasValue)
                         Successful = ushort.Parse(sourceValue) == player.Player.YearOfBirth;
                     Value = Successful
-                        ? player.Player.YearOfBirth.ToString()
-                        : sourceValue;
+                        ? player.Player.YearOfBirth
+                        : (object)sourceValue;
                     break;
 
                 case ProposalTypes.Clue:
@@ -113,7 +112,7 @@ namespace KikoleSite.Api.Models
             // a bit ugly, ngl
             if ((ProposalTypes)dto.ProposalTypeId == ProposalTypes.Year)
             {
-                Tip = ushort.Parse(Value) > player.Player.YearOfBirth
+                Tip = Convert.ToUInt16(Value) > player.Player.YearOfBirth
                     ? resources["TipOlderPlayerShort"]
                     : resources["TipYoungerPlayerShort"];
             }
