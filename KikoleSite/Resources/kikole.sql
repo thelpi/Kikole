@@ -801,6 +801,15 @@ INSERT INTO country_translations (country_id, language_id, `name`) VALUES
 (249, 1, 'Zimbabwe'),
 (249, 2, 'Zimbabwe');
 
+CREATE TABLE discussions (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  email varchar(255) COLLATE utf8_bin NOT NULL,
+  message text COLLATE utf8_bin NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
 CREATE TABLE languages (
   id bigint(20) UNSIGNED NOT NULL,
   code char(2) COLLATE utf8_bin NOT NULL,
@@ -956,6 +965,10 @@ ALTER TABLE country_translations
   ADD KEY country_id (country_id),
   ADD KEY language_id (language_id);
 
+ALTER TABLE discussions
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id);
+
 ALTER TABLE languages
   ADD PRIMARY KEY (id),
   ADD UNIQUE KEY code (code);
@@ -1010,7 +1023,6 @@ ALTER TABLE user_badges
 ALTER TABLE user_types
   ADD PRIMARY KEY (id);
 
-
 ALTER TABLE badges
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE challenges
@@ -1018,6 +1030,8 @@ ALTER TABLE challenges
 ALTER TABLE clubs
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE countries
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE discussions
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE languages
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
