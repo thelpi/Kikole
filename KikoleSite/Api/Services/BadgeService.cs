@@ -316,6 +316,8 @@ namespace KikoleSite.Api.Services
                 .GetFirstDateAsync()
                 .ConfigureAwait(false);
 
+            firstDate = firstDate.AddDays(-1);
+
             var endDate = _clock.Today;
 
             var playersHistoryFull = await _playerRepository

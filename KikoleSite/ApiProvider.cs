@@ -518,6 +518,13 @@ namespace KikoleSite
             return null;
         }
 
+        public async Task ResetBadgesAsync()
+        {
+            await _badgeService
+                .ResetBadgesAsync(GetLanguage())
+                .ConfigureAwait(false);
+        }
+
         #endregion site management
 
         #region main game

@@ -1,0 +1,6 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+
+<h3>@localizer["AdminActions"]</h3>
+<form method="post" action="/Admin/Actions">
+    <input type="submit" value="@localizer["RecomputeBadges"]" name="submit-recomputebadges" />
+</form>

@@ -23,6 +23,41 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Actions()
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Actions(object dummy)
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var action = GetSubmitAction();
+
+            if (action == "recomputebadges")
+            {
+                await _apiProvider
+                    .ResetBadgesAsync()
+                    .ConfigureAwait(false);
+            }
+
+            return View();
+        }
+
+        [HttpGet]
         public async Task<IActionResult> PlayerSubmission()
         {
             var (token, _) = GetAuthenticationCookie();

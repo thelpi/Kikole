@@ -75,6 +75,8 @@ namespace KikoleSite
 
         Task<string> CreateDiscussionAsync(string email, string message, string authToken);
 
+        Task ResetBadgesAsync();
+
         #endregion site management
 
         #region main game
