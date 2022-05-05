@@ -1,0 +1,35 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model ContactModel
+<div>
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div style="margin-top: 10px; color:crimson; font-size: large">
+            @Model.ErrorMessage
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+    {
+        <div style="margin-top: 10px; color:forestgreen; font-size: large">
+            @Model.SuccessMessage
+        </div>
+    }
+    <div style="margin-top: 10px">
+        <label>@localizer["LoggedAs"] <span style="color: forestgreen">@Model.LoggedAs</span></label>
+    </div>
+    <h3>@localizer["ContactAdmin"]</h3>
+    <form method="post" action="/Home/Contact">
+        <div>
+            <label>@localizer["YourEmail"]</label>
+            <div>
+                @Html.TextBoxFor(m => m.Email)
+            </div>
+            <label>@localizer["YourMessage"]</label>
+            <div>
+                @Html.TextAreaFor(m => m.Message)
+            </div>
+            <div>
+                <input type="submit" value="@localizer["ToSend"]" />
+            </div>
+        </div>
+    </form>
+</div>

@@ -117,22 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="InvalidEmail" xml:space="preserve">
-    <value>The email is empty.</value>
+  <data name="ContactAdmin" xml:space="preserve">
+    <value>Contact the administrator</value>
   </data>
-  <data name="InvalidGuess" xml:space="preserve">
-    <value>Invalid {0} guess.{1}</value>
+  <data name="LoggedAs" xml:space="preserve">
+    <value>You are logged as</value>
   </data>
-  <data name="InvalidMessage" xml:space="preserve">
-    <value>The message is empty.</value>
+  <data name="ToSend" xml:space="preserve">
+    <value>Send</value>
   </data>
-  <data name="InvalidRequest" xml:space="preserve">
-    <value>Invalid request</value>
+  <data name="YourEmail" xml:space="preserve">
+    <value>Your email</value>
   </data>
-  <data name="SuccessContactSent" xml:space="preserve">
-    <value>Message successfully sent.</value>
-  </data>
-  <data name="ValidGuess" xml:space="preserve">
-    <value>Valid {0} guess.</value>
+  <data name="YourMessage" xml:space="preserve">
+    <value>Your message</value>
   </data>
 </root>

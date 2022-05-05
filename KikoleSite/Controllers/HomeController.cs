@@ -21,6 +21,53 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        public IActionResult Contact()
+        {
+            var (token, login) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var model = new ContactModel
+            {
+                LoggedAs = login
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Contact(ContactModel model)
+        {
+            var (token, login) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token))
+                return RedirectToAction("Index", "Home");
+
+            if (string.IsNullOrWhiteSpace(model.Email))
+                model.ErrorMessage = _localizer["InvalidEmail"];
+            else if (string.IsNullOrWhiteSpace(model.Message))
+                model.ErrorMessage = _localizer["InvalidMessage"];
+            else
+            {
+                var result = await _apiProvider
+                    .CreateDiscussionAsync(model.Email, model.Message, token)
+                    .ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    model.SuccessMessage = _localizer["SuccessContactSent"];
+                    model.Message = null;
+                }
+                else
+                    model.SuccessMessage = result;
+            }
+
+            model.LoggedAs = login;
+            return View(model);
+        }
+
+        [HttpGet]
         public IActionResult Error()
         {
             ResetAuthenticationCookie();
