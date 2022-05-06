@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AboutClubs" xml:space="preserve">
+    <value>About clubs</value>
+  </data>
+  <data name="AboutClubsDetails" xml:space="preserve">
+    <value>&lt;p&gt;Only professional clubs are included in the player's career: youth clubs and "B" teams are excluded.&lt;/p&gt;
+&lt;p&gt;Exemple : Edouard Mendy hasn't played for "Olympique de Marseille" (B team), neither at "Le Havre" (youth).&lt;/p&gt;
+&lt;p&gt;Loans are included in the career, and explicitely indicated when it occurs.&lt;/p&gt;
+&lt;p&gt;The autocompletion is comprehensive. Meaning if you search a particular club and it doesn't appear, then the current player has not played in this club.&lt;/p&gt;</value>
+  </data>
   <data name="AboutCountry" xml:space="preserve">
     <value>About the nationality</value>
   </data>
@@ -156,10 +165,11 @@
   </data>
   <data name="Rules" xml:space="preserve">
     <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikole?"&lt;/span&gt; is a very simple game where you have to guess a new football player &lt;span style="color: crimson"&gt;every day&lt;/span&gt;.&lt;/p&gt;
-    &lt;p&gt;Your opponents have the same player to guess, so be the best and you'll appear on our &lt;a href="/Leaderboard"&gt;leaderboard&lt;/a&gt;!&lt;/p&gt;
-    &lt;p&gt;To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.&lt;/p&gt;
-    &lt;p&gt;Notice that the player can be active or retired, moreover feminine players are possible but quite rare.&lt;/p&gt;
-    &lt;p&gt;Fictional players (movies and such) are disallowed. As a rule of thumb, a player is eligible if he has a wikipedia entry in several languages.&lt;/p&gt;</value>
+&lt;p&gt;Your opponents have the same player to guess, so be the best and you'll appear on our &lt;a href="/Leaderboard"&gt;leaderboard&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.&lt;/p&gt;
+&lt;p&gt;Notice that the player can be active or retired, moreover feminine players are possible but quite rare.&lt;/p&gt;
+&lt;p&gt;Fictional players (movies and such) are disallowed.&lt;/p&gt;
+&lt;p&gt;In case of technical issue, complaint or to suggest a player (another way to gain points), please &lt;a href="/Home/Contact"&gt;contact me&lt;/a&gt; (authentication required).&lt;/p&gt;</value>
   </data>
   <data name="ScoreIntro" xml:space="preserve">
     <value>Score is computed with following rules:</value>

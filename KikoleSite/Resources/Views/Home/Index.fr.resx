@@ -225,4 +225,7 @@
   <data name="LoanInitial" xml:space="preserve">
     <value>p</value>
   </data>
+  <data name="TipAboutClubs" xml:space="preserve">
+    <value>voir les &lt;a href="#clubs-rules"&gt;règles&lt;/a&gt;</value>
+  </data>
 </root>

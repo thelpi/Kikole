@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ContactAdmin" xml:space="preserve">
-    <value>Contactez l'administrateur</value>
+    <value>Contacter l'administrateur</value>
   </data>
   <data name="LoggedAs" xml:space="preserve">
     <value>Vous êtes connecté en tant que</value>

@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AboutClubs" xml:space="preserve">
+    <value>A propos des clubs</value>
+  </data>
+  <data name="AboutClubsDetails" xml:space="preserve">
+    <value>&lt;p&gt;Seuls les clubs professionels sont présents dans la carrière du joueur : les réserves et les clubs juniors sont exclus.&lt;/p&gt;
+&lt;p&gt;Exemple : Edouard Mendy n'a pas joué à l'Olympique de Marseille (réserve), ni au Havre (junior).&lt;/p&gt;
+&lt;p&gt;Les prêts sont inclus dans la carrière, et explicitement indiqués quand c'est le cas.&lt;/p&gt;
+&lt;p&gt;L'autocomplétion est exhaustive. Cela signifie que si vous cherchez un club en particulier et qu'il n'apparait pas, alors le joueur du jour n'a pas joué dans ce club.&lt;/p&gt;</value>
+  </data>
   <data name="AboutCountry" xml:space="preserve">
     <value>A propos de la nationalité</value>
   </data>
@@ -159,7 +168,8 @@
 &lt;p&gt;Vos adversaires doivent deviner le même joueur, donc soyez le meilleur pour apparaître dans le &lt;a href="/Leaderboard"&gt;classement&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;Pour trouver le joueur du jour, vous pouvez faire des propositions concernant son année de naissance, poste, nationalité et carrière en club. Un indice de départ est également donné.&lt;/p&gt;
 &lt;p&gt;Veuillez noter que le joueur peut être actif ou retraité, de plus les joueuses sont parfois possibles bien que rare.&lt;/p&gt;
-&lt;p&gt;Les joueurs de fiction (films, mangas...) ne sont pas autorisés. En rêgle générale, un joueur est éligible quand il dispose d'une page Wikipédia dans plusieurs langues.&lt;/p&gt;</value>
+&lt;p&gt;Les joueurs de fiction (films, mangas...) ne sont pas autorisés.&lt;/p&gt;
+&lt;p&gt;Pour un problème technique, une réclamation ou proposer un joueur (un autre moyen de gagner des points), merci de &lt;a href="/Home/Contact"&gt;me contacter&lt;/a&gt; (il faut être connecté).&lt;/p&gt;</value>
   </data>
   <data name="ScoreIntro" xml:space="preserve">
     <value>Le score est calculé par les rêgles suivantes :</value>
