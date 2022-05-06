@@ -23,10 +23,9 @@ namespace KikoleSite.Api.Models
 
         public int? PointsPosition { get; }
 
-        public bool Success => Time.HasValue;
+        public bool Success { get; }
 
-        public bool SuccessDayOne => Time.HasValue
-            && Time.Value <= TimeSpan.FromMinutes(LeaderDto.FirstDayMinutes);
+        public bool SuccessDayOne { get; }
 
         internal DailyUserStat(DateTime currentDate,
             string playerName,
@@ -55,6 +54,8 @@ namespace KikoleSite.Api.Models
             Time = meLeader != null
                 ? new TimeSpan(0, meLeader.Time, 0)
                 : default(TimeSpan?);
+            Success = meLeader != null;
+            SuccessDayOne = meLeader?.IsCurrentDay == true;
             PointsPosition = GetUserPositionInLeaders(
                 userId, leaders.OrderByDescending(t => t.Points));
             TimePosition = GetUserPositionInLeaders(

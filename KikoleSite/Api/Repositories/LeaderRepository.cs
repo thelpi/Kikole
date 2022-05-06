@@ -33,7 +33,7 @@ namespace KikoleSite.Api.Repositories
             return await ExecuteReaderAsync<LeaderDto>(
                     "SELECT * FROM leaders " +
                     "WHERE proposal_date = @date " +
-                    $"AND {(onTimeOnly ? $"time <= {LeaderDto.FirstDayMinutes}" : "1 = 1")} " +
+                    $"AND {(onTimeOnly ? $"proposal_date = DATE(creation_date)" : "1 = 1")} " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new { date.Date })
                 .ConfigureAwait(false);
@@ -45,7 +45,7 @@ namespace KikoleSite.Api.Repositories
                     "SELECT * FROM leaders " +
                     "WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
                     "AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
-                    $"AND {(onTimeOnly ? $"time <= {LeaderDto.FirstDayMinutes}" : "1 = 1")} " +
+                    $"AND {(onTimeOnly ? $"proposal_date = DATE(creation_date)" : "1 = 1")} " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new
                     {
@@ -67,7 +67,7 @@ namespace KikoleSite.Api.Repositories
                     "       AND p.proposal_date = l.proposal_date" +
                     "   ) AS users_count " +
                     "   FROM leaders AS l " +
-                    $"   WHERE l.time <= {LeaderDto.FirstDayMinutes} " +
+                    $"  WHERE proposal_date = DATE(creation_date) " +
                     "   GROUP BY proposal_date" +
                     ") AS tmp " +
                     "JOIN players AS y ON tmp.proposal_date = y.proposal_date " +
