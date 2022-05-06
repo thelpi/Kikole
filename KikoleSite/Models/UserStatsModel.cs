@@ -31,6 +31,8 @@ namespace KikoleSite.Models
 
         public string BestTime { get; }
 
+        public DateTime RegistrationDate { get; }
+
         public IReadOnlyCollection<SingleUserStatModel> Stats { get; }
 
         public IReadOnlyCollection<UserBadge> Badges { get; }
@@ -80,6 +82,7 @@ namespace KikoleSite.Models
                 .Where(b => !badges.Any(_ => _.Id == b.Id))
                 .ToList();
             IsHimself = isHimself;
+            RegistrationDate = apiStat.RegistrationDate;
         }
 
         private int GetRate(int a, int b, int c = 100)

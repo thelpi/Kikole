@@ -194,7 +194,7 @@ namespace KikoleSite.Api.Services
                 currentDate = currentDate.AddDays(1);
             }
 
-            return new UserStat(stats, user.Login);
+            return new UserStat(stats, user.Login, user.CreationDate);
         }
 
         /// <inheritdoc />

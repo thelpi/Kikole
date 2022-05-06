@@ -6,6 +6,10 @@
     <label style="color: crimson">@Model.Login</label>
 </div>
 <div style="margin-top: 5px">
+    <label style="width: 150px; text-align: right">@localizer["RegistrationDate"]</label>
+    <label style="color: crimson">@Model.RegistrationDate.ToNaString()</label>
+</div>
+<div style="margin-top: 5px">
     <label style="width: 150px; text-align: right">@localizer["BestTime"]</label>
     <label style="color: crimson">@Model.BestTime</label>
 </div>

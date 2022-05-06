@@ -33,10 +33,13 @@ namespace KikoleSite.Api.Models
 
         public IReadOnlyCollection<DailyUserStat> Stats { get; }
 
-        internal UserStat(IReadOnlyCollection<DailyUserStat> stats, string login)
+        public DateTime RegistrationDate { get; }
+
+        internal UserStat(IReadOnlyCollection<DailyUserStat> stats, string login, DateTime registrationDate)
         {
             Login = login;
             Stats = stats;
+            RegistrationDate = registrationDate;
 
             // player creation NOT included
             Attempts = stats.Count(s => s.Attempt);

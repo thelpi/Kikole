@@ -243,4 +243,7 @@
   <data name="IncludingOutOfTime" xml:space="preserve">
     <value>Incluant hors-délais</value>
   </data>
+  <data name="RegistrationDate" xml:space="preserve">
+    <value>Date d'inscription :</value>
+  </data>
 </root>
