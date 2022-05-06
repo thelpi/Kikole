@@ -243,6 +243,9 @@ namespace KikoleSite.Controllers
                 .IsPowerUserAsync(token)
                 .ConfigureAwait(false);
 
+            if (!string.IsNullOrWhiteSpace(model.PlayerName) && string.IsNullOrWhiteSpace(model.EasyClue))
+                model.EasyClue = easyClue;
+
             model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
             model.Message = msg;
             model.LoggedAs = login;

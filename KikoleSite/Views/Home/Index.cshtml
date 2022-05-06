@@ -82,6 +82,12 @@
                     <label>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, DateTime.Now.AddDays(-Model.CurrentDay).ToNaString()))</label>
                 </div>
             }
+            <div style="margin-top: 10px">
+                @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
+            </div>
+            <div style="margin-top: 10px">
+                @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
+            </div>
         }
         else
         {
