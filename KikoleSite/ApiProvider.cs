@@ -525,6 +525,20 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
+        public async Task ComputeMissingLeadersAsync()
+        {
+            await _leaderService
+                .ComputeMissingLeadersAsync()
+                .ConfigureAwait(false);
+        }
+
+        public async Task ReassignPlayersOfTheDayAsync()
+        {
+            await _playerService
+                .ReassignPlayersOfTheDayAsync()
+                .ConfigureAwait(false);
+        }
+
         #endregion site management
 
         #region main game

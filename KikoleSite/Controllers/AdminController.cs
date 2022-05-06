@@ -47,11 +47,23 @@ namespace KikoleSite.Controllers
 
             var action = GetSubmitAction();
 
-            if (action == "recomputebadges")
+            switch (action)
             {
-                await _apiProvider
-                    .ResetBadgesAsync()
-                    .ConfigureAwait(false);
+                case "recomputebadges":
+                    await _apiProvider
+                        .ResetBadgesAsync()
+                        .ConfigureAwait(false);
+                    break;
+                case "recomputeleaders":
+                    await _apiProvider
+                        .ComputeMissingLeadersAsync()
+                        .ConfigureAwait(false);
+                    break;
+                case "reassignplayers":
+                    await _apiProvider
+                        .ReassignPlayersOfTheDayAsync()
+                        .ConfigureAwait(false);
+                    break;
             }
 
             return View();

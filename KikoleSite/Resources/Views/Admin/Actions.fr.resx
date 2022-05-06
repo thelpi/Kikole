@@ -120,7 +120,13 @@
   <data name="AdminActions" xml:space="preserve">
     <value>Actions d'administration</value>
   </data>
+  <data name="ReassignPlayers" xml:space="preserve">
+    <value>Réassigner la date des joueurs</value>
+  </data>
   <data name="RecomputeBadges" xml:space="preserve">
     <value>Recalculer les badges</value>
+  </data>
+  <data name="RecomputeLeaders" xml:space="preserve">
+    <value>Calculer les leaders manquants</value>
   </data>
 </root>

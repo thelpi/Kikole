@@ -77,6 +77,10 @@ namespace KikoleSite
 
         Task ResetBadgesAsync();
 
+        Task ComputeMissingLeadersAsync();
+
+        Task ReassignPlayersOfTheDayAsync();
+
         #endregion site management
 
         #region main game
