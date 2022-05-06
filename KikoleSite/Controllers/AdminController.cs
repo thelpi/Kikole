@@ -29,7 +29,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             return View();
@@ -42,7 +42,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             var action = GetSubmitAction();
@@ -64,7 +64,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             var players = await GetPlayerSubmissionsList(token)
@@ -85,7 +85,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             if (model == null)
@@ -158,7 +158,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             var chart = await _apiProvider
@@ -178,7 +178,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             var chart = await _apiProvider
@@ -324,7 +324,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             return View("Club", new ClubCreationModel());
@@ -337,7 +337,7 @@ namespace KikoleSite.Controllers
             if (string.IsNullOrWhiteSpace(token)
                 || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             if (string.IsNullOrWhiteSpace(model.MainName))

@@ -21,6 +21,7 @@ namespace KikoleSite.Models
         public int Points { get; set; }
         public string MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }
+        public bool IsErrorMessageForced { get; set; }
         public string BirthYear { get; set; }
         public string PlayerName { get; set; }
         public string CountryName { get; set; }

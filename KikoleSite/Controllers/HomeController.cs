@@ -26,7 +26,7 @@ namespace KikoleSite.Controllers
             var (token, login) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
             }
 
             var model = new ContactModel
@@ -42,7 +42,7 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token))
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
 
             if (string.IsNullOrWhiteSpace(model.Email))
                 model.ErrorMessage = _localizer["InvalidEmail"];
@@ -72,6 +72,14 @@ namespace KikoleSite.Controllers
         {
             ResetAuthenticationCookie();
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ErrorIndex()
+        {
+            return await Index(
+                    null, _localizer["AuthenticationRequired"].Value)
+                .ConfigureAwait(false);
         }
 
         [HttpGet]
@@ -223,7 +231,7 @@ namespace KikoleSite.Controllers
 
             if (!string.IsNullOrWhiteSpace(errorMessageForced))
             {
-                model.IsErrorMessage = true;
+                model.IsErrorMessageForced = true;
                 model.MessageToDisplay = errorMessageForced;
             }
 
@@ -260,7 +268,7 @@ namespace KikoleSite.Controllers
                 .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
             model.HasPendingChallenges = pendings.Count > 0;
             model.CanCreateClub = isPowerUser;
-            return View(model);
+            return View("Index", model);
         }
     }
 }

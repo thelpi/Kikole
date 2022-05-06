@@ -1,6 +1,12 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model HomeModel
 <div>
+    @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && Model.IsErrorMessageForced)
+    {
+    <div style="margin-top: 20px">
+        <label style="color:crimson">@Model.MessageToDisplay</label>
+    </div>
+    }
     @if (Model.AlmostThere)
     {
         <div style="margin-top: 20px; color:crimson; font-size: large">
@@ -91,7 +97,7 @@
         }
         else
         {
-            if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay))
+            if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && !Model.IsErrorMessageForced)
             {
                 <div style="margin-top: 5px">
                     @if (Model.IsErrorMessage)

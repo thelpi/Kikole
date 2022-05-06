@@ -22,7 +22,7 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token))
-                RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
 
             var model = new ChallengeModel();
 
@@ -36,7 +36,7 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token))
-                RedirectToAction("Index", "Home");
+                return RedirectToAction("ErrorIndex", "Home");
 
             var action = GetSubmitAction();
             if (action == "createchallenge")
