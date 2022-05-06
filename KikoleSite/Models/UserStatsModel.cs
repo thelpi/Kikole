@@ -7,35 +7,52 @@ namespace KikoleSite.Models
 {
     public class UserStatsModel
     {
-        public int SuccessRate => Attempts == 0
-            ? 0
-            : (int)Math.Round((Successes / (decimal)Attempts) * 100);
+        public string Login { get; }
 
-        public int PointsPerAttempt => Attempts == 0
-            ? 0
-            : (int)Math.Round(TotalPoints / (decimal)Attempts);
+        public int Attempts { get; }
 
-        public string Login { get; set; }
+        public int AttemptsDayOne { get; }
 
-        public int Attempts { get; set; }
+        public int Successes { get; }
 
-        public int Successes { get; set; }
+        public int SuccessesDayOne { get; }
 
-        public int TotalPoints { get; set; }
+        public int TotalPoints { get; }
 
-        public string BestPoints { get; set; }
+        public int TotalPointsDayOne { get; }
 
-        public string AverageTime { get; set; }
+        public string BestPoints { get; }
 
-        public string BestTime { get; set; }
+        public string BestPointsDayOne { get; }
 
-        public IReadOnlyCollection<SingleUserStatModel> Stats { get; set; }
+        public string AverageTime { get; }
 
-        public IReadOnlyCollection<UserBadge> Badges { get; set; }
+        public string AverageTimeDayOne { get; }
 
-        public IReadOnlyCollection<Badge> MissingBadges { get; set; }
+        public string BestTime { get; }
 
-        public bool IsHimself { get; set; }
+        public IReadOnlyCollection<SingleUserStatModel> Stats { get; }
+
+        public IReadOnlyCollection<UserBadge> Badges { get; }
+
+        public IReadOnlyCollection<Badge> MissingBadges { get; }
+
+        public bool IsHimself { get; }
+
+        public int Potentials => Stats.Count(_ => !_.IsCreator);
+
+        public int AttemptDayOneRate => GetRate(AttemptsDayOne, Potentials);
+
+        public int AttemptRate => GetRate(Attempts, Potentials);
+
+        public int SuccessDayOneRate => GetRate(SuccessesDayOne, AttemptsDayOne);
+
+        public int SuccessRate => GetRate(Successes, Attempts);
+
+        public int PointsPerAttemptDayOne => GetRate(TotalPointsDayOne, AttemptsDayOne, 1);
+
+        public int PointsPerAttempt => GetRate(TotalPoints, Attempts, 1);
+
 
         public UserStatsModel(UserStat apiStat,
             IReadOnlyCollection<UserBadge> badges,
@@ -45,10 +62,15 @@ namespace KikoleSite.Models
         {
             Login = apiStat.Login;
             Attempts = apiStat.Attempts;
+            AttemptsDayOne = apiStat.AttemptsDayOne;
             Successes = apiStat.Successes;
+            SuccessesDayOne = apiStat.SuccessesDayOne;
             TotalPoints = apiStat.TotalPoints;
+            TotalPointsDayOne = apiStat.TotalPointsDayOne;
             BestPoints = apiStat.BestPoints.ToNaString();
+            BestPointsDayOne = apiStat.BestPointsDayOne.ToNaString();
             AverageTime = apiStat.AverageTime.ToNaString();
+            AverageTimeDayOne = apiStat.AverageTimeDayOne.ToNaString();
             BestTime = apiStat.BestTime.ToNaString();
             Stats = apiStat.Stats
                 .Select(s => new SingleUserStatModel(s, knownAnswers.Contains(s.Answer)))
@@ -58,6 +80,11 @@ namespace KikoleSite.Models
                 .Where(b => !badges.Any(_ => _.Id == b.Id))
                 .ToList();
             IsHimself = isHimself;
+        }
+
+        private int GetRate(int a, int b, int c = 100)
+        {
+            return b == 0 ? 0 : (int)Math.Round(a / (decimal)b * c);
         }
     }
 }

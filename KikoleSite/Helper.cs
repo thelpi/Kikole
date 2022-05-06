@@ -20,7 +20,19 @@ namespace KikoleSite
 
         public static string ToNaString(this object data)
         {
-            return data?.ToString() ?? NA;
+            if (data == null)
+                return NA;
+
+            if (data.GetType() == typeof(TimeSpan) || data.GetType() == typeof(TimeSpan?))
+                return ((TimeSpan?)data).ToNaString();
+
+            if (data.GetType() == typeof(DateTime) || data.GetType() == typeof(DateTime?))
+                return ((DateTime?)data).ToNaString();
+
+            if (data.GetType() == typeof(bool))
+                return ((bool)data).ToYesNo();
+
+            return data.ToString();
         }
 
         internal static string ToNaString(this TimeSpan? data)

@@ -174,11 +174,11 @@ namespace KikoleSite.Api.Services
                     .ConfigureAwait(false);
 
                 var proposals = await _proposalRepository
-                    .GetProposalsDateExactAsync(currentDate, userId)
+                    .GetProposalsAsync(currentDate, userId)
                     .ConfigureAwait(false);
 
                 var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(currentDate, true)
+                    .GetLeadersAtDateAsync(currentDate, false)
                     .ConfigureAwait(false);
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
@@ -188,7 +188,7 @@ namespace KikoleSite.Api.Services
 
                 var singleStat = isCreator
                     ? new DailyUserStat(currentDate, pDay.Name, leaders)
-                    : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Count > 0, leaders, meLeader);
+                    : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Any(_ => _.IsCurrentDay), proposals.Count > 0, leaders, meLeader);
 
                 stats.Add(singleStat);
                 currentDate = currentDate.AddDays(1);

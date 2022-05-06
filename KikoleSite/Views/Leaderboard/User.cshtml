@@ -1,35 +1,70 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model UserStatsModel
 
-<h3>@localizer["GeneralInfo"]</h3>
-<div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["Username"]</label>
+<div style="margin-top: 15px">
+    <label style="width: 150px; text-align: right">@localizer["Username"]</label>
     <label style="color: crimson">@Model.Login</label>
 </div>
 <div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["Attempts"]</label>
-    <label style="color: crimson">@Model.Attempts</label>
-</div>
-<div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["Successes"]</label>
-    <label style="color: crimson">@Model.Successes (@Model.SuccessRate %)</label>
-</div>
-<div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["AverageTime"]</label>
-    <label style="color: crimson">@Model.AverageTime</label>
-</div>
-<div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["BestTime"]</label>
+    <label style="width: 150px; text-align: right">@localizer["BestTime"]</label>
     <label style="color: crimson">@Model.BestTime</label>
 </div>
-<div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["BestScore"]</label>
-    <label style="color: crimson">@Model.BestPoints (@Model.PointsPerAttempt @localizer["PtsByAttempt"])</label>
-</div>
-<div style="margin-top: 5px">
-    <label style="width: 120px; text-align: right">@localizer["TotalScore"]</label>
-    <label style="color: crimson">@Model.TotalPoints</label>
-</div>
+
+<fieldset style="margin-top: 5px">
+    <legend>@localizer["CurrentDay"]</legend>
+    <div>
+        <label style="width: 150px; text-align: right">@localizer["Attempts"]</label>
+        <label style="color: crimson">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["Successes"]</label>
+        <label style="color: crimson">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["TotalScore"]</label>
+        <label style="color: crimson">@Model.TotalPointsDayOne</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["AveragePoints"]</label>
+        <label style="color: crimson">@Model.PointsPerAttemptDayOne</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["BestScore"]</label>
+        <label style="color: crimson">@Model.BestPointsDayOne</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["AverageTime"]</label>
+        <label style="color: crimson">@Model.AverageTimeDayOne</label>
+    </div>
+</fieldset>
+
+<fieldset style="margin-top: 5px">
+    <legend>@localizer["IncludingOutOfTime"]</legend>
+    <div>
+        <label style="width: 150px; text-align: right">@localizer["Attempts"]</label>
+        <label style="color: crimson">@Model.Attempts (@Model.AttemptRate %)</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["Successes"]</label>
+        <label style="color: crimson">@Model.Successes (@Model.SuccessRate %)</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["TotalScore"]</label>
+        <label style="color: crimson">@Model.TotalPoints</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["AveragePoints"]</label>
+        <label style="color: crimson">@Model.PointsPerAttempt</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["BestScore"]</label>
+        <label style="color: crimson">@Model.BestPoints</label>
+    </div>
+    <div style="margin-top: 5px">
+        <label style="width: 150px; text-align: right">@localizer["AverageTime"]</label>
+        <label style="color: crimson">@Model.AverageTime</label>
+    </div>
+</fieldset>
 
 <h3>@localizer["StatsByDay"]</h3>
 <table style="margin-top: 10px">
@@ -37,8 +72,8 @@
         <tr>
             <th style="width: 100px">@localizer["DateHeader"]</th>
             <th style="width: 180px">@localizer["AnswerHeader"]</th>
-            <th style="width: 80px">@localizer["AttemptHeader"]</th>
-            <th style="width: 80px">@localizer["SuccessHeader"]</th>
+            <th style="width: 80px">@localizer["AttemptHeader"] *</th>
+            <th style="width: 80px">@localizer["SuccessHeader"] *</th>
             <th style="width: 80px">@localizer["PointsHeader"]</th>
             <th style="width: 80px">@localizer["PointsRankHeader"]</th>
             <th style="width: 80px">@localizer["TimeHeader"]</th>
@@ -51,12 +86,14 @@
         }
         @foreach (var stat in Model.Stats)
         {
+            var weightAttempt = stat.AttemptDayOne == true ? "bold" : "normal";
+            var weightSuccess = stat.SuccessDayOne == true ? "bold" : "normal";
             var background = stat.IsCreator ? "lavender" : (i % 2 == 0 ? "white" : "azure");
             <tr style="background-color: @background">
                 <td>@stat.Date.ToNaString()</td>
                 <td>@stat.Answer</td>
-                <td>@stat.Attempt.ToYesNo()</td>
-                <td>@stat.Success.ToYesNo()</td>
+                <td style="font-weight: @weightAttempt">@stat.Attempt.ToYesNo()</td>
+                <td style="font-weight: @weightSuccess">@stat.Success.ToYesNo()</td>
                 <td>@stat.Points.ToNaString()</td>
                 <td>@stat.PointsPosition.ToNaString()</td>
                 <td>@stat.Time.ToNaString()</td>
@@ -66,6 +103,7 @@
         }
     </tbody>
 </table>
+<div>@localizer["BoldFirstDay"]</div>
 
 <h3>@localizer["BadgesHead"]</h3>
 <h4>@localizer["BadgeYouOwn"]</h4>
@@ -78,37 +116,37 @@ else
     foreach (var badge in Model.Badges)
     {
         var color = !badge.Hidden ? "transparent" : "gold";
-<div style="float: left; margin-top: 5px; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
-    <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
-    <div style="text-align:center">@badge.Description</div>
-    @if (!badge.Hidden)
-    {
-        <div style="text-align:center">@localizer["GotThe"] @badge.GetDate.ToNaString()</div>
-    }
-    @if (Model.IsHimself)
-    {
-        if (badge.Users == 1)
-        {
-            <div style="text-align:center; font-weight: bold">@localizer["OnlyOne"]</div>
-        }
-        else
-        {
-            var v = badge.Users - 1;
-            <div style="text-align:center"><span style="color: crimson">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
-        }
-    }
-    else
-    {
-        if (badge.Users == 1)
-        {
-            <div style="text-align:center; font-weight: bold">@localizer["OnlyOneNotMe"]</div>
-        }
-        else
-        {
-            <div style="text-align:center"><span style="color: crimson">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
-        }
-    }
-</div>
+        <div style="float: left; margin-top: 5px; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+            <div style="text-align:center;color: forestgreen; font-size: large">@badge.Name</div>
+            <div style="text-align:center">@badge.Description</div>
+            @if (!badge.Hidden)
+            {
+                <div style="text-align:center">@localizer["GotThe"] @badge.GetDate.ToNaString()</div>
+            }
+            @if (Model.IsHimself)
+            {
+                if (badge.Users == 1)
+                {
+                    <div style="text-align:center; font-weight: bold">@localizer["OnlyOne"]</div>
+                }
+                else
+                {
+                    var v = badge.Users - 1;
+                    <div style="text-align:center"><span style="color: crimson">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
+                }
+            }
+            else
+            {
+                if (badge.Users == 1)
+                {
+                    <div style="text-align:center; font-weight: bold">@localizer["OnlyOneNotMe"]</div>
+                }
+                else
+                {
+                    <div style="text-align:center"><span style="color: crimson">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
+                }
+            }
+        </div>
     }
     <div style="clear: both" />
 }

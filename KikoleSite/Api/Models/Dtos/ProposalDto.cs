@@ -13,5 +13,7 @@ namespace KikoleSite.Api.Models.Dtos
         public byte Successful { get; set; }
 
         public DateTime ProposalDate { get; set; }
+
+        internal bool IsCurrentDay => ProposalDate == CreationDate.Date;
     }
 }

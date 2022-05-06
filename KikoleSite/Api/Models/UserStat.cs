@@ -11,13 +11,23 @@ namespace KikoleSite.Api.Models
 
         public int Attempts { get; }
 
+        public int AttemptsDayOne { get; }
+
         public int Successes { get; }
+
+        public int SuccessesDayOne { get; }
 
         public int TotalPoints { get; }
 
+        public int TotalPointsDayOne { get; }
+
         public int? BestPoints { get; }
 
+        public int? BestPointsDayOne { get; }
+
         public TimeSpan? AverageTime { get; }
+
+        public TimeSpan? AverageTimeDayOne { get; }
 
         public TimeSpan? BestTime { get; }
 
@@ -25,19 +35,29 @@ namespace KikoleSite.Api.Models
 
         internal UserStat(IReadOnlyCollection<DailyUserStat> stats, string login)
         {
+            Login = login;
+            Stats = stats;
+
+            // player creation NOT included
             Attempts = stats.Count(s => s.Attempt);
+            AttemptsDayOne = stats.Count(s => s.AttemptDayOne);
             AverageTime = stats.Where(s => s.Time.HasValue).Select(s => s.Time.Value).Average();
-            BestPoints = stats.Any(s => s.Points.HasValue)
-                ? stats.Where(s => s.Points.HasValue).Max(s => s.Points.Value)
-                : default(int?);
+            AverageTimeDayOne = stats.Where(s => s.Time.HasValue && s.SuccessDayOne).Select(s => s.Time.Value).Average();
             BestTime = stats.Any(s => s.Time.HasValue)
                 ? stats.Where(s => s.Time.HasValue).Min(s => s.Time.Value)
                 : default(TimeSpan?);
-            Login = login;
-            Stats = stats;
-            // player creation does not count
+            BestPoints = stats.Any(s => s.Points.HasValue && s.Attempt)
+                ? stats.Where(s => s.Points.HasValue && s.Attempt).Max(s => s.Points.Value)
+                : default(int?);
+            BestPointsDayOne = stats.Any(s => s.Points.HasValue && s.SuccessDayOne && s.AttemptDayOne)
+                ? stats.Where(s => s.Points.HasValue && s.SuccessDayOne && s.AttemptDayOne).Max(s => s.Points.Value)
+                : default(int?);
             Successes = stats.Count(s => s.Points.HasValue && s.Attempt);
+            SuccessesDayOne = stats.Count(s => s.Points.HasValue && s.AttemptDayOne);
+
+            // player creation included
             TotalPoints = stats.Sum(s => s.Points.GetValueOrDefault(0));
+            TotalPointsDayOne = stats.Where(s => s.SuccessDayOne).Sum(s => s.Points.GetValueOrDefault(0));
         }
     }
 }

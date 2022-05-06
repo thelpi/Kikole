@@ -13,6 +13,8 @@ namespace KikoleSite.Api.Models
 
         public bool Attempt { get; }
 
+        public bool AttemptDayOne { get; }
+
         public TimeSpan? Time { get; }
 
         public int? Points { get; }
@@ -20,6 +22,11 @@ namespace KikoleSite.Api.Models
         public int? TimePosition { get; }
 
         public int? PointsPosition { get; }
+
+        public bool Success => Time.HasValue;
+
+        public bool SuccessDayOne => Time.HasValue
+            && Time.Value <= TimeSpan.FromMinutes(LeaderDto.FirstDayMinutes);
 
         internal DailyUserStat(DateTime currentDate,
             string playerName,
@@ -33,6 +40,7 @@ namespace KikoleSite.Api.Models
         internal DailyUserStat(ulong userId,
             DateTime currentDate,
             string playerName,
+            bool attemptDayOne,
             bool attempt,
             IReadOnlyCollection<LeaderDto> leaders,
             LeaderDto meLeader)
@@ -40,6 +48,7 @@ namespace KikoleSite.Api.Models
             Date = currentDate;
             Answer = playerName;
             Attempt = attempt;
+            AttemptDayOne = attemptDayOne;
             Points = meLeader != null
                 ? meLeader.Points
                 : default(int?);

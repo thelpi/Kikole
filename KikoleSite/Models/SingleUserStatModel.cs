@@ -5,23 +5,27 @@ namespace KikoleSite.Models
 {
     public class SingleUserStatModel
     {
-        public DateTime Date { get; set; }
+        public DateTime Date { get; }
 
-        public string Answer { get; set; }
+        public string Answer { get; }
 
-        public bool? Attempt { get; set; }
+        public bool? AttemptDayOne { get; }
 
-        public bool? Success { get; set; }
+        public bool? Attempt { get; }
 
-        public TimeSpan? Time { get; set; }
+        public bool? SuccessDayOne { get; }
 
-        public int? Points { get; set; }
+        public bool? Success { get; }
 
-        public int? TimePosition { get; set; }
+        public TimeSpan? Time { get; }
 
-        public int? PointsPosition { get; set; }
+        public int? Points { get; }
 
-        public bool IsCreator { get; set; }
+        public int? TimePosition { get; }
+
+        public int? PointsPosition { get; }
+
+        public bool IsCreator { get; }
 
         public SingleUserStatModel(DailyUserStat apiStat, bool knowPlayer)
         {
@@ -32,13 +36,17 @@ namespace KikoleSite.Models
             Time = apiStat.Time;
             TimePosition = apiStat.TimePosition;
             Attempt = apiStat.Attempt;
-            Success = apiStat.Time.HasValue;
+            AttemptDayOne = apiStat.AttemptDayOne;
+            Success = apiStat.Success;
+            SuccessDayOne = apiStat.SuccessDayOne;
+            IsCreator = apiStat.Points.HasValue && !apiStat.Time.HasValue;
 
-            if (apiStat.Points.HasValue && !apiStat.Time.HasValue)
+            if (IsCreator)
             {
                 Attempt = null;
+                AttemptDayOne = null;
                 Success = null;
-                IsCreator = true;
+                SuccessDayOne = null;
             }
         }
     }

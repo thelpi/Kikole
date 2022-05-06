@@ -121,7 +121,7 @@
     <value>Answer</value>
   </data>
   <data name="AttemptHeader" xml:space="preserve">
-    <value>Attempt?</value>
+    <value>Tried?</value>
   </data>
   <data name="Attempts" xml:space="preserve">
     <value>Attempts:</value>
@@ -142,7 +142,7 @@
     <value>Points</value>
   </data>
   <data name="PointsRankHeader" xml:space="preserve">
-    <value>Pts pos.</value>
+    <value>Pts rank</value>
   </data>
   <data name="PtsByAttempt" xml:space="preserve">
     <value>pts p/ attempt</value>
@@ -154,13 +154,13 @@
     <value>Successes:</value>
   </data>
   <data name="SuccessHeader" xml:space="preserve">
-    <value>Success?</value>
+    <value>Found?</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Time</value>
   </data>
   <data name="TimeRankHeader" xml:space="preserve">
-    <value>Time pos.</value>
+    <value>Time rank</value>
   </data>
   <data name="TotalScore" xml:space="preserve">
     <value>Total score:</value>
@@ -221,5 +221,26 @@
   </data>
   <data name="OtherUsersNotMe" xml:space="preserve">
     <value>users have this badge</value>
+  </data>
+  <data name="AttemptsDayOne" xml:space="preserve">
+    <value>Attempts on 1st day:</value>
+  </data>
+  <data name="SuccessesDayOne" xml:space="preserve">
+    <value>Successes on 1st day:</value>
+  </data>
+  <data name="AverageTimeDayOne" xml:space="preserve">
+    <value>Average time on 1st day:</value>
+  </data>
+  <data name="AveragePoints" xml:space="preserve">
+    <value>Average points</value>
+  </data>
+  <data name="BoldFirstDay" xml:space="preserve">
+    <value>* in bold, kikoles tried / found the first day.</value>
+  </data>
+  <data name="CurrentDay" xml:space="preserve">
+    <value>The first day</value>
+  </data>
+  <data name="IncludingOutOfTime" xml:space="preserve">
+    <value>Including out-of-time</value>
   </data>
 </root>
