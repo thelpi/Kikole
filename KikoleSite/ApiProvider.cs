@@ -15,10 +15,14 @@ namespace KikoleSite
 {
     public class ApiProvider : IApiProvider
     {
+        // minutes
+        private const int DelayBetweenUserChecks = 10;
+
         private static Dictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
+        private readonly Dictionary<ulong, DateTime> _usersCheckCache;
         private readonly IUserRepository _userRepository;
         private readonly ICrypter _crypter;
         private readonly IStringLocalizer<Translations> _resources;
@@ -60,6 +64,7 @@ namespace KikoleSite
             _challengeService = challengeService;
             _leaderService = leaderService;
             _discussionRepository = discussionRepository;
+            _usersCheckCache = new Dictionary<ulong, DateTime>();
         }
 
         #region user accounts
@@ -158,7 +163,7 @@ namespace KikoleSite
         public async Task<string> ChangePasswordAsync(string authToken,
             string currentPassword, string newPassword)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["InvalidUser"];
@@ -189,7 +194,7 @@ namespace KikoleSite
         public async Task<string> ChangeQAndAAsync(string authToken,
             string question, string answer)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["InvalidUser"];
@@ -299,7 +304,7 @@ namespace KikoleSite
 
         public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, string authToken)
         {
-            var connectedUserId = ExtractUserIdFromToken(authToken);
+            var connectedUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             var badgesFull = await _badgeService
                  .GetUserBadgesAsync(userId, connectedUserId, GetLanguage())
@@ -317,7 +322,7 @@ namespace KikoleSite
 
         public async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             return await _playerService
                 .GetKnownPlayerNamesAsync(userId)
@@ -372,7 +377,7 @@ namespace KikoleSite
 
         public async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["InvalidUser"];
@@ -393,7 +398,7 @@ namespace KikoleSite
 
         public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return null;
@@ -408,7 +413,7 @@ namespace KikoleSite
         public async Task<string> ValidatePlayerSubmissionAsync(
             PlayerSubmissionValidationRequest request, string authToken)
         {
-            var callerUserId = ExtractUserIdFromToken(authToken);
+            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (request == null || callerUserId == 0)
                 return string.Format(_resources["InvalidRequest"], "null");
@@ -502,7 +507,7 @@ namespace KikoleSite
 
         public async Task<string> CreateDiscussionAsync(string email, string message, string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["InvalidUser"];
@@ -555,7 +560,7 @@ namespace KikoleSite
             if (request == null)
                 return null;
 
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return null;
@@ -602,7 +607,7 @@ namespace KikoleSite
         public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(
             DateTime proposalDate, string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return null;
@@ -626,7 +631,7 @@ namespace KikoleSite
         public async Task<PlayerCreator> IsPlayerOfTheDayUser(
             DateTime proposalDate, string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return null;
@@ -644,7 +649,7 @@ namespace KikoleSite
 
         public async Task<string> CreateChallengeAsync(ulong guestUserId, byte pointsRate, string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["InvalidUser"];
@@ -689,7 +694,7 @@ namespace KikoleSite
 
         public async Task<string> RespondToChallengeAsync(ulong id, bool isAccepted, string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["InvalidUser"];
@@ -731,7 +736,7 @@ namespace KikoleSite
             if (string.IsNullOrWhiteSpace(authToken))
                 return new List<Challenge>();
 
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return new List<Challenge>();
@@ -745,7 +750,7 @@ namespace KikoleSite
 
         public async Task<IReadOnlyCollection<Challenge>> GetRequestedChallengesAsync(string authToken)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return new List<Challenge>();
@@ -762,7 +767,7 @@ namespace KikoleSite
             if (string.IsNullOrWhiteSpace(authToken))
                 return new List<Challenge>();
 
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return new List<Challenge>();
@@ -783,7 +788,7 @@ namespace KikoleSite
             if (toDate.HasValue)
                 parameters.Add(("toDate", toDate.Value.ToString("yyyy-MM-dd")));
 
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             if (userId == 0)
                 return null;
@@ -815,7 +820,7 @@ namespace KikoleSite
 
         private async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)
         {
-            var userId = ExtractUserIdFromToken(authToken);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
@@ -827,7 +832,7 @@ namespace KikoleSite
             return user.UserTypeId >= (ulong)minimalType;
         }
 
-        private ulong ExtractUserIdFromToken(string token)
+        private async Task<ulong> ExtractUserIdFromTokenAsync(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
                 return 0;
@@ -838,6 +843,24 @@ namespace KikoleSite
                 || !ulong.TryParse(tokenParts[1], out var userTypeId)
                 || !Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == userTypeId))
                 return 0;
+
+            if (!_crypter.Encrypt($"{userId}_{userTypeId}").Equals(tokenParts[2]))
+                return 0;
+
+            var exists = _usersCheckCache.ContainsKey(userId);
+            if (!exists || (_clock.Now - _usersCheckCache[userId]).TotalMinutes > DelayBetweenUserChecks)
+            {
+                var user = await _userRepository.GetUserByIdAsync(userId).ConfigureAwait(false);
+                if (user == null)
+                    return 0;
+                else
+                {
+                    if (!exists)
+                        _usersCheckCache.Add(userId, _clock.Now);
+                    else
+                        _usersCheckCache[userId] = _clock.Now;
+                }
+            }
 
             return userId;
         }

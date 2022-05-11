@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Net;
 using KikoleSite.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -36,7 +35,8 @@ namespace KikoleSite
                     }
                     context.Exception = null;
                     context.ExceptionHandled = true;
-                    context.Result = new StatusCodeResult((int)HttpStatusCode.InternalServerError);
+                    context.HttpContext.Response.Cookies.Delete(Controllers.KikoleBaseController._cryptedAuthenticationCookieName);
+                    context.Result = new ViewResult { ViewName = "~/Views/Shared/Error.cshtml" };
                 }
                 catch { }
             }
