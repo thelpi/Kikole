@@ -220,9 +220,13 @@ namespace KikoleSite.Api.Services
 
                     foreach (var proposal in proposals.OrderBy(p => p.CreationDate))
                     {
-                        var minusPoints = ProposalChart.Default.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
+                        var (minusPoints, isRate) = ProposalChart.Default.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
                         if (proposal.Successful == 0)
+                        {
+                            if (isRate)
+                                minusPoints = (int)Math.Round(points * minusPoints / (decimal)100);
                             points -= minusPoints;
+                        }
 
                         if (proposal.Successful > 0 && (ProposalTypes)proposal.ProposalTypeId == ProposalTypes.Name)
                         {

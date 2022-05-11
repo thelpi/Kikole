@@ -158,7 +158,7 @@
     <value>An incorrect year proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="ClueGuess" xml:space="preserve">
-    <value>Asking for a second clue costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Asking for a second clue costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
   </data>
   <data name="GoodGuess" xml:space="preserve">
     <value>A good guess on any category costs &lt;span style="color: forestgreen; font-size: large"&gt;no points&lt;/span&gt;.</value>

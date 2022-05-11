@@ -228,4 +228,7 @@
   <data name="TipAboutClubs" xml:space="preserve">
     <value>voir les &lt;a href="#clubs-rules"&gt;règles&lt;/a&gt;</value>
   </data>
+  <data name="PointsPercent" xml:space="preserve">
+    <value>des pts</value>
+  </data>
 </root>

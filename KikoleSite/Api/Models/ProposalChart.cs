@@ -22,15 +22,15 @@ namespace KikoleSite.Api.Models
 
         public int SubmissionThresholdlosePoints => 750;
 
-        public readonly IReadOnlyDictionary<ProposalTypes, int> ProposalTypesCost
-            = new Dictionary<ProposalTypes, int>
+        public readonly IReadOnlyDictionary<ProposalTypes, (int points, bool isRate)> ProposalTypesCost
+            = new Dictionary<ProposalTypes, (int, bool)>
             {
-                { ProposalTypes.Club, 50 },
-                { ProposalTypes.Country, 25 },
-                { ProposalTypes.Name, 400 },
-                { ProposalTypes.Position, 75 },
-                { ProposalTypes.Year, 25 },
-                { ProposalTypes.Clue, 400 }
+                { ProposalTypes.Club, (50, false) },
+                { ProposalTypes.Country, (25, false) },
+                { ProposalTypes.Name, (400, false) },
+                { ProposalTypes.Position, (75, false) },
+                { ProposalTypes.Year, (25, false) },
+                { ProposalTypes.Clue, (50, true) }
             };
 
         public DateTime FirstDate { get; internal set; }

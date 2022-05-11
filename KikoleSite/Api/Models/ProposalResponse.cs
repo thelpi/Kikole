@@ -19,7 +19,7 @@ namespace KikoleSite.Api.Models
 
         public string Tip { get; }
 
-        public int LostPoints { get; }
+        public (int, bool) LostPoints { get; }
 
         public ProposalTypes ProposalType { get; }
 
@@ -95,9 +95,10 @@ namespace KikoleSite.Api.Models
                     break;
             }
 
-            LostPoints = Successful && ProposalType != ProposalTypes.Clue
-                ? 0
-                : ProposalChart.Default.ProposalTypesCost[ProposalType];
+            if (Successful && ProposalType != ProposalTypes.Clue)
+                LostPoints = (0, false);
+            else
+                LostPoints = ProposalChart.Default.ProposalTypesCost[ProposalType];
         }
 
         internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
@@ -120,7 +121,14 @@ namespace KikoleSite.Api.Models
 
         internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)
         {
-            TotalPoints = Math.Max(0, sourcePoints - (duplicate ? 0 : LostPoints));
+            var lostPoints = 0;
+            if (!duplicate)
+            {
+                lostPoints = LostPoints.Item2
+                    ? (int)Math.Round(sourcePoints * LostPoints.Item1 / (decimal)100)
+                    : LostPoints.Item1;
+            }
+            TotalPoints = Math.Max(0, sourcePoints - lostPoints);
             return this;
         }
 
