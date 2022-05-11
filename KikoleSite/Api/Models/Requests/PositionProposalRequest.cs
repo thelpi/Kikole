@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Localization;
 
@@ -8,9 +7,6 @@ namespace KikoleSite.Api.Models.Requests
 {
     public class PositionProposalRequest : BaseProposalRequest
     {
-        public PositionProposalRequest(IClock clock)
-            : base(clock) { }
-
         internal override ProposalTypes ProposalType => ProposalTypes.Position;
 
         internal override string IsValid(IStringLocalizer resources)

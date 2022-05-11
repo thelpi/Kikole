@@ -74,14 +74,15 @@ namespace KikoleSite
         }
 
         public async Task<string> CreateAccountAsync(string login,
-            string password, string question, string answer)
+            string password, string question, string answer, string ip)
         {
             var request = new UserRequest
             {
                 Login = login,
                 Password = password,
                 PasswordResetQuestion = question,
-                PasswordResetAnswer = answer?.Trim()
+                PasswordResetAnswer = answer?.Trim(),
+                Ip = ip
             };
 
             if (request == null)
@@ -546,30 +547,10 @@ namespace KikoleSite
         public async Task<ProposalResponse> SubmitProposalAsync(string value,
             uint daysBeforeNow,
             ProposalTypes proposalType,
-            string authToken)
+            string authToken,
+            string ip)
         {
-            BaseProposalRequest request = null;
-            switch (proposalType)
-            {
-                case ProposalTypes.Club:
-                    request = new ClubProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
-                    break;
-                case ProposalTypes.Clue:
-                    request = new ClueProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
-                    break;
-                case ProposalTypes.Country:
-                    request = new CountryProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
-                    break;
-                case ProposalTypes.Position:
-                    request = new PositionProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
-                    break;
-                case ProposalTypes.Name:
-                    request = new NameProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
-                    break;
-                case ProposalTypes.Year:
-                    request = new YearProposalRequest(_clock) { Value = value, DaysBeforeNow = daysBeforeNow };
-                    break;
-            }
+            var request = BaseProposalRequest.Create(_clock.Now, value, daysBeforeNow, proposalType, ip);
 
             if (request == null)
                 return null;

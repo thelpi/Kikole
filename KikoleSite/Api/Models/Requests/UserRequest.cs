@@ -17,6 +17,8 @@ namespace KikoleSite.Api.Models.Requests
 
         public Languages? Language { get; set; }
 
+        public string Ip { get; set; }
+
         internal string IsValid(IStringLocalizer resources)
         {
             if (string.IsNullOrWhiteSpace(Login))
@@ -45,7 +47,8 @@ namespace KikoleSite.Api.Models.Requests
                 Password = crypter.Encrypt(Password),
                 PasswordResetAnswer = crypter.Encrypt(realPasswordResetAnswer),
                 PasswordResetQuestion = realPasswordResetQuestion,
-                UserTypeId = (ulong)UserTypes.StandardUser
+                UserTypeId = (ulong)UserTypes.StandardUser,
+                Ip = Ip
             };
         }
     }

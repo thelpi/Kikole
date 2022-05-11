@@ -26,6 +26,7 @@ namespace KikoleSite.Api.Repositories
                     ("password_reset_answer", user.PasswordResetAnswer),
                     ("language_id", user.LanguageId),
                     ("user_type_id", user.UserTypeId),
+                    ("ip", user.Ip),
                     ("creation_date", Clock.Now))
                 .ConfigureAwait(false);
         }

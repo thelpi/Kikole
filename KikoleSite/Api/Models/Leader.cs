@@ -86,9 +86,12 @@ namespace KikoleSite.Api.Models
 
         internal static int GetSubmittedPlayerPoints(IEnumerable<LeaderDto> datesLeaders, DateTime date)
         {
+            // ONLY DAY ONE COST POINTS
             var leadersCosting = ProposalChart.Default.SubmissionBonusPoints
                 - datesLeaders
-                    .Where(d => d.ProposalDate.Date == date && d.Points >= ProposalChart.Default.SubmissionThresholdlosePoints)
+                    .Where(d => d.ProposalDate.Date == date
+                        && d.Points >= ProposalChart.Default.SubmissionThresholdlosePoints
+                        && d.IsCurrentDay)
                     .Sum(d => ProposalChart.Default.SubmissionLosePointsByLeader);
 
             return ProposalChart.Default.SubmissionBasePoints

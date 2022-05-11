@@ -133,7 +133,8 @@ namespace KikoleSite.Controllers
                         .CreateAccountAsync(model.LoginCreateSubmission,
                             model.PasswordCreate1Submission,
                             model.RecoveryQCreate,
-                            model.RecoveryACreate)
+                            model.RecoveryACreate,
+                            Request.HttpContext.Connection.RemoteIpAddress.ToString())
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(value))
                     {

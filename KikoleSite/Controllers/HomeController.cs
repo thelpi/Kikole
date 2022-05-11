@@ -165,7 +165,8 @@ namespace KikoleSite.Controllers
             var response = await _apiProvider
                 .SubmitProposalAsync(value, (uint)model.CurrentDay,
                     proposalType,
-                    token)
+                    token,
+                    Request.HttpContext.Connection.RemoteIpAddress.ToString())
                 .ConfigureAwait(false);
 
             model.IsErrorMessage = !response.Successful;

@@ -11,7 +11,7 @@ namespace KikoleSite
     {
         #region user accounts
 
-        Task<string> CreateAccountAsync(string login, string password, string question, string answer);
+        Task<string> CreateAccountAsync(string login, string password, string question, string answer, string ip);
 
         Task<(bool, string)> LoginAsync(string login, string password);
 
@@ -85,7 +85,7 @@ namespace KikoleSite
 
         #region main game
 
-        Task<ProposalResponse> SubmitProposalAsync(string value, uint daysBeforeNow, ProposalTypes proposalType, string authToken);
+        Task<ProposalResponse> SubmitProposalAsync(string value, uint daysBeforeNow, ProposalTypes proposalType, string authToken, string ip);
 
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken);
 

@@ -14,6 +14,8 @@ namespace KikoleSite.Api.Models.Dtos
 
         public DateTime ProposalDate { get; set; }
 
+        public string Ip { get; set; }
+
         internal bool IsCurrentDay => ProposalDate == CreationDate.Date;
     }
 }

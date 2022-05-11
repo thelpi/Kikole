@@ -13,5 +13,7 @@
         public ulong LanguageId { get; set; }
 
         public ulong UserTypeId { get; set; }
+
+        public string Ip { get; set; }
     }
 }
