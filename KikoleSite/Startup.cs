@@ -20,8 +20,6 @@ namespace KikoleSite
 {
     public class Startup
     {
-        const ulong DefaultLanguageId = 1;
-
         public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
@@ -81,6 +79,18 @@ namespace KikoleSite
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
+            var cultures = new List<CultureInfo> {
+                new CultureInfo("en"),
+                new CultureInfo("fr")
+            };
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("fr");
+                options.SupportedCultures = cultures;
+                options.SupportedUICultures = cultures;
+            });
+
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -102,21 +112,6 @@ namespace KikoleSite
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            var cultures = new List<CultureInfo> {
-                new CultureInfo("en"),
-                new CultureInfo("fr")
-            };
-
-            app.UseRequestLocalization(options =>
-            {
-                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en");
-                options.SupportedCultures = cultures;
-                options.SupportedUICultures = cultures;
-            });
-
-            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("fr");
-            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("fr");
         }
     }
 }

@@ -1,4 +1,9 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@{
+    var flagPath = "/images/GB-United-Kingdom-Flag-icon.png";
+    if (ViewData["Culture"]?.ToString() == "fr")
+        flagPath = "/images/FR-France-Flag-icon.png";
+}
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,6 +38,9 @@
                 <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
                 <a asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
                 <a asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
+                <a href="/Home/SwitchLang" class="navbar-brand">
+                    <img style="width: 25px; height: 25px" src="@flagPath" />
+                </a>
             </div>
         </div>
     </nav>

@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
@@ -80,6 +82,32 @@ namespace KikoleSite.Controllers
             return await Index(
                     null, _localizer["AuthenticationRequired"].Value)
                 .ConfigureAwait(false);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SwitchLang()
+        {
+            HttpContext.Request.Cookies.TryGetValue(
+                CookieRequestCultureProvider.DefaultCookieName,
+                out var currentLng);
+
+            var culture = currentLng == "c=en|uic=en" ? "fr" : "en";
+
+            HttpContext.Response.Cookies.Append
+            (
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(
+                    new RequestCulture(culture)),
+                    new CookieOptions
+                    {
+                        Expires = DateTime.MaxValue,
+                        IsEssential = true,
+                        Secure = false
+                    }
+            );
+
+            ViewData["Culture"] = culture;
+            return await Index(null, null).ConfigureAwait(false);
         }
 
         [HttpGet]
