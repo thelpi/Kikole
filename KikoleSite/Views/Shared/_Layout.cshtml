@@ -1,8 +1,12 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @{
-    var flagPath = "/images/GB-United-Kingdom-Flag-icon.png";
-    if (ViewData["Culture"]?.ToString() == "fr")
-        flagPath = "/images/FR-France-Flag-icon.png";
+    Context.Request.Cookies.TryGetValue(
+        Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
+        out var currentLng);
+
+    var flagPath = currentLng == "c=en|uic=en"
+        ? "/images/FR-France-Flag-icon.png"
+        : "/images/GB-United-Kingdom-Flag-icon.png";
 }
 <!DOCTYPE html>
 <html>

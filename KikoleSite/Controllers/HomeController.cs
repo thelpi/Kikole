@@ -85,7 +85,7 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SwitchLang()
+        public IActionResult SwitchLang()
         {
             HttpContext.Request.Cookies.TryGetValue(
                 CookieRequestCultureProvider.DefaultCookieName,
@@ -106,8 +106,7 @@ namespace KikoleSite.Controllers
                     }
             );
 
-            ViewData["Culture"] = culture;
-            return await Index(null, null).ConfigureAwait(false);
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
