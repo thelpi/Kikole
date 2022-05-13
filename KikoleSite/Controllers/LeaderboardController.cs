@@ -118,10 +118,10 @@ namespace KikoleSite.Controllers
             model.TodayLeaders = dayleaders;
 
             model.TodayAttemps = countToday;
-            model.TodaySuccessRate = (int)Math.Round(dayleaders.Count(dl => dl.BestTime.TotalMinutes <= 1440) / (decimal)countToday * 100);
+            model.TodaySuccessRate = countToday == 0 ? 0 : (int)Math.Round(dayleaders.Count(dl => dl.BestTime.TotalMinutes <= 1440) / (decimal)countToday * 100);
 
             model.TotalAttemps = countTotal;
-            model.TotalSuccessRate = (int)Math.Round(dayleaders.Count / (decimal)countTotal * 100);
+            model.TotalSuccessRate = countTotal == 0 ? 0 : (int)Math.Round(dayleaders.Count / (decimal)countTotal * 100);
 
             // TODO: meilleure solution à venir
             if (DateTime.Now.Day <= 3)
