@@ -28,6 +28,9 @@ namespace KikoleSite.Models
         public IReadOnlyCollection<Leader> TodayLeaders { get; set; }
 
         public int TodayAttemps { get; set; }
+        public int TotalAttemps { get; set; }
+        public int TotalSuccessRate { get; set; }
+        public int TodaySuccessRate { get; set; }
 
         public IReadOnlyCollection<LeaderSorts> SortTypes { get; }
             = Enum.GetValues(typeof(LeaderSorts))

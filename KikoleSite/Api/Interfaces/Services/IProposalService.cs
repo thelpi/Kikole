@@ -32,10 +32,10 @@ namespace KikoleSite.Api.Interfaces.Services
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
 
         /// <summary>
-        /// Gets users with at least one proposal on the specified date.
+        /// Gets, for a player's proposal date, the count of users who tried.
         /// </summary>
-        /// <param name="proposalDate">Proposal date.</param>
-        /// <returns>Collection of users.</returns>
-        Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime proposalDate);
+        /// <param name="proposalDate">The player's proposal date.</param>
+        /// <returns>Users who tried the first day and users who tried overall.</returns>
+        Task<(int today, int total)> GetUsersCountWithProposalAsync(DateTime proposalDate);
     }
 }

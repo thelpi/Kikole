@@ -43,8 +43,8 @@
                 <th style="width: 100px">@localizer["PointsHeader"]</th>
                 @if (!Model.IncludePvp)
                 {
-                <th style="width: 100px">@localizer["BestTimeHeader"]</th>
-                <th>@localizer["KFoundHeader"]</th>
+                    <th style="width: 100px">@localizer["BestTimeHeader"]</th>
+                    <th>@localizer["KFoundHeader"]</th>
                 }
             </tr>
         </thead>
@@ -100,5 +100,9 @@
             }
         </tbody>
     </table>
-    <label>@localizer["ActiveUsersToday"] <span style="color: crimson">@Model.TodayAttemps</span></label>
+    <label>@string.Format(localizer["ActiveUsers"].Value, Model.TotalAttemps, Model.TotalSuccessRate)</label><br />
+    @if (Model.TotalAttemps != Model.TodayAttemps)
+    {
+        <label>@string.Format(localizer["ActiveUsersToday"].Value, Model.TodayAttemps, Model.TodaySuccessRate)</label>
+    }
 </form>

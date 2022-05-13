@@ -81,11 +81,11 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate)
+        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate, bool exact)
         {
             return await ExecuteReaderAsync<ProposalDto>(
                     "SELECT * FROM proposals " +
-                    "WHERE proposal_date = DATE(creation_date) " +
+                    $"WHERE {(exact ? "proposal_date = DATE(creation_date)" : "1 = 1")} " +
                     "AND proposal_date = @proposal_date " +
                     $"AND user_id IN ({SubSqlValidUsers})",
                     new

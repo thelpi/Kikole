@@ -338,10 +338,10 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime date)
+        public async Task<(int today, int total)> GetUsersCountWithProposalAsync(DateTime date)
         {
             return await _proposalService
-                .GetUsersWithProposalAsync(date)
+                .GetUsersCountWithProposalAsync(date)
                 .ConfigureAwait(false);
         }
 

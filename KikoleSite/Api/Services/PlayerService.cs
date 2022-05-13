@@ -313,7 +313,7 @@ namespace KikoleSite.Api.Services
                     : pCreator.Login;
 
                 var proposals = await _proposalRepository
-                    .GetProposalsAsync(p.ProposalDate.Value)
+                    .GetProposalsAsync(p.ProposalDate.Value, true)
                     .ConfigureAwait(false);
 
                 var proposalsCount = proposals.Select(_ => _.UserId).Distinct().Count();

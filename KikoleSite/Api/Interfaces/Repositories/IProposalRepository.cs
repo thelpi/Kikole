@@ -18,6 +18,6 @@ namespace KikoleSite.Api.Interfaces.Repositories
 
         Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateTime playerProposalDate);
 
-        Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate);
+        Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate, bool exact);
     }
 }

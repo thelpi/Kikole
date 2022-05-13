@@ -116,29 +116,24 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<User>> GetUsersWithProposalAsync(DateTime proposalDate)
+        public async Task<(int today, int total)> GetUsersCountWithProposalAsync(DateTime proposalDate)
         {
             var proposals = await _proposalRepository
-                .GetProposalsAsync(proposalDate)
+                .GetProposalsAsync(proposalDate, false)
                 .ConfigureAwait(false);
 
-            var userIds = proposals
+            var today = proposals
+                .Where(p => p.CreationDate.Date == p.ProposalDate)
                 .Select(p => p.UserId)
                 .Distinct()
-                .ToList();
+                .Count();
 
-            var users = new List<User>(userIds.Count);
+            var overall = proposals
+                .Select(p => p.UserId)
+                .Distinct()
+                .Count();
 
-            foreach (var userId in userIds)
-            {
-                var user = await _userRepository
-                    .GetUserByIdAsync(userId)
-                    .ConfigureAwait(false);
-
-                users.Add(new User(user));
-            }
-
-            return users;
+            return (today, overall);
         }
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(
