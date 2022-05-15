@@ -121,7 +121,9 @@ namespace KikoleSite.Api.Services
                 .GetKikoleAwardsAsync(firstDayOfMonth, lastDayOfMonth)
                 .ConfigureAwait(false);
 
-            var leaders = ComputePveLeaders(leaderDtos, users, players);
+            var leaders = await ComputePveLeadersAsync(
+                    leaderDtos, users, players)
+                .ConfigureAwait(false);
 
             awards.PointsAwards = ComputeTopThreeLeadersAwards<PointsAward, int>(
                 leaders,
@@ -278,7 +280,9 @@ namespace KikoleSite.Api.Services
                     .GetPlayersOfTheDayAsync(minimalDate, maximalDate.GetValueOrDefault(_clock.Today))
                     .ConfigureAwait(false);
 
-                leaders = ComputePveLeaders(leaderDtos, users, players);
+                leaders = await ComputePveLeadersAsync(
+                        leaderDtos, users, players)
+                    .ConfigureAwait(false);
             }
 
             return SortWithPosition(leaders, leaderSort);
@@ -367,16 +371,37 @@ namespace KikoleSite.Api.Services
                 .ToList();
         }
 
-        private IReadOnlyCollection<Leader> ComputePveLeaders(
+        private async Task<IReadOnlyCollection<Leader>> ComputePveLeadersAsync(
             IReadOnlyCollection<LeaderDto> leaderDtos,
             IReadOnlyCollection<UserDto> users,
             IReadOnlyCollection<PlayerDto> players)
         {
-            return leaderDtos
+            var creatorsNotLeader = players
+                .Where(p => !leaderDtos.Any(l => l.UserId == p.CreationUserId));
+
+            var fullLeadersList = new List<LeaderDto>(leaderDtos);
+            foreach (var creator in creatorsNotLeader)
+            {
+                var user = await _userRepository
+                    .GetUserByIdAsync(creator.CreationUserId)
+                    .ConfigureAwait(false);
+
+                if ((UserTypes)user.UserTypeId != UserTypes.Administrator)
+                {
+                    fullLeadersList.Add(new LeaderDto
+                    {
+                        UserId = creator.CreationUserId,
+                        ProposalDate = creator.ProposalDate.Value,
+                        Time = (int)Math.Floor(new TimeSpan(23, 59, 59).TotalMinutes)
+                    });
+                }
+            }
+
+            return fullLeadersList
                 .GroupBy(leaderDto => leaderDto.UserId)
                 .Select(leaderDto => new Leader(leaderDto, users)
                     .WithPointsFromSubmittedPlayers(
-                        GetDatesWithPlayerCreation(players, leaderDto), leaderDtos))
+                        GetDatesWithPlayerCreation(players, leaderDto), fullLeadersList))
                 .ToList();
         }
 
