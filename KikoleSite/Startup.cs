@@ -12,6 +12,7 @@ using KikoleSite.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -89,6 +90,11 @@ namespace KikoleSite
                 options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("fr");
                 options.SupportedCultures = cultures;
                 options.SupportedUICultures = cultures;
+            });
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
             if (Environment.IsDevelopment())
