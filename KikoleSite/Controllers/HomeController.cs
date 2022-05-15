@@ -85,7 +85,7 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public IActionResult SwitchLang()
+        public IActionResult SwitchLang([FromQuery] string redirect)
         {
             HttpContext.Request.Cookies.TryGetValue(
                 CookieRequestCultureProvider.DefaultCookieName,
@@ -106,7 +106,7 @@ namespace KikoleSite.Controllers
                     }
             );
 
-            return RedirectToAction("Index");
+            return Redirect(redirect);
         }
 
         [HttpGet]

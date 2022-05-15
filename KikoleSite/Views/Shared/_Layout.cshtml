@@ -7,6 +7,10 @@
     var flagPath = currentLng == "c=en|uic=en"
         ? "/images/FR-France-Flag-icon.png"
         : "/images/GB-United-Kingdom-Flag-icon.png";
+
+    var redirectUrl = System.Web.HttpUtility.UrlEncode(Context.Request.Path.Value);
+    if (Context.Request.QueryString.HasValue)
+        redirectUrl = $"{redirectUrl}{System.Web.HttpUtility.UrlEncode(Context.Request.QueryString.Value)}";
 }
 <!DOCTYPE html>
 <html>
@@ -42,7 +46,7 @@
                 <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
                 <a asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
                 <a asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
-                <a href="/Home/SwitchLang" class="navbar-brand">
+                <a href="/Home/SwitchLang?redirect=@redirectUrl" class="navbar-brand">
                     <img style="width: 25px; height: 25px" src="@flagPath" />
                 </a>
             </div>
