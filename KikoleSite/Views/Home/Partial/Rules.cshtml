@@ -5,7 +5,7 @@
 </div>
 <div style="margin-top: 10px">
     @localizer["ScoreIntro"]
-    <ul>
+    <ul id="rules-list">
         <li>@Html.Raw(string.Format(localizer["StarterPoints"].Value, Model.BasePoints))</li>
         <li>@Html.Raw(string.Format(localizer["BadGuessName"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Name].points))</li>
         <li>@Html.Raw(string.Format(localizer["BadGuessClub"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Club].points))</li>

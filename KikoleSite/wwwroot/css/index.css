@@ -1,0 +1,277 @@
+﻿.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "title title title title"
+        "score info info info"
+        "club club nationality nationality"
+        "birth birth position position";
+    gap: 40px;
+}
+
+.title {
+    grid-area: title;
+    font-family: Verdana;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: darkgreen;
+    font-style: italic;
+}
+
+    .title p {
+        text-align: center;
+    }
+
+#kikole {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    #kikole svg {
+        width: 50px;
+        height: 50px;
+        margin-right: 15px;
+    }
+
+h1 {
+    margin: 0;
+}
+
+.bloc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#info-title {
+    font-size: 20px;
+    font-family: Verdana;
+    margin-bottom: 15px;
+    color: darkgreen;
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+.info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid darkgreen;
+    background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)), url(https://cdn.resfu.com/media/img_news/the--mysterious-footballer---besoccer.jpg?size=1000x&lossy=1);
+    border-radius: 30px;
+    background-size: 50%;
+    background-color: #EEE;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 10px;
+}
+
+.player-info {
+    max-width: 50%;
+}
+
+.info-bloc {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.score {
+    grid-area: score;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+    text-align: center;
+}
+
+.add-clue input {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.club {
+    grid-area: club;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5)), url(https://w0.peakpx.com/wallpaper/986/172/HD-wallpaper-chamois-niortais-fc-logo-football-lawn-french-football-club-white-blue-lines-grass-texture-ligue-2-niort-france-football-soccer-field.jpg);
+    border-radius: 30px;
+    border: 1px solid darkgreen;
+    padding: 10px;
+}
+
+.nationality {
+    grid-area: nationality;
+    background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4)), url(https://arai500.ch/wp-content/uploads/2017/12/drapeau.png);
+    background-size: 75%;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+    border-radius: 30px;
+    border: 1px solid darkgreen;
+    padding: 10px;
+}
+
+.bloc input {
+    border: 1px solid darkgreen;
+}
+
+.birth {
+    grid-area: birth;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5)), url(https://i.pinimg.com/originals/d1/24/2a/d1242a5ec334f3bcb46d80f340120abe.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 30px;
+    border: 1px solid darkgreen;
+    padding: 10px;
+}
+
+.position {
+    grid-area: position;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5)), url(https://www.lequipe.fr/_medias/img-ilosport-jpg/tactiques-football/1500000000376270/0-828-417-75/8df28.jpg);
+    border-radius: 30px;
+    border: 1px solid darkgreen;
+    padding: 10px;
+}
+
+    .position select {
+        border: 1px solid darkgreen;
+    }
+
+.submit {
+    grid-area: submit;
+    display: none;
+    justify-content: center;
+}
+
+    .submit .proposal-bloc {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .submit .miss {
+        min-width: 50%;
+    }
+
+#submit-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#guess-it {
+    background-color: darkgreen;
+    color: white;
+    font-weight: bold;
+    margin: 10px;
+}
+
+#see-info {
+    margin: 10px;
+    background-color: darkgreen;
+    color: white;
+    font-weight: bold;
+}
+
+.proposal-title {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    font-size: 20px;
+    font-family: Verdana;
+    color: darkgreen;
+    font-style: italic
+}
+
+    .proposal-title p {
+        font-size: 14px;
+        color: black;
+        font-weight: bold;
+    }
+
+.proposal-bloc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 150px;
+    margin-top: 15px;
+}
+
+    .proposal-bloc form {
+        min-width: 70%;
+        display: flex;
+        justify-content: center;
+    }
+
+.form-control {
+    text-align: center;
+    width: 220px;
+}
+
+.miss {
+    min-width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    align-self: start;
+}
+
+.miss-prop {
+    font-size: small;
+    color: crimson;
+    font-weight: bold;
+}
+
+.miss-title {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+#player-submit {
+    border: 1px solid red
+}
+
+select {
+    /* for Firefox */
+    -moz-appearance: none;
+    /* for Safari, Chrome, Opera */
+    -webkit-appearance: none;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    max-height: 100px;
+}
+
+#rules-list {
+    max-height: unset;
+}
+
+@media screen and (max-width: 640px) {
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "title"
+            "score"
+            "info"
+            "club"
+            "nationality"
+            "birth"
+            "position"
+            "submit";
+        gap: 20px;
+    }
+
+    .bloc {
+        margin: 10px;
+    }
+}

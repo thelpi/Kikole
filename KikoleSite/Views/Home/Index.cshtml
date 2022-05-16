@@ -1,11 +1,17 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model HomeModel
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/index.css" />
+}
+
 <div>
     @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && Model.IsErrorMessageForced)
     {
-    <div style="margin-top: 20px">
-        <label style="color:crimson">@Model.MessageToDisplay</label>
-    </div>
+        <div style="margin-top: 20px">
+            <label style="color:crimson">@Model.MessageToDisplay</label>
+        </div>
     }
     @if (Model.AlmostThere)
     {
@@ -110,195 +116,243 @@
                     }
                 </div>
             }
-            <div style="margin-top: 5px">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
+<div class="main-grid">
+    <div class="title">
+        <div id="kikole">
+            <svg width="150" height="150" viewBox="-105 -105 210 210" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <defs>
+                    <clipPath id="ball">
+                        <circle r="100" stroke-width="0" />
+                    </clipPath>
+                    <radialGradient id="shadow1" cx=".4" cy=".3" r=".8">
+                        <stop offset="0" stop-color="white" stop-opacity="1" />
+                        <stop offset=".4" stop-color="white" stop-opacity="1" />
+                        <stop offset=".8" stop-color="#EEEEEE" stop-opacity="1" />
+                    </radialGradient>
+                    <radialGradient id="shadow2" cx=".5" cy=".5" r=".5">
+                        <stop offset="0" stop-color="white" stop-opacity="0" />
+                        <stop offset=".8" stop-color="white" stop-opacity="0" />
+                        <stop offset=".99" stop-color="black" stop-opacity=".3" />
+                        <stop offset="1" stop-color="black" stop-opacity="1" />
+                    </radialGradient>
+                    <g id="black_stuff" stroke-linejoin="round" clip-path="url(#ball)">
+                        <g fill="black">
+                            <path d="M 6,-32 Q 26,-28 46,-19 Q 57,-35 64,-47 Q 50,-68 37,-76 Q 17,-75 1,-68 Q 4,-51 6,-32" />
+                            <path d="M -26,-2 Q -45,-8 -62,-11 Q -74,5 -76,22 Q -69,40 -50,54 Q -32,47 -17,39 Q -23,15 -26,-2" />
+                            <path d="M -95,22 Q -102,12 -102,-8 V 80 H -85 Q -95,45 -95,22" />
+                            <path d="M 55,24 Q 41,41 24,52 Q 28,65 31,79 Q 55,78 68,67 Q 78,50 80,35 Q 65,28 55,24" />
+                            <path d="M 0,120 L -3,95 Q -25,93 -42,82 Q -50,84 -60,81" />
+                            <path d="M -90,-48 Q -80,-52 -68,-49 Q -52,-71 -35,-77 Q -35,-100 -40,-100 H -100" />
+                            <path d="M 100,-55 L 87,-37 Q 98,-10 97,5 L 100,6" />
+                        </g>
+                        <g fill="none">
+                            <path d="M 6,-32 Q -18,-12 -26,-2                      M 46,-19 Q 54,5 55,24                      M 64,-47 Q 77,-44 87,-37                      M 37,-76 Q 39,-90 36,-100                      M 1,-68 Q -13,-77 -35,-77                      M -62,-11 Q -67,-25 -68,-49                      M -76,22 Q -85,24 -95,22                      M -50,54 Q -49,70 -42,82                      M -17,39 Q 0,48 24,52                      M 31,79 Q 20,92 -3,95                      M 68,67 L 80,80                      M 80,35 Q 90,25 97,5             " />
+                        </g>
+                    </g>
+                </defs>
+                <circle r="100" fill="white" stroke="none" />
+                <circle r="100" fill="url(#shadow1)" stroke="none" />
+                <g>
+                    <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0" to="360" begin="0s" dur="3s" repeatCount="indefinite" />
+                    <use xlink:href="#black_stuff" stroke="#EEE" stroke-width="7" />
+                    <use xlink:href="#black_stuff" stroke="#DDD" stroke-width="4" />
+                    <use xlink:href="#black_stuff" stroke="#999" stroke-width="2" />
+                    <use xlink:href="#black_stuff" stroke="black" stroke-width="1" />
+                </g>
+                <circle r="100" fill="url(#shadow2)" stroke="none" />
+                <h1>KIKOLE ?</h1>
+            </svg>
+        </div>
+        <p>Devine ce joueur !</p>
+    </div>
+    <div class="score">
+        <div style="margin-top: 5px">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
+        @{
             await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
-            <div style="margin-top: 30px; font-size: larger">
-                @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
-            </div>
-            @if (!string.IsNullOrWhiteSpace(Model.EasyClue))
-            {
-                <div style="margin-top: 30px; font-size: larger">
-                    @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
+        }
+    </div>
+    <div class="info bloc">
+        <div id="info-title">Information connues :</div>
+        <div class="info-bloc">
+            <div class="player-info">
+                <p><b>@localizer["DayClue"]</b> <span style="font-style:italic">@Model.Clue</span></p>
+                <div class="add-clue">
+                    @if (!string.IsNullOrWhiteSpace(Model.EasyClue))
+                    {
+                        <p><b>@localizer["EasyDayClue"]</b> <span style="font-style:italic">@Model.EasyClue</span></p>
+                    }
+                    else
+                    {
+                        <form method="post" action="/">
+                            @Html.HiddenFor(m => m.CurrentDay)
+                            <input class="btn btn-success" type="submit" value="@localizer["NeedAnotherClue"] (@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Clue].points  % @localizer["PointsPercent"])" name="submit-Clue" />
+                        </form>
+                    }
                 </div>
-            }
-            else
-            {
-                <form method="post" action="/">
-                    @Html.HiddenFor(m => m.CurrentDay)
-                    <div style="margin-top: 15px">
-                        <input type="submit" value="@localizer["NeedAnotherClue"]" name="submit-Clue" style="width: 200px; margin-right: 20px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Clue].points</span> % @localizer["PointsPercent"])</span>
-                    </div>
-                </form>
-            }
-            <!-- clubs -->
-            <form method="post" action="/">
-                @Html.HiddenFor(m => m.CurrentDay)
-                <fieldset style="margin-top: 30px">
-                    <div>
-                        <div>
-                            <label>@localizer["ClubsTitle"]</label>
-                        </div>
-                        <div>
-                            <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
-                            <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Club].points</span> @localizer["PointsIfIncorrect"])</span>
-                        </div>
-                        <div style="font-size: small">(@localizer["TipAboutClubs"])</div>
-                    </div>
+                <p>Joueur né en <b>@Model.BirthYear</b></p>
+                <p>Nationalité : <b>@Model.CountryName</b></p>
+                <p>Joue au poste de <b>@Model.Position</b></p>
+            </div>
+            <div class="career">
+                <label>@localizer["CareerClubSoFar"]</label>
+                <ul>
                     @if (Model.KnownPlayerClubs?.Count > 0)
                     {
-                        <div style="margin-top: 15px">
-                            <label>@localizer["CareerClubSoFar"]</label>
-                            <ul>
-                                @foreach (var club in Model.KnownPlayerClubs)
-                                {
-                                    <li>@string.Format("{0} - {1}{2}", club.HistoryPosition, club.Name, club.IsLoan ? $" ({localizer["LoanInitial"].Value})" : "")</li>
-                                }
-                            </ul>
-                        </div>
-                        <div style="font-size: small">(@localizer["ClubTipOne"])</div>
-                    }
-                    @if (Model.IncorrectClubs?.Count > 0)
-                    {
-                        <div style="margin-top: 10px">
-                            @foreach (var iClub in Model.IncorrectClubs)
-                            {
-                                <div style="font-size: small; text-decoration: line-through">@iClub</div>
-                            }
-                        </div>
-                    }
-                    @if (Model.CanCreateClub)
-                    {
-                        <div style="margin-top: 10px">
-                            <a href="/Admin/Club" target="_blank">@localizer["HelpToCreateClub"]</a> (@localizer["NewTab"])
-                        </div>
-                        <div style="font-size: small">(@localizer["CreateClubIsGood"])</div>
-                    }
-                </fieldset>
-            </form>
-            <!-- nationality -->
-            <form method="post" action="/">
-                @Html.HiddenFor(m => m.CurrentDay)
-                <div style="margin-top: 30px">
-                    <div>
-                        <label>@localizer["NationalityTitle"]</label>
-                    </div>
-                    @if (string.IsNullOrWhiteSpace(Model.CountryName))
-                    {
-                        <div>
-                            <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
-                            <input type="hidden" id="countryId" name="CountryNameSubmission" />
-                            <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Country].points</span> @localizer["PointsIfIncorrect"])</span>
-                        </div>
-                        <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
-                        @if (Model.IncorrectCountries?.Count > 0)
+                        @foreach (var club in Model.KnownPlayerClubs)
                         {
-                            <div style="margin-top: 10px">
-                                @foreach (var iCountry in Model.IncorrectCountries)
-                                {
-                                    <div style="font-size: small; text-decoration: line-through">@iCountry</div>
-                                }
-                            </div>
+                            <li>@string.Format("{0} - {1}", club.HistoryPosition, club.Name)</li>
                         }
                     }
-                    else
-                    {
-                        <div>
-                            <label>@Model.CountryName</label>
-                        </div>
-                    }
-                </div>
-            </form>
-            <!-- year -->
-            <form method="post" action="/">
+                </ul>
+                <div class="form-text">(@localizer["ClubTipOne"])</div>
+                <div class="form-text">(@localizer["ClubTipTwo"])</div>
+                <button class="btn btn-success" id="guess-it">J'ai trouvé !</button>
+            </div>
+        </div>
+    </div>
+    <div class="submit bloc">
+
+        <div class="proposal-title">
+            <label>@localizer["TypePlayerName"]</label>
+            <p>Coût : @Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Name].points @localizer["PointsIfIncorrect"]</p>
+        </div>
+        <div class="proposal-bloc">
+            <form id="submit-form" method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)
-                <div style="margin-top: 30px">
-                    <div>
-                        <label>@localizer["BirthYearTitle"]</label>
-                    </div>
-                    @if (string.IsNullOrWhiteSpace(Model.BirthYear))
-                    {
-                        <div>
-                            <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
-                            <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Year].points</span> @localizer["PointsIfIncorrect"])</span>
-                        </div>
-                        @if (Model.IncorrectYears?.Count > 0)
-                        {
-                            <div style="margin-top: 10px">
-                                @foreach (var (iYear, iTip) in Model.IncorrectYears)
-                                {
-                                    <div style="font-size: small"><span style="text-decoration: line-through">@iYear</span> (@iTip)</div>
-                                }
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div>
-                            <label>@Model.BirthYear</label>
-                        </div>
-                    }
-                </div>
+                <input id="player-submit" class="form-control" type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" />
+                <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
+                <div class="form-text">(@localizer["UseWikiTitle"])</div>
+                <button class="btn btn-success" id="see-info">Voir les informations</button>
             </form>
-            <!-- position -->
-            <form method="post" action="/">
-                @Html.HiddenFor(m => m.CurrentDay)
-                <div style="margin-top: 30px">
-                    <div>
-                        <label>@localizer["PositionTitle"]</label>
-                    </div>
-                    @if (string.IsNullOrWhiteSpace(Model.Position))
-                    {
-                        <div>
-                            @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
-                            <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
-                            <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Position].points</span> @localizer["PointsIfIncorrect"])</span>
-                        </div>
-                        @if (Model.IncorrectPositions?.Count > 0)
-                        {
-                            <div style="margin-top: 10px">
-                                @foreach (var iPosition in Model.IncorrectPositions)
-                                {
-                                    <div style="font-size: small; text-decoration: line-through">@iPosition</div>
-                                }
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div>
-                            <label>@Model.Position</label>
-                        </div>
-                    }
-                </div>
-            </form>
-            <!-- name -->
-            <form method="post" action="/">
-                @Html.HiddenFor(m => m.CurrentDay)
-                <div style="margin-top: 60px">
-                    <div>
-                        <label style="color:crimson">@localizer["TypePlayerName"]</label>
-                    </div>
-                    <div>
-                        <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" style="width: 300px; border-color: crimson" />
-                        <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
-                        <span>(-<span style="color: crimson">@Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Name].points</span> @localizer["PointsIfIncorrect"])</span>
-                    </div>
-                    <div style="font-size: small">(@localizer["UseWikiTitle"])</div>
-                </div>
+            <div class="miss">
+                <h5 class="miss-title">Joueur déjà tentées</h5>
                 @if (Model.IncorrectNames?.Count > 0)
                 {
                     <div style="margin-top: 10px">
-                        @foreach (var iName in Model.IncorrectNames)
-                        {
-                            <div style="font-size: small; text-decoration: line-through">@iName</div>
-                        }
+                        <ul>
+                            @foreach (var iName in Model.IncorrectNames)
+                            {
+                                <li class="miss-prop">@iName</li>
+                            }
+                        </ul>
                     </div>
                 }
+            </div>
+        </div>
+    </div>
+    <div class="club bloc">
+        <div class="proposal-title">
+            <label>@localizer["ClubsTitle"]</label>
+            <p>Coût : @Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Club].points @localizer["PointsIfIncorrect"]</p>
+        </div>
+        <div class="proposal-bloc">
+            <form method="post" action="/">
+                @Html.HiddenFor(m => m.CurrentDay)
+                <div>
+                    <input class="form-control" type="text" name="ClubNameSubmission" id="clubName" placeholder="@localizer["OneClubAtATime"]" />
+                    <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
+                </div>
             </form>
+            <div class="miss">
+                <h5 class="miss-title">Club déjà tentés</h5>
+                @if (Model.IncorrectClubs?.Count > 0)
+                {
+                    <ul style="margin-top: 10px">
+                        @foreach (var iClub in Model.IncorrectClubs)
+                        {
+                            <li class="miss-prop">@iClub</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="nationality bloc">
+        <div class="proposal-title">
+            <label>@localizer["NationalityTitle"]</label>
+            <p>Coût : @Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Country].points @localizer["PointsIfIncorrect"]</p>
+        </div>
+        <div class="proposal-bloc">
+            @if (string.IsNullOrWhiteSpace(Model.CountryName))
+            {
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <input class="form-control" type="text" id="countryName" name="CountryNameSubmissionValue" placeholder="@localizer["TipAboutNationality"].Value">
+                    <input type="hidden" id="countryId" name="CountryNameSubmission" />
+                    <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden; width: 0px" />
+                </form>
+                <div class="miss">
+                    <h5 class="miss-title">Pays déjà tentés</h5>
+                    @if (Model.IncorrectCountries?.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var iCountry in Model.IncorrectCountries)
+                            {
+                                <li class="miss-prop">@iCountry</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="birth bloc">
+        <div class="proposal-title">
+            <label>@localizer["BirthYearTitle"]</label>
+            <p>Coût : @Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Year].points @localizer["PointsIfIncorrect"]</p>
+        </div>
+        <div class="proposal-bloc">
+            @if (string.IsNullOrWhiteSpace(Model.BirthYear))
+            {
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <input class="form-control" type="text" id="birthYearValue" name="BirthYearSubmission" />
+                    <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
+                </form>
+                <div class="miss">
+                    <h5 class="miss-title">Années déjà tentées</h5>
+                    @if (Model.IncorrectYears?.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var iYear in Model.IncorrectYears)
+                            {
+                                <li class="miss-prop">@iYear</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="position bloc">
+        <div class="proposal-title">
+            <label>@localizer["PositionTitle"]</label>
+            <p>Coût : @Model.Chart.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Position].points @localizer["PointsIfIncorrect"]</p>
+        </div>
+        <div class="proposal-bloc">
+            @if (string.IsNullOrWhiteSpace(Model.Position))
+            {
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @class = "form-control", @id = "positionSubmission" })
+                    <input class="form-control" type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
+                </form>
+                <div class="miss">
+                    <h5 class="miss-title">Position déjà tentées</h5>
+                    @if (Model.IncorrectPositions?.Count > 0)
+                    {
+                        <ul>
+                            @foreach (var iPosition in Model.IncorrectPositions)
+                            {
+                                <li class="miss-prop">@iPosition</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
             <hr />
             await Html.RenderPartialAsync("Partial/Rules", Model.Chart).ConfigureAwait(false);
         }
