@@ -104,3 +104,25 @@ var autocompleteLogins = function (logins, fieldId) {
         minLength: 1
     });
 };
+
+$(function () {
+    var infoBloc = document.querySelector(".info");
+    var submitData = document.querySelector(".submit").innerHTML;
+    var infoData = infoBloc.innerHTML;
+    setGuessBtn()
+    function setGuessBtn() {
+        document.querySelector("#guess-it").addEventListener("click", (e) => {
+            e.preventDefault()
+            infoBloc.innerHTML = submitData;
+            setInfoBtn();
+        });
+    }
+
+    function setInfoBtn() {
+        document.querySelector("#see-info").addEventListener("click", (e) => {
+            e.preventDefault()
+            infoBloc.innerHTML = infoData;
+            setGuessBtn();
+        });
+    }
+});
