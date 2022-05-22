@@ -273,6 +273,11 @@ namespace KikoleSite.Controllers
             AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7);
             AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8);
             AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9);
+            AddClubIfValid(clubs, model.Club10, clubsReferential, ref iPos, model.IsLoan10);
+            AddClubIfValid(clubs, model.Club11, clubsReferential, ref iPos, model.IsLoan11);
+            AddClubIfValid(clubs, model.Club12, clubsReferential, ref iPos, model.IsLoan12);
+            AddClubIfValid(clubs, model.Club13, clubsReferential, ref iPos, model.IsLoan13);
+            AddClubIfValid(clubs, model.Club14, clubsReferential, ref iPos, model.IsLoan14);
 
             if (clubs.Count == 0)
             {
