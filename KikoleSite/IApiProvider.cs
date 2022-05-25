@@ -33,7 +33,7 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
-        Task<(int today, int total)> GetUsersCountWithProposalAsync(DateTime date);
+        Task<(IReadOnlyCollection<ulong> today, IReadOnlyCollection<ulong> total)> GetUsersWithProposalAsync(DateTime date);
 
         Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSorts leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp);
 

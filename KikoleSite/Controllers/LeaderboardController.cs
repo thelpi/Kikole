@@ -111,17 +111,20 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var (countToday, countTotal) = await _apiProvider
-                .GetUsersCountWithProposalAsync(day)
+                .GetUsersWithProposalAsync(day)
                 .ConfigureAwait(false);
 
             model.Leaders = leaders;
             model.TodayLeaders = dayleaders;
 
-            model.TodayAttemps = countToday;
-            model.TodaySuccessRate = countToday == 0 ? 0 : (int)Math.Round(dayleaders.Count(dl => dl.BestTime.TotalMinutes <= 1440) / (decimal)countToday * 100);
+            var leadersCountWithoutCreator = dayleaders.Count(dl => countTotal.Contains(dl.UserId));
+            var todayLeadersCountWithoutCreator = dayleaders.Count(dl => countToday.Contains(dl.UserId) && dl.BestTime.TotalMinutes <= 1440);
 
-            model.TotalAttemps = countTotal;
-            model.TotalSuccessRate = countTotal == 0 ? 0 : (int)Math.Round(dayleaders.Count / (decimal)countTotal * 100);
+            model.TodayAttemps = countToday.Count;
+            model.TodaySuccessRate = countToday.Count == 0 ? 0 : (int)Math.Round(todayLeadersCountWithoutCreator / (decimal)countToday.Count * 100);
+
+            model.TotalAttemps = countTotal.Count;
+            model.TotalSuccessRate = countTotal.Count == 0 ? 0 : (int)Math.Round(leadersCountWithoutCreator / (decimal)countTotal.Count * 100);
 
             // TODO: meilleure solution à venir
             if (DateTime.Now.Day <= 3)
