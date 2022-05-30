@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace KikoleSite
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
-        private readonly Dictionary<ulong, DateTime> _usersCheckCache;
+        private readonly ConcurrentDictionary<ulong, DateTime> _usersCheckCache;
         private readonly IUserRepository _userRepository;
         private readonly ICrypter _crypter;
         private readonly IStringLocalizer<Translations> _resources;
@@ -64,7 +65,7 @@ namespace KikoleSite
             _challengeService = challengeService;
             _leaderService = leaderService;
             _discussionRepository = discussionRepository;
-            _usersCheckCache = new Dictionary<ulong, DateTime>();
+            _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
         }
 
         #region user accounts
@@ -847,19 +848,13 @@ namespace KikoleSite
             if (!_crypter.Encrypt($"{userId}_{userTypeId}").Equals(tokenParts[2]))
                 return 0;
 
-            var exists = _usersCheckCache.ContainsKey(userId);
-            if (!exists || (_clock.Now - _usersCheckCache[userId]).TotalMinutes > DelayBetweenUserChecks)
+            if (!_usersCheckCache.ContainsKey(userId) || (_clock.Now - _usersCheckCache[userId]).TotalMinutes > DelayBetweenUserChecks)
             {
                 var user = await _userRepository.GetUserByIdAsync(userId).ConfigureAwait(false);
                 if (user == null)
                     return 0;
                 else
-                {
-                    if (!exists)
-                        _usersCheckCache.Add(userId, _clock.Now);
-                    else
-                        _usersCheckCache[userId] = _clock.Now;
-                }
+                    _usersCheckCache.AddOrUpdate(userId, _clock.Now, (k, v) => _clock.Now);
             }
 
             return userId;
