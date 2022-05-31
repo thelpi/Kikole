@@ -19,7 +19,7 @@ namespace KikoleSite
         // minutes
         private const int DelayBetweenUserChecks = 10;
 
-        private static Dictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
+        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
@@ -459,11 +459,13 @@ namespace KikoleSite
 
                 var apiCountries = countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList();
 
-                _countriesCache ??= new Dictionary<string, IReadOnlyDictionary<ulong, string>>();
-                _countriesCache.Add(
+                var dict = apiCountries.ToDictionary(ac => (ulong)ac.Code, ac => ac.Name);
+
+                _countriesCache ??= new ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>();
+                _countriesCache.AddOrUpdate(
                     CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                    apiCountries
-                        .ToDictionary(ac => (ulong)ac.Code, ac => ac.Name));
+                    dict,
+                    (k, v) => dict);
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
