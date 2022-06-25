@@ -43,10 +43,10 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>-->
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
-                <a asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
-                <a asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
-                <a href="/Home/SwitchLang?redirect=@redirectUrl" class="navbar-brand">
+                <a style="padding: 15px 13px" asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
+                <a style="padding: 15px 13px" asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
+                <a style="padding: 15px 13px" asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
+                <a style="padding: 15px 12px" href="/Home/SwitchLang?redirect=@redirectUrl" class="navbar-brand">
                     <img style="width: 25px; height: 25px" src="@flagPath" />
                 </a>
             </div>
@@ -60,9 +60,9 @@
         <hr />
         <footer>
             <div>
-                <a href="/Challenge">@localizer["ChallengeSomeone"]</a>  | 
-                <a href="/Admin">@localizer["SubmitKikole"]</a>  | 
-                <a href="/Home/Contact">@localizer["ContactAdmin"]</a>  | 
+                <a href="/Admin">@localizer["SubmitKikole"]</a>  |
+                <a href="/Home/Contact">@localizer["ContactAdmin"]</a>  |
+                <a href="https://monpetittricycle.fr" target="_blank">@localizer["FriendlyWebsite"]</a>  |
                 &copy; @System.DateTime.Now.ToString("yyyy") - @localizer["SiteName"]
             </div>
         </footer>
