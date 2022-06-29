@@ -127,12 +127,12 @@ namespace KikoleSite.Controllers
             model.TotalSuccessRate = countTotal.Count == 0 ? 0 : (int)Math.Round(leadersCountWithoutCreator / (decimal)countTotal.Count * 100);
 
             // TODO: meilleure solution à venir
-            if (DateTime.Now.Day <= 3)
+            /*if (DateTime.Now.Day <= 3)
             {
                 model.Awards = await _apiProvider
                     .GetMonthlyAwardsAsync(DateTime.Now.Year, DateTime.Now.Month - 1)
                     .ConfigureAwait(false);
-            }
+            }*/
 
             model.BoardName = _localizer["CustomLeaderboard"];
             var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();
