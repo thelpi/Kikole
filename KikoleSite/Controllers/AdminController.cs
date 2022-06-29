@@ -164,7 +164,7 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool withOkMessage)
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
@@ -178,6 +178,8 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var model = new PlayerCreationModel();
+            if (withOkMessage)
+                model.InfoMessage = _localizer["PlayerOk"];
             SetPositionsOnModel(model, chart);
             model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
             return View(model);
@@ -323,15 +325,7 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            model = new PlayerCreationModel
-            {
-                InfoMessage = _localizer["PlayerOk"]
-            };
-            SetPositionsOnModel(model, chart);
-            model.DisplayPlayerSubmissionLink = await _apiProvider
-                .IsAdminUserAsync(token)
-                .ConfigureAwait(false);
-            return View(model);
+            return RedirectToAction("Index", "Admin", new { withOkMessage = true });
         }
 
         [HttpGet]
