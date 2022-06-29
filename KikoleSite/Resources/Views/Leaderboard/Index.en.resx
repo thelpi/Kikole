@@ -154,7 +154,7 @@
     <value>Hardest kikoles of the month</value>
   </data>
   <data name="KFoundHeader" xml:space="preserve">
-    <value>Kikoles found</value>
+    <value>Kikoles found (created)</value>
   </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>

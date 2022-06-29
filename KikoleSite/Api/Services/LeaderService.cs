@@ -399,9 +399,12 @@ namespace KikoleSite.Api.Services
 
             return fullLeadersList
                 .GroupBy(leaderDto => leaderDto.UserId)
-                .Select(leaderDto => new Leader(leaderDto, users)
-                    .WithPointsFromSubmittedPlayers(
-                        GetDatesWithPlayerCreation(players, leaderDto), fullLeadersList))
+                .Select(leaderDto =>
+                {
+                    var playersCreated = GetDatesWithPlayerCreation(players, leaderDto);
+                    return new Leader(leaderDto, users, playersCreated.Count())
+                        .WithPointsFromSubmittedPlayers(playersCreated, fullLeadersList);
+                })
                 .ToList();
         }
 

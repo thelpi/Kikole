@@ -154,7 +154,7 @@
     <value>Kikolés les plus difficiles</value>
   </data>
   <data name="KFoundHeader" xml:space="preserve">
-    <value>Kikolés trouvés</value>
+    <value>Kikolés trouvés (créés)</value>
   </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>

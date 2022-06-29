@@ -15,6 +15,8 @@ namespace KikoleSite.Api.Models
 
         public int SuccessCount { get; }
 
+        public int CreatedCount { get; }
+
         public int TotalPoints { get; private set; }
 
         public int Position { get; internal set; }
@@ -63,11 +65,13 @@ namespace KikoleSite.Api.Models
         }
 
         internal Leader(IGrouping<ulong, LeaderDto> userDtos,
-            IReadOnlyCollection<UserDto> users)
+            IReadOnlyCollection<UserDto> users,
+            int createdCount)
         {
             var user = users.Single(p => p.Id == userDtos.Key);
             Login = user.Login;
             SuccessCount = userDtos.Count();
+            CreatedCount = createdCount;
             TotalPoints = userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);
             UserId = user.Id;
