@@ -62,7 +62,7 @@
                     @if (!Model.IncludePvp)
                     {
                         <td>@leader.BestTime.ToNaString()</td>
-                        <td>@leader.SuccessCount (@leader.CreatedCount)</td>
+                        <td>@leader.SuccessCount / @leader.CreatedCount</td>
                     }
                 </tr>
                 i++;

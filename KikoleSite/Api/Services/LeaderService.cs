@@ -379,6 +379,8 @@ namespace KikoleSite.Api.Services
             var creatorsNotLeader = players
                 .Where(p => !leaderDtos.Any(l => l.UserId == p.CreationUserId));
 
+            var creatorIds = creatorsNotLeader.Select(c => c.CreationUserId);
+
             var fullLeadersList = new List<LeaderDto>(leaderDtos);
             foreach (var creator in creatorsNotLeader)
             {
@@ -402,7 +404,7 @@ namespace KikoleSite.Api.Services
                 .Select(leaderDto =>
                 {
                     var playersCreated = GetDatesWithPlayerCreation(players, leaderDto);
-                    return new Leader(leaderDto, users, playersCreated.Count())
+                    return new Leader(leaderDto, users, playersCreated.Count(), creatorIds.Contains(leaderDto.Key))
                         .WithPointsFromSubmittedPlayers(playersCreated, fullLeadersList);
                 })
                 .ToList();

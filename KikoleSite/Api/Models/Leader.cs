@@ -66,11 +66,12 @@ namespace KikoleSite.Api.Models
 
         internal Leader(IGrouping<ulong, LeaderDto> userDtos,
             IReadOnlyCollection<UserDto> users,
-            int createdCount)
+            int createdCount,
+            bool creatorNotLeader)
         {
             var user = users.Single(p => p.Id == userDtos.Key);
             Login = user.Login;
-            SuccessCount = userDtos.Count();
+            SuccessCount = userDtos.Count() - (creatorNotLeader ? createdCount : 0);
             CreatedCount = createdCount;
             TotalPoints = userDtos.Sum(dto => dto.Points);
             BestTime = new TimeSpan(0, userDtos.Min(dto => dto.Time), 0);

@@ -154,7 +154,7 @@
     <value>Kikolés les plus difficiles</value>
   </data>
   <data name="KFoundHeader" xml:space="preserve">
-    <value>Kikolés trouvés (créés)</value>
+    <value>Kikolés trouvés / créés</value>
   </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>
@@ -181,6 +181,6 @@
     <value>Utilisateur</value>
   </data>
   <data name="UsernameHeaderInGoing" xml:space="preserve">
-    <value>Utilisateurs n'ayant pas encore trouvé</value>
+    <value>En recherche...</value>
   </data>
 </root>
