@@ -105,4 +105,27 @@
     {
         <label>@string.Format(localizer["ActiveUsersToday"].Value, Model.TodayAttemps, Model.TodaySuccessRate)</label>
     }
+    @if (Model.Searchers?.Count > 0)
+    {
+        <table style="margin-top: 5px">
+            <thead>
+                <tr>
+                    <th style="color: crimson; width: 150px">@localizer["UsernameHeaderInGoing"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    i = 0;
+                }
+                @foreach (var searcher in Model.Searchers)
+                {
+                    var background = (i % 2 == 0 ? "white" : "azure");
+                    <tr style="background-color: @background">
+                        <td style="color: crimson"><a href="/Leaderboard?userId=@searcher.Item1">@searcher.Item2</a></td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    }
 </form>

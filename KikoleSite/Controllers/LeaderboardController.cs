@@ -114,11 +114,13 @@ namespace KikoleSite.Controllers
                 .GetUsersWithProposalAsync(day)
                 .ConfigureAwait(false);
 
+            model.Searchers = countTotal.Where(xd => !dayleaders.Any(ldd => ldd.UserId == xd.Item1)).ToList();
+
             model.Leaders = leaders;
             model.TodayLeaders = dayleaders;
 
-            var leadersCountWithoutCreator = dayleaders.Count(dl => countTotal.Contains(dl.UserId));
-            var todayLeadersCountWithoutCreator = dayleaders.Count(dl => countToday.Contains(dl.UserId) && dl.BestTime.TotalMinutes <= 1440);
+            var leadersCountWithoutCreator = dayleaders.Count(dl => countTotal.Any(xd => xd.Item1 == dl.UserId));
+            var todayLeadersCountWithoutCreator = dayleaders.Count(dl => countToday.Any(xd => xd.Item1 == dl.UserId) && dl.BestTime.TotalMinutes <= 1440);
 
             model.TodayAttemps = countToday.Count;
             model.TodaySuccessRate = countToday.Count == 0 ? 0 : (int)Math.Round(todayLeadersCountWithoutCreator / (decimal)countToday.Count * 100);

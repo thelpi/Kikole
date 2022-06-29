@@ -26,6 +26,7 @@ namespace KikoleSite.Models
         public IReadOnlyCollection<Leader> Leaders { get; set; }
 
         public IReadOnlyCollection<Leader> TodayLeaders { get; set; }
+        public IReadOnlyCollection<(ulong, string)> Searchers { get; set; }
 
         public int TodayAttemps { get; set; }
         public int TotalAttemps { get; set; }

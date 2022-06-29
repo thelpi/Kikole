@@ -180,4 +180,7 @@
   <data name="UsernameHeader" xml:space="preserve">
     <value>Username</value>
   </data>
+  <data name="UsernameHeaderInGoing" xml:space="preserve">
+    <value>Users who have not found yet</value>
+  </data>
 </root>
