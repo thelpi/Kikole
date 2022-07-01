@@ -136,7 +136,7 @@
     <value>Meilleurs joueurs du mois par temps</value>
   </data>
   <data name="BestTimeHeader" xml:space="preserve">
-    <value>Meilleur temps</value>
+    <value>Temps min.</value>
   </data>
   <data name="CustomizeLeaderboard" xml:space="preserve">
     <value>Personnalisation du classement</value>

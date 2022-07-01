@@ -26,10 +26,6 @@
         @Html.EditorFor(m => m.MaximalDate)
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["PvpRanking"]</label>
-        @Html.CheckBoxFor(m => m.IncludePvp)
-    </div>
-    <div style="margin-top: 5px">
         <input style="margin-left: 155px" type="submit" value="@localizer["GetRanking"]" />
     </div>
 
@@ -38,13 +34,13 @@
     <table style="margin-top: 5px">
         <thead>
             <tr>
-                <th style="width: 50px">@localizer["PosShortHeader"]</th>
-                <th style="color: crimson; width: 150px">@localizer["UsernameHeader"]</th>
-                <th style="width: 100px">@localizer["PointsHeader"]</th>
-                <th style="width: 100px">@localizer["BestTimeHeader"]</th>
-                <th style="width: 50px">@localizer["FoundHeader"]</th>
-                <th style="width: 50px">@localizer["AttemptedHeader"]</th>
-                <th style="width: 50px">@localizer["ProposedHeader"]</th>
+                <th style="text-align: center; width: 50px">@localizer["PosShortHeader"]</th>
+                <th style="text-align: center; color: crimson; width: 150px">@localizer["UsernameHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["PointsHeader"]</th>
+                <th style="text-align: center; width: 100px">@localizer["BestTimeHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["FoundHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["AttemptedHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["ProposedHeader"]</th>
             </tr>
         </thead>
         <tbody>
@@ -55,13 +51,13 @@
             {
                 var background = i % 2 == 0 ? "white" : "azure";
                 <tr style="background-color: @background">
-                    <td>@leaderItem.Rank</td>
+                    <td style="text-align: center">@leaderItem.Rank</td>
                     <td style="color: crimson"><a href="/Leaderboard?userId=@leaderItem.UserId">@leaderItem.UserName</a></td>
-                    <td>@leaderItem.Points</td>
-                    <td>@leaderItem.BestTime.ToNaString()</td>
-                    <td>@leaderItem.KikolesFound</td>
-                    <td>@leaderItem.KikolesAttempted</td>
-                    <td>@leaderItem.KikolesProposed</td>
+                    <td style="text-align: right">@leaderItem.Points</td>
+                    <td style="text-align: right">@leaderItem.BestTime.ToNaString()</td>
+                    <td style="text-align: right">@leaderItem.KikolesFound</td>
+                    <td style="text-align: right">@leaderItem.KikolesAttempted</td>
+                    <td style="text-align: right">@leaderItem.KikolesProposed</td>
                 </tr>
                 i++;
             }
