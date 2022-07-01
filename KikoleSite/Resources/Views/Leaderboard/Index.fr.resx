@@ -123,6 +123,9 @@
   <data name="ActiveUsersToday" xml:space="preserve">
     <value>Dont le jour même : {0} ({1} % de réussite)</value>
   </data>
+  <data name="AttemptedHeader" xml:space="preserve">
+    <value>Tentés</value>
+  </data>
   <data name="BestPlayersMonthCount" xml:space="preserve">
     <value>Meilleurs joueurs du mois par nombre de kikolés</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="EasyKikoleMonth" xml:space="preserve">
     <value>Kikolés les plus faciles</value>
   </data>
+  <data name="FoundHeader" xml:space="preserve">
+    <value>Trouvés</value>
+  </data>
   <data name="FromDate" xml:space="preserve">
     <value>Depuis :</value>
   </data>
@@ -164,6 +170,9 @@
   </data>
   <data name="PosShortHeader" xml:space="preserve">
     <value>Pos.</value>
+  </data>
+  <data name="ProposedHeader" xml:space="preserve">
+    <value>Proposés</value>
   </data>
   <data name="PvpRanking" xml:space="preserve">
     <value>Classement PVP :</value>

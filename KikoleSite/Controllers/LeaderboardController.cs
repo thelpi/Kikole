@@ -106,8 +106,8 @@ namespace KikoleSite.Controllers
                 .GetDayLeadersAsync(day, model.DaySortType)
                 .ConfigureAwait(false);
 
-            var leaders = await _apiProvider
-                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate, model.IncludePvp)
+            model.Leaderboard = await _apiProvider
+                .GetLeaderboardAsync(model.SortType, model.MinimalDate, model.MaximalDate)
                 .ConfigureAwait(false);
 
             var (countToday, countTotal) = await _apiProvider
@@ -116,7 +116,6 @@ namespace KikoleSite.Controllers
 
             model.Searchers = countTotal.Where(xd => !dayleaders.Any(ldd => ldd.UserId == xd.Item1)).ToList();
 
-            model.Leaders = leaders;
             model.TodayLeaders = dayleaders;
 
             var leadersCountWithoutCreator = dayleaders.Count(dl => countTotal.Any(xd => xd.Item1 == dl.UserId));

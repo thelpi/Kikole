@@ -95,6 +95,26 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<int> GetDaysCountWithProposalAsync(DateTime startDate, DateTime endDate, ulong userId, bool exact)
+        {
+            return await ExecuteScalarAsync(
+                    "SELECT COUNT(DISTINCT proposal_date) " +
+                    "FROM proposals " +
+                    "WHERE user_id = @userId " +
+                    "AND proposal_date >= @startDate " +
+                    "AND proposal_date <= @endDate " +
+                    "AND (proposal_date = DATE(creation_date) OR 1 = @loose)",
+                    new
+                    {
+                        userId,
+                        startDate = startDate.Date,
+                        endDate = endDate.Date,
+                        loose = exact ? 0 : 1
+                    },
+                    0)
+                .ConfigureAwait(false);
+        }
+
         private async Task<IReadOnlyCollection<ProposalDto>> GetProposalsInternalAsync(
             string where, DateTime proposalDate, ulong userId)
         {

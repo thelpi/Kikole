@@ -35,7 +35,7 @@ namespace KikoleSite
 
         Task<(IReadOnlyCollection<(ulong, string)> today, IReadOnlyCollection<(ulong, string)> total)> GetUsersWithProposalAsync(DateTime date);
 
-        Task<IReadOnlyCollection<Leader>> GetLeadersAsync(LeaderSorts leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp);
+        Task<Leaderboard> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate);
 
         Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort);
 

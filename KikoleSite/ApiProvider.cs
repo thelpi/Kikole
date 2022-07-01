@@ -255,30 +255,18 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
-        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
-            LeaderSorts leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp)
+        public async Task<Leaderboard> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
         {
-            if (!includePvp && !Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                return null;
-
-            if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
-                return null;
-
-            IReadOnlyCollection<Leader> leaders;
-            if (includePvp)
+            if (minimalDate.Date > maximalDate.Date)
             {
-                leaders = await _leaderService
-                    .GetPvpLeadersAsync(minimalDate, maximalDate)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                leaders = await _leaderService
-                    .GetPveLeadersAsync(minimalDate, maximalDate, leaderSort)
-                    .ConfigureAwait(false);
+                var tmp = maximalDate;
+                maximalDate = minimalDate;
+                minimalDate = tmp;
             }
 
-            return leaders;
+            return await _leaderService
+                .GetLeaderboardAsync(minimalDate, maximalDate, leaderSort)
+                .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort)

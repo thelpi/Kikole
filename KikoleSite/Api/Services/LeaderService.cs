@@ -86,11 +86,83 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<Leader>> GetPveLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, LeaderSorts leaderSort)
+        public async Task<Leaderboard> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort)
         {
-            return await GetLeadersAsync(
-                    minimalDate, maximalDate, leaderSort, false)
+            var onTimeOnly = leaderSort != LeaderSorts.SuccessCountOverall
+                && leaderSort != LeaderSorts.TotalPointsOverall;
+
+            var leaders = await _leaderRepository
+                .GetLeadersAsync(startDate, endDate, onTimeOnly)
                 .ConfigureAwait(false);
+
+            // we need players to get creators
+            var players = await _playerRepository
+                .GetPlayersOfTheDayAsync(startDate, endDate)
+                .ConfigureAwait(false);
+
+            // mix of leaders and creators (some might not play during the period)
+            var allUsersId = players
+                .Select(_ => _.CreationUserId)
+                .Concat(leaders.Select(_ => _.UserId))
+                .Distinct();
+
+            var users = new List<UserDto>();
+            foreach (var userId in allUsersId)
+            {
+                var user = await _userRepository
+                    .GetUserByIdAsync(userId)
+                    .ConfigureAwait(false);
+
+                if (user.UserTypeId != (ulong)UserTypes.Administrator)
+                    users.Add(user);
+            }
+
+            var items = new List<LeaderboardItem>();
+            foreach (var user in users)
+            {
+                var userLeaders = leaders.Where(_ => _.UserId == user.Id);
+                var userPlayers = players.Where(_ => _.CreationUserId == user.Id);
+
+                var points = userLeaders.Sum(_ => _.Points);
+                foreach (var userPlayer in userPlayers)
+                    points += Leader.GetSubmittedPlayerPoints(leaders, userPlayer.ProposalDate.Value);
+
+                items.Add(new LeaderboardItem
+                {
+                    BestTime = userLeaders.Select(_ => new TimeSpan(0, _.Time, 0)).Min(),
+                    KikolesAttempted = await _proposalRepository
+                        .GetDaysCountWithProposalAsync(startDate, endDate, user.Id, onTimeOnly)
+                        .ConfigureAwait(false),
+                    KikolesFound = userLeaders.Count(),
+                    KikolesProposed = userPlayers.Count(),
+                    Points = points,
+                    UserId = user.Id,
+                    UserName = user.Login
+                });
+            }
+
+            switch (leaderSort)
+            {
+                case LeaderSorts.BestTime:
+                    items = items.SetPositions(_ => _.BestTime, false, (_, r) => _.Rank = r);
+                    break;
+                case LeaderSorts.SuccessCountOverall:
+                case LeaderSorts.SuccessCount:
+                    items = items.SetPositions(_ => _.KikolesFound, true, (_, r) => _.Rank = r);
+                    break;
+                case LeaderSorts.TotalPointsOverall:
+                case LeaderSorts.TotalPoints:
+                    items = items.SetPositions(_ => _.Points, true, (_, r) => _.Rank = r);
+                    break;
+            }
+
+            return new Leaderboard
+            {
+                EndDate = endDate,
+                StartDate = startDate,
+                Items = items,
+                Sort = leaderSort
+            };
         }
 
         /// <inheritdoc />

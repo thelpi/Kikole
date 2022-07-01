@@ -28,13 +28,13 @@ namespace KikoleSite.Api.Interfaces.Services
         Task<IReadOnlyCollection<Leader>> GetPvpLeadersAsync(DateTime? minimalDate, DateTime? maximalDate);
 
         /// <summary>
-        /// Gets leaders for a given period; challenge points excluded.
+        /// Gets leaderboard for a given period.
         /// </summary>
-        /// <param name="minimalDate">Starting date.</param>
-        /// <param name="maximalDate">Ending date.</param>
+        /// <param name="startDate">Starting date.</param>
+        /// <param name="endDate">Ending date.</param>
         /// <param name="leaderSort">Sort type.</param>
-        /// <returns>Sorted leaders.</returns>
-        Task<IReadOnlyCollection<Leader>> GetPveLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, LeaderSorts leaderSort);
+        /// <returns>Leaderboard.</returns>
+        Task<Leaderboard> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort);
 
         /// <summary>
         /// Gets monthly awards

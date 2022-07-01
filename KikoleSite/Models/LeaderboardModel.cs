@@ -23,8 +23,6 @@ namespace KikoleSite.Models
 
         public LeaderSorts SortType { get; set; }
 
-        public IReadOnlyCollection<Leader> Leaders { get; set; }
-
         public IReadOnlyCollection<Leader> TodayLeaders { get; set; }
         public IReadOnlyCollection<(ulong, string)> Searchers { get; set; }
 
@@ -50,5 +48,7 @@ namespace KikoleSite.Models
                 .ToList();
 
         public Awards Awards { get; set; }
+
+        public Leaderboard Leaderboard { get; set; }
     }
 }

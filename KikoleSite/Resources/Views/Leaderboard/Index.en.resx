@@ -123,6 +123,9 @@
   <data name="ActiveUsersToday" xml:space="preserve">
     <value>The first day : {0} ({1}% of success)</value>
   </data>
+  <data name="AttemptedHeader" xml:space="preserve">
+    <value>Attempted</value>
+  </data>
   <data name="BestPlayersMonthCount" xml:space="preserve">
     <value>Best players of the month by kikoles found</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="EasyKikoleMonth" xml:space="preserve">
     <value>Easiest kikoles of the month</value>
   </data>
+  <data name="FoundHeader" xml:space="preserve">
+    <value>Found</value>
+  </data>
   <data name="FromDate" xml:space="preserve">
     <value>From date:</value>
   </data>
@@ -164,6 +170,9 @@
   </data>
   <data name="PosShortHeader" xml:space="preserve">
     <value>Pos.</value>
+  </data>
+  <data name="ProposedHeader" xml:space="preserve">
+    <value>Proposed</value>
   </data>
   <data name="PvpRanking" xml:space="preserve">
     <value>PVP ranking:</value>
