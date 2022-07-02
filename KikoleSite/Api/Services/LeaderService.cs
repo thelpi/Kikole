@@ -129,7 +129,9 @@ namespace KikoleSite.Api.Services
 
                 items.Add(new LeaderboardItem
                 {
-                    BestTime = userLeaders.Select(_ => new TimeSpan(0, _.Time, 0)).Min(),
+                    BestTime = userLeaders.Any()
+                        ? userLeaders.Select(_ => new TimeSpan(0, _.Time, 0)).Min()
+                        : new TimeSpan(23, 59, 59),
                     KikolesAttempted = await _proposalRepository
                         .GetDaysCountWithProposalAsync(startDate, endDate, user.Id, onTimeOnly)
                         .ConfigureAwait(false),
