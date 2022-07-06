@@ -83,7 +83,7 @@ namespace KikoleSite.Api.Services
 
                 var points = userLeaders.Sum(_ => _.Points);
                 foreach (var userPlayer in userPlayers)
-                    points += Leader.GetSubmittedPlayerPoints(leaders, userPlayer.ProposalDate.Value);
+                    points += GetSubmittedPlayerPoints(leaders, userPlayer.ProposalDate.Value);
 
                 items.Add(new LeaderboardItem
                 {
@@ -163,7 +163,7 @@ namespace KikoleSite.Api.Services
                     && userId == pDay.CreationUserId;
 
                 var singleStat = isCreator
-                    ? new DailyUserStat(currentDate, pDay.Name, leaders)
+                    ? new DailyUserStat(currentDate, pDay.Name, GetSubmittedPlayerPoints(leaders, currentDate))
                     : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Any(_ => _.IsCurrentDay), proposals.Count > 0, leaders, meLeader);
 
                 stats.Add(singleStat);
@@ -268,7 +268,7 @@ namespace KikoleSite.Api.Services
                 {
                     Date = day,
                     IsCreator = true,
-                    Points = Leader.GetSubmittedPlayerPoints(leaders, day),
+                    Points = GetSubmittedPlayerPoints(leaders, day),
                     Time = new TimeSpan(23, 59, 59),
                     UserId = player.CreationUserId,
                     UserName = users[player.CreationUserId].Login
@@ -320,6 +320,20 @@ namespace KikoleSite.Api.Services
             }
 
             return users;
+        }
+
+        private int GetSubmittedPlayerPoints(IEnumerable<LeaderDto> datesLeaders, DateTime date)
+        {
+            // ONLY DAY ONE COST POINTS
+            var leadersCosting = ProposalChart.Default.SubmissionBonusPoints
+                - datesLeaders
+                    .Where(d => d.ProposalDate.Date == date
+                        && d.Points >= ProposalChart.Default.SubmissionThresholdlosePoints
+                        && d.IsCurrentDay)
+                    .Sum(d => ProposalChart.Default.SubmissionLosePointsByLeader);
+
+            return ProposalChart.Default.SubmissionBasePoints
+                + Math.Max(leadersCosting, 0);
         }
     }
 }
