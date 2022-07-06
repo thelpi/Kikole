@@ -1,16 +1,6 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model LeaderboardModel
 
-@if (Model.Awards != null)
-{
-    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthPoints"].Value, Model.Awards.PointsAwards.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthTime"].Value, Model.Awards.TimeAwards.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["BestPlayersMonthCount"].Value, Model.Awards.CountAwards.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["HardKikoleMonth"].Value, Model.Awards.HardestKikoles.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SingleAward", (localizer["EasyKikoleMonth"].Value, Model.Awards.EasiestKikoles.Cast<KikoleSite.Api.Models.BaseAward>())).ConfigureAwait(false);
-    <br />
-}
-
 <form action="/Leaderboard" method="post">
     <h3>@localizer["CustomizeLeaderboard"]</h3>
     <div style="margin-top: 5px">
@@ -47,19 +37,28 @@
             @{
                 var i = 0;
             }
-            @foreach (var leaderItem in Model.Leaderboard.Items)
+            @if (Model.Leaderboard.Items.Count > 0)
             {
-                var background = i % 2 == 0 ? "white" : "azure";
-                <tr style="background-color: @background">
-                    <td style="text-align: center">@leaderItem.Rank</td>
-                    <td style="color: crimson"><a href="/Leaderboard?userId=@leaderItem.UserId">@leaderItem.UserName</a></td>
-                    <td style="text-align: right">@leaderItem.Points</td>
-                    <td style="text-align: right">@leaderItem.BestTime.ToNaString()</td>
-                    <td style="text-align: right">@leaderItem.KikolesFound</td>
-                    <td style="text-align: right">@leaderItem.KikolesAttempted</td>
-                    <td style="text-align: right">@leaderItem.KikolesProposed</td>
+                foreach (var leaderItem in Model.Leaderboard.Items)
+                {
+                    var background = i % 2 == 0 ? "white" : "azure";
+                    <tr style="background-color: @background">
+                        <td style="text-align: center">@leaderItem.Rank</td>
+                        <td style="color: crimson"><a href="/Leaderboard?userId=@leaderItem.UserId">@leaderItem.UserName</a></td>
+                        <td style="text-align: right">@leaderItem.Points</td>
+                        <td style="text-align: right">@leaderItem.BestTime.ToNaString()</td>
+                        <td style="text-align: right">@leaderItem.KikolesFound</td>
+                        <td style="text-align: right">@leaderItem.KikolesAttempted</td>
+                        <td style="text-align: right">@leaderItem.KikolesProposed</td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr style="background-color: white">
+                    <td colspan="7">@localizer["NoUserInTable"]</td>
                 </tr>
-                i++;
             }
         </tbody>
     </table>
@@ -78,48 +77,59 @@
             </tr>
         </thead>
         <tbody>
-            @{
-                i = 0;
-            }
-            @foreach (var leader in Model.TodayLeaders)
+            @if (Model.Dayboard.Leaders.Count > 0)
             {
-                var background = leader.SuccessCount == 0 ? "lavender" : (i % 2 == 0 ? "white" : "azure");
-                <tr style="background-color: @background">
-                    <td>@leader.Position</td>
-                    <td style="color: crimson"><a href="/Leaderboard?userId=@leader.UserId">@leader.Login</a></td>
-                    <td>@leader.BestTime.ToNaString()</td>
-                    <td>@leader.TotalPoints</td>
-                </tr>
-                i++;
-            }
-        </tbody>
-    </table>
-    <label>@string.Format(localizer["ActiveUsers"].Value, Model.TotalAttemps, Model.TotalSuccessRate)</label><br />
-    @if (Model.TotalAttemps != Model.TodayAttemps)
-    {
-        <label>@string.Format(localizer["ActiveUsersToday"].Value, Model.TodayAttemps, Model.TodaySuccessRate)</label>
-    }
-    @if (Model.Searchers?.Count > 0)
-    {
-        <table style="margin-top: 5px">
-            <thead>
-                <tr>
-                    <th style="color: crimson; width: 150px">@localizer["UsernameHeaderInGoing"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    i = 0;
-                }
-                @foreach (var searcher in Model.Searchers)
+                i = 0;
+                foreach (var leader in Model.Dayboard.Leaders)
                 {
-                    var background = (i % 2 == 0 ? "white" : "azure");
+                    var background = leader.IsCreator ? "lavender" : (i % 2 == 0 ? "white" : "azure");
                     <tr style="background-color: @background">
-                        <td style="color: crimson"><a href="/Leaderboard?userId=@searcher.Item1">@searcher.Item2</a></td>
+                        <td>@leader.Rank</td>
+                        <td style="color: crimson"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
+                        <td>@leader.Time.ToNaString()</td>
+                        <td>@leader.Points</td>
                     </tr>
                     i++;
                 }
-            </tbody>
-        </table>
+            }
+            else
+            {
+                <tr style="background-color: white">
+                    <td colspan="4">@localizer["NoUserInTable"]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <label>@string.Format(localizer["ActiveUsers"].Value, Model.Dayboard.TotalAttemps, Model.Dayboard.TotalSuccessRate)</label><br />
+    @if (Model.Dayboard.TotalAttemps != Model.Dayboard.DayAttemps)
+    {
+        <label>@string.Format(localizer["ActiveUsersToday"].Value, Model.Dayboard.DayAttemps, Model.Dayboard.DaySuccessRate)</label>
     }
+    <table style="margin-top: 5px">
+        <thead>
+            <tr>
+                <th style="color: crimson; width: 150px">@localizer["UsernameHeaderInGoing"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Dayboard.Searchers.Count > 0)
+            {
+                i = 0;
+                foreach (var searcher in Model.Dayboard.Searchers)
+                {
+                    var background = (i % 2 == 0 ? "white" : "azure");
+                    <tr style="background-color: @background">
+                        <td style="color: crimson"><a href="/Leaderboard?userId=@searcher.UserId">@searcher.UserName</a></td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr style="background-color: white">
+                    <td>@localizer["NoUserInTable"]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </form>

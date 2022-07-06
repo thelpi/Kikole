@@ -62,13 +62,7 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(LeaderboardModel model)
         {
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
-
-            await SetModelPropertiesAsync(
-                    model, chart.FirstDate)
-                .ConfigureAwait(false);
+            await SetModelPropertiesAsync(model).ConfigureAwait(false);
 
             return View(model);
         }
@@ -77,63 +71,28 @@ namespace KikoleSite.Controllers
         {
             model = model ?? new LeaderboardModel();
 
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
-
             model.MinimalDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             model.MaximalDate = DateTime.Now.Date;
             model.SortType = LeaderSorts.TotalPoints;
             model.LeaderboardDay = DateTime.Now.Date;
             model.DaySortType = DayLeaderSorts.BestTime;
 
-            await SetModelPropertiesAsync(
-                    model, chart.FirstDate)
-                .ConfigureAwait(false);
+            await SetModelPropertiesAsync(model).ConfigureAwait(false);
 
             return View(model);
         }
 
-        private async Task SetModelPropertiesAsync(
-            LeaderboardModel model,
-            DateTime firstDate)
+        private async Task SetModelPropertiesAsync(LeaderboardModel model)
         {
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
-
-            var day = model.LeaderboardDay.Date.Max(firstDate.AddDays(-1)); // inc. secret
-
-            var dayleaders = await _apiProvider
-                .GetDayLeadersAsync(day, model.DaySortType)
-                .ConfigureAwait(false);
 
             model.Leaderboard = await _apiProvider
                 .GetLeaderboardAsync(model.SortType, model.MinimalDate, model.MaximalDate)
                 .ConfigureAwait(false);
 
-            var (countToday, countTotal) = await _apiProvider
-                .GetUsersWithProposalAsync(day)
+            model.Dayboard = await _apiProvider
+                .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
                 .ConfigureAwait(false);
-
-            model.Searchers = countTotal.Where(xd => !dayleaders.Any(ldd => ldd.UserId == xd.Item1)).ToList();
-
-            model.TodayLeaders = dayleaders;
-
-            var leadersCountWithoutCreator = dayleaders.Count(dl => countTotal.Any(xd => xd.Item1 == dl.UserId));
-            var todayLeadersCountWithoutCreator = dayleaders.Count(dl => countToday.Any(xd => xd.Item1 == dl.UserId) && dl.BestTime.TotalMinutes <= 1440);
-
-            model.TodayAttemps = countToday.Count;
-            model.TodaySuccessRate = countToday.Count == 0 ? 0 : (int)Math.Round(todayLeadersCountWithoutCreator / (decimal)countToday.Count * 100);
-
-            model.TotalAttemps = countTotal.Count;
-            model.TotalSuccessRate = countTotal.Count == 0 ? 0 : (int)Math.Round(leadersCountWithoutCreator / (decimal)countTotal.Count * 100);
-
-            // TODO: meilleure solution à venir
-            /*if (DateTime.Now.Day <= 3)
-            {
-                model.Awards = await _apiProvider
-                    .GetMonthlyAwardsAsync(DateTime.Now.Year, DateTime.Now.Month - 1)
-                    .ConfigureAwait(false);
-            }*/
 
             model.BoardName = _localizer["CustomLeaderboard"];
             var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();

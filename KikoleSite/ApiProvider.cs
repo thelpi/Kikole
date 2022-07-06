@@ -257,22 +257,15 @@ namespace KikoleSite
 
         public async Task<Leaderboard> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
         {
-            if (minimalDate.Date > maximalDate.Date)
-            {
-                var tmp = maximalDate;
-                maximalDate = minimalDate;
-                minimalDate = tmp;
-            }
-
             return await _leaderService
                 .GetLeaderboardAsync(minimalDate, maximalDate, leaderSort)
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort)
+        public async Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort)
         {
             return await _leaderService
-                .GetLeadersOfTheDayAsync(day, sort)
+                .GetDayboardAsync(day, sort)
                 .ConfigureAwait(false);
         }
 
@@ -315,22 +308,6 @@ namespace KikoleSite
 
             return await _playerService
                 .GetKnownPlayerNamesAsync(userId)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<Awards> GetMonthlyAwardsAsync(int year, int month)
-        {
-            var date = new DateTime(year, month, 1);
-
-            return await _leaderService
-                .GetAwardsAsync(date.Year, date.Month)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<(IReadOnlyCollection<(ulong, string)> today, IReadOnlyCollection<(ulong, string)> total)> GetUsersWithProposalAsync(DateTime date)
-        {
-            return await _proposalService
-                .GetUsersWithProposalAsync(date)
                 .ConfigureAwait(false);
         }
 

@@ -165,6 +165,9 @@
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>
   </data>
+  <data name="NoUserInTable" xml:space="preserve">
+    <value>Nobody</value>
+  </data>
   <data name="PointsHeader" xml:space="preserve">
     <value>Points</value>
   </data>

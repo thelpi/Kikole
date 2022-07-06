@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
@@ -12,22 +11,6 @@ namespace KikoleSite.Api.Interfaces.Services
     public interface ILeaderService
     {
         /// <summary>
-        /// Gets leaders for a specified day with a particular sort.
-        /// </summary>
-        /// <param name="day">The requested day.</param>
-        /// <param name="sort">Th expected sort.</param>
-        /// <returns>Collection of sorted leaders for the day.</returns>
-        Task<IReadOnlyCollection<Leader>> GetLeadersOfTheDayAsync(DateTime day, DayLeaderSorts sort);
-
-        /// <summary>
-        /// Gets challenge leaders for a given period.
-        /// </summary>
-        /// <param name="minimalDate">Starting date.</param>
-        /// <param name="maximalDate">Ending date.</param>
-        /// <returns>Leaders sorted by challenge points.</returns>
-        Task<IReadOnlyCollection<Leader>> GetPvpLeadersAsync(DateTime? minimalDate, DateTime? maximalDate);
-
-        /// <summary>
         /// Gets leaderboard for a given period.
         /// </summary>
         /// <param name="startDate">Starting date.</param>
@@ -37,12 +20,12 @@ namespace KikoleSite.Api.Interfaces.Services
         Task<Leaderboard> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort);
 
         /// <summary>
-        /// Gets monthly awards
+        /// Gets the board for a single day.
         /// </summary>
-        /// <param name="year">Year.</param>
-        /// <param name="month">Month.</param>
-        /// <returns>Instance of <see cref="Awards"/>.</returns>
-        Task<Awards> GetAwardsAsync(int year, int month);
+        /// <param name="date">The day.</param>
+        /// <param name="sort">Sort for leaders.</param>
+        /// <returns>Day board.</returns>
+        Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort);
 
         /// <summary>
         /// Get user statistics.

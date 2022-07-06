@@ -33,11 +33,9 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
-        Task<(IReadOnlyCollection<(ulong, string)> today, IReadOnlyCollection<(ulong, string)> total)> GetUsersWithProposalAsync(DateTime date);
-
         Task<Leaderboard> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate);
 
-        Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort);
+        Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort);
 
         Task<UserStat> GetUserStatsAsync(ulong id);
 
@@ -46,8 +44,6 @@ namespace KikoleSite
         Task<IReadOnlyCollection<Badge>> GetBadgesAsync();
 
         Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken);
-
-        Task<Awards> GetMonthlyAwardsAsync(int year, int month);
 
         #endregion stats, badges and leaderboard
 

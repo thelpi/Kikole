@@ -165,6 +165,9 @@
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>
   </data>
+  <data name="NoUserInTable" xml:space="preserve">
+    <value>Aucun.e</value>
+  </data>
   <data name="PointsHeader" xml:space="preserve">
     <value>Points</value>
   </data>

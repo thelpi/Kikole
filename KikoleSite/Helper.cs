@@ -230,7 +230,6 @@ namespace KikoleSite
             {
                 DayLeaderSorts.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
                 DayLeaderSorts.TotalPoints => IsFrench() ? "Points" : "Points",
-                DayLeaderSorts.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
                 _ => throw new NotImplementedException(),
             };
         }

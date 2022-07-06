@@ -3,7 +3,6 @@
     public enum DayLeaderSorts
     {
         BestTime,
-        TotalPoints,
-        TotalPointsOverall
+        TotalPoints
     }
 }
