@@ -36,6 +36,7 @@ namespace KikoleSite
         private readonly IBadgeService _badgeService;
         private readonly IChallengeService _challengeService;
         private readonly ILeaderService _leaderService;
+        private readonly IStatisticService _statisticService;
         private readonly IDiscussionRepository _discussionRepository;
 
         public ApiProvider(IUserRepository userRepository,
@@ -50,6 +51,7 @@ namespace KikoleSite
             IBadgeService badgeService,
             IChallengeService challengeService,
             ILeaderService leaderService,
+            IStatisticService statisticService,
             IDiscussionRepository discussionRepository)
         {
             _userRepository = userRepository;
@@ -64,6 +66,7 @@ namespace KikoleSite
             _badgeService = badgeService;
             _challengeService = challengeService;
             _leaderService = leaderService;
+            _statisticService = statisticService;
             _discussionRepository = discussionRepository;
             _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
         }
@@ -308,6 +311,15 @@ namespace KikoleSite
 
             return await _playerService
                 .GetKnownPlayerNamesAsync(userId)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<PlayersDistribution> GetPlayersDistributionAsync(string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            return await _statisticService
+                .GetPlayersDistributionAsync(userId, GetLanguage(), 25)
                 .ConfigureAwait(false);
         }
 

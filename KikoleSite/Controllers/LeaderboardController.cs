@@ -67,6 +67,30 @@ namespace KikoleSite.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Stats()
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var datas = await _apiProvider
+                .GetPlayersDistributionAsync(token)
+                .ConfigureAwait(false);
+
+            var statsModel = new StatsModel
+            {
+                DistributionClubs = datas.ClubsDistribution,
+                DistributionCountries = datas.CountriesDistribution,
+                DistributionDecades = datas.DecadesDistribution,
+                DistributionPositions = datas.PositionsDistribution
+            };
+
+            return View(statsModel);
+        }
+
         private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
         {
             model = model ?? new LeaderboardModel();

@@ -45,6 +45,8 @@ namespace KikoleSite
 
         Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken);
 
+        Task<PlayersDistribution> GetPlayersDistributionAsync(string authToken);
+
         #endregion stats, badges and leaderboard
 
         #region player creation
