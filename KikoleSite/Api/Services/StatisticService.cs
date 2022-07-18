@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
 using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
@@ -13,44 +11,30 @@ namespace KikoleSite.Api.Services
     public class StatisticService : IStatisticService
     {
         private readonly IStatisticRepository _statisticRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IClock _clock;
 
-        public StatisticService(IStatisticRepository statisticRepository,
-            IUserRepository userRepository,
-            IClock clock)
+        public StatisticService(IStatisticRepository statisticRepository)
         {
             _statisticRepository = statisticRepository;
-            _userRepository = userRepository;
-            _clock = clock;
         }
 
         public async Task<PlayersDistribution> GetPlayersDistributionAsync(ulong userId, Languages language, int maxItemsCount)
         {
-            var user = await _userRepository
-                .GetUserByIdAsync(userId)
-                .ConfigureAwait(false);
-
-            var endDate = user.UserTypeId == (ulong)UserTypes.Administrator
-                ? default(DateTime?)
-                : _clock.Today;
-
             var pld = new PlayersDistribution();
 
             var countriesPld = await _statisticRepository
-                .GetPlayersDistributionByCountryAsync((ulong)language, null, endDate)
+                .GetPlayersDistributionByCountryAsync(userId, (ulong)language)
                 .ConfigureAwait(false);
 
             var decadesPld = await _statisticRepository
-                .GetPlayersDistributionByDecadeAsync(null, endDate)
+                .GetPlayersDistributionByDecadeAsync(userId)
                 .ConfigureAwait(false);
 
             var clubsPld = await _statisticRepository
-                .GetPlayersDistributionByClubAsync(null, endDate)
+                .GetPlayersDistributionByClubAsync(userId)
                 .ConfigureAwait(false);
 
             var positionsPld = await _statisticRepository
-                .GetPlayersDistributionByPositionAsync(null, endDate)
+                .GetPlayersDistributionByPositionAsync(userId)
                 .ConfigureAwait(false);
 
             pld.CountriesDistribution = countriesPld
