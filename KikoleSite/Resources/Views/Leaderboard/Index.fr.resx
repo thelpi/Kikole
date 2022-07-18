@@ -165,6 +165,9 @@
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>
   </data>
+  <data name="NewPageBuilding" xml:space="preserve">
+    <value>Page en construction</value>
+  </data>
   <data name="NoUserInTable" xml:space="preserve">
     <value>Aucun.e</value>
   </data>
@@ -182,6 +185,9 @@
   </data>
   <data name="SortType" xml:space="preserve">
     <value>Type de tri :</value>
+  </data>
+  <data name="StatisticsPageLink" xml:space="preserve">
+    <value>Statistiques</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Temps</value>

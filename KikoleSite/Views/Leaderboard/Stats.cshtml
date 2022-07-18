@@ -1,99 +1,107 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model StatsModel
 
-<h3>@localizer["DistributionDecades"]</h3>
-<table>
-    <thead>
-        <tr>
-            <th>@localizer["ItemRank"]</th>
-            <th>@localizer["ItemValue"]</th>
-            <th>@localizer["ItemCount"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var i = 1;
-            foreach (var item in Model.DistributionDecades)
-            {
-                <tr>
-                    <td>@i</td>
-                    <td>@item.Value</td>
-                    <td>@item.Count</td>
-                </tr>
-                i++;
+<button type="button" class="collapsible">@localizer["DistributionDecades"]</button>
+<div class="collapsiblecontent" style="display: none">
+    <table>
+        <thead>
+            <tr>
+                <th>@localizer["ItemRank"]</th>
+                <th>@localizer["ItemValue"]</th>
+                <th>@localizer["ItemCount"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var i = 1;
+                foreach (var item in Model.DistributionDecades)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Value</td>
+                        <td>@item.Count</td>
+                    </tr>
+                    i++;
+                }
             }
-        }
-    </tbody>
-</table>
-<h3>@localizer["DistributionClubs"]</h3>
-<table>
-    <thead>
-        <tr>
-            <th>@localizer["ItemRank"]</th>
-            <th>@localizer["ItemValue"]</th>
-            <th>@localizer["ItemCount"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            i = 1;
-            foreach (var item in Model.DistributionClubs)
-            {
-                <tr>
-                    <td>@i</td>
-                    <td>@item.Value</td>
-                    <td>@item.Count</td>
-                </tr>
-                i++;
+        </tbody>
+    </table>
+</div>
+<button type="button" class="collapsible">@localizer["DistributionClubs"]</button>
+<div class="collapsiblecontent" style="display: none">
+    <table>
+        <thead>
+            <tr>
+                <th>@localizer["ItemRank"]</th>
+                <th>@localizer["ItemValue"]</th>
+                <th>@localizer["ItemCount"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                i = 1;
+                foreach (var item in Model.DistributionClubs)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Value</td>
+                        <td>@item.Count</td>
+                    </tr>
+                    i++;
+                }
             }
-        }
-    </tbody>
-</table>
-<h3>@localizer["DistributionPositions"]</h3>
-<table>
-    <thead>
-        <tr>
-            <th>@localizer["ItemRank"]</th>
-            <th>@localizer["ItemValue"]</th>
-            <th>@localizer["ItemCount"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            i = 1;
-            foreach (var item in Model.DistributionPositions)
-            {
-                <tr>
-                    <td>@i</td>
-                    <td>@item.Value</td>
-                    <td>@item.Count</td>
-                </tr>
-                i++;
+        </tbody>
+    </table>
+</div>
+<button type="button" class="collapsible">@localizer["DistributionPositions"]</button>
+<div class="collapsiblecontent" style="display: none">
+    <table>
+        <thead>
+            <tr>
+                <th>@localizer["ItemRank"]</th>
+                <th>@localizer["ItemValue"]</th>
+                <th>@localizer["ItemCount"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                i = 1;
+                foreach (var item in Model.DistributionPositions)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Value</td>
+                        <td>@item.Count</td>
+                    </tr>
+                    i++;
+                }
             }
-        }
-    </tbody>
-</table>
-<h3>@localizer["DistributionCountries"]</h3>
-<table>
-    <thead>
-        <tr>
-            <th>@localizer["ItemRank"]</th>
-            <th>@localizer["ItemValue"]</th>
-            <th>@localizer["ItemCount"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            i = 1;
-            foreach (var item in Model.DistributionCountries)
-            {
-                <tr>
-                    <td>@i</td>
-                    <td>@item.Value</td>
-                    <td>@item.Count</td>
-                </tr>
-                i++;
+        </tbody>
+    </table>
+</div>
+<button type="button" class="collapsible">@localizer["DistributionCountries"]</button>
+<div class="collapsiblecontent" style="display: none">
+    <table>
+        <thead>
+            <tr>
+                <th>@localizer["ItemRank"]</th>
+                <th>@localizer["ItemValue"]</th>
+                <th>@localizer["ItemCount"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                i = 1;
+                foreach (var item in Model.DistributionCountries)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Value</td>
+                        <td>@item.Count</td>
+                    </tr>
+                    i++;
+                }
             }
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
