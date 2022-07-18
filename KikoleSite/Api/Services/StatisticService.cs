@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces.Repositories;
 using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
-using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Models.Enums;
 
 namespace KikoleSite.Api.Services
@@ -47,22 +46,12 @@ namespace KikoleSite.Api.Services
 
             pld.DecadesDistribution = decadesPld
                 .Take(maxItemsCount)
-                .Select(_ =>
-                    new PlayersDistributionDto<string>
-                    {
-                        Count = _.Count,
-                        Value = _.Value.ToString().PadRight(4, '0')
-                    })
+                .Select(_ => _.ToTarget(x => x.ToString().PadRight(4, '0')))
                 .ToList();
 
             pld.PositionsDistribution = positionsPld
                 .Take(maxItemsCount)
-                .Select(_ =>
-                    new PlayersDistributionDto<Positions>
-                    {
-                        Count = _.Count,
-                        Value = (Positions)_.Value 
-                    })
+                .Select(_ => _.ToTarget(x => (Positions)x))
                 .ToList();
 
             return pld;

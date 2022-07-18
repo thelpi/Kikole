@@ -1,0 +1,29 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model (string title, IReadOnlyCollection<KikoleSite.Api.Models.Dtos.PlayersDistributionDto<object>> datas)
+
+<button type="button" class="collapsible">@localizer[Model.title]</button>
+<div class="collapsiblecontent" style="display: none">
+    <table>
+        <thead>
+            <tr>
+                <th>@localizer["ItemRank"]</th>
+                <th>@localizer["ItemValue"]</th>
+                <th>@localizer["ItemCount"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var i = 1;
+                foreach (var item in Model.datas)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Value</td>
+                        <td>@item.Count</td>
+                    </tr>
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>

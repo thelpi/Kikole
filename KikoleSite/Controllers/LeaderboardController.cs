@@ -82,10 +82,10 @@ namespace KikoleSite.Controllers
 
             var statsModel = new StatsModel
             {
-                DistributionClubs = datas.ClubsDistribution,
-                DistributionCountries = datas.CountriesDistribution,
-                DistributionDecades = datas.DecadesDistribution,
-                DistributionPositions = datas.PositionsDistribution
+                DistributionClubs = datas.ClubsDistribution.Select(_ => _.ToTarget(x => (object)x)).ToList(),
+                DistributionCountries = datas.CountriesDistribution.Select(_ => _.ToTarget(x => (object)x)).ToList(),
+                DistributionDecades = datas.DecadesDistribution.Select(_ => _.ToTarget(x => (object)x)).ToList(),
+                DistributionPositions = datas.PositionsDistribution.Select(_ => _.ToTarget(x => (object)x)).ToList()
             };
 
             return View(statsModel);

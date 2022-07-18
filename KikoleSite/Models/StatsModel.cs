@@ -6,9 +6,9 @@ namespace KikoleSite.Models
 {
     public class StatsModel
     {
-        public IReadOnlyCollection<PlayersDistributionDto<string>> DistributionCountries { get; set; }
-        public IReadOnlyCollection<PlayersDistributionDto<string>> DistributionClubs { get; set; }
-        public IReadOnlyCollection<PlayersDistributionDto<string>> DistributionDecades { get; set; }
-        public IReadOnlyCollection<PlayersDistributionDto<Positions>> DistributionPositions { get; set; }
+        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionCountries { get; set; }
+        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionClubs { get; set; }
+        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionDecades { get; set; }
+        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionPositions { get; set; }
     }
 }

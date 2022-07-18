@@ -117,4 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DistributionClubs" xml:space="preserve">
+    <value>Répartition par club</value>
+  </data>
+  <data name="DistributionCountries" xml:space="preserve">
+    <value>Répartition par pays</value>
+  </data>
+  <data name="DistributionDecades" xml:space="preserve">
+    <value>Répartition par décade</value>
+  </data>
+  <data name="DistributionPositions" xml:space="preserve">
+    <value>Répartition par position</value>
+  </data>
+  <data name="ItemCount" xml:space="preserve">
+    <value>Kikolés</value>
+  </data>
+  <data name="ItemRank" xml:space="preserve">
+    <value>Rang</value>
+  </data>
+  <data name="ItemValue" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
 </root>
