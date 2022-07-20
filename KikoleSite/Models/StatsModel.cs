@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
-using KikoleSite.Api.Models.Dtos;
-using KikoleSite.Api.Models.Enums;
 
 namespace KikoleSite.Models
 {
     public class StatsModel
     {
-        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionCountries { get; set; }
-        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionClubs { get; set; }
-        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionDecades { get; set; }
-        public IReadOnlyCollection<PlayersDistributionDto<object>> DistributionPositions { get; set; }
+        public IReadOnlyCollection<(int rank, int count, string value, decimal rate)> DistributionCountries { get; set; }
+        public IReadOnlyCollection<(int rank, int count, string value, decimal rate)> DistributionClubs { get; set; }
+        public IReadOnlyCollection<(int rank, int count, string value, decimal rate)> DistributionDecades { get; set; }
+        public IReadOnlyCollection<(int rank, int count, string value, decimal rate)> DistributionPositions { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
@@ -17,45 +16,41 @@ namespace KikoleSite.Api.Repositories
             : base(configuration, clock)
         { }
 
-        public async Task<IReadOnlyCollection<PlayersDistributionDto<string>>> GetPlayersDistributionByClubAsync(ulong userId)
+        public async Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByClubAsync(ulong userId)
         {
-            return await ExecuteReaderAsync<PlayersDistributionDto<string>>(
-                    "SELECT c.name AS value, COUNT(*) AS count " +
+            return await ExecuteReaderAsync<PlayersDistributionDto<ulong>>(
+                    "SELECT l.club_id AS value, COUNT(*) AS count " +
                     "FROM players AS p " +
                     "   JOIN player_clubs AS l ON p.id = l.player_id " +
-                    "   JOIN clubs AS c ON l.club_id = c.id " +
                     "WHERE p.proposal_date IS NOT NULL " +
                     UserPlayerLinkSql +
-                    "GROUP BY c.name " +
+                    "GROUP BY l.club_id " +
                     "ORDER BY COUNT(*) DESC",
                     new { userId })
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayersDistributionDto<string>>> GetPlayersDistributionByCountryAsync(ulong userId, ulong languageId)
+        public async Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByCountryAsync(ulong userId)
         {
-            return await ExecuteReaderAsync<PlayersDistributionDto<string>>(
-                    "SELECT t.name AS value, COUNT(*) AS count " +
+            return await ExecuteReaderAsync<PlayersDistributionDto<ulong>>(
+                    "SELECT country_id AS value, COUNT(*) AS count " +
                     "FROM players AS p " +
-                    "   JOIN countries AS c ON p.country_id = c.id " +
-                    "   JOIN country_translations AS t ON c.id = t.country_id " +
-                    "WHERE t.language_id = @languageId " +
-                    "   AND p.proposal_date IS NOT NULL " +
+                    "WHERE proposal_date IS NOT NULL " +
                     UserPlayerLinkSql +
-                    "GROUP BY t.name " +
+                    "GROUP BY country_id " +
                     "ORDER BY COUNT(*) DESC",
-                    new { userId, languageId })
+                    new { userId })
                 .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<PlayersDistributionDto<int>>> GetPlayersDistributionByDecadeAsync(ulong userId)
         {
             return await ExecuteReaderAsync<PlayersDistributionDto<int>>(
-                    "SELECT SUBSTRING(year_of_birth, 1, 3) AS value, COUNT(*) AS count " +
+                    "SELECT CONCAT(SUBSTRING(year_of_birth, 1, 3), '0') AS value, COUNT(*) AS count " +
                     "FROM players AS p " +
                     "WHERE proposal_date IS NOT NULL " +
                     UserPlayerLinkSql +
-                    "GROUP BY SUBSTRING(year_of_birth, 1, 3) " +
+                    "GROUP BY CONCAT(SUBSTRING(year_of_birth, 1, 3), '0') " +
                     "ORDER BY COUNT(*) DESC",
                     new { userId })
                 .ConfigureAwait(false);

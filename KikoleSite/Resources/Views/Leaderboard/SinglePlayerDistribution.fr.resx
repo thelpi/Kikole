@@ -130,10 +130,13 @@
     <value>Répartition par position</value>
   </data>
   <data name="ItemCount" xml:space="preserve">
-    <value>Kikolés</value>
+    <value>Count</value>
   </data>
   <data name="ItemRank" xml:space="preserve">
     <value>Rang</value>
+  </data>
+  <data name="ItemRate" xml:space="preserve">
+    <value>%</value>
   </data>
   <data name="ItemValue" xml:space="preserve">
     <value>Valeur</value>

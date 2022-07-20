@@ -1,5 +1,5 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
-@model (string title, IReadOnlyCollection<KikoleSite.Api.Models.Dtos.PlayersDistributionDto<object>> datas)
+@model (string title, IReadOnlyCollection<(int rank, int count, string value, decimal rate)> datas)
 
 <button type="button" class="collapsible">@localizer[Model.title]</button>
 <div class="collapsiblecontent" style="display: none">
@@ -7,20 +7,23 @@
         <thead>
             <tr>
                 <th>@localizer["ItemRank"]</th>
-                <th>@localizer["ItemValue"]</th>
-                <th>@localizer["ItemCount"]</th>
+                <th style="padding-right: 10px; padding-left: 10px">@localizer["ItemValue"]</th>
+                <th style="padding-right: 5px">@localizer["ItemCount"]</th>
+                <th style="text-align: right">@localizer["ItemRate"]</th>
             </tr>
         </thead>
         <tbody>
             @{
-                var i = 1;
-                foreach (var item in Model.datas)
+                var i = 0;
+                foreach (var (rank, count, value, rate) in Model.datas)
                 {
-                    <tr>
-                        <td>@i</td>
-                        <td>@item.Value</td>
-                        <td>@item.Count</td>
-                    </tr>
+                    var background = i % 2 == 0 ? "white" : "azure";
+                        <tr style="background-color: @background">
+                            <td style="text-align: right">@rank</td>
+                            <td style="padding-right: 10px; padding-left: 10px">@value</td>
+                            <td style="padding-right: 5px; text-align: right">@count</td>
+                            <td style="text-align: right">@rate</td>
+                        </tr>
                     i++;
                 }
             }

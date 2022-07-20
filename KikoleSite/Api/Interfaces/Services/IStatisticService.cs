@@ -6,6 +6,6 @@ namespace KikoleSite.Api.Interfaces.Services
 {
     public interface IStatisticService
     {
-        Task<PlayersDistribution> GetPlayersDistributionAsync(ulong userId, Languages language, int maxItemsCount);
+        Task<PlayersDistribution> GetPlayersDistributionAsync(ulong userId, Languages language, int maxItemsRank);
     }
 }
