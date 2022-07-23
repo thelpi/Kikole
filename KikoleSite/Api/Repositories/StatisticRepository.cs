@@ -14,6 +14,19 @@ namespace KikoleSite.Api.Repositories
     [ExcludeFromCodeCoverage]
     public class StatisticRepository : BaseRepository, IStatisticRepository
     {
+        private static readonly string UserPlayerLinkSql =
+            "AND (" +
+            "   EXISTS (" +
+            "       SELECT 1 FROM users AS u " +
+            "       WHERE u.id = @userId " +
+            "           AND u.user_type_id = " + (ulong)UserTypes.Administrator +
+            "   ) OR EXISTS (" +
+            "       SELECT 1 FROM leaders AS ld " +
+            "       WHERE ld.proposal_date = p.proposal_date " +
+            "           AND ld.user_id = @userId " +
+            "   ) OR p.creation_user_id = @userId " +
+            ") ";
+
         public StatisticRepository(IConfiguration configuration, IClock clock)
             : base(configuration, clock)
         { }
@@ -71,30 +84,49 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync()
+        public async Task<IReadOnlyDictionary<(int y, int w), int>> GetWeeklyActiveUsersAsync(DateTime? startDate, DateTime? endDate)
         {
-            var rawDatas = await ExecuteReaderAsync<(int, int)>(
-                    "SELECT WEEK(creation_date), COUNT(DISTINCT user_id) " +
+            var rawDatas = await ExecuteReaderAsync<(int y, int w, int c)>(
+                    "SELECT YEAR(creation_date), WEEK(creation_date), COUNT(DISTINCT user_id) " +
                     "FROM proposals " +
-                    "GROUP BY WEEK(creation_date) " +
-                    "ORDER BY WEEK(creation_date)",
-                    null)
+                    "WHERE (@startDate IS NULL OR creation_date >= @startDate) " +
+                    "   AND (@endDate IS NULL OR creation_date < @endDate) " +
+                    "GROUP BY YEAR(creation_date), WEEK(creation_date) " +
+                    "ORDER BY YEAR(creation_date), WEEK(creation_date)",
+                    new { startDate, endDate })
                 .ConfigureAwait(false);
 
-            return rawDatas.ToDictionary(_ => _.Item1, _ => _.Item2);
+            return rawDatas.ToDictionary(_ => (_.y, _.w), _ => _.c);
         }
 
-        private static readonly string UserPlayerLinkSql = 
-            "AND (" +
-            "   EXISTS (" +
-            "       SELECT 1 FROM users AS u " +
-            "       WHERE u.id = @userId " +
-            "           AND u.user_type_id = " + (ulong)UserTypes.Administrator +
-            "   ) OR EXISTS (" +
-            "       SELECT 1 FROM leaders AS ld " +
-            "       WHERE ld.proposal_date = p.proposal_date " +
-            "           AND ld.user_id = @userId " +
-            "   ) OR p.creation_user_id = @userId " +
-            ") ";
+        public async Task<IReadOnlyDictionary<(int y, int m), int>> GetMonthlyActiveUsersAsync(DateTime? startDate, DateTime? endDate)
+        {
+            var rawDatas = await ExecuteReaderAsync<(int y, int m, int c)>(
+                    "SELECT YEAR(creation_date), MONTH(creation_date), COUNT(DISTINCT user_id) " +
+                    "FROM proposals " +
+                    "WHERE (@startDate IS NULL OR creation_date >= @startDate) " +
+                    "   AND (@endDate IS NULL OR creation_date < @endDate) " +
+                    "GROUP BY YEAR(creation_date), MONTH(creation_date) " +
+                    "ORDER BY YEAR(creation_date), MONTH(creation_date)",
+                    new { startDate, endDate })
+                .ConfigureAwait(false);
+
+            return rawDatas.ToDictionary(_ => (_.y, _.m), _ => _.c);
+        }
+
+        public async Task<IReadOnlyDictionary<DateTime, int>> GetDailyActiveUsersAsync(DateTime? startDate, DateTime? endDate)
+        {
+            var rawDatas = await ExecuteReaderAsync<(DateTime d, int c)>(
+                    "SELECT DATE(creation_date), COUNT(DISTINCT user_id) " +
+                    "FROM proposals " +
+                    "WHERE (@startDate IS NULL OR creation_date >= @startDate) " +
+                    "   AND (@endDate IS NULL OR creation_date < @endDate) " +
+                    "GROUP BY DATE(creation_date) " +
+                    "ORDER BY DATE(creation_date)",
+                    new { startDate, endDate })
+                .ConfigureAwait(false);
+
+            return rawDatas.ToDictionary(_ => _.d, _ => _.c);
+        }
     }
 }

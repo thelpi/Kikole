@@ -100,12 +100,21 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetActivityDatas()
+        public async Task<JsonResult> GetStatisticActiveUsers()
         {
             var datas = await _apiProvider
-                .GetActivityDatasAsync()
+                .GetStatisticActiveUsersAsync()
                 .ConfigureAwait(false);
-            return Json(datas.Select(_ => new KeyValuePair<string, int>(_.Key.ToString(), _.Value)));
+
+            return Json(new
+            {
+                monthly = datas.MonthlyDatas.Select(_ =>
+                    new KeyValuePair<string, int>($"{_.Key.m.ToString().PadLeft(2, '0')} ({_.Key.y.ToString().Substring(2, 2)})", _.Value)),
+                weekly = datas.WeeklyDatas.Select(_ =>
+                    new KeyValuePair<string, int>($"{_.Key.w.ToString().PadLeft(2, '0')} ({_.Key.y.ToString().Substring(2, 2)})", _.Value)),
+                daily = datas.DailyDatas.Select(_ =>
+                    new KeyValuePair<string, int>(_.Key.GetNumDayLabel(), _.Value))
+            });
         }
 
         private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)

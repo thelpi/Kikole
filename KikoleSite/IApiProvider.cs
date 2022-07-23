@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Api.Models.Requests;
+using KikoleSite.Api.Models.Statistics;
 
 namespace KikoleSite
 {
@@ -47,7 +48,7 @@ namespace KikoleSite
 
         Task<PlayersDistribution> GetPlayersDistributionAsync(string authToken);
 
-        Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync();
+        Task<ActiveUsers> GetStatisticActiveUsersAsync();
 
         #endregion stats, badges and leaderboard
 

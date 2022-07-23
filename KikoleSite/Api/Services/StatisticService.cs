@@ -8,6 +8,7 @@ using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Dtos;
 using KikoleSite.Api.Models.Enums;
+using KikoleSite.Api.Models.Statistics;
 
 namespace KikoleSite.Api.Services
 {
@@ -64,11 +65,26 @@ namespace KikoleSite.Api.Services
             };
         }
 
-        public async Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync()
+        public async Task<ActiveUsers> GetActiveUsersAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            return await _statisticRepository
-                .GetActivityDatasAsync()
+            var wDatas = await _statisticRepository
+                .GetWeeklyActiveUsersAsync(startDate, endDate)
                 .ConfigureAwait(false);
+
+            var mDatas = await _statisticRepository
+                .GetMonthlyActiveUsersAsync(startDate, endDate)
+                .ConfigureAwait(false);
+
+            var dDatas = await _statisticRepository
+                .GetDailyActiveUsersAsync(startDate, endDate)
+                .ConfigureAwait(false);
+
+            return new ActiveUsers
+            {
+                DailyDatas = dDatas,
+                MonthlyDatas = mDatas,
+                WeeklyDatas = wDatas
+            };
         }
 
         private static List<PlayersDistributionItem<T2>> ToDistributionItemsList<T1, T2>(

@@ -10,6 +10,7 @@ using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Api.Models.Requests;
+using KikoleSite.Api.Models.Statistics;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite
@@ -323,10 +324,10 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync()
+        public async Task<ActiveUsers> GetStatisticActiveUsersAsync()
         {
             return await _statisticService
-                .GetActivityDatasAsync()
+                .GetActiveUsersAsync()
                 .ConfigureAwait(false);
         }
 

@@ -112,27 +112,35 @@ for (var i = 0; i < coll.length; i++) {
 }
 
 function drawChart() {
-    // Set Data
-    var activityDatas = [['Week', 'Players']];
+    var weekActivityDatas = [['Week', 'Players']];
+    var monthActivityDatas = [['Month', 'Players']];
+    var dayActivityDatas = [['Day', 'Players']];
     $.ajax({
-        url: '/Leaderboard/GetActivityDatas/',
+        url: '/Leaderboard/GetStatisticActiveUsers/',
         data: {},
         type: "GET",
         async: false,
         success: function (data) {
-            data.forEach(item => activityDatas.push([item.Key, item.Value]));
+            data.weekly.forEach(item => weekActivityDatas.push([item.Key, item.Value]));
+            data.monthly.forEach(item => monthActivityDatas.push([item.Key, item.Value]));
+            data.daily.forEach(item => dayActivityDatas.push([item.Key, item.Value]));
         }
     });
-    var data = google.visualization.arrayToDataTable(activityDatas);
-    // Set Options
+    buildActiveUsersLineChartGraph('dayActivityChart', dayActivityDatas, 'Date');
+    buildActiveUsersLineChartGraph('weekActivityChart', weekActivityDatas, 'Week');
+    buildActiveUsersLineChartGraph('monthActivityChart', monthActivityDatas, 'Month');
+}
+
+function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
+    var tableDats = google.visualization.arrayToDataTable(sourceDatas);
     var options = {
-        hAxis: { title: 'Week number' },
-        vAxis: { title: 'Active players' },
+        hAxis: { title: yAxisTitle },
+        vAxis: { title: 'Active users' },
         legend: 'none',
-        width: 900,
-        height: 506
+        width: 1600,
+        height: 900
     };
-    // Draw Chart
-    var chart = new google.visualization.LineChart(document.getElementById('activityChart'));
-    chart.draw(data, options);
+    new google.visualization
+        .LineChart(document.getElementById(elementId))
+        .draw(tableDats, options);
 }
