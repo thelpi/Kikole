@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using KikoleSite.Api.Models.Enums;
 
-namespace KikoleSite.Api.Models
+namespace KikoleSite.Api.Models.Statistics
 {
     public class PlayersDistribution
     {

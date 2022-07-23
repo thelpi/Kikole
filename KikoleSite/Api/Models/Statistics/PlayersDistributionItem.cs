@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Api.Models
+﻿namespace KikoleSite.Api.Models.Statistics
 {
     public class PlayersDistributionItem<T>
     {
