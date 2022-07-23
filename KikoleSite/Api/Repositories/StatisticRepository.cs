@@ -91,6 +91,7 @@ namespace KikoleSite.Api.Repositories
                     "FROM proposals " +
                     "WHERE (@startDate IS NULL OR creation_date >= @startDate) " +
                     "   AND (@endDate IS NULL OR creation_date < @endDate) " +
+                    $"   AND user_id IN ({SubSqlValidUsers}) " +
                     "GROUP BY YEAR(creation_date), WEEK(creation_date) " +
                     "ORDER BY YEAR(creation_date), WEEK(creation_date)",
                     new { startDate, endDate })
@@ -106,6 +107,7 @@ namespace KikoleSite.Api.Repositories
                     "FROM proposals " +
                     "WHERE (@startDate IS NULL OR creation_date >= @startDate) " +
                     "   AND (@endDate IS NULL OR creation_date < @endDate) " +
+                    $"   AND user_id IN ({SubSqlValidUsers}) " +
                     "GROUP BY YEAR(creation_date), MONTH(creation_date) " +
                     "ORDER BY YEAR(creation_date), MONTH(creation_date)",
                     new { startDate, endDate })
@@ -121,6 +123,7 @@ namespace KikoleSite.Api.Repositories
                     "FROM proposals " +
                     "WHERE (@startDate IS NULL OR creation_date >= @startDate) " +
                     "   AND (@endDate IS NULL OR creation_date < @endDate) " +
+                    $"   AND user_id IN ({SubSqlValidUsers}) " +
                     "GROUP BY DATE(creation_date) " +
                     "ORDER BY DATE(creation_date)",
                     new { startDate, endDate })
