@@ -117,7 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ActivityChart" xml:space="preserve">
-    <value>Charte de l'activité</value>
+  <data name="ActiveUsersTitle" xml:space="preserve">
+    <value>Nombre d'utilisateurs actifs</value>
+  </data>
+  <data name="PlayersDistributionTitle" xml:space="preserve">
+    <value>Répartition des joueurs par critère</value>
   </data>
 </root>

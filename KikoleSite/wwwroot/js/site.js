@@ -112,6 +112,25 @@ for (var i = 0; i < coll.length; i++) {
 }
 
 function drawChart() {
+
+    var playerDistributionCountryDatas = [['Country', 'Players percent']];
+    var playerDistributionPositionDatas = [['Position', 'Players percent']];
+    var playerDistributionDecadeDatas = [['Decade', 'Players percent']];
+    $.ajax({
+        url: '/Leaderboard/GetStatisticPlayersDistribution/',
+        data: {},
+        type: "GET",
+        async: false,
+        success: function (data) {
+            data.country.forEach(item => playerDistributionCountryDatas.push([item.Key, item.Value]));
+            data.position.forEach(item => playerDistributionPositionDatas.push([item.Key, item.Value]));
+            data.decade.forEach(item => playerDistributionDecadeDatas.push([item.Key, item.Value]));
+        }
+    });
+    buildPlayerDistributionChartGraph('playerDistributionCountryChart', playerDistributionCountryDatas, 'Distribution by country');
+    buildPlayerDistributionChartGraph('playerDistributionPositionChart', playerDistributionPositionDatas, 'Distribution by position');
+    buildPlayerDistributionChartGraph('playerDistributionDecadeChart', playerDistributionDecadeDatas, 'Distribution by decade');
+
     var weekActivityDatas = [['Week', 'Players']];
     var monthActivityDatas = [['Month', 'Players']];
     var dayActivityDatas = [['Day', 'Players']];
@@ -126,9 +145,9 @@ function drawChart() {
             data.daily.forEach(item => dayActivityDatas.push([item.Key, item.Value]));
         }
     });
-    buildActiveUsersLineChartGraph('dayActivityChart', dayActivityDatas, 'Date');
-    buildActiveUsersLineChartGraph('weekActivityChart', weekActivityDatas, 'Week');
-    buildActiveUsersLineChartGraph('monthActivityChart', monthActivityDatas, 'Month');
+    buildActiveUsersLineChartGraph('dayActiveUsersChart', dayActivityDatas, 'Date');
+    buildActiveUsersLineChartGraph('weekActiveUsersChart', weekActivityDatas, 'Week');
+    buildActiveUsersLineChartGraph('monthActiveUsersChart', monthActivityDatas, 'Month');
 }
 
 function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
@@ -143,4 +162,16 @@ function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
     new google.visualization
         .LineChart(document.getElementById(elementId))
         .draw(tableDats, options);
+}
+
+function buildPlayerDistributionChartGraph(elementId, sourceDatas, pieTitle) {
+    var data = google.visualization.arrayToDataTable(sourceDatas);
+    var options = {
+        title: pieTitle,
+        width: 1600,
+        height: 900
+    };
+    new google.visualization
+        .PieChart(document.getElementById(elementId))
+        .draw(data, options);
 }

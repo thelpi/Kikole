@@ -1,5 +1,4 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
-@model StatsModel
 
 <script>
     $(document).ready(function () {
@@ -8,16 +7,16 @@
     });
 </script>
 
-@{
-    await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionDecades", Model.DistributionDecades)).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionClubs", Model.DistributionClubs)).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionPositions", Model.DistributionPositions)).ConfigureAwait(false);
-    await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionCountries", Model.DistributionCountries)).ConfigureAwait(false);
-}
-
-<button type="button" class="collapsible">@localizer["ActivityChart"]</button>
+<button type="button" class="collapsible">@localizer["PlayersDistributionTitle"]</button>
 <div class="collapsiblecontent" style="display: none">
-    <div id="dayActivityChart"></div>
-    <div id="weekActivityChart"></div>
-    <div id="monthActivityChart"></div>
+    <div id="playerDistributionCountryChart"></div>
+    <div id="playerDistributionPositionChart"></div>
+    <div id="playerDistributionDecadeChart"></div>
+</div>
+
+<button type="button" class="collapsible">@localizer["ActiveUsersTitle"]</button>
+<div class="collapsiblecontent" style="display: none">
+    <div id="dayActiveUsersChart"></div>
+    <div id="weekActiveUsersChart"></div>
+    <div id="monthActiveUsersChart"></div>
 </div>

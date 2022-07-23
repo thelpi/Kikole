@@ -68,35 +68,33 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Stats()
+        public IActionResult Stats()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetStatisticPlayersDistribution()
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token))
             {
-                return RedirectToAction("ErrorIndex", "Home");
+                return Json(new {});
             }
 
             var datas = await _apiProvider
                 .GetPlayersDistributionAsync(token)
                 .ConfigureAwait(false);
 
-            var statsModel = new StatsModel
+            return Json(new
             {
-                DistributionClubs = datas.ClubsDistribution
-                    .Select(_ => (_.Rank, _.Count, _.Value.Name, Math.Round(_.Rate, 2)))
-                    .ToList(),
-                DistributionCountries = datas.CountriesDistribution
-                    .Select(_ => (_.Rank, _.Count, _.Value.Name, Math.Round(_.Rate, 2)))
-                    .ToList(),
-                DistributionDecades = datas.DecadesDistribution
-                    .Select(_ => (_.Rank, _.Count, _.Value.ToString(), Math.Round(_.Rate, 2)))
-                    .ToList(),
-                DistributionPositions = datas.PositionsDistribution
-                    .Select(_ => (_.Rank, _.Count, _.Value.GetLabel(), Math.Round(_.Rate, 2)))
-                    .ToList()
-            };
-
-            return View(statsModel);
+                country = datas.CountriesDistribution.Select(_ =>
+                    new KeyValuePair<string, decimal>(_.Value.Name, Math.Round(_.Rate, 2))),
+                decade = datas.DecadesDistribution.Select(_ =>
+                    new KeyValuePair<string, decimal>(_.Value.ToString(), Math.Round(_.Rate, 2))),
+                position = datas.PositionsDistribution.Select(_ =>
+                    new KeyValuePair<string, decimal>(_.Value.GetLabel(), Math.Round(_.Rate, 2)))
+            });
         }
 
         [HttpGet]

@@ -100,7 +100,7 @@ namespace KikoleSite.Api.Services
                         totalCount);
                 })
                 .SetPositions(_ => _.Rate, true, (_, i) => _.Rank = i)
-                .TakeWhile(_ => _.Rank <= maxItemsRank)
+                .TakeWhile(_ => maxItemsRank < 0 || _.Rank <= maxItemsRank)
                 .ToList();
         }
     }

@@ -320,7 +320,7 @@ namespace KikoleSite
             var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             return await _statisticService
-                .GetPlayersDistributionAsync(userId, GetLanguage(), 25)
+                .GetPlayersDistributionAsync(userId, GetLanguage(), -1)
                 .ConfigureAwait(false);
         }
 
