@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
@@ -67,6 +69,19 @@ namespace KikoleSite.Api.Repositories
                     "ORDER BY COUNT(*) DESC",
                     new { userId })
                 .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync()
+        {
+            var rawDatas = await ExecuteReaderAsync<(int, int)>(
+                    "SELECT WEEK(creation_date), COUNT(DISTINCT user_id) " +
+                    "FROM proposals " +
+                    "GROUP BY WEEK(creation_date) " +
+                    "ORDER BY WEEK(creation_date)",
+                    null)
+                .ConfigureAwait(false);
+
+            return rawDatas.ToDictionary(_ => _.Item1, _ => _.Item2);
         }
 
         private static readonly string UserPlayerLinkSql = 

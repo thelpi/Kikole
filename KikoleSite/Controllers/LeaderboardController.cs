@@ -99,6 +99,15 @@ namespace KikoleSite.Controllers
             return View(statsModel);
         }
 
+        [HttpGet]
+        public async Task<JsonResult> GetActivityDatas()
+        {
+            var datas = await _apiProvider
+                .GetActivityDatasAsync()
+                .ConfigureAwait(false);
+            return Json(datas.Select(_ => new KeyValuePair<string, int>(_.Key.ToString(), _.Value)));
+        }
+
         private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
         {
             model = model ?? new LeaderboardModel();

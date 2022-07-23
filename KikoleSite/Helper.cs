@@ -14,6 +14,8 @@ namespace KikoleSite
         public const string TimeSpanPattern = @"hh\:mm";
         public const string DateTimePatternEn = "yyyy-MM-dd";
         public const string DateTimePatternFr = "dd/MM/yyyy";
+        public const string DayPatternEn = "MM-dd";
+        public const string DayPatternFr = "dd/MM";
         public const string Iso8859Code = "ISO-8859-8";
 
         static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
@@ -232,6 +234,13 @@ namespace KikoleSite
                 DayLeaderSorts.TotalPoints => IsFrench() ? "Points" : "Points",
                 _ => throw new NotImplementedException(),
             };
+        }
+
+        internal static string GetNumDayLabel(this DateTime date)
+        {
+            return IsFrench()
+                ? date.ToString(DayPatternFr)
+                : date.ToString(DayPatternEn);
         }
 
         private static bool IsFrench()

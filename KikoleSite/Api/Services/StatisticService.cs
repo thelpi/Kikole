@@ -64,6 +64,13 @@ namespace KikoleSite.Api.Services
             };
         }
 
+        public async Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync()
+        {
+            return await _statisticRepository
+                .GetActivityDatasAsync()
+                .ConfigureAwait(false);
+        }
+
         private static List<PlayersDistributionItem<T2>> ToDistributionItemsList<T1, T2>(
             IReadOnlyCollection<PlayersDistributionDto<T1>> sourceList,
             Func<T1, T2> transformItem, int totalCount, int maxItemsRank)

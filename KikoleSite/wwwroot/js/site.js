@@ -110,3 +110,29 @@ for (var i = 0; i < coll.length; i++) {
         }
     });
 }
+
+function drawChart() {
+    // Set Data
+    var activityDatas = [['Week', 'Players']];
+    $.ajax({
+        url: '/Leaderboard/GetActivityDatas/',
+        data: {},
+        type: "GET",
+        async: false,
+        success: function (data) {
+            data.forEach(item => activityDatas.push([item.Key, item.Value]));
+        }
+    });
+    var data = google.visualization.arrayToDataTable(activityDatas);
+    // Set Options
+    var options = {
+        hAxis: { title: 'Week number' },
+        vAxis: { title: 'Active players' },
+        legend: 'none',
+        width: 900,
+        height: 506
+    };
+    // Draw Chart
+    var chart = new google.visualization.LineChart(document.getElementById('activityChart'));
+    chart.draw(data, options);
+}

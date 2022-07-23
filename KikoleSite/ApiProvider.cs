@@ -323,6 +323,13 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync()
+        {
+            return await _statisticService
+                .GetActivityDatasAsync()
+                .ConfigureAwait(false);
+        }
+
         #endregion stats, badges and leaderboard
 
         #region player creation

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Api.Models.Dtos;
 
@@ -13,5 +14,7 @@ namespace KikoleSite.Api.Interfaces.Repositories
         Task<IReadOnlyCollection<PlayersDistributionDto<int>>> GetPlayersDistributionByDecadeAsync(ulong userId);
 
         Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByClubAsync(ulong userId);
+       
+        Task<IReadOnlyDictionary<int, int>> GetActivityDatasAsync();
     }
 }

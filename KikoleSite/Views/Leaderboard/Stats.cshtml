@@ -1,9 +1,21 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model StatsModel
 
+<script>
+    $(document).ready(function () {
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(drawChart);
+    });
+</script>
+
 @{
     await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionDecades", Model.DistributionDecades)).ConfigureAwait(false);
     await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionClubs", Model.DistributionClubs)).ConfigureAwait(false);
     await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionPositions", Model.DistributionPositions)).ConfigureAwait(false);
     await Html.RenderPartialAsync("SinglePlayerDistribution", ("DistributionCountries", Model.DistributionCountries)).ConfigureAwait(false);
 }
+
+<button type="button" class="collapsible">@localizer["ActivityChart"]</button>
+<div class="collapsiblecontent" style="display: none">
+    <div id="activityChart"></div>
+</div>
