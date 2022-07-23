@@ -60,8 +60,8 @@ namespace KikoleSite.Api.Services
                 TotalPlayersCount = totalCount,
                 CountriesDistribution = ToDistributionItemsList(countriesPld, _ => new Country(countries.Single(c => c.Code == ((Countries)_).ToString())), totalCount, maxItemsRank),
                 ClubsDistribution = ToDistributionItemsList(clubsPld, _ => new Club(clubs.Single(c => c.Id == _)), totalCount, maxItemsRank),
-                DecadesDistribution = ToDistributionItemsList(decadesPld, _ => _, totalCount, maxItemsRank),
-                PositionsDistribution = ToDistributionItemsList(positionsPld, _ => (Positions)_, totalCount, maxItemsRank)
+                DecadesDistribution = ToDistributionItemsList(decadesPld, _ => _, totalCount, -1),
+                PositionsDistribution = ToDistributionItemsList(positionsPld, _ => (Positions)_, totalCount, -1)
             };
         }
 

@@ -111,11 +111,12 @@ for (var i = 0; i < coll.length; i++) {
     });
 }
 
-function drawChart() {
+function drawStatisticPageCharts() {
 
     var playerDistributionCountryDatas = [['Country', 'Players percent']];
     var playerDistributionPositionDatas = [['Position', 'Players percent']];
     var playerDistributionDecadeDatas = [['Decade', 'Players percent']];
+    var playerDistributionClubDatas = [['Club', 'Players count']];
     $.ajax({
         url: '/Leaderboard/GetStatisticPlayersDistribution/',
         data: {},
@@ -125,11 +126,13 @@ function drawChart() {
             data.country.forEach(item => playerDistributionCountryDatas.push([item.Key, item.Value]));
             data.position.forEach(item => playerDistributionPositionDatas.push([item.Key, item.Value]));
             data.decade.forEach(item => playerDistributionDecadeDatas.push([item.Key, item.Value]));
+            data.club.forEach(item => playerDistributionClubDatas.push([item.Key, item.Value]));
         }
     });
-    buildPlayerDistributionChartGraph('playerDistributionCountryChart', playerDistributionCountryDatas, 'Distribution by country');
-    buildPlayerDistributionChartGraph('playerDistributionPositionChart', playerDistributionPositionDatas, 'Distribution by position');
-    buildPlayerDistributionChartGraph('playerDistributionDecadeChart', playerDistributionDecadeDatas, 'Distribution by decade');
+    buildPlayerDistributionPieChartGraph('playerDistributionCountryChart', playerDistributionCountryDatas, 'Distribution by country');
+    buildPlayerDistributionPieChartGraph('playerDistributionPositionChart', playerDistributionPositionDatas, 'Distribution by position');
+    buildPlayerDistributionPieChartGraph('playerDistributionDecadeChart', playerDistributionDecadeDatas, 'Distribution by decade');
+    buildPlayerDistributionColumnChartGraph('playerDistributionClubChart', playerDistributionClubDatas, 'Top 25 clubs');
 
     var weekActivityDatas = [['Week', 'Players']];
     var monthActivityDatas = [['Month', 'Players']];
@@ -164,7 +167,7 @@ function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
         .draw(tableDats, options);
 }
 
-function buildPlayerDistributionChartGraph(elementId, sourceDatas, pieTitle) {
+function buildPlayerDistributionPieChartGraph(elementId, sourceDatas, pieTitle) {
     var data = google.visualization.arrayToDataTable(sourceDatas);
     var options = {
         title: pieTitle,
@@ -173,5 +176,17 @@ function buildPlayerDistributionChartGraph(elementId, sourceDatas, pieTitle) {
     };
     new google.visualization
         .PieChart(document.getElementById(elementId))
+        .draw(data, options);
+}
+
+function buildPlayerDistributionColumnChartGraph(elementId, sourceDatas, title) {
+    var data = google.visualization.arrayToDataTable(sourceDatas);
+    var options = {
+        title: title,
+        width: 1600,
+        height: 900
+    };
+    new google.visualization
+        .ColumnChart(document.getElementById(elementId))
         .draw(data, options);
 }

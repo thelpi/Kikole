@@ -93,7 +93,9 @@ namespace KikoleSite.Controllers
                 decade = datas.DecadesDistribution.Select(_ =>
                     new KeyValuePair<string, decimal>(_.Value.ToString(), Math.Round(_.Rate, 2))),
                 position = datas.PositionsDistribution.Select(_ =>
-                    new KeyValuePair<string, decimal>(_.Value.GetLabel(), Math.Round(_.Rate, 2)))
+                    new KeyValuePair<string, decimal>(_.Value.GetLabel(), Math.Round(_.Rate, 2))),
+                club = datas.ClubsDistribution.Select(_ =>
+                    new KeyValuePair<string, decimal>(_.Value.Name, _.Count))
             });
         }
 

@@ -3,7 +3,7 @@
 <script>
     $(document).ready(function () {
         google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(drawChart);
+        google.charts.setOnLoadCallback(drawStatisticPageCharts);
     });
 </script>
 
@@ -12,6 +12,7 @@
     <div id="playerDistributionCountryChart"></div>
     <div id="playerDistributionPositionChart"></div>
     <div id="playerDistributionDecadeChart"></div>
+    <div id="playerDistributionClubChart"></div>
 </div>
 
 <button type="button" class="collapsible">@localizer["ActiveUsersTitle"]</button>
