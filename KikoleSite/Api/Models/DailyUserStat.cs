@@ -29,11 +29,11 @@ namespace KikoleSite.Api.Models
 
         internal DailyUserStat(DateTime currentDate,
             string playerName,
-            IReadOnlyCollection<LeaderDto> leaders)
+            int? points)
         {
             Date = currentDate;
             Answer = playerName;
-            Points = Leader.GetSubmittedPlayerPoints(leaders, currentDate);
+            Points = points;
         }
 
         internal DailyUserStat(ulong userId,

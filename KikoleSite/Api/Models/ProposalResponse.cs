@@ -43,7 +43,7 @@ namespace KikoleSite.Api.Models
             {
                 case ProposalTypes.Name:
                     if (!success.HasValue)
-                        Successful = player.Player.AllowedNames.ContainsSanitized(sourceValue);
+                        Successful = player.Player.AllowedNames.ContainsApproximately(sourceValue);
                     Value = Successful
                         ? player.Player.Name
                         : sourceValue;

@@ -82,16 +82,9 @@ var autocompleteClubs = function (clubIdName, submit) {
 };
 $(function() {
     autocompleteClubs("#clubName", true);
-    autocompleteClubs("#Club0", false);
-    autocompleteClubs("#Club1", false);
-    autocompleteClubs("#Club2", false);
-    autocompleteClubs("#Club3", false);
-    autocompleteClubs("#Club4", false);
-    autocompleteClubs("#Club5", false);
-    autocompleteClubs("#Club6", false);
-    autocompleteClubs("#Club7", false);
-    autocompleteClubs("#Club8", false);
-    autocompleteClubs("#Club9", false);
+    for (let i = 0; i < 15; i++) {
+        autocompleteClubs("#Club" + i, false);
+    }
 });
 
 /* logins autocompletion */
@@ -104,6 +97,19 @@ var autocompleteLogins = function (logins, fieldId) {
         minLength: 1
     });
 };
+
+var coll = document.getElementsByClassName("collapsible");
+for (var i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function () {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    });
+}
 
 $(function () {
     var infoBloc = document.querySelector(".info");

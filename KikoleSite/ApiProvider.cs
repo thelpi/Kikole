@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -18,11 +19,11 @@ namespace KikoleSite
         // minutes
         private const int DelayBetweenUserChecks = 10;
 
-        private static Dictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
+        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
-        private readonly Dictionary<ulong, DateTime> _usersCheckCache;
+        private readonly ConcurrentDictionary<ulong, DateTime> _usersCheckCache;
         private readonly IUserRepository _userRepository;
         private readonly ICrypter _crypter;
         private readonly IStringLocalizer<Translations> _resources;
@@ -35,6 +36,7 @@ namespace KikoleSite
         private readonly IBadgeService _badgeService;
         private readonly IChallengeService _challengeService;
         private readonly ILeaderService _leaderService;
+        private readonly IStatisticService _statisticService;
         private readonly IDiscussionRepository _discussionRepository;
 
         public ApiProvider(IUserRepository userRepository,
@@ -49,6 +51,7 @@ namespace KikoleSite
             IBadgeService badgeService,
             IChallengeService challengeService,
             ILeaderService leaderService,
+            IStatisticService statisticService,
             IDiscussionRepository discussionRepository)
         {
             _userRepository = userRepository;
@@ -63,8 +66,9 @@ namespace KikoleSite
             _badgeService = badgeService;
             _challengeService = challengeService;
             _leaderService = leaderService;
+            _statisticService = statisticService;
             _discussionRepository = discussionRepository;
-            _usersCheckCache = new Dictionary<ulong, DateTime>();
+            _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
         }
 
         #region user accounts
@@ -254,36 +258,17 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
-        public async Task<IReadOnlyCollection<Leader>> GetLeadersAsync(
-            LeaderSorts leaderSort, DateTime? minimalDate, DateTime? maximalDate, bool includePvp)
-        {
-            if (!includePvp && !Enum.IsDefined(typeof(LeaderSorts), leaderSort))
-                return null;
-
-            if (minimalDate.HasValue && maximalDate.HasValue && minimalDate.Value.Date > maximalDate.Value.Date)
-                return null;
-
-            IReadOnlyCollection<Leader> leaders;
-            if (includePvp)
-            {
-                leaders = await _leaderService
-                    .GetPvpLeadersAsync(minimalDate, maximalDate)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                leaders = await _leaderService
-                    .GetPveLeadersAsync(minimalDate, maximalDate, leaderSort)
-                    .ConfigureAwait(false);
-            }
-
-            return leaders;
-        }
-
-        public async Task<IReadOnlyCollection<Leader>> GetDayLeadersAsync(DateTime day, DayLeaderSorts sort)
+        public async Task<Leaderboard> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
         {
             return await _leaderService
-                .GetLeadersOfTheDayAsync(day, sort)
+                .GetLeaderboardAsync(minimalDate, maximalDate, leaderSort)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort)
+        {
+            return await _leaderService
+                .GetDayboardAsync(day, sort)
                 .ConfigureAwait(false);
         }
 
@@ -329,19 +314,12 @@ namespace KikoleSite
                 .ConfigureAwait(false);
         }
 
-        public async Task<Awards> GetMonthlyAwardsAsync(int year, int month)
+        public async Task<PlayersDistribution> GetPlayersDistributionAsync(string authToken)
         {
-            var date = new DateTime(year, month, 1);
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
-            return await _leaderService
-                .GetAwardsAsync(date.Year, date.Month)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<(int today, int total)> GetUsersCountWithProposalAsync(DateTime date)
-        {
-            return await _proposalService
-                .GetUsersCountWithProposalAsync(date)
+            return await _statisticService
+                .GetPlayersDistributionAsync(userId, GetLanguage(), 25)
                 .ConfigureAwait(false);
         }
 
@@ -458,11 +436,13 @@ namespace KikoleSite
 
                 var apiCountries = countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList();
 
-                _countriesCache ??= new Dictionary<string, IReadOnlyDictionary<ulong, string>>();
-                _countriesCache.Add(
+                var dict = apiCountries.ToDictionary(ac => (ulong)ac.Code, ac => ac.Name);
+
+                _countriesCache ??= new ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>();
+                _countriesCache.AddOrUpdate(
                     CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                    apiCountries
-                        .ToDictionary(ac => (ulong)ac.Code, ac => ac.Name));
+                    dict,
+                    (k, v) => dict);
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
@@ -847,19 +827,13 @@ namespace KikoleSite
             if (!_crypter.Encrypt($"{userId}_{userTypeId}").Equals(tokenParts[2]))
                 return 0;
 
-            var exists = _usersCheckCache.ContainsKey(userId);
-            if (!exists || (_clock.Now - _usersCheckCache[userId]).TotalMinutes > DelayBetweenUserChecks)
+            if (!_usersCheckCache.ContainsKey(userId) || (_clock.Now - _usersCheckCache[userId]).TotalMinutes > DelayBetweenUserChecks)
             {
                 var user = await _userRepository.GetUserByIdAsync(userId).ConfigureAwait(false);
                 if (user == null)
                     return 0;
                 else
-                {
-                    if (!exists)
-                        _usersCheckCache.Add(userId, _clock.Now);
-                    else
-                        _usersCheckCache[userId] = _clock.Now;
-                }
+                    _usersCheckCache.AddOrUpdate(userId, _clock.Now, (k, v) => _clock.Now);
             }
 
             return userId;

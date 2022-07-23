@@ -19,5 +19,7 @@ namespace KikoleSite.Api.Interfaces.Repositories
         Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateTime playerProposalDate);
 
         Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate, bool exact);
+
+        Task<int> GetDaysCountWithProposalAsync(DateTime startDate, DateTime endDate, ulong userId, bool exact);
     }
 }

@@ -122,7 +122,7 @@ namespace KikoleSite.Controllers
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
-                && day.Value >= 0)
+                && (day.Value >= 0 || await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 var dt = DateTime.Now.Date.AddDays(-day.Value);
                 if (dt >= chart.FirstDate.Date)
@@ -279,6 +279,10 @@ namespace KikoleSite.Controllers
                 .IsPowerUserAsync(token)
                 .ConfigureAwait(false);
 
+            var isAdminUser = await _apiProvider
+                .IsAdminUserAsync(token)
+                .ConfigureAwait(false);
+
             if (!string.IsNullOrWhiteSpace(model.PlayerName) && string.IsNullOrWhiteSpace(model.EasyClue))
                 model.EasyClue = easyClue;
 
@@ -296,6 +300,7 @@ namespace KikoleSite.Controllers
                 .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
             model.HasPendingChallenges = pendings.Count > 0;
             model.CanCreateClub = isPowerUser;
+            model.IsAdmin = isAdminUser;
             return View("Index", model);
         }
     }

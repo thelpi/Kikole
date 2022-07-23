@@ -19,6 +19,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kikole?</title>
 
+    <link rel="stylesheet" href="~/css/kikole.css" />
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
@@ -44,10 +45,10 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>-->
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
-                <a asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
-                <a asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
-                <a href="/Home/SwitchLang?redirect=@redirectUrl" class="navbar-brand">
+                <a style="padding: 15px 13px" asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
+                <a style="padding: 15px 13px" asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
+                <a style="padding: 15px 13px" asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
+                <a style="padding: 15px 12px" href="/Home/SwitchLang?redirect=@redirectUrl" class="navbar-brand">
                     <img style="width: 25px; height: 25px" src="@flagPath" />
                 </a>
             </div>
@@ -61,9 +62,9 @@
         <hr />
         <footer>
             <div>
-                <a href="/Challenge">@localizer["ChallengeSomeone"]</a>  | 
-                <a href="/Admin">@localizer["SubmitKikole"]</a>  | 
-                <a href="/Home/Contact">@localizer["ContactAdmin"]</a>  | 
+                <a href="/Admin">@localizer["SubmitKikole"]</a>  |
+                <a href="/Home/Contact">@localizer["ContactAdmin"]</a>  |
+                <a href="https://monpetittricycle.fr" target="_blank">@localizer["FriendlyWebsite"]</a>  |
                 &copy; @System.DateTime.Now.ToString("yyyy") - @localizer["SiteName"]
             </div>
         </footer>
@@ -73,12 +74,7 @@
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
     </environment>
     <environment exclude="Development">
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
-                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
-                crossorigin="anonymous"
-                integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd">
-        </script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     </environment>
     <script src="~/js/site.js" asp-append-version="true"></script>
 

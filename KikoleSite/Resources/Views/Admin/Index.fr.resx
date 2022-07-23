@@ -148,7 +148,7 @@
     <value>dans l'ordre chronologique, sans la carrière junior ni les équipes B</value>
   </data>
   <data name="ClubsTip2" xml:space="preserve">
-    <value>si plus de 10 clubs, mettre les 10 premiers et l'administrateur complètera ; merci de créer les clubs</value>
+    <value>si plus de 15 clubs, mettre les 15 premiers et l'administrateur complètera ; merci de créer les clubs</value>
   </data>
   <data name="Clue" xml:space="preserve">
     <value>Indice</value>

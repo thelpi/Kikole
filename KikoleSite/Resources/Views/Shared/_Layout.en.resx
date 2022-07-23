@@ -126,6 +126,9 @@
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact</value>
   </data>
+  <data name="FriendlyWebsite" xml:space="preserve">
+    <value>You like bike?</value>
+  </data>
   <data name="Leaderboard" xml:space="preserve">
     <value>Leaderboard</value>
   </data>

@@ -56,6 +56,16 @@ namespace KikoleSite.Models
 
         public string Club9 { get; set; }
 
+        public string Club10 { get; set; }
+
+        public string Club11 { get; set; }
+
+        public string Club12 { get; set; }
+
+        public string Club13 { get; set; }
+
+        public string Club14 { get; set; }
+
         public bool IsLoan0 { get; set; }
 
         public bool IsLoan1 { get; set; }
@@ -75,6 +85,16 @@ namespace KikoleSite.Models
         public bool IsLoan8 { get; set; }
 
         public bool IsLoan9 { get; set; }
+
+        public bool IsLoan10 { get; set; }
+
+        public bool IsLoan11 { get; set; }
+
+        public bool IsLoan12 { get; set; }
+
+        public bool IsLoan13 { get; set; }
+
+        public bool IsLoan14 { get; set; }
 
         public string Position { get; set; }
 

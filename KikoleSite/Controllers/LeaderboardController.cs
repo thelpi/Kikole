@@ -62,24 +62,46 @@ namespace KikoleSite.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(LeaderboardModel model)
         {
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
-
-            await SetModelPropertiesAsync(
-                    model, chart.FirstDate)
-                .ConfigureAwait(false);
+            await SetModelPropertiesAsync(model).ConfigureAwait(false);
 
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Stats()
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var datas = await _apiProvider
+                .GetPlayersDistributionAsync(token)
+                .ConfigureAwait(false);
+
+            var statsModel = new StatsModel
+            {
+                DistributionClubs = datas.ClubsDistribution
+                    .Select(_ => (_.Rank, _.Count, _.Value.Name, Math.Round(_.Rate, 2)))
+                    .ToList(),
+                DistributionCountries = datas.CountriesDistribution
+                    .Select(_ => (_.Rank, _.Count, _.Value.Name, Math.Round(_.Rate, 2)))
+                    .ToList(),
+                DistributionDecades = datas.DecadesDistribution
+                    .Select(_ => (_.Rank, _.Count, _.Value.ToString(), Math.Round(_.Rate, 2)))
+                    .ToList(),
+                DistributionPositions = datas.PositionsDistribution
+                    .Select(_ => (_.Rank, _.Count, _.Value.GetLabel(), Math.Round(_.Rate, 2)))
+                    .ToList()
+            };
+
+            return View(statsModel);
         }
 
         private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
         {
             model = model ?? new LeaderboardModel();
-
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
 
             model.MinimalDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             model.MaximalDate = DateTime.Now.Date;
@@ -87,49 +109,22 @@ namespace KikoleSite.Controllers
             model.LeaderboardDay = DateTime.Now.Date;
             model.DaySortType = DayLeaderSorts.BestTime;
 
-            await SetModelPropertiesAsync(
-                    model, chart.FirstDate)
-                .ConfigureAwait(false);
+            await SetModelPropertiesAsync(model).ConfigureAwait(false);
 
             return View(model);
         }
 
-        private async Task SetModelPropertiesAsync(
-            LeaderboardModel model,
-            DateTime firstDate)
+        private async Task SetModelPropertiesAsync(LeaderboardModel model)
         {
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
-            var day = model.LeaderboardDay.Date.Max(firstDate.AddDays(-1)); // inc. secret
-
-            var dayleaders = await _apiProvider
-                .GetDayLeadersAsync(day, model.DaySortType)
+            model.Leaderboard = await _apiProvider
+                .GetLeaderboardAsync(model.SortType, model.MinimalDate, model.MaximalDate)
                 .ConfigureAwait(false);
 
-            var leaders = await _apiProvider
-                .GetLeadersAsync(model.SortType, model.MinimalDate, model.MaximalDate, model.IncludePvp)
+            model.Dayboard = await _apiProvider
+                .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
                 .ConfigureAwait(false);
-
-            var (countToday, countTotal) = await _apiProvider
-                .GetUsersCountWithProposalAsync(day)
-                .ConfigureAwait(false);
-
-            model.Leaders = leaders;
-            model.TodayLeaders = dayleaders;
-
-            model.TodayAttemps = countToday;
-            model.TodaySuccessRate = countToday == 0 ? 0 : (int)Math.Round(dayleaders.Count(dl => dl.BestTime.TotalMinutes <= 1440) / (decimal)countToday * 100);
-
-            model.TotalAttemps = countTotal;
-            model.TotalSuccessRate = countTotal == 0 ? 0 : (int)Math.Round(dayleaders.Count / (decimal)countTotal * 100);
-
-            // TODO: meilleure solution à venir
-            if (DateTime.Now.Day <= 3)
-            {
-                model.Awards = await _apiProvider
-                    .GetMonthlyAwardsAsync(DateTime.Now.Year, DateTime.Now.Month - 1)
-                    .ConfigureAwait(false);
-            }
 
             model.BoardName = _localizer["CustomLeaderboard"];
             var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();

@@ -117,88 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ActiveUsers" xml:space="preserve">
-    <value>Utilisateurs ayant tenté : {0} ({1} % de réussite)</value>
+  <data name="DistributionClubs" xml:space="preserve">
+    <value>Clubs distribution</value>
   </data>
-  <data name="ActiveUsersToday" xml:space="preserve">
-    <value>Dont le jour même : {0} ({1} % de réussite)</value>
+  <data name="DistributionCountries" xml:space="preserve">
+    <value>Countries distribution</value>
   </data>
-  <data name="AttemptedHeader" xml:space="preserve">
-    <value>Tentés</value>
+  <data name="DistributionDecades" xml:space="preserve">
+    <value>Decades distributions</value>
   </data>
-  <data name="BestPlayersMonthCount" xml:space="preserve">
-    <value>Meilleurs joueurs du mois par nombre de kikolés</value>
+  <data name="DistributionPositions" xml:space="preserve">
+    <value>Positions distribution</value>
   </data>
-  <data name="BestPlayersMonthPoints" xml:space="preserve">
-    <value>Meilleurs joueurs du mois par points</value>
+  <data name="ItemCount" xml:space="preserve">
+    <value>Count</value>
   </data>
-  <data name="BestPlayersMonthTime" xml:space="preserve">
-    <value>Meilleurs joueurs du mois par temps</value>
+  <data name="ItemRank" xml:space="preserve">
+    <value>Rank</value>
   </data>
-  <data name="BestTimeHeader" xml:space="preserve">
-    <value>Temps min.</value>
+  <data name="ItemRate" xml:space="preserve">
+    <value>%</value>
   </data>
-  <data name="CustomizeLeaderboard" xml:space="preserve">
-    <value>Personnalisation du classement</value>
-  </data>
-  <data name="DailyLeaderboard" xml:space="preserve">
-    <value>Classement quotidien</value>
-  </data>
-  <data name="EasyKikoleMonth" xml:space="preserve">
-    <value>Kikolés les plus faciles</value>
-  </data>
-  <data name="FoundHeader" xml:space="preserve">
-    <value>Trouvés</value>
-  </data>
-  <data name="FromDate" xml:space="preserve">
-    <value>Depuis :</value>
-  </data>
-  <data name="GetRanking" xml:space="preserve">
-    <value>Classer</value>
-  </data>
-  <data name="HardKikoleMonth" xml:space="preserve">
-    <value>Kikolés les plus difficiles</value>
-  </data>
-  <data name="KFoundHeader" xml:space="preserve">
-    <value>Kikolés trouvés / créés</value>
-  </data>
-  <data name="LeaderboardDesc" xml:space="preserve">
-    <value>trié par {0}, depuis {1} jusqu'au {2}</value>
-  </data>
-  <data name="NewPageBuilding" xml:space="preserve">
-    <value>Page en construction</value>
-  </data>
-  <data name="NoUserInTable" xml:space="preserve">
-    <value>Aucun.e</value>
-  </data>
-  <data name="PointsHeader" xml:space="preserve">
-    <value>Points</value>
-  </data>
-  <data name="PosShortHeader" xml:space="preserve">
-    <value>Pos.</value>
-  </data>
-  <data name="ProposedHeader" xml:space="preserve">
-    <value>Proposés</value>
-  </data>
-  <data name="PvpRanking" xml:space="preserve">
-    <value>Classement PVP :</value>
-  </data>
-  <data name="SortType" xml:space="preserve">
-    <value>Type de tri :</value>
-  </data>
-  <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Statistiques</value>
-  </data>
-  <data name="TimeHeader" xml:space="preserve">
-    <value>Temps</value>
-  </data>
-  <data name="ToDate" xml:space="preserve">
-    <value>Jusqu'au :</value>
-  </data>
-  <data name="UsernameHeader" xml:space="preserve">
-    <value>Utilisateur</value>
-  </data>
-  <data name="UsernameHeaderInGoing" xml:space="preserve">
-    <value>En recherche...</value>
+  <data name="ItemValue" xml:space="preserve">
+    <value>Value</value>
   </data>
 </root>

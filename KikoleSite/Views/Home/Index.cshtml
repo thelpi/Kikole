@@ -63,7 +63,7 @@
             {
                 <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
             }
-            @if (Model.CurrentDay > 0)
+            @if (Model.CurrentDay > 0 || Model.IsAdmin)
             {
                 @if (!Model.NoPreviousDay)
                 {

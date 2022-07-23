@@ -123,6 +123,9 @@
   <data name="ActiveUsersToday" xml:space="preserve">
     <value>The first day : {0} ({1}% of success)</value>
   </data>
+  <data name="AttemptedHeader" xml:space="preserve">
+    <value>Attempted</value>
+  </data>
   <data name="BestPlayersMonthCount" xml:space="preserve">
     <value>Best players of the month by kikoles found</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="EasyKikoleMonth" xml:space="preserve">
     <value>Easiest kikoles of the month</value>
   </data>
+  <data name="FoundHeader" xml:space="preserve">
+    <value>Found</value>
+  </data>
   <data name="FromDate" xml:space="preserve">
     <value>From date:</value>
   </data>
@@ -154,10 +160,16 @@
     <value>Hardest kikoles of the month</value>
   </data>
   <data name="KFoundHeader" xml:space="preserve">
-    <value>Kikoles found</value>
+    <value>Kikoles found (created)</value>
   </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>
+  </data>
+  <data name="NewPageBuilding" xml:space="preserve">
+    <value>Page under construction</value>
+  </data>
+  <data name="NoUserInTable" xml:space="preserve">
+    <value>Nobody</value>
   </data>
   <data name="PointsHeader" xml:space="preserve">
     <value>Points</value>
@@ -165,11 +177,17 @@
   <data name="PosShortHeader" xml:space="preserve">
     <value>Pos.</value>
   </data>
+  <data name="ProposedHeader" xml:space="preserve">
+    <value>Proposed</value>
+  </data>
   <data name="PvpRanking" xml:space="preserve">
     <value>PVP ranking:</value>
   </data>
   <data name="SortType" xml:space="preserve">
     <value>Sort type:</value>
+  </data>
+  <data name="StatisticsPageLink" xml:space="preserve">
+    <value>Statistics</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Time</value>
@@ -179,5 +197,8 @@
   </data>
   <data name="UsernameHeader" xml:space="preserve">
     <value>Username</value>
+  </data>
+  <data name="UsernameHeaderInGoing" xml:space="preserve">
+    <value>Searching...</value>
   </data>
 </root>

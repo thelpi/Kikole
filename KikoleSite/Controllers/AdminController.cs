@@ -164,7 +164,7 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool withOkMessage)
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
@@ -178,6 +178,8 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var model = new PlayerCreationModel();
+            if (withOkMessage)
+                model.InfoMessage = _localizer["PlayerOk"];
             SetPositionsOnModel(model, chart);
             model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
             return View(model);
@@ -273,6 +275,11 @@ namespace KikoleSite.Controllers
             AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7);
             AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8);
             AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9);
+            AddClubIfValid(clubs, model.Club10, clubsReferential, ref iPos, model.IsLoan10);
+            AddClubIfValid(clubs, model.Club11, clubsReferential, ref iPos, model.IsLoan11);
+            AddClubIfValid(clubs, model.Club12, clubsReferential, ref iPos, model.IsLoan12);
+            AddClubIfValid(clubs, model.Club13, clubsReferential, ref iPos, model.IsLoan13);
+            AddClubIfValid(clubs, model.Club14, clubsReferential, ref iPos, model.IsLoan14);
 
             if (clubs.Count == 0)
             {
@@ -318,15 +325,7 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            model = new PlayerCreationModel
-            {
-                InfoMessage = _localizer["PlayerOk"]
-            };
-            SetPositionsOnModel(model, chart);
-            model.DisplayPlayerSubmissionLink = await _apiProvider
-                .IsAdminUserAsync(token)
-                .ConfigureAwait(false);
-            return View(model);
+            return RedirectToAction("Index", "Admin", new { withOkMessage = true });
         }
 
         [HttpGet]
