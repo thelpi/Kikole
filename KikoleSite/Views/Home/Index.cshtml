@@ -53,18 +53,12 @@
             </div>
         }
         <div style="margin-top: 10px">
-            @if (!Model.NoPreviousDay)
-            {
-                <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
-            }
-            @if (Model.CurrentDay > 0 || Model.IsAdmin)
-            {
-                @if (!Model.NoPreviousDay)
-                {
-                    <span>| </span>
+            <script>
+                function handler(e) {
+                    window.location.href = "/?day=" + daysBetween(e.target.value, Date.now());
                 }
-                <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
-            }
+            </script>
+            <input type="date" onchange="handler(event);" value="@DateTime.Now.AddDays(-Model.CurrentDay).ToString("yyyy-MM-dd")">
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
         {
