@@ -199,5 +199,11 @@ function treatAsUTC(date) {
 
 function daysBetween(startDate, endDate) {
     var millisecondsPerDay = 24 * 60 * 60 * 1000;
-    return Math.trunc((treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay);
+    var endDateReal = treatAsUTC(endDate);
+    var startDateReal = treatAsUTC(startDate);
+    if (endDateReal > startDateReal) {
+        return Math.trunc((endDateReal - startDateReal) / millisecondsPerDay);
+    } else {
+        return Math.floor((endDateReal - startDateReal) / millisecondsPerDay);
+    }
 }
