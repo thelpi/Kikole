@@ -388,6 +388,68 @@ namespace KikoleSite.Controllers
             return View("Club", model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> PlayerEdit(ulong playerId)
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false))
+                || playerId == 0)
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var (clueEn, clueFr, easyClueEn, easyClueFr, error) = await _apiProvider
+                .GetPlayerCluesAsync(playerId, token)
+                .ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var model = new PlayerEditModel
+            {
+                PlayerId = playerId,
+                ClueEn = clueEn,
+                ClueFr = clueFr,
+                EasyClueEn = easyClueEn,
+                EasyClueFr = easyClueFr
+            };
+
+            return View("PlayerEdit", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PlayerEdit(PlayerEditModel model)
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token)
+                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.ClueEn)
+                || string.IsNullOrWhiteSpace(model.ClueFr)
+                || string.IsNullOrWhiteSpace(model.EasyClueEn)
+                || string.IsNullOrWhiteSpace(model.EasyClueFr)
+                || model.PlayerId == 0)
+            {
+                model.Message = "Données de formulaire invalides";
+                return View("PlayerEdit", model);
+            }
+
+            var result = await _apiProvider
+                .UpdatePlayerCluesAsync(model.PlayerId, model.ClueEn, model.EasyClueEn, model.ClueFr, model.EasyClueFr, token)
+                .ConfigureAwait(false);
+
+            model.Success = string.IsNullOrWhiteSpace(result);
+            model.Message = result;
+
+            return View("PlayerEdit", model);
+        }
+
         private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList(string token)
         {
             var pls = await _apiProvider

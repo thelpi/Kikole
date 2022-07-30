@@ -1,0 +1,48 @@
+﻿@model PlayerEditModel
+
+@if (Model.Success == true)
+{
+    <div style="margin-top: 30px">
+        Modifications OK
+    </div>
+}
+else
+{
+    if (Model.Success == false)
+    {
+        if (string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div style="margin-top: 30px">
+                Erreur inconnue
+            </div>
+        }
+        else
+        {
+            <div style="margin-top: 30px">
+                @Model.Message
+            </div>
+        }
+    }
+    <form method="post" action="/Admin/PlayerEdit">
+        @Html.HiddenFor(m => m.PlayerId)
+        <div style="margin-top: 40px">
+            <label style="width: 75px">Clue (EN):</label>
+            @Html.TextBoxFor(m => m.ClueEn, new { @style = "width: 425px" })
+        </div>
+        <div style="margin-top: 20px">
+            <label style="width: 75px">Clue (FR):</label>
+            @Html.TextBoxFor(m => m.ClueFr, new { @style = "width: 425px" })
+        </div>
+        <div style="margin-top: 20px">
+            <label style="width: 75px">Easy (EN):</label>
+            @Html.TextBoxFor(m => m.EasyClueEn, new { @style = "width: 425px" })
+        </div>
+        <div style="margin-top: 20px">
+            <label style="width: 75px">Easy (FR):</label>
+            @Html.TextBoxFor(m => m.EasyClueFr, new { @style = "width: 425px" })
+        </div>
+        <div style="margin-top: 20px">
+            <input type="submit" value="Save" />
+        </div>
+    </form>
+}

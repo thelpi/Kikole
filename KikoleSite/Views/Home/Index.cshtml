@@ -59,6 +59,10 @@
                 }
             </script>
             <input type="date" onchange="handler(event);" value="@DateTime.Now.AddDays(-Model.CurrentDay).ToString("yyyy-MM-dd")">
+            @if (Model.IsAdmin && Model.CurrentDay < 0)
+            {
+                <a href="/Admin/PlayerEdit?playerId=@Model.PlayerId">@localizer["GoToPlayerClues"]</a>
+            }
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
         {

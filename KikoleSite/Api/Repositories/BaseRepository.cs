@@ -98,6 +98,14 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
+        protected async Task<ulong> ExecuteReplaceAsync(string table, params (string column, object value)[] columns)
+        {
+            return await ExecuteNonQueryAndGetInsertedIdAsync(
+                    GetBasicInsertSql(table, columns, true),
+                    GetDynamicParameters(columns))
+                .ConfigureAwait(false);
+        }
+
         protected async Task<T> GetDtoAsync<T>(string table, params (string column, object value)[] conditions)
         {
             return await ExecuteScalarAsync<T>(
@@ -119,9 +127,9 @@ namespace KikoleSite.Api.Repositories
             return $"SELECT * FROM {table} WHERE {(conditions?.Length > 0 ? string.Join(" AND ", conditions.Select(c => $"{c.column} = @{c.column}")) : "1=1")}";
         }
 
-        private static string GetBasicInsertSql(string table, (string column, object value)[] columns)
+        private static string GetBasicInsertSql(string table, (string column, object value)[] columns, bool replace = false)
         {
-            return $"INSERT INTO {table} ({string.Join(", ", columns.Select(c => c.column))}) VALUES ({string.Join(", ", columns.Select(c => $"@{c.column}"))})";
+            return $"{(replace ? "REPLACE" : "INSERT")} INTO {table} ({string.Join(", ", columns.Select(c => c.column))}) VALUES ({string.Join(", ", columns.Select(c => $"@{c.column}"))})";
         }
 
         private static DynamicParameters GetDynamicParameters((string column, object value)[] conditions)

@@ -62,6 +62,10 @@ namespace KikoleSite
 
         Task<string> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request, string authToken);
 
+        Task<string> UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn, string clueFr, string easyClueFr, string authToken);
+
+        Task<(string clueEn, string clueFr, string easyClueEn, string easyClueFr, string error)> GetPlayerCluesAsync(ulong playerId, string authToken);
+
         #endregion player creation
 
         #region site management

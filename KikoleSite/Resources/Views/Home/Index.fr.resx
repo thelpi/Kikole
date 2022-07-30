@@ -231,4 +231,7 @@
   <data name="PointsPercent" xml:space="preserve">
     <value>des pts</value>
   </data>
+  <data name="GoToPlayerClues" xml:space="preserve">
+    <value>Modifier les indices du joueur</value>
+  </data>
 </root>

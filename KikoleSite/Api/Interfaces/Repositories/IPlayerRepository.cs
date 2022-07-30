@@ -23,7 +23,9 @@ namespace KikoleSite.Api.Interfaces.Repositories
 
         Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId);
 
-        Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, string easyClueEn, DateTime date);
+        Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);
+
+        Task ValidatePlayerProposalAsync(ulong playerId, DateTime date);
 
         Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date);
 

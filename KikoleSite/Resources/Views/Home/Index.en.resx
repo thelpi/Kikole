@@ -231,4 +231,7 @@
   <data name="PointsPercent" xml:space="preserve">
     <value>of pts</value>
   </data>
+  <data name="GoToPlayerClues" xml:space="preserve">
+    <value>Edit the player's clues</value>
+  </data>
 </root>

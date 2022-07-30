@@ -9,6 +9,7 @@ namespace KikoleSite.Models
 {
     public class HomeModel
     {
+        public ulong PlayerId { get; set; }
         public bool IsAdmin { get; set; }
         public bool CanCreateClub { get; set; }
         public string Clue { get; set; }

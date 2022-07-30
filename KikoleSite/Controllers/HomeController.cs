@@ -301,6 +301,7 @@ namespace KikoleSite.Controllers
             model.HasPendingChallenges = pendings.Count > 0;
             model.CanCreateClub = isPowerUser;
             model.IsAdmin = isAdminUser;
+            model.PlayerId = playerCreator?.PlayerId ?? 0;
             return View("Index", model);
         }
     }

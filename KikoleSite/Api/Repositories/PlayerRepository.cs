@@ -107,18 +107,31 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task ValidatePlayerProposalAsync(ulong playerId, string clueEn, string easyClueEn, DateTime date)
+        public async Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn)
         {
             await ExecuteNonQueryAsync(
                     "UPDATE players " +
-                    "SET proposal_date = @date, clue = @clueEn, easy_clue = @easyClueEn " +
+                    "SET clue = @clueEn, easy_clue = @easyClueEn " +
                     "WHERE id = @playerId",
                     new
                     {
                         playerId,
                         clueEn,
-                        date.Date,
                         easyClueEn
+                    })
+                .ConfigureAwait(false);
+        }
+
+        public async Task ValidatePlayerProposalAsync(ulong playerId, DateTime date)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE players " +
+                    "SET proposal_date = @date " +
+                    "WHERE id = @playerId",
+                    new
+                    {
+                        playerId,
+                        date.Date
                     })
                 .ConfigureAwait(false);
         }
@@ -127,7 +140,7 @@ namespace KikoleSite.Api.Repositories
         {
             foreach (var languageId in cluesByLanguage.Keys)
             {
-                await ExecuteInsertAsync(
+                await ExecuteReplaceAsync(
                         "player_clue_translations",
                         ("player_id", playerId),
                         ("language_id", languageId),

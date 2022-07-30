@@ -428,6 +428,43 @@ namespace KikoleSite
             return null;
         }
 
+        public async Task<string> UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn, string clueFr, string easyClueFr, string authToken)
+        {
+            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (callerUserId == 0)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            var isAdmin = await IsAdminUserAsync(authToken).ConfigureAwait(false);
+            if (!isAdmin)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            await _playerService
+                .UpdatePlayerCluesAsync(playerId, clueEn, easyClueEn,
+                    new Dictionary<Languages, string> { { Languages.fr, clueFr } },
+                    new Dictionary<Languages, string> { { Languages.fr, easyClueFr } })
+                .ConfigureAwait(false);
+
+            return null;
+        }
+
+        public async Task<(string clueEn, string clueFr, string easyClueEn, string easyClueFr, string error)> GetPlayerCluesAsync(ulong playerId, string authToken)
+        {
+            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+            if (callerUserId == 0)
+                return (null, null, null, null, "KO");
+
+            var isAdmin = await IsAdminUserAsync(authToken).ConfigureAwait(false);
+            if (!isAdmin)
+                return (null, null, null, null, "KO");
+
+            var clues = await _playerService
+                .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr })
+                .ConfigureAwait(false);
+
+            return (clues[Languages.en].clue, clues[Languages.fr].clue, clues[Languages.en].easyclue, clues[Languages.fr].easyclue, null);
+        }
+
         #endregion player creation
 
         #region site management
