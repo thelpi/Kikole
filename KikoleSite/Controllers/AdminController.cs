@@ -32,11 +32,16 @@ namespace KikoleSite.Controllers
                 return RedirectToAction("ErrorIndex", "Home");
             }
 
-            return View();
+            // default : from now without ms to tomorrow 23:59:59
+            return View(new AdminModel
+            {
+                MessageDateStart = DateTime.Today.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second),
+                MessageDateEnd = DateTime.Today.AddDays(2).AddSeconds(-1)
+            });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Actions(object dummy)
+        public async Task<IActionResult> Actions(AdminModel model)
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
@@ -64,9 +69,20 @@ namespace KikoleSite.Controllers
                         .ReassignPlayersOfTheDayAsync()
                         .ConfigureAwait(false);
                     break;
+                case "insertmessage":
+                    if (model == null)
+                    {
+                        return RedirectToAction("ErrorIndex", "Home");
+                    }
+                    await _apiProvider
+                        .CreateMessageAsync(model.Message ?? string.Empty, model.MessageDateStart, model.MessageDateEnd)
+                        .ConfigureAwait(false);
+                    model.Message = null;
+                    model.ActionFeedback = "Annonce créée";
+                    break;
             }
 
-            return View();
+            return View(model);
         }
 
         [HttpGet]

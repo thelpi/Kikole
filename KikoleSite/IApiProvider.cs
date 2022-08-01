@@ -76,6 +76,8 @@ namespace KikoleSite
 
         Task<string> GetCurrentMessageAsync();
 
+        Task CreateMessageAsync(string message, DateTime? startDate, DateTime? endDate);
+
         Task<ProposalChart> GetProposalChartAsync();
 
         Task<string> CreateDiscussionAsync(string email, string message, string authToken);

@@ -29,5 +29,14 @@ namespace KikoleSite.Api.Repositories
                     })
                 .ConfigureAwait(false);
         }
+
+        public async Task InsertMessageAsync(MessageDto message)
+        {
+            await ExecuteInsertAsync("messages",
+                ("display_from", message.DisplayFrom),
+                ("display_to", message.DisplayTo),
+                ("message", message.Message),
+                ("creation_date", message.CreationDate));
+        }
     }
 }

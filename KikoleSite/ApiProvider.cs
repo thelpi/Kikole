@@ -530,6 +530,19 @@ namespace KikoleSite
             return message?.Message;
         }
 
+        public async Task CreateMessageAsync(string message, DateTime? startDate, DateTime? endDate)
+        {
+            await _messageRepository
+                .InsertMessageAsync(new Api.Models.Dtos.MessageDto
+                {
+                    DisplayTo = endDate,
+                    DisplayFrom = startDate,
+                    CreationDate = _clock.Now,
+                    Message = message
+                })
+                .ConfigureAwait(false);
+        }
+
         public async Task<string> CreateDiscussionAsync(string email, string message, string authToken)
         {
             var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);

@@ -1,14 +1,35 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model AdminModel
+
+@if (!string.IsNullOrWhiteSpace(Model?.ActionFeedback))
+{
+    <div style="margin-bottom: 10px">
+        @Model.ActionFeedback
+    </div>
+}
 
 <h3>@localizer["AdminActions"]</h3>
 <form method="post" action="/Admin/Actions">
     <div>
         <input type="submit" value="@localizer["RecomputeBadges"]" name="submit-recomputebadges" />
     </div>
-    <div style="margin-top: 5px">
+    <div style="margin-top: 10px">
         <input type="submit" value="@localizer["RecomputeLeaders"]" name="submit-recomputeleaders" />
     </div>
-    <div style="margin-top: 5px">
+    <div style="margin-top: 10px">
         <input type="submit" value="@localizer["ReassignPlayers"]" name="submit-reassignplayers" />
     </div>
+    <fieldset style="margin-top: 10px">
+        <legend>@localizer["AddGlobalMessage"]</legend>
+        <div>
+            @Html.TextBoxFor(m => m.Message, new { @style = "width: 400px" });
+        </div>
+        <div style="margin-top: 5px">
+            @Html.EditorFor(m => m.MessageDateStart);
+        </div>
+        <div style="margin-top: 5px">
+            @Html.EditorFor(m => m.MessageDateEnd);
+        </div>
+        <input style="margin-top: 5px" type="submit" value="@localizer["ActionAddMessage"]" name="submit-insertmessage" />
+    </fieldset>
 </form>
