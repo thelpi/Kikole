@@ -94,6 +94,8 @@ namespace KikoleSite
 
         #region main game
 
+        Task<Api.Models.Dtos.PlayerFullDto> GetFullPlayerAsync(DateTime date);
+
         Task<ProposalResponse> SubmitProposalAsync(string value, uint daysBeforeNow, ProposalTypes proposalType, string authToken, string ip);
 
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken);

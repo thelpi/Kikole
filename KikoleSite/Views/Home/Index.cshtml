@@ -3,9 +3,9 @@
 <div>
     @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && Model.IsErrorMessageForced)
     {
-    <div style="margin-top: 20px">
-        <label style="color:crimson">@Model.MessageToDisplay</label>
-    </div>
+        <div style="margin-top: 20px">
+            <label style="color:crimson">@Model.MessageToDisplay</label>
+        </div>
     }
     @if (Model.AlmostThere)
     {
@@ -101,6 +101,25 @@
             </div>
             <div style="margin-top: 10px">
                 @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
+            </div>
+            <div style="margin-top: 10px">
+                @localizer["FinalPosition"] <span style="font-style:italic">@Model.Position</span>
+            </div>
+            <div style="margin-top: 10px">
+                @localizer["FinalBirthYear"] <span style="font-style:italic">@Model.BirthYear</span>
+            </div>
+            <div style="margin-top: 10px">
+                @localizer["FinalNationality"] <span style="font-style:italic">@Model.CountryName</span>
+            </div>
+            <div style="margin-top: 10px">
+                @localizer["FinalClubs"]
+                @foreach (var club in Model.KnownPlayerClubs.OrderBy(x => x.HistoryPosition))
+                {
+                    var name = $"{club.HistoryPosition} - {club.Name}";
+                    if (club.IsLoan)
+                        name += " (p)";
+                    <div style="font-style:italic">@name</div>
+                }
             </div>
         }
         else

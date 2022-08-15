@@ -594,6 +594,13 @@ namespace KikoleSite
 
         #region main game
 
+        public async Task<Api.Models.Dtos.PlayerFullDto> GetFullPlayerAsync(DateTime date)
+        {
+            return await _playerService
+                .GetPlayerOfTheDayFullInfoAsync(date)
+                .ConfigureAwait(false);
+        }
+
         public async Task<ProposalResponse> SubmitProposalAsync(string value,
             uint daysBeforeNow,
             ProposalTypes proposalType,

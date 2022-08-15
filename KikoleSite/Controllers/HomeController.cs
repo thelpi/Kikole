@@ -302,6 +302,23 @@ namespace KikoleSite.Controllers
             model.CanCreateClub = isPowerUser;
             model.IsAdmin = isAdminUser;
             model.PlayerId = playerCreator?.PlayerId ?? 0;
+
+            if (!string.IsNullOrWhiteSpace(model.PlayerName))
+            {
+                var pp = await _apiProvider
+                    .GetFullPlayerAsync(proposalDate)
+                    .ConfigureAwait(false);
+
+                var countries = await _apiProvider
+                    .GetCountriesAsync()
+                    .ConfigureAwait(false);
+
+                model.CountryName = countries.FirstOrDefault(c => c.Key == pp.Player.CountryId).Value;
+                model.Position = ((Positions)pp.Player.PositionId).GetLabel();
+                model.KnownPlayerClubs = pp.PlayerClubs.Select(pc => new PlayerClub(pc, pp.Clubs)).ToList();
+                model.BirthYear = pp.Player.YearOfBirth.ToNaString();
+            }
+
             return View("Index", model);
         }
     }

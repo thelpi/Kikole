@@ -234,4 +234,16 @@
   <data name="GoToPlayerClues" xml:space="preserve">
     <value>Modifier les indices du joueur</value>
   </data>
+  <data name="FinalBirthYear" xml:space="preserve">
+    <value>Année de naissance :</value>
+  </data>
+  <data name="FinalClubs" xml:space="preserve">
+    <value>Clubs :</value>
+  </data>
+  <data name="FinalNationality" xml:space="preserve">
+    <value>Nationalité :</value>
+  </data>
+  <data name="FinalPosition" xml:space="preserve">
+    <value>Position :</value>
+  </data>
 </root>

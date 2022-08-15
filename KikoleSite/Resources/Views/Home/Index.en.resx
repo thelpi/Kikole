@@ -234,4 +234,16 @@
   <data name="GoToPlayerClues" xml:space="preserve">
     <value>Edit the player's clues</value>
   </data>
+  <data name="FinalBirthYear" xml:space="preserve">
+    <value>Birth year:</value>
+  </data>
+  <data name="FinalClubs" xml:space="preserve">
+    <value>Clubs:</value>
+  </data>
+  <data name="FinalNationality" xml:space="preserve">
+    <value>Nationality:</value>
+  </data>
+  <data name="FinalPosition" xml:space="preserve">
+    <value>Position:</value>
+  </data>
 </root>
