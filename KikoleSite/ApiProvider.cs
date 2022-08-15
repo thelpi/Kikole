@@ -562,6 +562,13 @@ namespace KikoleSite
             return null;
         }
 
+        public async Task<IReadOnlyCollection<Api.Models.Dtos.DiscussionDto>> GetDiscussionsAsync()
+        {
+            return await _discussionRepository
+                .GetDiscussionsAsync()
+                .ConfigureAwait(false);
+        }
+
         public async Task ResetBadgesAsync()
         {
             await _badgeService

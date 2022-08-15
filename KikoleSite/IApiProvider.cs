@@ -82,6 +82,8 @@ namespace KikoleSite
 
         Task<string> CreateDiscussionAsync(string email, string message, string authToken);
 
+        Task<IReadOnlyCollection<Api.Models.Dtos.DiscussionDto>> GetDiscussionsAsync();
+
         Task ResetBadgesAsync();
 
         Task ComputeMissingLeadersAsync();

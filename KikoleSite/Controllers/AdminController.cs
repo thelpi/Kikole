@@ -36,7 +36,8 @@ namespace KikoleSite.Controllers
             return View(new AdminModel
             {
                 MessageDateStart = DateTime.Today.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second),
-                MessageDateEnd = DateTime.Today.AddDays(2).AddSeconds(-1)
+                MessageDateEnd = DateTime.Today.AddDays(2).AddSeconds(-1),
+                Discussions = await _apiProvider.GetDiscussionsAsync().ConfigureAwait(false)
             });
         }
 
