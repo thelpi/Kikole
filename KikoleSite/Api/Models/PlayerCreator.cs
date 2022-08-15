@@ -13,16 +13,16 @@ namespace KikoleSite.Api.Models
 
         public bool CanDisplayCreator { get; }
 
-        internal PlayerCreator(ulong userId, PlayerDto p, UserDto u)
+        internal PlayerCreator(UserDto requestUser, PlayerDto player, UserDto creatorUser)
         {
-            PlayerId = p.Id;
-            Login = u.UserTypeId == (ulong)UserTypes.PowerUser
-                ? u.Login
+            PlayerId = player.Id;
+            Login = creatorUser.UserTypeId == (ulong)UserTypes.PowerUser
+                ? creatorUser.Login
                 : null;
-            Name = p.CreationUserId == userId
-                ? p.Name
+            Name = player.CreationUserId == requestUser.Id || requestUser.UserTypeId == (ulong)UserTypes.Administrator
+                ? player.Name
                 : null;
-            CanDisplayCreator = p.HideCreator == 0;
+            CanDisplayCreator = player.HideCreator == 0;
         }
 
         protected PlayerCreator(UserDto u, PlayerDto p)

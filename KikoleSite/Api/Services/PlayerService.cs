@@ -192,15 +192,19 @@ namespace KikoleSite.Api.Services
             ulong userId,
             DateTime proposalDate)
         {
-            var p = await _playerRepository
+            var player = await _playerRepository
                 .GetPlayerOfTheDayAsync(proposalDate.Date)
                 .ConfigureAwait(false);
 
-            var u = await _userRepository
-                .GetUserByIdAsync(p.CreationUserId)
+            var creatorUser = await _userRepository
+                .GetUserByIdAsync(player.CreationUserId)
                 .ConfigureAwait(false);
 
-            return new PlayerCreator(userId, p, u);
+            var requestUser = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            return new PlayerCreator(requestUser, player, creatorUser);
         }
 
         /// <inheritdoc />
