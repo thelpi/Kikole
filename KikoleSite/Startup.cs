@@ -77,6 +77,12 @@ namespace KikoleSite
                 .AddSingleton<ICrypter, Crypter>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton(new Random());
+
+            // elite
+            services
+                .Configure<Elite.RankingConfiguration>(Configuration.GetSection("Ranking"))
+                .AddSingleton<Elite.IReadRepository, Elite.ReadRepository>()
+                .AddSingleton<Elite.IStatisticsProvider, Elite.StatisticsProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
