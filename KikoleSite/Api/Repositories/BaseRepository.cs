@@ -59,7 +59,7 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
-        protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters, T defaultValue = default(T))
+        protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters, T defaultValue = default)
         {
             T result = defaultValue;
 
