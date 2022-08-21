@@ -34,6 +34,11 @@ namespace KikoleSite.Elite.Repositories
             return await GetPlayersInternalAsync(true, false).ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<PlayerDto>> GetBannedPlayersAsync()
+        {
+            return await GetPlayersInternalAsync(true, true).ConfigureAwait(false);
+        }
+
         private async Task<IReadOnlyCollection<PlayerDto>> GetPlayersInternalAsync(bool isDirty, bool isBanned)
         {
             return await ExecuteReaderAsync<PlayerDto>(
