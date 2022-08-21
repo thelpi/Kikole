@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Elite
+﻿using KikoleSite.Elite.Enums;
+
+namespace KikoleSite.Elite.Models
 {
     public class WrBase
     {

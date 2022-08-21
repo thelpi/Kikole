@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Elite.Enums;
 
 namespace KikoleSite.Elite
 {

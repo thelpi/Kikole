@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Elite
+﻿namespace KikoleSite.Elite.Enums
 {
     public enum Stage
     {

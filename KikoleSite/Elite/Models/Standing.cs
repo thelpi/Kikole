@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using KikoleSite.Elite.Enums;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Models
 {
     public class Standing
     {
         private DateTime _startDate;
         private DateTime? _endDate;
-        private List<long> _times;
+        private readonly List<long> _times;
 
         public Stage Stage { get; internal set; }
         public Level Level { get; internal set; }

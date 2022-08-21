@@ -1,6 +1,9 @@
 ﻿using System;
+using KikoleSite.Elite.Dtos;
+using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Extensions;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Models
 {
     public class Player
     {
@@ -20,7 +23,7 @@ namespace KikoleSite.Elite
             Id = dto.Id;
             RealName = dto.RealName;
             SurName = dto.SurName;
-            ControlStyle = Extensions.ToControlStyle(dto.ControlStyle);
+            ControlStyle = ModelExtensions.ToControlStyle(dto.ControlStyle);
             Color = dto.Color;
         }
     }

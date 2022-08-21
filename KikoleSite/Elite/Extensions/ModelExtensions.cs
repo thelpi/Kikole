@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Elite.Enums;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Extensions
 {
-    public static class Extensions
+    public static class ModelExtensions
     {
         private const int GoldeneyeStagesCount = 20;
 

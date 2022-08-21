@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Elite.Enums;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Models
 {
     public class StageLeaderboardItem : IEquatable<StageLeaderboardItem>
     {

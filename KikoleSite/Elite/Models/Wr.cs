@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Elite.Dtos;
+using KikoleSite.Elite.Enums;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Models
 {
     public class Wr : WrBase
     {
@@ -11,7 +13,7 @@ namespace KikoleSite.Elite
         public Player Player => _holders[0].Item1;
         public DateTime Date => _holders[0].Item2;
         public Engine Engine => _holders[0].Item3;
-        public Player UntiedSlayPlayer => _holders.Count > 1 ? _holders[1].Item1 : default(Player);
+        public Player UntiedSlayPlayer => _holders.Count > 1 ? _holders[1].Item1 : default;
         public DateTime? UntiedSlayDate => _holders.Count > 1 ? _holders[1].Item2 : default(DateTime?);
         public IReadOnlyCollection<(Player, DateTime, Engine)> Holders => _holders;
         public DateTime? SlayDate { get; private set; }

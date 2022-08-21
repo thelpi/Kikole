@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using KikoleSite.Elite.Enums;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Models
 {
     public class StageLeaderboard
     {

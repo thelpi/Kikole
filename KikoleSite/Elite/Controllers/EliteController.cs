@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Elite;
+using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Providers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KikoleSite.Controllers
+namespace KikoleSite.Elite.Controllers
 {
     public class EliteController : Controller
     {
@@ -16,7 +17,7 @@ namespace KikoleSite.Controllers
             _statisticsProvider = statisticsProvider;
         }
 
-        [HttpGet("games/{game}/longest-standings")]
+        [HttpGet("the-elite/games/{game}/longest-standings")]
         public async Task<JsonResult> GetLongestStandingsAsync(
             [FromRoute] Game game,
             [FromQuery][Required] StandingType standingType,
@@ -32,7 +33,7 @@ namespace KikoleSite.Controllers
             return Json(standings.Take(count ?? 100).ToList());
         }
 
-        [HttpGet("stages/{stage}/leaderboard-history")]
+        [HttpGet("the-elite/stages/{stage}/leaderboard-history")]
         public async Task<JsonResult> GetStageLeaderboardHistoryAsync(
             [FromRoute] Stage stage,
             [FromQuery] LeaderboardGroupOptions groupOption,
@@ -45,7 +46,7 @@ namespace KikoleSite.Controllers
             return Json(datas);
         }
 
-        [HttpGet("players")]
+        [HttpGet("the-elite/players")]
         public async Task<JsonResult> GetPlayersAsync()
         {
             var players = await _statisticsProvider

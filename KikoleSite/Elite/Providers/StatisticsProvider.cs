@@ -3,9 +3,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Elite.Dtos;
+using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Extensions;
+using KikoleSite.Elite.Models;
+using KikoleSite.Elite.Repositories;
 using Microsoft.Extensions.Options;
 
-namespace KikoleSite.Elite
+namespace KikoleSite.Elite.Providers
 {
     public sealed class StatisticsProvider : IStatisticsProvider
     {
@@ -344,64 +349,6 @@ namespace KikoleSite.Elite
                     }
                 }
             }
-        }
-
-        private static IEnumerable<(long, DateTime, Stage)> GetPotentialSweeps(
-            bool untied,
-            Dictionary<(Stage, Level), List<EntryDto>> entriesGroups,
-            DateTime currentDate,
-            Stage stage)
-        {
-            var tiedSweepPlayerIds = new List<long>();
-            long? untiedSweepPlayerId = null;
-            foreach (var level in SystemExtensions.Enumerate<Level>())
-            {
-                var stageLevelDateWrs = entriesGroups[(stage, level)]
-                    .Where(e => e.Date.Value.Date <= currentDate.Date)
-                    .GroupBy(e => e.Time)
-                    .OrderBy(e => e.Key)
-                    .FirstOrDefault();
-
-                bool isPotentialSweep = untied
-                    ? stageLevelDateWrs?.Count() == 1
-                    : stageLevelDateWrs?.Count() > 0;
-
-                if (isPotentialSweep)
-                {
-                    if (untied)
-                    {
-                        var currentPId = stageLevelDateWrs.First().PlayerId;
-                        if (!untiedSweepPlayerId.HasValue)
-                        {
-                            untiedSweepPlayerId = currentPId;
-                        }
-
-                        isPotentialSweep = untiedSweepPlayerId.Value == currentPId;
-                    }
-                    else
-                    {
-                        tiedSweepPlayerIds = tiedSweepPlayerIds.IntersectOrConcat(stageLevelDateWrs.Select(_ => _.PlayerId));
-
-                        isPotentialSweep = tiedSweepPlayerIds.Count > 0;
-                    }
-                }
-
-                if (!isPotentialSweep)
-                {
-                    tiedSweepPlayerIds.Clear();
-                    untiedSweepPlayerId = null;
-                    break;
-                }
-            }
-
-            if (!untied)
-            {
-                return tiedSweepPlayerIds.Select(_ => (_, currentDate, stage));
-            }
-
-            return untiedSweepPlayerId.HasValue
-                ? (untiedSweepPlayerId.Value, currentDate.Date, stage).Yield()
-                : Enumerable.Empty<(long, DateTime, Stage)>();
         }
 
         private IReadOnlyCollection<Wr> GetStageLevelWorldRecords(

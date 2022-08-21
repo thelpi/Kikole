@@ -80,9 +80,9 @@ namespace KikoleSite
 
             // elite
             services
-                .Configure<Elite.RankingConfiguration>(Configuration.GetSection("Ranking"))
-                .AddSingleton<Elite.IReadRepository, Elite.ReadRepository>()
-                .AddSingleton<Elite.IStatisticsProvider, Elite.StatisticsProvider>();
+                .Configure<Elite.Models.RankingConfiguration>(Configuration.GetSection("Ranking"))
+                .AddSingleton<Elite.Repositories.IReadRepository, Elite.Repositories.ReadRepository>()
+                .AddSingleton<Elite.Providers.IStatisticsProvider, Elite.Providers.StatisticsProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
