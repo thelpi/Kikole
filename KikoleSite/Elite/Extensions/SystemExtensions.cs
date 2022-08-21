@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using KikoleSite.Elite.Enums;
 
 namespace KikoleSite.Elite
@@ -140,6 +141,16 @@ namespace KikoleSite.Elite
             {
                 bag.Add(element);
             }
+        }
+
+        public static bool IsWebNotFound(this Exception ex)
+        {
+            if (!(ex is WebException webEx) || !(webEx.Response is HttpWebResponse))
+            {
+                return false;
+            }
+
+            return (webEx.Response as HttpWebResponse).StatusCode == HttpStatusCode.NotFound;
         }
     }
 }
