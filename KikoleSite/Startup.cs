@@ -80,8 +80,10 @@ namespace KikoleSite
 
             // elite
             services
-                .Configure<Elite.Models.RankingConfiguration>(Configuration.GetSection("Ranking"))
+                .Configure<Elite.Configurations.TheEliteWebsiteConfiguration>(Configuration.GetSection("TheEliteWebsite"))
+                .Configure<Elite.Configurations.RankingConfiguration>(Configuration.GetSection("Ranking"))
                 .AddSingleton<Elite.Repositories.IReadRepository, Elite.Repositories.ReadRepository>()
+                .AddSingleton<Elite.Repositories.IWriteRepository, Elite.Repositories.WriteRepository>()
                 .AddSingleton<Elite.Providers.IStatisticsProvider, Elite.Providers.StatisticsProvider>();
         }
 
