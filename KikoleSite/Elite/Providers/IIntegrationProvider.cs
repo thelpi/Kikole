@@ -6,11 +6,9 @@ namespace KikoleSite.Elite.Providers
 {
     public interface IIntegrationProvider
     {
-        Task ScanAllPlayersEntriesHistoryAsync(Game game);
+        Task RefreshAllEntriesAsync(Game game);
 
-        Task ScanPlayerEntriesHistoryAsync(Game game, long playerId);
-
-        Task ScanTimePageForNewPlayersAsync(DateTime? stopAt, bool addEntries);
+        Task RefreshEntriesToDateAsync(DateTime stopAt);
 
         Task RefreshPlayersAsync();
     }

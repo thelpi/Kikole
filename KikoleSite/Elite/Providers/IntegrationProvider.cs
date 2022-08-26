@@ -7,7 +7,6 @@ using System.Web;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
 using KikoleSite.Elite.Models;
 using KikoleSite.Elite.Repositories;
 
@@ -48,7 +47,12 @@ namespace KikoleSite.Elite.Providers
                 .Select(pUrl => HttpUtility.UrlDecode(pUrl))
                 .ToList();
 
-            var (validPlayers, bannedPlayers) = await GetPlayersAsync()
+            var validPlayers = await _readRepository
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+
+            var bannedPlayers = await _readRepository
+                .GetPlayersAsync(true)
                 .ConfigureAwait(false);
 
             foreach (var pUrl in allPlayerUrls)
@@ -103,9 +107,11 @@ namespace KikoleSite.Elite.Providers
             }
         }
 
-        public async Task ScanAllPlayersEntriesHistoryAsync(Game game)
+        public async Task RefreshAllEntriesAsync(Game game)
         {
-            var (validPlayers, bannedPlayers) = await GetPlayersAsync().ConfigureAwait(false);
+            var validPlayers = await _readRepository
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
 
             const int parallel = 8;
             for (var i = 0; i < validPlayers.Count; i += parallel)
@@ -118,27 +124,13 @@ namespace KikoleSite.Elite.Providers
             }
         }
 
-        public async Task ScanPlayerEntriesHistoryAsync(Game game, long playerId)
+        public async Task RefreshEntriesToDateAsync(DateTime stopAt)
         {
-            var (validPlayers, bannedPlayers) = await GetPlayersAsync().ConfigureAwait(false);
+            var validPlayers = await _readRepository
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
 
-            var player = validPlayers.FirstOrDefault(p => p.Id == playerId);
-            if (player == null)
-            {
-                throw new ArgumentException($"invalid {nameof(playerId)}.", nameof(playerId));
-            }
-
-            await ExtractPlayerTimesAsync(game, player).ConfigureAwait(false);
-        }
-
-        public async Task ScanTimePageForNewPlayersAsync(DateTime? stopAt, bool addEntries)
-        {
-            var (validPlayers, bannedPlayers) = await GetPlayersAsync().ConfigureAwait(false);
-
-            // Takes GoldenEye as default date (older than Perfect Dark)
-            var allDatesToLoop = (stopAt ?? Game.GoldenEye.GetEliteFirstDate()).LoopBetweenDates(DateStep.Month, _clock).Reverse().ToList();
-
-            var playersToCreate = new ConcurrentBag<string>();
+            var allDatesToLoop = stopAt.LoopBetweenDates(DateStep.Month, _clock).Reverse().ToList();
 
             var allEntries = new ConcurrentBag<EntryWebDto>();
 
@@ -151,75 +143,61 @@ namespace KikoleSite.Elite.Providers
                         .GetMonthPageTimeEntriesAsync(loopDate.Year, loopDate.Month)
                         .ConfigureAwait(false);
 
-                    foreach (var entry in results)
-                    {
-                        if (!bannedPlayers.Any(p => p.UrlName.Equals(entry.PlayerUrlName, StringComparison.InvariantCultureIgnoreCase))
-                            && !validPlayers.Any(p => p.UrlName.Equals(entry.PlayerUrlName, StringComparison.InvariantCultureIgnoreCase)))
-                        {
-                            playersToCreate.Add(entry.PlayerUrlName);
-                        }
-                    }
-
                     allEntries.AddRange(results);
                 })).ConfigureAwait(false);
             }
 
-            var newPlayers = new Dictionary<string, long>();
-            foreach (var pName in playersToCreate.Distinct())
+            var existingEntries = (await _readRepository
+                .GetEntriesAsync(null, null, new DateTime(stopAt.Year, stopAt.Month, 1), _clock.Tomorrow)
+                .ConfigureAwait(false))
+                .GroupBy(_ => (_.PlayerId, _.Stage, _.Level, _.Time, _.Engine))
+                .Select(_ => _.Key)
+                .ToList();
+
+            var tasks = new List<Task>(parallel);
+            var groupSize = allEntries.Count / (parallel - 1);
+            for (var i = 0; i < parallel; i++)
             {
-                var id = await _writeRepository
-                    .InsertPlayerAsync(pName, Player.DefaultPlayerHexColor)
-                    .ConfigureAwait(false);
-                newPlayers.Add(pName, id);
+                tasks.Add(
+                    ManageGroupOfEntriesAsync(
+                        validPlayers,
+                        allEntries.Skip(i * groupSize).Take(groupSize),
+                        existingEntries));
             }
 
-            if (addEntries)
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        private async Task ManageGroupOfEntriesAsync(
+            IReadOnlyCollection<PlayerDto> validPlayers,
+            IEnumerable<EntryWebDto> entriesToManage,
+            List<(long PlayerId, Stage Stage, Level Level, long Time, Engine Engine)> existingEntries)
+        {
+            foreach (var entry in entriesToManage)
             {
-                foreach (var entry in allEntries)
+                if (entry.Date.Value >= _clock.Tomorrow)
+                    continue;
+
+                var idMatch = validPlayers
+                    .FirstOrDefault(p =>
+                        p.IsSame(entry.PlayerUrlName))
+                    ?.Id;
+
+                if (idMatch.HasValue)
                 {
-                    var idMatch = validPlayers
-                            .FirstOrDefault(p =>
-                                p.UrlName.Equals(
-                                    entry.PlayerUrlName,
-                                    StringComparison.InvariantCultureIgnoreCase))?
-                            .Id;
+                    var dto = entry.ToEntry(idMatch.Value);
+                    dto.Engine = await _siteParser
+                        .GetTimeEntryEngineAsync(entry.EngineUrl)
+                        .ConfigureAwait(false);
 
-                    // should use InvariantCultureIgnoreCase
-                    if (!idMatch.HasValue && newPlayers.ContainsKey(entry.PlayerUrlName))
+                    if (!existingEntries.Contains((dto.PlayerId, dto.Stage, dto.Level, dto.Time, dto.Engine)))
                     {
-                        idMatch = newPlayers[entry.PlayerUrlName];
-                    }
-
-                    if (idMatch.HasValue)
-                    {
-                        var dto = entry.ToEntry(idMatch.Value);
-                        dto.Engine = await _siteParser
-                            .GetTimeEntryEngineAsync(entry.EngineUrl)
-                            .ConfigureAwait(false);
-
                         await _writeRepository
-                            .InsertTimeEntryAsync(dto)
+                            .ReplaceTimeEntryAsync(dto)
                             .ConfigureAwait(false);
-                    }
-                    else
-                    {
-
                     }
                 }
             }
-        }
-
-        private async Task<(IReadOnlyCollection<PlayerDto> validPlayers, IReadOnlyCollection<PlayerDto> bannedPlayers)> GetPlayersAsync()
-        {
-            var players = await _readRepository
-                .GetPlayersAsync()
-                .ConfigureAwait(false);
-
-            var dirtyPlayers = await _readRepository
-                .GetPlayersAsync(true)
-                .ConfigureAwait(false);
-
-            return (players, dirtyPlayers);
         }
 
         private async Task ExtractPlayerTimesAsync(Game game, PlayerDto player)
@@ -239,7 +217,7 @@ namespace KikoleSite.Elite.Providers
                 {
                     var groupEntry = group.OrderBy(d => d.Date ?? DateTime.MaxValue).First();
                     await _writeRepository
-                        .InsertTimeEntryAsync(groupEntry.ToEntry(player.Id))
+                        .ReplaceTimeEntryAsync(groupEntry.ToEntry(player.Id))
                         .ConfigureAwait(false);
                 }
             }

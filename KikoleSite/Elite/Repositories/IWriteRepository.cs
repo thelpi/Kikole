@@ -6,7 +6,7 @@ namespace KikoleSite.Elite.Repositories
 {
     public interface IWriteRepository
     {
-        Task<long> InsertTimeEntryAsync(EntryDto requestEntry);
+        Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry);
 
         Task<long> InsertPlayerAsync(string urlName, string defaultHexColor);
 

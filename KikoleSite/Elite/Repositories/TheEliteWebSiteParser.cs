@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using HtmlAgilityPack;
 using KikoleSite.Elite.Configurations;
 using KikoleSite.Elite.Dtos;
@@ -287,7 +288,7 @@ namespace KikoleSite.Elite.Repositories
                 return null;
             }
 
-            string playerUrl = link
+            var playerUrl = HttpUtility.UrlDecode(link
                 .ParentNode
                 .ParentNode
                 .ChildNodes[3]
@@ -295,8 +296,7 @@ namespace KikoleSite.Elite.Repositories
                 .First()
                 .Attributes["href"]
                 .Value
-                .Replace(playerUrlPrefix, string.Empty)
-                .Replace("+", " ");
+                .Replace(playerUrlPrefix, string.Empty));
 
             if (string.IsNullOrWhiteSpace(playerUrl))
             {
@@ -371,13 +371,15 @@ namespace KikoleSite.Elite.Repositories
             {
                 try
                 {
+                    var urlEncodedPlayerUrl = HttpUtility.UrlEncode(playerUrlName);
+
                     var client = new HttpClient
                     {
                         BaseAddress = new Uri(_configuration.BaseUri)
                     };
 
                     var response = await client
-                        .GetAsync(new Uri($"~{playerUrlName}/{game.GetGameUrlName()}/history", UriKind.Relative))
+                        .GetAsync(new Uri($"~{urlEncodedPlayerUrl}/{game.GetGameUrlName()}/history", UriKind.Relative))
                         .ConfigureAwait(false);
 
                     var cookie = response.Headers.GetValues("Set-Cookie").First().Split(';').First().Split('=').ElementAt(1);
@@ -400,7 +402,7 @@ namespace KikoleSite.Elite.Repositories
 
                     response = await client
                         .PostAsync(
-                            new Uri($"~{playerUrlName}/{game.GetGameUrlName()}/history", UriKind.Relative),
+                            new Uri($"~{urlEncodedPlayerUrl}/{game.GetGameUrlName()}/history", UriKind.Relative),
                             new FormUrlEncodedContent(queryParams))
                         .ConfigureAwait(false);
 

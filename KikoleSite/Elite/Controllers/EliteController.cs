@@ -28,6 +28,26 @@ namespace KikoleSite.Elite.Controllers
             return NoContent();
         }
 
+        [HttpGet("the-elite/entries/{game}/refresh")]
+        public async Task<IActionResult> RefreshEntriesAsync([FromRoute] Game game)
+        {
+            await _integrationProvider
+                .RefreshAllEntriesAsync(game)
+                .ConfigureAwait(false);
+
+            return NoContent();
+        }
+
+        [HttpGet("the-elite/entries/refresh")]
+        public async Task<IActionResult> RefreshEntriesAsync([Required][FromQuery] DateTime fromDate)
+        {
+            await _integrationProvider
+                .RefreshEntriesToDateAsync(fromDate)
+                .ConfigureAwait(false);
+
+            return NoContent();
+        }
+
         [HttpGet("the-elite/games/{game}/longest-standings")]
         public async Task<JsonResult> GetLongestStandingsAsync(
             [FromRoute] Game game,

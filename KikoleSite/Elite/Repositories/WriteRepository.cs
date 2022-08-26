@@ -10,30 +10,23 @@ namespace KikoleSite.Elite.Repositories
     {
         public WriteRepository(IConfiguration configuration) : base(configuration) { }
 
-        public async Task<long> InsertTimeEntryAsync(EntryDto requestEntry)
+        public async Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry)
         {
-            try
-            {
-                return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
-                        "INSERT INTO entry " +
-                        "(player_id, level_id, stage_id, date, time, system_id, creation_date) " +
-                        "VALUES " +
-                        "(@player_id, @level_id, @stage_id, @date, @time, @system_id, NOW())",
-                        new
-                        {
-                            player_id = requestEntry.PlayerId,
-                            level_id = (long)requestEntry.Level,
-                            stage_id = (long)requestEntry.Stage,
-                            requestEntry.Date,
-                            requestEntry.Time,
-                            system_id = (long)requestEntry.Engine
-                        })
-                    .ConfigureAwait(false);
-            }
-            catch (MySqlException ex) when (ex.Number == 1062)
-            {
-                return 0;
-            }
+            return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
+                    "REPLACE INTO entry " +
+                    "(player_id, level_id, stage_id, date, time, system_id, creation_date) " +
+                    "VALUES " +
+                    "(@player_id, @level_id, @stage_id, @date, @time, @system_id, NOW())",
+                    new
+                    {
+                        player_id = requestEntry.PlayerId,
+                        level_id = (long)requestEntry.Level,
+                        stage_id = (long)requestEntry.Stage,
+                        requestEntry.Date,
+                        requestEntry.Time,
+                        system_id = (long)requestEntry.Engine
+                    })
+                .ConfigureAwait(false);
         }
 
         public async Task<long> InsertPlayerAsync(string urlName, string defaultHexColor)
