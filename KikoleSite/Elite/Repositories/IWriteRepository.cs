@@ -10,10 +10,10 @@ namespace KikoleSite.Elite.Repositories
 
         Task<long> InsertPlayerAsync(string urlName, string defaultHexColor);
 
-        Task DeletePlayerStageEntriesAsync(Stage stage, long playerId);
+        Task DeletePlayerEntriesAsync(Game game, long playerId);
 
-        Task UpdateDirtyPlayerAsync(long playerId);
+        Task UpdatePlayerAsync(PlayerDto player);
 
-        Task CleanPlayerAsync(PlayerDto player);
+        Task BanPlayerAsync(long playerId);
     }
 }

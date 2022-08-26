@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
@@ -59,32 +58,23 @@ namespace KikoleSite.Elite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task UpdateDirtyPlayerAsync(long playerId)
+        public async Task DeletePlayerEntriesAsync(Game game, long playerId)
         {
             await ExecuteNonQueryAsync(
-                    "UPDATE player SET is_dirty = 1 WHERE id = @id",
-                    new { id = playerId })
-                .ConfigureAwait(false);
-        }
-
-        public async Task DeletePlayerStageEntriesAsync(Stage stage, long playerId)
-        {
-            await ExecuteNonQueryAsync(
-                    "DELETE FROM entry WHERE player_id = @player_id AND stage_id = @stage_id",
+                    $"DELETE FROM entry WHERE player_id = @player_id AND stage_id {(game == Game.GoldenEye ? "<= 20" : "> 20")}",
                     new
                     {
-                        stage_id = (long)stage,
                         player_id = playerId
                     })
                 .ConfigureAwait(false);
         }
 
-        public async Task CleanPlayerAsync(PlayerDto player)
+        public async Task UpdatePlayerAsync(PlayerDto player)
         {
             await ExecuteNonQueryAsync(
                     "UPDATE player " +
                     "SET real_name = @real_name, surname = @surname, color = @color, " +
-                    "control_style = @control_style, is_dirty = 0 " +
+                    "control_style = @control_style, is_dirty = 0, is_banned = 0 " +
                     "WHERE id = @id",
                     new
                     {
@@ -93,6 +83,19 @@ namespace KikoleSite.Elite.Repositories
                         surname = player.SurName,
                         color = player.Color,
                         control_style = player.ControlStyle
+                    })
+                .ConfigureAwait(false);
+        }
+
+        public async Task BanPlayerAsync(long playerId)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE player " +
+                    "SET is_banned = 1 " +
+                    "WHERE id = @id",
+                    new
+                    {
+                        id = playerId
                     })
                 .ConfigureAwait(false);
         }

@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Elite.Dtos
+﻿using System;
+
+namespace KikoleSite.Elite.Dtos
 {
     public class PlayerDto
     {
@@ -10,5 +12,10 @@
         public string Color { get; set; }
         public bool IsDirty { get; set; }
         public bool IsBanned { get; set; }
+
+        public bool IsSame(string url)
+        {
+            return UrlName.Equals(url, StringComparison.InvariantCultureIgnoreCase);
+        }
     }
 }

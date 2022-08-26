@@ -14,5 +14,7 @@ namespace KikoleSite.Elite.Repositories
         Task<IReadOnlyCollection<EntryWebDto>> GetPlayerEntriesAsync(Game game, string playerUrlName);
 
         Task<Engine> GetTimeEntryEngineAsync(string url);
+
+        Task<IReadOnlyCollection<string>> GetPlayerUrlsAsync(Game game);
     }
 }

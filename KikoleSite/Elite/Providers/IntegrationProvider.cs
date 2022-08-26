@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
@@ -31,6 +32,77 @@ namespace KikoleSite.Elite.Providers
             _clock = clock;
         }
 
+        public async Task RefreshPlayersAsync()
+        {
+            var gePlayerUrls = await _siteParser
+                .GetPlayerUrlsAsync(Game.GoldenEye)
+                .ConfigureAwait(false);
+
+            var pdPlayerUrls = await _siteParser
+                .GetPlayerUrlsAsync(Game.PerfectDark)
+                .ConfigureAwait(false);
+
+            var allPlayerUrls = gePlayerUrls
+                .Concat(pdPlayerUrls)
+                .Distinct()
+                .Select(pUrl => HttpUtility.UrlDecode(pUrl))
+                .ToList();
+
+            var (validPlayers, bannedPlayers) = await GetPlayersAsync()
+                .ConfigureAwait(false);
+
+            foreach (var pUrl in allPlayerUrls)
+            {
+                if (!validPlayers.Any(p => p.IsSame(pUrl)))
+                {
+                    var pInfo = await _siteParser
+                        .GetPlayerInformationAsync(pUrl, Player.DefaultPlayerHexColor)
+                        .ConfigureAwait(false);
+
+                    if (pInfo != null)
+                    {
+                        var formelyBannedPlayer = bannedPlayers.FirstOrDefault(p => p.IsSame(pUrl));
+
+                        if (formelyBannedPlayer != null)
+                        {
+                            pInfo.Id = formelyBannedPlayer.Id;
+                        }
+                        else
+                        {
+                            var pid = await _writeRepository
+                                .InsertPlayerAsync(pUrl, Player.DefaultPlayerHexColor)
+                                .ConfigureAwait(false);
+
+                            pInfo.Id = pid;
+                        }
+
+                        await _writeRepository
+                            .UpdatePlayerAsync(pInfo)
+                            .ConfigureAwait(false);
+                    }
+                }
+            }
+
+            var playersToBan = validPlayers
+                .Where(p => !allPlayerUrls.Any(pUrl => p.IsSame(pUrl)))
+                .ToList();
+
+            foreach (var pToBan in playersToBan)
+            {
+                await _writeRepository
+                    .DeletePlayerEntriesAsync(Game.GoldenEye, pToBan.Id)
+                    .ConfigureAwait(false);
+
+                await _writeRepository
+                    .DeletePlayerEntriesAsync(Game.PerfectDark, pToBan.Id)
+                    .ConfigureAwait(false);
+
+                await _writeRepository
+                    .BanPlayerAsync(pToBan.Id)
+                    .ConfigureAwait(false);
+            }
+        }
+
         public async Task ScanAllPlayersEntriesHistoryAsync(Game game)
         {
             var (validPlayers, bannedPlayers) = await GetPlayersAsync().ConfigureAwait(false);
@@ -57,34 +129,6 @@ namespace KikoleSite.Elite.Providers
             }
 
             await ExtractPlayerTimesAsync(game, player).ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<Player>> GetCleanableDirtyPlayersAsync()
-        {
-            var okPlayers = new System.Collections.Concurrent.ConcurrentBag<Player>();
-
-            var players = await _readRepository
-                .GetDirtyPlayersAsync()
-                .ConfigureAwait(false);
-
-            const int parallel = 8;
-            for (var i = 0; i < players.Count; i += parallel)
-            {
-                await Task.WhenAll(players.Skip(i).Take(parallel).Select(async p =>
-                {
-                    var pInfo = await _siteParser
-                        .GetPlayerInformationAsync(p.UrlName, Player.DefaultPlayerHexColor)
-                        .ConfigureAwait(false);
-
-                    if (pInfo != null)
-                    {
-                        pInfo.Id = p.Id;
-                        okPlayers.Add(new Player(pInfo));
-                    }
-                })).ConfigureAwait(false);
-            }
-
-            return okPlayers;
         }
 
         public async Task ScanTimePageForNewPlayersAsync(DateTime? stopAt, bool addEntries)
@@ -165,68 +209,17 @@ namespace KikoleSite.Elite.Providers
             }
         }
 
-        public async Task<bool> CleanDirtyPlayerAsync(long playerId)
-        {
-            var players = await _readRepository
-                .GetDirtyPlayersAsync()
-                .ConfigureAwait(false);
-
-            var p = players.SingleOrDefault(_ => _.Id == playerId);
-            if (p == null)
-                return false;
-
-            var pInfo = await _siteParser
-                .GetPlayerInformationAsync(p.UrlName, Player.DefaultPlayerHexColor)
-                .ConfigureAwait(false);
-            if (pInfo == null)
-                return false;
-
-            pInfo.Id = playerId;
-
-            await _writeRepository
-                .CleanPlayerAsync(pInfo)
-                .ConfigureAwait(false);
-
-            return true;
-        }
-
-        public async Task CheckPotentialBannedPlayersAsync()
-        {
-            var nonDirtyPlayers = await _readRepository
-                .GetPlayersAsync()
-                .ConfigureAwait(false);
-
-            const int parallel = 8;
-            for (var i = 0; i < nonDirtyPlayers.Count; i += parallel)
-            {
-                await Task.WhenAll(nonDirtyPlayers.Skip(i).Take(parallel).Select(async p =>
-                {
-                    var res = await _siteParser
-                        .GetPlayerInformationAsync(p.UrlName, Player.DefaultPlayerHexColor)
-                        .ConfigureAwait(false);
-
-                    if (res == null)
-                    {
-                        await _writeRepository
-                            .UpdateDirtyPlayerAsync(p.Id)
-                            .ConfigureAwait(false);
-                    }
-                })).ConfigureAwait(false);
-            }
-        }
-
-        private async Task<(List<PlayerDto> validPlayers, List<PlayerDto> bannedPlayers)> GetPlayersAsync()
+        private async Task<(IReadOnlyCollection<PlayerDto> validPlayers, IReadOnlyCollection<PlayerDto> bannedPlayers)> GetPlayersAsync()
         {
             var players = await _readRepository
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
 
             var dirtyPlayers = await _readRepository
-                .GetBannedPlayersAsync()
+                .GetPlayersAsync(true)
                 .ConfigureAwait(false);
 
-            return (players.Concat(dirtyPlayers.Where(p => !p.IsBanned)).ToList(),
-                dirtyPlayers.Where(p => p.IsBanned).ToList());
+            return (players, dirtyPlayers);
         }
 
         private async Task ExtractPlayerTimesAsync(Game game, PlayerDto player)
@@ -237,12 +230,9 @@ namespace KikoleSite.Elite.Providers
 
             if (entries != null)
             {
-                foreach (var stage in game.GetStages())
-                {
-                    await _writeRepository
-                        .DeletePlayerStageEntriesAsync(stage, player.Id)
-                        .ConfigureAwait(false);
-                }
+                await _writeRepository
+                    .DeletePlayerEntriesAsync(game, player.Id)
+                    .ConfigureAwait(false);
 
                 var groupEntries = entries.GroupBy(e => (e.Stage, e.Level, e.Time, e.Engine));
                 foreach (var group in groupEntries)

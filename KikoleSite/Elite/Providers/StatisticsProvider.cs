@@ -248,18 +248,13 @@ namespace KikoleSite.Elite.Providers
             return entries;
         }
 
-        // Gets a dictionary of every player by identifier (including dirty, but not banned)
         private async Task<IReadOnlyDictionary<long, PlayerDto>> GetPlayersInternalAsync()
         {
-            var playersSourceClean = await _readRepository
+            var playersList = await _readRepository
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
 
-            var playersSourceDirty = await _readRepository
-                .GetDirtyPlayersAsync()
-                .ConfigureAwait(false);
-
-            return playersSourceClean.Concat(playersSourceDirty).ToDictionary(p => p.Id, p => p);
+            return playersList.ToDictionary(p => p.Id, p => p);
         }
 
         // Sets a fake date on entries without it

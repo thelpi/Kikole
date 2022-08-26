@@ -8,9 +8,7 @@ namespace KikoleSite.Elite.Repositories
 {
     public interface IReadRepository
     {
-        Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync();
+        Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync(bool banned = false);
         Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate);
-        Task<IReadOnlyCollection<PlayerDto>> GetDirtyPlayersAsync();
-        Task<IReadOnlyCollection<PlayerDto>> GetBannedPlayersAsync();
     }
 }

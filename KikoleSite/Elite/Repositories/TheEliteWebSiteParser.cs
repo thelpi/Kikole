@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using KikoleSite.Elite.Configurations;
@@ -214,6 +215,45 @@ namespace KikoleSite.Elite.Repositories
             }
 
             return Engine.UNK;
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetPlayerUrlsAsync(Game game)
+        {
+            var top50Content = await GetPageStringContentAsync(
+                    $"ajax/rankings/{(game == Game.GoldenEye ? "ge" : "pd")}/initial/1661098116")
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(top50Content))
+            {
+                return null;
+            }
+
+            var topFullContent = await GetPageStringContentAsync(
+                    $"ajax/rankings/{(game == Game.GoldenEye ? "ge" : "pd")}/post50/1661097156")
+                .ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(topFullContent))
+            {
+                return null;
+            }
+
+            var top50datas = JsonSerializer.Deserialize<AjaxRankingDto>(top50Content);
+            var otherDatas = JsonSerializer.Deserialize<AjaxRankingDto>(topFullContent);
+
+            var urls = new List<string>(50 + otherDatas.TValue.Count / AjaxRankingDto.ValuesCountByPlayer);
+
+            urls.AddRange(ExtractPlayerUrlNames(top50datas.TValue));
+            urls.AddRange(ExtractPlayerUrlNames(otherDatas.TValue));
+
+            return urls;
+        }
+
+        private static IEnumerable<string> ExtractPlayerUrlNames(IReadOnlyList<JsonElement> playersAr)
+        {
+            for (var i = AjaxRankingDto.UrlNamePosition; i < playersAr.Count; i += AjaxRankingDto.ValuesCountByPlayer)
+            {
+                yield return playersAr[i].GetString();
+            }
         }
 
         private EntryWebDto ExtractTimeLinkDetails(HtmlNode link)

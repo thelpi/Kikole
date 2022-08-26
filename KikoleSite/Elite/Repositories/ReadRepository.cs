@@ -24,32 +24,16 @@ namespace KikoleSite.Elite.Repositories
             return await GetEntriesByCriteriaInternalAsync(stage, level, null, null).ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync()
-        {
-            return await GetPlayersInternalAsync(false, false).ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<PlayerDto>> GetDirtyPlayersAsync()
-        {
-            return await GetPlayersInternalAsync(true, false).ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<PlayerDto>> GetBannedPlayersAsync()
-        {
-            return await GetPlayersInternalAsync(true, true).ConfigureAwait(false);
-        }
-
-        private async Task<IReadOnlyCollection<PlayerDto>> GetPlayersInternalAsync(bool isDirty, bool isBanned)
+        public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync(bool banned = false)
         {
             return await ExecuteReaderAsync<PlayerDto>(
                     "SELECT id, url_name, real_name, surname,  color, " +
                     "control_style, is_dirty, is_banned " +
                     "FROM player " +
-                    "WHERE is_dirty = @is_dirty AND is_banned = @is_banned",
+                    "WHERE is_banned = @is_banned",
                     new
                     {
-                        is_dirty = isDirty,
-                        is_banned = isBanned
+                        is_banned = banned
                     })
                 .ConfigureAwait(false);
         }

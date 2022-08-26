@@ -11,10 +11,21 @@ namespace KikoleSite.Elite.Controllers
     public class EliteController : Controller
     {
         private readonly IStatisticsProvider _statisticsProvider;
+        private readonly IIntegrationProvider _integrationProvider;
 
-        public EliteController(IStatisticsProvider statisticsProvider)
+        public EliteController(IStatisticsProvider statisticsProvider,
+            IIntegrationProvider integrationProvider)
         {
             _statisticsProvider = statisticsProvider;
+            _integrationProvider = integrationProvider;
+        }
+
+        [HttpGet("the-elite/players/refresh")]
+        public async Task<IActionResult> RefreshPlayersAsync()
+        {
+            await _integrationProvider.RefreshPlayersAsync().ConfigureAwait(false);
+
+            return NoContent();
         }
 
         [HttpGet("the-elite/games/{game}/longest-standings")]
