@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using KikoleSite.Api.Interfaces;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
 using Microsoft.Extensions.Configuration;
@@ -7,11 +6,9 @@ using MySql.Data.MySqlClient;
 
 namespace KikoleSite.Elite.Repositories
 {
-    public sealed class WriteRepository : Api.Repositories.BaseRepository, IWriteRepository
+    public sealed class WriteRepository : BaseRepository, IWriteRepository
     {
-        public WriteRepository(IConfiguration configuration, IClock clock)
-            : base(configuration, clock)
-        { }
+        public WriteRepository(IConfiguration configuration) : base(configuration) { }
 
         public async Task<long> InsertTimeEntryAsync(EntryDto requestEntry)
         {

@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KikoleSite.Api.Interfaces;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Elite.Repositories
 {
-    public sealed class ReadRepository : Api.Repositories.BaseRepository, IReadRepository
+    public sealed class ReadRepository : BaseRepository, IReadRepository
     {
-        public ReadRepository(IConfiguration configuration, IClock clock)
-            : base(configuration, clock)
-        { }
+        public ReadRepository(IConfiguration configuration) : base(configuration) { }
 
         public async Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate)
         {
