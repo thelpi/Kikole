@@ -202,7 +202,7 @@ namespace KikoleSite.Elite.Providers
             }
 
             var existingEntries = (await _readRepository
-                .GetEntriesAsync(null, null, new DateTime(stopAt.Year, stopAt.Month, 1), _clock.Tomorrow)
+                .GetEntriesAsync(null, null, stopAt.Truncat(DateStep.Month), _clock.Tomorrow)
                 .ConfigureAwait(false))
                 .GroupBy(_ => (_.PlayerId, _.Stage, _.Level, _.Time, _.Engine))
                 .Select(_ => _.Key)
