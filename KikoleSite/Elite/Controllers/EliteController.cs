@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KikoleSite.Elite.Controllers
 {
+    [Route("the-elite")]
     public class EliteController : Controller
     {
         private readonly IStatisticsProvider _statisticsProvider;
@@ -20,8 +21,8 @@ namespace KikoleSite.Elite.Controllers
             _integrationProvider = integrationProvider;
         }
 
-        [HttpGet("the-elite/players/refresh")]
-        public async Task<IActionResult> RefreshPlayersAsync([FromQuery] bool addTimesForNewPlayers)
+        [HttpGet("players/refresh")]
+        public async Task<JsonResult> RefreshPlayersAsync([FromQuery] bool addTimesForNewPlayers)
         {
             var refreshResult = await _integrationProvider
                 .RefreshPlayersAsync(addTimesForNewPlayers)
@@ -30,8 +31,8 @@ namespace KikoleSite.Elite.Controllers
             return Json(refreshResult);
         }
 
-        [HttpGet("the-elite/entries/{game}/refresh")]
-        public async Task<IActionResult> RefreshEntriesAsync([FromRoute] Game game)
+        [HttpGet("entries/{game}/refresh")]
+        public async Task<JsonResult> RefreshEntriesAsync([FromRoute] Game game)
         {
             var refreshResult = await _integrationProvider
                 .RefreshAllEntriesAsync(game)
@@ -40,8 +41,8 @@ namespace KikoleSite.Elite.Controllers
             return Json(refreshResult);
         }
 
-        [HttpGet("the-elite/entries/refresh")]
-        public async Task<IActionResult> RefreshEntriesAsync([Required][FromQuery] DateTime fromDate)
+        [HttpGet("entries/refresh")]
+        public async Task<JsonResult> RefreshEntriesAsync([Required][FromQuery] DateTime fromDate)
         {
             var refreshResult = await _integrationProvider
                 .RefreshEntriesToDateAsync(fromDate)
@@ -50,7 +51,7 @@ namespace KikoleSite.Elite.Controllers
             return Json(refreshResult);
         }
 
-        [HttpGet("the-elite/games/{game}/longest-standings")]
+        [HttpGet("games/{game}/longest-standings")]
         public async Task<JsonResult> GetLongestStandingsAsync(
             [FromRoute] Game game,
             [FromQuery][Required] StandingType standingType,
@@ -66,7 +67,7 @@ namespace KikoleSite.Elite.Controllers
             return Json(standings.Take(count ?? 100).ToList());
         }
 
-        [HttpGet("the-elite/stages/{stage}/leaderboard-history")]
+        [HttpGet("stages/{stage}/leaderboard-history")]
         public async Task<JsonResult> GetStageLeaderboardHistoryAsync(
             [FromRoute] Stage stage,
             [FromQuery] LeaderboardGroupOptions groupOption,
@@ -79,7 +80,7 @@ namespace KikoleSite.Elite.Controllers
             return Json(datas);
         }
 
-        [HttpGet("the-elite/players")]
+        [HttpGet("players")]
         public async Task<JsonResult> GetPlayersAsync()
         {
             var players = await _statisticsProvider

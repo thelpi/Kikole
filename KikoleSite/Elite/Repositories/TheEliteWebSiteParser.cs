@@ -343,6 +343,9 @@ namespace KikoleSite.Elite.Repositories
             while (attemps < _configuration.PageAttemps)
             {
                 using var webClient = new WebClient();
+#if !DEBUG
+                webClient.Proxy = new WebProxy("http://winproxy.server.lan:3128");
+#endif
                 try
                 {
                     data = await webClient
