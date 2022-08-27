@@ -33,21 +33,21 @@ namespace KikoleSite.Elite.Controllers
         [HttpGet("the-elite/entries/{game}/refresh")]
         public async Task<IActionResult> RefreshEntriesAsync([FromRoute] Game game)
         {
-            await _integrationProvider
+            var refreshResult = await _integrationProvider
                 .RefreshAllEntriesAsync(game)
                 .ConfigureAwait(false);
 
-            return NoContent();
+            return Json(refreshResult);
         }
 
         [HttpGet("the-elite/entries/refresh")]
         public async Task<IActionResult> RefreshEntriesAsync([Required][FromQuery] DateTime fromDate)
         {
-            await _integrationProvider
+            var refreshResult = await _integrationProvider
                 .RefreshEntriesToDateAsync(fromDate)
                 .ConfigureAwait(false);
 
-            return NoContent();
+            return Json(refreshResult);
         }
 
         [HttpGet("the-elite/games/{game}/longest-standings")]

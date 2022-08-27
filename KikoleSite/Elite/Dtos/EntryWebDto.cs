@@ -17,5 +17,10 @@
                 Engine = Engine
             };
         }
+
+        public override string ToString()
+        {
+            return $"[player:{PlayerUrlName}|stage:{Stage}|level:{Level}|time:{Time}]";
+        }
     }
 }

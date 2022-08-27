@@ -141,11 +141,11 @@ namespace KikoleSite.Elite.Providers
 
             if (addTimesForNewPlayers && createdPlayers.Count > 0)
             {
-                var geLogs = await RefreshPlayersEntriesAsync(
+                var (_, geLogs) = await RefreshPlayersEntriesAsync(
                         Game.GoldenEye, createdPlayers)
                     .ConfigureAwait(false);
 
-                var pdLogs = await RefreshPlayersEntriesAsync(
+                var (_, pdLogs) = await RefreshPlayersEntriesAsync(
                         Game.PerfectDark, createdPlayers)
                     .ConfigureAwait(false);
 
@@ -161,16 +161,24 @@ namespace KikoleSite.Elite.Providers
             };
         }
 
-        public async Task RefreshAllEntriesAsync(Game game)
+        public async Task<RefreshEntriesResult> RefreshAllEntriesAsync(Game game)
         {
             var validPlayers = await _readRepository
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
 
-            await RefreshPlayersEntriesAsync(game, validPlayers).ConfigureAwait(false);
+            var (entriesCount, errors) = await RefreshPlayersEntriesAsync(
+                    game, validPlayers)
+                .ConfigureAwait(false);
+
+            return new RefreshEntriesResult
+            {
+                Errors = errors,
+                ReplacedEntriesCount = entriesCount
+            };
         }
 
-        public async Task RefreshEntriesToDateAsync(DateTime stopAt)
+        public async Task<RefreshEntriesResult> RefreshEntriesToDateAsync(DateTime stopAt)
         {
             var validPlayers = await _readRepository
                 .GetPlayersAsync()
@@ -200,23 +208,33 @@ namespace KikoleSite.Elite.Providers
                 .Select(_ => _.Key)
                 .ToList();
 
+            var groupsErrors = new ConcurrentBag<string>();
+            var groupsCount = new ConcurrentBag<int>();
             var tasks = new List<Task>(parallel);
             var groupSize = allEntries.Count / (parallel - 1);
             for (var i = 0; i < parallel; i++)
             {
-                tasks.Add(
-                    ManageGroupOfEntriesAsync(
-                        validPlayers,
-                        allEntries.Skip(i * groupSize).Take(groupSize),
-                        existingEntries));
+                tasks.Add(ManageGroupOfEntriesAsync(
+                    validPlayers,
+                    allEntries.Skip(i * groupSize).Take(groupSize),
+                    existingEntries,
+                    groupsErrors,
+                    groupsCount));
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            return new RefreshEntriesResult
+            {
+                Errors = groupsErrors.ToList(),
+                ReplacedEntriesCount = groupsCount.Sum()
+            };
         }
 
-        private async Task<IReadOnlyCollection<string>> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
+        private async Task<(int count, IReadOnlyCollection<string> errors)> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
         {
-            var logs = new ConcurrentBag<string>();
+            var errors = new ConcurrentBag<string>();
+            var count = 0;
 
             const int parallel = 8;
             for (var i = 0; i < validPlayers.Count; i += parallel)
@@ -225,27 +243,39 @@ namespace KikoleSite.Elite.Providers
                 {
                     try
                     {
-                        await ExtractPlayerTimesAsync(game, player).ConfigureAwait(false);
+                        var (localCount, localErrors) = await ExtractPlayerTimesAsync(
+                                game, player)
+                            .ConfigureAwait(false);
+                        errors.AddRange(localErrors);
+                        count += localCount;
                     }
                     catch (Exception ex)
                     {
-                        logs.Add($"Error while adding {game} time entries for {player.Id}.\n{ex.Message}");
+                        errors.Add($"Error while adding {game} time entries for {player.Id}.\n{ex.Message}");
                     }
                 })).ConfigureAwait(false);
             }
 
-            return logs;
+            return (count, errors);
         }
 
         private async Task ManageGroupOfEntriesAsync(
             IReadOnlyCollection<PlayerDto> validPlayers,
             IEnumerable<EntryWebDto> entriesToManage,
-            List<(long PlayerId, Stage Stage, Level Level, long Time, Engine Engine)> existingEntries)
+            List<(long PlayerId, Stage Stage, Level Level, long Time, Engine Engine)> existingEntries,
+            ConcurrentBag<string> groupsErrors,
+            ConcurrentBag<int> groupsCount)
         {
+            var errors = new List<string>();
+            var count = 0;
+
             foreach (var entry in entriesToManage)
             {
                 if (entry.Date.Value >= _clock.Tomorrow)
+                {
+                    errors.Add($"Entry {entry} is in the future: {entry.Date.Value}.");
                     continue;
+                }
 
                 var idMatch = validPlayers
                     .FirstOrDefault(p =>
@@ -254,23 +284,41 @@ namespace KikoleSite.Elite.Providers
 
                 if (idMatch.HasValue)
                 {
-                    var dto = entry.ToEntry(idMatch.Value);
-                    dto.Engine = await _siteParser
-                        .GetTimeEntryEngineAsync(entry.EngineUrl)
-                        .ConfigureAwait(false);
-
-                    if (!existingEntries.Contains((dto.PlayerId, dto.Stage, dto.Level, dto.Time, dto.Engine)))
+                    try
                     {
-                        await _writeRepository
-                            .ReplaceTimeEntryAsync(dto)
+                        var dto = entry.ToEntry(idMatch.Value);
+                        dto.Engine = await _siteParser
+                            .GetTimeEntryEngineAsync(entry.EngineUrl)
                             .ConfigureAwait(false);
+
+                        if (!existingEntries.Contains((dto.PlayerId, dto.Stage, dto.Level, dto.Time, dto.Engine)))
+                        {
+                            await _writeRepository
+                                .ReplaceTimeEntryAsync(dto)
+                                .ConfigureAwait(false);
+                            count++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"Error while processing entry {entry}\n{ex.Message}");
                     }
                 }
+                else
+                {
+                    errors.Add($"Entry {entry} has no matching valid player.");
+                }
             }
+
+            groupsErrors.AddRange(errors);
+            groupsCount.Add(count);
         }
 
-        private async Task ExtractPlayerTimesAsync(Game game, PlayerDto player)
+        private async Task<(int count, IReadOnlyCollection<string> errors)> ExtractPlayerTimesAsync(Game game, PlayerDto player)
         {
+            var count = 0;
+            var errors = new List<string>();
+
             var entries = await _siteParser
                 .GetPlayerEntriesAsync(game, player.UrlName)
                 .ConfigureAwait(false);
@@ -285,11 +333,25 @@ namespace KikoleSite.Elite.Providers
                 foreach (var group in groupEntries)
                 {
                     var groupEntry = group.OrderBy(d => d.Date ?? DateTime.MaxValue).First();
-                    await _writeRepository
-                        .ReplaceTimeEntryAsync(groupEntry.ToEntry(player.Id))
-                        .ConfigureAwait(false);
+                    try
+                    {
+                        await _writeRepository
+                            .ReplaceTimeEntryAsync(groupEntry.ToEntry(player.Id))
+                            .ConfigureAwait(false);
+                        count++;
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"Error while processing entry {groupEntry}\n{ex.Message}");
+                    }
                 }
             }
+            else
+            {
+                errors.Add($"Unable to get {game} entries page for player {player.UrlName}.");
+            }
+
+            return (count, errors);
         }
     }
 }

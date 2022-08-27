@@ -7,9 +7,9 @@ namespace KikoleSite.Elite.Providers
 {
     public interface IIntegrationProvider
     {
-        Task RefreshAllEntriesAsync(Game game);
+        Task<RefreshEntriesResult> RefreshAllEntriesAsync(Game game);
 
-        Task RefreshEntriesToDateAsync(DateTime stopAt);
+        Task<RefreshEntriesResult> RefreshEntriesToDateAsync(DateTime stopAt);
 
         Task<RefreshPlayersResult> RefreshPlayersAsync(bool addTimesForNewPlayers);
     }
