@@ -18,6 +18,50 @@ namespace KikoleSite.Elite.Repositories
 {
     public class TheEliteWebSiteParser : ITheEliteWebSiteParser
     {
+        private const char DatePartsSeparator = ' ';
+        private const string UntiedTimeLabel = "(untied!)";
+        private const string TimeNa = "N/A";
+        private const char TimePartsSeparator = ':';
+        private const char LinkSeparator = '-';
+        private const string PlayerUrlPrefix = "/~";
+        private const string EngineStringBeginString = "System:</strong>";
+        private const string EngineStringEndString = "</li>";
+        private const string TimeClass = "time";
+
+        private static readonly IReadOnlyDictionary<string, int> MonthLabels =
+            new Dictionary<string, int>
+            {
+                { "January", 1 },
+                { "February", 2 },
+                { "March", 3 },
+                { "April", 4 },
+                { "May", 5 },
+                { "June", 6 },
+                { "July", 7 },
+                { "August", 8 },
+                { "September", 9 },
+                { "October", 10 },
+                { "November", 11 },
+                { "December", 12 }
+            };
+
+        private static readonly IReadOnlyDictionary<string, int> MonthShortLabels =
+            new Dictionary<string, int>
+            {
+                { "Jan", 1 },
+                { "Feb", 2 },
+                { "Mar", 3 },
+                { "Apr", 4 },
+                { "May", 5 },
+                { "Jun", 6 },
+                { "Jul", 7 },
+                { "Aug", 8 },
+                { "Sep", 9 },
+                { "Oct", 10 },
+                { "Nov", 11 },
+                { "Dec", 12 }
+            };
+
         private readonly TheEliteWebsiteConfiguration _configuration;
 
         public TheEliteWebSiteParser(IOptions<TheEliteWebsiteConfiguration> configuration)
@@ -29,9 +73,9 @@ namespace KikoleSite.Elite.Repositories
         {
             var linksValues = new ConcurrentBag<EntryWebDto>();
 
-            string uri = string.Format(_configuration.HistoryPage, year, month);
+            var uri = string.Format(_configuration.HistoryPage, year, month);
 
-            string historyContent = await GetPageStringContentAsync(uri)
+            var historyContent = await GetPageStringContentAsync(uri)
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(historyContent))
@@ -42,13 +86,11 @@ namespace KikoleSite.Elite.Repositories
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(historyContent);
 
-            const string timeClass = "time";
-
             var links = htmlDoc.DocumentNode.SelectNodes("//a");
-            foreach (HtmlNode link in links)
+            foreach (var link in links)
             {
                 if (link.Attributes.Contains("class")
-                    && link.Attributes["class"].Value == timeClass)
+                    && link.Attributes["class"].Value == TimeClass)
                 {
                     var linkValues = ExtractTimeLinkDetails(link);
                     if (linkValues != null)
@@ -63,10 +105,6 @@ namespace KikoleSite.Elite.Repositories
 
         public async Task<PlayerDto> GetPlayerInformationAsync(string urlName, string defaultHexPlayer)
         {
-            var logs = new List<string>();
-            string realName = null;
-            string controlStyle = null;
-
             var pageContent = await GetPageStringContentAsync($"/~{urlName.Replace(" ", "+")}", true)
                 .ConfigureAwait(false);
 
@@ -81,18 +119,19 @@ namespace KikoleSite.Elite.Repositories
             var headFull = htmlDoc.DocumentNode.SelectNodes("//h1");
             var h1Node = headFull.Count > 1 ? headFull[1] : headFull.First();
 
-            string surname = h1Node.InnerText.Trim().Replace("\r", "").Replace("\n", "").Replace("\t", "");
+            var surname = h1Node.InnerText.Trim().Replace("\r", "").Replace("\n", "").Replace("\t", "");
             if (string.IsNullOrWhiteSpace(surname))
             {
                 surname = null;
             }
 
-            string color = h1Node.Attributes["style"].Value.Replace("color:#", "").Trim();
+            var color = h1Node.Attributes["style"].Value.Replace("color:#", "").Trim();
             if (color.Length != 6)
             {
                 color = null;
             }
 
+            string controlStyle = null;
             var indexofControlStyle = pageContent.IndexOf("uses the <strong>");
             if (indexofControlStyle >= 0)
             {
@@ -104,6 +143,7 @@ namespace KikoleSite.Elite.Repositories
                 }
             }
 
+            string realName = null;
             var indexofRealname = pageContent.IndexOf("real name is <strong>");
             if (indexofRealname >= 0)
             {
@@ -115,7 +155,7 @@ namespace KikoleSite.Elite.Repositories
                 }
             }
 
-            var p = new PlayerDto
+            return new PlayerDto
             {
                 Color = color ?? defaultHexPlayer,
                 ControlStyle = controlStyle,
@@ -123,8 +163,6 @@ namespace KikoleSite.Elite.Repositories
                 SurName = surname ?? urlName,
                 UrlName = urlName
             };
-
-            return p;
         }
 
         public async Task<IReadOnlyCollection<EntryWebDto>> GetPlayerEntriesAsync(Game game, string playerUrlName)
@@ -160,18 +198,6 @@ namespace KikoleSite.Elite.Repositories
                     continue;
                 }
 
-                var engine = ToEngine(rowDatas[4]);
-                if (engine == Engine.UNK)
-                {
-
-                }
-
-                var date = ParseDateFromString(rowDatas[0], out bool failToExtractDate, true);
-                if (failToExtractDate)
-                {
-
-                }
-
                 var time = ExtractTime(rowDatas[3], out bool failToExtractTime);
                 if (failToExtractTime || !time.HasValue)
                 {
@@ -180,11 +206,11 @@ namespace KikoleSite.Elite.Repositories
 
                 entries.Add(new EntryWebDto
                 {
-                    Date = date,
+                    Date = ParseDateFromString(rowDatas[0], out _, true),
                     Level = level.Value,
                     PlayerUrlName = playerUrlName,
                     Stage = stage.Value,
-                    Engine = engine,
+                    Engine = ToEngine(rowDatas[4]),
                     Time = time.Value
                 });
             }
@@ -194,21 +220,18 @@ namespace KikoleSite.Elite.Repositories
 
         public async Task<Engine> GetTimeEntryEngineAsync(string url)
         {
-            const string engineStringBeginString = "System:</strong>";
-            const string engineStringEndString = "</li>";
-
-            string pageContent = await GetPageStringContentAsync(url).ConfigureAwait(false);
+            var pageContent = await GetPageStringContentAsync(url).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(pageContent))
             {
-                int engineStringBeginPos = pageContent.IndexOf(engineStringBeginString);
+                var engineStringBeginPos = pageContent.IndexOf(EngineStringBeginString);
                 if (engineStringBeginPos >= 0)
                 {
-                    string pageContentAtBeginPos = pageContent[(engineStringBeginPos + engineStringBeginString.Length)..];
-                    int engineStringEndPos = pageContentAtBeginPos.Trim().IndexOf(engineStringEndString);
+                    var pageContentAtBeginPos = pageContent[(engineStringBeginPos + EngineStringBeginString.Length)..];
+                    var engineStringEndPos = pageContentAtBeginPos.Trim().IndexOf(EngineStringEndString);
                     if (engineStringEndPos >= 0)
                     {
-                        string engineString = pageContentAtBeginPos.Substring(0, engineStringEndPos + 1);
+                        var engineString = pageContentAtBeginPos.Substring(0, engineStringEndPos + 1);
 
                         return ToEngine(engineString);
                     }
@@ -247,119 +270,6 @@ namespace KikoleSite.Elite.Repositories
             urls.AddRange(ExtractPlayerUrlNames(otherDatas.TValue));
 
             return urls;
-        }
-
-        private static IEnumerable<string> ExtractPlayerUrlNames(IReadOnlyList<JsonElement> playersAr)
-        {
-            for (var i = AjaxRankingDto.UrlNamePosition; i < playersAr.Count; i += AjaxRankingDto.ValuesCountByPlayer)
-            {
-                yield return playersAr[i].GetString();
-            }
-        }
-
-        private EntryWebDto ExtractTimeLinkDetails(HtmlNode link)
-        {
-            const char linkSeparator = '-';
-            const string playerUrlPrefix = "/~";
-
-            string[] linkParts = CleanString(link.InnerText)
-                .Split(linkSeparator, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .ToArray();
-
-            if (linkParts.Length < 2)
-            {
-                return null;
-            }
-
-            DateTime? date = ExtractAndCheckDate(link, out bool exit);
-            if (exit)
-            {
-                return null;
-            }
-
-            string stageName = linkParts[0].ToLowerInvariant().Replace(" ", string.Empty);
-            if (!ModelExtensions.StageFormatedNames.ContainsKey(stageName))
-            {
-                if (stageName != ModelExtensions.PerfectDarkDuelStageFormatedName)
-                {
-                    throw new FormatException($"Unable to extract the stage ID.");
-                }
-                return null;
-            }
-
-            var playerUrl = HttpUtility.UrlDecode(link
-                .ParentNode
-                .ParentNode
-                .ChildNodes[3]
-                .ChildNodes
-                .First()
-                .Attributes["href"]
-                .Value
-                .Replace(playerUrlPrefix, string.Empty));
-
-            if (string.IsNullOrWhiteSpace(playerUrl))
-            {
-                return null;
-            }
-
-            Level? level = SystemExtensions
-                .Enumerate<Level>()
-                .Select(l => (Level?)l)
-                .FirstOrDefault(l =>
-                    l.Value.GetLabel(Game.GoldenEye).Equals(linkParts[1], StringComparison.InvariantCultureIgnoreCase)
-                    || l.Value.GetLabel(Game.PerfectDark).Equals(linkParts[1], StringComparison.InvariantCultureIgnoreCase));
-
-            if (!level.HasValue)
-            {
-                return null;
-            }
-
-            long? time = ExtractTime(linkParts[2], out bool failToExtractTime);
-            if (failToExtractTime || !time.HasValue)
-            {
-                return null;
-            }
-
-            return new EntryWebDto
-            {
-                Date = date,
-                Level = level.Value,
-                PlayerUrlName = playerUrl,
-                Stage = ModelExtensions.StageFormatedNames[stageName],
-                Engine = Engine.UNK,
-                EngineUrl = link.Attributes["href"].Value,
-                Time = time.Value
-            };
-        }
-
-        private static DateTime? ExtractAndCheckDate(HtmlNode link, out bool exit)
-        {
-            exit = false;
-
-            string dateString = link.ParentNode.ParentNode.ChildNodes[1].InnerText;
-
-            if (string.IsNullOrWhiteSpace(dateString))
-            {
-                exit = true;
-                return null;
-            }
-
-            DateTime? date = ParseDateFromString(dateString, out bool failToExtractDate);
-            if (failToExtractDate)
-            {
-                exit = true;
-                return null;
-            }
-
-            return date;
-        }
-
-        private static Engine ToEngine(string engineString)
-        {
-            return Enum.TryParse<Engine>(engineString.Trim().Replace("-", "_"), true, out var engine)
-                ? engine
-                : Engine.UNK;
         }
 
         private async Task<string> GetPlayerHistoryPageContentAsync(string playerUrlName, Game game)
@@ -457,23 +367,14 @@ namespace KikoleSite.Elite.Repositories
             return data;
         }
 
-        private static string CleanString(string input)
-        {
-            return input.Replace("\t", "").Replace("\n", "").Replace("\r", "");
-        }
-
         private static long? ExtractTime(string timeString, out bool failToExtractTime)
         {
-            const string untiedString = "(untied!)";
-            const string N_A = "N/A";
-            const char separator = ':';
-
             failToExtractTime = false;
 
-            timeString = timeString.Replace(untiedString, string.Empty).Trim();
-            if (timeString.IndexOf(separator) >= 0)
+            timeString = timeString.Replace(UntiedTimeLabel, string.Empty).Trim();
+            if (timeString.IndexOf(TimePartsSeparator) >= 0)
             {
-                string[] timeComponents = timeString.Split(separator);
+                string[] timeComponents = timeString.Split(TimePartsSeparator);
                 if (timeComponents.Length > 3)
                 {
                     //logs.Add("Invalid time value");
@@ -506,7 +407,7 @@ namespace KikoleSite.Elite.Repositories
                 }
                 return (hours * 60 * 60) + (minutes * 60) + seconds;
             }
-            else if (timeString != N_A)
+            else if (timeString != TimeNa)
             {
                 //logs.Add("Invalid time value");
                 failToExtractTime = true;
@@ -518,39 +419,7 @@ namespace KikoleSite.Elite.Repositories
 
         private static DateTime? ParseDateFromString(string dateString, out bool failToExtractDate, bool partialMonthName = false)
         {
-            const char separator = ' ';
-
-            var monthsLabel = new Dictionary<string, int>
-            {
-                { "January", 1 },
-                { "February", 2 },
-                { "March", 3 },
-                { "April", 4 },
-                { "May", 5 },
-                { "June", 6 },
-                { "July", 7 },
-                { "August", 8 },
-                { "September", 9 },
-                { "October", 10 },
-                { "November", 11 },
-                { "December", 12 }
-            };
-
-            var monthsPartialLabel = new Dictionary<string, int>
-            {
-                { "Jan", 1 },
-                { "Feb", 2 },
-                { "Mar", 3 },
-                { "Apr", 4 },
-                { "May", 5 },
-                { "Jun", 6 },
-                { "Jul", 7 },
-                { "Aug", 8 },
-                { "Sep", 9 },
-                { "Oct", 10 },
-                { "Nov", 11 },
-                { "Dec", 12 }
-            };
+            
 
             failToExtractDate = false;
 
@@ -558,7 +427,7 @@ namespace KikoleSite.Elite.Repositories
 
             if (dateString != ModelExtensions.DefaultLabel)
             {
-                string[] dateComponents = dateString.Split(separator);
+                string[] dateComponents = dateString.Split(DatePartsSeparator);
                 if (dateComponents.Length != 3)
                 {
                     //logs.Add("No date found !");
@@ -567,7 +436,7 @@ namespace KikoleSite.Elite.Repositories
                 }
                 if (partialMonthName)
                 {
-                    if (!monthsPartialLabel.ContainsKey(dateComponents[1]))
+                    if (!MonthShortLabels.ContainsKey(dateComponents[1]))
                     {
                         //logs.Add("No date found !");
                         failToExtractDate = true;
@@ -576,7 +445,7 @@ namespace KikoleSite.Elite.Repositories
                 }
                 else
                 {
-                    if (!monthsLabel.ContainsKey(dateComponents[1]))
+                    if (!MonthLabels.ContainsKey(dateComponents[1]))
                     {
                         //logs.Add("No date found !");
                         failToExtractDate = true;
@@ -595,10 +464,121 @@ namespace KikoleSite.Elite.Repositories
                     failToExtractDate = true;
                     return null;
                 }
-                return new DateTime(year, partialMonthName ? monthsPartialLabel[dateComponents[1]] : monthsLabel[dateComponents[1]], day);
+                return new DateTime(year, partialMonthName ? MonthShortLabels[dateComponents[1]] : MonthLabels[dateComponents[1]], day);
             }
 
             return null;
+        }
+
+        private static IEnumerable<string> ExtractPlayerUrlNames(IReadOnlyList<JsonElement> playersAr)
+        {
+            for (var i = AjaxRankingDto.UrlNamePosition; i < playersAr.Count; i += AjaxRankingDto.ValuesCountByPlayer)
+            {
+                yield return playersAr[i].GetString();
+            }
+        }
+
+        private static DateTime? ExtractAndCheckDate(HtmlNode link, out bool exit)
+        {
+            exit = false;
+
+            string dateString = link.ParentNode.ParentNode.ChildNodes[1].InnerText;
+
+            if (string.IsNullOrWhiteSpace(dateString))
+            {
+                exit = true;
+                return null;
+            }
+
+            DateTime? date = ParseDateFromString(dateString, out bool failToExtractDate);
+            if (failToExtractDate)
+            {
+                exit = true;
+                return null;
+            }
+
+            return date;
+        }
+
+        private static Engine ToEngine(string engineString)
+        {
+            return Enum.TryParse<Engine>(engineString.Trim().Replace("-", "_"), true, out var engine)
+                ? engine
+                : Engine.UNK;
+        }
+
+        private static EntryWebDto ExtractTimeLinkDetails(HtmlNode link)
+        {
+            var linkParts = link.InnerText
+                .RemoveNewLinesAndTabs()
+                .Split(LinkSeparator, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .ToArray();
+
+            if (linkParts.Length < 2)
+            {
+                return null;
+            }
+
+            DateTime? date = ExtractAndCheckDate(link, out bool exit);
+            if (exit)
+            {
+                return null;
+            }
+
+            var stageName = linkParts[0].ToLowerInvariant().Replace(" ", string.Empty);
+            if (!ModelExtensions.StageFormatedNames.ContainsKey(stageName))
+            {
+                if (stageName != ModelExtensions.PerfectDarkDuelStageFormatedName)
+                {
+                    throw new FormatException($"Unable to extract the stage ID.");
+                }
+                return null;
+            }
+
+            var playerUrl = HttpUtility.UrlDecode(link
+                .ParentNode
+                .ParentNode
+                .ChildNodes[3]
+                .ChildNodes
+                .First()
+                .Attributes["href"]
+                .Value
+                .Replace(PlayerUrlPrefix, string.Empty));
+
+            if (string.IsNullOrWhiteSpace(playerUrl))
+            {
+                return null;
+            }
+
+            var level = SystemExtensions
+                .Enumerate<Level>()
+                .Select(l => (Level?)l)
+                .FirstOrDefault(l =>
+                    l.Value.GetLabel(Game.GoldenEye).Equals(linkParts[1], StringComparison.InvariantCultureIgnoreCase)
+                    || l.Value.GetLabel(Game.PerfectDark).Equals(linkParts[1], StringComparison.InvariantCultureIgnoreCase));
+
+            if (!level.HasValue)
+            {
+                return null;
+            }
+
+            var time = ExtractTime(linkParts[2], out var failToExtractTime);
+            if (failToExtractTime || !time.HasValue)
+            {
+                return null;
+            }
+
+            return new EntryWebDto
+            {
+                Date = date,
+                Level = level.Value,
+                PlayerUrlName = playerUrl,
+                Stage = ModelExtensions.StageFormatedNames[stageName],
+                Engine = Engine.UNK,
+                EngineUrl = link.Attributes["href"].Value,
+                Time = time.Value
+            };
         }
     }
 }

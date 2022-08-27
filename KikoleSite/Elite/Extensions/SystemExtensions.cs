@@ -152,5 +152,9 @@ namespace KikoleSite.Elite
 
             return (webEx.Response as HttpWebResponse).StatusCode == HttpStatusCode.NotFound;
         }
+        public static string RemoveNewLinesAndTabs(this string input)
+        {
+            return input.Replace("\t", "").Replace("\n", "").Replace("\r", "");
+        }
     }
 }
