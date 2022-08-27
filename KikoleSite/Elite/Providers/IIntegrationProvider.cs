@@ -11,6 +11,6 @@ namespace KikoleSite.Elite.Providers
 
         Task RefreshEntriesToDateAsync(DateTime stopAt);
 
-        Task<RefreshPlayersResult> RefreshPlayersAsync();
+        Task<RefreshPlayersResult> RefreshPlayersAsync(bool addTimesForNewPlayers);
     }
 }

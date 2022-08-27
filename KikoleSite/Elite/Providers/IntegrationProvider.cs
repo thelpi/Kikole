@@ -32,7 +32,7 @@ namespace KikoleSite.Elite.Providers
             _clock = clock;
         }
 
-        public async Task<RefreshPlayersResult> RefreshPlayersAsync()
+        public async Task<RefreshPlayersResult> RefreshPlayersAsync(bool addTimesForNewPlayers)
         {
             var errors = new List<string>();
 
@@ -139,6 +139,20 @@ namespace KikoleSite.Elite.Providers
                 }
             }
 
+            if (addTimesForNewPlayers && createdPlayers.Count > 0)
+            {
+                var geLogs = await RefreshPlayersEntriesAsync(
+                        Game.GoldenEye, createdPlayers)
+                    .ConfigureAwait(false);
+
+                var pdLogs = await RefreshPlayersEntriesAsync(
+                        Game.PerfectDark, createdPlayers)
+                    .ConfigureAwait(false);
+
+                errors.AddRange(geLogs);
+                errors.AddRange(pdLogs);
+            }
+
             return new RefreshPlayersResult
             {
                 CreatedPlayers = createdPlayers,
@@ -153,15 +167,7 @@ namespace KikoleSite.Elite.Providers
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
 
-            const int parallel = 8;
-            for (var i = 0; i < validPlayers.Count; i += parallel)
-            {
-                await Task.WhenAll(validPlayers.Skip(i).Take(parallel).Select(async player =>
-                {
-                    await ExtractPlayerTimesAsync(game, player)
-                        .ConfigureAwait(false);
-                })).ConfigureAwait(false);
-            }
+            await RefreshPlayersEntriesAsync(game, validPlayers).ConfigureAwait(false);
         }
 
         public async Task RefreshEntriesToDateAsync(DateTime stopAt)
@@ -206,6 +212,29 @@ namespace KikoleSite.Elite.Providers
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        private async Task<IReadOnlyCollection<string>> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
+        {
+            var logs = new ConcurrentBag<string>();
+
+            const int parallel = 8;
+            for (var i = 0; i < validPlayers.Count; i += parallel)
+            {
+                await Task.WhenAll(validPlayers.Skip(i).Take(parallel).Select(async player =>
+                {
+                    try
+                    {
+                        await ExtractPlayerTimesAsync(game, player).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        logs.Add($"Error while adding {game} time entries for {player.Id}.\n{ex.Message}");
+                    }
+                })).ConfigureAwait(false);
+            }
+
+            return logs;
         }
 
         private async Task ManageGroupOfEntriesAsync(

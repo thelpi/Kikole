@@ -21,10 +21,10 @@ namespace KikoleSite.Elite.Controllers
         }
 
         [HttpGet("the-elite/players/refresh")]
-        public async Task<IActionResult> RefreshPlayersAsync()
+        public async Task<IActionResult> RefreshPlayersAsync([FromQuery] bool addTimesForNewPlayers)
         {
             var refreshResult = await _integrationProvider
-                .RefreshPlayersAsync()
+                .RefreshPlayersAsync(addTimesForNewPlayers)
                 .ConfigureAwait(false);
 
             return Json(refreshResult);
