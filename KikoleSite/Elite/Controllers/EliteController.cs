@@ -14,6 +14,11 @@ namespace KikoleSite.Elite.Controllers
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly IIntegrationProvider _integrationProvider;
 
+        private static readonly object _lock = new object();
+        private static Task _runningTask;
+        private static object _taskResult;
+        private static string _taskName;
+
         public EliteController(IStatisticsProvider statisticsProvider,
             IIntegrationProvider integrationProvider)
         {
@@ -22,33 +27,30 @@ namespace KikoleSite.Elite.Controllers
         }
 
         [HttpGet("players/refresh")]
-        public async Task<JsonResult> RefreshPlayersAsync([FromQuery] bool addTimesForNewPlayers)
+        public JsonResult RefreshPlayers([FromQuery] bool addTimesForNewPlayers)
         {
-            var refreshResult = await _integrationProvider
-                .RefreshPlayersAsync(addTimesForNewPlayers)
-                .ConfigureAwait(false);
-
-            return Json(refreshResult);
+            var json = StartAsyncTaskAndGetJson(() =>
+                _integrationProvider.RefreshPlayersAsync(addTimesForNewPlayers),
+                nameof(RefreshPlayers));
+            return Json(json);
         }
 
         [HttpGet("entries/{game}/refresh")]
-        public async Task<JsonResult> RefreshEntriesAsync([FromRoute] Game game)
+        public JsonResult RefreshGameEntries([FromRoute] Game game)
         {
-            var refreshResult = await _integrationProvider
-                .RefreshAllEntriesAsync(game)
-                .ConfigureAwait(false);
-
-            return Json(refreshResult);
+            var json = StartAsyncTaskAndGetJson(() =>
+                _integrationProvider.RefreshAllEntriesAsync(game),
+                nameof(RefreshGameEntries));
+            return Json(json);
         }
 
         [HttpGet("entries/refresh")]
-        public async Task<JsonResult> RefreshEntriesAsync([Required][FromQuery] DateTime fromDate)
+        public JsonResult RefreshRecentEntries([Required][FromQuery] DateTime fromDate)
         {
-            var refreshResult = await _integrationProvider
-                .RefreshEntriesToDateAsync(fromDate)
-                .ConfigureAwait(false);
-
-            return Json(refreshResult);
+            var json = StartAsyncTaskAndGetJson(() =>
+                _integrationProvider.RefreshEntriesToDateAsync(fromDate),
+                nameof(RefreshRecentEntries));
+            return Json(json);
         }
 
         [HttpGet("games/{game}/longest-standings")]
@@ -88,6 +90,37 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
 
             return Json(players);
+        }
+
+        private static object StartAsyncTaskAndGetJson<T>(Func<Task<T>> asyncCall, string taskName)
+        {
+            object returned = null;
+            lock (_lock)
+            {
+                if (_runningTask != null)
+                {
+                    if (!_runningTask.IsCompleted)
+                    {
+                        returned = new { msg = $"Task \"{_taskName}\" is already running." };
+                    }
+                    else
+                    {
+                        returned = new { msg = $"Task \"{_taskName}\" just finished.", result = _taskResult };
+                        _runningTask = null;
+                        _taskName = null;
+                    }
+                }
+                else
+                {
+                    _taskName = taskName;
+                    _runningTask = Task.Run(async () =>
+                    {
+                        _taskResult = await asyncCall().ConfigureAwait(false);
+                    });
+                    returned = new { msg = $"Task \"{_taskName}\" has been launched." };
+                }
+            }
+            return returned;
         }
     }
 }
