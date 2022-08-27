@@ -8,6 +8,7 @@ namespace KikoleSite.Elite.Loggers
     {
         private readonly Api.Interfaces.IClock _clock;
         private readonly string _logsFilePathFormat;
+        private readonly object _lock = new object();
 
         public FileLogger(IConfiguration configuration, Api.Interfaces.IClock clock)
         {
@@ -19,12 +20,15 @@ namespace KikoleSite.Elite.Loggers
         {
             try
             {
-                var now = _clock.Now;
-                using var sw = InitiateOrReuseFileStream(now);
-                sw.WriteLine($"Exception timestamp: {now:HH:mm:ss}");
-                sw.WriteLine(ex.Message);
-                sw.WriteLine(ex.StackTrace);
-                sw.WriteLine(sw.NewLine);
+                lock (_lock)
+                {
+                    var now = _clock.Now;
+                    using var sw = InitiateOrReuseFileStream(now);
+                    sw.WriteLine($"Exception timestamp: {now:HH:mm:ss}");
+                    sw.WriteLine(ex.Message);
+                    sw.WriteLine(ex.StackTrace);
+                    sw.WriteLine(sw.NewLine);
+                }
             }
             catch { }
         }
@@ -33,9 +37,12 @@ namespace KikoleSite.Elite.Loggers
         {
             try
             {
-                var now = _clock.Now;
-                using var sw = InitiateOrReuseFileStream(now);
-                sw.WriteLine($"{now:HH:mm:ss} - {message}");
+                lock (_lock)
+                {
+                    var now = _clock.Now;
+                    using var sw = InitiateOrReuseFileStream(now);
+                    sw.WriteLine($"{now:HH:mm:ss} - {message}");
+                }
             }
             catch { }
         }
@@ -46,10 +53,13 @@ namespace KikoleSite.Elite.Loggers
             {
                 if (messages?.Length > 0)
                 {
-                    var now = _clock.Now;
-                    using var sw = InitiateOrReuseFileStream(now);
-                    foreach (var message in messages)
-                        sw.WriteLine($"{now:HH:mm:ss} - {message}");
+                    lock (_lock)
+                    {
+                        var now = _clock.Now;
+                        using var sw = InitiateOrReuseFileStream(now);
+                        foreach (var message in messages)
+                            sw.WriteLine($"{now:HH:mm:ss} - {message}");
+                    }
                 }
             }
             catch { }

@@ -115,7 +115,14 @@ namespace KikoleSite.Elite.Controllers
                     _taskName = taskName;
                     _runningTask = Task.Run(async () =>
                     {
-                        _taskResult = await asyncCall().ConfigureAwait(false);
+                        try
+                        {
+                            _taskResult = await asyncCall().ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            _taskResult = new { globalTaskError = $"{ex.Message}\n{ex.StackTrace}" };
+                        }
                     });
                     returned = new { msg = $"Task \"{_taskName}\" has been launched." };
                 }
