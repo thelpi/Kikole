@@ -1,0 +1,59 @@
+﻿@model KikoleSite.Elite.ViewDatas.PlayerDetailsViewData
+
+<table class="player-times">
+    <tbody>
+        <tr>
+            <th class="stage">Stage</th>
+            <th class="difficulty">Agent</th>
+            <th class="difficulty">Secret Agent</th>
+            <th class="difficulty">00 Agent</th>
+        </tr>
+        @foreach (var stageDetails in Model.DetailsByStage)
+        {
+            <tr>
+                <td><a href="#" class="stage-title">@stageDetails.Stage.ToString()</a></td>
+                @if (!stageDetails.EasyTime.HasValue)
+                {
+                    <td>N/A</td>
+                }
+                else
+                {
+                    <td>
+                        <strong><a href="#" class="time">@stageDetails.EasyTime.Value.ToString(@"mm\:ss")</a></strong> /
+                        <a href="/goldeneye/stage/dam#t053" class="time"><span class="points">@stageDetails.EasyPoints</span> pts</a>
+                    </td>
+                }
+                @if (!stageDetails.MediumTime.HasValue)
+                {
+                    <td>N/A</td>
+                }
+                else
+                {
+                    <td>
+                        <strong><a href="#" class="time">@stageDetails.MediumTime.Value.ToString(@"mm\:ss")</a></strong> /
+                        <a href="/goldeneye/stage/dam#t177" class="time"><span class="points">@stageDetails.MediumPoints</span> pts</a>
+                    </td>
+                }
+                @if (!stageDetails.HardTime.HasValue)
+                {
+                    <td>N/A</td>
+                }
+                else
+                {
+                    <td>
+                        <strong><a href="#" class="time">@stageDetails.HardTime.Value.ToString(@"mm\:ss")</a></strong> /
+                        <a href="/goldeneye/stage/dam#t2118" class="time"><span class="points">@stageDetails.HardPoints</span> pts</a>
+                    </td>
+                }
+            </tr>
+        }
+        <tr>
+            <th>Totals</th>
+            <th>@Model.EasyTime.ToString(@"mm\:ss") / <span class="points">@Model.EasyPoints</span> pts</th>
+            <th>@Model.MediumTime.ToString(@"mm\:ss") / <span class="points">@Model.MediumPoints</span> pts</th>
+            <th>@Model.HardTime.ToString(@"mm\:ss") / <span class="points">@Model.HardPoints</span> pts</th>
+        </tr>
+    </tbody>
+</table>
+<p class="overall">Overall Combined Time: @Model.OverallTime.ToString("c")</p><!-- (9th)-->
+<p class="overall">Overall Combined Points: <span class="points">@Model.OverallPoints</span> points (@Model.OverallRanking)</p>

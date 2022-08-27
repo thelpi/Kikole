@@ -1,0 +1,19 @@
+﻿@model IEnumerable<KikoleSite.Elite.ViewDatas.PlayerItemData>
+
+<table id="wr-table" class="ge">
+    <tbody>
+        <tr>
+            <th class="stage">ID</th>
+            <th class="stage">Real name</th>
+            <th class="stage">Surname</th>
+        </tr>
+        @foreach (var player in Model)
+        {
+            <tr>
+                <td style="color:#@player.Color">@player.Id</td>
+                <td style="color:#@player.Color">@player.RealName</td>
+                <td style="color:#@player.Color">@player.SurName</td>
+            </tr>
+        }
+    </tbody>
+</table>

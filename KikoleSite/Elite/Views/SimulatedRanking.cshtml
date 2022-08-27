@@ -1,0 +1,88 @@
+﻿@model KikoleSite.Elite.ViewDatas.SimulatedRankingViewData
+
+<h2>World Records</h2>
+<table id="wr-table" class="ge">
+    <tbody>
+        <tr>
+            <th class="stage">Stage</th>
+            <th class="difficulty">Agent</th>
+            <th class="difficulty">Secret Agent</th>
+            <th class="difficulty">00 Agent</th>
+        </tr>
+        @foreach (var stage in Model.StageWorldRecordEntries)
+        {
+            <tr>
+                @if (stage == null)
+                {
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                }
+                else
+                {
+                    <td><img width="75" height="48" src="@stage.Image" /><a href="#">@stage.Name</a></td>
+                    <td>
+                        <div class="time">@stage.EasyTime.ToString(@"mm\:ss")</div>
+                        <div class="initials">
+                            @{
+                                int i = 0;
+                                foreach (var kvp in stage.EasyColoredInitials)
+                                {
+                                    if (i == 5)
+                                    {
+                                        <br />
+                                    }
+                                    <a href="#" style="color:#@kvp.Item2" title="@kvp.Item3">@kvp.Item1</a>
+                                    i++;
+                                }
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="time">@stage.MediumTime.ToString(@"mm\:ss")</div>
+                        <div class="initials">
+                            @{
+                                i = 0;
+                                foreach (var kvp in stage.MediumColoredInitials)
+                                {
+                                    if (i == 5)
+                                    {
+                                        <br />
+                                    }
+                                    <a href="#" style="color:#@kvp.Item2" title="@kvp.Item3">@kvp.Item1</a>
+                                    i++;
+                                }
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="time">@stage.HardTime.ToString(@"mm\:ss")</div>
+                        <div class="initials">
+                            @{
+                                i = 0;
+                                foreach (var kvp in stage.HardColoredInitials)
+                                {
+                                    if (i == 5)
+                                    {
+                                        <br />
+                                    }
+                                    <a href="#" style="color:#@kvp.Item2" title="@kvp.Item3">@kvp.Item1</a>
+                                    i++;
+                                }
+                            }
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+        <tr>
+            <th>Totals</th>
+            <th>@Model.EasyCombinedTime.ToString(@"mm\:ss")</th>
+            <th>@Model.MediumCombinedTime.ToString(@"mm\:ss")</th>
+            <th>@Model.HardCombinedTime.ToString(@"mm\:ss")</th>
+        </tr>
+    </tbody>
+</table>
+<p class="overall">Overall combined time: @Model.CombinedTime.ToString("c")</p>
+@await Html.PartialAsync("~/Elite/Views/RankingBoxes.cshtml", new Tuple<IEnumerable<KikoleSite.Elite.ViewDatas.PointsRankingItemData>, IEnumerable<KikoleSite.Elite.ViewDatas.TimeRankingItemData>>(Model.PointsRankingEntries, Model.TimeRankingEntries)).ConfigureAwait(false)

@@ -1,0 +1,66 @@
+﻿@model Tuple<IEnumerable<KikoleSite.Elite.ViewDatas.PointsRankingItemData>, IEnumerable<KikoleSite.Elite.ViewDatas.TimeRankingItemData>>
+
+<div class="dual-box">
+    <h2>Point Rankings</h2>
+    <div id="point-rankings">
+        <table>
+            <tbody>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>A</th>
+                    <th>SA</th>
+                    <th>00A</th>
+                    <th>Total</th>
+                </tr>
+                @foreach (var item in Model.Item1)
+                {
+                    <tr>
+                        <td class="rank">@item.Rank</td>
+                        <td>
+                            <!-- TODO: flag -->
+                            <!--<div class="flag f16 US"></div>-->
+                            <a style="color:#@item.PlayerColor">@item.PlayerName</a>
+                        </td>
+                        <td>@item.EasyPoints</td>
+                        <td>@item.MediumPoints</td>
+                        <td>@item.HardPoints</td>
+                        <td class="sorted"><strong>@item.TotalPoints</strong></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="dual-box last">
+    <h2>Time Rankings</h2>
+    <div id="time-rankings">
+        <table>
+            <tbody>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>A</th>
+                    <th>SA</th>
+                    <th>00A</th>
+                    <th>Total</th>
+                </tr>
+                @foreach (var item in Model.Item2)
+                {
+                    <tr>
+                        <td class="rank">@item.Rank</td>
+                        <td>
+                            <!-- TODO: flag -->
+                            <!--<div class="flag f16 US"></div>-->
+                            <a style="color:#@item.PlayerColor">@item.PlayerName</a>
+                        </td>
+                        <td>@item.EasyTime.ToString(@"mm\:ss")</td>
+                        <td>@item.MediumTime.ToString(@"mm\:ss")</td>
+                        <td>@item.HardTime.ToString(@"mm\:ss")</td>
+                        <td class="sorted"><strong>@item.TotalTime.ToString("c")</strong></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

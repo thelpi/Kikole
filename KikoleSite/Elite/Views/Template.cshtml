@@ -1,0 +1,21 @@
+﻿@model KikoleSite.Elite.ViewDatas.BaseViewData
+
+<html class=" byzbljr idc0_332">
+<head>
+    <title>The GoldenEye World Records and Rankings - The Elite Rankings</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link href="https://rankings.the-elite.net/css/base.1628312764.css" type="text/css" rel="stylesheet">
+    <link href="https://rankings.the-elite.net/css/users.1631148673.css" type="text/css" rel="stylesheet">
+    <link href="https://rankings.the-elite.net/css/flags.1541225167.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <div id="page" class="with-sidebar">
+            <div id="content">
+                <h1>@Model.Title</h1>
+                @await Html.PartialAsync(Model.Name, Model.Data).ConfigureAwait(false)
+            </div>
+        </div>
+    </div>
+</body>
+</html>

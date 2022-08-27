@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Models;
 
 namespace KikoleSite.Elite.Extensions
 {
@@ -189,6 +190,21 @@ namespace KikoleSite.Elite.Extensions
         {
             return _levelLabels.ContainsKey((level, game)) ?
                 _levelLabels[(level, game)] : DefaultLabel;
+        }
+
+        internal static List<T> WithRanks<T, TValue>(
+            this List<T> rankings,
+            Func<T, TValue> getComparedValue)
+            where T : Ranking
+            where TValue : IEquatable<TValue>
+        {
+            for (int i = 0; i < rankings.Count; i++)
+            {
+                rankings[i].SetRank(
+                    i == 0 ? null : rankings[i - 1],
+                    getComparedValue);
+            }
+            return rankings;
         }
     }
 }

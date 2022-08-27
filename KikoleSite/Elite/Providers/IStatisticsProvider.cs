@@ -21,5 +21,8 @@ namespace KikoleSite.Elite.Providers
             Stage stage,
             LeaderboardGroupOptions groupOption,
             int daysStep);
+
+        Task<IReadOnlyCollection<RankingEntryLight>> GetRankingEntriesAsync(
+            RankingRequest request);
     }
 }
