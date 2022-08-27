@@ -105,7 +105,7 @@ namespace KikoleSite.Elite.Repositories
 
         public async Task<PlayerDto> GetPlayerInformationAsync(string urlName, string defaultHexPlayer)
         {
-            var pageContent = await GetPageStringContentAsync($"/~{urlName.Replace(" ", "+")}", true)
+            var pageContent = await GetPageStringContentAsync($"/~{HttpUtility.UrlEncode(urlName)}", true)
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(pageContent))

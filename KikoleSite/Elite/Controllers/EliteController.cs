@@ -23,9 +23,11 @@ namespace KikoleSite.Elite.Controllers
         [HttpGet("the-elite/players/refresh")]
         public async Task<IActionResult> RefreshPlayersAsync()
         {
-            await _integrationProvider.RefreshPlayersAsync().ConfigureAwait(false);
+            var refreshResult = await _integrationProvider
+                .RefreshPlayersAsync()
+                .ConfigureAwait(false);
 
-            return NoContent();
+            return Json(refreshResult);
         }
 
         [HttpGet("the-elite/entries/{game}/refresh")]

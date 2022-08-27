@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Models.Integration;
 
 namespace KikoleSite.Elite.Providers
 {
@@ -10,6 +11,6 @@ namespace KikoleSite.Elite.Providers
 
         Task RefreshEntriesToDateAsync(DateTime stopAt);
 
-        Task RefreshPlayersAsync();
+        Task<RefreshPlayersResult> RefreshPlayersAsync();
     }
 }
