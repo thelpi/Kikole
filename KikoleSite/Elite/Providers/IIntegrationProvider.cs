@@ -9,6 +9,8 @@ namespace KikoleSite.Elite.Providers
     {
         Task<RefreshEntriesResult> RefreshAllEntriesAsync(Game game);
 
+        Task<RefreshEntriesResult> RefreshPlayerEntriesAsync(long playerId);
+
         Task<RefreshEntriesResult> RefreshEntriesToDateAsync(DateTime stopAt);
 
         Task<RefreshPlayersResult> RefreshPlayersAsync(bool addTimesForNewPlayers);

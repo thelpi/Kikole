@@ -231,6 +231,47 @@ namespace KikoleSite.Elite.Providers
             };
         }
 
+        public async Task<RefreshEntriesResult> RefreshPlayerEntriesAsync(long playerId)
+        {
+            var errors = new ConcurrentBag<string>();
+            var count = 0;
+
+            var players = await _readRepository
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+
+            var p = players.SingleOrDefault(_ => _.Id == playerId);
+            if (p == null)
+            {
+                errors.Add($"The player identifier {playerId} doesn't exist.");
+                return new RefreshEntriesResult
+                {
+                    Errors = errors,
+                    ReplacedEntriesCount = count
+                };
+            }
+
+            var (localCount, localErrors) = await ExtractPlayerTimesAsync(
+                    Game.GoldenEye, p)
+                .ConfigureAwait(false);
+
+            errors.AddRange(localErrors);
+            count += localCount;
+
+            (localCount, localErrors) = await ExtractPlayerTimesAsync(
+                    Game.PerfectDark, p)
+                .ConfigureAwait(false);
+
+            errors.AddRange(localErrors);
+            count += localCount;
+
+            return new RefreshEntriesResult
+            {
+                Errors = errors,
+                ReplacedEntriesCount = count
+            };
+        }
+
         private async Task<(int count, IReadOnlyCollection<string> errors)> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
         {
             var errors = new ConcurrentBag<string>();

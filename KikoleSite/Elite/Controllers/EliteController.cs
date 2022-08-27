@@ -53,6 +53,15 @@ namespace KikoleSite.Elite.Controllers
             return Json(json);
         }
 
+        [HttpGet("players/{playerId}/entries/refresh")]
+        public JsonResult RefreshPlayerEntries([FromRoute] long playerId)
+        {
+            var json = StartAsyncTaskAndGetJson(() =>
+                _integrationProvider.RefreshPlayerEntriesAsync(playerId),
+                nameof(RefreshPlayerEntries));
+            return Json(json);
+        }
+
         [HttpGet("games/{game}/longest-standings")]
         public async Task<JsonResult> GetLongestStandingsAsync(
             [FromRoute] Game game,
