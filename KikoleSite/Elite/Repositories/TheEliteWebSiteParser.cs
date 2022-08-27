@@ -283,7 +283,12 @@ namespace KikoleSite.Elite.Repositories
                 {
                     var urlEncodedPlayerUrl = HttpUtility.UrlEncode(playerUrlName);
 
-                    var client = new HttpClient
+                    var httpClientHandler = new HttpClientHandler
+                    {
+                        Proxy = GetProxy()
+                    };
+
+                    var client = new HttpClient(httpClientHandler)
                     {
                         BaseAddress = new Uri(_configuration.BaseUri)
                     };
@@ -343,9 +348,9 @@ namespace KikoleSite.Elite.Repositories
             while (attemps < _configuration.PageAttemps)
             {
                 using var webClient = new WebClient();
-#if !DEBUG
-                webClient.Proxy = new WebProxy("http://winproxy.server.lan:3128");
-#endif
+                var proxy = GetProxy();
+                if (proxy != null)
+                    webClient.Proxy = proxy;
                 try
                 {
                     data = await webClient
@@ -582,6 +587,14 @@ namespace KikoleSite.Elite.Repositories
                 EngineUrl = link.Attributes["href"].Value,
                 Time = time.Value
             };
+        }
+
+        private WebProxy GetProxy()
+        {
+            if (string.IsNullOrWhiteSpace(_configuration.ProxyServerUrl))
+                return null;
+
+            return new WebProxy(_configuration.ProxyServerUrl);
         }
     }
 }
