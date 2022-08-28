@@ -1,0 +1,62 @@
+﻿@model KikoleSite.Elite.ViewDatas.IndexViewData
+
+    <h2>What you need to know before starting</h2>
+    <p>
+        Infographics are sometimes SLOW; page takes between few seconds and a full minute to render.
+    </p>
+    <p>
+        You'll need to manipulate browser URL by yourself with a specific set of parameters each time (see below).
+    </p>
+    <p>
+        Please report any error you might encounter and PLEASE do not spam a page.
+    </p>
+
+    <h2>"Set of parameters"? What the f*** does it mean?</h2>
+    <h3>Players</h3>
+    <p>
+        The full list of The-Elite players is available <a href="/the-elite/players" target="_blank">here</a>.
+        <br />
+        This will be usefull to get the <span style="font-weight: bold; color: red">player ID</span> parameter.
+    </p>
+    <h3>Games</h3>
+    <p>
+        The game has to be specified after the component '/games/' of the URL.
+        <br />
+        To specify <span style="font-weight: bold; color: red">GoldenEye</span> as a parameter, use <span style="font-weight: bold; color: red">1</span>.
+        <br />
+        To specify <span style="font-weight: bold; color: red">PerfectDark</span> as a parameter, use <span style="font-weight: bold; color: red">2</span>.
+    </p>
+    <h3>Engines / Systems</h3>
+    <p>
+        To specify <span style="font-weight: bold; color: red">NTSC-J</span> as a parameter, use <span style="font-weight: bold; color: red">1</span>.
+        <br />
+        To specify <span style="font-weight: bold; color: red">NTSC</span> as a parameter, use <span style="font-weight: bold; color: red">2</span>.
+        <br />
+        To specify <span style="font-weight: bold; color: red">PAL</span> as a parameter, use <span style="font-weight: bold; color: red">3</span>.
+    </p>
+    <h3>Dates</h3>
+    <p>
+        When you need to specify a date, use the syntax <span style="font-weight: bold; color: red">YYYY-MM-DD</span> without time.
+    </p>
+
+    <h2>Available features</h2>
+    <h3>Dystopia Ranking - See the ranking at a specific date with current times of one player</h3>
+    <p>
+        Use <a href="/the-elite/games/1/player-rankings?playerId=2&rankingDate=2012-12-01" target="_blank">this URL</a> as a template; in this exemple, Gus Riolo (id = 2) in GoldenEye in december 2012.
+        <br />
+        Parameter 'playerId' is mandatory; use the player ID from <a href="/the-elite/players">the list</a>.
+    </p>
+    <h3>Framed Ranking - See the ranking based solely on time entries between two dates</h3>
+    <p>
+        Use <a href="/the-elite/games/2/time-frame-rankings?rankingStartDate=2019-01-01&rankingDate=2021-01-01" target="_blank">this URL</a> as a template; in this exemple, PerfectDark between 2019 and 2021.
+        <br />
+        Parameter 'rankingStartDate' is mandatory.
+        <br />
+        Parameter 'rankingDate' is optional; the current date will be used if not specified.
+    </p>
+    <h3>Engine Ranking - See the ranking at a specific date for a specific engine</h3>
+    <p>
+        Use <a href="/the-elite/games/1/engine-rankings?engine=3&rankingDate=2015-05-01" target="_blank">this URL</a> as a template; in this exemple, PAL (id = 3) in GoldenEye in may 2015).
+        <br />
+        Parameter 'engine' is mandatory; see above for available values.
+    </p>

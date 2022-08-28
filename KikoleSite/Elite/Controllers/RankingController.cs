@@ -20,6 +20,7 @@ namespace KikoleSite.Elite.Controllers
         private const string RankingViewName = "SimulatedRanking";
         private const string PlayersViewName = "Players";
         private const string PlayerDetailsViewName = "PlayerDetails";
+        private const string IndexViewName = "Index";
 
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
@@ -32,10 +33,20 @@ namespace KikoleSite.Elite.Controllers
             _clock = clock;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> IndexAsync()
+        {
+            return await ViewAsync(
+                    IndexViewName,
+                    "The Elite infographics - How to",
+                    () => Task.FromResult((object)new IndexViewData()))
+                .ConfigureAwait(false);
+        }
+
         [HttpGet("players")]
         public async Task<IActionResult> GetPlayersAsync()
         {
-            return await View(
+            return await ViewAsync(
                 PlayersViewName,
                 "Players list",
                 async () =>
@@ -151,7 +162,7 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "The engine is invalid." });
             }
 
-            return await View(
+            return await ViewAsync(
                 PlayerDetailsViewName,
                 $"PlayerID {playerId} - {game} times",
                 async () =>
@@ -183,7 +194,7 @@ namespace KikoleSite.Elite.Controllers
             DateTime? rankingStartDate = null,
             Engine? engine = null)
         {
-            return await View(
+            return await ViewAsync(
                 RankingViewName,
                 "The GoldenEye/PerfectDark World Records and Rankings SIMULATOR",
                 async () =>
@@ -260,7 +271,7 @@ namespace KikoleSite.Elite.Controllers
             return rankingEntriesBase.Select(r => r as RankingEntry).ToList();
         }
 
-        private async Task<IActionResult> View(
+        private async Task<IActionResult> ViewAsync(
             string viewName,
             string title,
             Func<Task<object>> getDatasFunc)
