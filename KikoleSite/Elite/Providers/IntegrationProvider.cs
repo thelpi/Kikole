@@ -360,32 +360,48 @@ namespace KikoleSite.Elite.Providers
             var count = 0;
             var errors = new List<string>();
 
-            var entries = await _siteParser
+            var entriesFromSite = await _siteParser
                 .GetPlayerEntriesAsync(game, player.UrlName)
                 .ConfigureAwait(false);
 
-            if (entries != null)
-            {
-                await _writeRepository
-                    .DeletePlayerEntriesAsync(game, player.Id)
-                    .ConfigureAwait(false);
+            var entriesFromDatabase = await _readRepository
+                .GetPlayerEntriesAsync(player.Id, game)
+                .ConfigureAwait(false);
 
-                var groupEntries = entries.GroupBy(e => (e.Stage, e.Level, e.Time, e.Engine));
-                foreach (var group in groupEntries)
+            if (entriesFromSite != null)
+            {
+                entriesFromSite = entriesFromSite
+                    .GroupBy(e => (e.Stage, e.Level, e.Time, e.Engine))
+                    .Select(e => e.OrderBy(d => d.Date ?? DateTime.MaxValue).First())
+                    .ToList();
+
+                var entriesToReplace = entriesFromSite
+                    .Where(e => !entriesFromDatabase.Any(ce => ce.AreEqual(e)))
+                    .ToList();
+
+                foreach (var entry in entriesToReplace)
                 {
-                    var groupEntry = group.OrderBy(d => d.Date ?? DateTime.MaxValue).First();
                     try
                     {
                         await _writeRepository
-                            .ReplaceTimeEntryAsync(groupEntry.ToEntry(player.Id))
+                            .ReplaceTimeEntryAsync(entry.ToEntry(player.Id))
                             .ConfigureAwait(false);
                         count++;
                     }
                     catch (Exception ex)
                     {
-                        errors.Add($"Error while processing entry {groupEntry}\n{ex.Message}");
+                        errors.Add($"Error while processing entry {entry}\n{ex.Message}");
                     }
                 }
+
+                var removeEntriesId = entriesFromDatabase
+                    .Where(e => !entriesFromSite.Any(end => end.AreSame(e)))
+                    .Select(e => e.Id)
+                    .ToArray();
+
+                await _writeRepository
+                    .DeleteEntriesAsync(removeEntriesId)
+                    .ConfigureAwait(false);
             }
             else
             {

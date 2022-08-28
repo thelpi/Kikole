@@ -15,5 +15,7 @@ namespace KikoleSite.Elite.Repositories
         Task UpdatePlayerAsync(PlayerDto player);
 
         Task BanPlayerAsync(long playerId);
+
+        Task DeleteEntriesAsync(params long[] entriesId);
     }
 }
