@@ -22,10 +22,14 @@ namespace KikoleSite.Elite.Controllers
         private const string PlayerDetailsViewName = "PlayerDetails";
 
         private readonly IStatisticsProvider _statisticsProvider;
+        private readonly Api.Interfaces.IClock _clock;
 
-        public SimulatedRankingController(IStatisticsProvider statisticsProvider)
+        public SimulatedRankingController(
+            IStatisticsProvider statisticsProvider,
+            Api.Interfaces.IClock clock)
         {
             _statisticsProvider = statisticsProvider;
+            _clock = clock;
         }
 
         [HttpGet("players")]
@@ -36,7 +40,9 @@ namespace KikoleSite.Elite.Controllers
                 "Players list",
                 async () =>
                 {
-                    var players = await _statisticsProvider.GetPlayersAsync().ConfigureAwait(false);
+                    var players = await _statisticsProvider
+                        .GetPlayersAsync()
+                        .ConfigureAwait(false);
 
                     return players.Select(p => p.ToPlayerItemData()).ToList();
                 }).ConfigureAwait(false);
@@ -48,13 +54,26 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] long playerId,
             [FromQuery] DateTime? rankingDate)
         {
-            if (!Enum.TryParse(typeof(Game), game.ToString(), out _)
-                || playerId <= 0)
+            if (!CheckGameParameter(game))
             {
-                return BadRequest();
+                return Json(new { error = "Invalid game value." });
             }
 
-            return await SimulateRankingInternalAsync(game, rankingDate, playerId)
+            if (playerId <= 0)
+            {
+                return Json(new { error = "Invalid player identifier." });
+            }
+
+            var players = await _statisticsProvider
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+            if (!players.Any(p => p.Id == playerId))
+            {
+                return Json(new { error = "The player associated to the identifier does not exist." });
+            }
+
+            return await SimulateRankingInternalAsync(
+                    game, rankingDate, playerId)
                 .ConfigureAwait(false);
         }
 
@@ -64,14 +83,19 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] DateTime? rankingDate,
             [Required][FromQuery] DateTime rankingStartDate)
         {
-            if (!Enum.TryParse(typeof(Game), game.ToString(), out _)
-                || rankingStartDate > DateTime.Now
-                || (rankingDate.HasValue && rankingDate < rankingStartDate))
+            if (!CheckGameParameter(game))
             {
-                return BadRequest();
+                return Json(new { error = "Invalid game value." });
             }
 
-            return await SimulateRankingInternalAsync(game, rankingDate, rankingStartDate: rankingStartDate)
+            if (rankingStartDate >= _clock.Tomorrow
+                || (rankingDate.HasValue && rankingDate < rankingStartDate))
+            {
+                return Json(new { error = "The ranking start date is invalid." });
+            }
+
+            return await SimulateRankingInternalAsync(
+                    game, rankingDate, rankingStartDate: rankingStartDate)
                 .ConfigureAwait(false);
         }
 
@@ -79,19 +103,20 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByEngineAsync(
             [FromRoute] Game game,
             [FromQuery] DateTime? rankingDate,
-            [FromQuery] int engine)
+            [FromQuery] Engine engine)
         {
-            if (!Enum.TryParse(typeof(Game), game.ToString(), out _))
+            if (!CheckGameParameter(game))
             {
-                return BadRequest();
+                return Json(new { error = "Invalid game value." });
             }
 
-            if (!SystemExtensions.Enumerate<Engine>().Any(e => engine == (int)e))
+            if (!CheckGameParameter(engine))
             {
-                return BadRequest();
+                return Json(new { error = "The engine is invalid." });
             }
 
-            return await SimulateRankingInternalAsync(game, rankingDate, engine: engine)
+            return await SimulateRankingInternalAsync(
+                    game, rankingDate, engine: engine)
                 .ConfigureAwait(false);
         }
 
@@ -101,8 +126,31 @@ namespace KikoleSite.Elite.Controllers
             [FromRoute] long playerId,
             [FromQuery] DateTime? rankingDate,
             [FromQuery] DateTime? rankingStartDate,
-            [FromQuery] int? engine)
+            [FromQuery] Engine? engine)
         {
+            if (!CheckGameParameter(game))
+            {
+                return Json(new { error = "Invalid game value." });
+            }
+
+            if (playerId <= 0)
+            {
+                return Json(new { error = "Invalid player identifier." });
+            }
+
+            var players = await _statisticsProvider
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+            if (!players.Any(p => p.Id == playerId))
+            {
+                return Json(new { error = "The player associated to the identifier does not exist." });
+            }
+
+            if (!CheckGameParameter(engine))
+            {
+                return Json(new { error = "The engine is invalid." });
+            }
+
             return await View(
                 PlayerDetailsViewName,
                 $"PlayerID {playerId} - {game} times",
@@ -118,19 +166,31 @@ namespace KikoleSite.Elite.Controllers
                 }).ConfigureAwait(false);
         }
 
+        private static bool CheckGameParameter(Game game)
+        {
+            return Enum.TryParse(typeof(Game), game.ToString(), out _);
+        }
+
+        private static bool CheckGameParameter(Engine? engine)
+        {
+            return !engine.HasValue || Enum.TryParse(typeof(Engine), engine.ToString(), out _);
+        }
+
         private async Task<IActionResult> SimulateRankingInternalAsync(
             Game game,
             DateTime? rankingDate,
             long? playerId = null,
             DateTime? rankingStartDate = null,
-            int? engine = null)
+            Engine? engine = null)
         {
             return await View(
                 RankingViewName,
                 "The GoldenEye/PerfectDark World Records and Rankings SIMULATOR",
                 async () =>
                 {
-                    var rankingEntries = await GetRankingsWithParamsAsync(game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine).ConfigureAwait(false);
+                    var rankingEntries = await GetRankingsWithParamsAsync(
+                            game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine)
+                        .ConfigureAwait(false);
 
                     var pointsRankingEntries = rankingEntries
                         .Where(r => r.Rank <= MaxRankDisplay)
@@ -175,14 +235,14 @@ namespace KikoleSite.Elite.Controllers
             DateTime rankingDate,
             long? playerId,
             DateTime? rankingStartDate,
-            int? engine)
+            Engine? engine)
         {
             var request = new RankingRequest
             {
                 Game = game,
                 FullDetails = true,
                 RankingDate = rankingDate,
-                Engine = (Engine?)engine,
+                Engine = engine,
                 IncludeUnknownEngine = true,
                 RankingStartDate = rankingStartDate
             };
@@ -205,12 +265,19 @@ namespace KikoleSite.Elite.Controllers
             string title,
             Func<Task<object>> getDatasFunc)
         {
-            return View($"Elite/Views/Template.cshtml", new BaseViewData
+            try
             {
-                Data = await getDatasFunc().ConfigureAwait(false),
-                Name = $"~/Elite/Views/{viewName}.cshtml",
-                Title = title
-            });
+                return View($"Elite/Views/Template.cshtml", new BaseViewData
+                {
+                    Data = await getDatasFunc().ConfigureAwait(false),
+                    Name = $"~/Elite/Views/{viewName}.cshtml",
+                    Title = title
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = $"An error has occured:\n{ex.Message}" });
+            }
         }
     }
 }
