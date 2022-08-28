@@ -7,9 +7,10 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Elite.Repositories
 {
-    public sealed class ReadRepository : BaseRepository, IReadRepository
+    public sealed class ReadRepository : Api.Repositories.BaseRepository, IReadRepository
     {
-        public ReadRepository(IConfiguration configuration) : base(configuration) { }
+        public ReadRepository(Api.Interfaces.IClock clock, IConfiguration configuration)
+            : base(configuration, clock) { }
 
         public async Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate)
         {

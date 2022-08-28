@@ -2,13 +2,13 @@
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
 using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
 
 namespace KikoleSite.Elite.Repositories
 {
-    public sealed class WriteRepository : BaseRepository, IWriteRepository
+    public sealed class WriteRepository : Api.Repositories.BaseRepository, IWriteRepository
     {
-        public WriteRepository(IConfiguration configuration) : base(configuration) { }
+        public WriteRepository(Api.Interfaces.IClock clock, IConfiguration configuration)
+            : base(configuration, clock) { }
 
         public async Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry)
         {
