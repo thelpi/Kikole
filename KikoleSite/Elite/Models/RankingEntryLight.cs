@@ -15,6 +15,8 @@ namespace KikoleSite.Elite.Models
         public int UntiedRecordsCount { get; private set; }
         public int RecordsCount { get; private set; }
 
+        public string PlayerName => Game == Game.GoldenEye ? Player?.RealName : Player?.SurName;
+
         internal RankingEntryLight(Game game, PlayerDto player)
         {
             Game = game;

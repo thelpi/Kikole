@@ -66,7 +66,7 @@ namespace KikoleSite.Elite.ViewDatas
                 OverallPoints = entry.Points,
                 OverallRanking = entry.Rank,
                 OverallTime = new TimeSpan(0, 0, (int)entry.CumuledTime),
-                PlayerName = entry.Player.RealName
+                PlayerName = entry.PlayerName
             };
         }
 
@@ -78,7 +78,7 @@ namespace KikoleSite.Elite.ViewDatas
                 HardTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Hard]),
                 MediumTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Medium]),
                 PlayerColor = entry.Player.Color,
-                PlayerName = entry.Player.RealName,
+                PlayerName = entry.PlayerName,
                 Rank = rank,
                 TotalTime = new TimeSpan(0, 0, (int)entry.CumuledTime)
             };
@@ -92,7 +92,7 @@ namespace KikoleSite.Elite.ViewDatas
                 HardPoints = entry.LevelPoints[Level.Hard],
                 MediumPoints = entry.LevelPoints[Level.Medium],
                 PlayerColor = entry.Player.Color,
-                PlayerName = entry.Player.RealName,
+                PlayerName = entry.PlayerName,
                 Rank = entry.Rank,
                 TotalPoints = entry.Points
             };
@@ -115,7 +115,7 @@ namespace KikoleSite.Elite.ViewDatas
                 .Where(x => x.IsValid(stage, level)
                     && x.Details[stage][level].Item3 == bestTime)
                 .OrderBy(x => x.Details[stage][level].Item4)
-                .Select(x => (x.Player.RealName.ToInitials(), PlayerColor: x.Player.Color, PlayerName: x.Player.RealName))
+                .Select(x => (x.PlayerName.ToInitials(), PlayerColor: x.Player.Color, PlayerName: x.PlayerName))
                 .ToList();
         }
 
