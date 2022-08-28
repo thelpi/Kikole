@@ -5,9 +5,9 @@
     <tbody>
         <tr>
             <th class="stage">Stage</th>
-            <th class="difficulty">Agent</th>
-            <th class="difficulty">Secret Agent</th>
-            <th class="difficulty">00 Agent</th>
+            <th class="difficulty">@Model.EasyLabel</th>
+            <th class="difficulty">@Model.MediumLabel</th>
+            <th class="difficulty">@Model.HardLabel</th>
         </tr>
         @foreach (var stage in Model.StageWorldRecordEntries)
         {

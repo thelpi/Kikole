@@ -157,7 +157,10 @@ namespace KikoleSite.Elite.Controllers
                         HardCombinedTime = new TimeSpan(0, 0, secondsLevel[Level.Hard]),
                         PointsRankingEntries = pointsRankingEntries,
                         TimeRankingEntries = timeRankingEntries,
-                        StageWorldRecordEntries = stageWorldRecordEntries
+                        StageWorldRecordEntries = stageWorldRecordEntries,
+                        EasyLabel = Level.Easy.GetLabel(game),
+                        MediumLabel = Level.Medium.GetLabel(game),
+                        HardLabel = Level.Hard.GetLabel(game)
                     };
                 }).ConfigureAwait(false);
         }

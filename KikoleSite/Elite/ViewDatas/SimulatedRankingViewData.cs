@@ -12,5 +12,8 @@ namespace KikoleSite.Elite.ViewDatas
         public TimeSpan EasyCombinedTime { get; set; }
         public TimeSpan MediumCombinedTime { get; set; }
         public TimeSpan HardCombinedTime { get; set; }
+        public string EasyLabel { get; set; }
+        public string MediumLabel { get; set; }
+        public string HardLabel { get; set; }
     }
 }
