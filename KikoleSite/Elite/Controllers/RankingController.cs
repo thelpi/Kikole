@@ -160,7 +160,10 @@ namespace KikoleSite.Elite.Controllers
                         StageWorldRecordEntries = stageWorldRecordEntries,
                         EasyLabel = Level.Easy.GetLabel(game),
                         MediumLabel = Level.Medium.GetLabel(game),
-                        HardLabel = Level.Hard.GetLabel(game)
+                        HardLabel = Level.Hard.GetLabel(game),
+                        EasyShortLabel = Level.Easy.GetLabel(game, true),
+                        MediumShortLabel = Level.Medium.GetLabel(game, true),
+                        HardShortLabel = Level.Hard.GetLabel(game, true)
                     };
                 }).ConfigureAwait(false);
         }

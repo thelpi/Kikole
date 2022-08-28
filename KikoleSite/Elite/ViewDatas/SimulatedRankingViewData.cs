@@ -15,5 +15,8 @@ namespace KikoleSite.Elite.ViewDatas
         public string EasyLabel { get; set; }
         public string MediumLabel { get; set; }
         public string HardLabel { get; set; }
+        public string EasyShortLabel { get; set; }
+        public string MediumShortLabel { get; set; }
+        public string HardShortLabel { get; set; }
     }
 }

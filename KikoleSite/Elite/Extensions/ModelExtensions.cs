@@ -130,6 +130,15 @@ namespace KikoleSite.Elite.Extensions
             { (Level.Medium, Game.PerfectDark), "Special agent" },
             { (Level.Hard, Game.PerfectDark), "Perfect agent" },
         };
+        private static readonly Dictionary<(Level, Game), string> _levelShortLabels = new Dictionary<(Level, Game), string>
+        {
+            { (Level.Easy, Game.GoldenEye), "A" },
+            { (Level.Medium, Game.GoldenEye), "S" },
+            { (Level.Hard, Game.GoldenEye), "00A" },
+            { (Level.Easy, Game.PerfectDark), "A" },
+            { (Level.Medium, Game.PerfectDark), "SA" },
+            { (Level.Hard, Game.PerfectDark), "PA" },
+        };
 
         public static ControlStyle? ToControlStyle(string controlStyleLabel)
         {
@@ -186,10 +195,11 @@ namespace KikoleSite.Elite.Extensions
             return _eliteUrlName[game];
         }
 
-        public static string GetLabel(this Level level, Game game)
+        public static string GetLabel(this Level level, Game game, bool shortVersion = false)
         {
-            return _levelLabels.ContainsKey((level, game)) ?
-                _levelLabels[(level, game)] : DefaultLabel;
+            return shortVersion
+                ? _levelShortLabels[(level, game)]
+                : _levelLabels[(level, game)];
         }
 
         internal static List<T> WithRanks<T, TValue>(

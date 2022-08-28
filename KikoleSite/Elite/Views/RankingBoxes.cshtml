@@ -1,4 +1,4 @@
-﻿@model Tuple<IEnumerable<KikoleSite.Elite.ViewDatas.PointsRankingItemData>, IEnumerable<KikoleSite.Elite.ViewDatas.TimeRankingItemData>>
+﻿@model KikoleSite.Elite.ViewDatas.SimulatedRankingViewData
 
 <div class="dual-box">
     <h2>Point Rankings</h2>
@@ -8,12 +8,12 @@
                 <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>A</th>
-                    <th>SA</th>
-                    <th>00A</th>
+                    <th>@Model.EasyShortLabel</th>
+                    <th>@Model.MediumShortLabel</th>
+                    <th>@Model.HardShortLabel</th>
                     <th>Total</th>
                 </tr>
-                @foreach (var item in Model.Item1)
+                @foreach (var item in Model.PointsRankingEntries)
                 {
                     <tr>
                         <td class="rank">@item.Rank</td>
@@ -40,12 +40,12 @@
                 <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>A</th>
-                    <th>SA</th>
-                    <th>00A</th>
+                    <th>@Model.EasyShortLabel</th>
+                    <th>@Model.MediumShortLabel</th>
+                    <th>@Model.HardShortLabel</th>
                     <th>Total</th>
                 </tr>
-                @foreach (var item in Model.Item2)
+                @foreach (var item in Model.TimeRankingEntries)
                 {
                     <tr>
                         <td class="rank">@item.Rank</td>
