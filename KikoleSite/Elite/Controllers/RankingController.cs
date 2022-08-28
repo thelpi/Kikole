@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Elite.Enums;
@@ -30,7 +31,7 @@ namespace KikoleSite.Elite.Controllers
         [HttpGet("players")]
         public async Task<IActionResult> GetPlayersAsync()
         {
-            return await DoAndCatchAsync(
+            return await View(
                 PlayersViewName,
                 "Players list",
                 async () =>
@@ -61,15 +62,16 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByTimeFrameAsync(
             [FromRoute] Game game,
             [FromQuery] DateTime? rankingDate,
-            [FromQuery] int monthsPrior)
+            [Required][FromQuery] DateTime rankingStartDate)
         {
             if (!Enum.TryParse(typeof(Game), game.ToString(), out _)
-                || monthsPrior <= 0)
+                || rankingStartDate > DateTime.Now
+                || (rankingDate.HasValue && rankingDate < rankingStartDate))
             {
                 return BadRequest();
             }
 
-            return await SimulateRankingInternalAsync(game, rankingDate, monthsPrior: monthsPrior)
+            return await SimulateRankingInternalAsync(game, rankingDate, rankingStartDate: rankingStartDate)
                 .ConfigureAwait(false);
         }
 
@@ -98,16 +100,16 @@ namespace KikoleSite.Elite.Controllers
             [FromRoute] Game game,
             [FromRoute] long playerId,
             [FromQuery] DateTime? rankingDate,
-            [FromQuery] int? monthsPrior,
+            [FromQuery] DateTime? rankingStartDate,
             [FromQuery] int? engine)
         {
-            return await DoAndCatchAsync(
+            return await View(
                 PlayerDetailsViewName,
                 $"PlayerID {playerId} - {game} times",
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(game,
-                        rankingDate ?? DateTime.Now, playerId, monthsPrior, engine)
+                        rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine)
                     .ConfigureAwait(false);
 
                     var pRanking = rankingEntries.Single(r => r.Player.Id == playerId);
@@ -120,15 +122,15 @@ namespace KikoleSite.Elite.Controllers
             Game game,
             DateTime? rankingDate,
             long? playerId = null,
-            int? monthsPrior = null,
+            DateTime? rankingStartDate = null,
             int? engine = null)
         {
-            return await DoAndCatchAsync(
+            return await View(
                 RankingViewName,
                 "The GoldenEye/PerfectDark World Records and Rankings SIMULATOR",
                 async () =>
                 {
-                    var rankingEntries = await GetRankingsWithParamsAsync(game, rankingDate ?? DateTime.Now, playerId, monthsPrior, engine).ConfigureAwait(false);
+                    var rankingEntries = await GetRankingsWithParamsAsync(game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine).ConfigureAwait(false);
 
                     var pointsRankingEntries = rankingEntries
                         .Where(r => r.Rank <= MaxRankDisplay)
@@ -172,7 +174,7 @@ namespace KikoleSite.Elite.Controllers
             Game game,
             DateTime rankingDate,
             long? playerId,
-            int? monthsPrior,
+            DateTime? rankingStartDate,
             int? engine)
         {
             var request = new RankingRequest
@@ -181,18 +183,14 @@ namespace KikoleSite.Elite.Controllers
                 FullDetails = true,
                 RankingDate = rankingDate,
                 Engine = (Engine?)engine,
-                IncludeUnknownEngine = true
+                IncludeUnknownEngine = true,
+                RankingStartDate = rankingStartDate
             };
 
             if (playerId.HasValue)
             {
                 request.PlayerVsLegacy = (playerId.Value, rankingDate);
                 request.RankingDate = DateTime.Now;
-            }
-
-            if (monthsPrior.HasValue)
-            {
-                request.RankingStartDate = rankingDate.AddMonths(-monthsPrior.Value);
             }
 
             var rankingEntriesBase = await _statisticsProvider
@@ -202,16 +200,14 @@ namespace KikoleSite.Elite.Controllers
             return rankingEntriesBase.Select(r => r as RankingEntry).ToList();
         }
 
-        private async Task<IActionResult> DoAndCatchAsync(
+        private async Task<IActionResult> View(
             string viewName,
             string title,
             Func<Task<object>> getDatasFunc)
         {
-            var datas = await getDatasFunc().ConfigureAwait(false);
-
             return View($"Elite/Views/Template.cshtml", new BaseViewData
             {
-                Data = datas,
+                Data = await getDatasFunc().ConfigureAwait(false),
                 Name = $"~/Elite/Views/{viewName}.cshtml",
                 Title = title
             });
