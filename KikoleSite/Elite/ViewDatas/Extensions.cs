@@ -109,13 +109,19 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
+        internal static bool IsFullStage(this ChronologyTypeItemData chronologyType)
+        {
+            return chronologyType == ChronologyTypeItemData.Ranking
+                || chronologyType == ChronologyTypeItemData.Leaderboard;
+        }
+
         private static List<(string, string, string)> GetPlayersRankedAtStageAndLevelTime(List<RankingEntry> rankingEntries, Stage stage, Level level, int bestTime)
         {
             return rankingEntries
                 .Where(x => x.IsValid(stage, level)
                     && x.Details[stage][level].Item3 == bestTime)
                 .OrderBy(x => x.Details[stage][level].Item4)
-                .Select(x => (x.PlayerName.ToInitials(), PlayerColor: x.Player.Color, PlayerName: x.PlayerName))
+                .Select(x => (x.PlayerName.ToInitials(), PlayerColor: x.Player.Color, x.PlayerName))
                 .ToList();
         }
 

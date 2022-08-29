@@ -1,0 +1,36 @@
+﻿@model KikoleSite.Elite.ViewDatas.StandingCanvasViewData
+
+<html>
+    <body style="background-color: black">
+        <table id="main-grid">
+            @{
+                var rowSpan = Model.IsFullStage ? 3 : 1;
+            }
+            @foreach (var stage in Model.StageImages.Keys)
+            {
+                for (var levelId = 0; levelId < 3; levelId++)
+                {
+                    <tr>
+                        @if (levelId == 0)
+                        {
+                            <td rowspan="3">
+                                <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
+                            </td>
+                        }
+                        @if (levelId == 0 || !Model.IsFullStage)
+                        {
+                            <td rowspan="@rowSpan">
+                                @{
+                                    var canvasId = Model.IsFullStage
+                                        ? $"stage-{(int)stage}-canvas"
+                                        : $"stage-{(int)stage}-{levelId}-canvas";
+                                }
+                                <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.StandingCanvasViewData.TotalWidth" height="48" />
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </table>
+    </body>
+</html>

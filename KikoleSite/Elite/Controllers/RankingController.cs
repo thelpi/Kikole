@@ -16,11 +16,13 @@ namespace KikoleSite.Elite.Controllers
     public class SimulatedRankingController : Controller
     {
         private const int MaxRankDisplay = 500;
+
         private const string StageImagePath = @"/images/elite/{0}.jpg";
         private const string RankingViewName = "SimulatedRanking";
         private const string PlayersViewName = "Players";
         private const string PlayerDetailsViewName = "PlayerDetails";
         private const string IndexViewName = "Index";
+        private const string CanvasViewName = "Canvas";
 
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
@@ -31,6 +33,39 @@ namespace KikoleSite.Elite.Controllers
         {
             _statisticsProvider = statisticsProvider;
             _clock = clock;
+        }
+
+        [HttpGet("games/{game}/chronology-types/{chronologyType}")]
+        public IActionResult GetChronology(
+            [FromRoute] Game game,
+            [FromRoute] ChronologyTypeItemData chronologyType,
+            [FromQuery] Engine? engine)
+        {
+            if (!CheckGameParameter(game))
+            {
+                return Json(new { error = "Invalid game value." });
+            }
+
+            if (!CheckEngineParameter(engine))
+            {
+                return Json(new { error = "The engine is invalid." });
+            }
+
+            if (!CheckChronologyTypeParameter(chronologyType))
+            {
+                return Json(new { error = "The chronology type is invalid." });
+            }
+
+            var model = new StandingCanvasViewData
+            {
+                TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
+                ChronologyType = chronologyType,
+                Engine = engine,
+                Game = game,
+                StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
+            };
+
+            return View($"Elite/Views/{CanvasViewName}.cshtml", model);
         }
 
         [HttpGet]
@@ -121,7 +156,7 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "Invalid game value." });
             }
 
-            if (!CheckGameParameter(engine))
+            if (!CheckEngineParameter(engine))
             {
                 return Json(new { error = "The engine is invalid." });
             }
@@ -157,7 +192,7 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "The player associated to the identifier does not exist." });
             }
 
-            if (!CheckGameParameter(engine))
+            if (!CheckEngineParameter(engine))
             {
                 return Json(new { error = "The engine is invalid." });
             }
@@ -182,9 +217,14 @@ namespace KikoleSite.Elite.Controllers
             return Enum.TryParse(typeof(Game), game.ToString(), out _);
         }
 
-        private static bool CheckGameParameter(Engine? engine)
+        private static bool CheckEngineParameter(Engine? engine)
         {
             return !engine.HasValue || Enum.TryParse(typeof(Engine), engine.ToString(), out _);
+        }
+
+        private static bool CheckChronologyTypeParameter(ChronologyTypeItemData standingType)
+        {
+            return Enum.TryParse(typeof(ChronologyTypeItemData), standingType.ToString(), out _);
         }
 
         private async Task<IActionResult> SimulateRankingInternalAsync(
