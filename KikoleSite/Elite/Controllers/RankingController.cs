@@ -19,6 +19,7 @@ namespace KikoleSite.Elite.Controllers
         private const int MaxRankDisplay = 500;
         private const int DefaultLeaderboardDayStep = 5;
         private const int MaxStageParallelism = 4; // divisor of 20
+        private const string AnonymiseColorRgb = "FFFFFF";
 
         private const string StageImagePath = @"/images/elite/{0}.jpg";
         private const string RankingViewName = "SimulatedRanking";
@@ -43,13 +44,45 @@ namespace KikoleSite.Elite.Controllers
             [FromRoute] Game game,
             [FromRoute] ChronologyTypeItemData chronologyType,
             [FromQuery] Engine? engine,
-            [FromQuery] long? playerId)
+            [FromQuery] long? playerId,
+            [FromQuery] bool anonymise)
         {
-            object results = null;
+            if (!CheckGameParameter(game))
+            {
+                return Json(new { error = "Invalid game value." });
+            }
+
+            if (!CheckEngineParameter(engine))
+            {
+                return Json(new { error = "The engine is invalid." });
+            }
+
+            if (!CheckChronologyTypeParameter(chronologyType))
+            {
+                return Json(new { error = "The chronology type is invalid." });
+            }
+
+            if (playerId.HasValue)
+            {
+                if (playerId <= 0)
+                {
+                    return Json(new { error = "Invalid player identifier." });
+                }
+
+                var players = await _statisticsProvider
+                    .GetPlayersAsync()
+                    .ConfigureAwait(false);
+                if (!players.Any(p => p.Id == playerId))
+                {
+                    return Json(new { error = "The player associated to the identifier does not exist." });
+                }
+            }
+
+            List<ChronologyCanvasItemData> results;
 
             if (chronologyType.IsFullStage())
             {
-                var items = new ConcurrentBag<IReadOnlyCollection<StageLeaderboard>>();
+                var itemGroups = new ConcurrentBag<IReadOnlyCollection<StageLeaderboard>>();
                 var stages = game.GetStages();
                 var tasks = new List<Task>(MaxStageParallelism);
                 var stagesByTask = stages.Count / MaxStageParallelism;
@@ -64,22 +97,23 @@ namespace KikoleSite.Elite.Controllers
                                 .GetStageLeaderboardHistoryAsync(stage, chronologyType.ToLeaderboardGroupOption(), DefaultLeaderboardDayStep)
                                 .ConfigureAwait(false);
 
-                            if (playerId.HasValue)
-                            {
-                                foreach (var stageItem in stageItems)
-                                {
-                                    stageItem.Items = stageItem.Items.Where(_ => _.Player.Id == playerId).ToList();
-                                }
-                            }
-
-                            items.Add(stageItems);
+                            itemGroups.Add(stageItems);
                         }
                     }));
                 }
 
                 Task.WaitAll(tasks.ToArray());
 
-                results = items.SelectMany(_ => _).ToList();
+                results = new List<ChronologyCanvasItemData>(5000); // arbitrary
+                foreach (var itemGroup in itemGroups)
+                {
+                    foreach (var item in itemGroup)
+                    {
+                        results.AddRange(item.Items
+                            .Where(_ => !playerId.HasValue || _.Player.Id == playerId)
+                            .Select(_ => _.ToChronologyCanvasItemData(item, chronologyType, anonymise, AnonymiseColorRgb)));
+                    }
+                }
             }
             else
             {
@@ -87,12 +121,10 @@ namespace KikoleSite.Elite.Controllers
                     .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType().Value, null, engine)
                     .ConfigureAwait(false);
 
-                if (playerId.HasValue)
-                {
-                    standings = standings.Where(x => x.Author.Id == playerId).ToList();
-                }
-
-                results = standings;
+                results = standings
+                    .Where(_ => !playerId.HasValue || _.Author.Id == playerId)
+                    .Select(_ => _.ToChronologyCanvasItemData(anonymise, AnonymiseColorRgb))
+                    .ToList();
             }
 
             return Json(results);

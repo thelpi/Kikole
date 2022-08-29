@@ -124,6 +124,17 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
+        internal static Func<StageLeaderboardItem, double> GetOpacityFunc(this ChronologyTypeItemData chronologyType)
+        {
+            return chronologyType switch
+            {
+                ChronologyTypeItemData.Leaderboard =>
+                    it => it.Rank > 10 ? 0 : (11 - it.Rank) / (double)10,
+                _ =>
+                    it => (0.00083 * Math.Pow(it.Points, 2) + 0.0839) / 100,
+            };
+        }
+
         internal static StandingType? ToStandingType(this ChronologyTypeItemData chronologyType)
         {
             return chronologyType switch
@@ -132,6 +143,37 @@ namespace KikoleSite.Elite.ViewDatas
                 ChronologyTypeItemData.FirstUnslay => StandingType.FirstUnslayed,
                 ChronologyTypeItemData.Untied => StandingType.UntiedExceptSelf,
                 _ => null,
+            };
+        }
+
+        internal static ChronologyCanvasItemData ToChronologyCanvasItemData(this Standing standing, bool anonymise, string anonymiseColorRgb)
+        {
+            return new ChronologyCanvasItemData
+            {
+                Stage = standing.Stage,
+                Level = standing.Level,
+                Color = anonymise
+                    ? anonymiseColorRgb
+                    : standing.Author.Color,
+                Opacity = 1,
+                Label = standing.ToString(),
+                DaysBefore = standing.DaysBefore,
+                Days = standing.Days.Value
+            };
+        }
+
+        internal static ChronologyCanvasItemData ToChronologyCanvasItemData(this StageLeaderboardItem item, StageLeaderboard ld, ChronologyTypeItemData chronologyType, bool anonymise, string anonymiseColorRgb)
+        {
+            return new ChronologyCanvasItemData
+            {
+                Days = ld.Days,
+                DaysBefore = ld.TotalDays,
+                Color = anonymise
+                    ? anonymiseColorRgb
+                    : item.Player.Color,
+                Label = $"Date:{ld.DateStart}\nPoints:{item.Points}\nRank:{item.Rank}",
+                Opacity = chronologyType.GetOpacityFunc()(item),
+                Stage = ld.Stage
             };
         }
 

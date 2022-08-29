@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Extensions;
 
 namespace KikoleSite.Elite.Models
 {
@@ -18,5 +19,8 @@ namespace KikoleSite.Elite.Models
         public DateTime DateStart { get; set; }
         public DateTime DateEnd { get; set; }
         public Stage Stage { get; set; }
+
+        public int Days => (int)Math.Floor((DateEnd - DateStart).TotalDays);
+        public int TotalDays => (int)Math.Floor((DateStart - Stage.GetGame().GetEliteFirstDate()).TotalDays);
     }
 }

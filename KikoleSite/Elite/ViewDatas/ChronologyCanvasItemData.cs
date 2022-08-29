@@ -1,13 +1,15 @@
-﻿namespace KikoleSite.Elite.ViewDatas
+﻿using KikoleSite.Elite.Enums;
+
+namespace KikoleSite.Elite.ViewDatas
 {
     public class ChronologyCanvasItemData
     {
-        public double Top { get; set; }
-        public double Last { get; set; }
         public string Label { get; set; }
         public string Color { get; set; }
-        public string Width { get; set; }
-        public string Height { get; set; }
-        public string Opacity { get; set; }
+        public int Days { get; set; }
+        public int DaysBefore { get; set; }
+        public double Opacity { get; set; }
+        public Stage Stage { get; set; }
+        public Level? Level { get; set; }
     }
 }

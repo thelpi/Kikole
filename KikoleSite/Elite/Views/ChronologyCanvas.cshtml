@@ -8,16 +8,16 @@
             }
             @foreach (var stage in Model.StageImages.Keys)
             {
-                for (var levelId = 0; levelId < 3; levelId++)
+                for (var levelId = 1; levelId <= 3; levelId++)
                 {
                     <tr>
-                        @if (levelId == 0)
+                        @if (levelId == 1)
                         {
                             <td rowspan="3">
                                 <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
                             </td>
                         }
-                        @if (levelId == 0 || !Model.IsFullStage)
+                        @if (levelId == 1 || !Model.IsFullStage)
                         {
                             <td rowspan="@rowSpan">
                                 @{

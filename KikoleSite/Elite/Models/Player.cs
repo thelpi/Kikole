@@ -26,5 +26,12 @@ namespace KikoleSite.Elite.Models
             ControlStyle = ModelExtensions.ToControlStyle(dto.ControlStyle);
             Color = dto.Color;
         }
+
+        public string ToString(Game game)
+        {
+            return game == Game.PerfectDark
+                ? SurName
+                : RealName;
+        }
     }
 }

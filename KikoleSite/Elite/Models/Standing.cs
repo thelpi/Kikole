@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Extensions;
 
 namespace KikoleSite.Elite.Models
 {
@@ -18,6 +19,7 @@ namespace KikoleSite.Elite.Models
         public Player Slayer { get; internal set; }
         public IReadOnlyCollection<long> Times => _times;
         public int? Days { get; private set; }
+        public int DaysBefore => (int)Math.Floor((StartDate - Stage.GetGame().GetEliteFirstDate()).TotalDays);
 
         internal Standing(long time)
         {
@@ -37,6 +39,18 @@ namespace KikoleSite.Elite.Models
         {
             Days = (int)(EndDate.GetValueOrDefault(dateIfNull) - StartDate).TotalDays;
             return this;
+        }
+
+        public override string ToString()
+        {
+            var datas = new[]
+            {
+                $"{Stage} - {Level}",
+                Author.ToString(Stage.GetGame()),
+                $"{Days} {(Days <= 1 ? "day" : "days")}",
+                $"From {StartDate:yyyy-MM-dd} {(EndDate.HasValue ? $"to {EndDate.Value:yyyy-MM-dd}" : "(ongoing)")}"
+            };
+            return string.Join('\n', datas);
         }
     }
 }
