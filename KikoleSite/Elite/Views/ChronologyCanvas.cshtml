@@ -6,8 +6,12 @@
     var playerIdJs = Model.PlayerId.HasValue ? Model.PlayerId.ToString() : "null";
     var anonymiseJs = Model.Anonymise ? 1 : 0;
     var totalWidth = KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth;
+    var leftImgWidth = 75;
     var height = 48;
     var height3 = height / 3;
+    var gridLeftMargin = $"-{((totalWidth + leftImgWidth) / 2)}px";
+    var loaderSize = 256;
+    var loaderMargin = $"-{(loaderSize / 2)}px";
 }
 <html>
     <head>
@@ -16,14 +20,15 @@
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     </head>
     <body style="background-color: black">
-        <table id="main-grid">
+        <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/elite/ajax-loader.gif" style="display: none; position: absolute; left: 50%; top: 50%; margin-left: @loaderMargin; margin-top: @loaderMargin;" />
+        <table id="main-grid" style="position: absolute; left: 50%; margin-left: @gridLeftMargin; ">
             @foreach (var stage in Model.StageImages.Keys)
             {
                 @if (Model.IsFullStage)
                 {
                     <tr>
                         <td>
-                            <img width="75" height="@height" src="@Model.StageImages[stage]" title="@stage" />
+                            <img width="@leftImgWidth" height="@height" src="@Model.StageImages[stage]" title="@stage" />
                         </td>
                         <td>
                             @{
@@ -66,6 +71,10 @@
                     },
                     type: "GET",
                     dataType: "json",
+                    beforeSend: function () {
+                        $("#loading-image").show();
+                        $("#main-grid").hide();
+                    },
                     success: function (data) {
                         data.forEach(e => {
                             var canvasName = "stage-" + e.stage + "-canvas";
@@ -82,6 +91,8 @@
                             ctx.globalAlpha = e.opacity;
                             ctx.fillRect(x, 0, width, height);
                         });
+                        $("#loading-image").hide();
+                        $("#main-grid").show();
                     },
                     error: function (data) {
                         alert('Call error: ' + JSON.stringify(data));
