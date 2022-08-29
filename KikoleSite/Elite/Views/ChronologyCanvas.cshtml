@@ -1,36 +1,76 @@
 ﻿@model KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData
-
+@{ 
+    var gameId = (int)Model.Game;
+    var typeId = (int)Model.ChronologyType;
+    var engineIdJs = Model.Engine.HasValue ? ((int)Model.Engine).ToString() : "null";
+    var playerIdJs = Model.PlayerId.HasValue ? Model.PlayerId.ToString() : "null";
+    var anonymiseJs = Model.Anonymise ? 1 : 0;
+}
 <html>
+    <head>
+        <link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="Stylesheet">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    </head>
     <body style="background-color: black">
         <table id="main-grid">
-            @{
-                var rowSpan = Model.IsFullStage ? 3 : 1;
-            }
             @foreach (var stage in Model.StageImages.Keys)
             {
-                for (var levelId = 1; levelId <= 3; levelId++)
+                @if (Model.IsFullStage)
                 {
                     <tr>
-                        @if (levelId == 1)
-                        {
-                            <td rowspan="3">
-                                <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
-                            </td>
-                        }
-                        @if (levelId == 1 || !Model.IsFullStage)
-                        {
-                            <td rowspan="@rowSpan">
-                                @{
-                                    var canvasId = Model.IsFullStage
-                                        ? $"stage-{(int)stage}-canvas"
-                                        : $"stage-{(int)stage}-{levelId}-canvas";
-                                }
-                                <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth" height="48" />
-                            </td>
-                        }
+                        <td>
+                            <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
+                        </td>
+                        <td>
+                            @{
+                                var canvasId = $"stage-{(int)stage}-canvas";
+                            }
+                            <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth" height="48" />
+                        </td>
                     </tr>
+                }
+                else
+                {
+                    for (var i = 1; i <= 3; i++)
+                    {
+                        <tr>
+                            @if (i == 1)
+                            {
+                                <td rowspan="3">
+                                    <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
+                                </td>
+                            }
+                            <td>
+                                @{
+                                    var canvasId = $"stage-{(int)stage}-{i}-canvas";
+                                }
+                                <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth" height="16" />
+                            </td>
+                        </tr>
+                    }
                 }
             }
         </table>
+        <script>
+            $(function () {
+                $.ajax({
+                    url: '/the-elite/games/@gameId/chronology-types/@typeId/data',
+                    data: {
+                        "engine": @engineIdJs,
+                        "playerId": @playerIdJs,
+                        "anonymise": @anonymiseJs,
+                    },
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        alert('C\'est OK: ' + data.length);
+                    },
+                    error: function (data) {
+                        alert('Call error: ' + JSON.stringify(data));
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

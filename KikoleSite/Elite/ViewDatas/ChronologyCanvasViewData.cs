@@ -12,6 +12,8 @@ namespace KikoleSite.Elite.ViewDatas
         public ChronologyTypeItemData ChronologyType { get; set; }
         public Engine? Engine { get; set; }
         public int TotalDays { get; set; }
+        public long? PlayerId { get; set; }
+        public bool Anonymise { get; set; }
 
         public bool IsFullStage => ChronologyType.IsFullStage();
     }
