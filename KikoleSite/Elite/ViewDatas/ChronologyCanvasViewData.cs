@@ -3,7 +3,7 @@ using KikoleSite.Elite.Enums;
 
 namespace KikoleSite.Elite.ViewDatas
 {
-    public class StandingCanvasViewData
+    public class ChronologyCanvasViewData
     {
         public const int TotalWidth = 1600;
 

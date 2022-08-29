@@ -115,6 +115,26 @@ namespace KikoleSite.Elite.ViewDatas
                 || chronologyType == ChronologyTypeItemData.Leaderboard;
         }
 
+        internal static LeaderboardGroupOptions ToLeaderboardGroupOption(this ChronologyTypeItemData chronologyType)
+        {
+            return chronologyType switch
+            {
+                ChronologyTypeItemData.Leaderboard => LeaderboardGroupOptions.RankedTop10,
+                _ => LeaderboardGroupOptions.None,
+            };
+        }
+
+        internal static StandingType? ToStandingType(this ChronologyTypeItemData chronologyType)
+        {
+            return chronologyType switch
+            {
+                ChronologyTypeItemData.AllUnslay => StandingType.BetweenTwoTimes,
+                ChronologyTypeItemData.FirstUnslay => StandingType.FirstUnslayed,
+                ChronologyTypeItemData.Untied => StandingType.UntiedExceptSelf,
+                _ => null,
+            };
+        }
+
         private static List<(string, string, string)> GetPlayersRankedAtStageAndLevelTime(List<RankingEntry> rankingEntries, Stage stage, Level level, int bestTime)
         {
             return rankingEntries

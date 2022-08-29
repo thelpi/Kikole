@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,13 +17,15 @@ namespace KikoleSite.Elite.Controllers
     public class SimulatedRankingController : Controller
     {
         private const int MaxRankDisplay = 500;
+        private const int DefaultLeaderboardDayStep = 5;
+        private const int MaxStageParallelism = 4; // divisor of 20
 
         private const string StageImagePath = @"/images/elite/{0}.jpg";
         private const string RankingViewName = "SimulatedRanking";
         private const string PlayersViewName = "Players";
         private const string PlayerDetailsViewName = "PlayerDetails";
         private const string IndexViewName = "Index";
-        private const string CanvasViewName = "Canvas";
+        private const string ChronologyCanvasViewName = "ChronologyCanvas";
 
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
@@ -33,6 +36,66 @@ namespace KikoleSite.Elite.Controllers
         {
             _statisticsProvider = statisticsProvider;
             _clock = clock;
+        }
+
+        [HttpGet("games/{game}/chronology-types/{chronologyType}/data")]
+        public async Task<JsonResult> GetChronologyDataAsync(
+            [FromRoute] Game game,
+            [FromRoute] ChronologyTypeItemData chronologyType,
+            [FromQuery] Engine? engine,
+            [FromQuery] long? playerId)
+        {
+            object results = null;
+
+            if (chronologyType.IsFullStage())
+            {
+                var items = new ConcurrentBag<IReadOnlyCollection<StageLeaderboard>>();
+                var stages = game.GetStages();
+                var tasks = new List<Task>(MaxStageParallelism);
+                var stagesByTask = stages.Count / MaxStageParallelism;
+
+                for (var i = 0; i < MaxStageParallelism; i++)
+                {
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        foreach (var stage in stages.Skip(stagesByTask).Take(stagesByTask))
+                        {
+                            var stageItems = await _statisticsProvider
+                                .GetStageLeaderboardHistoryAsync(stage, chronologyType.ToLeaderboardGroupOption(), DefaultLeaderboardDayStep)
+                                .ConfigureAwait(false);
+
+                            if (playerId.HasValue)
+                            {
+                                foreach (var stageItem in stageItems)
+                                {
+                                    stageItem.Items = stageItem.Items.Where(_ => _.Player.Id == playerId).ToList();
+                                }
+                            }
+
+                            items.Add(stageItems);
+                        }
+                    }));
+                }
+
+                Task.WaitAll(tasks.ToArray());
+
+                results = items.SelectMany(_ => _).ToList();
+            }
+            else
+            {
+                var standings = await _statisticsProvider
+                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType().Value, null, engine)
+                    .ConfigureAwait(false);
+
+                if (playerId.HasValue)
+                {
+                    standings = standings.Where(x => x.Author.Id == playerId).ToList();
+                }
+
+                results = standings;
+            }
+
+            return Json(results);
         }
 
         [HttpGet("games/{game}/chronology-types/{chronologyType}")]
@@ -56,7 +119,7 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "The chronology type is invalid." });
             }
 
-            var model = new StandingCanvasViewData
+            var model = new ChronologyCanvasViewData
             {
                 TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
                 ChronologyType = chronologyType,
@@ -65,7 +128,7 @@ namespace KikoleSite.Elite.Controllers
                 StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
             };
 
-            return View($"Elite/Views/{CanvasViewName}.cshtml", model);
+            return View($"Elite/Views/{ChronologyCanvasViewName}.cshtml", model);
         }
 
         [HttpGet]

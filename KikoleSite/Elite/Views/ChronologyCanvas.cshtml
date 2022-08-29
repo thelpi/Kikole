@@ -1,4 +1,4 @@
-﻿@model KikoleSite.Elite.ViewDatas.StandingCanvasViewData
+﻿@model KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData
 
 <html>
     <body style="background-color: black">
@@ -25,7 +25,7 @@
                                         ? $"stage-{(int)stage}-canvas"
                                         : $"stage-{(int)stage}-{levelId}-canvas";
                                 }
-                                <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.StandingCanvasViewData.TotalWidth" height="48" />
+                                <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth" height="48" />
                             </td>
                         }
                     </tr>
