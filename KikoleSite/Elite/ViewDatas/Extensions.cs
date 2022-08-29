@@ -150,8 +150,8 @@ namespace KikoleSite.Elite.ViewDatas
         {
             return new ChronologyCanvasItemData
             {
-                Stage = standing.Stage,
-                Level = standing.Level,
+                Stage = (int)standing.Stage,
+                Level = (int)standing.Level,
                 Color = anonymise
                     ? anonymiseColorRgb
                     : standing.Author.Color,
@@ -173,7 +173,7 @@ namespace KikoleSite.Elite.ViewDatas
                     : item.Player.Color,
                 Label = $"Date:{ld.DateStart}\nPoints:{item.Points}\nRank:{item.Rank}",
                 Opacity = chronologyType.GetOpacityFunc()(item),
-                Stage = ld.Stage
+                Stage = (int)ld.Stage
             };
         }
 

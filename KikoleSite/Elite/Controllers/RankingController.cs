@@ -89,9 +89,10 @@ namespace KikoleSite.Elite.Controllers
 
                 for (var i = 0; i < MaxStageParallelism; i++)
                 {
+                    var stagesGroup = stages.Skip(stagesByTask * i).Take(stagesByTask);
                     tasks.Add(Task.Run(async () =>
                     {
-                        foreach (var stage in stages.Skip(stagesByTask).Take(stagesByTask))
+                        foreach (var stage in stagesGroup)
                         {
                             var stageItems = await _statisticsProvider
                                 .GetStageLeaderboardHistoryAsync(stage, chronologyType.ToLeaderboardGroupOption(), DefaultLeaderboardDayStep)

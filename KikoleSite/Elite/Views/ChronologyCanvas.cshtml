@@ -5,6 +5,9 @@
     var engineIdJs = Model.Engine.HasValue ? ((int)Model.Engine).ToString() : "null";
     var playerIdJs = Model.PlayerId.HasValue ? Model.PlayerId.ToString() : "null";
     var anonymiseJs = Model.Anonymise ? 1 : 0;
+    var totalWidth = KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth;
+    var height = 48;
+    var height3 = height / 3;
 }
 <html>
     <head>
@@ -20,13 +23,13 @@
                 {
                     <tr>
                         <td>
-                            <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
+                            <img width="75" height="@height" src="@Model.StageImages[stage]" title="@stage" />
                         </td>
                         <td>
                             @{
                                 var canvasId = $"stage-{(int)stage}-canvas";
                             }
-                            <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth" height="48" />
+                            <canvas id="@canvasId" width="@totalWidth" height="@height" />
                         </td>
                     </tr>
                 }
@@ -38,14 +41,14 @@
                             @if (i == 1)
                             {
                                 <td rowspan="3">
-                                    <img width="75" height="48" src="@Model.StageImages[stage]" title="@stage" />
+                                    <img width="75" height="@height" src="@Model.StageImages[stage]" title="@stage" />
                                 </td>
                             }
                             <td>
                                 @{
                                     var canvasId = $"stage-{(int)stage}-{i}-canvas";
                                 }
-                                <canvas id="@canvasId" width="@KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth" height="16" />
+                                <canvas id="@canvasId" width="@totalWidth" height="@height3" />
                             </td>
                         </tr>
                     }
@@ -64,7 +67,21 @@
                     type: "GET",
                     dataType: "json",
                     success: function (data) {
-                        alert('C\'est OK: ' + data.length);
+                        data.forEach(e => {
+                            var canvasName = "stage-" + e.stage + "-canvas";
+                            var height = @height;
+                            if (e.level) {
+                                canvasName = "stage-" + e.stage + "-" + e.level + "-canvas";
+                                height = @height3;
+                            }
+                            var width = Math.ceil(e.days / @Model.TotalDays * @totalWidth);
+                            var x = Math.ceil(e.daysBefore / @Model.TotalDays * @totalWidth);
+                            var c = document.getElementById(canvasName);
+                            var ctx = c.getContext("2d");
+                            ctx.fillStyle = "#" + e.color;
+                            ctx.globalAlpha = e.opacity;
+                            ctx.fillRect(x, 0, width, height);
+                        });
                     },
                     error: function (data) {
                         alert('Call error: ' + JSON.stringify(data));

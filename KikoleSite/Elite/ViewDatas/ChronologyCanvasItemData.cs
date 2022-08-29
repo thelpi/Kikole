@@ -1,6 +1,4 @@
-﻿using KikoleSite.Elite.Enums;
-
-namespace KikoleSite.Elite.ViewDatas
+﻿namespace KikoleSite.Elite.ViewDatas
 {
     public class ChronologyCanvasItemData
     {
@@ -9,7 +7,7 @@ namespace KikoleSite.Elite.ViewDatas
         public int Days { get; set; }
         public int DaysBefore { get; set; }
         public double Opacity { get; set; }
-        public Stage Stage { get; set; }
-        public Level? Level { get; set; }
+        public int Stage { get; set; }
+        public int? Level { get; set; }
     }
 }
