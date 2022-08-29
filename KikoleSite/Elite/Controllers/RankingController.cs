@@ -17,7 +17,7 @@ namespace KikoleSite.Elite.Controllers
     public class SimulatedRankingController : Controller
     {
         private const int MaxRankDisplay = 500;
-        private const int DefaultLeaderboardDayStep = 5;
+        private const int DefaultLeaderboardDayStep = 7;
         private const int MaxStageParallelism = 4; // divisor of 20
         private const string AnonymiseColorRgb = "FFFFFF";
 
@@ -77,6 +77,10 @@ namespace KikoleSite.Elite.Controllers
                     return Json(new { error = "The player associated to the identifier does not exist." });
                 }
             }
+            else if (chronologyType.IsFullStage())
+            {
+                return Json(new { error = "Player identifier is mandatory for this type." });
+            }
 
             List<ChronologyCanvasItemData> results;
 
@@ -131,10 +135,10 @@ namespace KikoleSite.Elite.Controllers
             return Json(results);
         }
 
-        [HttpGet("games/{game}/chronology-types/{chronologyType}")]
-        public async Task<IActionResult> GetChronologyAsync(
+        [HttpGet("games/{game}/wr-chronology")]
+        public async Task<IActionResult> GetWorldRecordsChronologyAsync(
             [FromRoute] Game game,
-            [FromRoute] ChronologyTypeItemData chronologyType,
+            [FromQuery] ChronologyTypeItemData type,
             [FromQuery] Engine? engine,
             [FromQuery] long? playerId,
             [FromQuery] bool anonymise)
@@ -149,7 +153,7 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "The engine is invalid." });
             }
 
-            if (!CheckChronologyTypeParameter(chronologyType))
+            if (!CheckChronologyTypeParameter(type) || type.IsFullStage())
             {
                 return Json(new { error = "The chronology type is invalid." });
             }
@@ -173,8 +177,51 @@ namespace KikoleSite.Elite.Controllers
             var model = new ChronologyCanvasViewData
             {
                 TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
-                ChronologyType = chronologyType,
+                ChronologyType = type,
                 Engine = engine,
+                Game = game,
+                PlayerId = playerId,
+                Anonymise = anonymise,
+                StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
+            };
+
+            return View($"Elite/Views/{ChronologyCanvasViewName}.cshtml", model);
+        }
+
+        [HttpGet("games/{game}/rk-chronology")]
+        public async Task<IActionResult> GetRankingsChronologyAsync(
+            [FromRoute] Game game,
+            [FromQuery] ChronologyTypeItemData type,
+            [FromQuery] long playerId,
+            [FromQuery] bool anonymise)
+        {
+            if (!CheckGameParameter(game))
+            {
+                return Json(new { error = "Invalid game value." });
+            }
+
+            if (!CheckChronologyTypeParameter(type) || !type.IsFullStage())
+            {
+                return Json(new { error = "The chronology type is invalid." });
+            }
+
+            if (playerId <= 0)
+            {
+                return Json(new { error = "Invalid player identifier." });
+            }
+
+            var players = await _statisticsProvider
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+            if (!players.Any(p => p.Id == playerId))
+            {
+                return Json(new { error = "The player associated to the identifier does not exist." });
+            }
+
+            var model = new ChronologyCanvasViewData
+            {
+                TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
+                ChronologyType = type,
                 Game = game,
                 PlayerId = playerId,
                 Anonymise = anonymise,

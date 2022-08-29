@@ -74,8 +74,8 @@
                                 canvasName = "stage-" + e.stage + "-" + e.level + "-canvas";
                                 height = @height3;
                             }
-                            var width = Math.ceil(e.days / @Model.TotalDays * @totalWidth);
-                            var x = Math.ceil(e.daysBefore / @Model.TotalDays * @totalWidth);
+                            var width = Math.round(e.days / @Model.TotalDays * @totalWidth);
+                            var x = Math.round(e.daysBefore / @Model.TotalDays * @totalWidth);
                             var c = document.getElementById(canvasName);
                             var ctx = c.getContext("2d");
                             ctx.fillStyle = "#" + e.color;
