@@ -220,7 +220,7 @@ namespace KikoleSite.Elite.Providers
                 startDate = date;
             }
 
-            return ConsolidateLeaderboards(leaderboards, groupOption);
+            return ConsolidateLeaderboards(leaderboards, groupOption, playerId.HasValue);
         }
 
         public async Task<IReadOnlyCollection<RankingEntryLight>> GetRankingEntriesAsync(
@@ -587,7 +587,10 @@ namespace KikoleSite.Elite.Providers
             return wrs;
         }
 
-        private static IReadOnlyCollection<StageLeaderboard> ConsolidateLeaderboards(List<StageLeaderboard> leaderboards, LeaderboardGroupOptions groupOption)
+        private static IReadOnlyCollection<StageLeaderboard> ConsolidateLeaderboards(
+            List<StageLeaderboard> leaderboards,
+            LeaderboardGroupOptions groupOption,
+            bool singlePlayer)
         {
             var consolidedLeaderboards = new List<StageLeaderboard>(leaderboards.Count);
             if (StageLeaderboardItem.ComputeGroupOtions.ContainsKey(groupOption) && leaderboards.Count > 0)
@@ -597,6 +600,14 @@ namespace KikoleSite.Elite.Providers
                 IEqualityComparer<StageLeaderboardItem> comparer = EqualityComparer<StageLeaderboardItem>.Default;
                 if (groupOption == LeaderboardGroupOptions.FirstRankedFirst)
                     comparer = new StageLeaderboardItemSamePlayer();
+                else if (singlePlayer)
+                {
+                    if (groupOption == LeaderboardGroupOptions.Ranked)
+                        comparer = new StageLeaderboardItemSameTier();
+                    else if (groupOption == LeaderboardGroupOptions.RankedFirst
+                        || groupOption == LeaderboardGroupOptions.RankedTop10)
+                        comparer = new StageLeaderboardItemSameRank();
+                }
 
                 consolidedLeaderboards.Add(leaderboards[0]);
                 for (var i = 1; i < leaderboards.Count; i++)

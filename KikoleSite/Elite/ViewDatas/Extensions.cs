@@ -131,7 +131,7 @@ namespace KikoleSite.Elite.ViewDatas
                 ChronologyTypeItemData.Leaderboard =>
                     it => it.Rank > 10 ? 0 : (11 - it.Rank) / (double)10,
                 _ =>
-                    it => (0.00083 * Math.Pow(it.Points, 2) + 0.0839) / 100,
+                    it => it.Tier / (double)10,
             };
         }
 
