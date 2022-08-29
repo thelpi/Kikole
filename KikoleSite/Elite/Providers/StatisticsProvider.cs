@@ -197,7 +197,11 @@ namespace KikoleSite.Elite.Providers
                 .ToList();
         }
 
-        public async Task<IReadOnlyCollection<StageLeaderboard>> GetStageLeaderboardHistoryAsync(Stage stage, LeaderboardGroupOptions groupOption, int daysStep)
+        public async Task<IReadOnlyCollection<StageLeaderboard>> GetStageLeaderboardHistoryAsync(
+            Stage stage,
+            LeaderboardGroupOptions groupOption,
+            int daysStep,
+            long? playerId)
         {
             var players = await GetPlayersInternalAsync().ConfigureAwait(false);
 
@@ -209,9 +213,9 @@ namespace KikoleSite.Elite.Providers
             {
                 if (date > startDate)
                 {
-                    var leaderboard = GetSpecificDateStageLeaderboard(stage, players, entries, startDate, date);
-
-                    leaderboards.Add(leaderboard);
+                    var leaderboard = GetSpecificDateStageLeaderboard(stage, players, entries, startDate, date, playerId);
+                    if (leaderboard != null)
+                        leaderboards.Add(leaderboard);
                 }
                 startDate = date;
             }
@@ -609,7 +613,13 @@ namespace KikoleSite.Elite.Providers
             return consolidedLeaderboards;
         }
 
-        private static StageLeaderboard GetSpecificDateStageLeaderboard(Stage stage, IReadOnlyDictionary<long, PlayerDto> players, List<EntryDto> entries, DateTime startDate, DateTime endDate)
+        private static StageLeaderboard GetSpecificDateStageLeaderboard(
+            Stage stage,
+            IReadOnlyDictionary<long, PlayerDto> players,
+            List<EntryDto> entries,
+            DateTime startDate,
+            DateTime endDate,
+            long? playerId)
         {
             var dateEntries = entries
                 .Where(_ => _.Date < endDate)
@@ -667,6 +677,9 @@ namespace KikoleSite.Elite.Providers
                 }
             }
 
+            if (playerId.HasValue && !playersPoints.ContainsKey(playerId.Value))
+                return null;
+
             var items = playersPoints
                 .Select(_ => new StageLeaderboardItem
                 {
@@ -684,7 +697,7 @@ namespace KikoleSite.Elite.Providers
             {
                 DateEnd = endDate,
                 DateStart = startDate,
-                Items = items,
+                Items = items.Where(_ => !playerId.HasValue || _.Player.Id == playerId).ToList(),
                 Stage = stage
             };
         }

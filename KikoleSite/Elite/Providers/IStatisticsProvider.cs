@@ -20,7 +20,8 @@ namespace KikoleSite.Elite.Providers
         Task<IReadOnlyCollection<StageLeaderboard>> GetStageLeaderboardHistoryAsync(
             Stage stage,
             LeaderboardGroupOptions groupOption,
-            int daysStep);
+            int daysStep,
+            long? playerId);
 
         Task<IReadOnlyCollection<RankingEntryLight>> GetRankingEntriesAsync(
             RankingRequest request);

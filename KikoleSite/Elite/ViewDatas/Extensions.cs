@@ -120,7 +120,7 @@ namespace KikoleSite.Elite.ViewDatas
             return chronologyType switch
             {
                 ChronologyTypeItemData.Leaderboard => LeaderboardGroupOptions.RankedTop10,
-                _ => LeaderboardGroupOptions.None,
+                _ => LeaderboardGroupOptions.Ranked,
             };
         }
 

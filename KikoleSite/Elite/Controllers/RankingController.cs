@@ -17,7 +17,7 @@ namespace KikoleSite.Elite.Controllers
     public class SimulatedRankingController : Controller
     {
         private const int MaxRankDisplay = 500;
-        private const int DefaultLeaderboardDayStep = 7;
+        private const int DefaultLeaderboardDayStep = 1;
         private const int MaxStageParallelism = 4; // divisor of 20
         private const string AnonymiseColorRgb = "FFFFFF";
 
@@ -99,7 +99,7 @@ namespace KikoleSite.Elite.Controllers
                         foreach (var stage in stagesGroup)
                         {
                             var stageItems = await _statisticsProvider
-                                .GetStageLeaderboardHistoryAsync(stage, chronologyType.ToLeaderboardGroupOption(), DefaultLeaderboardDayStep)
+                                .GetStageLeaderboardHistoryAsync(stage, chronologyType.ToLeaderboardGroupOption(), DefaultLeaderboardDayStep, playerId)
                                 .ConfigureAwait(false);
 
                             itemGroups.Add(stageItems);
@@ -115,7 +115,6 @@ namespace KikoleSite.Elite.Controllers
                     foreach (var item in itemGroup)
                     {
                         results.AddRange(item.Items
-                            .Where(_ => !playerId.HasValue || _.Player.Id == playerId)
                             .Select(_ => _.ToChronologyCanvasItemData(item, chronologyType, anonymise != 0, AnonymiseColorRgb)));
                     }
                 }
