@@ -478,6 +478,13 @@ namespace KikoleSite.Elite.Providers
                             realMax = betterEntry.Date.Value;
                         }
 
+                        // when the min / max theoric is too wide to set a proper date
+                        if (realMin == game.GetEliteFirstDate() && realMax == Player.LastEmptyDate)
+                        {
+                            entries.Remove(entry);
+                            continue;
+                        }
+
                         switch (_configuration.NoDateEntryRankingRule)
                         {
                             case NoDateEntryRankingRule.Average:
