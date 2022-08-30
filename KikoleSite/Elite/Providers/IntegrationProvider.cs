@@ -36,7 +36,7 @@ namespace KikoleSite.Elite.Providers
             bool addTimesForNewPlayers,
             bool refreshExistingPlayers)
         {
-            var errors = new List<string>();
+            var errors = new ConcurrentBag<string>();
 
             var gePlayerUrls = await _siteParser
                 .GetPlayerUrlsAsync(Game.GoldenEye)
@@ -69,60 +69,76 @@ namespace KikoleSite.Elite.Providers
                 .GetPlayersAsync(true)
                 .ConfigureAwait(false);
 
-            var createdPlayers = new List<PlayerDto>();
-            foreach (var pUrl in allPlayerUrls)
+            var createdPlayers = new ConcurrentBag<PlayerDto>();
+
+            const int Concurrency = 4;
+            var countByGroup = allPlayerUrls.Count / Concurrency;
+            if (allPlayerUrls.Count % Concurrency > 0)
+                countByGroup++;
+
+            var tasks = new List<Task>();
+            for (var i = 0; i < Concurrency; i++)
             {
-                var matchingPlayer = validPlayers.SingleOrDefault(p => p.IsSame(pUrl));
-                if (matchingPlayer == null || refreshExistingPlayers)
+                var groupOfPlayerUrls = allPlayerUrls.Skip(i * countByGroup).Take(countByGroup);
+                tasks.Add(Task.Run(async () =>
                 {
-                    try
+                    foreach (var pUrl in groupOfPlayerUrls)
                     {
-                        var pInfo = await _siteParser
-                            .GetPlayerInformationAsync(pUrl, Player.DefaultPlayerHexColor)
-                            .ConfigureAwait(false);
-
-                        if (pInfo != null)
+                        var matchingPlayer = validPlayers.SingleOrDefault(p => p.IsSame(pUrl));
+                        if (matchingPlayer == null || refreshExistingPlayers)
                         {
-                            if (matchingPlayer == null)
+                            try
                             {
-                                var formelyBannedPlayer = bannedPlayers.FirstOrDefault(p => p.IsSame(pUrl));
+                                var pInfo = await _siteParser
+                                    .GetPlayerInformationAsync(pUrl, Player.DefaultPlayerHexColor)
+                                    .ConfigureAwait(false);
 
-                                if (formelyBannedPlayer != null)
+                                if (pInfo != null)
                                 {
-                                    pInfo.Id = formelyBannedPlayer.Id;
+                                    if (matchingPlayer == null)
+                                    {
+                                        var formelyBannedPlayer = bannedPlayers.FirstOrDefault(p => p.IsSame(pUrl));
+
+                                        if (formelyBannedPlayer != null)
+                                        {
+                                            pInfo.Id = formelyBannedPlayer.Id;
+                                        }
+                                        else
+                                        {
+                                            var pId = await _writeRepository
+                                                .InsertPlayerAsync(pUrl, Player.DefaultPlayerHexColor)
+                                                .ConfigureAwait(false);
+
+                                            pInfo.Id = pId;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        pInfo.Id = matchingPlayer.Id;
+                                    }
+
+                                    await _writeRepository
+                                        .UpdatePlayerAsync(pInfo.WithRealYearOfBirth(matchingPlayer))
+                                        .ConfigureAwait(false);
+
+                                    if (matchingPlayer == null)
+                                        createdPlayers.Add(pInfo);
                                 }
                                 else
                                 {
-                                    var pId = await _writeRepository
-                                        .InsertPlayerAsync(pUrl, Player.DefaultPlayerHexColor)
-                                        .ConfigureAwait(false);
-
-                                    pInfo.Id = pId;
+                                    errors.Add($"No page found for player with URI {pUrl}.");
                                 }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                pInfo.Id = matchingPlayer.Id;
+                                errors.Add($"Error while checking player with URI {pUrl}.\n{ex.Message}");
                             }
-
-                            await _writeRepository
-                                .UpdatePlayerAsync(pInfo.WithRealYearOfBirth(matchingPlayer))
-                                .ConfigureAwait(false);
-
-                            if (matchingPlayer == null)
-                                createdPlayers.Add(pInfo);
-                        }
-                        else
-                        {
-                            errors.Add($"No page found for player with URI {pUrl}.");
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        errors.Add($"Error while checking player with URI {pUrl}.\n{ex.Message}");
-                    }
-                }
+                }));
             }
+
+            Task.WaitAll(tasks.ToArray());
 
             var playersToBan = validPlayers
                 .Where(p => !allPlayerUrls.Any(pUrl => p.IsSame(pUrl)))
