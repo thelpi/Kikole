@@ -33,17 +33,16 @@ namespace KikoleSite.Elite.Repositories
         {
             return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
                     "INSERT INTO elite_players " +
-                    "(url_name, real_name, surname, color, control_style, is_dirty, creation_date) " +
+                    "(url_name, real_name, surname, color, control_style, creation_date) " +
                     "VALUES " +
-                    "(@url_name, @real_name, @surname, @color, @control_style, @is_dirty, NOW())",
+                    "(@url_name, @real_name, @surname, @color, @control_style, NOW())",
                     new
                     {
                         url_name = urlName,
                         real_name = urlName,
                         surname = urlName,
                         color = defaultHexColor,
-                        control_style = default(string),
-                        is_dirty = 1
+                        control_style = default(string)
                     })
                 .ConfigureAwait(false);
         }
@@ -64,7 +63,7 @@ namespace KikoleSite.Elite.Repositories
             await ExecuteNonQueryAsync(
                     "UPDATE elite_players " +
                     "SET real_name = @real_name, surname = @surname, color = @color, " +
-                    "control_style = @control_style, is_dirty = 0, is_banned = 0 " +
+                    "control_style = @control_style, is_banned = 0 " +
                     "WHERE id = @id",
                     new
                     {

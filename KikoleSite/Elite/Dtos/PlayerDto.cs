@@ -10,7 +10,6 @@ namespace KikoleSite.Elite.Dtos
         public string SurName { get; set; }
         public string ControlStyle { get; set; }
         public string Color { get; set; }
-        public bool IsDirty { get; set; }
         public bool IsBanned { get; set; }
 
         public bool IsSame(string url)
