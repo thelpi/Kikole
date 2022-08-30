@@ -27,6 +27,32 @@ namespace KikoleSite.Elite.Repositories
         private const string EngineStringBeginString = "System:</strong>";
         private const string EngineStringEndString = "</li>";
         private const string TimeClass = "time";
+        private const string ControlStylePattern = "uses the ";
+        private const string RealNamePattern = "real name is ";
+        private const string CountryPattern = "country: ";
+        private const string AgePattern = "is currently ";
+        private const string ColorPattern = "color:#";
+        private const string PageNotFoundTitle = "<title>Page Not Found - The Elite Rankings</title>";
+        private const string Top50PlayersUrl = "ajax/rankings/{0}/initial/1661098116";
+        private const string AllPlayersUrl = "ajax/rankings/{0}/post50/1661097156";
+        private const string PlayerHistoryUrl = "~{0}/{1}/history";
+        private const string CookieHistoryName = "Set-Cookie";
+
+        private static readonly IReadOnlyCollection<KeyValuePair<string, string>> StaticQueryParams =
+            new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("date_start", ""),
+                new KeyValuePair<string, string>("stage_id", ""),
+                new KeyValuePair<string, string>("date_end", ""),
+                new KeyValuePair<string, string>("difficulty-0", "0"),
+                new KeyValuePair<string, string>("difficulty-1", "1"),
+                new KeyValuePair<string, string>("difficulty-2", "2"),
+                new KeyValuePair<string, string>("system-0", "NTSC"),
+                new KeyValuePair<string, string>("system-1", "NTSC-J"),
+                new KeyValuePair<string, string>("system-2", "PAL"),
+                new KeyValuePair<string, string>("system-3", "Unknown"),
+                new KeyValuePair<string, string>("current_pr", "0")
+            };
 
         private static readonly IReadOnlyDictionary<string, int> MonthLabels =
             new Dictionary<string, int>
@@ -63,10 +89,14 @@ namespace KikoleSite.Elite.Repositories
             };
 
         private readonly TheEliteWebsiteConfiguration _configuration;
+        private readonly Api.Interfaces.IClock _clock;
 
-        public TheEliteWebSiteParser(IOptions<TheEliteWebsiteConfiguration> configuration)
+        public TheEliteWebSiteParser(
+            IOptions<TheEliteWebsiteConfiguration> configuration,
+            Api.Interfaces.IClock clock)
         {
-            _configuration = configuration?.Value ?? throw new ArgumentNullException(nameof(configuration));
+            _configuration = configuration.Value;
+            _clock = clock;
         }
 
         public async Task<IReadOnlyCollection<EntryWebDto>> GetMonthPageTimeEntriesAsync(int year, int month)
@@ -105,7 +135,7 @@ namespace KikoleSite.Elite.Repositories
 
         public async Task<PlayerDto> GetPlayerInformationAsync(string urlName, string defaultHexPlayer)
         {
-            var pageContent = await GetPageStringContentAsync($"/~{HttpUtility.UrlEncode(urlName)}", true)
+            var pageContent = await GetPageStringContentAsync($"{PlayerUrlPrefix}{HttpUtility.UrlEncode(urlName)}", true)
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(pageContent))
@@ -119,40 +149,28 @@ namespace KikoleSite.Elite.Repositories
             var headFull = htmlDoc.DocumentNode.SelectNodes("//h1");
             var h1Node = headFull.Count > 1 ? headFull[1] : headFull.First();
 
-            var surname = h1Node.InnerText.Trim().Replace("\r", "").Replace("\n", "").Replace("\t", "");
+            var surname = h1Node.InnerText.Sanitize();
             if (string.IsNullOrWhiteSpace(surname))
             {
                 surname = null;
             }
 
-            var color = h1Node.Attributes["style"].Value.Replace("color:#", "").Trim();
+            var color = h1Node.Attributes["style"].Value.Replace(ColorPattern, "").Trim();
             if (color.Length != 6)
             {
                 color = null;
             }
 
-            string controlStyle = null;
-            var indexofControlStyle = pageContent.IndexOf("uses the <strong>");
-            if (indexofControlStyle >= 0)
-            {
-                var controlStyleTxt = pageContent[(indexofControlStyle + "uses the <strong>".Length)..];
-                controlStyleTxt = controlStyleTxt.Split(new[] { "</strong>" }, StringSplitOptions.RemoveEmptyEntries).First().Trim().Replace("\r", "").Replace("\n", "").Replace("\t", "");
-                if (!string.IsNullOrWhiteSpace(controlStyleTxt))
-                {
-                    controlStyle = controlStyleTxt;
-                }
-            }
+            var controlStyle = ExtractPlayerProperty(pageContent, ControlStylePattern);
+            var realName = ExtractPlayerProperty(pageContent, RealNamePattern);
+            var country = ExtractPlayerProperty(pageContent, CountryPattern);
+            var ageString = ExtractPlayerProperty(pageContent, AgePattern);
 
-            string realName = null;
-            var indexofRealname = pageContent.IndexOf("real name is <strong>");
-            if (indexofRealname >= 0)
+            int? maxYob = null, minYob = null;
+            if (!string.IsNullOrWhiteSpace(ageString) && int.TryParse(ageString, out int age))
             {
-                var realnameTxt = pageContent[(indexofRealname + "real name is <strong>".Length)..];
-                realnameTxt = realnameTxt.Split(new[] { "</strong>" }, StringSplitOptions.RemoveEmptyEntries).First().Trim().Replace("\r", "").Replace("\n", "").Replace("\t", "");
-                if (!string.IsNullOrWhiteSpace(realnameTxt))
-                {
-                    realName = realnameTxt;
-                }
+                maxYob = _clock.Today.Year - age;
+                minYob = maxYob - 1;
             }
 
             return new PlayerDto
@@ -161,7 +179,10 @@ namespace KikoleSite.Elite.Repositories
                 ControlStyle = controlStyle,
                 RealName = realName ?? (surname ?? urlName),
                 SurName = surname ?? urlName,
-                UrlName = urlName
+                UrlName = urlName,
+                Country = country,
+                MaxYearOfBirth = maxYob,
+                MinYearOfBirth = minYob
             };
         }
 
@@ -172,8 +193,7 @@ namespace KikoleSite.Elite.Repositories
             var pageContent = await GetPlayerHistoryPageContentAsync(playerUrlName, game)
                 .ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(pageContent)
-                || pageContent.Contains("<title>Page Not Found - The Elite Rankings</title>"))
+            if (string.IsNullOrWhiteSpace(pageContent) || pageContent.Contains(PageNotFoundTitle))
             {
                 // Do not return an empty list here.
                 return null;
@@ -244,7 +264,7 @@ namespace KikoleSite.Elite.Repositories
         public async Task<IReadOnlyCollection<string>> GetPlayerUrlsAsync(Game game)
         {
             var top50Content = await GetPageStringContentAsync(
-                    $"ajax/rankings/{(game == Game.GoldenEye ? "ge" : "pd")}/initial/1661098116")
+                    string.Format(Top50PlayersUrl, game == Game.GoldenEye ? "ge" : "pd"))
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(top50Content))
@@ -253,7 +273,7 @@ namespace KikoleSite.Elite.Repositories
             }
 
             var topFullContent = await GetPageStringContentAsync(
-                    $"ajax/rankings/{(game == Game.GoldenEye ? "ge" : "pd")}/post50/1661097156")
+                    string.Format(AllPlayersUrl, game == Game.GoldenEye ? "ge" : "pd"))
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(topFullContent))
@@ -293,32 +313,20 @@ namespace KikoleSite.Elite.Repositories
                         BaseAddress = new Uri(_configuration.BaseUri)
                     };
 
+                    var historyUrl = string.Format(PlayerHistoryUrl, urlEncodedPlayerUrl, game.GetGameUrlName());
+
                     var response = await client
-                        .GetAsync(new Uri($"~{urlEncodedPlayerUrl}/{game.GetGameUrlName()}/history", UriKind.Relative))
+                        .GetAsync(new Uri(historyUrl, UriKind.Relative))
                         .ConfigureAwait(false);
 
-                    var cookie = response.Headers.GetValues("Set-Cookie").First().Split(';').First().Split('=').ElementAt(1);
-
-                    var queryParams = new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>("date_start", ""),
-                        new KeyValuePair<string, string>("stage_id", ""),
-                        new KeyValuePair<string, string>("date_end", ""),
-                        new KeyValuePair<string, string>("difficulty-0", "0"),
-                        new KeyValuePair<string, string>("difficulty-1", "1"),
-                        new KeyValuePair<string, string>("difficulty-2", "2"),
-                        new KeyValuePair<string, string>("system-0", "NTSC"),
-                        new KeyValuePair<string, string>("system-1", "NTSC-J"),
-                        new KeyValuePair<string, string>("system-2", "PAL"),
-                        new KeyValuePair<string, string>("system-3", "Unknown"),
-                        new KeyValuePair<string, string>("current_pr", "0"),
-                        new KeyValuePair<string, string>("sid", cookie),
-                    };
+                    var cookie = response.Headers.GetValues(CookieHistoryName).First().Split(';').First().Split('=').ElementAt(1);
 
                     response = await client
                         .PostAsync(
-                            new Uri($"~{urlEncodedPlayerUrl}/{game.GetGameUrlName()}/history", UriKind.Relative),
-                            new FormUrlEncodedContent(queryParams))
+                            new Uri(historyUrl, UriKind.Relative),
+                            new FormUrlEncodedContent(
+                                StaticQueryParams.Concat(
+                                    new KeyValuePair<string, string>("sid", cookie).Yield())))
                         .ConfigureAwait(false);
 
                     stringContent = await response.Content
@@ -427,8 +435,6 @@ namespace KikoleSite.Elite.Repositories
 
         private static DateTime? ParseDateFromString(string dateString, out bool failToExtractDate, bool partialMonthName = false)
         {
-            
-
             failToExtractDate = false;
 
             dateString = dateString?.Trim();
@@ -518,7 +524,7 @@ namespace KikoleSite.Elite.Repositories
         private static EntryWebDto ExtractTimeLinkDetails(HtmlNode link)
         {
             var linkParts = link.InnerText
-                .RemoveNewLinesAndTabs()
+                .Sanitize()
                 .Split(LinkSeparator, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim())
                 .ToArray();
@@ -595,6 +601,23 @@ namespace KikoleSite.Elite.Repositories
                 return null;
 
             return new WebProxy(_configuration.ProxyServerUrl);
+        }
+
+        private static string ExtractPlayerProperty(string pageContent, string prefix)
+        {
+            string propertyValue = null;
+            var indexOfPropertyValue = pageContent.IndexOf($"{prefix}<strong>");
+            if (indexOfPropertyValue >= 0)
+            {
+                var realnameTxt = pageContent[(indexOfPropertyValue + $"{prefix}<strong>".Length)..];
+                realnameTxt = realnameTxt.Split(new[] { "</strong>" }, StringSplitOptions.RemoveEmptyEntries).First().Sanitize();
+                if (!string.IsNullOrWhiteSpace(realnameTxt))
+                {
+                    propertyValue = realnameTxt;
+                }
+            }
+
+            return propertyValue;
         }
     }
 }

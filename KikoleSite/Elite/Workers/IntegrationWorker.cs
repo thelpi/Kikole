@@ -42,7 +42,7 @@ namespace KikoleSite.Elite.Workers
             var isGlobalRefresh = _clock.Today.Day == 1;
 
             var refreshPlayersResult = await _integrationProvider
-                .RefreshPlayersAsync(!isGlobalRefresh)
+                .RefreshPlayersAsync(!isGlobalRefresh, isGlobalRefresh)
                 .ConfigureAwait(false);
 
             _logger.Log(refreshPlayersResult.Errors?.ToArray());

@@ -26,10 +26,13 @@ namespace KikoleSite.Elite.Controllers
         }
 
         [HttpGet("players/refresh")]
-        public JsonResult RefreshPlayers([FromQuery] bool addTimesForNewPlayers, [FromQuery] string secret)
+        public JsonResult RefreshPlayers(
+            [FromQuery] bool addTimesForNewPlayers,
+            [FromQuery] bool refreshExistingPlayers,
+            [FromQuery] string secret)
         {
             var json = StartAsyncTaskAndGetJson(() =>
-                _integrationProvider.RefreshPlayersAsync(addTimesForNewPlayers),
+                _integrationProvider.RefreshPlayersAsync(addTimesForNewPlayers, refreshExistingPlayers),
                 nameof(RefreshPlayers),
                 secret);
             return Json(json);

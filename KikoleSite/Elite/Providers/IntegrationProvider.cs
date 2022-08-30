@@ -32,7 +32,9 @@ namespace KikoleSite.Elite.Providers
             _clock = clock;
         }
 
-        public async Task<RefreshPlayersResult> RefreshPlayersAsync(bool addTimesForNewPlayers)
+        public async Task<RefreshPlayersResult> RefreshPlayersAsync(
+            bool addTimesForNewPlayers,
+            bool refreshExistingPlayers)
         {
             var errors = new List<string>();
 
@@ -70,7 +72,8 @@ namespace KikoleSite.Elite.Providers
             var createdPlayers = new List<PlayerDto>();
             foreach (var pUrl in allPlayerUrls)
             {
-                if (!validPlayers.Any(p => p.IsSame(pUrl)))
+                var matchingPlayer = validPlayers.SingleOrDefault(p => p.IsSame(pUrl));
+                if (matchingPlayer == null || refreshExistingPlayers)
                 {
                     try
                     {
@@ -80,26 +83,30 @@ namespace KikoleSite.Elite.Providers
 
                         if (pInfo != null)
                         {
-                            var formelyBannedPlayer = bannedPlayers.FirstOrDefault(p => p.IsSame(pUrl));
-
-                            if (formelyBannedPlayer != null)
+                            if (matchingPlayer == null)
                             {
-                                pInfo.Id = formelyBannedPlayer.Id;
-                            }
-                            else
-                            {
-                                var pid = await _writeRepository
-                                    .InsertPlayerAsync(pUrl, Player.DefaultPlayerHexColor)
-                                    .ConfigureAwait(false);
+                                var formelyBannedPlayer = bannedPlayers.FirstOrDefault(p => p.IsSame(pUrl));
 
-                                pInfo.Id = pid;
+                                if (formelyBannedPlayer != null)
+                                {
+                                    pInfo.Id = formelyBannedPlayer.Id;
+                                }
+                                else
+                                {
+                                    var pId = await _writeRepository
+                                        .InsertPlayerAsync(pUrl, Player.DefaultPlayerHexColor)
+                                        .ConfigureAwait(false);
+
+                                    pInfo.Id = pId;
+                                }
                             }
 
                             await _writeRepository
-                                .UpdatePlayerAsync(pInfo)
+                                .UpdatePlayerAsync(pInfo.WithRealYearOfBirth(matchingPlayer))
                                 .ConfigureAwait(false);
 
-                            createdPlayers.Add(pInfo);
+                            if (matchingPlayer == null)
+                                createdPlayers.Add(pInfo);
                         }
                         else
                         {

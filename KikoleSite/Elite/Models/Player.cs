@@ -17,6 +17,8 @@ namespace KikoleSite.Elite.Models
         public string SurName { get; }
         public ControlStyle? ControlStyle { get; }
         public string Color { get; }
+        public string Country { get; }
+        public int? YearOfBirth { get; }
 
         internal Player(PlayerDto dto)
         {
@@ -25,6 +27,8 @@ namespace KikoleSite.Elite.Models
             SurName = dto.SurName;
             ControlStyle = ModelExtensions.ToControlStyle(dto.ControlStyle);
             Color = dto.Color;
+            Country = dto.Country;
+            YearOfBirth = dto.MinYearOfBirth;
         }
 
         public string ToString(Game game)

@@ -62,8 +62,14 @@ namespace KikoleSite.Elite.Repositories
         {
             await ExecuteNonQueryAsync(
                     "UPDATE elite_players " +
-                    "SET real_name = @real_name, surname = @surname, color = @color, " +
-                    "control_style = @control_style, is_banned = 0 " +
+                    "SET real_name = @real_name, " +
+                    "   surname = @surname, " +
+                    "   color = @color, " +
+                    "   control_style = @control_style, " +
+                    "   is_banned = 0, " +
+                    "   country = @country, " +
+                    "   min_year_of_birth = @minyob, " +
+                    "   max_year_of_birth = @maxyob " +
                     "WHERE id = @id",
                     new
                     {
@@ -71,7 +77,10 @@ namespace KikoleSite.Elite.Repositories
                         real_name = player.RealName,
                         surname = player.SurName,
                         color = player.Color,
-                        control_style = player.ControlStyle
+                        control_style = player.ControlStyle,
+                        country = player.Country,
+                        minyob = player.MinYearOfBirth,
+                        maxyob = player.MaxYearOfBirth
                     })
                 .ConfigureAwait(false);
         }
