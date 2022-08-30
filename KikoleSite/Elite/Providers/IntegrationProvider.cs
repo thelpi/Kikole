@@ -100,6 +100,10 @@ namespace KikoleSite.Elite.Providers
                                     pInfo.Id = pId;
                                 }
                             }
+                            else
+                            {
+                                pInfo.Id = matchingPlayer.Id;
+                            }
 
                             await _writeRepository
                                 .UpdatePlayerAsync(pInfo.WithRealYearOfBirth(matchingPlayer))
