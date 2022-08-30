@@ -135,12 +135,14 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
-        internal static StandingType? ToStandingType(this ChronologyTypeItemData chronologyType)
+        internal static StandingType? ToStandingType(this ChronologyTypeItemData chronologyType, bool specificPlayer)
         {
             return chronologyType switch
             {
                 ChronologyTypeItemData.AllUnslay => StandingType.BetweenTwoTimes,
-                ChronologyTypeItemData.FirstUnslay => StandingType.FirstUnslayed,
+                ChronologyTypeItemData.FirstUnslay => specificPlayer
+                    ? StandingType.Unslayed
+                    : StandingType.FirstUnslayed,
                 ChronologyTypeItemData.Untied => StandingType.UntiedExceptSelf,
                 _ => null,
             };

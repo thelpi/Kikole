@@ -17,7 +17,7 @@ namespace KikoleSite.Elite.Controllers
     public class SimulatedRankingController : Controller
     {
         private const int MaxRankDisplay = 500;
-        private const int DefaultLeaderboardDayStep = 1;
+        private const int DefaultLeaderboardDayStep = 7;
         private const int MaxStageParallelism = 4; // divisor of 20
         private const string AnonymiseColorRgb = "FFFFFF";
 
@@ -122,7 +122,7 @@ namespace KikoleSite.Elite.Controllers
             else
             {
                 var standings = await _statisticsProvider
-                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType().Value, null, engine)
+                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType(playerId.HasValue).Value, null, engine)
                     .ConfigureAwait(false);
 
                 results = standings
