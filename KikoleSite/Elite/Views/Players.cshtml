@@ -3,16 +3,20 @@
 <table id="wr-table" class="ge">
     <tbody>
         <tr>
-            <th class="stage">ID</th>
+            <th class="stage" style="width: 10%">ID</th>
             <th class="stage">Real name</th>
             <th class="stage">Surname</th>
+            <th class="stage" style="width: 10%">Color</th>
+            <!--<th class="stage">Country</th>-->
         </tr>
         @foreach (var player in Model)
         {
             <tr>
-                <td style="color:#@player.Color">@player.Id</td>
-                <td style="color:#@player.Color">@player.RealName</td>
-                <td style="color:#@player.Color">@player.SurName</td>
+                <td style="color:@player.Color">@player.Id</td>
+                <td style="color:@player.Color">@player.RealName</td>
+                <td style="color:@player.Color">@player.SurName</td>
+                <td style="color:@player.Color">@player.Color</td>
+                <!--<td style="color:@player.Color">@player.Country</td>-->
             </tr>
         }
     </tbody>

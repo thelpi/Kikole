@@ -6,5 +6,6 @@
         public string RealName { get; set; }
         public string SurName { get; set; }
         public string Color { get; set; }
+        public string Country { get; set; }
     }
 }

@@ -102,10 +102,11 @@ namespace KikoleSite.Elite.ViewDatas
         {
             return new PlayerItemData
             {
-                Color = player.Color,
+                Color = $"#{player.Color}",
                 Id = player.Id,
                 RealName = player.RealName,
-                SurName = player.SurName
+                SurName = player.SurName,
+                Country = player.Country
             };
         }
 

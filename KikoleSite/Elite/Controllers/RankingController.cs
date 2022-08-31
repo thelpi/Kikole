@@ -252,7 +252,10 @@ namespace KikoleSite.Elite.Controllers
                         .GetPlayersAsync()
                         .ConfigureAwait(false);
 
-                    return players.Select(p => p.ToPlayerItemData()).ToList();
+                    return players
+                        .OrderBy(p => p.Color)
+                        .Select(p => p.ToPlayerItemData())
+                        .ToList();
                 }).ConfigureAwait(false);
         }
 

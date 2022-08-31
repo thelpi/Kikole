@@ -29,7 +29,7 @@ namespace KikoleSite.Elite.Repositories
         public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync(bool banned = false)
         {
             return await ExecuteReaderAsync<PlayerDto>(
-                    "SELECT id, url_name, real_name, surname,  color, control_style, is_banned " +
+                    "SELECT id, url_name, real_name, surname,  color, control_style, is_banned, country " +
                     "FROM elite_players " +
                     "WHERE is_banned = @is_banned",
                     new
