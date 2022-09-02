@@ -43,6 +43,8 @@ namespace KikoleSite.Elite.Models
 
         public bool IncludeUnknownEngine { get; set; }
 
+        public string Country { get; set; }
+
         internal IReadOnlyDictionary<long, PlayerDto> Players { get; set; }
 
         internal ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>> Entries { get; }

@@ -226,7 +226,8 @@ namespace KikoleSite.Elite.Providers
         public async Task<IReadOnlyCollection<RankingEntryLight>> GetRankingEntriesAsync(
             RankingRequest request)
         {
-            request.Players = await GetPlayersInternalAsync().ConfigureAwait(false);
+            request.Players = await GetPlayersInternalAsync(request.Country)
+                .ConfigureAwait(false);
 
             return await GetFullGameConsolidatedRankingAsync(request)
                 .ConfigureAwait(false);
@@ -415,13 +416,16 @@ namespace KikoleSite.Elite.Providers
             return entries;
         }
 
-        private async Task<IReadOnlyDictionary<long, PlayerDto>> GetPlayersInternalAsync()
+        private async Task<IReadOnlyDictionary<long, PlayerDto>> GetPlayersInternalAsync(string country = null)
         {
             var playersList = await _readRepository
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
 
-            return playersList.ToDictionary(p => p.Id, p => p);
+            return playersList
+                .Where(p => string.IsNullOrWhiteSpace(country)
+                    || country.Equals(p.Country, StringComparison.InvariantCultureIgnoreCase))
+                .ToDictionary(p => p.Id, p => p);
         }
 
         // Sets a fake date on entries without it

@@ -331,13 +331,35 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
         }
 
+        [HttpGet("games/{game}/country-rankings")]
+        public async Task<IActionResult> GetRankingByCountryAsync(
+            [FromRoute] Game game,
+            [FromQuery] DateTime? rankingDate,
+            [FromQuery] string country)
+        {
+            if (!CheckGameParameter(game))
+            {
+                return Json(new { error = "Invalid game value." });
+            }
+
+            if (string.IsNullOrWhiteSpace(country))
+            {
+                return Json(new { error = "The country is invalid." });
+            }
+
+            return await SimulateRankingInternalAsync(
+                    game, rankingDate, country: country)
+                .ConfigureAwait(false);
+        }
+
         [HttpGet("games/{game}/players/{playerId}/details")]
         public async Task<IActionResult> GetPlayerDetailsForSpecifiedRankingAsync(
             [FromRoute] Game game,
             [FromRoute] long playerId,
             [FromQuery] DateTime? rankingDate,
             [FromQuery] DateTime? rankingStartDate,
-            [FromQuery] Engine? engine)
+            [FromQuery] Engine? engine,
+            [FromQuery] string country)
         {
             if (!CheckGameParameter(game))
             {
@@ -368,7 +390,7 @@ namespace KikoleSite.Elite.Controllers
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(game,
-                        rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine)
+                        rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country)
                     .ConfigureAwait(false);
 
                     var pRanking = rankingEntries.Single(r => r.Player.Id == playerId);
@@ -397,7 +419,8 @@ namespace KikoleSite.Elite.Controllers
             DateTime? rankingDate,
             long? playerId = null,
             DateTime? rankingStartDate = null,
-            Engine? engine = null)
+            Engine? engine = null,
+            string country = null)
         {
             return await ViewAsync(
                 RankingViewName,
@@ -405,7 +428,7 @@ namespace KikoleSite.Elite.Controllers
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(
-                            game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine)
+                            game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country)
                         .ConfigureAwait(false);
 
                     var pointsRankingEntries = rankingEntries
@@ -451,7 +474,8 @@ namespace KikoleSite.Elite.Controllers
             DateTime rankingDate,
             long? playerId,
             DateTime? rankingStartDate,
-            Engine? engine)
+            Engine? engine,
+            string country)
         {
             var request = new RankingRequest
             {
@@ -460,7 +484,8 @@ namespace KikoleSite.Elite.Controllers
                 RankingDate = rankingDate,
                 Engine = engine,
                 IncludeUnknownEngine = true,
-                RankingStartDate = rankingStartDate
+                RankingStartDate = rankingStartDate,
+                Country = country
             };
 
             if (playerId.HasValue)
