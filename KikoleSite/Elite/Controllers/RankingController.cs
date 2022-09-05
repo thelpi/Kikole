@@ -47,7 +47,8 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] long? playerId,
             [FromQuery] DateTime? rankingDate,
             [FromQuery] StandingType standingType,
-            [FromQuery] Engine? engine)
+            [FromQuery] Engine? engine,
+            [FromQuery] long? slayerPlayerId)
         {
             if (!CheckGameParameter(game))
             {
@@ -64,6 +65,10 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "The standing type is invalid." });
             }
 
+            var players = await _statisticsProvider
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+
             Player p = null;
             if (playerId.HasValue)
             {
@@ -72,11 +77,23 @@ namespace KikoleSite.Elite.Controllers
                     return Json(new { error = "Invalid player identifier." });
                 }
 
-                var players = await _statisticsProvider
-                    .GetPlayersAsync()
-                    .ConfigureAwait(false);
                 p = players.SingleOrDefault(p => p.Id == playerId);
                 if (p == null)
+                {
+                    return Json(new { error = "The player associated to the identifier does not exist." });
+                }
+            }
+
+            Player pSlayer = null;
+            if (slayerPlayerId.HasValue)
+            {
+                if (slayerPlayerId <= 0)
+                {
+                    return Json(new { error = "Invalid player identifier." });
+                }
+
+                pSlayer = players.SingleOrDefault(p => p.Id == slayerPlayerId);
+                if (pSlayer == null)
                 {
                     return Json(new { error = "The player associated to the identifier does not exist." });
                 }
@@ -87,6 +104,8 @@ namespace KikoleSite.Elite.Controllers
                 title += $" - {engine} only";
             if (p != null)
                 title += $" - {p.ToString(game)}";
+            if (pSlayer != null)
+                title += $" - slayed/tied by {pSlayer.ToString(game)}";
             if (rankingDate.HasValue)
                 title += $" - {rankingDate.Value:yyyy-MM-dd}";
             if (stillOngoing == true)
@@ -100,7 +119,7 @@ namespace KikoleSite.Elite.Controllers
                     async () =>
                     {
                         var results = await _statisticsProvider
-                            .GetLongestStandingsAsync(game, rankingDate, standingType, stillOngoing, engine, playerId)
+                            .GetLongestStandingsAsync(game, rankingDate, standingType, stillOngoing, engine, playerId, slayerPlayerId)
                             .ConfigureAwait(false);
 
                         return new LongestStandingViewData
@@ -196,7 +215,7 @@ namespace KikoleSite.Elite.Controllers
             else
             {
                 var standings = await _statisticsProvider
-                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType(playerId.HasValue).Value, null, engine, playerId)
+                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType(playerId.HasValue).Value, null, engine, playerId, null)
                     .ConfigureAwait(false);
 
                 results = standings

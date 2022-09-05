@@ -16,7 +16,8 @@ namespace KikoleSite.Elite.Providers
             StandingType standingType,
             bool? stillOngoing,
             Engine? engine,
-            long? playerId);
+            long? playerId,
+            long? slayerPlayerId);
 
         Task<IReadOnlyCollection<StageLeaderboard>> GetStageLeaderboardHistoryAsync(
             Stage stage,

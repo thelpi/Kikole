@@ -35,7 +35,8 @@ namespace KikoleSite.Elite.Providers
             StandingType standingType,
             bool? stillOngoing,
             Engine? engine,
-            long? playerId)
+            long? playerId,
+            long? slayerPlayerId)
         {
             var standings = new List<Standing>();
 
@@ -171,7 +172,8 @@ namespace KikoleSite.Elite.Providers
                 .Where(x => (stillOngoing == true
                     ? !x.EndDate.HasValue
                     : (stillOngoing != false || x.EndDate.HasValue))
-                    && (!playerId.HasValue || x.Author.Id == playerId))
+                    && (!playerId.HasValue || x.Author.Id == playerId)
+                    && (!slayerPlayerId.HasValue || x.Slayer?.Id == slayerPlayerId))
                 .OrderByDescending(x => x.WithDays(endDate ?? _clock.Now).Days)
                 .ToList()
                 .WithRanks(x => x.Days.Value);
