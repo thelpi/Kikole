@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
 
@@ -11,6 +12,8 @@ namespace KikoleSite.Elite.Models
         private DateTime _rankingDate;
         private DateTime? _rankingStartDate;
         private (long, DateTime)? _playerVsLegacy;
+        private Dictionary<long, PlayerDto> _players;
+        private readonly Dictionary<string, (long fakeId, List<long> playersId)> _countryPlayersGroup = new Dictionary<string, (long, List<long>)>();
 
         public Game Game { get; set; }
 
@@ -45,9 +48,60 @@ namespace KikoleSite.Elite.Models
 
         public string Country { get; set; }
 
-        internal IReadOnlyDictionary<long, PlayerDto> Players { get; set; }
+        public bool CountryGrouping { get; set; }
+
+        internal IReadOnlyDictionary<long, PlayerDto> Players
+        {
+            get { return _players; }
+            set
+            {
+                _players = value.ToDictionary(_ => _.Key, _ => _.Value);
+                if (CountryGrouping)
+                {
+                    _players = MergePlayersIntoCountries();
+                    CountryPlayersGroup = _countryPlayersGroup.Values.ToDictionary(_ => _.fakeId, _ => (IReadOnlyCollection<long>)_.playersId);
+                }
+            }
+        }
+
+        internal IReadOnlyDictionary<long, IReadOnlyCollection<long>> CountryPlayersGroup { get; private set; }
 
         internal ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>> Entries { get; }
             = new ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>>();
+
+        private Dictionary<long, PlayerDto> MergePlayersIntoCountries()
+        {
+            var i = 1;
+            foreach (var pId in _players.Keys)
+            {
+                var country = _players[pId].Country ?? string.Empty;
+                if (!_countryPlayersGroup.ContainsKey(country))
+                {
+                    _countryPlayersGroup.Add(country, (i, new List<long>()));
+                    i++;
+                }
+                _countryPlayersGroup[country].playersId.Add(pId);
+            }
+
+            var players = new List<PlayerDto>(_countryPlayersGroup.Count);
+
+            var random = new Random();
+
+            foreach (var country in _countryPlayersGroup.Keys)
+            {
+                var fillCountry = string.IsNullOrWhiteSpace(country) ? "N/A" : country;
+                players.Add(new PlayerDto
+                {
+                    Color = $"{random.Next(0, 256):X2}{random.Next(0, 256):X2}{random.Next(0, 256):X2}",
+                    Country = fillCountry,
+                    Id = _countryPlayersGroup[country].fakeId,
+                    RealName = fillCountry,
+                    SurName = fillCountry,
+                    UrlName = fillCountry
+                });
+            }
+
+            return players.ToDictionary(r => r.Id, r => r);
+        }
     }
 }

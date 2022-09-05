@@ -364,7 +364,8 @@ namespace KikoleSite.Elite.Providers
             Stage stage,
             Level level)
         {
-            var entries = await GetStageLevelEntriesCoreAsync(request.Players, stage, level, request.Entries)
+            var entries = await GetStageLevelEntriesCoreAsync(
+                    request.Players, stage, level, request.Entries, request.CountryPlayersGroup)
                 .ConfigureAwait(false);
 
             if (request.Engine.HasValue)
@@ -391,7 +392,8 @@ namespace KikoleSite.Elite.Providers
             IReadOnlyDictionary<long, PlayerDto> players,
             Stage stage,
             Level level,
-            ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>> entriesCache = null)
+            ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>> entriesCache = null,
+            IReadOnlyDictionary<long, IReadOnlyCollection<long>> countryPlayersGroup = null)
         {
             // Gets every entry for the stage and level
             var tmpEntriesSource = entriesCache?.ContainsKey((stage, level)) == true
@@ -399,6 +401,15 @@ namespace KikoleSite.Elite.Providers
                 : await _readRepository
                     .GetEntriesAsync(stage, level, null, null)
                     .ConfigureAwait(false);
+
+            // if country grouping, replace player by "country player"
+            if (countryPlayersGroup?.Count > 0)
+            {
+                foreach (var entry in tmpEntriesSource)
+                {
+                    entry.PlayerId = countryPlayersGroup.Single(_ => _.Value.Contains(entry.PlayerId)).Key;
+                }
+            }
 
             // Entries not related to players are excluded
             var entries = tmpEntriesSource

@@ -342,13 +342,8 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = "Invalid game value." });
             }
 
-            if (string.IsNullOrWhiteSpace(country))
-            {
-                return Json(new { error = "The country is invalid." });
-            }
-
             return await SimulateRankingInternalAsync(
-                    game, rankingDate, country: country)
+                    game, rankingDate, country: country, countryGrouping: string.IsNullOrWhiteSpace(country))
                 .ConfigureAwait(false);
         }
 
@@ -390,7 +385,7 @@ namespace KikoleSite.Elite.Controllers
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(game,
-                        rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country)
+                        rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country, false)
                     .ConfigureAwait(false);
 
                     var pRanking = rankingEntries.Single(r => r.Player.Id == playerId);
@@ -420,7 +415,8 @@ namespace KikoleSite.Elite.Controllers
             long? playerId = null,
             DateTime? rankingStartDate = null,
             Engine? engine = null,
-            string country = null)
+            string country = null,
+            bool countryGrouping = false)
         {
             return await ViewAsync(
                 RankingViewName,
@@ -428,7 +424,7 @@ namespace KikoleSite.Elite.Controllers
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(
-                            game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country)
+                            game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country, countryGrouping)
                         .ConfigureAwait(false);
 
                     var pointsRankingEntries = rankingEntries
@@ -475,7 +471,8 @@ namespace KikoleSite.Elite.Controllers
             long? playerId,
             DateTime? rankingStartDate,
             Engine? engine,
-            string country)
+            string country,
+            bool countryGrouping)
         {
             var request = new RankingRequest
             {
@@ -485,7 +482,8 @@ namespace KikoleSite.Elite.Controllers
                 Engine = engine,
                 IncludeUnknownEngine = true,
                 RankingStartDate = rankingStartDate,
-                Country = country
+                Country = country,
+                CountryGrouping = countryGrouping
             };
 
             if (playerId.HasValue)
