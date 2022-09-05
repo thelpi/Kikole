@@ -27,6 +27,7 @@ namespace KikoleSite.Elite.Controllers
         private const string PlayerDetailsViewName = "PlayerDetails";
         private const string IndexViewName = "Index";
         private const string ChronologyCanvasViewName = "ChronologyCanvas";
+        private const string LongestStandingViewName = "LongestStanding";
 
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
@@ -37,6 +38,82 @@ namespace KikoleSite.Elite.Controllers
         {
             _statisticsProvider = statisticsProvider;
             _clock = clock;
+        }
+
+        [HttpGet("games/{game}/longest-standings")]
+        public async Task<IActionResult> GetLongestStandingAsync(
+            [FromRoute] Game game,
+            [FromQuery] bool? stillOngoing,
+            [FromQuery] long? playerId,
+            [FromQuery] DateTime? rankingDate,
+            [FromQuery] StandingType standingType,
+            [FromQuery] Engine? engine)
+        {
+            if (!CheckGameParameter(game))
+            {
+                return Json(new { error = "Invalid game value." });
+            }
+
+            if (!CheckEngineParameter(engine))
+            {
+                return Json(new { error = "The engine is invalid." });
+            }
+
+            if (!CheckStandingTypeParameter(standingType))
+            {
+                return Json(new { error = "The standing type is invalid." });
+            }
+
+            Player p = null;
+            if (playerId.HasValue)
+            {
+                if (playerId <= 0)
+                {
+                    return Json(new { error = "Invalid player identifier." });
+                }
+
+                var players = await _statisticsProvider
+                    .GetPlayersAsync()
+                    .ConfigureAwait(false);
+                p = players.SingleOrDefault(p => p.Id == playerId);
+                if (p == null)
+                {
+                    return Json(new { error = "The player associated to the identifier does not exist." });
+                }
+            }
+
+            var title = $"{game} - {standingType.GetStandingTypeDescription()}";
+            if (engine.HasValue)
+                title += $" - {engine} only";
+            if (p != null)
+                title += $" - {p.ToString(game)}";
+            if (rankingDate.HasValue)
+                title += $" - {rankingDate.Value:yyyy-MM-dd}";
+            if (stillOngoing == true)
+                title += " - Only ongoing entries";
+            else if (stillOngoing == false)
+                title += " - Only finished entries";
+
+            return await ViewAsync(
+                    LongestStandingViewName,
+                    title,
+                    async () =>
+                    {
+                        var results = await _statisticsProvider
+                            .GetLongestStandingsAsync(game, rankingDate, standingType, stillOngoing, engine, playerId)
+                            .ConfigureAwait(false);
+
+                        var standings = results
+                            .Select(_ => _.ToStandingItemData())
+                            .ToList()
+                            .WithRanks(_ => _.Days);
+
+                        return new LongestStandingViewData
+                        {
+                            Standings = standings
+                        };
+                    })
+                .ConfigureAwait(false);
         }
 
         [HttpGet("games/{game}/chronology-types/{chronologyType}/data")]
@@ -122,11 +199,10 @@ namespace KikoleSite.Elite.Controllers
             else
             {
                 var standings = await _statisticsProvider
-                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType(playerId.HasValue).Value, null, engine)
+                    .GetLongestStandingsAsync(game, null, chronologyType.ToStandingType(playerId.HasValue).Value, null, engine, playerId)
                     .ConfigureAwait(false);
 
                 results = standings
-                    .Where(_ => !playerId.HasValue || _.Author.Id == playerId)
                     .Select(_ => _.ToChronologyCanvasItemData(anonymise != 0, AnonymiseColorRgb))
                     .ToList();
             }
@@ -407,6 +483,11 @@ namespace KikoleSite.Elite.Controllers
         private static bool CheckChronologyTypeParameter(ChronologyTypeItemData standingType)
         {
             return Enum.TryParse(typeof(ChronologyTypeItemData), standingType.ToString(), out _);
+        }
+
+        private static bool CheckStandingTypeParameter(StandingType standingType)
+        {
+            return Enum.TryParse(typeof(StandingType), standingType.ToString(), out _);
         }
 
         private async Task<IActionResult> SimulateRankingInternalAsync(

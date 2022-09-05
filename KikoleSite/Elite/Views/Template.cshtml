@@ -11,7 +11,7 @@
 <body>
     <div id="container">
         <div id="page" class="with-sidebar">
-            <div id="content">
+            <div id="content" style="width: 918px">
                 <h1>@Model.Title</h1>
                 @await Html.PartialAsync(Model.Name, Model.Data).ConfigureAwait(false)
             </div>

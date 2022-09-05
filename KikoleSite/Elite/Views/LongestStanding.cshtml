@@ -1,0 +1,45 @@
+﻿@using KikoleSite.Elite.Extensions;
+@model KikoleSite.Elite.ViewDatas.LongestStandingViewData
+
+<table>
+    <tbody>
+        <tr>
+            <th><font color="#FF9900">Rank</font></th>
+            <th><font color="#FF9900">Duration</font></th>
+            <th><font color="#FF9900">Record</font></th>
+            <th><font color="#FF9900">Date</font></th>
+            <th><font color="#FF9900">Record Holder</font></th>
+            <th><font color="#FF9900">Tied or Beaten by</font></th>
+            <th><font color="#FF9900">On the</font></th>
+        </tr>
+        @foreach (var standing in Model.Standings)
+        {
+            <tr>
+                <td class="rank">@standing.Rank</td>
+                <td><strong>@standing.Days</strong>  days</td>
+                @if (standing.Times.Count > 1)
+                {
+                <td>@standing.Stage - @standing.Level.GetLabel(standing.Stage.GetGame())
+                <br />From @standing.Time.ToString(@"mm\:ss") to @standing.Times.Last().ToString(@"mm\:ss")
+                </td>
+                }
+                else
+                {
+                <td>@standing.Time.ToString(@"mm\:ss") - @standing.Stage - @standing.Level.GetLabel(standing.Stage.GetGame())</td>
+                }
+                <td>@standing.Date.ToString("yyyy-MM-dd")</td>
+                <td><font color="#@standing.PlayerColor">@standing.PlayerName</font></td>
+                @if (!standing.NextDate.HasValue)
+                {
+                    <td>-</td>
+                    <td>-</td>
+                }
+                else
+                {
+                    <td><font color="#@standing.NextPlayerColor">@standing.NextPlayerName</font></td>
+                    <td>@standing.NextDate.Value.ToString("yyyy-MM-dd")</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

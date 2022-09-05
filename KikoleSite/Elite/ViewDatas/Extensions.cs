@@ -180,6 +180,44 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
+        internal static StandingItemData ToStandingItemData(this Standing item)
+        {
+            return new StandingItemData
+            {
+                Date = item.StartDate,
+                Days = item.Days.Value,
+                NextDate = item.EndDate,
+                Level = item.Level,
+                NextPlayerColor = item.Slayer?.Color,
+                NextPlayerName = item.Stage.GetGame() == Game.PerfectDark
+                    ? item.Slayer?.SurName
+                    : item.Slayer?.RealName,
+                PlayerColor = item.Author.Color,
+                PlayerName = item.Stage.GetGame() == Game.PerfectDark
+                    ? item.Author.SurName
+                    : item.Author.RealName,
+                Stage = item.Stage,
+                Times = item.Times
+                    .Select(_ => new TimeSpan(0, 0, (int)_))
+                    .OrderByDescending(_ => _)
+                    .ToList()
+            };
+        }
+
+        internal static string GetStandingTypeDescription(this StandingType standingType)
+        {
+            return standingType switch
+            {
+                StandingType.BetweenTwoTimes => "Longest delay between two world records",
+                StandingType.FirstUnslayed => "Longest standing world records",
+                StandingType.Unslayed => "Longest delay for a player while holding a world record",
+                StandingType.UnslayedExceptSelf => "Longest delay for a player while being unslayed by someone else",
+                StandingType.Untied => "Longest standing untied world records",
+                StandingType.UntiedExceptSelf => "Longest delay for a player while being untied by someone else",
+                _ => null,
+            };
+        }
+
         private static List<(string, string, string)> GetPlayersRankedAtStageAndLevelTime(List<RankingEntry> rankingEntries, Stage stage, Level level, int bestTime)
         {
             return rankingEntries

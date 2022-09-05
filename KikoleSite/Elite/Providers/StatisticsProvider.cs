@@ -34,7 +34,8 @@ namespace KikoleSite.Elite.Providers
             DateTime? endDate,
             StandingType standingType,
             bool? stillOngoing,
-            Engine? engine)
+            Engine? engine,
+            long? playerId)
         {
             var standings = new List<Standing>();
 
@@ -161,13 +162,11 @@ namespace KikoleSite.Elite.Providers
                 }
             }
 
-            var now = _clock.Now;
-
             standings = standings
                 .Where(x => stillOngoing == true
                     ? !x.EndDate.HasValue
                     : (stillOngoing != false || x.EndDate.HasValue))
-                .OrderByDescending(x => x.WithDays(now).Days)
+                .OrderByDescending(x => x.WithDays(endDate ?? _clock.Now).Days)
                 .ToList();
 
             if (standingType == StandingType.FirstUnslayed)
@@ -185,7 +184,9 @@ namespace KikoleSite.Elite.Providers
                 standings = tmpStandings;
             }
 
-            return standings;
+            return standings
+                .Where(s => !playerId.HasValue || s.Author.Id == playerId)
+                .ToList();
         }
 
         public async Task<IReadOnlyCollection<Player>> GetPlayersAsync()
