@@ -70,7 +70,7 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
-        internal static TimeRankingItemData ToTimeRankingItemData(this RankingEntry entry, int rank)
+        internal static TimeRankingItemData ToTimeRankingItemData(this RankingEntry entry)
         {
             return new TimeRankingItemData
             {
@@ -79,7 +79,7 @@ namespace KikoleSite.Elite.ViewDatas
                 MediumTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Medium]),
                 PlayerColor = entry.Player.Color,
                 PlayerName = entry.PlayerName,
-                Rank = rank,
+                Rank = entry.Rank,
                 TotalTime = new TimeSpan(0, 0, (int)entry.CumuledTime)
             };
         }

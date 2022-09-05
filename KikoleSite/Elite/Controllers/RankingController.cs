@@ -350,13 +350,14 @@ namespace KikoleSite.Elite.Controllers
             var players = await _statisticsProvider
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
-            if (!players.Any(p => p.Id == playerId))
+            var p = players.SingleOrDefault(p => p.Id == playerId);
+            if (p == null)
             {
                 return Json(new { error = "The player associated to the identifier does not exist." });
             }
 
             return await SimulateRankingInternalAsync(
-                    game, rankingDate, playerId)
+                    game, rankingDate, p)
                 .ConfigureAwait(false);
         }
 
@@ -489,19 +490,33 @@ namespace KikoleSite.Elite.Controllers
         private async Task<IActionResult> SimulateRankingInternalAsync(
             Game game,
             DateTime? rankingDate,
-            long? playerId = null,
+            Player player = null,
             DateTime? rankingStartDate = null,
             Engine? engine = null,
             string country = null,
             bool countryGrouping = false)
         {
+            var title = $"{game} - Ranking generator";
+            if (countryGrouping)
+                title += " - by country";
+            if (!string.IsNullOrWhiteSpace(country))
+                title += $" - {country}";
+            if (engine.HasValue)
+                title += $" - {engine} only";
+            if (player != null)
+                title += $" - {player.ToString(game)}";
+            if (rankingStartDate.HasValue)
+                title += $" - starts at {rankingStartDate.Value:yyyy-MM-dd}";
+            if (rankingDate.HasValue)
+                title += $" - {rankingDate.Value:yyyy-MM-dd}";
+
             return await ViewAsync(
                 RankingViewName,
-                "The GoldenEye/PerfectDark World Records and Rankings SIMULATOR",
+                title,
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(
-                            game, rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country, countryGrouping)
+                            game, rankingDate ?? DateTime.Now, player?.Id, rankingStartDate, engine, country, countryGrouping)
                         .ConfigureAwait(false);
 
                     var pointsRankingEntries = rankingEntries
@@ -509,16 +524,18 @@ namespace KikoleSite.Elite.Controllers
                         .Select(r => r.ToPointsRankingItemData())
                         .ToList();
 
-                    // this does not manage equality between two global times
-                    // ie one player will be ranked above/below the other one
-                    int rank = 1;
+                    // proceed to a new orderBy from the base list
                     var timeRankingEntries = rankingEntries
                         .OrderBy(x => x.CumuledTime)
-                        .Take(MaxRankDisplay)
-                        .Select(r => r.ToTimeRankingItemData(rank++))
+                        .ToList()
+                        .WithRanks(r => r.CumuledTime)
+                        .Where(r => r.Rank <= MaxRankDisplay)
+                        .Select(r => r.ToTimeRankingItemData())
                         .ToList();
 
+                    // accumulate time at each call of 'ToStageWorldRecordItemData' below
                     var secondsLevel = SystemExtensions.Enumerate<Level>().ToDictionary(l => l, l => 0);
+
                     var stageWorldRecordEntries = game.GetStages()
                         .Select(s => s.ToStageWorldRecordItemData(rankingEntries, secondsLevel, StageImagePath))
                         .ToList();

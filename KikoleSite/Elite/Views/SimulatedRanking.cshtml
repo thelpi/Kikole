@@ -29,7 +29,7 @@
                                 int i = 0;
                                 foreach (var kvp in stage.EasyColoredInitials)
                                 {
-                                    if (i == 5)
+                                    if (i > 0 && i % 5 == 0)
                                     {
                                         <br />
                                     }
@@ -46,7 +46,7 @@
                                 i = 0;
                                 foreach (var kvp in stage.MediumColoredInitials)
                                 {
-                                    if (i == 5)
+                                    if (i > 0 && i % 5 == 0)
                                     {
                                         <br />
                                     }
@@ -63,7 +63,7 @@
                                 i = 0;
                                 foreach (var kvp in stage.HardColoredInitials)
                                 {
-                                    if (i == 5)
+                                    if (i > 0 && i % 5 == 0)
                                     {
                                         <br />
                                     }
