@@ -5,7 +5,7 @@ using KikoleSite.Elite.Extensions;
 
 namespace KikoleSite.Elite.Models
 {
-    public class Standing
+    public class Standing : Ranking
     {
         private DateTime _startDate;
         private DateTime? _endDate;

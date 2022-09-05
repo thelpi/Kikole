@@ -4,8 +4,9 @@ using KikoleSite.Elite.Enums;
 
 namespace KikoleSite.Elite.ViewDatas
 {
-    public class StandingItemData : Models.Ranking
+    public class StandingItemData
     {
+        public int Rank { get; set; }
         public int Days { get; set; }
         public IReadOnlyList<TimeSpan> Times { get; set; }
         public Stage Stage { get; set; }

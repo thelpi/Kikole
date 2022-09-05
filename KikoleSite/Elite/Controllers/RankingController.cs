@@ -103,14 +103,11 @@ namespace KikoleSite.Elite.Controllers
                             .GetLongestStandingsAsync(game, rankingDate, standingType, stillOngoing, engine, playerId)
                             .ConfigureAwait(false);
 
-                        var standings = results
-                            .Select(_ => _.ToStandingItemData())
-                            .ToList()
-                            .WithRanks(_ => _.Days);
-
                         return new LongestStandingViewData
                         {
-                            Standings = standings
+                            Standings = results
+                                .Select(_ => _.ToStandingItemData())
+                                .ToList()
                         };
                     })
                 .ConfigureAwait(false);
@@ -329,7 +326,6 @@ namespace KikoleSite.Elite.Controllers
                         .ConfigureAwait(false);
 
                     return players
-                        .OrderBy(p => p.Color)
                         .Select(p => p.ToPlayerItemData())
                         .ToList();
                 }).ConfigureAwait(false);
@@ -461,12 +457,12 @@ namespace KikoleSite.Elite.Controllers
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(game,
-                        rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country, false)
-                    .ConfigureAwait(false);
+                            rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country, false)
+                        .ConfigureAwait(false);
 
-                    var pRanking = rankingEntries.Single(r => r.Player.Id == playerId);
-
-                    return pRanking.ToPlayerDetailsViewData(StageImagePath);
+                    return rankingEntries
+                        .Single(r => r.Player.Id == playerId)
+                        .ToPlayerDetailsViewData(StageImagePath);
                 }).ConfigureAwait(false);
         }
 

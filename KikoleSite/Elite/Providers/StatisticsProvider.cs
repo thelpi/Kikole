@@ -57,15 +57,20 @@ namespace KikoleSite.Elite.Providers
                         {
                             case StandingType.Unslayed:
                             case StandingType.FirstUnslayed:
-                                standings.AddRange(locWr.Holders.Select(_ => new Standing(locWr.Time)
-                                {
-                                    Slayer = locWr.SlayPlayer,
-                                    EndDate = locWr.SlayDate,
-                                    StartDate = _.Item2,
-                                    Author = _.Item1,
-                                    Level = level,
-                                    Stage = stage
-                                }));
+                                standings.AddRange(
+                                    locWr.Holders
+                                        .Take(standingType == StandingType.FirstUnslayed
+                                            ? 1
+                                            : locWr.Holders.Count)
+                                        .Select(_ => new Standing(locWr.Time)
+                                        {
+                                            Slayer = locWr.SlayPlayer,
+                                            EndDate = locWr.SlayDate,
+                                            StartDate = _.Item2,
+                                            Author = _.Item1,
+                                            Level = level,
+                                            Stage = stage
+                                        }));
                                 break;
                             case StandingType.UnslayedExceptSelf:
                                 var slayer = locWr.SlayPlayer;
@@ -162,31 +167,14 @@ namespace KikoleSite.Elite.Providers
                 }
             }
 
-            standings = standings
-                .Where(x => stillOngoing == true
+            return standings
+                .Where(x => (stillOngoing == true
                     ? !x.EndDate.HasValue
                     : (stillOngoing != false || x.EndDate.HasValue))
+                    && (!playerId.HasValue || x.Author.Id == playerId))
                 .OrderByDescending(x => x.WithDays(endDate ?? _clock.Now).Days)
-                .ToList();
-
-            if (standingType == StandingType.FirstUnslayed)
-            {
-                var tmpStandings = new List<Standing>(standings.Count);
-                foreach (var std in standings)
-                {
-                    if (!tmpStandings.Any(_ => _.Stage == std.Stage
-                        && _.Level == std.Level
-                        && _.Times.Single() == std.Times.Single()))
-                    {
-                        tmpStandings.Add(std);
-                    }
-                }
-                standings = tmpStandings;
-            }
-
-            return standings
-                .Where(s => !playerId.HasValue || s.Author.Id == playerId)
-                .ToList();
+                .ToList()
+                .WithRanks(x => x.Days.Value);
         }
 
         public async Task<IReadOnlyCollection<Player>> GetPlayersAsync()
@@ -195,6 +183,7 @@ namespace KikoleSite.Elite.Providers
 
             return players
                 .Select(p => new Player(p.Value))
+                .OrderBy(p => p.Color)
                 .ToList();
         }
 

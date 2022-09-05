@@ -200,7 +200,8 @@ namespace KikoleSite.Elite.ViewDatas
                 Times = item.Times
                     .Select(_ => new TimeSpan(0, 0, (int)_))
                     .OrderByDescending(_ => _)
-                    .ToList()
+                    .ToList(),
+                Rank = item.Rank
             };
         }
 
