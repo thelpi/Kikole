@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Elite.ViewDatas
 {
     public class IndexViewData
     {
-        public IReadOnlyList<string> Countries { get; set; }
+        public IReadOnlyList<SelectListItem> Countries { get; set; }
 
         public int Game { get; set; }
 

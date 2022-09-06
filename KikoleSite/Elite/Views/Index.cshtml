@@ -61,7 +61,7 @@
         <div class="formBlock">
             <label class="formLabel" for="RankingDate">At date:</label>
             @Html.EditorFor(m => m.RankingDate, new { @id = "RankingDate" })
-            <span>(optional; use it to set the view in the past)</span>
+            <span>(optional; default is now)</span>
         </div>
         <div class="formBlock">
             <label class="formLabel"></label>
@@ -74,6 +74,15 @@
 <div class="collapsiblecontent" style="display: none">
     <form method="post" action="/the-elite/world-records-chronology">
         <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
         </div>
@@ -83,6 +92,15 @@
 <button type="button" class="collapsible">Ranking / Leaderboard chronology</button>
 <div class="collapsiblecontent" style="display: none">
     <form method="post" action="/the-elite/rankings-chronology">
+        <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
         <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
@@ -94,6 +112,15 @@
 <div class="collapsiblecontent" style="display: none">
     <form method="post" action="/the-elite/player-dystopia-rankings">
         <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
         </div>
@@ -103,6 +130,31 @@
 <button type="button" class="collapsible">Engine ranking</button>
 <div class="collapsiblecontent" style="display: none">
     <form method="post" action="/the-elite/engine-rankings">
+        <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="Engine">Engine:</label>
+            @Html.DropDownListFor(m => m.Engine,
+                new[] {
+                    new SelectListItem { Value = "0", Text = "Unknown" },
+                    new SelectListItem { Value = "1", Text = "NTSC" },
+                    new SelectListItem { Value = "2", Text = "NTSC-J" },
+                    new SelectListItem { Value = "3", Text = "PAL" }
+                },
+                new { @id = "Engine" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="RankingDate">At date:</label>
+            @Html.EditorFor(m => m.RankingDate, new { @id = "RankingDate" })
+            <span>(optional; default is now)</span>
+        </div>
         <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
@@ -114,6 +166,25 @@
 <div class="collapsiblecontent" style="display: none">
     <form method="post" action="/the-elite/time-frame-rankings">
         <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="RankingStartDate">Starts at:</label>
+            @Html.EditorFor(m => m.RankingStartDate, new { @id = "RankingStartDate" })
+            <span>(mandatory; lower that the ending date)</span>
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="RankingDate">Ends at:</label>
+            @Html.EditorFor(m => m.RankingDate, new { @id = "RankingDate" })
+            <span>(optional; default is now)</span>
+        </div>
+        <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
         </div>
@@ -123,6 +194,27 @@
 <button type="button" class="collapsible">Countries ranking</button>
 <div class="collapsiblecontent" style="display: none">
     <form method="post" action="/the-elite/country-rankings">
+        <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="Country">Country:</label>
+            @Html.DropDownListFor(m => m.Country,
+                Model.Countries,
+                new { @id = "Country" })
+            <span>(empty to rank countries themselves)</span>
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="RankingDate">At date:</label>
+            @Html.EditorFor(m => m.RankingDate, new { @id = "RankingDate" })
+            <span>(optional; default is now)</span>
+        </div>
         <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />

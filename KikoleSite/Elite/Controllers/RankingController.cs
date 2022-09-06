@@ -9,6 +9,7 @@ using KikoleSite.Elite.Models;
 using KikoleSite.Elite.Providers;
 using KikoleSite.Elite.ViewDatas;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Elite.Controllers
 {
@@ -20,7 +21,6 @@ namespace KikoleSite.Elite.Controllers
         private const int MaxStageParallelism = 4; // divisor of 20
         private const string AnonymiseColorRgb = "FFFFFF";
         private const string StageImagePath = @"/images/elite/{0}.jpg";
-        private const string UnknownCountryLabel = "Unknown";
 
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
@@ -45,18 +45,19 @@ namespace KikoleSite.Elite.Controllers
                             .GetPlayersAsync(useCache: true)
                             .ConfigureAwait(false);
 
+                        var countries = players
+                            .Select(p => p.Country)
+                            .Distinct()
+                            .Where(c => !string.IsNullOrWhiteSpace(c))
+                            .OrderBy(c => c)
+                            .Select(c => new SelectListItem(c, c))
+                            .ToList();
+
+                        countries.Insert(0, new SelectListItem(string.Empty, null));
+
                         return new IndexViewData
                         {
-                            Countries = players
-                                .Select(_ =>
-                                {
-                                    var c = _.Country ?? string.Empty;
-                                    if (string.IsNullOrWhiteSpace(c))
-                                        c = UnknownCountryLabel;
-                                    return c;
-                                })
-                                .Distinct()
-                                .ToList(),
+                            Countries = countries,
                             Game = (int)Game.GoldenEye,
                             StandingType = (int)StandingType.Untied,
                             ChronologyType = (int)ChronologyTypeItemData.FirstUnslay,
