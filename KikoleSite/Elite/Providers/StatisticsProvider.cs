@@ -179,12 +179,21 @@ namespace KikoleSite.Elite.Providers
                 .WithRanks(x => x.Days.Value);
         }
 
-        public async Task<IReadOnlyCollection<Player>> GetPlayersAsync()
+        public async Task<IReadOnlyCollection<Player>> GetPlayersAsync(bool useCache = false, string pattern = null)
         {
-            var players = await GetPlayersInternalAsync().ConfigureAwait(false);
+            var playersKeys = await GetPlayersInternalAsync(useCache: useCache).ConfigureAwait(false);
+
+            var players = playersKeys.Select(kvp => kvp.Value);
+
+            if (!string.IsNullOrWhiteSpace(pattern))
+            {
+                players = players.Where(p =>
+                    p.RealName.Contains(pattern, StringComparison.InvariantCultureIgnoreCase)
+                    || p.SurName.Contains(pattern, StringComparison.InvariantCultureIgnoreCase));
+            }
 
             return players
-                .Select(p => new Player(p.Value))
+                .Select(p => new Player(p))
                 .OrderBy(p => p.Color)
                 .ToList();
         }
@@ -419,10 +428,10 @@ namespace KikoleSite.Elite.Providers
             return entries;
         }
 
-        private async Task<IReadOnlyDictionary<long, PlayerDto>> GetPlayersInternalAsync(string country = null)
+        private async Task<IReadOnlyDictionary<long, PlayerDto>> GetPlayersInternalAsync(string country = null, bool useCache = false)
         {
             var playersList = await _readRepository
-                .GetPlayersAsync()
+                .GetPlayersAsync(banned: false, fromCache: useCache)
                 .ConfigureAwait(false);
 
             return playersList

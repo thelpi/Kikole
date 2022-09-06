@@ -332,6 +332,21 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
         }
 
+        [HttpPost("player-filter")]
+        public async Task<JsonResult> GetPlayersJsonAsync(string pattern)
+        {
+            var players = await _statisticsProvider
+                .GetPlayersAsync(useCache: true, pattern: pattern)
+                .ConfigureAwait(false);
+
+            return Json(players.Select(p => new
+            {
+                id = p.Id,
+                color = p.Color,
+                name = $"{p.RealName} - {p.SurName}"
+            }));
+        }
+
         [HttpGet("players")]
         public async Task<IActionResult> GetPlayersAsync()
         {

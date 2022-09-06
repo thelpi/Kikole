@@ -8,7 +8,7 @@ namespace KikoleSite.Elite.Providers
 {
     public interface IStatisticsProvider
     {
-        Task<IReadOnlyCollection<Player>> GetPlayersAsync();
+        Task<IReadOnlyCollection<Player>> GetPlayersAsync(bool useCache = false, string pattern = null);
 
         Task<IReadOnlyCollection<Standing>> GetLongestStandingsAsync(
             Game game,

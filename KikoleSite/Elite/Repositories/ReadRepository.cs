@@ -9,6 +9,9 @@ namespace KikoleSite.Elite.Repositories
 {
     public sealed class ReadRepository : Api.Repositories.BaseRepository, IReadRepository
     {
+        private IReadOnlyList<PlayerDto> _playersCache = null;
+        private readonly object cacheLock = new object();
+
         public ReadRepository(Api.Interfaces.IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
 
@@ -26,9 +29,20 @@ namespace KikoleSite.Elite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync(bool banned = false)
+        public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync(bool banned = false, bool fromCache = false)
         {
-            return await ExecuteReaderAsync<PlayerDto>(
+            if (!banned && fromCache && _playersCache != null)
+            {
+                lock (cacheLock)
+                {
+                    if (_playersCache != null)
+                    {
+                        return _playersCache;
+                    }
+                }
+            }
+
+            var players = await ExecuteReaderAsync<PlayerDto>(
                     "SELECT id, url_name, real_name, surname,  color, control_style, is_banned, country " +
                     "FROM elite_players " +
                     "WHERE is_banned = @is_banned",
@@ -37,6 +51,16 @@ namespace KikoleSite.Elite.Repositories
                         is_banned = banned
                     })
                 .ConfigureAwait(false);
+
+            if (!banned)
+            {
+                lock (cacheLock)
+                {
+                    _playersCache = players;
+                }
+            }
+
+            return players;
         }
 
         public async Task<IReadOnlyCollection<EntryDto>> GetPlayerEntriesAsync(long playerId, Game game)
