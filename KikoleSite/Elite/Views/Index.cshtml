@@ -2,6 +2,9 @@
 
 <button type="button" class="collapsible">Longest standing world records</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A view on longest standing times with several criteria; all times included (not just the top 10).</p>
+    </fieldset>
     <form method="post" action="/the-elite/longest-standing-world-records">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -72,6 +75,9 @@
 
 <button type="button" class="collapsible">World records chronology</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A chronological view of world records, on every stage and every level, with several criteria.</p>
+    </fieldset>
     <form method="post" action="/the-elite/world-records-chronology">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -83,6 +89,26 @@
                 new { @id = "Game" })
         </div>
         <div class="formBlock">
+            <label class="formLabel" for="ChronologyType">Chronology type:</label>
+            @Html.DropDownListFor(m => m.ChronologyType,
+                new[] {
+                    new SelectListItem { Value = "0", Text = "Untied world records" },
+                    new SelectListItem { Value = "1", Text = "All world records" },
+                    new SelectListItem { Value = "2", Text = "Unslay world records" },
+                },
+                new { @id = "ChronologyType" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="playerSelectionWrChronology">Player:</label>
+            @Html.HiddenFor(m => m.PlayerId, new { @id = "PlayerIdWrChronology" })
+            <input type="text" id="playerSelectionWrChronology" name="playerSelection" />
+            <span>(optional; type real name or surname)</span>
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="Anonymise">Anonymise color:</label>
+            @Html.CheckBoxFor(m => m.Anonymise, new { @id = "Anonymise" })
+        </div>
+        <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
         </div>
@@ -91,6 +117,9 @@
 
 <button type="button" class="collapsible">Ranking / Leaderboard chronology</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A heat-mapped chronological view on leaderboard/ranking presence on each stage for a single player.</p>
+    </fieldset>
     <form method="post" action="/the-elite/rankings-chronology">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -102,6 +131,23 @@
                 new { @id = "Game" })
         </div>
         <div class="formBlock">
+            <label class="formLabel" for="ChronologyType">Chronology type:</label>
+            @Html.DropDownListFor(m => m.ChronologyType,
+                new[] {
+                    new SelectListItem { Value = "3", Text = "Leaderboard heatmap" },
+                    new SelectListItem { Value = "4", Text = "Ranking heatmap" }
+                },
+                new { @id = "ChronologyType" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="playerSelectionLeaderboardChronology">Player:</label>
+            @Html.HiddenFor(m => m.PlayerId, new { @id = "PlayerIdLeaderboardChronology" })
+            <input type="text" id="playerSelectionLeaderboardChronology" name="playerSelection" />
+            <span>(mandatory; type real name or surname)</span>
+        </div>
+        <label class="formLabel" for="Anonymise">Anonymise color:</label>
+        @Html.CheckBoxFor(m => m.Anonymise, new { @id = "Anonymise" })
+        <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
         </div>
@@ -110,6 +156,9 @@
 
 <button type="button" class="collapsible">Player's dystopia ranking</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A view on what the ranking could be for a player, with current times, at a given date in the past.</p>
+    </fieldset>
     <form method="post" action="/the-elite/player-dystopia-rankings">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -121,6 +170,17 @@
                 new { @id = "Game" })
         </div>
         <div class="formBlock">
+            <label class="formLabel" for="playerSelectionDystopia">Player:</label>
+            @Html.HiddenFor(m => m.PlayerId, new { @id = "PlayerIdDystopia" })
+            <input type="text" id="playerSelectionDystopia" name="playerSelection" />
+            <span>(mandatory; type real name or surname)</span>
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="RankingDate">At date:</label>
+            @Html.EditorFor(m => m.RankingDate, new { @id = "RankingDate" })
+            <span>(optional; default is now, which is pointless in this scenario)</span>
+        </div>
+        <div class="formBlock">
             <label class="formLabel"></label>
             <input type="submit" value="Ok" />
         </div>
@@ -129,6 +189,9 @@
 
 <button type="button" class="collapsible">Engine ranking</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A view on ranking by engine.</p>
+    </fieldset>
     <form method="post" action="/the-elite/engine-rankings">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -164,6 +227,9 @@
 
 <button type="button" class="collapsible">Time frame ranking</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A view on ranking while including only times from a range of dates.</p>
+    </fieldset>
     <form method="post" action="/the-elite/time-frame-rankings">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -193,6 +259,9 @@
 
 <button type="button" class="collapsible">Countries ranking</button>
 <div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>A view on ranking for a specific country, or ranking between countries.</p>
+    </fieldset>
     <form method="post" action="/the-elite/country-rankings">
         <div class="formBlock">
             <label class="formLabel" for="Game">Game:</label>
@@ -266,6 +335,9 @@
 <script>
     $(function () {
         autocompletePlayers("#playerSelection", "#PlayerId");
+        autocompletePlayers("#playerSelectionDystopia", "#PlayerIdDystopia");
+        autocompletePlayers("#playerSelectionWrChronology", "#PlayerIdWrChronology");
+        autocompletePlayers("#playerSelectionLeaderboardChronology", "#PlayerIdLeaderboardChronology");
         autocompletePlayers("#slayerPlayerSelection", "#SlayerPlayerId");
 
         var coll = document.getElementsByClassName("collapsible");
