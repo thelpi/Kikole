@@ -54,9 +54,9 @@
                             <!--<div class="flag f16 US"></div>-->
                             <a style="color:#@item.PlayerColor">@item.PlayerName</a>
                         </td>
-                        <td>@item.EasyTime.ToString(@"mm\:ss")</td>
-                        <td>@item.MediumTime.ToString(@"mm\:ss")</td>
-                        <td>@item.HardTime.ToString(@"mm\:ss")</td>
+                        <td>@item.EasyTime.ToString(item.EasyTime.TotalMinutes >= 60 ? "c" : @"mm\:ss")</td>
+                        <td>@item.MediumTime.ToString(item.MediumTime.TotalMinutes >= 60 ? "c" : @"mm\:ss")</td>
+                        <td>@item.HardTime.ToString(item.HardTime.TotalMinutes >= 60 ? "c" : @"mm\:ss")</td>
                         <td class="sorted"><strong>@item.TotalTime.ToString("c")</strong></td>
                     </tr>
                 }
