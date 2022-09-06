@@ -36,6 +36,11 @@ namespace KikoleSite.Elite.Controllers
         [HttpGet]
         public async Task<IActionResult> IndexAsync()
         {
+            return await IndexAsync(null).ConfigureAwait(false);
+        }
+
+        private async Task<IActionResult> IndexAsync(string errorMessage)
+        {
             return await ViewAsync(
                     "Index",
                     "The Elite infographics",
@@ -61,6 +66,7 @@ namespace KikoleSite.Elite.Controllers
                             Game = (int)Game.GoldenEye,
                             StandingType = (int)StandingType.Untied,
                             ChronologyType = (int)ChronologyTypeItemData.FirstUnslay,
+                            ErrorMessage = errorMessage
                         };
                     })
                 .ConfigureAwait(false);
@@ -178,28 +184,28 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetLongestStandingAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             if (!CheckEngineParameter(viewData.Engine, out var engine))
-                return Json(new { error = "The engine is invalid." });
+                return await IndexAsync("The engine is invalid.").ConfigureAwait(false);
 
             if (!CheckStandingTypeParameter(viewData.StandingType, out var standingType))
-                return Json(new { error = "The standing type is invalid." });
+                return await IndexAsync("The standing type is invalid.").ConfigureAwait(false);
 
             var (success, p) = await CheckPlayerParameterAsync(
                     viewData.PlayerId, false)
                 .ConfigureAwait(false);
             if (!success)
-                return Json(new { error = "Invalid player." });
+                return await IndexAsync("Invalid player.").ConfigureAwait(false);
 
             var (successSlayer, pSlayer) = await CheckPlayerParameterAsync(
                     viewData.SlayerPlayerId, false)
                 .ConfigureAwait(false);
             if (!successSlayer)
-                return Json(new { error = "Invalid slayer player." });
+                return await IndexAsync("Invalid slayer player.").ConfigureAwait(false);
 
             var title = $"{game} - {standingType.GetStandingTypeDescription()}";
             if (engine.HasValue)
@@ -249,22 +255,22 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetWorldRecordsChronologyAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             if (!CheckChronologyTypeParameter(viewData.ChronologyType, out var type) || type.IsFullStage())
-                return Json(new { error = "The chronology type is invalid." });
+                return await IndexAsync("The chronology type is invalid.").ConfigureAwait(false);
 
             if (!CheckEngineParameter(viewData.Engine, out var engine))
-                return Json(new { error = "The engine is invalid." });
+                return await IndexAsync("The engine is invalid.").ConfigureAwait(false);
 
             var (success, _) = await CheckPlayerParameterAsync(
                     viewData.PlayerId, false)
                 .ConfigureAwait(false);
             if (!success)
-                return Json(new { error = "Invalid player." });
+                return await IndexAsync("Invalid player.").ConfigureAwait(false);
 
             var model = new ChronologyCanvasViewData
             {
@@ -284,19 +290,19 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingsChronologyAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             if (!CheckChronologyTypeParameter(viewData.ChronologyType, out var type) || !type.IsFullStage())
-                return Json(new { error = "The chronology type is invalid." });
+                return await IndexAsync("The chronology type is invalid.").ConfigureAwait(false);
 
             var (success, _) = await CheckPlayerParameterAsync(
                     viewData.PlayerId, true)
                 .ConfigureAwait(false);
             if (!success)
-                return Json(new { error = "Invalid player." });
+                return await IndexAsync("Invalid player.").ConfigureAwait(false);
 
             var model = new ChronologyCanvasViewData
             {
@@ -315,16 +321,16 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByPlayerDystopiaAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             var (success, player) = await CheckPlayerParameterAsync(
                     viewData.PlayerId, true)
                 .ConfigureAwait(false);
             if (!success)
-                return Json(new { error = "Invalid player." });
+                return await IndexAsync("Invalid player.").ConfigureAwait(false);
 
             return await SimulateRankingInternalAsync(
                     game, viewData.RankingDate, player)
@@ -335,13 +341,13 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByTimeFrameAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             if (!CheckRankingStartDateParameter(viewData))
-                return Json(new { error = "The ranking start date is invalid." });
+                return await IndexAsync("The ranking start date is invalid.").ConfigureAwait(false);
 
             return await SimulateRankingInternalAsync(
                     game, viewData.RankingDate, rankingStartDate: viewData.RankingStartDate)
@@ -352,13 +358,13 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByEngineAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             if (!viewData.Engine.HasValue || !CheckEngineParameter(viewData.Engine, out var engine))
-                return Json(new { error = "The engine is invalid." });
+                return await IndexAsync("The engine is invalid.").ConfigureAwait(false);
 
             return await SimulateRankingInternalAsync(
                     game, viewData.RankingDate, engine: engine)
@@ -369,10 +375,10 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByCountryAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (!CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             return await SimulateRankingInternalAsync(
                     game,
@@ -386,17 +392,17 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetPlayerDetailsForSpecifiedRankingAsync(IndexViewData viewData)
         {
             if (viewData == null)
-                return Json(new { error = "Invalid form." });
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
             if (CheckGameParameter(viewData.Game, out var game))
-                return Json(new { error = "Invalid game value." });
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             var (success, _) = await CheckPlayerParameterAsync(viewData.PlayerId, true).ConfigureAwait(false);
             if (!success)
-                return Json(new { error = "Invalid player." });
+                return await IndexAsync("Invalid player.").ConfigureAwait(false);
 
             if (!CheckEngineParameter(viewData.Engine, out var engine))
-                return Json(new { error = "The engine is invalid." });
+                return await IndexAsync("The engine is invalid.").ConfigureAwait(false);
 
             return await ViewAsync(
                 "PlayerDetails",
@@ -699,7 +705,7 @@ namespace KikoleSite.Elite.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { error = $"An error has occured:\n{ex.Message}" });
+                return await IndexAsync(ex.Message).ConfigureAwait(false);
             }
         }
 

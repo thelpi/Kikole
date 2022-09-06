@@ -9,6 +9,8 @@ namespace KikoleSite.Elite.ViewDatas
     {
         public IReadOnlyList<SelectListItem> Countries { get; set; }
 
+        public string ErrorMessage { get; set; }
+
         public int Game { get; set; }
 
         public int ChronologyType { get; set; }

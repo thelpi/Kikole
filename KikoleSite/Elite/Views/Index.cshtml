@@ -1,5 +1,14 @@
 ﻿@model KikoleSite.Elite.ViewDatas.IndexViewData
 
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <fieldset>
+        <p style="color: red; font-size: larger">An error has occured:</p>
+        <p>@Model.ErrorMessage</p>
+        <p>If the message is technical, pease wait few minutes before trying again and/or contact the administrator.</p>
+    </fieldset>
+}
+
 <button type="button" class="collapsible">Longest standing world records</button>
 <div class="collapsiblecontent" style="display: none">
     <fieldset>
@@ -320,10 +329,10 @@
         background-color: #333;
     }
 
-    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-    .active, .collapsible:hover {
-        background-color: #808080;
-    }
+        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+        .active, .collapsible:hover {
+            background-color: #808080;
+        }
 
     /* Style the collapsible content. Note: hidden by default */
     .collapsiblecontent {
