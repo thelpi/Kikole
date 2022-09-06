@@ -1,118 +1,124 @@
 ﻿@model KikoleSite.Elite.ViewDatas.IndexViewData
 
-<h2>What you need to know before starting</h2>
-<p>
-    Infographics are sometimes SLOW; page takes between few seconds and a full minute to render.
-</p>
-<p>
-    You'll need to manipulate browser URL by yourself with a specific set of parameters each time (see below).
-</p>
-<p>
-    Please report any error you might encounter and PLEASE do not spam a page.
-</p>
+<h2>Longest standing world records</h2>
+<form method="post" action="/the-elite/longest-standing-world-records">
+    <div class="formBlock">
+        <label class="formLabel" for="Game">Game:</label>
+        @Html.DropDownListFor(m => m.Game,
+            new[] {
+                new SelectListItem { Value = "1", Text = "GoldenEye" },
+                new SelectListItem { Value = "2", Text = "Perfect Dark" }
+            },
+            new { @id = "Game" })
+    </div>
+    <div class="formBlock">
+        <label class="formLabel" for="StandingType">Standing type:</label>
+        @Html.DropDownListFor(m => m.StandingType,
+            new[] {
+                new SelectListItem { Value = "0", Text = "Longest standing untied (classic)" },
+                new SelectListItem { Value = "1", Text = "Longest while holding an UWR (can include multiple times)" },
+                new SelectListItem { Value = "2", Text = "Longest while holding a world record (single time)" },
+                new SelectListItem { Value = "3", Text = "Longest while holding a world record (multiple times)" },
+                new SelectListItem { Value = "4", Text = "Longest delay betweeen two ties (or between last tie and slay)" },
+                new SelectListItem { Value = "5", Text = "Longest standing (classic)" }
+            },
+            new { @id = "StandingType" })
+    </div>
+    <div class="formBlock">
+        <label class="formLabel" for="Engine">Engine:</label>
+        @Html.DropDownListFor(m => m.Engine,
+            new[] {
+                new SelectListItem { Value = null, Text = "All" },
+                new SelectListItem { Value = "0", Text = "Unknown" },
+                new SelectListItem { Value = "1", Text = "NTSC" },
+                new SelectListItem { Value = "2", Text = "NTSC-J" },
+                new SelectListItem { Value = "3", Text = "PAL" }
+            },
+            new { @id = "Engine" })
+    </div>
+    <div class="formBlock">
+        <label class="formLabel" for="playerSelection">Player:</label>
+        @Html.HiddenFor(m => m.PlayerId, new { @id = "PlayerId" })
+        <input type="text" id="playerSelection" name="playerSelection" />
+        <span>(optional; type real name or surname)</span>
+    </div>
+    <div class="formBlock">
+        <label class="formLabel" for="slayerPlayerSelection">Slay/Tied player:</label>
+        @Html.HiddenFor(m => m.SlayerPlayerId, new { @id = "SlayerPlayerId" })
+        <input type="text" id="slayerPlayerSelection" name="slayerPlayerSelection" />
+        <span>(optional; type real name or surname)</span>
+    </div>
+    <div class="formBlock">
+        <label class="formLabel" for="slayerPlayerSelection">Ongoing:</label>
+        <label for="ongoing0">All</label>
+        @Html.RadioButtonFor(m => m.StillOngoing, 0, new { @id = "ongoing0" })
+        <label for="ongoing1">Yes</label>
+        @Html.RadioButtonFor(m => m.StillOngoing, 1, new { @id = "ongoing1" })
+        <label for="ongoingM1">No</label>
+        @Html.RadioButtonFor(m => m.StillOngoing, -1, new { @id = "ongoingM1" })
+    </div>
+    <div class="formBlock">
+        <label class="formLabel" for="RankingDate">At date:</label>
+        @Html.EditorFor(m => m.RankingDate, new { @id = "RankingDate" })
+        <span>(optional; use it to set the view in the past)</span>
+    </div>
+    <div class="formBlock">
+        <label class="formLabel"></label>
+        <input type="submit" value="Ok" />
+    </div>
+</form>
+<style>
+    .formLabel {
+        width: 100px;
+        display: inline-block;
+        text-align: right;
+        margin-right: 5px;
+    }
+    .formBlock {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        height: 30px;
+    }
+</style>
+<script>
+    $(function () {
+        autocompletePlayers("#playerSelection", "#PlayerId");
+        autocompletePlayers("#slayerPlayerSelection", "#SlayerPlayerId");
 
-<h2>Available features</h2>
-<h3>World records chronology - See a chronology of every world record</h3>
-<p>
-    Use <a href="/the-elite/games/1/wr-chronology?type=0&playerId=14&anonymise=true&engine=3" target="_blank">this URL</a> as a template.
-</p>
-<p>
-    Parameters:
-    <ul>
-        <li>
-            <span style="font-weight: bold; color: red">type</span> is the type of chronology; available values are:
-            <ul>
-                <li><span style="font-weight: bold; color: red">0</span> for untied world records; ie the bar disappears when the wr is tied.</li>
-                <li><span style="font-weight: bold; color: red">1</span> to see any world record; ie the bar disappears on the next tied.</li>
-                <li><span style="font-weight: bold; color: red">2</span> to see the first to perform a world record; ie the bar disappears when the wr is slayed.</li>
-            </ul>
-            When a player ID is specified, <span style="font-weight: bold; color: red">2</span> is slightly different: the bar starts when the selected player sets or ties the WR (he's not necessarily the first).
-        </li>
-        <li>
-            <span style="font-weight: bold; color: red">playerId</span> is a played ID; use the player ID from <a href="/the-elite/players">the list</a>.
-            This parameter is <span style="font-weight: bold; color: red">optional</span>; default is all the players.
-        </li>
-        <li>
-            <span style="font-weight: bold; color: red">anonymise</span> can be used to display white bars instead of player's color.
-            This parameter is <span style="font-weight: bold; color: red">optional</span>; default is false.
-        </li>
-        <li>
-            <span style="font-weight: bold; color: red">engine</span> can be used to filter times from a specific engine; see below for available values.
-            This parameter is <span style="font-weight: bold; color: red">optional</span>; default is all the engines.
-        </li>
-    </ul>
-    In the template example, it's every untied world records on PAL by Perfect Ace on GoldenEye, anonymised.
-</p>
-<h3>Ranking and leaderboard chronology - See a chronology of leaderboard / ranking points for a specific player</h3>
-<p>
-    Use <a href="/the-elite/games/2/rk-chronology?type=3&playerId=1&anonymise=false" target="_blank">this URL</a> as a template.
-</p>
-<p>
-    Parameters:
-    <ul>
-        <li>
-            <span style="font-weight: bold; color: red">type</span> is the type of chronology; available values are:
-            <ul>
-                <li><span style="font-weight: bold; color: red">3</span> to see presence in the leaderboard (the most colored the closest to 1st place).</li>
-                <li><span style="font-weight: bold; color: red">4</span> to see points for the stage (the most colored the closest to 300 points).</li>
-            </ul>
-        </li>
-        <li>
-            <span style="font-weight: bold; color: red">playerId</span> is a played ID; use the player ID from <a href="/the-elite/players">the list</a>.
-            This parameter is <span style="font-weight: bold; color: red">mandatory</span>.
-        </li>
-        <li>
-            <span style="font-weight: bold; color: red">anonymise</span> can be used to display white bars instead of player's color.
-            This parameter is <span style="font-weight: bold; color: red">optional</span>; default is false.
-        </li>
-    </ul>
-    In the template example, it's leaderboard history of Karl Jobst on PerfectDark, not anonymised.
-</p>
-<h3>Dystopia Ranking - See the ranking at a specific date with current times of one player</h3>
-<p>
-    Use <a href="/the-elite/games/1/player-rankings?playerId=2&rankingDate=2012-12-01" target="_blank">this URL</a> as a template; in this exemple, Gus Riolo (id = 2) in GoldenEye in december 2012.
-    <br />
-    Parameter 'playerId' is mandatory; use the player ID from <a href="/the-elite/players">the list</a>.
-</p>
-<h3>Framed Ranking - See the ranking based solely on time entries between two dates</h3>
-<p>
-    Use <a href="/the-elite/games/2/time-frame-rankings?rankingStartDate=2019-01-01&rankingDate=2021-01-01" target="_blank">this URL</a> as a template; in this exemple, PerfectDark between 2019 and 2021.
-    <br />
-    Parameter 'rankingStartDate' is mandatory.
-    <br />
-    Parameter 'rankingDate' is optional; the current date will be used if not specified.
-</p>
-<h3>Engine Ranking - See the ranking at a specific date for a specific engine</h3>
-<p>
-    Use <a href="/the-elite/games/1/engine-rankings?engine=3&rankingDate=2015-05-01" target="_blank">this URL</a> as a template; in this exemple, PAL (id = 3) in GoldenEye in may 2015).
-    <br />
-    Parameter 'engine' is mandatory; see below for available values.
-</p>
-
-<h2>"Set of parameters"? What the f*** does it mean?</h2>
-<h3>Players</h3>
-<p>
-    The full list of The-Elite players is available <a href="/the-elite/players" target="_blank">here</a>.
-    <br />
-    This will be usefull to get the <span style="font-weight: bold; color: red">player ID</span> parameter.
-</p>
-<h3>Games</h3>
-<p>
-    The game has to be specified after the component '/games/' of the URL.
-    <br />
-    To specify <span style="font-weight: bold; color: red">GoldenEye</span> as a parameter, use <span style="font-weight: bold; color: red">1</span>.
-    <br />
-    To specify <span style="font-weight: bold; color: red">PerfectDark</span> as a parameter, use <span style="font-weight: bold; color: red">2</span>.
-</p>
-<h3>Engines / Systems</h3>
-<p>
-    To specify <span style="font-weight: bold; color: red">NTSC-J</span> as a parameter, use <span style="font-weight: bold; color: red">1</span>.
-    <br />
-    To specify <span style="font-weight: bold; color: red">NTSC</span> as a parameter, use <span style="font-weight: bold; color: red">2</span>.
-    <br />
-    To specify <span style="font-weight: bold; color: red">PAL</span> as a parameter, use <span style="font-weight: bold; color: red">3</span>.
-</p>
-<h3>Dates</h3>
-<p>
-    When you need to specify a date, use the syntax <span style="font-weight: bold; color: red">YYYY-MM-DD</span> without time.
-</p>
+    });
+    var autocompletePlayers = function (textId, hiddenId) {
+        $(textId).blur(function () {
+            if ($(this).val() == "") {
+                $(hiddenId).val("");
+            }
+        });
+        $(textId).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/the-elite/player-filter/',
+                    data: {
+                        "pattern": request.term
+                    },
+                    type: "POST",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.name,
+                                value: item.id
+                            };
+                        }))
+                    },
+                    error: function (data) {
+                        alert('Call error: ' + JSON.stringify(data));
+                    }
+                });
+            },
+            select: function (e, i) {
+                $(hiddenId).val(i.item.value);
+                $(textId).val(i.item.label);
+                return false;
+            },
+            minLength: 3
+        });
+    };
+</script>

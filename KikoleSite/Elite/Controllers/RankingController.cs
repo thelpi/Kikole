@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Elite.Enums;
@@ -20,14 +19,8 @@ namespace KikoleSite.Elite.Controllers
         private const int DefaultLeaderboardDayStep = 7;
         private const int MaxStageParallelism = 4; // divisor of 20
         private const string AnonymiseColorRgb = "FFFFFF";
-
         private const string StageImagePath = @"/images/elite/{0}.jpg";
-        private const string RankingViewName = "SimulatedRanking";
-        private const string PlayersViewName = "Players";
-        private const string PlayerDetailsViewName = "PlayerDetails";
-        private const string IndexViewName = "Index";
-        private const string ChronologyCanvasViewName = "ChronologyCanvas";
-        private const string LongestStandingViewName = "LongestStanding";
+        private const string UnknownCountryLabel = "Unknown";
 
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
@@ -40,96 +33,54 @@ namespace KikoleSite.Elite.Controllers
             _clock = clock;
         }
 
-        [HttpGet("games/{game}/longest-standings")]
-        public async Task<IActionResult> GetLongestStandingAsync(
-            [FromRoute] Game game,
-            [FromQuery] bool? stillOngoing,
-            [FromQuery] long? playerId,
-            [FromQuery] DateTime? rankingDate,
-            [FromQuery] StandingType standingType,
-            [FromQuery] Engine? engine,
-            [FromQuery] long? slayerPlayerId)
+        [HttpGet]
+        public async Task<IActionResult> IndexAsync()
         {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (!CheckEngineParameter(engine))
-            {
-                return Json(new { error = "The engine is invalid." });
-            }
-
-            if (!CheckStandingTypeParameter(standingType))
-            {
-                return Json(new { error = "The standing type is invalid." });
-            }
-
-            var players = await _statisticsProvider
-                .GetPlayersAsync()
-                .ConfigureAwait(false);
-
-            Player p = null;
-            if (playerId.HasValue)
-            {
-                if (playerId <= 0)
-                {
-                    return Json(new { error = "Invalid player identifier." });
-                }
-
-                p = players.SingleOrDefault(p => p.Id == playerId);
-                if (p == null)
-                {
-                    return Json(new { error = "The player associated to the identifier does not exist." });
-                }
-            }
-
-            Player pSlayer = null;
-            if (slayerPlayerId.HasValue)
-            {
-                if (slayerPlayerId <= 0)
-                {
-                    return Json(new { error = "Invalid player identifier." });
-                }
-
-                pSlayer = players.SingleOrDefault(p => p.Id == slayerPlayerId);
-                if (pSlayer == null)
-                {
-                    return Json(new { error = "The player associated to the identifier does not exist." });
-                }
-            }
-
-            var title = $"{game} - {standingType.GetStandingTypeDescription()}";
-            if (engine.HasValue)
-                title += $" - {engine} only";
-            if (p != null)
-                title += $" - {p.ToString(game)}";
-            if (pSlayer != null)
-                title += $" - slayed/tied by {pSlayer.ToString(game)}";
-            if (rankingDate.HasValue)
-                title += $" - {rankingDate.Value:yyyy-MM-dd}";
-            if (stillOngoing == true)
-                title += " - Only ongoing entries";
-            else if (stillOngoing == false)
-                title += " - Only finished entries";
-
             return await ViewAsync(
-                    LongestStandingViewName,
-                    title,
+                    "Index",
+                    "The Elite infographics",
                     async () =>
                     {
-                        var results = await _statisticsProvider
-                            .GetLongestStandingsAsync(game, rankingDate, standingType, stillOngoing, engine, playerId, slayerPlayerId)
+                        var players = await _statisticsProvider
+                            .GetPlayersAsync(useCache: true)
                             .ConfigureAwait(false);
 
-                        return new LongestStandingViewData
+                        return new IndexViewData
                         {
-                            Standings = results
-                                .Select(_ => _.ToStandingItemData())
-                                .ToList()
+                            Countries = players
+                                .Select(_ =>
+                                {
+                                    var c = _.Country ?? string.Empty;
+                                    if (string.IsNullOrWhiteSpace(c))
+                                        c = UnknownCountryLabel;
+                                    return c;
+                                })
+                                .Distinct()
+                                .ToList(),
+                            Game = (int)Game.GoldenEye,
+                            StandingType = (int)StandingType.Untied,
+                            ChronologyType = (int)ChronologyTypeItemData.FirstUnslay,
                         };
                     })
                 .ConfigureAwait(false);
+        }
+
+        [HttpGet("players")]
+        public async Task<IActionResult> GetPlayersAsync()
+        {
+            return await ViewAsync(
+                "Players",
+                "Players list",
+                async () =>
+                {
+                    var players = await _statisticsProvider
+                        .GetPlayersAsync()
+                        .ConfigureAwait(false);
+
+                    return players
+                        .Select(p => p.ToPlayerItemData())
+                        .ToList();
+                }).ConfigureAwait(false);
         }
 
         [HttpGet("games/{game}/chronology-types/{chronologyType}/data")]
@@ -141,42 +92,21 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] byte anonymise)
         {
             if (!CheckGameParameter(game))
-            {
                 return Json(new { error = "Invalid game value." });
-            }
 
             if (!CheckEngineParameter(engine))
-            {
                 return Json(new { error = "The engine is invalid." });
-            }
 
             if (!CheckChronologyTypeParameter(chronologyType))
-            {
                 return Json(new { error = "The chronology type is invalid." });
-            }
 
-            if (playerId.HasValue)
-            {
-                if (playerId <= 0)
-                {
-                    return Json(new { error = "Invalid player identifier." });
-                }
-
-                var players = await _statisticsProvider
-                    .GetPlayersAsync()
-                    .ConfigureAwait(false);
-                if (!players.Any(p => p.Id == playerId))
-                {
-                    return Json(new { error = "The player associated to the identifier does not exist." });
-                }
-            }
-            else if (chronologyType.IsFullStage())
-            {
-                return Json(new { error = "Player identifier is mandatory for this type." });
-            }
+            var (success, _) = await CheckPlayerParameterAsync(
+                    playerId, chronologyType.IsFullStage())
+                .ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
 
             List<ChronologyCanvasItemData> results;
-
             if (chronologyType.IsFullStage())
             {
                 var itemGroups = new ConcurrentBag<IReadOnlyCollection<StageLeaderboard>>();
@@ -226,112 +156,6 @@ namespace KikoleSite.Elite.Controllers
             return Json(results);
         }
 
-        [HttpGet("games/{game}/wr-chronology")]
-        public async Task<IActionResult> GetWorldRecordsChronologyAsync(
-            [FromRoute] Game game,
-            [FromQuery] ChronologyTypeItemData type,
-            [FromQuery] Engine? engine,
-            [FromQuery] long? playerId,
-            [FromQuery] bool anonymise)
-        {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (!CheckEngineParameter(engine))
-            {
-                return Json(new { error = "The engine is invalid." });
-            }
-
-            if (!CheckChronologyTypeParameter(type) || type.IsFullStage())
-            {
-                return Json(new { error = "The chronology type is invalid." });
-            }
-
-            if (playerId.HasValue)
-            {
-                if (playerId <= 0)
-                {
-                    return Json(new { error = "Invalid player identifier." });
-                }
-
-                var players = await _statisticsProvider
-                    .GetPlayersAsync()
-                    .ConfigureAwait(false);
-                if (!players.Any(p => p.Id == playerId))
-                {
-                    return Json(new { error = "The player associated to the identifier does not exist." });
-                }
-            }
-
-            var model = new ChronologyCanvasViewData
-            {
-                TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
-                ChronologyType = type,
-                Engine = engine,
-                Game = game,
-                PlayerId = playerId,
-                Anonymise = anonymise,
-                StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
-            };
-
-            return View($"Elite/Views/{ChronologyCanvasViewName}.cshtml", model);
-        }
-
-        [HttpGet("games/{game}/rk-chronology")]
-        public async Task<IActionResult> GetRankingsChronologyAsync(
-            [FromRoute] Game game,
-            [FromQuery] ChronologyTypeItemData type,
-            [FromQuery] long playerId,
-            [FromQuery] bool anonymise)
-        {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (!CheckChronologyTypeParameter(type) || !type.IsFullStage())
-            {
-                return Json(new { error = "The chronology type is invalid." });
-            }
-
-            if (playerId <= 0)
-            {
-                return Json(new { error = "Invalid player identifier." });
-            }
-
-            var players = await _statisticsProvider
-                .GetPlayersAsync()
-                .ConfigureAwait(false);
-            if (!players.Any(p => p.Id == playerId))
-            {
-                return Json(new { error = "The player associated to the identifier does not exist." });
-            }
-
-            var model = new ChronologyCanvasViewData
-            {
-                TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
-                ChronologyType = type,
-                Game = game,
-                PlayerId = playerId,
-                Anonymise = anonymise,
-                StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
-            };
-
-            return View($"Elite/Views/{ChronologyCanvasViewName}.cshtml", model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> IndexAsync()
-        {
-            return await ViewAsync(
-                    IndexViewName,
-                    "The Elite infographics - How to",
-                    () => Task.FromResult((object)new IndexViewData()))
-                .ConfigureAwait(false);
-        }
-
         [HttpPost("player-filter")]
         public async Task<JsonResult> GetPlayersJsonAsync(string pattern)
         {
@@ -347,22 +171,283 @@ namespace KikoleSite.Elite.Controllers
             }));
         }
 
-        [HttpGet("players")]
-        public async Task<IActionResult> GetPlayersAsync()
+        #region Features
+
+        [HttpPost("longest-standing-world-records")]
+        public async Task<IActionResult> GetLongestStandingAsync(IndexViewData viewData)
         {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            if (!CheckEngineParameter(viewData.Engine, out var engine))
+                return Json(new { error = "The engine is invalid." });
+
+            if (!CheckStandingTypeParameter(viewData.StandingType, out var standingType))
+                return Json(new { error = "The standing type is invalid." });
+
+            var (success, p) = await CheckPlayerParameterAsync(
+                    viewData.PlayerId, false)
+                .ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
+
+            var (successSlayer, pSlayer) = await CheckPlayerParameterAsync(
+                    viewData.SlayerPlayerId, false)
+                .ConfigureAwait(false);
+            if (!successSlayer)
+                return Json(new { error = "Invalid slayer player." });
+
+            var title = $"{game} - {standingType.GetStandingTypeDescription()}";
+            if (engine.HasValue)
+                title += $" - {engine} only";
+            if (p != null)
+                title += $" - {p.ToString(game)}";
+            if (pSlayer != null)
+                title += $" - slayed/tied by {pSlayer.ToString(game)}";
+            if (viewData.RankingDate.HasValue)
+                title += $" - {viewData.RankingDate.Value:yyyy-MM-dd}";
+            if (viewData.StillOngoing > 0)
+                title += " - Only ongoing entries";
+            else if (viewData.StillOngoing < 0)
+                title += " - Only finished entries";
+
             return await ViewAsync(
-                PlayersViewName,
-                "Players list",
+                    "LongestStanding",
+                    title,
+                    async () =>
+                    {
+                        var results = await _statisticsProvider
+                            .GetLongestStandingsAsync(
+                                game,
+                                viewData.RankingDate,
+                                standingType,
+                                viewData.StillOngoing > 0
+                                    ? true
+                                    : (viewData.StillOngoing < 0
+                                        ? false
+                                        : default(bool?)),
+                                engine,
+                                viewData.PlayerId,
+                                viewData.SlayerPlayerId)
+                            .ConfigureAwait(false);
+
+                        return new LongestStandingViewData
+                        {
+                            Standings = results
+                                .Select(_ => _.ToStandingItemData())
+                                .ToList()
+                        };
+                    })
+                .ConfigureAwait(false);
+        }
+
+        [HttpPost("world-records-chronology")]
+        public async Task<IActionResult> GetWorldRecordsChronologyAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            if (!CheckChronologyTypeParameter(viewData.ChronologyType, out var type) || type.IsFullStage())
+                return Json(new { error = "The chronology type is invalid." });
+
+            if (!CheckEngineParameter(viewData.Engine, out var engine))
+                return Json(new { error = "The engine is invalid." });
+
+            var (success, _) = await CheckPlayerParameterAsync(
+                    viewData.PlayerId, false)
+                .ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
+
+            var model = new ChronologyCanvasViewData
+            {
+                TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
+                ChronologyType = type,
+                Engine = engine,
+                Game = game,
+                PlayerId = viewData.PlayerId,
+                Anonymise = viewData.Anonymise,
+                StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
+            };
+
+            return View($"Elite/Views/ChronologyCanvas.cshtml", model);
+        }
+
+        [HttpPost("rankings-chronology")]
+        public async Task<IActionResult> GetRankingsChronologyAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            if (!CheckChronologyTypeParameter(viewData.ChronologyType, out var type) || !type.IsFullStage())
+                return Json(new { error = "The chronology type is invalid." });
+
+            var (success, _) = await CheckPlayerParameterAsync(
+                    viewData.PlayerId, true)
+                .ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
+
+            var model = new ChronologyCanvasViewData
+            {
+                TotalDays = (int)Math.Floor((_clock.Tomorrow - game.GetEliteFirstDate()).TotalDays),
+                ChronologyType = type,
+                Game = game,
+                PlayerId = viewData.PlayerId,
+                Anonymise = viewData.Anonymise,
+                StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
+            };
+
+            return View($"Elite/Views/ChronologyCanvas.cshtml", model);
+        }
+
+        [HttpPost("player-dystopia-rankings")]
+        public async Task<IActionResult> GetRankingByPlayerDystopiaAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            var (success, player) = await CheckPlayerParameterAsync(
+                    viewData.PlayerId, true)
+                .ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
+
+            return await SimulateRankingInternalAsync(
+                    game, viewData.RankingDate, player)
+                .ConfigureAwait(false);
+        }
+
+        [HttpPost("time-frame-rankings")]
+        public async Task<IActionResult> GetRankingByTimeFrameAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            if (!CheckRankingStartDateParameter(viewData))
+                return Json(new { error = "The ranking start date is invalid." });
+
+            return await SimulateRankingInternalAsync(
+                    game, viewData.RankingDate, rankingStartDate: viewData.RankingStartDate)
+                .ConfigureAwait(false);
+        }
+
+        [HttpPost("engine-rankings")]
+        public async Task<IActionResult> GetRankingByEngineAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            if (!viewData.Engine.HasValue || !CheckEngineParameter(viewData.Engine, out var engine))
+                return Json(new { error = "The engine is invalid." });
+
+            return await SimulateRankingInternalAsync(
+                    game, viewData.RankingDate, engine: engine)
+                .ConfigureAwait(false);
+        }
+
+        [HttpPost("country-rankings")]
+        public async Task<IActionResult> GetRankingByCountryAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            return await SimulateRankingInternalAsync(
+                    game,
+                    viewData.RankingDate,
+                    country: viewData.Country,
+                    countryGrouping: string.IsNullOrWhiteSpace(viewData.Country))
+                .ConfigureAwait(false);
+        }
+
+        [HttpPost("player-ranking-details")]
+        public async Task<IActionResult> GetPlayerDetailsForSpecifiedRankingAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return Json(new { error = "Invalid form." });
+
+            if (CheckGameParameter(viewData.Game, out var game))
+                return Json(new { error = "Invalid game value." });
+
+            var (success, _) = await CheckPlayerParameterAsync(viewData.PlayerId, true).ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
+
+            if (!CheckEngineParameter(viewData.Engine, out var engine))
+                return Json(new { error = "The engine is invalid." });
+
+            return await ViewAsync(
+                "PlayerDetails",
+                // TODO: customize the title
+                $"PlayerID {viewData.PlayerId} - {game} times",
                 async () =>
                 {
-                    var players = await _statisticsProvider
-                        .GetPlayersAsync()
+                    var rankingEntries = await GetRankingsWithParamsAsync(game,
+                            viewData.RankingDate ?? _clock.Today,
+                            viewData.PlayerId,
+                            viewData.RankingStartDate,
+                            engine,
+                            viewData.Country,
+                            false)
                         .ConfigureAwait(false);
 
-                    return players
-                        .Select(p => p.ToPlayerItemData())
-                        .ToList();
+                    return rankingEntries
+                        .Single(r => r.Player.Id == viewData.PlayerId)
+                        .ToPlayerDetailsViewData(StageImagePath);
                 }).ConfigureAwait(false);
+        }
+
+        #endregion Features
+
+        #region Old routes for features
+
+        [HttpGet("games/{game}/longest-standings")]
+        public async Task<IActionResult> GetLongestStandingAsync(
+            [FromRoute] Game game,
+            [FromQuery] bool? stillOngoing,
+            [FromQuery] long? playerId,
+            [FromQuery] DateTime? rankingDate,
+            [FromQuery] StandingType standingType,
+            [FromQuery] Engine? engine,
+            [FromQuery] long? slayerPlayerId)
+        {
+            return await GetLongestStandingAsync(
+                new IndexViewData
+                {
+                    RankingDate = rankingDate,
+                    StandingType = (int)standingType,
+                    Game = (int)game,
+                    StillOngoing = stillOngoing == true
+                        ? 1
+                        : (stillOngoing == false
+                            ? -1
+                            : 0),
+                    PlayerId = playerId,
+                    Engine = (int?)engine,
+                    SlayerPlayerId = slayerPlayerId
+                })
+                .ConfigureAwait(false);
         }
 
         [HttpGet("games/{game}/player-rankings")]
@@ -371,27 +456,13 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] long playerId,
             [FromQuery] DateTime? rankingDate)
         {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (playerId <= 0)
-            {
-                return Json(new { error = "Invalid player identifier." });
-            }
-
-            var players = await _statisticsProvider
-                .GetPlayersAsync()
-                .ConfigureAwait(false);
-            var p = players.SingleOrDefault(p => p.Id == playerId);
-            if (p == null)
-            {
-                return Json(new { error = "The player associated to the identifier does not exist." });
-            }
-
-            return await SimulateRankingInternalAsync(
-                    game, rankingDate, p)
+            return await GetRankingByPlayerDystopiaAsync(
+                new IndexViewData
+                {
+                    Game = (int)game,
+                    PlayerId = playerId,
+                    RankingDate = rankingDate
+                })
                 .ConfigureAwait(false);
         }
 
@@ -399,21 +470,15 @@ namespace KikoleSite.Elite.Controllers
         public async Task<IActionResult> GetRankingByTimeFrameAsync(
             [FromRoute] Game game,
             [FromQuery] DateTime? rankingDate,
-            [Required][FromQuery] DateTime rankingStartDate)
+            [FromQuery] DateTime rankingStartDate)
         {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (rankingStartDate >= _clock.Tomorrow
-                || (rankingDate.HasValue && rankingDate < rankingStartDate))
-            {
-                return Json(new { error = "The ranking start date is invalid." });
-            }
-
-            return await SimulateRankingInternalAsync(
-                    game, rankingDate, rankingStartDate: rankingStartDate)
+            return await GetRankingByTimeFrameAsync(
+                new IndexViewData
+                {
+                    Game = (int)game,
+                    RankingDate = rankingDate,
+                    RankingStartDate = rankingStartDate
+                })
                 .ConfigureAwait(false);
         }
 
@@ -423,18 +488,13 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] DateTime? rankingDate,
             [FromQuery] Engine engine)
         {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (!CheckEngineParameter(engine))
-            {
-                return Json(new { error = "The engine is invalid." });
-            }
-
-            return await SimulateRankingInternalAsync(
-                    game, rankingDate, engine: engine)
+            return await GetRankingByEngineAsync(
+                new IndexViewData
+                {
+                    Game = (int)game,
+                    RankingDate = rankingDate,
+                    Engine = (int)engine
+                })
                 .ConfigureAwait(false);
         }
 
@@ -444,13 +504,13 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] DateTime? rankingDate,
             [FromQuery] string country)
         {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            return await SimulateRankingInternalAsync(
-                    game, rankingDate, country: country, countryGrouping: string.IsNullOrWhiteSpace(country))
+            return await GetRankingByCountryAsync(
+                new IndexViewData
+                {
+                    Game = (int)game,
+                    RankingDate = rankingDate,
+                    Country = country
+                })
                 .ConfigureAwait(false);
         }
 
@@ -463,63 +523,58 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] Engine? engine,
             [FromQuery] string country)
         {
-            if (!CheckGameParameter(game))
-            {
-                return Json(new { error = "Invalid game value." });
-            }
-
-            if (playerId <= 0)
-            {
-                return Json(new { error = "Invalid player identifier." });
-            }
-
-            var players = await _statisticsProvider
-                .GetPlayersAsync()
-                .ConfigureAwait(false);
-            if (!players.Any(p => p.Id == playerId))
-            {
-                return Json(new { error = "The player associated to the identifier does not exist." });
-            }
-
-            if (!CheckEngineParameter(engine))
-            {
-                return Json(new { error = "The engine is invalid." });
-            }
-
-            return await ViewAsync(
-                PlayerDetailsViewName,
-                $"PlayerID {playerId} - {game} times",
-                async () =>
+            return await GetPlayerDetailsForSpecifiedRankingAsync(
+                new IndexViewData
                 {
-                    var rankingEntries = await GetRankingsWithParamsAsync(game,
-                            rankingDate ?? DateTime.Now, playerId, rankingStartDate, engine, country, false)
-                        .ConfigureAwait(false);
-
-                    return rankingEntries
-                        .Single(r => r.Player.Id == playerId)
-                        .ToPlayerDetailsViewData(StageImagePath);
-                }).ConfigureAwait(false);
+                    Game = (int)game,
+                    RankingDate = rankingDate,
+                    Country = country,
+                    PlayerId = playerId,
+                    RankingStartDate = rankingStartDate,
+                    Engine = (int?)engine
+                })
+                .ConfigureAwait(false);
         }
 
-        private static bool CheckGameParameter(Game game)
+        [HttpGet("games/{game}/wr-chronology")]
+        public async Task<IActionResult> GetWorldRecordsChronologyAsync(
+            [FromRoute] Game game,
+            [FromQuery] ChronologyTypeItemData type,
+            [FromQuery] Engine? engine,
+            [FromQuery] long? playerId,
+            [FromQuery] bool anonymise)
         {
-            return Enum.TryParse(typeof(Game), game.ToString(), out _);
+            return await GetWorldRecordsChronologyAsync(
+                new IndexViewData
+                {
+                    Game = (int)game,
+                    PlayerId = playerId,
+                    Engine = (int?)engine,
+                    Anonymise = anonymise,
+                    ChronologyType = (int)type
+                })
+                .ConfigureAwait(false);
         }
 
-        private static bool CheckEngineParameter(Engine? engine)
+        [HttpGet("games/{game}/rk-chronology")]
+        public async Task<IActionResult> GetRankingsChronologyAsync(
+            [FromRoute] Game game,
+            [FromQuery] ChronologyTypeItemData type,
+            [FromQuery] long playerId,
+            [FromQuery] bool anonymise)
         {
-            return !engine.HasValue || Enum.TryParse(typeof(Engine), engine.ToString(), out _);
+            return await GetRankingsChronologyAsync(
+                new IndexViewData
+                {
+                    Game = (int)game,
+                    PlayerId = playerId,
+                    Anonymise = anonymise,
+                    ChronologyType = (int)type
+                })
+                .ConfigureAwait(false);
         }
 
-        private static bool CheckChronologyTypeParameter(ChronologyTypeItemData standingType)
-        {
-            return Enum.TryParse(typeof(ChronologyTypeItemData), standingType.ToString(), out _);
-        }
-
-        private static bool CheckStandingTypeParameter(StandingType standingType)
-        {
-            return Enum.TryParse(typeof(StandingType), standingType.ToString(), out _);
-        }
+        #endregion Old routes for features
 
         private async Task<IActionResult> SimulateRankingInternalAsync(
             Game game,
@@ -545,12 +600,12 @@ namespace KikoleSite.Elite.Controllers
                 title += $" - {rankingDate.Value:yyyy-MM-dd}";
 
             return await ViewAsync(
-                RankingViewName,
+                "SimulatedRanking",
                 title,
                 async () =>
                 {
                     var rankingEntries = await GetRankingsWithParamsAsync(
-                            game, rankingDate ?? DateTime.Now, player?.Id, rankingStartDate, engine, country, countryGrouping)
+                            game, rankingDate ?? _clock.Today, player?.Id, rankingStartDate, engine, country, countryGrouping)
                         .ConfigureAwait(false);
 
                     var pointsRankingEntries = rankingEntries
@@ -617,14 +672,14 @@ namespace KikoleSite.Elite.Controllers
             if (playerId.HasValue)
             {
                 request.PlayerVsLegacy = (playerId.Value, rankingDate);
-                request.RankingDate = DateTime.Now;
+                request.RankingDate = _clock.Today;
             }
 
             var rankingEntriesBase = await _statisticsProvider
                 .GetRankingEntriesAsync(request)
                 .ConfigureAwait(false);
 
-            return rankingEntriesBase.Select(r => r as RankingEntry).ToList();
+            return rankingEntriesBase.Cast<RankingEntry>().ToList();
         }
 
         private async Task<IActionResult> ViewAsync(
@@ -646,5 +701,79 @@ namespace KikoleSite.Elite.Controllers
                 return Json(new { error = $"An error has occured:\n{ex.Message}" });
             }
         }
+
+        #region Check parameters methods
+
+        private async Task<(bool success, Player data)> CheckPlayerParameterAsync(long? playerId, bool required)
+        {
+            if (!playerId.HasValue)
+                return (!required, null);
+
+            if (playerId <= 0)
+                return (false, null);
+
+            var players = await _statisticsProvider
+                .GetPlayersAsync()
+                .ConfigureAwait(false);
+            var p = players.SingleOrDefault(p => p.Id == playerId);
+            return (p != null, p);
+        }
+
+        private static bool CheckGameParameter(int gameId, out Game game)
+        {
+            var match = SystemExtensions.Enumerate<Game>().Where(g => (int)g == gameId);
+            game = match.FirstOrDefault();
+            return match.Any();
+        }
+
+        private static bool CheckGameParameter(Game game)
+        {
+            return Enum.TryParse(typeof(Game), game.ToString(), out _);
+        }
+
+        private static bool CheckEngineParameter(int? engineId, out Engine? engine)
+        {
+            if (!engineId.HasValue)
+            {
+                engine = null;
+                return true;
+            }
+            var match = SystemExtensions.Enumerate<Engine>().Where(e => (int)e == engineId);
+            engine = match.FirstOrDefault();
+            return match.Any();
+        }
+
+        private static bool CheckEngineParameter(Engine? engine)
+        {
+            return !engine.HasValue || Enum.TryParse(typeof(Engine), engine.ToString(), out _);
+        }
+
+        private static bool CheckChronologyTypeParameter(int chronologyTypeId, out ChronologyTypeItemData chronologyType)
+        {
+            var match = SystemExtensions.Enumerate<ChronologyTypeItemData>().Where(ct => (int)ct == chronologyTypeId);
+            chronologyType = match.FirstOrDefault();
+            return match.Any();
+        }
+
+        private static bool CheckChronologyTypeParameter(ChronologyTypeItemData standingType)
+        {
+            return Enum.TryParse(typeof(ChronologyTypeItemData), standingType.ToString(), out _);
+        }
+
+        private static bool CheckStandingTypeParameter(int standingTypeId, out StandingType standingType)
+        {
+            var match = SystemExtensions.Enumerate<StandingType>().Where(st => (int)st == standingTypeId);
+            standingType = match.FirstOrDefault();
+            return match.Any();
+        }
+
+        private bool CheckRankingStartDateParameter(IndexViewData viewData)
+        {
+            return viewData.RankingStartDate.HasValue
+                && viewData.RankingStartDate < _clock.Tomorrow
+                && (!viewData.RankingDate.HasValue || viewData.RankingDate >= viewData.RankingStartDate);
+        }
+
+        #endregion Check parameters methods
     }
 }
