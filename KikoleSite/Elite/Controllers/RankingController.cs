@@ -91,6 +91,10 @@ namespace KikoleSite.Elite.Controllers
                 $"Player details for {game}",
                 async () =>
                 {
+                    var rankingHistory = await _statisticsProvider
+                        .GetPlayerRankingHistoryAsync(game, p.Id)
+                        .ConfigureAwait(false);
+
                     var untiedWrs = await _statisticsProvider
                         .GetLongestStandingsAsync(game, null, StandingType.Untied, null, null, p.Id, null)
                         .ConfigureAwait(false);
@@ -103,6 +107,35 @@ namespace KikoleSite.Elite.Controllers
                     var allWrs = await _statisticsProvider
                         .GetLongestStandingsAsync(game, null, StandingType.FirstUnslayed, null, null, p.Id, null)
                         .ConfigureAwait(false);
+
+                    var bestPr = rankingHistory.First(_ => _.PointsRank == rankingHistory.Max(r => r.PointsRank));
+                    var bestTr = rankingHistory.First(_ => _.TimeRank == rankingHistory.Max(r => r.TimeRank));
+
+                    var rkm = new Dictionary<int, DateTime>();
+                    foreach (var k in PlayerViewData.RankMilestones)
+                    {
+                        foreach (var rk in rankingHistory)
+                        {
+                            if (!rkm.ContainsKey(k) && rk.PointsRank <= k)
+                            {
+                                rkm.Add(k, rk.Date);
+                                break;
+                            }
+                        }
+                    }
+
+                    var rpm = new Dictionary<int, DateTime>();
+                    foreach (var pk in PlayerViewData.PointsMilestones)
+                    {
+                        foreach (var rk in rankingHistory)
+                        {
+                            if (!rpm.ContainsKey(pk) && rk.Points >= pk)
+                            {
+                                rpm.Add(pk, rk.Date);
+                                break;
+                            }
+                        }
+                    }
 
                     return new PlayerViewData
                     {
@@ -126,14 +159,20 @@ namespace KikoleSite.Elite.Controllers
                                 .Select(_ => _.ToStandingItemData())
                                 .ToList()
                         },
-                        // TODO
-                        JoinDate = new DateTime(2012, 04, 05),
-                        LastActivityDate = DateTime.Today,
-                        BestPointsRank = (1, 5850, new DateTime(2015, 12, 02)),
-                        BestTimeRank = (4, new TimeSpan(1, 24, 36), new DateTime(2017, 08, 02)),
-                        RankingMilestones = new List<(DateTime, int)>(),
-                        RankingPointsMilestones = new List<(DateTime, int)>(),
-                        RankingHistory = new List<(DateTime, int)>()
+                        JoinDate = rankingHistory.Min(_ => _.Date),
+                        LastActivityDate = rankingHistory.Max(_ => _.Date),
+                        BestPointsRank = (bestPr.PointsRank, bestTr.Points, bestTr.Date),
+                        BestTimeRank = (bestTr.TimeRank, bestTr.Time, bestTr.Date),
+                        RankingMilestones = rkm
+                            .Select(_ => (_.Value, _.Key))
+                            .ToList(),
+                        RankingPointsMilestones = rpm
+                            .Select(_ => (_.Value, _.Key))
+                            .ToList(),
+                        RankingHistory = rankingHistory
+                            .OrderBy(_ => _.Date)
+                            .Select(_ => (_.Date, _.PointsRank))
+                            .ToList()
                     };
                 }).ConfigureAwait(false);
         }

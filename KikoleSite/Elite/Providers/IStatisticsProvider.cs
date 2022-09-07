@@ -27,5 +27,9 @@ namespace KikoleSite.Elite.Providers
 
         Task<IReadOnlyCollection<RankingEntryLight>> GetRankingEntriesAsync(
             RankingRequest request);
+
+        Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(
+            Game game,
+            long playerId);
     }
 }

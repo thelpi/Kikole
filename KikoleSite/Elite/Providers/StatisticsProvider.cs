@@ -234,6 +234,11 @@ namespace KikoleSite.Elite.Providers
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(Game game, long playerId)
+        {
+            throw new NotImplementedException();
+        }
+
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)
         {
             // Gets ranking
