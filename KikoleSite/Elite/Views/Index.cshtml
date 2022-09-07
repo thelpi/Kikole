@@ -329,10 +329,10 @@
         background-color: #333;
     }
 
-        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-        .active, .collapsible:hover {
-            background-color: #808080;
-        }
+    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+    .active, .collapsible:hover {
+        background-color: #808080;
+    }
 
     /* Style the collapsible content. Note: hidden by default */
     .collapsiblecontent {
@@ -358,6 +358,15 @@
                     content.style.display = "none";
                 } else {
                     content.style.display = "block";
+                    var otherCols = document.getElementsByClassName("collapsible");
+                    for (var j = 0; j < otherCols.length; j++) {
+                        if (otherCols[j] != this) {
+                            if (otherCols[j].classList.contains("active")) {
+                                otherCols[j].classList.toggle("active");
+                            }
+                            otherCols[j].nextElementSibling.style.display = "none";
+                        }
+                    }
                 }
             });
         }

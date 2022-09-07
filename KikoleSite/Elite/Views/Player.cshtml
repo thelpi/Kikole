@@ -2,8 +2,8 @@
 @using KikoleSite.Elite.Extensions;
 @model KikoleSite.Elite.ViewDatas.PlayerViewData
 
-<fieldset>
-    <legend>General information</legend>
+<button type="button" class="collapsible">General information</button>
+<div class="collapsiblecontent" style="display: block">
     <div class="formBlock">
         <label class="formLabel">Real name:</label>
         <label style="color: @Model.Color">@Model.RealName</label>
@@ -24,10 +24,10 @@
         <label class="formLabel">Last activity date:</label>
         <label>@Model.LastActivityDate.ToString("yyyy-MM-dd")</label>
     </div>
-</fieldset>
+</div>
 
-<fieldset>
-    <legend>Ranking highlights</legend>
+<button type="button" class="collapsible">Ranking highlights</button>
+<div class="collapsiblecontent" style="display: none">
     <div class="formBlock">
         <label class="formLabel">Best points ranking:</label>
         <label><span style="color: red">@Model.BestPointsRank.rank.ToRankString()</span> with <span style="color: gold">@Model.BestPointsRank.points</span> points, the <span style="color: cornflowerblue">@Model.BestPointsRank.date.ToString("yyyy-MM-dd")</span></label>
@@ -78,8 +78,8 @@
                     foreach (var rkm in Model.RankingMilestones)
                     {
                         <tr>
-                        <td>@rkm.date.ToString("yyyy-MM-dd")</td>
-                        <td>@rkm.rank.ToRankString()</td>
+                            <td>@rkm.date.ToString("yyyy-MM-dd")</td>
+                            <td>@rkm.rank.ToRankString()</td>
                         </tr>
                     }
                 }
@@ -93,10 +93,10 @@
         </table>
     </div>
     <div class="formBlock3" id="rankingHistory"></div>
-</fieldset>
+</div>
 
-<fieldset>
-    <legend>Untied world records</legend>
+<button type="button" class="collapsible">Untied world records</button>
+<div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.UntiedWorldRecords.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedWorldRecords }).ConfigureAwait(false);
@@ -105,10 +105,10 @@
     {
         <label>No untied world record!</label>
     }
-</fieldset>
+</div>
 
-<fieldset>
-    <legend>Untied world records slayed</legend>
+<button type="button" class="collapsible">Untied world records slayed</button>
+<div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.UntiedSlayWorldRecords.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedSlayWorldRecords }).ConfigureAwait(false);
@@ -117,10 +117,10 @@
     {
         <label>No untied world record slayed!</label>
     }
-</fieldset>
+</div>
 
-<fieldset>
-    <legend>World records slayed</legend>
+<button type="button" class="collapsible">World records slayed</button>
+<div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.SlayWorldRecords.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.SlayWorldRecords }).ConfigureAwait(false);
@@ -129,10 +129,10 @@
     {
         <label>No slayed world record!</label>
     }
-</fieldset>
+</div>
 
-<fieldset>
-    <legend>All world records</legend>
+<button type="button" class="collapsible">All world records</button>
+<div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.WorldRecords.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.WorldRecords }).ConfigureAwait(false);
@@ -141,7 +141,7 @@
     {
         <label>No world record!</label>
     }
-</fieldset>
+</div>
 
 <style>
     .formLabel {
@@ -165,7 +165,34 @@
     .formBlock3 {
         margin-top: 5px;
         margin-bottom: 5px;
-        float:left;
+        float: left;
+    }
+
+    /* Style the button that is used to open and close the collapsible content */
+    .collapsible {
+        cursor: pointer;
+        padding: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 12px;
+        color: white;
+        background-color: #333;
+    }
+
+    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+    .active, .collapsible:hover {
+        background-color: #808080;
+    }
+
+    /* Style the collapsible content. Note: hidden by default */
+    .collapsiblecontent {
+        padding: 0 5px;
+        display: none;
+        overflow: hidden;
     }
 </style>
 
@@ -206,5 +233,26 @@
                 .LineChart(document.getElementById('rankingHistory'))
                 .draw(tableDatas, options);
         });
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                    var otherCols = document.getElementsByClassName("collapsible");
+                    for (var j = 0; j < otherCols.length; j++) {
+                        if (otherCols[j] != this) {
+                            if (otherCols[j].classList.contains("active")) {
+                                otherCols[j].classList.toggle("active");
+                            }
+                            otherCols[j].nextElementSibling.style.display = "none";
+                        }
+                    }
+                }
+            });
+        }
     });
 </script>
