@@ -72,6 +72,72 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
         }
 
+        [HttpGet("players/{playerId}")]
+        public async Task<IActionResult> GetPlayerDetailsAsync(
+            [FromRoute] long playerId,
+            [FromQuery] Game game)
+        {
+            if (!CheckGameParameter(game))
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
+
+            var (success, p) = await CheckPlayerParameterAsync(
+                    playerId, true)
+                .ConfigureAwait(false);
+            if (!success)
+                return await IndexAsync("Invalid player.").ConfigureAwait(false);
+
+            return await ViewAsync(
+                "Player",
+                $"Player details for {game}",
+                async () =>
+                {
+                    var untiedWrs = await _statisticsProvider
+                        .GetLongestStandingsAsync(game, null, StandingType.Untied, null, null, p.Id, null)
+                        .ConfigureAwait(false);
+                    var slayUntiedWrs = await _statisticsProvider
+                        .GetLongestStandingsAsync(game, null, StandingType.Untied, null, null, null, p.Id)
+                        .ConfigureAwait(false);
+                    var slayWrs = await _statisticsProvider
+                        .GetLongestStandingsAsync(game, null, StandingType.FirstUnslayed, null, null, null, p.Id)
+                        .ConfigureAwait(false);
+                    var allWrs = await _statisticsProvider
+                        .GetLongestStandingsAsync(game, null, StandingType.FirstUnslayed, null, null, p.Id, null)
+                        .ConfigureAwait(false);
+
+                    return new PlayerViewData
+                    {
+                        Game = game,
+                        Color = $"#{p.Color}",
+                        Country = p.Country,
+                        RealName = p.RealName,
+                        SurName = p.SurName,
+                        WorldRecords = new PlayerWorldRecordsItemData
+                        {
+                            UntiedSlayWorldRecords = slayUntiedWrs
+                                .Select(_ => _.ToStandingItemData())
+                                .ToList(),
+                            UntiedWorldRecords = untiedWrs
+                                .Select(_ => _.ToStandingItemData())
+                                .ToList(),
+                            WorldRecords = allWrs
+                                .Select(_ => _.ToStandingItemData())
+                                .ToList(),
+                            SlayWorldRecords = slayWrs
+                                .Select(_ => _.ToStandingItemData())
+                                .ToList()
+                        },
+                        // TODO
+                        JoinDate = new DateTime(2012, 04, 05),
+                        LastActivityDate = DateTime.Today,
+                        BestPointsRank = (1, 5850, new DateTime(2015, 12, 02)),
+                        BestTimeRank = (4, new TimeSpan(1, 24, 36), new DateTime(2017, 08, 02)),
+                        RankingMilestones = new List<(DateTime, int)>(),
+                        RankingPointsMilestones = new List<(DateTime, int)>(),
+                        RankingHistory = new List<(DateTime, int)>()
+                    };
+                }).ConfigureAwait(false);
+        }
+
         [HttpGet("players")]
         public async Task<IActionResult> GetPlayersAsync()
         {
