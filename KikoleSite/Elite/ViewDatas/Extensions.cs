@@ -47,13 +47,13 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
-        internal static PlayerDetailsViewData ToPlayerDetailsViewData(this RankingEntry entry, string imagePath)
+        internal static PlayerRankingDetailsViewData ToPlayerRankingDetailsViewData(this RankingEntry entry, string imagePath)
         {
             var localDetails = new Dictionary<Stage, IReadOnlyDictionary<Level, (int, int, long?, DateTime?)>>();
             foreach (var stage in entry.Game.GetStages())
                 localDetails.Add(stage, entry.Details.ContainsKey(stage) ? entry.Details[stage] : null);
 
-            return new PlayerDetailsViewData
+            return new PlayerRankingDetailsViewData
             {
                 DetailsByStage = localDetails.Keys.Select(sk => localDetails[sk].ToPlayerStageDetailsItemData(sk, imagePath)).ToList(),
                 EasyPoints = entry.LevelPoints[Level.Easy],

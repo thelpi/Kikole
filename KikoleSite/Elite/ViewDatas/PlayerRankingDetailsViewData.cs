@@ -4,7 +4,7 @@ using KikoleSite.Elite.Enums;
 
 namespace KikoleSite.Elite.ViewDatas
 {
-    public class PlayerDetailsViewData
+    public class PlayerRankingDetailsViewData
     {
         public string PlayerName { get; set; }
         public Game Game { get; set; }

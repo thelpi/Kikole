@@ -389,7 +389,7 @@ namespace KikoleSite.Elite.Controllers
         }
 
         [HttpPost("player-ranking-details")]
-        public async Task<IActionResult> GetPlayerDetailsForSpecifiedRankingAsync(IndexViewData viewData)
+        public async Task<IActionResult> GetPlayerRankingDetailsAsync(IndexViewData viewData)
         {
             if (viewData == null)
                 return await IndexAsync("Invalid form.").ConfigureAwait(false);
@@ -405,7 +405,7 @@ namespace KikoleSite.Elite.Controllers
                 return await IndexAsync("The engine is invalid.").ConfigureAwait(false);
 
             return await ViewAsync(
-                "PlayerDetails",
+                "PlayerRankingDetails",
                 // TODO: customize the title
                 $"PlayerID {viewData.PlayerId} - {game} times",
                 async () =>
@@ -421,7 +421,7 @@ namespace KikoleSite.Elite.Controllers
 
                     return rankingEntries
                         .Single(r => r.Player.Id == viewData.PlayerId)
-                        .ToPlayerDetailsViewData(StageImagePath);
+                        .ToPlayerRankingDetailsViewData(StageImagePath);
                 }).ConfigureAwait(false);
         }
 
@@ -521,8 +521,8 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
         }
 
-        [HttpGet("games/{game}/players/{playerId}/details")]
-        public async Task<IActionResult> GetPlayerDetailsForSpecifiedRankingAsync(
+        [HttpGet("games/{game}/players/{playerId}/ranking-details")]
+        public async Task<IActionResult> GetPlayerRankingDetailsAsync(
             [FromRoute] Game game,
             [FromRoute] long playerId,
             [FromQuery] DateTime? rankingDate,
@@ -530,7 +530,7 @@ namespace KikoleSite.Elite.Controllers
             [FromQuery] Engine? engine,
             [FromQuery] string country)
         {
-            return await GetPlayerDetailsForSpecifiedRankingAsync(
+            return await GetPlayerRankingDetailsAsync(
                 new IndexViewData
                 {
                     Game = (int)game,
