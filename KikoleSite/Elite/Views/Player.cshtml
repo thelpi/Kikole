@@ -207,7 +207,7 @@
                 foreach (var rh in Model.RankingHistory)
                 {
                     <text>
-                    sourceDatas.push([new Date(@rh.date.Year, @rh.date.Month, @rh.date.Day), @rh.rank]);
+                    sourceDatas.push([new Date(@rh.date.Year, @rh.date.Month, @rh.date.Day), -@rh.rank]);
                     </text>
                 }
             }
@@ -216,8 +216,8 @@
                 var now = System.DateTime.Today;
                 var start = Model.Game.GetEliteFirstDate();
                 <text>
-                sourceDatas.push([new Date(@start.Year, @start.Month, @start.Day), 9999]);
-                sourceDatas.push([new Date(@now.Year, @now.Month, @now.Day), 9999]);
+                sourceDatas.push([new Date(@start.Year, @start.Month, @start.Day), -9999]);
+                sourceDatas.push([new Date(@now.Year, @now.Month, @now.Day), -9999]);
                 </text>
             }
             var tableDatas = google.visualization.arrayToDataTable(sourceDatas);
