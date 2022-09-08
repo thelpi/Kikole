@@ -283,8 +283,19 @@ namespace KikoleSite.Elite.Providers
                 foreach (var stage in game.GetStages())
                 {
                     var stageLevelRanking = new Dictionary<DateTime, IReadOnlyDictionary<long, PlayerStageLevelRankingLight>>();
+                    var isLoopFirstDate = true;
                     foreach (var date in dates)
                     {
+                        if (!isLoopFirstDate)
+                        {
+                            var hasAny = entries[(stage, level)].Any(x => x.Date == date);
+                            if (!hasAny)
+                            {
+                                stageLevelRanking.Add(date, stageLevelRanking.Values.Last());
+                                continue;
+                            }
+                        }
+
                         var localRankings = new Dictionary<long, PlayerStageLevelRankingLight>();
 
                         // keeps the best time for each player
@@ -326,6 +337,7 @@ namespace KikoleSite.Elite.Providers
                         }
 
                         stageLevelRanking.Add(date, localRankings);
+                        isLoopFirstDate = false;
                     }
                     stageLevelRankings.TryAdd((stage, level), stageLevelRanking);
                 }
