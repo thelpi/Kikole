@@ -105,11 +105,11 @@ namespace KikoleSite.Elite.Controllers
                         .GetLongestStandingsAsync(game, null, StandingType.FirstUnslayed, null, null, null, p.Id)
                         .ConfigureAwait(false);
                     var allWrs = await _statisticsProvider
-                        .GetLongestStandingsAsync(game, null, StandingType.FirstUnslayed, null, null, p.Id, null)
+                        .GetLongestStandingsAsync(game, null, StandingType.Unslayed, null, null, p.Id, null)
                         .ConfigureAwait(false);
 
-                    var bestPr = rankingHistory.First(_ => _.PointsRank == rankingHistory.Max(r => r.PointsRank));
-                    var bestTr = rankingHistory.First(_ => _.TimeRank == rankingHistory.Max(r => r.TimeRank));
+                    var bestPr = rankingHistory.First(_ => _.PointsRank == rankingHistory.Min(r => r.PointsRank));
+                    var bestTr = rankingHistory.First(_ => _.TimeRank == rankingHistory.Min(r => r.TimeRank));
 
                     var rkm = new Dictionary<int, DateTime>();
                     foreach (var k in PlayerViewData.RankMilestones)

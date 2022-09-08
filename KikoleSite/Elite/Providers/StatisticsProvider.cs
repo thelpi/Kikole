@@ -236,7 +236,195 @@ namespace KikoleSite.Elite.Providers
 
         public async Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(Game game, long playerId)
         {
-            throw new NotImplementedException();
+            // gets all entries
+            var entries = new Dictionary<(Stage s, Level l), List<EntryDto>>();
+            foreach (var stage in game.GetStages())
+            {
+                foreach (var level in SystemExtensions.Enumerate<Level>())
+                {
+                    var sourceEntries = await _readRepository
+                        .GetEntriesAsync(stage, level, null, null)
+                        .ConfigureAwait(false);
+                    entries.Add((stage, level), sourceEntries.ToList());
+                }
+            }
+
+            // finds if at least one for the player
+            var entriesForMinDate = entries.SelectMany(x => x.Value).Where(x => x.PlayerId == playerId);
+            if (!entriesForMinDate.Any())
+                return new List<PlayerRankingLight>();
+
+            // tries to fill blank dates
+            foreach (var (s, l) in entries.Keys)
+                ManageDateLessEntries(game, entries[(s, l)]);
+
+            // represents all dates with at least one change, after the player has join
+            var minDate = entriesForMinDate.Min(x => x.Date);
+            var dates = entries
+                .SelectMany(x => x.Value)
+                .Select(x => x.Date.Value)
+                .Distinct()
+                .Where(x => x >= minDate)
+                .OrderBy(x => x)
+                .ToList();
+
+            // represents all players ID
+            var playersId = entries
+                .SelectMany(x => x.Value)
+                .Select(x => x.PlayerId)
+                .Distinct()
+                .ToList();
+
+            // for each stage/level, the rankings are sorted by date asc
+            var stageLevelRankings = new ConcurrentDictionary<(Stage s, Level l), IReadOnlyDictionary<DateTime, IReadOnlyDictionary<long, PlayerStageLevelRankingLight>>>();
+
+            Parallel.ForEach(SystemExtensions.Enumerate<Level>(), level =>
+            {
+                foreach (var stage in game.GetStages())
+                {
+                    var stageLevelRanking = new Dictionary<DateTime, IReadOnlyDictionary<long, PlayerStageLevelRankingLight>>();
+                    foreach (var date in dates)
+                    {
+                        var localRankings = new Dictionary<long, PlayerStageLevelRankingLight>();
+
+                        // keeps the best time for each player
+                        var entriesAtDate = entries[(stage, level)]
+                            .Where(x => x.Date <= date)
+                            .GroupBy(x => x.PlayerId)
+                            .Select(x => x.OrderBy(x => x.Time).ThenBy(x => x.Date).First())
+                            .OrderBy(x => x.Time)
+                            .ToList();
+
+                        // compute points
+                        long? time = null;
+                        int playersCountForTime = 1;
+                        var points = StageLeaderboard.BasePoints;
+                        foreach (var entry in entriesAtDate)
+                        {
+                            if (!time.HasValue || time != entry.Time)
+                            {
+                                if (time.HasValue)
+                                {
+                                    for (var i = 0; i < playersCountForTime; i++)
+                                        points = StageLeaderboard.PointsChart.TryGetValue(points, out int tmpPoints) ? tmpPoints : points - 1;
+                                }
+                                playersCountForTime = 1;
+                                time = entry.Time;
+                            }
+                            else
+                                playersCountForTime++;
+
+                            localRankings.Add(entry.PlayerId, new PlayerStageLevelRankingLight
+                            {
+                                Date = date,
+                                Level = level,
+                                PlayerId = entry.PlayerId,
+                                Stage = stage,
+                                Time = new TimeSpan(0, 0, (int)entry.Time),
+                                Points = points
+                            });
+                        }
+
+                        stageLevelRanking.Add(date, localRankings);
+                    }
+                    stageLevelRankings.TryAdd((stage, level), stageLevelRanking);
+                }
+            });
+
+            // for each date, creates a full ranking, then we get only the player ranking
+            var chronologyRankings = new List<PlayerRankingLight>(dates.Count);
+            foreach (var date in dates)
+            {
+                // transforms each player into a ranking instance
+                var rks = playersId
+                    .Select(x => new PlayerRankingLight
+                    {
+                        Date = date,
+                        Game = game,
+                        PlayerId = x,
+                        Time = TimeSpan.Zero
+                    })
+                    .ToList();
+
+                // adjusts each ranking with data from the tuple stage/level closest to the current date
+                foreach (var stage in game.GetStages())
+                {
+                    foreach (var level in SystemExtensions.Enumerate<Level>())
+                    {
+                        var stageLevelRankingCurrent = stageLevelRankings[(stage, level)].LastOrDefault(x => x.Key.Date <= date);
+                        if (stageLevelRankingCurrent.Value?.Count > 0)
+                        {
+                            rks.ForEach(x =>
+                            {
+                                if (stageLevelRankingCurrent.Value.ContainsKey(x.PlayerId))
+                                {
+                                    x.Points += stageLevelRankingCurrent.Value[x.PlayerId].Points;
+                                    x.Time = x.Time.Add(stageLevelRankingCurrent.Value[x.PlayerId].Time);
+                                }
+                                else
+                                {
+                                    // there is no data: for this stage/level, the player ranking takes the default time
+                                    x.Time = x.Time.Add(TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds));
+                                }
+                            });
+                        }
+                        else
+                        {
+                            // there is no data: for this stage/level, every ranking takes the default time
+                            rks.ForEach(x => x.Time = x.Time.Add(TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds)));
+                        }
+                    }
+                }
+
+                // sets the ranking by points
+                rks = rks
+                    .OrderByDescending(x => x.Points)
+                    .ToList();
+
+                var subRank = 0;
+                for (int i = 0; i < rks.Count; i++)
+                {
+                    rks[i].PointsRank = 1;
+                    if (i > 0)
+                    {
+                        subRank++;
+                        rks[i].PointsRank = rks[i - 1].PointsRank;
+                        if (rks[i - 1].Points != rks[i].Points)
+                        {
+                            rks[i].PointsRank += subRank;
+                            subRank = 0;
+                        }
+                    }
+                }
+
+                // rankings without any time
+                rks.ForEach(x => x.Time = x.Time == TimeSpan.Zero ? TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds * 60) : x.Time);
+
+                // sets the ranking by time
+                rks = rks
+                    .OrderBy(x => x.Time)
+                    .ToList();
+
+                subRank = 0;
+                for (int i = 0; i < rks.Count; i++)
+                {
+                    rks[i].TimeRank = 1;
+                    if (i > 0)
+                    {
+                        subRank++;
+                        rks[i].TimeRank = rks[i - 1].TimeRank;
+                        if (rks[i - 1].Time != rks[i].Time)
+                        {
+                            rks[i].TimeRank += subRank;
+                            subRank = 0;
+                        }
+                    }
+                }
+
+                chronologyRankings.Add(rks.Single(x => x.PlayerId == playerId));
+            }
+
+            return chronologyRankings;
         }
 
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)
