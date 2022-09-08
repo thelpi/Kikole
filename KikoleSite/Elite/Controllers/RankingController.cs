@@ -114,27 +114,17 @@ namespace KikoleSite.Elite.Controllers
                     var rkm = new Dictionary<int, DateTime>();
                     foreach (var k in PlayerViewData.RankMilestones)
                     {
-                        foreach (var rk in rankingHistory)
-                        {
-                            if (!rkm.ContainsKey(k) && rk.PointsRank <= k)
-                            {
-                                rkm.Add(k, rk.Date);
-                                break;
-                            }
-                        }
+                        var okRk = rankingHistory.FirstOrDefault(_ => _.PointsRank <= k);
+                        if (okRk != null)
+                            rkm.Add(k, okRk.Date);
                     }
 
                     var rpm = new Dictionary<int, DateTime>();
                     foreach (var pk in PlayerViewData.PointsMilestones)
                     {
-                        foreach (var rk in rankingHistory)
-                        {
-                            if (!rpm.ContainsKey(pk) && rk.Points >= pk)
-                            {
-                                rpm.Add(pk, rk.Date);
-                                break;
-                            }
-                        }
+                        var okRk = rankingHistory.FirstOrDefault(_ => _.Points >= pk);
+                        if (okRk != null)
+                            rpm.Add(pk, okRk.Date);
                     }
 
                     return new PlayerViewData
@@ -161,7 +151,7 @@ namespace KikoleSite.Elite.Controllers
                         },
                         JoinDate = rankingHistory.Min(_ => _.Date),
                         LastActivityDate = rankingHistory.Max(_ => _.Date),
-                        BestPointsRank = (bestPr.PointsRank, bestTr.Points, bestTr.Date),
+                        BestPointsRank = (bestPr.PointsRank, bestPr.Points, bestPr.Date),
                         BestTimeRank = (bestTr.TimeRank, bestTr.Time, bestTr.Date),
                         RankingMilestones = rkm
                             .Select(_ => (_.Value, _.Key))
