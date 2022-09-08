@@ -9,6 +9,35 @@
     </fieldset>
 }
 
+<button type="button" class="collapsible">Player sheet</button>
+<div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>Details about a specific player.</p>
+        <p style="color: red">Might take a full minute to generate!</p>
+    </fieldset>
+    <form method="get" action="/the-elite/player-details">
+        <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="playerDetailSelection">Player:</label>
+            @Html.HiddenFor(m => m.PlayerId, new { @id = "PlayerDetailId" })
+            <input type="text" id="playerDetailSelection" name="playerSelection" />
+            <span>(optional; type real name or surname)</span>
+        </div>
+        <div class="formBlock">
+            <label class="formLabel"></label>
+            <input type="submit" value="Ok" />
+        </div>
+    </form>
+</div>
+
 <button type="button" class="collapsible">Longest standing world records</button>
 <div class="collapsiblecontent" style="display: none">
     <fieldset>
@@ -344,6 +373,7 @@
 <script>
     $(function () {
         autocompletePlayers("#playerSelection", "#PlayerId");
+        autocompletePlayers("#playerDetailSelection", "#PlayerDetailId");
         autocompletePlayers("#playerSelectionDystopia", "#PlayerIdDystopia");
         autocompletePlayers("#playerSelectionWrChronology", "#PlayerIdWrChronology");
         autocompletePlayers("#playerSelectionLeaderboardChronology", "#PlayerIdLeaderboardChronology");

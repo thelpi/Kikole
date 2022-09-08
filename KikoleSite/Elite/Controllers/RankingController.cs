@@ -72,9 +72,9 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
         }
 
-        [HttpGet("players/{playerId}")]
+        [HttpGet("player-details")]
         public async Task<IActionResult> GetPlayerDetailsAsync(
-            [FromRoute] long playerId,
+            [FromQuery] long playerId,
             [FromQuery] Game game)
         {
             if (!CheckGameParameter(game))
