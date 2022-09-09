@@ -19,6 +19,9 @@ namespace KikoleSite.Elite.Providers
         private readonly RankingConfiguration _configuration;
         private readonly Api.Interfaces.IClock _clock;
 
+        private static readonly TimeSpan StageLevelDefaultTime = TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds);
+        private static readonly TimeSpan FullGameDefaultTime = StageLevelDefaultTime.Multiply(20 * 3); // 3 levels, 20 stages
+
         public StatisticsProvider(
             IReadRepository readRepository,
             IOptions<RankingConfiguration> configuration,
@@ -364,7 +367,7 @@ namespace KikoleSite.Elite.Providers
                                 Date = date,
                                 Game = game,
                                 PlayerId = x,
-                                Time = TimeSpan.Zero
+                                Time = FullGameDefaultTime
                             };
                             if (x == playerId)
                                 myRanking = localRk;
@@ -377,39 +380,15 @@ namespace KikoleSite.Elite.Providers
                     {
                         foreach (var level in SystemExtensions.Enumerate<Level>())
                         {
-                            var stageLevelRankingCurrent = stageLevelRankings[(stage, level)].LastOrDefault(x => x.Key.Date <= date);
-                            if (stageLevelRankingCurrent.Value?.Count > 0)
+                            var stageLevelRankingCurrent = stageLevelRankings[(stage, level)]
+                                .LastOrDefault(x => x.Key.Date <= date);
+                            foreach (var x in rks.Where(x => stageLevelRankingCurrent.Value?.ContainsKey(x.PlayerId) == true))
                             {
-                                rks.ForEach(x =>
-                                {
-                                    if (stageLevelRankingCurrent.Value.ContainsKey(x.PlayerId))
-                                    {
-                                        x.Points += stageLevelRankingCurrent.Value[x.PlayerId].Points;
-                                        x.Time = x.Time.Add(stageLevelRankingCurrent.Value[x.PlayerId].Time);
-                                    }
-                                    else
-                                    {
-                                        // there is no data: for this stage/level, the player ranking takes the default time
-                                        x.Time = x.Time.Add(TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds));
-                                    }
-                                });
-                            }
-                            else
-                            {
-                                // there is no data: for this stage/level, every ranking takes the default time
-                                rks.ForEach(x => x.Time = x.Time.Add(TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds)));
+                                x.Points += stageLevelRankingCurrent.Value[x.PlayerId].Points;
+                                x.Time = x.Time.Subtract(StageLevelDefaultTime - stageLevelRankingCurrent.Value[x.PlayerId].Time);
                             }
                         }
                     }
-
-                    // rankings without any time
-                    rks
-                        .Where(x => x.Time == TimeSpan.Zero)
-                        .All(x =>
-                        {
-                            x.Time = TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds * 60);
-                            return true;
-                        });
 
                     // sets the ranking by points
                     rks = rks
