@@ -88,7 +88,8 @@ namespace KikoleSite
                 .AddSingleton<Elite.Providers.IStatisticsProvider, Elite.Providers.StatisticsProvider>()
                 .AddSingleton<Elite.Providers.IIntegrationProvider, Elite.Providers.IntegrationProvider>()
                 .AddSingleton<Elite.Loggers.FileLogger>()
-                .AddHostedService<Elite.Workers.IntegrationWorker>();
+                .AddHostedService<Elite.Workers.IntegrationWorker>()
+                .AddSingleton<Elite.Repositories.ICacheManager, Elite.Repositories.CacheManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

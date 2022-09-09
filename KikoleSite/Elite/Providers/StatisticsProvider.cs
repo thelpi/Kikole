@@ -15,6 +15,7 @@ namespace KikoleSite.Elite.Providers
 {
     public sealed class StatisticsProvider : IStatisticsProvider
     {
+        private readonly ICacheManager _cacheManager;
         private readonly IReadRepository _readRepository;
         private readonly RankingConfiguration _configuration;
         private readonly Api.Interfaces.IClock _clock;
@@ -25,11 +26,13 @@ namespace KikoleSite.Elite.Providers
         public StatisticsProvider(
             IReadRepository readRepository,
             IOptions<RankingConfiguration> configuration,
-            Api.Interfaces.IClock clock)
+            Api.Interfaces.IClock clock,
+            ICacheManager cacheManager)
         {
-            _readRepository = readRepository ?? throw new ArgumentNullException(nameof(readRepository));
-            _configuration = configuration?.Value ?? throw new ArgumentNullException(nameof(configuration));
+            _readRepository = readRepository;
+            _configuration = configuration.Value;
             _clock = clock;
+            _cacheManager = cacheManager;
         }
 
         public async Task<IReadOnlyCollection<Standing>> GetLongestStandingsAsync(
@@ -245,8 +248,8 @@ namespace KikoleSite.Elite.Providers
             {
                 foreach (var level in SystemExtensions.Enumerate<Level>())
                 {
-                    var sourceEntries = await _readRepository
-                        .GetEntriesAsync(stage, level, null, null)
+                    var sourceEntries = await _cacheManager
+                        .GetStageLevelEntriesAsync(stage, level)
                         .ConfigureAwait(false);
                     entries.Add((stage, level), sourceEntries.ToList());
                 }
