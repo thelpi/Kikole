@@ -66,9 +66,6 @@ namespace KikoleSite.Elite.Models
 
         internal IReadOnlyDictionary<long, IReadOnlyCollection<long>> CountryPlayersGroup { get; private set; }
 
-        internal ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>> Entries { get; }
-            = new ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>>();
-
         private Dictionary<long, PlayerDto> MergePlayersIntoCountries()
         {
             var i = 1;

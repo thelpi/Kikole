@@ -557,7 +557,7 @@ namespace KikoleSite.Elite.Providers
             Level level)
         {
             var entries = await GetStageLevelEntriesCoreAsync(
-                    request.Players, stage, level, request.Entries, request.CountryPlayersGroup)
+                    request.Players, stage, level, request.CountryPlayersGroup)
                 .ConfigureAwait(false);
 
             if (request.Engine.HasValue)
@@ -584,15 +584,12 @@ namespace KikoleSite.Elite.Providers
             IReadOnlyDictionary<long, PlayerDto> players,
             Stage stage,
             Level level,
-            ConcurrentDictionary<(Stage, Level), IReadOnlyCollection<EntryDto>> entriesCache = null,
             IReadOnlyDictionary<long, IReadOnlyCollection<long>> countryPlayersGroup = null)
         {
             // Gets every entry for the stage and level
-            var tmpEntriesSource = entriesCache?.ContainsKey((stage, level)) == true
-                ? entriesCache[(stage, level)]
-                : await _readRepository
-                    .GetEntriesAsync(stage, level, null, null)
-                    .ConfigureAwait(false);
+            var tmpEntriesSource = await _cacheManager
+                .GetStageLevelEntriesAsync(stage, level)
+                .ConfigureAwait(false);
 
             // if country grouping, replace player by "country player"
             if (countryPlayersGroup?.Count > 0)
@@ -610,11 +607,6 @@ namespace KikoleSite.Elite.Providers
 
             // Sets date for every entry
             ManageDateLessEntries(stage.GetGame(), entries);
-
-            if (entriesCache?.ContainsKey((stage, level)) == false)
-            {
-                entriesCache.TryAdd((stage, level), new List<EntryDto>(entries));
-            }
 
             return entries;
         }
