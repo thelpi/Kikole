@@ -355,13 +355,20 @@ namespace KikoleSite.Elite.Providers
                 foreach (var date in dates.Skip(ip * datesCount).Take(datesCount))
                 {
                     // transforms each player into a ranking instance
+                    PlayerRankingLight myRanking = null;
                     var rks = playersId
-                        .Select(x => new PlayerRankingLight
+                        .Select(x =>
                         {
-                            Date = date,
-                            Game = game,
-                            PlayerId = x,
-                            Time = TimeSpan.Zero
+                            var localRk = new PlayerRankingLight
+                            {
+                                Date = date,
+                                Game = game,
+                                PlayerId = x,
+                                Time = TimeSpan.Zero
+                            };
+                            if (x == playerId)
+                                myRanking = localRk;
+                            return localRk;
                         })
                         .ToList();
 
@@ -395,52 +402,30 @@ namespace KikoleSite.Elite.Providers
                         }
                     }
 
+                    // rankings without any time
+                    rks
+                        .Where(x => x.Time == TimeSpan.Zero)
+                        .All(x =>
+                        {
+                            x.Time = TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds * 60);
+                            return true;
+                        });
+
                     // sets the ranking by points
                     rks = rks
                         .OrderByDescending(x => x.Points)
                         .ToList();
 
-                    var subRank = 0;
-                    for (int i = 0; i < rks.Count; i++)
-                    {
-                        rks[i].PointsRank = 1;
-                        if (i > 0)
-                        {
-                            subRank++;
-                            rks[i].PointsRank = rks[i - 1].PointsRank;
-                            if (rks[i - 1].Points != rks[i].Points)
-                            {
-                                rks[i].PointsRank += subRank;
-                                subRank = 0;
-                            }
-                        }
-                    }
-
-                    // rankings without any time
-                    rks.ForEach(x => x.Time = x.Time == TimeSpan.Zero ? TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds * 60) : x.Time);
+                    rks.SetRank((x1, x2) => x1.Points == x2.Points, x => x.PointsRank, (x, r) => x.PointsRank = r);
 
                     // sets the ranking by time
                     rks = rks
                         .OrderBy(x => x.Time)
                         .ToList();
 
-                    subRank = 0;
-                    for (int i = 0; i < rks.Count; i++)
-                    {
-                        rks[i].TimeRank = 1;
-                        if (i > 0)
-                        {
-                            subRank++;
-                            rks[i].TimeRank = rks[i - 1].TimeRank;
-                            if (rks[i - 1].Time != rks[i].Time)
-                            {
-                                rks[i].TimeRank += subRank;
-                                subRank = 0;
-                            }
-                        }
-                    }
+                    rks.SetRank((x1, x2) => x1.Time == x2.Time, x => x.TimeRank, (x, r) => x.TimeRank = r);
 
-                    chronologyRankings.Add(rks.Single(x => x.PlayerId == playerId));
+                    chronologyRankings.Add(myRanking);
                 }
             });
 
