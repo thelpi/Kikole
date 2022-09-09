@@ -278,6 +278,12 @@ namespace KikoleSite.Elite.Providers
                 .Distinct()
                 .ToList();
 
+            // shortcut to get if time entry exits for a date
+            var datesForStageLevel = entries
+                .ToDictionary(x => x.Key, x => new HashSet<DateTime>(x.Value
+                    .GroupBy(_ => _.Date.Value)
+                    .Select(_ => _.Key)));
+
             // for each stage/level, the rankings are sorted by date asc
             var stageLevelRankings = new ConcurrentDictionary<(Stage s, Level l), IReadOnlyDictionary<DateTime, IReadOnlyDictionary<long, PlayerStageLevelRankingLight>>>();
 
@@ -291,8 +297,7 @@ namespace KikoleSite.Elite.Providers
                     {
                         if (!isLoopFirstDate)
                         {
-                            var hasAny = entries[(stage, level)].Any(x => x.Date == date);
-                            if (!hasAny)
+                            if (!datesForStageLevel[(stage, level)].Contains(date))
                             {
                                 stageLevelRanking.Add(date, stageLevelRanking.Values.Last());
                                 continue;
