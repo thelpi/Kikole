@@ -12,5 +12,14 @@ namespace KikoleSite.Elite.Models
         public DateTime Date { get; set; }
         public long PlayerId { get; set; }
         public Game Game { get; set; }
+
+        public bool HasChanged(PlayerRankingLight other)
+        {
+            // assuming same player obviously
+            return Points != other.Points
+                || PointsRank != other.PointsRank
+                || Time != other.Time
+                || TimeRank != other.TimeRank;
+        }
     }
 }

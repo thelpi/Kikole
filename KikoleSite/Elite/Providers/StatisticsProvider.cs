@@ -429,7 +429,13 @@ namespace KikoleSite.Elite.Providers
                 }
             });
 
-            return chronologyRankings.OrderBy(x => x.Date).ToList();
+            var chronologyRankingsList = chronologyRankings
+                .OrderBy(x => x.Date)
+                .ToList();
+
+            return chronologyRankingsList
+                .Where((x, i) => i == 0 || x.HasChanged(chronologyRankingsList[i - 1]))
+                .ToList();
         }
 
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)
