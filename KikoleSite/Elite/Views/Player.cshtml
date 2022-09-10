@@ -18,11 +18,17 @@
     </div>
     <div class="formBlock">
         <label class="formLabel">First activity date:</label>
-        <label>@Model.JoinDate.ToString("yyyy-MM-dd")</label>
+        @{ 
+            var dateText = Model.JoinDate?.ToString("yyyy-MM-dd") ?? "N/A";
+        }
+        <label>@dateText</label>
     </div>
     <div class="formBlock">
         <label class="formLabel">Last activity date:</label>
-        <label>@Model.LastActivityDate.ToString("yyyy-MM-dd")</label>
+        @{
+            dateText = Model.LastActivityDate?.ToString("yyyy-MM-dd") ?? "N/A";
+        }
+        <label>@dateText</label>
     </div>
 </div>
 
@@ -30,11 +36,25 @@
 <div class="collapsiblecontent" style="display: none">
     <div class="formBlock">
         <label class="formLabel">Best points ranking:</label>
-        <label><span style="color: red">@Model.BestPointsRank.rank.ToRankString()</span> with <span style="color: gold">@Model.BestPointsRank.points</span> points, the <span style="color: cornflowerblue">@Model.BestPointsRank.date.ToString("yyyy-MM-dd")</span></label>
+        @if (Model.BestPointsRank.HasValue)
+        {
+            <label><span style="color: red">@Model.BestPointsRank.Value.rank.ToRankString()</span> with <span style="color: gold">@Model.BestPointsRank.Value.points</span> points, the <span style="color: cornflowerblue">@Model.BestPointsRank.Value.date.ToString("yyyy-MM-dd")</span></label>
+        }
+        else
+        {
+            <label>N/A</label>
+        }
     </div>
     <div class="formBlock">
         <label class="formLabel">Best time ranking:</label>
-        <label><span style="color: red">@Model.BestTimeRank.rank.ToRankString()</span> with a time of <span style="color: gold">@Model.BestTimeRank.time.ToString("c")</span>, the <span style="color: cornflowerblue">@Model.BestTimeRank.date.ToString("yyyy-MM-dd")</span></label>
+        @if (Model.BestTimeRank.HasValue)
+        {
+            <label><span style="color: red">@Model.BestTimeRank.Value.rank.ToRankString()</span> with a time of <span style="color: gold">@Model.BestTimeRank.Value.time.ToString("c")</span>, the <span style="color: cornflowerblue">@Model.BestTimeRank.Value.date.ToString("yyyy-MM-dd")</span></label>
+        }
+        else
+        {
+            <label>N/A</label>
+        }
     </div>
     <div class="formBlock2">
         <table class="dual-box">
@@ -46,7 +66,7 @@
                     <th>Date</th>
                     <th>Points</th>
                 </tr>
-                @if (Model.RankingPointsMilestones.Count > 0)
+                @if (Model.RankingPointsMilestones?.Count > 0)
                 {
                     foreach (var rpm in Model.RankingPointsMilestones)
                     {
@@ -73,7 +93,7 @@
                     <th>Date</th>
                     <th>Rank</th>
                 </tr>
-                @if (Model.RankingMilestones.Count > 0)
+                @if (Model.RankingMilestones?.Count > 0)
                 {
                     foreach (var rkm in Model.RankingMilestones)
                     {
@@ -97,7 +117,7 @@
 
 <button type="button" class="collapsible">Untied world records</button>
 <div class="collapsiblecontent" style="display: none">
-    @if (Model.WorldRecords.UntiedWorldRecords.Count > 0)
+    @if (Model.WorldRecords.UntiedWorldRecords?.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedWorldRecords }).ConfigureAwait(false);
     }
@@ -109,7 +129,7 @@
 
 <button type="button" class="collapsible">Untied world records slayed</button>
 <div class="collapsiblecontent" style="display: none">
-    @if (Model.WorldRecords.UntiedSlayWorldRecords.Count > 0)
+    @if (Model.WorldRecords.UntiedSlayWorldRecords?.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedSlayWorldRecords }).ConfigureAwait(false);
     }
@@ -121,7 +141,7 @@
 
 <button type="button" class="collapsible">World records slayed</button>
 <div class="collapsiblecontent" style="display: none">
-    @if (Model.WorldRecords.SlayWorldRecords.Count > 0)
+    @if (Model.WorldRecords.SlayWorldRecords?.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.SlayWorldRecords }).ConfigureAwait(false);
     }
@@ -133,7 +153,7 @@
 
 <button type="button" class="collapsible">All world records</button>
 <div class="collapsiblecontent" style="display: none">
-    @if (Model.WorldRecords.WorldRecords.Count > 0)
+    @if (Model.WorldRecords.WorldRecords?.Count > 0)
     {
         await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.WorldRecords }).ConfigureAwait(false);
     }
@@ -202,7 +222,7 @@
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(() => {
             var sourceDatas = [['Date', 'Rank']];
-            @if (Model.RankingHistory.Count > 0)
+            @if (Model.RankingHistory?.Count > 0)
             {
                 foreach (var rh in Model.RankingHistory)
                 {

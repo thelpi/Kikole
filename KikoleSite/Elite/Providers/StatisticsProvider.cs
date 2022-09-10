@@ -185,7 +185,9 @@ namespace KikoleSite.Elite.Providers
                 .WithRanks(x => x.Days.Value);
         }
 
-        public async Task<IReadOnlyCollection<Player>> GetPlayersAsync(bool useCache = false, string pattern = null)
+        public async Task<IReadOnlyCollection<Player>> GetPlayersAsync(
+            bool useCache = false,
+            string pattern = null)
         {
             var playersKeys = await GetPlayersInternalAsync(useCache: useCache).ConfigureAwait(false);
 
@@ -240,7 +242,9 @@ namespace KikoleSite.Elite.Providers
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(Game game, long playerId)
+        public async Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(
+            Game game,
+            long playerId)
         {
             // gets all entries
             var entries = new Dictionary<(Stage s, Level l), List<EntryDto>>();
@@ -423,6 +427,19 @@ namespace KikoleSite.Elite.Providers
             return chronologyRankingsList
                 .Where((x, i) => i == 0 || x.HasChanged(chronologyRankingsList[i - 1]))
                 .ToList();
+        }
+
+        public async Task<(DateTime? firstDate, DateTime? lastDate)> GetPlayerActivityDatesAsync(
+            Game game,
+            long playerId)
+        {
+            var entries = await _cacheManager
+                .GetPlayerEntriesAsync(game, playerId)
+                .ConfigureAwait(false);
+
+            return entries.Count == 0
+                ? (null, null)
+                : (entries.Min(_ => _.Date), entries.Max(_ => _.Date));
         }
 
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)

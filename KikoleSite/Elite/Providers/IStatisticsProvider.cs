@@ -31,5 +31,9 @@ namespace KikoleSite.Elite.Providers
         Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(
             Game game,
             long playerId);
+
+        Task<(DateTime? firstDate, DateTime? lastDate)> GetPlayerActivityDatesAsync(
+            Game game,
+            long playerId);
     }
 }

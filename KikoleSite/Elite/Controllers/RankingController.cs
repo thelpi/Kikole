@@ -108,6 +108,10 @@ namespace KikoleSite.Elite.Controllers
                         .GetLongestStandingsAsync(game, null, StandingType.Unslayed, null, null, p.Id, null)
                         .ConfigureAwait(false);
 
+                    var (firstDate, lastDate) = await _statisticsProvider
+                        .GetPlayerActivityDatesAsync(game, p.Id)
+                        .ConfigureAwait(false);
+
                     var bestPr = rankingHistory.First(_ => _.PointsRank == rankingHistory.Min(r => r.PointsRank));
                     var bestTr = rankingHistory.First(_ => _.TimeRank == rankingHistory.Min(r => r.TimeRank));
 
@@ -149,8 +153,8 @@ namespace KikoleSite.Elite.Controllers
                                 .Select(_ => _.ToStandingItemData())
                                 .ToList()
                         },
-                        JoinDate = rankingHistory.Min(_ => _.Date),
-                        LastActivityDate = rankingHistory.Max(_ => _.Date),
+                        JoinDate = firstDate,
+                        LastActivityDate = lastDate,
                         BestPointsRank = (bestPr.PointsRank, bestPr.Points, bestPr.Date),
                         BestTimeRank = (bestTr.TimeRank, bestTr.Time, bestTr.Date),
                         RankingMilestones = rkm

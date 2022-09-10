@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Extensions;
 
 namespace KikoleSite.Elite.Repositories
 {
@@ -40,6 +42,36 @@ namespace KikoleSite.Elite.Repositories
                 await SetCacheEntriesInternalAsync(stage, level).ConfigureAwait(false);
 
             return _entries[(stage, level)];
+        }
+
+        public async Task<IReadOnlyCollection<EntryDto>> GetPlayerEntriesAsync(Game game, long playerId)
+        {
+            if (_disableCache)
+            {
+                return await _repository
+                    .GetPlayerEntriesAsync(playerId, game)
+                    .ConfigureAwait(false);
+            }
+
+            var gameStages = game.GetStages();
+            var levels = SystemExtensions.Enumerate<Level>();
+
+            var countOk = gameStages
+                .Count(s => levels
+                    .All(l => _entries.ContainsKey((s, l))));
+
+            if (countOk < gameStages.Count)
+            {
+                return await _repository
+                    .GetPlayerEntriesAsync(playerId, game)
+                    .ConfigureAwait(false);
+            }
+
+            return _entries
+                .SelectMany(x => x.Value)
+                .Where(x => x.PlayerId == playerId
+                    && gameStages.Contains(x.Stage))
+                .ToList();
         }
 
         private async Task SetCacheEntriesInternalAsync(Stage stage, Level level)
