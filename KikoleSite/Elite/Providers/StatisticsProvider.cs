@@ -242,7 +242,7 @@ namespace KikoleSite.Elite.Providers
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayerRankingLight>> GetPlayerRankingHistoryAsync(
+        public async Task<PlayerRankingHistory> GetPlayerRankingHistoryAsync(
             Game game,
             long playerId)
         {
@@ -262,7 +262,7 @@ namespace KikoleSite.Elite.Providers
             // finds if at least one for the player
             var entriesForMinDate = entries.SelectMany(x => x.Value).Where(x => x.PlayerId == playerId);
             if (!entriesForMinDate.Any())
-                return new List<PlayerRankingLight>();
+                return new PlayerRankingHistory(new List<PlayerRankingLight>());
 
             // tries to fill blank dates
             foreach (var (s, l) in entries.Keys)
@@ -424,9 +424,9 @@ namespace KikoleSite.Elite.Providers
                 .OrderBy(x => x.Date)
                 .ToList();
 
-            return chronologyRankingsList
+            return new PlayerRankingHistory(chronologyRankingsList
                 .Where((x, i) => i == 0 || x.HasChanged(chronologyRankingsList[i - 1]))
-                .ToList();
+                .ToList());
         }
 
         public async Task<(DateTime? firstDate, DateTime? lastDate)> GetPlayerActivityDatesAsync(

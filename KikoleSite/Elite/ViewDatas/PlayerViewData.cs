@@ -6,15 +6,6 @@ namespace KikoleSite.Elite.ViewDatas
 {
     public class PlayerViewData
     {
-        public static readonly int[] RankMilestones = new int[]
-        {
-            100, 50, 20, 10, 5, 3, 1
-        };
-        public static readonly int[] PointsMilestones = new int[]
-        {
-            1, 1000, 2000, 3000, 4000, 5000
-        };
-
         public Game Game { get; set; }
         public string RealName { get; set; }
         public string SurName { get; set; }

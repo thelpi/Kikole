@@ -91,7 +91,7 @@ namespace KikoleSite.Elite.Controllers
                 $"Player details for {game}",
                 async () =>
                 {
-                    var rankingHistory = await _statisticsProvider
+                    var rankingDetails = await _statisticsProvider
                         .GetPlayerRankingHistoryAsync(game, p.Id)
                         .ConfigureAwait(false);
 
@@ -111,25 +111,6 @@ namespace KikoleSite.Elite.Controllers
                     var (firstDate, lastDate) = await _statisticsProvider
                         .GetPlayerActivityDatesAsync(game, p.Id)
                         .ConfigureAwait(false);
-
-                    var bestPr = rankingHistory.First(_ => _.PointsRank == rankingHistory.Min(r => r.PointsRank));
-                    var bestTr = rankingHistory.First(_ => _.TimeRank == rankingHistory.Min(r => r.TimeRank));
-
-                    var rkm = new Dictionary<int, DateTime>();
-                    foreach (var k in PlayerViewData.RankMilestones)
-                    {
-                        var okRk = rankingHistory.FirstOrDefault(_ => _.PointsRank <= k);
-                        if (okRk != null)
-                            rkm.Add(k, okRk.Date);
-                    }
-
-                    var rpm = new Dictionary<int, DateTime>();
-                    foreach (var pk in PlayerViewData.PointsMilestones)
-                    {
-                        var okRk = rankingHistory.FirstOrDefault(_ => _.Points >= pk);
-                        if (okRk != null)
-                            rpm.Add(pk, okRk.Date);
-                    }
 
                     return new PlayerViewData
                     {
@@ -155,17 +136,16 @@ namespace KikoleSite.Elite.Controllers
                         },
                         JoinDate = firstDate,
                         LastActivityDate = lastDate,
-                        BestPointsRank = (bestPr.PointsRank, bestPr.Points, bestPr.Date),
-                        BestTimeRank = (bestTr.TimeRank, bestTr.Time, bestTr.Date),
-                        RankingMilestones = rkm
+                        BestPointsRank = (rankingDetails.BestPointsRanking.PointsRank, rankingDetails.BestPointsRanking.Points, rankingDetails.BestPointsRanking.Date),
+                        BestTimeRank = (rankingDetails.BestTimeRanking.TimeRank, rankingDetails.BestTimeRanking.Time, rankingDetails.BestTimeRanking.Date),
+                        RankingMilestones = rankingDetails.PointsRankHighlights
                             .Select(_ => (_.Value, _.Key))
                             .ToList(),
-                        RankingPointsMilestones = rpm
+                        RankingPointsMilestones = rankingDetails.PointsHighlights
                             .Select(_ => (_.Value, _.Key))
                             .ToList(),
-                        RankingHistory = rankingHistory
-                            .OrderBy(_ => _.Date)
-                            .Select(_ => (_.Date, _.PointsRank))
+                        RankingHistory = rankingDetails.PointsRankHistory
+                            .Select(x => (x.Key, x.Value))
                             .ToList()
                     };
                 }).ConfigureAwait(false);
