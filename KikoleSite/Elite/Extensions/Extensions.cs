@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace KikoleSite.Elite.Views
+namespace KikoleSite.Elite.Extensions
 {
-    public static class Extensions
+    public static class ViewExtensions
     {
         private static readonly IReadOnlyDictionary<int, string> RankSuffixes =
             new Dictionary<int, string>
