@@ -13,6 +13,8 @@ namespace KikoleSite.Elite.Models
         public long PlayerId { get; set; }
         public Game Game { get; set; }
 
+        public string TimeString => Time.ToString("c");
+
         public bool HasChanged(PlayerRankingLight other)
         {
             // assuming same player obviously

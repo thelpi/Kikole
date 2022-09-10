@@ -91,10 +91,6 @@ namespace KikoleSite.Elite.Controllers
                 $"Player details for {game}",
                 async () =>
                 {
-                    var rankingDetails = await _statisticsProvider
-                        .GetPlayerRankingHistoryAsync(game, p.Id)
-                        .ConfigureAwait(false);
-
                     var untiedWrs = await _statisticsProvider
                         .GetLongestStandingsAsync(game, null, StandingType.Untied, null, null, p.Id, null)
                         .ConfigureAwait(false);
@@ -115,6 +111,7 @@ namespace KikoleSite.Elite.Controllers
                     return new PlayerViewData
                     {
                         Game = game,
+                        Id = p.Id,
                         Color = $"#{p.Color}",
                         Country = p.Country,
                         RealName = p.RealName,
@@ -135,18 +132,7 @@ namespace KikoleSite.Elite.Controllers
                                 .ToList()
                         },
                         JoinDate = firstDate,
-                        LastActivityDate = lastDate,
-                        BestPointsRank = (rankingDetails.BestPointsRanking.PointsRank, rankingDetails.BestPointsRanking.Points, rankingDetails.BestPointsRanking.Date),
-                        BestTimeRank = (rankingDetails.BestTimeRanking.TimeRank, rankingDetails.BestTimeRanking.Time, rankingDetails.BestTimeRanking.Date),
-                        RankingMilestones = rankingDetails.PointsRankHighlights
-                            .Select(_ => (_.Value, _.Key))
-                            .ToList(),
-                        RankingPointsMilestones = rankingDetails.PointsHighlights
-                            .Select(_ => (_.Value, _.Key))
-                            .ToList(),
-                        RankingHistory = rankingDetails.PointsRankHistory
-                            .Select(x => (x.Key, x.Value))
-                            .ToList()
+                        LastActivityDate = lastDate
                     };
                 }).ConfigureAwait(false);
         }
@@ -168,6 +154,8 @@ namespace KikoleSite.Elite.Controllers
                         .ToList();
                 }).ConfigureAwait(false);
         }
+
+        #region AJAX routes
 
         [HttpGet("games/{game}/chronology-types/{chronologyType}/data")]
         public async Task<JsonResult> GetChronologyDataAsync(
@@ -256,6 +244,29 @@ namespace KikoleSite.Elite.Controllers
                 name = $"{p.RealName} - {p.SurName}"
             }));
         }
+
+        [HttpGet("games/{game}/players/{playerId}/ranking-history")]
+        public async Task<JsonResult> GetPlayerRankingHistoryAsync(
+            [FromRoute] Game game,
+            [FromRoute] long playerId)
+        {
+            if (!CheckGameParameter(game))
+                return Json(new { error = "Invalid game value." });
+
+            var (success, _) = await CheckPlayerParameterAsync(
+                    playerId, true)
+                .ConfigureAwait(false);
+            if (!success)
+                return Json(new { error = "Invalid player." });
+
+            var result = await _statisticsProvider
+                .GetPlayerRankingHistoryAsync(game, playerId)
+                .ConfigureAwait(false);
+
+            return Json(result);
+        }
+
+        #endregion AJAX routes
 
         #region Features
 

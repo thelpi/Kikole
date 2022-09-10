@@ -18,9 +18,9 @@ namespace KikoleSite.Elite.Models
         public IReadOnlyCollection<PlayerRankingLight> RankingDetails { get; }
         public PlayerRankingLight BestPointsRanking { get; }
         public PlayerRankingLight BestTimeRanking { get; }
-        public IReadOnlyDictionary<int, DateTime> PointsHighlights { get; }
-        public IReadOnlyDictionary<int, DateTime> PointsRankHighlights { get; }
-        public IReadOnlyDictionary<DateTime, int> PointsRankHistory { get; }
+        public IReadOnlyCollection<DateInfo> PointsHighlights { get; }
+        public IReadOnlyCollection<DateInfo> PointsRankHighlights { get; }
+        public IReadOnlyCollection<DateInfo> PointsRankHistory { get; }
 
         public PlayerRankingHistory(IReadOnlyCollection<PlayerRankingLight> rankings)
         {
@@ -29,44 +29,56 @@ namespace KikoleSite.Elite.Models
             BestPointsRanking = rankings.First(_ => _.PointsRank == rankings.Min(r => r.PointsRank));
             BestTimeRanking = rankings.First(_ => _.TimeRank == rankings.Min(r => r.TimeRank));
 
-            var rkm = new Dictionary<int, DateTime>();
+            var rkm = new List<DateInfo>();
             foreach (var k in RankMilestones)
             {
                 var okRk = rankings.FirstOrDefault(_ => _.PointsRank <= k);
                 if (okRk != null)
-                    rkm.Add(k, okRk.Date);
+                    rkm.Add(new DateInfo(k, okRk.Date));
             }
 
             PointsRankHighlights = rkm;
 
-            var rpm = new Dictionary<int, DateTime>();
+            var rpm = new List<DateInfo>();
             foreach (var pk in PointsMilestones)
             {
                 var okRk = rankings.FirstOrDefault(_ => _.Points >= pk);
                 if (okRk != null)
-                    rpm.Add(pk, okRk.Date);
+                    rpm.Add(new DateInfo(pk, okRk.Date));
             }
 
             PointsHighlights = rpm;
 
-            var groupHistoryRank = new Dictionary<DateTime, int>();
+            var groupHistoryRank = new List<DateInfo>();
             int currentRank = -1;
             var counter = 1;
             foreach (var rk in rankings)
             {
                 if (currentRank != rk.PointsRank)
                 {
-                    groupHistoryRank.Add(rk.Date, rk.PointsRank);
+                    groupHistoryRank.Add(new DateInfo(rk.PointsRank, rk.Date));
                     currentRank = rk.PointsRank;
                 }
                 else if (counter == rankings.Count)
                 {
-                    groupHistoryRank.Add(rk.Date, rk.PointsRank);
+                    groupHistoryRank.Add(new DateInfo(rk.PointsRank, rk.Date));
                 }
                 counter++;
             }
 
             PointsRankHistory = groupHistoryRank;
+        }
+
+        public struct DateInfo
+        {
+            public int Value { get; }
+            public DateTime Date { get; }
+
+            public DateInfo(int value, DateTime date)
+            {
+                Value = value;
+                Date = date;
+            }
         }
     }
 }

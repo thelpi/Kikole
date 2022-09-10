@@ -1,5 +1,10 @@
-﻿@using KikoleSite.Elite.Extensions;
-@model KikoleSite.Elite.ViewDatas.PlayerViewData
+﻿@model KikoleSite.Elite.ViewDatas.PlayerViewData
+
+@{
+    var gameId = (int)Model.Game;
+    var loaderSize = 80;
+    var loaderMargin = $"-{(loaderSize / 2)}px";
+}
 
 <button type="button" class="collapsible">General information</button>
 <div class="collapsiblecontent" style="display: block">
@@ -33,30 +38,15 @@
 
 <button type="button" class="collapsible">Ranking highlights</button>
 <div class="collapsiblecontent" style="display: none">
-    <div class="formBlock">
+    <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/elite/ajax-loader.gif" style="display: none; position: relative; left: 50%; margin-left: @loaderMargin; padding-bottom: 20px; padding-top: 20px;" />
+    <div class="formBlock" id="bestPointsRanking">
         <label class="formLabel">Best points ranking:</label>
-        @if (Model.BestPointsRank.HasValue)
-        {
-            <label><span style="color: red">@Model.BestPointsRank.Value.rank.ToRankString()</span> with <span style="color: gold">@Model.BestPointsRank.Value.points</span> points, the <span style="color: cornflowerblue">@Model.BestPointsRank.Value.date.ToString("yyyy-MM-dd")</span></label>
-        }
-        else
-        {
-            <label>N/A</label>
-        }
     </div>
-    <div class="formBlock">
+    <div class="formBlock" id="bestTimeRanking">
         <label class="formLabel">Best time ranking:</label>
-        @if (Model.BestTimeRank.HasValue)
-        {
-            <label><span style="color: red">@Model.BestTimeRank.Value.rank.ToRankString()</span> with a time of <span style="color: gold">@Model.BestTimeRank.Value.time.ToString("c")</span>, the <span style="color: cornflowerblue">@Model.BestTimeRank.Value.date.ToString("yyyy-MM-dd")</span></label>
-        }
-        else
-        {
-            <label>N/A</label>
-        }
     </div>
-    <div class="formBlock2">
-        <table class="dual-box">
+    <div class="formBlock2" id="highlights">
+        <table class="dual-box" id="pointsHighlights">
             <tbody>
                 <tr>
                     <th colspan="2">Points highlights</th>
@@ -65,25 +55,9 @@
                     <th>Date</th>
                     <th>Points</th>
                 </tr>
-                @if (Model.RankingPointsMilestones?.Count > 0)
-                {
-                    foreach (var rpm in Model.RankingPointsMilestones)
-                    {
-                        <tr>
-                            <td>@rpm.date.ToString("yyyy-MM-dd")</td>
-                            <td>@rpm.points</td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="2">No highlight!</td>
-                    </tr>
-                }
             </tbody>
         </table>
-        <table class="dual-box last">
+        <table class="dual-box last" id="rankHighlights">
             <tbody>
                 <tr>
                     <th colspan="2">Rank highlights</th>
@@ -92,22 +66,6 @@
                     <th>Date</th>
                     <th>Rank</th>
                 </tr>
-                @if (Model.RankingMilestones?.Count > 0)
-                {
-                    foreach (var rkm in Model.RankingMilestones)
-                    {
-                        <tr>
-                            <td>@rkm.date.ToString("yyyy-MM-dd")</td>
-                            <td>@rkm.rank.ToRankString()</td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="2">No highlight!</td>
-                    </tr>
-                }
             </tbody>
         </table>
     </div>
@@ -221,36 +179,79 @@
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(() => {
             var sourceDatas = [['Date', 'Rank']];
-            @if (Model.RankingHistory?.Count > 0)
-            {
-                foreach (var rh in Model.RankingHistory)
-                {
-                    <text>
-                    sourceDatas.push([new Date(@rh.date.Year, @rh.date.Month, @rh.date.Day), -@rh.rank]);
-                    </text>
-                }
-            }
-            else
-            {
-                var now = System.DateTime.Today;
-                var start = Model.Game.GetEliteFirstDate();
-                <text>
-                sourceDatas.push([new Date(@start.Year, @start.Month, @start.Day), -9999]);
-                sourceDatas.push([new Date(@now.Year, @now.Month, @now.Day), -9999]);
-                </text>
-            }
-            var tableDatas = google.visualization.arrayToDataTable(sourceDatas);
-            var options = {
-                width: 892,
-                height: 502,
-                chartArea: {
-                    left: 15, top: 15, width: "95%", height: "90%"
+            $.ajax({
+                url: '/the-elite/games/@gameId/players/@Model.Id/ranking-history',
+                data: {},
+                type: "GET",
+                dataType: "json",
+                beforeSend: function () {
+                    $("#loading-image").show();
+                    $("#bestPointsRanking").hide();
+                    $("#bestTimeRanking").hide();
+                    $("#highlights").hide();
+                    $("#rankingHistory").hide();
                 },
-                legend: { position: 'none' }
-            };
-            new google.visualization
-                .LineChart(document.getElementById('rankingHistory'))
-                .draw(tableDatas, options);
+                success: function (data) {
+                    if (data.pointsRankHistory.length > 0) {
+                        data.pointsRankHistory.forEach(item => sourceDatas.push([new Date(item.date), -parseInt(item.value)]));
+                    } else {
+                        sourceDatas.push([new Date('"' + @Model.DefaultFirstDate.ToString("yyyy-MM-dd") + '"'), -9999]);
+                        sourceDatas.push([new Date('"' + @Model.DefaultLastDate.ToString("yyyy-MM-dd") + '"'), -9999]);
+                    }
+
+                    var tableDatas = google.visualization.arrayToDataTable(sourceDatas);
+                    var options = {
+                        width: 892,
+                        height: 502,
+                        chartArea: {
+                            left: 15, top: 15, width: "95%", height: "90%"
+                        },
+                        legend: { position: 'none' }
+                    };
+                    new google.visualization
+                        .LineChart(document.getElementById('rankingHistory'))
+                        .draw(tableDatas, options);
+
+                    var rh = $('#rankHighlights').find('tbody');
+                    if (data.pointsRankHighlights.length > 0) {
+                        data.pointsRankHighlights.forEach(item => {
+                            rh.append('<tr><td>' + toYyyyMmDd(item.date) + '</td><td>' + toRank(item.value) + '</td></tr>');
+                        });
+                    } else {
+                        rh.append('<tr><td colspan="2">No highlight!</td></tr>');
+                    }
+
+                    var ph = $('#pointsHighlights').find('tbody');
+                    if (data.pointsHighlights.length > 0) {
+                        data.pointsHighlights.forEach(item => {
+                            ph.append('<tr><td>' + toYyyyMmDd(item.date) + '</td><td>' + item.value + '</td></tr>');
+                        });
+                    } else {
+                        ph.append('<tr><td colspan="2">No highlight!</td></tr>');
+                    }
+
+                    if (data.bestPointsRanking) {
+                        $('#bestPointsRanking').append('<label><span style="color: red">' + toRank(data.bestPointsRanking.pointsRank) + '</span> with <span style="color: gold">' + data.bestPointsRanking.points + '</span> points, the <span style="color: cornflowerblue">' + toYyyyMmDd(data.bestPointsRanking.date) + '</span></label>');
+                    } else {
+                        $('#bestPointsRanking').append('<label>N/A</label>');
+                    }
+
+                    if (data.bestTimeRanking) {
+                        $('#bestTimeRanking').append('<label><span style="color: red">' + toRank(data.bestTimeRanking.timeRank) + '</span> with a time of <span style="color: gold">' + data.bestTimeRanking.timeString + '</span>, the <span style="color: cornflowerblue">' + toYyyyMmDd(data.bestPointsRanking.date) + '</span></label>');
+                    } else {
+                        $('#bestTimeRanking').append('<label>N/A</label>');
+                    }
+
+                    $("#loading-image").hide();
+                    $("#bestPointsRanking").show();
+                    $("#bestTimeRanking").show();
+                    $("#highlights").show();
+                    $("#rankingHistory").show();
+                },
+                error: function (data) {
+                    alert('Call error: ' + JSON.stringify(data));
+                }
+            });
         });
         var coll = document.getElementsByClassName("collapsible");
         for (var i = 0; i < coll.length; i++) {
@@ -273,5 +274,25 @@
                 }
             });
         }
+        var toYyyyMmDd = function (data) {
+            var realDate = new Date(data);
+            var mm = realDate.getMonth() + 1;
+            var dd = realDate.getDate();
+            return [
+                realDate.getFullYear(),
+                (mm > 9 ? '' : '0') + mm,
+                (dd > 9 ? '' : '0') + dd
+            ].join('-');
+        };
+        var toRank = function (data) {
+            if (data == 1)
+                return data + 'st';
+            else if (data == 2)
+                return data + 'nd';
+            else if (data == 3)
+                return data + 'rd';
+            else
+                return data + 'th';
+        };
     });
 </script>
