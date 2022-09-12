@@ -15,14 +15,17 @@ namespace KikoleSite.Elite.Models
             1, 1000, 2000, 3000, 4000, 5000
         };
 
+        private readonly DateTime _requestedDate;
+
         public IReadOnlyCollection<PlayerRankingLight> RankingDetails { get; }
         public PlayerRankingLight BestPointsRanking { get; }
         public PlayerRankingLight BestTimeRanking { get; }
         public IReadOnlyCollection<DateInfo> PointsHighlights { get; }
         public IReadOnlyCollection<DateInfo> PointsRankHighlights { get; }
         public IReadOnlyCollection<DateInfo> PointsRankHistory { get; }
+        public DateTime RequestedDate => _requestedDate.Date;
 
-        public PlayerRankingHistory(IReadOnlyCollection<PlayerRankingLight> rankings)
+        public PlayerRankingHistory(IReadOnlyCollection<PlayerRankingLight> rankings, DateTime date)
         {
             RankingDetails = rankings;
 
@@ -67,6 +70,7 @@ namespace KikoleSite.Elite.Models
             }
 
             PointsRankHistory = groupHistoryRank;
+            _requestedDate = date;
         }
 
         public struct DateInfo

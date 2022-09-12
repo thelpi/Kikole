@@ -25,6 +25,9 @@ namespace KikoleSite.Elite.Controllers
         private readonly IStatisticsProvider _statisticsProvider;
         private readonly Api.Interfaces.IClock _clock;
 
+        private static readonly ConcurrentDictionary<(long, Game), (bool loading, PlayerRankingHistory data)> _generatedRankings
+            = new ConcurrentDictionary<(long, Game), (bool loading, PlayerRankingHistory data)>();
+
         public SimulatedRankingController(
             IStatisticsProvider statisticsProvider,
             Api.Interfaces.IClock clock)
@@ -85,6 +88,32 @@ namespace KikoleSite.Elite.Controllers
                 .ConfigureAwait(false);
             if (!success)
                 return await IndexAsync("Invalid player.").ConfigureAwait(false);
+
+            var reload = true;
+            if (_generatedRankings.ContainsKey((playerId, game)))
+            {
+                if (_generatedRankings[(playerId, game)].loading)
+                    reload = false;
+                else if (_generatedRankings[(playerId, game)].data.RequestedDate == _clock.Today)
+                    reload = false;
+                else
+                    _generatedRankings.TryRemove((playerId, game), out _);
+            }
+
+            if (reload)
+            {
+                // fire and forget
+                _ = Task.Run(async () =>
+                {
+                    _generatedRankings.AddOrUpdate((playerId, game), (true, null), (k, v) => (true, null));
+
+                    var result = await _statisticsProvider
+                        .GetPlayerRankingHistoryAsync(game, playerId)
+                        .ConfigureAwait(false);
+
+                    _generatedRankings.AddOrUpdate((playerId, game), (false, result), (k, v) => (false, result));
+                });
+            }
 
             return await ViewAsync(
                 "Player",
@@ -246,24 +275,19 @@ namespace KikoleSite.Elite.Controllers
         }
 
         [HttpGet("games/{game}/players/{playerId}/ranking-history")]
-        public async Task<JsonResult> GetPlayerRankingHistoryAsync(
+        public JsonResult GetPlayerRankingHistory(
             [FromRoute] Game game,
             [FromRoute] long playerId)
         {
-            if (!CheckGameParameter(game))
-                return Json(new { error = "Invalid game value." });
+            if (!_generatedRankings.ContainsKey((playerId, game))
+                || _generatedRankings[(playerId, game)].loading)
+                return Json(new { message = "Data are not available yet." });
 
-            var (success, _) = await CheckPlayerParameterAsync(
-                    playerId, true)
-                .ConfigureAwait(false);
-            if (!success)
-                return Json(new { error = "Invalid player." });
+            var data = _generatedRankings[(playerId, game)].data;
+            if (data.RequestedDate == _clock.Today)
+                return Json(data);
 
-            var result = await _statisticsProvider
-                .GetPlayerRankingHistoryAsync(game, playerId)
-                .ConfigureAwait(false);
-
-            return Json(result);
+            return Json(new { message = "Data are expired." });
         }
 
         #endregion AJAX routes

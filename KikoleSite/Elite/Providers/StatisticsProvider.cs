@@ -262,7 +262,7 @@ namespace KikoleSite.Elite.Providers
             // finds if at least one for the player
             var entriesForMinDate = entries.SelectMany(x => x.Value).Where(x => x.PlayerId == playerId);
             if (!entriesForMinDate.Any())
-                return new PlayerRankingHistory(new List<PlayerRankingLight>());
+                return new PlayerRankingHistory(new List<PlayerRankingLight>(), _clock.Today);
 
             // tries to fill blank dates
             foreach (var (s, l) in entries.Keys)
@@ -424,9 +424,11 @@ namespace KikoleSite.Elite.Providers
                 .OrderBy(x => x.Date)
                 .ToList();
 
-            return new PlayerRankingHistory(chronologyRankingsList
-                .Where((x, i) => i == 0 || x.HasChanged(chronologyRankingsList[i - 1]))
-                .ToList());
+            return new PlayerRankingHistory(
+                chronologyRankingsList
+                    .Where((x, i) => i == 0 || x.HasChanged(chronologyRankingsList[i - 1]))
+                    .ToList(),
+                _clock.Today);
         }
 
         public async Task<(DateTime? firstDate, DateTime? lastDate)> GetPlayerActivityDatesAsync(

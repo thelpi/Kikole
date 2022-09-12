@@ -38,7 +38,11 @@
 
 <button type="button" class="collapsible">Ranking highlights</button>
 <div class="collapsiblecontent" style="display: none">
-    <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/elite/ajax-loader.gif" style="display: none; position: relative; left: 50%; margin-left: @loaderMargin; padding-bottom: 20px; padding-top: 20px;" />
+    <div class="formBlock2" id="whileLoadingBlock">
+        <p>The ranking generation takes between a few seconds and few minutes. Use this button to know if it's done, it will refresh the section automatically:</p>
+        <br />
+        <input type="submit" value="Refresh" id="refreshDataSubmit" />
+    </div>
     <div class="formBlock" id="bestPointsRanking">
         <label class="formLabel">Best points ranking:</label>
     </div>
@@ -176,8 +180,48 @@
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
     $(document).ready(function () {
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(() => {
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                    var otherCols = document.getElementsByClassName("collapsible");
+                    for (var j = 0; j < otherCols.length; j++) {
+                        if (otherCols[j] != this) {
+                            if (otherCols[j].classList.contains("active")) {
+                                otherCols[j].classList.toggle("active");
+                            }
+                            otherCols[j].nextElementSibling.style.display = "none";
+                        }
+                    }
+                }
+            });
+        }
+        var toYyyyMmDd = function (data) {
+            var realDate = new Date(data);
+            var mm = realDate.getMonth() + 1;
+            var dd = realDate.getDate();
+            return [
+                realDate.getFullYear(),
+                (mm > 9 ? '' : '0') + mm,
+                (dd > 9 ? '' : '0') + dd
+            ].join('-');
+        };
+        var toRank = function (data) {
+            if (data == 1)
+                return data + 'st';
+            else if (data == 2)
+                return data + 'nd';
+            else if (data == 3)
+                return data + 'rd';
+            else
+                return data + 'th';
+        };
+        var googleChartCallback = function(firstCall) {
             var sourceDatas = [['Date', 'Rank']];
             $.ajax({
                 url: '/the-elite/games/@gameId/players/@Model.Id/ranking-history',
@@ -185,13 +229,20 @@
                 type: "GET",
                 dataType: "json",
                 beforeSend: function () {
-                    $("#loading-image").show();
+                    $("#whileLoadingBlock").show();
                     $("#bestPointsRanking").hide();
                     $("#bestTimeRanking").hide();
                     $("#highlights").hide();
                     $("#rankingHistory").hide();
                 },
                 success: function (data) {
+                    if (data.message) {
+                        if (!firstCall) {
+                            alert(data.message);
+                        }
+                        return;
+                    }
+
                     if (data.pointsRankHistory.length > 0) {
                         data.pointsRankHistory.forEach(item => sourceDatas.push([new Date(item.date), -parseInt(item.value)]));
                     } else {
@@ -242,7 +293,7 @@
                         $('#bestTimeRanking').append('<label>N/A</label>');
                     }
 
-                    $("#loading-image").hide();
+                    $("#whileLoadingBlock").hide();
                     $("#bestPointsRanking").show();
                     $("#bestTimeRanking").show();
                     $("#highlights").show();
@@ -252,47 +303,9 @@
                     alert('Call error: ' + JSON.stringify(data));
                 }
             });
-        });
-        var coll = document.getElementsByClassName("collapsible");
-        for (var i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function () {
-                this.classList.toggle("active");
-                var content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                    var otherCols = document.getElementsByClassName("collapsible");
-                    for (var j = 0; j < otherCols.length; j++) {
-                        if (otherCols[j] != this) {
-                            if (otherCols[j].classList.contains("active")) {
-                                otherCols[j].classList.toggle("active");
-                            }
-                            otherCols[j].nextElementSibling.style.display = "none";
-                        }
-                    }
-                }
-            });
-        }
-        var toYyyyMmDd = function (data) {
-            var realDate = new Date(data);
-            var mm = realDate.getMonth() + 1;
-            var dd = realDate.getDate();
-            return [
-                realDate.getFullYear(),
-                (mm > 9 ? '' : '0') + mm,
-                (dd > 9 ? '' : '0') + dd
-            ].join('-');
         };
-        var toRank = function (data) {
-            if (data == 1)
-                return data + 'st';
-            else if (data == 2)
-                return data + 'nd';
-            else if (data == 3)
-                return data + 'rd';
-            else
-                return data + 'th';
-        };
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(() => googleChartCallback(true));
+        document.getElementById('refreshDataSubmit').addEventListener("click", () => googleChartCallback(false), false);
     });
 </script>
