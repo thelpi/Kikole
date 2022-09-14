@@ -19,5 +19,10 @@ namespace KikoleSite.Elite.ViewDatas
         public DateTime? NextDate { get; set; }
 
         public TimeSpan Time => Times[0];
+
+        public override string ToString()
+        {
+            return $"{Date:yyyy-MM-dd} - {Stage} - {Level} - {Time:mm\\:ss}";
+        }
     }
 }

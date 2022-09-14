@@ -20,6 +20,7 @@ namespace KikoleSite.Elite.Models
         public IReadOnlyCollection<long> Times => _times;
         public int? Days { get; private set; }
         public int DaysBefore => (int)Math.Floor((StartDate - Stage.GetGame().GetEliteFirstDate()).TotalDays);
+        public (DateTime, DateTime?) Period => (StartDate, EndDate);
 
         internal Standing(long time)
         {

@@ -156,5 +156,29 @@ namespace KikoleSite.Elite
         {
             return input.Trim().Replace("\t", "").Replace("\n", "").Replace("\r", "");
         }
+
+        public static bool IsOverlap(
+            this (DateTime s, DateTime? e) first,
+            (DateTime s, DateTime? e) second)
+        {
+            return (first.s < second.s && (first.e > second.s || !first.e.HasValue))
+                || (second.s < first.s && (second.e > first.s || !second.e.HasValue));
+        }
+
+        public static (DateTime s, DateTime? e)? GetOverlapPeriod(
+            this (DateTime s, DateTime? e) first,
+            (DateTime s, DateTime? e) second)
+        {
+            if (!first.IsOverlap(second))
+                return null;
+
+            var minDateEnd = first.e.HasValue
+                ? (second.e.HasValue
+                    ? first.e.Value.Min(second.e.Value)
+                    : first.e)
+                : second.e;
+
+            return (first.s.Max(second.s), minDateEnd);
+        }
     }
 }

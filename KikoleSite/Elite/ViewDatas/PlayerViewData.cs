@@ -13,10 +13,12 @@ namespace KikoleSite.Elite.ViewDatas
         public string SurName { get; set; }
         public string Color { get; set; }
         public string Country { get; set; }
+        public StandingItemData FirstWorldRecord { get; set; }
         public DateTime? JoinDate { get; set; }
         public DateTime? LastActivityDate { get; set; }
         public PlayerWorldRecordsItemData WorldRecords { get; set; }
-        public IReadOnlyDictionary<Engine, PlayerWorldRecordsItemData> EngineWorldRecords { get; set; }
+        public IReadOnlyCollection<SweepItemData> Three00PtsSweeps { get; set; }
+        public IReadOnlyCollection<SweepItemData> UntiedSweeps { get; set; }
 
         public DateTime DefaultFirstDate => Game.GetEliteFirstDate();
         public DateTime DefaultLastDate => DateTime.Today;

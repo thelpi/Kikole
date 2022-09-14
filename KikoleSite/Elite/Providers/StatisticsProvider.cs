@@ -444,6 +444,56 @@ namespace KikoleSite.Elite.Providers
                 : (entries.Min(_ => _.Date), entries.Max(_ => _.Date));
         }
 
+        public async Task<IReadOnlyCollection<SweepLight>> GetSweepsAsync(
+            Game game,
+            long? playerId,
+            bool untied,
+            Engine? engine,
+            bool? stillOngoing)
+        {
+            var wrType = untied
+                ? StandingType.UntiedExceptSelf
+                : StandingType.UnslayedExceptSelf;
+
+            var wrs = await GetLongestStandingsAsync(
+                    game, null, wrType, stillOngoing, engine, playerId, null)
+                .ConfigureAwait(false);
+
+            var sweeps = new List<SweepLight>(wrs.Count / 3);
+            foreach (var eWr in wrs.Where(x => x.Level == Level.Easy))
+            {
+                foreach (var mWr in wrs.Where(x =>
+                    x.Level == Level.Medium
+                    && x.Stage == eWr.Stage
+                    && x.Author.Id == eWr.Author.Id
+                    && x.Period.IsOverlap(eWr.Period)))
+                {
+                    foreach (var hWr in wrs.Where(x =>
+                        x.Level == Level.Hard
+                        && x.Stage == eWr.Stage
+                        && x.Period.IsOverlap(eWr.Period)
+                        && x.Period.IsOverlap(mWr.Period)))
+                    {
+                        var period = eWr.Period
+                            .GetOverlapPeriod(mWr.Period)
+                            .Value
+                            .GetOverlapPeriod(hWr.Period);
+                        sweeps.Add(new SweepLight
+                        {
+                            PlayerId = eWr.Author.Id,
+                            Untied = untied,
+                            Stage = eWr.Stage,
+                            DateEnd = period.Value.e,
+                            DateStart = period.Value.s,
+                            Days = (int)Math.Floor(((period.Value.e ?? _clock.Tomorrow) - period.Value.s).TotalDays)
+                        });
+                    }
+                }
+            }
+
+            return sweeps.OrderByDescending(x => x.Days).ToList();
+        }
+
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)
         {
             // Gets ranking

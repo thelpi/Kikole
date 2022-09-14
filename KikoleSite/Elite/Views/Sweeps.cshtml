@@ -1,0 +1,28 @@
+﻿@model IReadOnlyCollection<KikoleSite.Elite.ViewDatas.SweepItemData>
+
+<table>
+    <tbody>
+        <tr>
+            <th><font color="#FF9900">Days</font></th>
+            <th><font color="#FF9900">Stage</font></th>
+            <th><font color="#FF9900">From</font></th>
+            <th><font color="#FF9900">To</font></th>
+        </tr>
+        @foreach (var sweep in Model)
+        {
+            <tr>
+                <td>@sweep.Days</td>
+                <td>@sweep.Stage</td>
+                <td>@sweep.DateStart.ToString("yyyy-MM-dd")</td>
+                @if (!sweep.DateEnd.HasValue)
+                {
+                    <td>-</td>
+                }
+                else
+                {
+                    <td>@sweep.DateEnd.Value.ToString("yyyy-MM-dd")</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

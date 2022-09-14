@@ -205,6 +205,17 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
+        internal static SweepItemData ToSweepItemData(this SweepLight sweep)
+        {
+            return new SweepItemData
+            {
+                DateEnd = sweep.DateEnd,
+                DateStart = sweep.DateStart,
+                Days = sweep.Days,
+                Stage = sweep.Stage
+            };
+        }
+
         internal static string GetStandingTypeDescription(this StandingType standingType)
         {
             return standingType switch

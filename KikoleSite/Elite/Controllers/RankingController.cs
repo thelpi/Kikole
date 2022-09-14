@@ -137,6 +137,14 @@ namespace KikoleSite.Elite.Controllers
                         .GetPlayerActivityDatesAsync(game, p.Id)
                         .ConfigureAwait(false);
 
+                    var untiedSweeps = await _statisticsProvider
+                        .GetSweepsAsync(game, playerId, true, null, null)
+                        .ConfigureAwait(false);
+
+                    var three00PtsSweeps = await _statisticsProvider
+                        .GetSweepsAsync(game, playerId, false, null, null)
+                        .ConfigureAwait(false);
+
                     return new PlayerViewData
                     {
                         Game = game,
@@ -161,7 +169,18 @@ namespace KikoleSite.Elite.Controllers
                                 .ToList()
                         },
                         JoinDate = firstDate,
-                        LastActivityDate = lastDate
+                        LastActivityDate = lastDate,
+                        Three00PtsSweeps = three00PtsSweeps
+                            .Select(_ => _.ToSweepItemData())
+                            .ToList(),
+                        UntiedSweeps = untiedSweeps
+                            .Select(_ => _.ToSweepItemData())
+                            .ToList(),
+                        FirstWorldRecord = allWrs.Count == 0
+                            ? null
+                            : allWrs
+                                .First(x => x.StartDate == allWrs.Min(_ => _.StartDate))
+                                .ToStandingItemData()
                     };
                 }).ConfigureAwait(false);
         }

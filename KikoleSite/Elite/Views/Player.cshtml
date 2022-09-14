@@ -22,7 +22,7 @@
     </div>
     <div class="formBlock">
         <label class="formLabel">First activity date:</label>
-        @{ 
+        @{
             var dateText = Model.JoinDate?.ToString("yyyy-MM-dd") ?? "N/A";
         }
         <label>@dateText</label>
@@ -34,12 +34,23 @@
         }
         <label>@dateText</label>
     </div>
+    <div class="formBlock">
+        <label class="formLabel">First world record:</label>
+        @if (Model.FirstWorldRecord == null)
+        {
+            <label>No world record yet</label>
+        }
+        else
+        {
+            <label>@Model.FirstWorldRecord.ToString()</label>
+        }
+    </div>
 </div>
 
 <button type="button" class="collapsible">Ranking highlights</button>
 <div class="collapsiblecontent" style="display: none">
     <div class="formBlock2" id="whileLoadingBlock">
-        <p>The ranking generation takes between a few seconds and few minutes. Use this button to know if it's done, it will refresh the section automatically:</p>
+        <p>You can try to refresh, but it doesn't work well at his moment:</p>
         <br />
         <input type="submit" value="Refresh" id="refreshDataSubmit" />
     </div>
@@ -124,6 +135,30 @@
     }
 </div>
 
+<button type="button" class="collapsible">300th points sweeps</button>
+<div class="collapsiblecontent" style="display: none">
+    @if (Model.Three00PtsSweeps?.Count > 0)
+    {
+        await Html.RenderPartialAsync("~/Elite/Views/Sweeps.cshtml", Model.Three00PtsSweeps).ConfigureAwait(false);
+    }
+    else
+    {
+        <label>No 300th points sweep!</label>
+    }
+</div>
+
+<button type="button" class="collapsible">Untied sweeps</button>
+<div class="collapsiblecontent" style="display: none">
+    @if (Model.UntiedSweeps?.Count > 0)
+    {
+        await Html.RenderPartialAsync("~/Elite/Views/Sweeps.cshtml", Model.UntiedSweeps).ConfigureAwait(false);
+    }
+    else
+    {
+        <label>No untied sweep!</label>
+    }
+</div>
+
 <style>
     .formLabel {
         width: 120px;
@@ -164,10 +199,10 @@
         background-color: #333;
     }
 
-    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-    .active, .collapsible:hover {
-        background-color: #808080;
-    }
+        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+        .active, .collapsible:hover {
+            background-color: #808080;
+        }
 
     /* Style the collapsible content. Note: hidden by default */
     .collapsiblecontent {
