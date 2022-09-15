@@ -70,6 +70,29 @@ namespace KikoleSite.Elite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<StageLevelRankingDto>> GetStageLevelRankingsAsync(Stage stage, Level level, DateTime date)
+        {
+            return await ExecuteReaderAsync<StageLevelRankingDto>(
+                    "SELECT * " +
+                    "FROM elite_stage_level_rankings " +
+                    "WHERE date = (" +
+                    "   SELECT MAX(r2.date) " +
+                    "   FROM elite_stage_level_rankings AS r2 " +
+                    "   WHERE r2.stage_id = @stage_id " +
+                    "   AND r2.level_id = @level_id " +
+                    "   AND r2.date <= @date" +
+                    ") " +
+                    "AND stage_id = @stage_id " +
+                    "AND level_id = @level_id",
+                    new
+                    {
+                        stage_id = (long)stage,
+                        level_id = (long)level,
+                        date = date.Date
+                    })
+                .ConfigureAwait(false);
+        }
+
         private async Task<IReadOnlyCollection<EntryDto>> GetEntriesByCriteriaInternalAsync(
             Stage? stage, Level? level, DateTime? startDate, DateTime? endDate, long? playerId, Game? game)
         {

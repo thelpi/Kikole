@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
 
@@ -17,5 +18,9 @@ namespace KikoleSite.Elite.Repositories
         Task BanPlayerAsync(long playerId);
 
         Task DeleteEntriesAsync(params long[] entriesId);
+
+        Task<long> ReplaceRankingAsync(StageLevelRankingDto ranking);
+
+        Task RemoveRankingsAfterDateAsync(Stage stage, Level level, DateTime dateMinInclude);
     }
 }

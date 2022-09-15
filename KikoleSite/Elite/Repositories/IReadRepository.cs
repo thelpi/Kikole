@@ -11,5 +11,6 @@ namespace KikoleSite.Elite.Repositories
         Task<IReadOnlyCollection<PlayerDto>> GetPlayersAsync(bool banned = false, bool fromCache = false);
         Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate);
         Task<IReadOnlyCollection<EntryDto>> GetPlayerEntriesAsync(long playerId, Game game);
+        Task<IReadOnlyCollection<StageLevelRankingDto>> GetStageLevelRankingsAsync(Stage stage, Level level, DateTime date);
     }
 }

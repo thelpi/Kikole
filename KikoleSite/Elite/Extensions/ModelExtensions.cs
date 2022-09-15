@@ -216,5 +216,103 @@ namespace KikoleSite.Elite.Extensions
             }
             return rankings;
         }
+
+        internal static void ManageDateLessEntries(
+            this List<Dtos.EntryDto> entries,
+            NoDateEntryRankingRule rule,
+            DateTime now)
+        {
+            if (rule == NoDateEntryRankingRule.Ignore)
+            {
+                entries.RemoveAll(e => !e.Date.HasValue);
+                return;
+            }
+
+            var game = entries.First().Stage.GetGame();
+
+            var dateMinMaxPlayer = new Dictionary<long, (DateTime Min, DateTime Max, IReadOnlyCollection<Dtos.EntryDto> Entries)>();
+
+            var dateLessEntries = entries.Where(e => !e.Date.HasValue).ToList();
+            foreach (var entry in dateLessEntries)
+            {
+                if (!dateMinMaxPlayer.ContainsKey(entry.PlayerId))
+                {
+                    var dateMin = entries
+                        .Where(e => e.PlayerId == entry.PlayerId && e.Date.HasValue)
+                        .Select(e => e.Date.Value)
+                        .Concat(game.GetEliteFirstDate().Yield())
+                        .Min();
+                    var dateMax = entries.Where(e => e.PlayerId == entry.PlayerId).Max(e => e.Date ?? Player.LastEmptyDate);
+                    dateMinMaxPlayer.Add(entry.PlayerId, (dateMin, dateMax, entries.Where(e => e.PlayerId == entry.PlayerId).ToList()));
+                }
+
+                // Same time with a known date (possible for another engine/system)
+                var sameEntry = dateMinMaxPlayer[entry.PlayerId].Entries.FirstOrDefault(e => e.Stage == entry.Stage && e.Level == entry.Level && e.Time == entry.Time && e.Date.HasValue);
+                // Better time (closest to current) with a known date
+                var betterEntry = dateMinMaxPlayer[entry.PlayerId].Entries.OrderBy(e => e.Time).FirstOrDefault(e => e.Stage == entry.Stage && e.Level == entry.Level && e.Time < entry.Time && e.Date.HasValue);
+                // Worse time (closest to current) with a known date
+                var worseEntry = dateMinMaxPlayer[entry.PlayerId].Entries.OrderByDescending(e => e.Time).FirstOrDefault(e => e.Stage == entry.Stage && e.Level == entry.Level && e.Time < entry.Time && e.Date.HasValue);
+
+                if (sameEntry != null)
+                {
+                    // use the another engine/system date as the current date
+                    entry.Date = sameEntry.Date;
+                    entry.IsSimulatedDate = true;
+                }
+                else
+                {
+                    var realMin = dateMinMaxPlayer[entry.PlayerId].Min;
+                    if (worseEntry != null && worseEntry.Date > realMin)
+                    {
+                        realMin = worseEntry.Date.Value;
+                    }
+
+                    var realMax = dateMinMaxPlayer[entry.PlayerId].Max;
+                    if (betterEntry != null && betterEntry.Date < realMax)
+                    {
+                        realMax = betterEntry.Date.Value;
+                    }
+
+                    // when the min / max theoric is too wide to set a proper date
+                    if (realMin == game.GetEliteFirstDate() && realMax == Player.LastEmptyDate)
+                    {
+                        entries.Remove(entry);
+                        continue;
+                    }
+
+                    switch (rule)
+                    {
+                        case NoDateEntryRankingRule.Average:
+                            entry.Date = realMin.AddDays((realMax - realMin).TotalDays / 2).Date;
+                            entry.IsSimulatedDate = true;
+                            break;
+                        case NoDateEntryRankingRule.Max:
+                            entry.Date = realMax;
+                            entry.IsSimulatedDate = true;
+                            break;
+                        case NoDateEntryRankingRule.Min:
+                            entry.Date = realMin;
+                            entry.IsSimulatedDate = true;
+                            break;
+                        case NoDateEntryRankingRule.PlayerHabit:
+                            var entriesBetween = dateMinMaxPlayer[entry.PlayerId].Entries
+                                .Where(e => e.Date < realMax && e.Date > realMin)
+                                .Select(e => Convert.ToInt32((now - e.Date.Value).TotalDays))
+                                .ToList();
+                            if (entriesBetween.Count == 0)
+                            {
+                                entry.Date = realMin.AddDays((realMax - realMin).TotalDays / 2).Date;
+                            }
+                            else
+                            {
+                                var avgDays = entriesBetween.Average();
+                                entry.Date = now.AddDays(-avgDays).Date;
+                            }
+                            entry.IsSimulatedDate = true;
+                            break;
+                    }
+                }
+            }
+        }
     }
 }
