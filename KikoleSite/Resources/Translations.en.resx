@@ -219,6 +219,9 @@
   <data name="InvalidQOrA" xml:space="preserve">
     <value>Invalid question or answer</value>
   </data>
+  <data name="InvalidRegistrationId" xml:space="preserve">
+    <value>This registration identifier is invalid</value>
+  </data>
   <data name="InvalidRequest" xml:space="preserve">
     <value>Invalid request: {0}</value>
   </data>
@@ -260,6 +263,9 @@
   </data>
   <data name="TipYoungerPlayerShort" xml:space="preserve">
     <value>younger</value>
+  </data>
+  <data name="UsedRegistrationId" xml:space="preserve">
+    <value>This registration identifier is already used</value>
   </data>
   <data name="UserCreationFailure" xml:space="preserve">
     <value>User creation failure</value>

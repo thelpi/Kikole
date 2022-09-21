@@ -84,7 +84,7 @@ namespace KikoleSite
         }
 
         public async Task<string> CreateAccountAsync(string login,
-            string password, string question, string answer, string ip)
+            string password, string question, string answer, string ip, Guid registrationId)
         {
             var request = new UserRequest
             {
@@ -109,12 +109,26 @@ namespace KikoleSite
             if (existingUser != null)
                 return _resources["AlreadyExistsAccount"];
 
+            var registration = await _userRepository
+                .GetRegistrationGuidAsync(registrationId.ToString())
+                .ConfigureAwait(false);
+
+            if (registration == null)
+                return _resources["InvalidRegistrationId"];
+
+            if (registration.UserId.HasValue)
+                return _resources["UsedRegistrationId"];
+
             var userId = await _userRepository
                 .CreateUserAsync(request.ToDto(_crypter))
                 .ConfigureAwait(false);
 
             if (userId == 0)
                 return _resources["UserCreationFailure"];
+
+            await _userRepository
+                .LinkRegistrationGuidToUserAsync(registrationId.ToString(), userId)
+                .ConfigureAwait(false);
 
             return null;
         }

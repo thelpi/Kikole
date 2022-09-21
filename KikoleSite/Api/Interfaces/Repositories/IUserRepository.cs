@@ -21,5 +21,9 @@ namespace KikoleSite.Api.Interfaces.Repositories
         Task<UserDto> GetUserByIdAsync(ulong userId);
 
         Task ResetUserQAndAAsync(ulong userId, string question, string anwser);
+
+        Task<RegistrationGuidDto> GetRegistrationGuidAsync(string id);
+
+        Task LinkRegistrationGuidToUserAsync(string id, ulong userId);
     }
 }

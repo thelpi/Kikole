@@ -72,6 +72,12 @@ else
 
     <h3>@localizer["CreateAccount"]</h3>
     <form method="post" action="/Account">
+        <p><a href="/Home/Contest">@localizer["FreeRegistrationClosed"]</a></p>
+        <div style="margin-top: 5px">
+            <label style="width: 150px; text-align: right">@localizer["SetRegistrationId"]</label>
+            @Html.TextBoxFor(m => m.RegistrationId, new { @style = "width: 200px" })
+        </div>
+        <div style="font-size: small; margin-top: 5px">@localizer["TipRegistrationId"]</div>
         <div style="margin-top: 5px">
             <label style="width: 150px; text-align: right">@localizer["SetLogin"]</label>
             @Html.TextBoxFor(m => m.LoginCreateSubmission, new { @style = "width: 200px" })

@@ -23,5 +23,7 @@
 
         public string LoginRecoverySubmission { get; set; }
         public string QuestionRecovery { get; set; }
+
+        public string RegistrationId { get; set; }
     }
 }

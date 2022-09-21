@@ -101,6 +101,28 @@ namespace KikoleSite.Api.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<RegistrationGuidDto> GetRegistrationGuidAsync(string id)
+        {
+            return await GetDtoAsync<RegistrationGuidDto>(
+                    "registration_guids",
+                    ("id", id))
+                .ConfigureAwait(false);
+        }
+
+        public async Task LinkRegistrationGuidToUserAsync(string id, ulong userId)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE registration_guids " +
+                    "SET user_id = @userId " +
+                    "WHERE id = @id",
+                    new
+                    {
+                        id,
+                        userId
+                    })
+                .ConfigureAwait(false);
+        }
+
         private async Task<bool> ResetUserPasswordAsync(string login, (string, string) fieldInfo, string newPassword)
         {
             var user = await GetDtoAsync<UserDto>(

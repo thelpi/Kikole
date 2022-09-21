@@ -132,6 +132,9 @@
   <data name="CurrentPwd" xml:space="preserve">
     <value>Mot de passe actuel :</value>
   </data>
+  <data name="FreeRegistrationClosed" xml:space="preserve">
+    <value>Inscription désormais sur invitation, suivez le lien pour savoir pourquoi</value>
+  </data>
   <data name="GetPwdByQuestion" xml:space="preserve">
     <value>Récupérer le mot de passe avec la question secrète</value>
   </data>
@@ -165,8 +168,14 @@
   <data name="SetPwd" xml:space="preserve">
     <value>Mot de passe :</value>
   </data>
+  <data name="SetRegistrationId" xml:space="preserve">
+    <value>Code d'inscription :</value>
+  </data>
   <data name="TipRecovery" xml:space="preserve">
     <value>Les champs ci-dessous sont optionnels, mais si vous perdez votre mot de passe, la réponse à cette question peut vous sauver !</value>
+  </data>
+  <data name="TipRegistrationId" xml:space="preserve">
+    <value>Vous ne pouvez pas vous inscrire sans ce code (au format XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)</value>
   </data>
   <data name="Update" xml:space="preserve">
     <value>Mettre à jour</value>

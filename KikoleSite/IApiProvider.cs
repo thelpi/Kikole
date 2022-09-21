@@ -12,7 +12,7 @@ namespace KikoleSite
     {
         #region user accounts
 
-        Task<string> CreateAccountAsync(string login, string password, string question, string answer, string ip);
+        Task<string> CreateAccountAsync(string login, string password, string question, string answer, string ip, Guid registrationId);
 
         Task<(bool, string)> LoginAsync(string login, string password);
 

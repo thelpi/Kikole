@@ -123,7 +123,9 @@ namespace KikoleSite.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)
                     || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
-                    || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
+                    || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission)
+                    || string.IsNullOrWhiteSpace(model.RegistrationId)
+                    || !System.Guid.TryParse(model.RegistrationId, out var registrationId))
                 {
                     model.Error = _localizer["InvalidForm"];
                 }
@@ -134,7 +136,8 @@ namespace KikoleSite.Controllers
                             model.PasswordCreate1Submission,
                             model.RecoveryQCreate,
                             model.RecoveryACreate,
-                            Request.HttpContext.Connection.RemoteIpAddress.ToString())
+                            Request.HttpContext.Connection.RemoteIpAddress.ToString(),
+                            registrationId)
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(value))
                     {

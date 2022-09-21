@@ -132,6 +132,9 @@
   <data name="CurrentPwd" xml:space="preserve">
     <value>Current password:</value>
   </data>
+  <data name="FreeRegistrationClosed" xml:space="preserve">
+    <value>Registration on invitation for now, follow the link to know why</value>
+  </data>
   <data name="GetPwdByQuestion" xml:space="preserve">
     <value>Recover password with secret question</value>
   </data>
@@ -165,8 +168,14 @@
   <data name="SetPwd" xml:space="preserve">
     <value>Password:</value>
   </data>
+  <data name="SetRegistrationId" xml:space="preserve">
+    <value>Registration id:</value>
+  </data>
   <data name="TipRecovery" xml:space="preserve">
     <value>Fields below are optionnal, but if you lose your password, the answer to this question might save you!</value>
+  </data>
+  <data name="TipRegistrationId" xml:space="preserve">
+    <value>You can't register without this id (formated as XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)</value>
   </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>

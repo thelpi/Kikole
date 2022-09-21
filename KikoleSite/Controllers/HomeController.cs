@@ -23,6 +23,12 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        public IActionResult Contest()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult Contact()
         {
             var (token, login) = GetAuthenticationCookie();

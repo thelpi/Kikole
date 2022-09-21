@@ -219,6 +219,9 @@
   <data name="InvalidQOrA" xml:space="preserve">
     <value>Question ou réponse invalide</value>
   </data>
+  <data name="InvalidRegistrationId" xml:space="preserve">
+    <value>Cet identifiant d'enregistrement est invalide</value>
+  </data>
   <data name="InvalidRequest" xml:space="preserve">
     <value>Requête invalide : {0}</value>
   </data>
@@ -260,6 +263,9 @@
   </data>
   <data name="TipYoungerPlayerShort" xml:space="preserve">
     <value>plus jeune</value>
+  </data>
+  <data name="UsedRegistrationId" xml:space="preserve">
+    <value>Cet identifiant d'enregistrement est déjà utilisé</value>
   </data>
   <data name="UserCreationFailure" xml:space="preserve">
     <value>Echec de la création du compte</value>
