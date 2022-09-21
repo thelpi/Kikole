@@ -123,11 +123,25 @@ namespace KikoleSite.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)
                     || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
-                    || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission)
-                    || string.IsNullOrWhiteSpace(model.RegistrationId)
-                    || !System.Guid.TryParse(model.RegistrationId, out var registrationId))
+                    || string.IsNullOrWhiteSpace(model.RegistrationId))
                 {
                     model.Error = _localizer["InvalidForm"];
+                }
+                else if (!System.Guid.TryParse(model.RegistrationId, out var registrationId))
+                {
+                    model.Error = _localizer["InvalidRegistrationGuidFormat"];
+                }
+                else if (!string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
+                {
+                    model.Error = _localizer["NotMatchingPassword"];
+                }
+                else if (model.PasswordCreate1Submission.Length < 6)
+                {
+                    model.Error = _localizer["TooShortPassword"];
+                }
+                else if (model.LoginCreateSubmission.Length < 3)
+                {
+                    model.Error = _localizer["TooShortLogin"];
                 }
                 else
                 {

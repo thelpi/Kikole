@@ -120,6 +120,12 @@
   <data name="InvalidForm" xml:space="preserve">
     <value>Formulaire invalide</value>
   </data>
+  <data name="InvalidRegistrationGuidFormat" xml:space="preserve">
+    <value>Le code d'inscription est dans un format invalide</value>
+  </data>
+  <data name="NotMatchingPassword" xml:space="preserve">
+    <value>Les mots de passe ne correspondent pas</value>
+  </data>
   <data name="PasswordChanged" xml:space="preserve">
     <value>Votre mot de passe a été changé</value>
   </data>
@@ -128,5 +134,11 @@
   </data>
   <data name="QandAUpdated" xml:space="preserve">
     <value>Question et réponse mises à jour</value>
+  </data>
+  <data name="TooShortLogin" xml:space="preserve">
+    <value>Le login est trop court (3 caractères minimum)</value>
+  </data>
+  <data name="TooShortPassword" xml:space="preserve">
+    <value>Le mot de passe est trop court (6 caractères minimum)</value>
   </data>
 </root>
