@@ -19,6 +19,7 @@ $(function () {
             if ($("#submitYear").length > 0) {
                 $("#submitYear").click();
             }
+            return false;
         },
         minLength: 1
     });
@@ -46,9 +47,11 @@ $(function () {
         },
         select: function (e, i) {
             $("#countryId").val(i.item.value);
+            $("#countryName").val(i.item.label);
             if ($("#submitCountry").length > 0) {
                 $("#submitCountry").click();
             }
+            return false;
         },
         minLength: 1
     });
@@ -76,6 +79,7 @@ var autocompleteClubs = function (clubIdName, submit) {
             if (submit && $("#submitClub").length > 0) {
                 $("#submitClub").click();
             }
+            return false;
         },
         minLength: 1
     });
@@ -93,6 +97,7 @@ var autocompleteLogins = function (logins, fieldId) {
         source: logins,
         select: function (e, i) {
             $(fieldId).val(i.item.value);
+            return false;
         },
         minLength: 1
     });
