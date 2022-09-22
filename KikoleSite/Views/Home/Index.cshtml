@@ -15,6 +15,14 @@
     }
     else if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div style="margin-top: 20px; color:crimson; font-size: large">
+                <fieldset style="padding: 15px; border-color: red; border-width: 1px; border-style: solid ">
+                    @Html.Raw(Model.Message)
+                </fieldset>
+            </div>
+        }
         await Html.RenderPartialAsync("Partial/Rules", Model.Chart).ConfigureAwait(false);
         <div style="margin-top: 40px">
             <label>@localizer["YouAreNotLogged"]</label>

@@ -120,11 +120,15 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = GetAuthenticationCookie();
 
+            var msg = await _apiProvider
+                .GetCurrentMessageAsync()
+                .ConfigureAwait(false);
+
             var chart = await _apiProvider
                 .GetProposalChartAsync()
                 .ConfigureAwait(false);
 
-            var model = new HomeModel { Points = chart.BasePoints };
+            var model = new HomeModel { Points = chart.BasePoints, Message = msg };
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
@@ -185,6 +189,12 @@ namespace KikoleSite.Controllers
             {
                 return Redirect("/");
             }
+
+            var msg = await _apiProvider
+                .GetCurrentMessageAsync()
+                .ConfigureAwait(false);
+
+            model.Message = msg;
 
             var value = model.GetValueFromProposalType(proposalType);
             if (string.IsNullOrWhiteSpace(value))
@@ -269,10 +279,6 @@ namespace KikoleSite.Controllers
                 model.MessageToDisplay = errorMessageForced;
             }
 
-            var msg = await _apiProvider
-                .GetCurrentMessageAsync()
-                .ConfigureAwait(false);
-
             var pendings = await _apiProvider
                 .GetChallengesWaitingForResponseAsync(token)
                 .ConfigureAwait(false);
@@ -293,7 +299,6 @@ namespace KikoleSite.Controllers
                 model.EasyClue = easyClue;
 
             model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
-            model.Message = msg;
             model.LoggedAs = login;
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()
