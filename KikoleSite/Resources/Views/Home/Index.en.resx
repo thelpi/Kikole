@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountMandatory" xml:space="preserve">
-    <value>An account is mandatory to play, but it takes 10 seconds to create and no personal information are required!</value>
+    <value>An account is mandatory to play. Until november, you need an invitation to sign up. The nov. 1st, registration will be free again.</value>
   </data>
   <data name="BirthYearTitle" xml:space="preserve">
     <value>Year of birth:</value>

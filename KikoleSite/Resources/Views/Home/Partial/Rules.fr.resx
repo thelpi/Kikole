@@ -164,7 +164,7 @@
     <value>Une proposition correcte dans n'importe quelle catégorie ne coûte &lt;span style="color: forestgreen; font-size: large"&gt;aucun point&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
-    <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu très simple où vous devez deviner un nouveau footballeur &lt;span style="color: crimson"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu où vous devez deviner un nouveau footballeur &lt;span style="color: crimson"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;Vos adversaires doivent deviner le même joueur, donc soyez le meilleur pour apparaître dans le &lt;a href="/Leaderboard"&gt;classement&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;Pour trouver le joueur du jour, vous pouvez faire des propositions concernant son année de naissance, poste, nationalité et carrière en club. Un indice de départ est également donné.&lt;/p&gt;
 &lt;p&gt;Veuillez noter que le joueur peut être actif ou retraité, de plus les joueuses sont parfois possibles bien que rare.&lt;/p&gt;

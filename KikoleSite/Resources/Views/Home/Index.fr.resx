@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountMandatory" xml:space="preserve">
-    <value>Le compte est nécessaire pour jouer, mais il prend 10 secondes à créer et aucune information personnelle n'est requise !</value>
+    <value>Un compte est nécessaire pour jouer. Jusqu'au mois de novembre, il vous faut une invitation pour s'inscrire. L'inscription redeviendra libre à cette date.</value>
   </data>
   <data name="BirthYearTitle" xml:space="preserve">
     <value>Année de naissance :</value>

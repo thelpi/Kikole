@@ -164,7 +164,7 @@
     <value>A good guess on any category costs &lt;span style="color: forestgreen; font-size: large"&gt;no points&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
-    <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikole?"&lt;/span&gt; is a very simple game where you have to guess a new football player &lt;span style="color: crimson"&gt;every day&lt;/span&gt;.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikole?"&lt;/span&gt; is a game where you have to guess a new football player &lt;span style="color: crimson"&gt;every day&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;Your opponents have the same player to guess, so be the best and you'll appear on our &lt;a href="/Leaderboard"&gt;leaderboard&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.&lt;/p&gt;
 &lt;p&gt;Notice that the player can be active or retired, moreover feminine players are possible but quite rare.&lt;/p&gt;
