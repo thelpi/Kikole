@@ -28,7 +28,7 @@
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {
             <div style="margin-top: 20px; color:crimson; font-size: large">
-                @Model.Message
+                @Html.Raw(Model.Message)
             </div>
         }
         @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
