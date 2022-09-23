@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
@@ -17,7 +18,7 @@ namespace KikoleSite.Api.Interfaces.Services
         /// <param name="endDate">Ending date.</param>
         /// <param name="leaderSort">Sort type.</param>
         /// <returns>Leaderboard.</returns>
-        Task<Leaderboard> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort);
+        Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort);
 
         /// <summary>
         /// Gets the board for a single day.

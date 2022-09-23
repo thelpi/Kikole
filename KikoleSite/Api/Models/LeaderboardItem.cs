@@ -12,5 +12,8 @@ namespace KikoleSite.Api.Models
         public int KikolesFound { get; set; }
         public int KikolesAttempted { get; set; }
         public int KikolesProposed { get; set; }
+
+        // ugly, but easier here than in JS
+        public string BestTimeString => BestTime.ToNaString();
     }
 }

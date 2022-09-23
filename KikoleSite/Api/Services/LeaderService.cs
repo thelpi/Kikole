@@ -46,7 +46,7 @@ namespace KikoleSite.Api.Services
         }
 
         /// <inheritdoc />
-        public async Task<Leaderboard> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort)
+        public async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort)
         {
             if (startDate.Date > endDate.Date)
             {
@@ -116,13 +116,7 @@ namespace KikoleSite.Api.Services
                     break;
             }
 
-            return new Leaderboard
-            {
-                EndDate = endDate,
-                StartDate = startDate,
-                Items = items,
-                Sort = leaderSort
-            };
+            return items;
         }
 
         /// <inheritdoc />

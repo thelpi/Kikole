@@ -20,8 +20,13 @@
     </div>
 
     <h3>@Model.BoardName</h3>
-    <span>(@Html.Raw(string.Format(localizer["LeaderboardDesc"].Value, Model.Leaderboard.Sort.GetLabel(), Model.Leaderboard.StartDate.ToNaString(), Model.Leaderboard.EndDate.ToNaString())))</span>
-    <table style="margin-top: 5px">
+    <span>(@Html.Raw(string.Format(localizer["LeaderboardDesc"].Value, Model.SortType.GetLabel(), Model.MinimalDate.ToNaString(), Model.MaximalDate.ToNaString())))</span>
+    @{ 
+        var loaderSize = 50;
+        var loaderMargin = $"-{(loaderSize / 2)}px";
+    }
+    <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/elite/ajax-loader.gif" style="display: none; left: 50%; margin-left: @loaderMargin; margin-top: 100px;" />
+    <table id="globalLeaderboardTable" style="margin-top: 5px">
         <thead>
             <tr>
                 <th style="text-align: center; width: 50px">@localizer["PosShortHeader"]</th>
@@ -33,34 +38,7 @@
                 <th style="text-align: center; width: 75px">@localizer["ProposedHeader"]</th>
             </tr>
         </thead>
-        <tbody>
-            @{
-                var i = 0;
-            }
-            @if (Model.Leaderboard.Items.Count > 0)
-            {
-                foreach (var leaderItem in Model.Leaderboard.Items)
-                {
-                    var background = i % 2 == 0 ? "white" : "azure";
-                    <tr style="background-color: @background">
-                        <td style="text-align: center">@leaderItem.Rank</td>
-                        <td style="color: crimson"><a href="/Leaderboard?userId=@leaderItem.UserId">@leaderItem.UserName</a></td>
-                        <td style="text-align: right">@leaderItem.Points</td>
-                        <td style="text-align: right">@leaderItem.BestTime.ToNaString()</td>
-                        <td style="text-align: right">@leaderItem.KikolesFound</td>
-                        <td style="text-align: right">@leaderItem.KikolesAttempted</td>
-                        <td style="text-align: right">@leaderItem.KikolesProposed</td>
-                    </tr>
-                    i++;
-                }
-            }
-            else
-            {
-                <tr style="background-color: white">
-                    <td colspan="7">@localizer["NoUserInTable"]</td>
-                </tr>
-            }
-        </tbody>
+        <tbody></tbody>
     </table>
 
     <h3>@localizer["DailyLeaderboard"]</h3>
@@ -77,6 +55,9 @@
             </tr>
         </thead>
         <tbody>
+            @{
+                var i = 0;
+            }
             @if (Model.Dayboard.Leaders.Count > 0)
             {
                 i = 0;
@@ -135,3 +116,42 @@
 </form>
 <h3>@localizer["NewPageBuilding"]</h3>
 <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
+
+<script>
+    $(function () {
+        $.ajax({
+            url: '/leaderboard-details?sortType=@Model.SortType&minimalDate=@Model.MinimalDate.ToString("yyyy-MM-dd")&maximalDate=@Model.MaximalDate.ToString("yyyy-MM-dd")',
+            type: "GET",
+            dataType: "json",
+            beforeSend: function () {
+                $("#loading-image").show();
+                $("#globalLeaderboardTable").hide();
+            },
+            success: function (data) {
+                var i = 0;
+                var tabBody = $("#globalLeaderboardTable").find('tbody');
+                data.forEach(e => {
+                    var background = i % 2 == 0 ? "white" : "azure";
+                    tabBody.append(`<tr style="background-color: ` + background + `">
+                        <td style="text-align: center">` + e.rank + `</td>
+                        <td style="color: crimson"><a href="/Leaderboard?userId=` + e.userId + `">` + e.userName + `</a></td>
+                        <td style="text-align: right">` + e.points + `</td>
+                        <td style="text-align: right">` + e.bestTimeString + `</td>
+                        <td style="text-align: right">` + e.kikolesFound + `</td>
+                        <td style="text-align: right">` + e.kikolesAttempted + `</td>
+                        <td style="text-align: right">` + e.kikolesProposed + `</td>
+                    </tr>`);
+                    i++;
+                });
+                if (i == 0) {
+                    tabBody.append('<tr style="background-color: white"><td colspan="7">@localizer["NoUserInTable"]</td></tr>');
+                }
+                $("#loading-image").hide();
+                $("#globalLeaderboardTable").show();
+            },
+            error: function (data) {
+                alert('Call error: ' + JSON.stringify(data));
+            }
+        });
+    });
+</script>

@@ -18,7 +18,7 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var (token, login) = GetAuthenticationCookie();
+            var (_, login) = GetAuthenticationCookie();
 
             return View(new AccountModel
             {

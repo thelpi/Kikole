@@ -273,7 +273,7 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
-        public async Task<Leaderboard> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
+        public async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
         {
             return await _leaderService
                 .GetLeaderboardAsync(minimalDate, maximalDate, leaderSort)

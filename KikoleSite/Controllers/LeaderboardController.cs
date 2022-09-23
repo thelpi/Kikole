@@ -119,7 +119,7 @@ namespace KikoleSite.Controllers
 
         private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
         {
-            model = model ?? new LeaderboardModel();
+            model ??= new LeaderboardModel();
 
             model.MinimalDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             model.MaximalDate = DateTime.Now.Date;
@@ -132,13 +132,19 @@ namespace KikoleSite.Controllers
             return View(model);
         }
 
+        [HttpGet("leaderboard-details")]
+        public async Task<JsonResult> GetLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
+        {
+            var ld = await _apiProvider
+                .GetLeaderboardAsync(sortType, minimalDate, maximalDate)
+                .ConfigureAwait(false);
+
+            return Json(ld);
+        }
+
         private async Task SetModelPropertiesAsync(LeaderboardModel model)
         {
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
-
-            model.Leaderboard = await _apiProvider
-                .GetLeaderboardAsync(model.SortType, model.MinimalDate, model.MaximalDate)
-                .ConfigureAwait(false);
 
             model.Dayboard = await _apiProvider
                 .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)

@@ -37,8 +37,6 @@ namespace KikoleSite.Models
 
         public DayLeaderSorts DaySortType { get; set; }
 
-        public Leaderboard Leaderboard { get; set; }
-
         public Dayboard Dayboard { get; set; }
     }
 }
