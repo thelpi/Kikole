@@ -61,7 +61,6 @@ namespace KikoleSite
                 .AddSingleton<ILeaderRepository, LeaderRepository>()
                 .AddSingleton<IBadgeRepository, BadgeRepository>()
                 .AddSingleton<IMessageRepository, MessageRepository>()
-                .AddSingleton<IChallengeRepository, ChallengeRepository>()
                 .AddSingleton<IDiscussionRepository, DiscussionRepository>()
                 .AddSingleton<IStatisticRepository, StatisticRepository>()
                 // handlers
@@ -71,7 +70,6 @@ namespace KikoleSite
                 .AddSingleton<IPlayerService, PlayerService>()
                 .AddSingleton<ILeaderService, LeaderService>()
                 .AddSingleton<IProposalService, ProposalService>()
-                .AddSingleton<IChallengeService, ChallengeService>()
                 .AddSingleton<IStatisticService, StatisticService>()
                 // helpers
                 .AddSingleton<ICrypter, Crypter>()

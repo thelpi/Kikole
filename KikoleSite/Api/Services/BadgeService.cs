@@ -26,7 +26,6 @@ namespace KikoleSite.Api.Services
         private readonly ILeaderRepository _leaderRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IProposalRepository _proposalRepository;
-        private readonly IChallengeRepository _challengeRepository;
         private readonly IUserRepository _userRepository;
         private readonly IClock _clock;
 
@@ -38,7 +37,6 @@ namespace KikoleSite.Api.Services
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
-        /// <param name="challengeRepository">Instance of <see cref="IChallengeRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
         /// <param name="clock">Clock service.</param>
         public BadgeService(IPlayerHandler playerHandler,
@@ -46,7 +44,6 @@ namespace KikoleSite.Api.Services
             ILeaderRepository leaderRepository,
             IPlayerRepository playerRepository,
             IProposalRepository proposalRepository,
-            IChallengeRepository challengeRepository,
             IUserRepository userRepository,
             IClock clock)
         {
@@ -55,7 +52,6 @@ namespace KikoleSite.Api.Services
             _leaderRepository = leaderRepository;
             _playerRepository = playerRepository;
             _proposalRepository = proposalRepository;
-            _challengeRepository = challengeRepository;
             _userRepository = userRepository;
             _clock = clock;
         }
@@ -66,9 +62,6 @@ namespace KikoleSite.Api.Services
                 Badges.DoYouSpeakPatois,
                 Badges.DoItYourself,
                 Badges.WeAreKikole,
-                Badges.AllIn,
-                Badges.GambleAddiction,
-                Badges.ChallengeAccepted,
                 Badges.Dedicated
             };
 
@@ -243,60 +236,6 @@ namespace KikoleSite.Api.Services
                     (0, 7, (l, p) => ((int)p) + l.Points, p => (int)p >= 6666)
                 }
             };
-
-        private static readonly IReadOnlyDictionary<Badges, Func<ChallengeDto, IReadOnlyCollection<ChallengeDto>, bool>> ChallengeBasedBadgeCondition
-            = new Dictionary<Badges, Func<ChallengeDto, IReadOnlyCollection<ChallengeDto>, bool>>
-            {
-                {
-                    Badges.GambleAddiction,
-                    (c, ch) => ch.Count(ac => ac.HostUserId == c.HostUserId) >= 5
-                },
-                {
-                    Badges.AllIn,
-                    (c, ch) => c.PointsRate >= 80
-                },
-                {
-                    Badges.ChallengeAccepted,
-                    (c, ch) => true
-                }
-            };
-
-        /// <inheritdoc />
-        public async Task ManageChallengesBasedBadgesAsync(ulong challengeId)
-        {
-            var challenge = await _challengeRepository
-                .GetChallengeByIdAsync(challengeId)
-                .ConfigureAwait(false);
-
-            var allAccepted = await _challengeRepository
-               .GetAcceptedChallengesAsync(null, null)
-               .ConfigureAwait(false);
-
-            foreach (var user in new[] { challenge.HostUserId, challenge.GuestUserId })
-            {
-                if (ChallengeBasedBadgeCondition[Badges.ChallengeAccepted](challenge, allAccepted))
-                {
-                    await AddBadgeToUserAsync(
-                            Badges.ChallengeAccepted, user)
-                        .ConfigureAwait(false);
-                }
-
-
-                if (ChallengeBasedBadgeCondition[Badges.AllIn](challenge, allAccepted))
-                {
-                    await AddBadgeToUserAsync(
-                            Badges.AllIn, user)
-                        .ConfigureAwait(false);
-                }
-            }
-
-            if (ChallengeBasedBadgeCondition[Badges.GambleAddiction](challenge, allAccepted))
-            {
-                await AddBadgeToUserAsync(
-                        Badges.GambleAddiction, challenge.HostUserId)
-                    .ConfigureAwait(false);
-            }
-        }
 
         /// <inheritdoc />
         public async Task ResetBadgesAsync(Languages language)

@@ -69,12 +69,5 @@ namespace KikoleSite.Api.Interfaces.Services
         /// </summary>
         /// <returns>Nothing.</returns>
         Task ResetBadgesAsync(Languages language);
-
-        /// <summary>
-        /// Manages badges related to a new challenge accepted.
-        /// </summary>
-        /// <param name="challengeId">Challenge identifier involved.</param>
-        /// <returns>Nothing.</returns>
-        Task ManageChallengesBasedBadgesAsync(ulong challengeId);
     }
 }
