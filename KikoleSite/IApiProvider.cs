@@ -34,6 +34,8 @@ namespace KikoleSite
 
         #region stats, badges and leaderboard
 
+        Task<Palmares> GetPalmaresAsync();
+
         Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate);
 
         Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort);

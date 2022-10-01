@@ -166,10 +166,13 @@
     <value>sort by {0}, from {1} to {2}</value>
   </data>
   <data name="NewPageBuilding" xml:space="preserve">
-    <value>Page under construction</value>
+    <value>Statistics</value>
   </data>
   <data name="NoUserInTable" xml:space="preserve">
     <value>Nobody</value>
+  </data>
+  <data name="PalmaresLink" xml:space="preserve">
+    <value>Prize list</value>
   </data>
   <data name="PointsHeader" xml:space="preserve">
     <value>Points</value>
@@ -187,7 +190,7 @@
     <value>Sort type:</value>
   </data>
   <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Statistics</value>
+    <value>Stats about kikoles and website</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Time</value>

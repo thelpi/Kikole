@@ -142,6 +142,32 @@ namespace KikoleSite.Controllers
             return Json(ld);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Palmares()
+        {
+            var model = new PalmaresModel();
+
+            var data = await _apiProvider
+                .GetPalmaresAsync()
+                .ConfigureAwait(false);
+
+            model.MonthlyPalmares = data.MonthlyPalmares
+                .Select(x => (
+                    new DateTime(x.Key.year, x.Key.month, 1),
+                    new[]
+                    {
+                        (x.Value.first.Id, x.Value.first.Login),
+                        (x.Value.second.Id, x.Value.second.Login),
+                        (x.Value.third.Id, x.Value.third.Login)
+                    }))
+                .ToList();
+            model.GlobalPalmares = data.GlobalPalmares
+                .Select(x => (x.user.Login, x.first, x.second, x.third))
+                .ToList();
+
+            return View("Palmares", model);
+        }
+
         private async Task SetModelPropertiesAsync(LeaderboardModel model)
         {
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);

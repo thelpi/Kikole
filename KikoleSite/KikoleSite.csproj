@@ -28,6 +28,9 @@
     <Content Update="Views\Home\Partial\Rules.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\Leaderboard\Palmares.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Leaderboard\SingleAward.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

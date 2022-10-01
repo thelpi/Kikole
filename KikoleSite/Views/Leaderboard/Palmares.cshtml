@@ -1,0 +1,68 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model PalmaresModel
+
+<h2>Palmares</h2>
+
+<h3>Par mois</h3>
+<table style="margin-top: 5px">
+    <thead>
+        <tr>
+            <th style="text-align: center; width: 75px">Date</th>
+            <th style="text-align: center; width: 150px">Premier</th>
+            <th style="text-align: center; width: 150px">Deuxième</th>
+            <th style="text-align: center; width: 150px">Troisième</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.MonthlyPalmares.Count == 0)
+        {
+            <tr>
+                <td colspan="4">No data to display</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var (date, palmares) in Model.MonthlyPalmares)
+            {
+                <tr>
+                    <td style="text-align: center">@date.ToString("MMM yyyy")</td>
+                    <td style="text-align: center"><a href="/Leaderboard?userId=@palmares[0].playerId">@palmares[0].playerName</a></td>
+                    <td style="text-align: center"><a href="/Leaderboard?userId=@palmares[1].playerId">@palmares[1].playerName</a></td>
+                    <td style="text-align: center"><a href="/Leaderboard?userId=@palmares[2].playerId">@palmares[2].playerName</a></td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<h3>Total</h3>
+<table style="margin-top: 5px">
+    <thead>
+        <tr>
+            <th style="text-align: center; width: 150px">Joueur</th>
+            <th style="text-align: center; width: 100px">Nb. 1er</th>
+            <th style="text-align: center; width: 100px">Nb. 2ème</th>
+            <th style="text-align: center; width: 100px">Nb. 3ème</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.GlobalPalmares.Count == 0)
+        {
+            <tr>
+                <td colspan="4">No data to display</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var (player, first, second, third) in Model.GlobalPalmares)
+            {
+                <tr>
+                    <td style="text-align: center">@player</td>
+                    <td style="text-align: center; color: gold"><b>@first</b></td>
+                    <td style="text-align: center; color: silver"><b>@second</b></td>
+                    <td style="text-align: center; color: peru"><b>@third</b></td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

@@ -21,7 +21,7 @@
 
     <h3>@Model.BoardName</h3>
     <span>(@Html.Raw(string.Format(localizer["LeaderboardDesc"].Value, Model.SortType.GetLabel(), Model.MinimalDate.ToNaString(), Model.MaximalDate.ToNaString())))</span>
-    @{ 
+    @{
         var loaderSize = 50;
         var loaderMargin = $"-{(loaderSize / 2)}px";
     }
@@ -116,6 +116,8 @@
 </form>
 <h3>@localizer["NewPageBuilding"]</h3>
 <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
+<br />
+<a href="/Leaderboard/Palmares">@localizer["PalmaresLink"]</a>
 
 <script>
     $(function () {

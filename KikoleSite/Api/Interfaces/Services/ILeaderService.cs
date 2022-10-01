@@ -40,5 +40,11 @@ namespace KikoleSite.Api.Interfaces.Services
         /// </summary>
         /// <returns>Nothing.</returns>
         Task ComputeMissingLeadersAsync();
+
+        /// <summary>
+        /// Gets palmares.
+        /// </summary>
+        /// <returns>Nothing.</returns>
+        Task<Palmares> GetPalmaresAsync();
     }
 }

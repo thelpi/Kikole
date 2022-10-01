@@ -166,10 +166,13 @@
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>
   </data>
   <data name="NewPageBuilding" xml:space="preserve">
-    <value>Page en construction</value>
+    <value>Statistiques</value>
   </data>
   <data name="NoUserInTable" xml:space="preserve">
     <value>Aucun.e</value>
+  </data>
+  <data name="PalmaresLink" xml:space="preserve">
+    <value>Palmarès</value>
   </data>
   <data name="PointsHeader" xml:space="preserve">
     <value>Points</value>
@@ -187,7 +190,7 @@
     <value>Type de tri :</value>
   </data>
   <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Statistiques</value>
+    <value>Stats sur les kikolés et le site</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Temps</value>

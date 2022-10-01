@@ -58,6 +58,30 @@ namespace KikoleSite.Api.Services
             var onTimeOnly = leaderSort != LeaderSorts.SuccessCountOverall
                 && leaderSort != LeaderSorts.TotalPointsOverall;
 
+            var items = await ComputeLeaderboardItemsAsync(
+                    startDate, endDate, onTimeOnly)
+                .ConfigureAwait(false);
+
+            switch (leaderSort)
+            {
+                case LeaderSorts.BestTime:
+                    items = items.SetPositions(_ => _.BestTime, false, (_, r) => _.Rank = r);
+                    break;
+                case LeaderSorts.SuccessCountOverall:
+                case LeaderSorts.SuccessCount:
+                    items = items.SetPositions(_ => _.KikolesFound, true, (_, r) => _.Rank = r);
+                    break;
+                case LeaderSorts.TotalPointsOverall:
+                case LeaderSorts.TotalPoints:
+                    items = items.SetPositions(_ => _.Points, true, (_, r) => _.Rank = r);
+                    break;
+            }
+
+            return items;
+        }
+
+        private async Task<List<LeaderboardItem>> ComputeLeaderboardItemsAsync(DateTime startDate, DateTime endDate, bool onTimeOnly)
+        {
             var leaders = await _leaderRepository
                 .GetLeadersAsync(startDate, endDate, onTimeOnly)
                 .ConfigureAwait(false);
@@ -99,21 +123,6 @@ namespace KikoleSite.Api.Services
                     UserId = user.Id,
                     UserName = user.Login
                 });
-            }
-
-            switch (leaderSort)
-            {
-                case LeaderSorts.BestTime:
-                    items = items.SetPositions(_ => _.BestTime, false, (_, r) => _.Rank = r);
-                    break;
-                case LeaderSorts.SuccessCountOverall:
-                case LeaderSorts.SuccessCount:
-                    items = items.SetPositions(_ => _.KikolesFound, true, (_, r) => _.Rank = r);
-                    break;
-                case LeaderSorts.TotalPointsOverall:
-                case LeaderSorts.TotalPoints:
-                    items = items.SetPositions(_ => _.Points, true, (_, r) => _.Rank = r);
-                    break;
             }
 
             return items;
@@ -297,6 +306,120 @@ namespace KikoleSite.Api.Services
                 Sort = sort,
                 Searchers = searchItems.ToList(),
                 Leaders = leaderItems.ToList()
+            };
+        }
+
+        public async Task<Palmares> GetPalmaresAsync()
+        {
+            var months = new Dictionary<(int month, int year), (User first, User second, User third)>();
+
+            var users = new Dictionary<ulong, (User, int, int, int)>();
+
+            var date = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+            date = new DateTime(date.Year, date.Month, 1);
+
+            var currentMonth = new DateTime(_clock.Today.Year, _clock.Today.Month, 1);
+            while (date <= currentMonth)
+            {
+                var nextMonth = date.AddMonths(1);
+
+                var ldItems = await ComputeLeaderboardItemsAsync(
+                        new DateTime(date.Year, date.Month, 1),
+                        nextMonth.AddDays(-1),
+                        true)
+                    .ConfigureAwait(false);
+
+                var orderedLdItems = ldItems
+                    .OrderByDescending(x => x.Points)
+                    .ThenByDescending(x => x.KikolesFound)
+                    .ThenBy(x => x.BestTime)
+                    .ToList();
+
+                var first = orderedLdItems[0];
+                User firstUser = null;
+                if (!users.ContainsKey(first.UserId))
+                {
+                    firstUser = new User(
+                        new UserDto
+                        {
+                            Id = first.UserId,
+                            Login = first.UserName
+                        });
+                    users.Add(first.UserId, (firstUser, 1, 0, 0));
+                }
+                else
+                {
+                    firstUser = users[first.UserId].Item1;
+                    users[first.UserId] = (
+                        firstUser,
+                        users[first.UserId].Item2 + 1,
+                        users[first.UserId].Item3,
+                        users[first.UserId].Item4);
+                }
+
+                var second = orderedLdItems[1];
+                User secondUser = null;
+                if (!users.ContainsKey(second.UserId))
+                {
+                    secondUser = new User(
+                        new UserDto
+                        {
+                            Id = second.UserId,
+                            Login = second.UserName
+                        });
+                    users.Add(second.UserId, (secondUser, 0, 1, 0));
+                }
+                else
+                {
+                    secondUser = users[second.UserId].Item1;
+                    users[second.UserId] = (
+                        secondUser,
+                        users[second.UserId].Item2,
+                        users[second.UserId].Item3 + 1,
+                        users[second.UserId].Item4);
+                }
+
+                var third = orderedLdItems[2];
+                User thirdUser = null;
+                if (!users.ContainsKey(third.UserId))
+                {
+                    thirdUser = new User(
+                        new UserDto
+                        {
+                            Id = third.UserId,
+                            Login = third.UserName
+                        });
+                    users.Add(third.UserId, (thirdUser, 0, 0, 1));
+                }
+                else
+                {
+                    thirdUser = users[third.UserId].Item1;
+                    users[third.UserId] = (
+                        thirdUser,
+                        users[third.UserId].Item2,
+                        users[third.UserId].Item3,
+                        users[third.UserId].Item4 + 1);
+                }
+
+                months.Add((date.Month, date.Year), (
+                    firstUser,
+                    secondUser,
+                    thirdUser));
+
+                date = nextMonth;
+            }
+
+            return new Palmares
+            {
+                MonthlyPalmares = months,
+                GlobalPalmares = users.Values
+                    .Select(x => x)
+                    .OrderByDescending(x => x.Item2)
+                    .ThenByDescending(x => x.Item3)
+                    .ThenByDescending(x => x.Item4)
+                    .ToList()
             };
         }
 
