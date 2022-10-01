@@ -48,18 +48,6 @@
         <div style="margin-top: 10px">
             <label>@localizer["LoggedAs"] <span style="color: forestgreen">@Model.LoggedAs</span></label>
         </div>
-        @if (Model.TodayChallenge != null)
-        {
-            <div style="margin-top: 10px">
-                <label>@Html.Raw(string.Format(localizer["ChallengeOngoing"].Value, Model.TodayChallenge.OpponentLogin, Model.TodayChallenge.PointsRate))</label>
-            </div>
-        }
-        @if (Model.HasPendingChallenges)
-        {
-            <div style="margin-top: 10px">
-                <label>@localizer["PendingChallenges"]</label>
-            </div>
-        }
         <div style="margin-top: 10px">
             <script>
                 function handler(e) {

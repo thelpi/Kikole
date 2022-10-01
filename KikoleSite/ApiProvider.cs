@@ -35,7 +35,6 @@ namespace KikoleSite
         private readonly IClubRepository _clubRepository;
         private readonly IProposalService _proposalService;
         private readonly IBadgeService _badgeService;
-        private readonly IChallengeService _challengeService;
         private readonly ILeaderService _leaderService;
         private readonly IStatisticService _statisticService;
         private readonly IDiscussionRepository _discussionRepository;
@@ -50,7 +49,6 @@ namespace KikoleSite
             IClubRepository clubRepository,
             IProposalService proposalService,
             IBadgeService badgeService,
-            IChallengeService challengeService,
             ILeaderService leaderService,
             IStatisticService statisticService,
             IDiscussionRepository discussionRepository)
@@ -65,7 +63,6 @@ namespace KikoleSite
             _clubRepository = clubRepository;
             _proposalService = proposalService;
             _badgeService = badgeService;
-            _challengeService = challengeService;
             _leaderService = leaderService;
             _statisticService = statisticService;
             _discussionRepository = discussionRepository;
@@ -717,177 +714,6 @@ namespace KikoleSite
         }
 
         #endregion main game
-
-        #region challenges
-
-        public async Task<string> CreateChallengeAsync(ulong guestUserId, byte pointsRate, string authToken)
-        {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return _resources["InvalidUser"];
-
-            var request = new ChallengeRequest
-            {
-                GuestUserId = guestUserId,
-                PointsRate = pointsRate
-            };
-
-            if (request == null)
-                return string.Format(_resources["InvalidRequest"], "null");
-
-            var validityRequest = request.IsValid(_resources);
-            if (!string.IsNullOrWhiteSpace(validityRequest))
-                return string.Format(_resources["InvalidRequest"], validityRequest);
-
-            if (request.GuestUserId == userId)
-                return _resources["CantChallengeYourself"];
-
-            var response = await _challengeService
-                .CreateChallengeAsync(request, userId)
-                .ConfigureAwait(false);
-
-            if (response == ChallengeResponseError.ChallengeHostIsInvalid)
-                return _resources["ChallengeHostIsInvalid"];
-
-            if (response == ChallengeResponseError.ChallengeCreatorIsAdmin)
-                return _resources["ChallengeCreatorIsAdmin"];
-
-            if (response == ChallengeResponseError.ChallengeOpponentIsInvalid)
-                return _resources["ChallengeOpponentIsInvalid"];
-
-            if (response == ChallengeResponseError.ChallengeOpponentIsAdmin)
-                return _resources["ChallengeOpponentIsAdmin"];
-
-            if (response == ChallengeResponseError.ChallengeAlreadyExist)
-                return _resources["ChallengeAlreadyExist"];
-
-            return null;
-        }
-
-        public async Task<string> RespondToChallengeAsync(ulong id, bool isAccepted, string authToken)
-        {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return _resources["InvalidUser"];
-
-            if (id == 0)
-                return _resources["InvalidChallengeId"];
-
-            var response = await _challengeService
-                .RespondToChallengeAsync(id, userId, isAccepted)
-                .ConfigureAwait(false);
-
-            if (response == ChallengeResponseError.ChallengeNotFound)
-                return _resources["ChallengeNotFound"];
-
-            if (response == ChallengeResponseError.CantAutoAcceptChallenge)
-                return _resources["CantAutoAcceptChallenge"];
-
-            if (response == ChallengeResponseError.BothAcceptedAndCancelledChallenge)
-                return _resources["BothAcceptedAndCancelledChallenge"];
-
-            if (response == ChallengeResponseError.ChallengeAlreadyAccepted)
-                return _resources["ChallengeAlreadyAccepted"];
-
-            if (response == ChallengeResponseError.ChallengeAlreadyAnswered)
-                return _resources["ChallengeAlreadyAnswered"];
-
-            if (response == ChallengeResponseError.InvalidOpponentAccount)
-                return _resources["InvalidOpponentAccount"];
-
-            await _badgeService
-                .ManageChallengesBasedBadgesAsync(id)
-                .ConfigureAwait(false);
-
-            return null;
-        }
-
-        public async Task<IReadOnlyCollection<Challenge>> GetChallengesWaitingForResponseAsync(string authToken)
-        {
-            if (string.IsNullOrWhiteSpace(authToken))
-                return new List<Challenge>();
-
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return new List<Challenge>();
-
-            var challenges = await _challengeService
-                .GetPendingChallengesAsync(userId)
-                .ConfigureAwait(false);
-
-            return challenges;
-        }
-
-        public async Task<IReadOnlyCollection<Challenge>> GetRequestedChallengesAsync(string authToken)
-        {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return new List<Challenge>();
-
-            var challenges = await _challengeService
-                .GetRequestedChallengesAsync(userId)
-                .ConfigureAwait(false);
-
-            return challenges;
-        }
-
-        public async Task<IReadOnlyCollection<Challenge>> GetAcceptedChallengesAsync(string authToken)
-        {
-            if (string.IsNullOrWhiteSpace(authToken))
-                return new List<Challenge>();
-
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return new List<Challenge>();
-
-            var challenges = await _challengeService
-                .GetAcceptedChallengesAsync(userId)
-                .ConfigureAwait(false);
-
-            return challenges;
-        }
-
-        public async Task<IReadOnlyCollection<Challenge>> GetChallengesHistoryAsync(
-            DateTime? fromDate, DateTime? toDate, string authToken)
-        {
-            var parameters = new List<(string, string)>();
-            if (fromDate.HasValue)
-                parameters.Add(("fromDate", fromDate.Value.ToString("yyyy-MM-dd")));
-            if (toDate.HasValue)
-                parameters.Add(("toDate", toDate.Value.ToString("yyyy-MM-dd")));
-
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return null;
-
-            var debut = await _playerService
-                .GetFirstSubmittedPlayerDateAsync(false)
-                .ConfigureAwait(false);
-
-            if (fromDate.HasValue && fromDate.Value.Date < debut.Date)
-                return null;
-
-            var yesterday = _clock.Now.AddDays(-1).Date;
-            if (toDate.HasValue && toDate.Value.Date < yesterday)
-                return null;
-
-            if (toDate.HasValue && fromDate.HasValue && toDate.Value.Date < fromDate.Value.Date)
-                return null;
-
-            var challenges = await _challengeService
-                .GetChallengesHistoryAsync(userId, fromDate?.Date ?? debut.Date, toDate?.Date ?? yesterday)
-                .ConfigureAwait(false);
-
-            return challenges;
-        }
-
-        #endregion challenges
 
         #region private generic methods
 

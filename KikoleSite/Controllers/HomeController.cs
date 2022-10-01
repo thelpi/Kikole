@@ -279,14 +279,6 @@ namespace KikoleSite.Controllers
                 model.MessageToDisplay = errorMessageForced;
             }
 
-            var pendings = await _apiProvider
-                .GetChallengesWaitingForResponseAsync(token)
-                .ConfigureAwait(false);
-
-            var accepteds = await _apiProvider
-                .GetAcceptedChallengesAsync(token)
-                .ConfigureAwait(false);
-
             var isPowerUser = await _apiProvider
                 .IsPowerUserAsync(token)
                 .ConfigureAwait(false);
@@ -307,9 +299,6 @@ namespace KikoleSite.Controllers
             model.Chart = chart;
             model.Clue = clue;
             model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
-            model.TodayChallenge = accepteds
-                .SingleOrDefault(c => c.ChallengeDate == DateTime.Now.Date);
-            model.HasPendingChallenges = pendings.Count > 0;
             model.CanCreateClub = isPowerUser;
             model.IsAdmin = isAdminUser;
             model.PlayerId = playerCreator?.PlayerId ?? 0;

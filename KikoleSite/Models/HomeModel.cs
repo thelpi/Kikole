@@ -39,8 +39,6 @@ namespace KikoleSite.Models
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }
         public bool IsCreator { get; set; }
-        public Challenge TodayChallenge { get; set; }
-        public bool HasPendingChallenges { get; set; }
 
         public IReadOnlyList<string> IncorrectClubs { get; set; }
         public IReadOnlyList<string> IncorrectCountries { get; set; }

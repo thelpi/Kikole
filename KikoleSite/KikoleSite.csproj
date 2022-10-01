@@ -19,9 +19,6 @@
     <Content Update="Views\Admin\PlayerSubmission.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
-    <Content Update="Views\Challenge\Index.cshtml">
-      <Pack>$(IncludeRazorContentInPack)</Pack>
-    </Content>
     <Content Update="Views\Home\Partial\Badges.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
