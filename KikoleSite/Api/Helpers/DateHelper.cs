@@ -13,11 +13,6 @@ namespace KikoleSite.Api.Helpers
                 : TimeSpan.FromSeconds(spans.Select(s => s.TotalSeconds).Average());
         }
 
-        internal static int? ToSeconds(this TimeSpan? ts)
-        {
-            return ts.HasValue ? ts.Value.ToSeconds() : default(int?);
-        }
-
         internal static int ToSeconds(this TimeSpan ts)
         {
             return (int)Math.Floor(ts.TotalSeconds);
