@@ -6,9 +6,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Elite.Repositories
 {
-    public sealed class WriteRepository : Api.Repositories.BaseRepository, IWriteRepository
+    public sealed class WriteRepository : KikoleSite.Repositories.BaseRepository, IWriteRepository
     {
-        public WriteRepository(Api.Interfaces.IClock clock, IConfiguration configuration)
+        public WriteRepository(Interfaces.IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
 
         public async Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry)

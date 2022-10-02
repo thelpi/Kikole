@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using KikoleSite.Api.Models;
+using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.ViewModels

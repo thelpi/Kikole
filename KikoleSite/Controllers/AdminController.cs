@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api.Interfaces;
-using KikoleSite.Api.Interfaces.Repositories;
-using KikoleSite.Api.Interfaces.Services;
-using KikoleSite.Api.Models;
-using KikoleSite.Api.Models.Enums;
-using KikoleSite.Api.Models.Requests;
+using KikoleSite.Interfaces;
+using KikoleSite.Interfaces.Repositories;
+using KikoleSite.Interfaces.Services;
+using KikoleSite.Models;
+using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -652,7 +652,7 @@ namespace KikoleSite.Controllers
             return (clues[Languages.en].clue, clues[Languages.fr].clue, clues[Languages.en].easyclue, clues[Languages.fr].easyclue, null);
         }
 
-        private async Task<IReadOnlyCollection<Api.Models.Dtos.DiscussionDto>> GetDiscussionsAsync()
+        private async Task<IReadOnlyCollection<Models.Dtos.DiscussionDto>> GetDiscussionsAsync()
         {
             return await _discussionRepository
                 .GetDiscussionsAsync()
@@ -683,7 +683,7 @@ namespace KikoleSite.Controllers
         private async Task CreateMessageAsync(string message, DateTime? startDate, DateTime? endDate)
         {
             await _messageRepository
-                .InsertMessageAsync(new Api.Models.Dtos.MessageDto
+                .InsertMessageAsync(new Models.Dtos.MessageDto
                 {
                     DisplayTo = endDate,
                     DisplayFrom = startDate,

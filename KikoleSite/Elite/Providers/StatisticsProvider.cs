@@ -18,7 +18,7 @@ namespace KikoleSite.Elite.Providers
         private readonly ICacheManager _cacheManager;
         private readonly IReadRepository _readRepository;
         private readonly RankingConfiguration _configuration;
-        private readonly Api.Interfaces.IClock _clock;
+        private readonly Interfaces.IClock _clock;
 
         private static readonly TimeSpan StageLevelDefaultTime = TimeSpan.FromSeconds(RankingEntryLight.UnsetTimeValueSeconds);
         private static readonly TimeSpan FullGameDefaultTime = StageLevelDefaultTime.Multiply(20 * 3); // 3 levels, 20 stages
@@ -26,7 +26,7 @@ namespace KikoleSite.Elite.Providers
         public StatisticsProvider(
             IReadRepository readRepository,
             IOptions<RankingConfiguration> configuration,
-            Api.Interfaces.IClock clock,
+            Interfaces.IClock clock,
             ICacheManager cacheManager)
         {
             _readRepository = readRepository;

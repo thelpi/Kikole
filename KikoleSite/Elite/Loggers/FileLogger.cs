@@ -6,11 +6,11 @@ namespace KikoleSite.Elite.Loggers
 {
     public class FileLogger
     {
-        private readonly Api.Interfaces.IClock _clock;
+        private readonly Interfaces.IClock _clock;
         private readonly string _logsFilePathFormat;
         private readonly object _lock = new object();
 
-        public FileLogger(IConfiguration configuration, Api.Interfaces.IClock clock)
+        public FileLogger(IConfiguration configuration, Interfaces.IClock clock)
         {
             _logsFilePathFormat = configuration.GetValue<string>("TheEliteLogsFilePathFormat");
             _clock = clock;

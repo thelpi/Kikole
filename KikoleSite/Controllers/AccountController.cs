@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using KikoleSite.Api.Interfaces;
-using KikoleSite.Api.Interfaces.Repositories;
-using KikoleSite.Api.Interfaces.Services;
-using KikoleSite.Api.Models.Requests;
+using KikoleSite.Interfaces;
+using KikoleSite.Interfaces.Repositories;
+using KikoleSite.Interfaces.Services;
+using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

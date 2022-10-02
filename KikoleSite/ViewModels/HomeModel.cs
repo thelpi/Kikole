@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Api.Models;
-using KikoleSite.Api.Models.Enums;
+using KikoleSite.Models;
+using KikoleSite.Models.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.ViewModels

@@ -23,14 +23,14 @@ namespace KikoleSite.Elite.Controllers
         private const string StageImagePath = @"/images/elite/{0}.jpg";
 
         private readonly IStatisticsProvider _statisticsProvider;
-        private readonly Api.Interfaces.IClock _clock;
+        private readonly Interfaces.IClock _clock;
 
         private static readonly ConcurrentDictionary<(long, Game), (bool loading, PlayerRankingHistory data)> _generatedRankings
             = new ConcurrentDictionary<(long, Game), (bool loading, PlayerRankingHistory data)>();
 
         public SimulatedRankingController(
             IStatisticsProvider statisticsProvider,
-            Api.Interfaces.IClock clock)
+            Interfaces.IClock clock)
         {
             _statisticsProvider = statisticsProvider;
             _clock = clock;

@@ -1,5 +1,5 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
-@model KikoleSite.Api.Models.ProposalChart
+@model KikoleSite.Models.ProposalChart
 <div style="margin-top: 10px">
     @localizer["Rules"]
 </div>
@@ -7,12 +7,12 @@
     @localizer["ScoreIntro"]
     <ul>
         <li>@Html.Raw(string.Format(localizer["StarterPoints"].Value, Model.BasePoints))</li>
-        <li>@Html.Raw(string.Format(localizer["BadGuessName"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Name].points))</li>
-        <li>@Html.Raw(string.Format(localizer["BadGuessClub"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Club].points))</li>
-        <li>@Html.Raw(string.Format(localizer["BadGuessCountry"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Country].points))</li>
-        <li>@Html.Raw(string.Format(localizer["BadGuessYear"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Year].points))</li>
-        <li>@Html.Raw(string.Format(localizer["BadGuessPosition"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Position].points))</li>
-        <li>@Html.Raw(string.Format(localizer["ClueGuess"].Value, Model.ProposalTypesCost[KikoleSite.Api.Models.Enums.ProposalTypes.Clue].points))</li>
+        <li>@Html.Raw(string.Format(localizer["BadGuessName"].Value, Model.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points))</li>
+        <li>@Html.Raw(string.Format(localizer["BadGuessClub"].Value, Model.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Club].points))</li>
+        <li>@Html.Raw(string.Format(localizer["BadGuessCountry"].Value, Model.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Country].points))</li>
+        <li>@Html.Raw(string.Format(localizer["BadGuessYear"].Value, Model.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Year].points))</li>
+        <li>@Html.Raw(string.Format(localizer["BadGuessPosition"].Value, Model.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Position].points))</li>
+        <li>@Html.Raw(string.Format(localizer["ClueGuess"].Value, Model.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points))</li>
         <li>@localizer["GoodGuess"]</li>
     </ul>
 </div>

@@ -9,6 +9,6 @@ namespace KikoleSite.ViewModels
         public DateTime MessageDateStart { get; set; }
         public DateTime MessageDateEnd { get; set; }
         public string ActionFeedback { get; set; }
-        public IReadOnlyCollection<Api.Models.Dtos.DiscussionDto> Discussions { get; set; }
+        public IReadOnlyCollection<Models.Dtos.DiscussionDto> Discussions { get; set; }
     }
 }

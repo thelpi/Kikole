@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using KikoleSite.Api.Interfaces;
+using KikoleSite.Interfaces;
 using KikoleSite.Elite.Configurations;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;

@@ -7,12 +7,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Elite.Repositories
 {
-    public sealed class ReadRepository : Api.Repositories.BaseRepository, IReadRepository
+    public sealed class ReadRepository : KikoleSite.Repositories.BaseRepository, IReadRepository
     {
         private IReadOnlyList<PlayerDto> _playersCache = null;
         private readonly object cacheLock = new object();
 
-        public ReadRepository(Api.Interfaces.IClock clock, IConfiguration configuration)
+        public ReadRepository(Interfaces.IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
 
         public async Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate)

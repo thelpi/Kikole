@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using KikoleSite.Api.Models.Enums;
+using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite

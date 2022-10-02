@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api.Interfaces;
-using KikoleSite.Api.Interfaces.Repositories;
-using KikoleSite.Api.Interfaces.Services;
-using KikoleSite.Api.Models;
-using KikoleSite.Api.Models.Enums;
-using KikoleSite.Api.Models.Requests;
+using KikoleSite.Interfaces;
+using KikoleSite.Interfaces.Repositories;
+using KikoleSite.Interfaces.Services;
+using KikoleSite.Models;
+using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
@@ -357,7 +357,7 @@ namespace KikoleSite.Controllers
                 return _resources["InvalidUser"];
 
             await _discussionRepository
-                .CreateDiscussionAsync(new Api.Models.Dtos.DiscussionDto
+                .CreateDiscussionAsync(new Models.Dtos.DiscussionDto
                 {
                     Email = email,
                     UserId = userId,
@@ -368,7 +368,7 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private async Task<Api.Models.Dtos.PlayerFullDto> GetFullPlayerAsync(DateTime date)
+        private async Task<Models.Dtos.PlayerFullDto> GetFullPlayerAsync(DateTime date)
         {
             return await _playerService
                 .GetPlayerOfTheDayFullInfoAsync(date)
