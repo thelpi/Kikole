@@ -6,6 +6,7 @@ using KikoleSite.Api.Interfaces.Repositories;
 using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models.Requests;
 using KikoleSite.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -392,6 +393,20 @@ namespace KikoleSite.Controllers
             SetCookie(_cryptedAuthenticationCookieName,
                 $"{token}{CookiePartsSeparator}{login}",
                 DateTime.Now.AddMonths(1));
+        }
+
+        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
+        {
+            Response.Cookies.Delete(cookieName);
+            Response.Cookies.Append(
+                cookieName,
+                cookieValue.Encrypt(),
+                    new CookieOptions
+                    {
+                        Expires = expiration,
+                        IsEssential = true,
+                        Secure = false
+                    });
         }
     }
 }

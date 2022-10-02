@@ -103,7 +103,9 @@ namespace KikoleSite.Controllers
 
         protected (string token, string login) GetAuthenticationCookie()
         {
-            var cookieValue = GetCookieContent(_cryptedAuthenticationCookieName);
+            var cookieValue = Request.Cookies.TryGetValue(_cryptedAuthenticationCookieName, out string cookieValueTmp)
+                ? cookieValueTmp.Decrypt()
+                : null;
             if (cookieValue != null)
             {
                 var cookieParts = cookieValue.Split(CookiePartsSeparator);
@@ -119,20 +121,6 @@ namespace KikoleSite.Controllers
         protected void ResetAuthenticationCookie()
         {
             Response.Cookies.Delete(_cryptedAuthenticationCookieName);
-        }
-
-        protected async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)
-        {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            var user = await _userRepository
-                .GetUserByIdAsync(userId)
-                .ConfigureAwait(false);
-
-            if (user == null)
-                return false;
-
-            return user.UserTypeId >= (ulong)minimalType;
         }
 
         protected async Task<ulong> ExtractUserIdFromTokenAsync(string token)
@@ -237,25 +225,18 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
         }
 
-        protected void SetCookie(string cookieName, string cookieValue, DateTime expiration)
+        private async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)
         {
-            Response.Cookies.Delete(cookieName);
-            Response.Cookies.Append(
-                cookieName,
-                cookieValue.Encrypt(),
-                    new CookieOptions
-                    {
-                        Expires = expiration,
-                        IsEssential = true,
-                        Secure = false
-                    });
-        }
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
-        private string GetCookieContent(string cookieName)
-        {
-            return Request.Cookies.TryGetValue(cookieName, out string cookieValue)
-                ? cookieValue.Decrypt()
-                : null;
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return false;
+
+            return user.UserTypeId >= (ulong)minimalType;
         }
     }
 }
