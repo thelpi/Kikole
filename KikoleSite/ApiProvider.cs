@@ -302,7 +302,7 @@ namespace KikoleSite
             var connectedUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             var badgesFull = await _badgeService
-                 .GetUserBadgesAsync(userId, connectedUserId, GetLanguage())
+                 .GetUserBadgesAsync(userId, connectedUserId, Helper.GetLanguage())
                  .ConfigureAwait(false);
 
             return badgesFull;
@@ -311,7 +311,7 @@ namespace KikoleSite
         public async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
         {
             return await _badgeService
-                .GetAllBadgesAsync(GetLanguage())
+                .GetAllBadgesAsync(Helper.GetLanguage())
                 .ConfigureAwait(false);
         }
 
@@ -329,7 +329,7 @@ namespace KikoleSite
             var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             return await _statisticService
-                .GetPlayersDistributionAsync(userId, GetLanguage(), 25)
+                .GetPlayersDistributionAsync(userId, Helper.GetLanguage(), 25)
                 .ConfigureAwait(false);
         }
 
@@ -482,7 +482,7 @@ namespace KikoleSite
         {
             if (_countriesCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
             {
-                var lng = GetLanguage();
+                var lng = Helper.GetLanguage();
 
                 var countries = await _internationalRepository
                     .GetCountriesAsync((ulong)lng)
@@ -581,7 +581,7 @@ namespace KikoleSite
         public async Task ResetBadgesAsync()
         {
             await _badgeService
-                .ResetBadgesAsync(GetLanguage())
+                .ResetBadgesAsync(Helper.GetLanguage())
                 .ConfigureAwait(false);
         }
 
@@ -648,7 +648,7 @@ namespace KikoleSite
             if (leader != null)
             {
                 var leaderBadges = await _badgeService
-                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, GetLanguage())
+                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, Helper.GetLanguage())
                     .ConfigureAwait(false);
 
                 foreach (var b in leaderBadges)
@@ -656,7 +656,7 @@ namespace KikoleSite
             }
 
             var proposalBadges = await _badgeService
-                .PrepareNonLeaderBadgesAsync(userId, request, GetLanguage())
+                .PrepareNonLeaderBadgesAsync(userId, request, Helper.GetLanguage())
                 .ConfigureAwait(false);
 
             foreach (var b in proposalBadges)
@@ -683,7 +683,7 @@ namespace KikoleSite
         public async Task<string> GetClueAsync(DateTime proposalDate, bool isEasy)
         {
             var clue = await _playerService
-                .GetPlayerClueAsync(proposalDate, isEasy, GetLanguage())
+                .GetPlayerClueAsync(proposalDate, isEasy, Helper.GetLanguage())
                 .ConfigureAwait(false);
 
             return clue;
@@ -747,13 +747,6 @@ namespace KikoleSite
             }
 
             return userId;
-        }
-
-        private static Languages GetLanguage()
-        {
-            return CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"
-                ? Languages.fr
-                : Languages.en;
         }
 
         #endregion private generic methods
