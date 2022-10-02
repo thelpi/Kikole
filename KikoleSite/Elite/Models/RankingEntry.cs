@@ -14,17 +14,11 @@ namespace KikoleSite.Elite.Models
         private readonly Dictionary<Level, long> _levelCumuledTime;
         private readonly Dictionary<Stage, Dictionary<Level, (int, int, long?, System.DateTime?)>> _details;
 
-        public IReadOnlyDictionary<Level, int> LevelPoints { get { return _levelPoints; } }
-        public IReadOnlyDictionary<Level, int> LevelUntiedRecordsCount { get { return _levelUntiedRecordsCount; } }
-        public IReadOnlyDictionary<Level, int> LevelRecordsCount { get { return _levelRecordsCount; } }
-        public IReadOnlyDictionary<Level, long> LevelCumuledTime { get { return _levelCumuledTime; } }
-        public IReadOnlyDictionary<Stage, IReadOnlyDictionary<Level, (int, int, long?, System.DateTime?)>> Details
-        {
-            get
-            {
-                return _details.ToDictionary(d => d.Key, d => (IReadOnlyDictionary<Level, (int, int, long?, System.DateTime?)>)d.Value);
-            }
-        }
+        public IReadOnlyDictionary<Level, int> LevelPoints => _levelPoints;
+        public IReadOnlyDictionary<Level, int> LevelUntiedRecordsCount => _levelUntiedRecordsCount;
+        public IReadOnlyDictionary<Level, int> LevelRecordsCount => _levelRecordsCount;
+        public IReadOnlyDictionary<Level, long> LevelCumuledTime => _levelCumuledTime;
+        public IReadOnlyDictionary<Stage, IReadOnlyDictionary<Level, (int, int, long?, System.DateTime?)>> Details => _details.ToDictionary(d => d.Key, d => (IReadOnlyDictionary<Level, (int, int, long?, System.DateTime?)>)d.Value);
 
         internal RankingEntry(Game game, PlayerDto player) : base(game, player)
         {

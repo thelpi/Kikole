@@ -1,15 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
 using KikoleSite.Api.Models.Dtos;
-using KikoleSite.Api.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Api.Repositories
 {
-    [ExcludeFromCodeCoverage]
     public class UserRepository : BaseRepository, IUserRepository
     {
         public UserRepository(IConfiguration configuration, IClock clock)
@@ -28,16 +24,6 @@ namespace KikoleSite.Api.Repositories
                     ("user_type_id", user.UserTypeId),
                     ("ip", user.Ip),
                     ("creation_date", Clock.Now))
-                .ConfigureAwait(false);
-        }
-
-        public async Task<UserDto> GetUserByLoginPasswordAsync(string login, string password)
-        {
-            return await GetDtoAsync<UserDto>(
-                    "users",
-                    ("login", login),
-                    ("password", password),
-                    ("is_disabled", 0))
                 .ConfigureAwait(false);
         }
 
@@ -65,16 +51,6 @@ namespace KikoleSite.Api.Repositories
                     login,
                     ("password_reset_answer", passwordResetAnswer),
                     newPassword)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync()
-        {
-            // TODO: could use "base.SubSqlValidUsers" maybe?
-            return await ExecuteReaderAsync<UserDto>(
-                    "SELECT * FROM users " +
-                    "WHERE is_disabled = 0 AND user_type_id != @adminId",
-                    new { adminId = (ulong)UserTypes.Administrator })
                 .ConfigureAwait(false);
         }
 

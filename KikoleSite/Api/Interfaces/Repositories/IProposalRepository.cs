@@ -12,8 +12,6 @@ namespace KikoleSite.Api.Interfaces.Repositories
         // loose (not necessarily on exact date)
         Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate, ulong userId);
 
-        Task<IReadOnlyCollection<ProposalDto>> GetProposalsDateExactAsync(DateTime playerProposalDate, ulong userId);
-
         Task<IReadOnlyCollection<ProposalDto>> GetAllProposalsDateExactAsync(ulong userId);
 
         Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateTime playerProposalDate);

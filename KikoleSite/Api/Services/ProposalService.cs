@@ -22,7 +22,6 @@ namespace KikoleSite.Api.Services
     {
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IPlayerHandler _playerHandler;
         private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
@@ -32,20 +31,17 @@ namespace KikoleSite.Api.Services
         /// </summary>
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
-        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
         /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
         /// <param name="resources">Translation resources.</param>
         /// <param name="clock">Clock service.</param>
         public ProposalService(IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
-            IUserRepository userRepository,
             IPlayerHandler playerHandler,
             IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
-            _userRepository = userRepository;
             _playerHandler = playerHandler;
             _resources = resources;
             _clock = clock;
@@ -113,38 +109,6 @@ namespace KikoleSite.Api.Services
             }
 
             return (response, proposalsAlready, leader);
-        }
-
-        /// <inheritdoc />
-        public async Task<(IReadOnlyCollection<(ulong, string)> today, IReadOnlyCollection<(ulong, string)> total)> GetUsersWithProposalAsync(DateTime proposalDate)
-        {
-            var proposals = await _proposalRepository
-                .GetProposalsAsync(proposalDate, false)
-                .ConfigureAwait(false);
-
-            var today = proposals
-                .Where(p => p.CreationDate.Date == p.ProposalDate)
-                .Select(p => p.UserId)
-                .Distinct()
-                .ToList();
-
-            var overall = proposals
-                .Select(p => p.UserId)
-                .Distinct()
-                .ToList();
-
-            var todays = new List<(ulong, string)>();
-            var overAlls = new List<(ulong, string)>();
-
-            foreach (var ov in overall)
-            {
-                var u = await _userRepository.GetUserByIdAsync(ov).ConfigureAwait(false);
-                overAlls.Add((u.Id, u.Login));
-                if (today.Contains(u.Id))
-                    todays.Add((u.Id, u.Login));
-            }
-
-            return (todays, overAlls);
         }
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(

@@ -71,15 +71,6 @@ namespace KikoleSite
 
         #region user accounts
 
-        public async Task<IReadOnlyCollection<User>> GetActiveUsersAsync()
-        {
-            var users = await _userRepository
-                .GetActiveUsersAsync()
-                .ConfigureAwait(false);
-
-            return users.Select(u => new User(u)).ToList();
-        }
-
         public async Task<string> CreateAccountAsync(string login,
             string password, string question, string answer, string ip, Guid registrationId)
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
@@ -9,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Api.Repositories
 {
-    [ExcludeFromCodeCoverage]
     public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         public PlayerRepository(IConfiguration configuration, IClock clock)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Elite.Dtos;
@@ -19,25 +18,22 @@ namespace KikoleSite.Elite.Models
 
         public DateTime RankingDate
         {
-            get { return _rankingDate; }
-            set { _rankingDate = value.Date; }
+            get => _rankingDate;
+            set => _rankingDate = value.Date;
         }
 
         public DateTime? RankingStartDate
         {
-            get { return _rankingStartDate; }
-            set { _rankingStartDate = value?.Date; }
+            get => _rankingStartDate;
+            set => _rankingStartDate = value?.Date;
         }
 
         public (long, DateTime)? PlayerVsLegacy
         {
-            get { return _playerVsLegacy; }
-            set
-            {
-                _playerVsLegacy = value.HasValue
+            get => _playerVsLegacy;
+            set => _playerVsLegacy = value.HasValue
                     ? (value.Value.Item1, value.Value.Item2.Date)
                     : default((long, DateTime)?);
-            }
         }
 
         public bool FullDetails { get; set; }
@@ -52,7 +48,7 @@ namespace KikoleSite.Elite.Models
 
         internal IReadOnlyDictionary<long, PlayerDto> Players
         {
-            get { return _players; }
+            get => _players;
             set
             {
                 _players = value.ToDictionary(_ => _.Key, _ => _.Value);

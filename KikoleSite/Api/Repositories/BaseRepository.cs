@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
@@ -11,7 +10,6 @@ using MySql.Data.MySqlClient;
 
 namespace KikoleSite.Api.Repositories
 {
-    [ExcludeFromCodeCoverage]
     public abstract class BaseRepository
     {
         protected readonly IClock Clock;

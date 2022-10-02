@@ -30,12 +30,5 @@ namespace KikoleSite.Api.Interfaces.Services
         /// <param name="userId">User identifier.</param>
         /// <returns>Collection of proposals.</returns>
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
-
-        /// <summary>
-        /// Gets, for a player's proposal date, the list of users who tried.
-        /// </summary>
-        /// <param name="proposalDate">The player's proposal date.</param>
-        /// <returns>Users who tried the first day and users who tried overall.</returns>
-        Task<(IReadOnlyCollection<(ulong, string)> today, IReadOnlyCollection<(ulong, string)> total)> GetUsersWithProposalAsync(DateTime proposalDate);
     }
 }

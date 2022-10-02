@@ -19,9 +19,6 @@ namespace KikoleSite.Api.Helpers
         public DateTime Tomorrow => Today.AddDays(1);
 
         /// <inheritdoc />
-        public DateTime Yesterday => Today.AddDays(-1);
-
-        /// <inheritdoc />
         public bool IsTomorrowIn(int minutes)
         {
             return Now.AddMinutes(minutes) >= Tomorrow;

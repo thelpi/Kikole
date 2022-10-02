@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Api.Repositories
 {
-    [ExcludeFromCodeCoverage]
     public class ProposalRepository : BaseRepository, IProposalRepository
     {
         public ProposalRepository(IConfiguration configuration, IClock clock)
@@ -36,16 +34,6 @@ namespace KikoleSite.Api.Repositories
         {
             return await GetProposalsInternalAsync(
                     "proposal_date = @real_proposal_date",
-                    playerProposalDate,
-                    userId)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsDateExactAsync(
-            DateTime playerProposalDate, ulong userId)
-        {
-            return await GetProposalsInternalAsync(
-                    "proposal_date = DATE(creation_date) AND proposal_date = @real_proposal_date",
                     playerProposalDate,
                     userId)
                 .ConfigureAwait(false);

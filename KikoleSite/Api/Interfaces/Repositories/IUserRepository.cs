@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KikoleSite.Api.Models.Dtos;
 
 namespace KikoleSite.Api.Interfaces.Repositories
@@ -8,15 +7,11 @@ namespace KikoleSite.Api.Interfaces.Repositories
     {
         Task<ulong> CreateUserAsync(UserDto user);
 
-        Task<UserDto> GetUserByLoginPasswordAsync(string login, string password);
-
         Task<UserDto> GetUserByLoginAsync(string login);
 
         Task<bool> ResetUserKnownPasswordAsync(string login, string oldPassword, string newPassword);
 
         Task<bool> ResetUserUnknownPasswordAsync(string login, string passwordResetAnswer, string newPassword);
-
-        Task<IReadOnlyCollection<UserDto>> GetActiveUsersAsync();
 
         Task<UserDto> GetUserByIdAsync(ulong userId);
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Api.Helpers;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Handlers;
 using KikoleSite.Api.Interfaces.Repositories;
@@ -23,8 +22,6 @@ namespace KikoleSite.Api.Services
         private readonly IPlayerHandler _playerHandler;
         private readonly IPlayerRepository _playerRepository;
         private readonly IUserRepository _userRepository;
-        private readonly ILeaderRepository _leaderRepository;
-        private readonly IProposalRepository _proposalRepository;
         private readonly IClock _clock;
         private readonly Random _randomizer;
 
@@ -34,23 +31,17 @@ namespace KikoleSite.Api.Services
         /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
         /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
-        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
-        /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="clock">Clock service.</param>
         /// <param name="randomizer">Randomizer.</param>
         public PlayerService(IPlayerHandler playerHandler,
             IPlayerRepository playerRepository,
             IUserRepository userRepository,
-            ILeaderRepository leaderRepository,
-            IProposalRepository proposalRepository,
             IClock clock,
             Random randomizer)
         {
             _playerHandler = playerHandler;
             _playerRepository = playerRepository;
             _userRepository = userRepository;
-            _leaderRepository = leaderRepository;
-            _proposalRepository = proposalRepository;
             _clock = clock;
             _randomizer = randomizer;
         }
@@ -308,84 +299,6 @@ namespace KikoleSite.Api.Services
                     .ConfigureAwait(false);
                 i++;
             }
-        }
-
-        /// <inheritdoc />
-        public async Task<IReadOnlyCollection<PlayerStat>> GetPlayersStatisticsAsync(ulong userId, params (PlayerStatSorts, bool)[] sorts)
-        {
-            var usersCache = new Dictionary<ulong, UserDto>();
-
-            async Task<UserDto> GetUserAsync(ulong id)
-            {
-                if (!usersCache.ContainsKey(id))
-                {
-                    var user = await _userRepository
-                        .GetUserByIdAsync(userId)
-                        .ConfigureAwait(false);
-                    usersCache.Add(id, user);
-                }
-                return usersCache[id];
-            }
-
-            var user = await GetUserAsync(userId).ConfigureAwait(false);
-
-            var isAdmin = user.UserTypeId == (ulong)UserTypes.Administrator;
-
-            var firstDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-
-            var players = await _playerRepository
-                .GetPlayersOfTheDayAsync(firstDate, _clock.Today)
-                .ConfigureAwait(false);
-
-            var playersStats = new List<PlayerStat>();
-            foreach (var p in players)
-            {
-                var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(p.ProposalDate.Value, true)
-                    .ConfigureAwait(false);
-
-                var anonymise = !isAdmin && !leaders.Any(l => l.UserId == userId);
-
-                var pCreator = await GetUserAsync(p.CreationUserId).ConfigureAwait(false);
-
-                var creatorLogin = pCreator == null || !(isAdmin || p.ProposalDate.Value < _clock.Today || pCreator.Id == user.Id)
-                    ? null
-                    : pCreator.Login;
-
-                var proposals = await _proposalRepository
-                    .GetProposalsAsync(p.ProposalDate.Value, true)
-                    .ConfigureAwait(false);
-
-                var proposalsCount = proposals.Select(_ => _.UserId).Distinct().Count();
-
-                playersStats.Add(new PlayerStat(p, creatorLogin, anonymise, leaders, proposalsCount));
-            }
-
-            var orderedPlayerStates = playersStats.OrderBy(_ => _.Name);
-            if (sorts?.Length > 0)
-            {
-                var first = true;
-                foreach (var (sortType, descending) in sorts)
-                {
-                    if (first)
-                    {
-                        orderedPlayerStates = descending
-                            ? orderedPlayerStates.OrderByDescending(_ => _.GetSortValue(sortType.ToString()))
-                            : orderedPlayerStates.OrderBy(_ => _.GetSortValue(sortType.ToString()));
-                        first = false;
-                    }
-                    else
-                    {
-                        orderedPlayerStates = descending
-                            ? orderedPlayerStates.ThenByDescending(_ => _.GetSortValue(sortType.ToString()))
-                            : orderedPlayerStates.ThenBy(_ => _.GetSortValue(sortType.ToString()));
-                    }
-                }
-            }
-
-            return orderedPlayerStates.ToList();
         }
 
         private async Task<DateTime> GetNextDateAsync()

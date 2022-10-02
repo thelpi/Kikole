@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
@@ -9,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Api.Repositories
 {
-    [ExcludeFromCodeCoverage]
     public class LeaderRepository : BaseRepository, ILeaderRepository
     {
         public LeaderRepository(IConfiguration configuration, IClock clock)
@@ -51,33 +49,6 @@ namespace KikoleSite.Api.Repositories
                     {
                         minimal_date = minimalDate?.Date,
                         maximal_date = maximalDate?.Date
-                    })
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<KikoleAwardDto>> GetKikoleAwardsAsync(DateTime minDate, DateTime maxDate)
-        {
-            return await ExecuteReaderAsync<KikoleAwardDto>(
-                    "SELECT y.name, y.proposal_date, points / users_count AS avg_pts " +
-                    "FROM (" +
-                    "   SELECT proposal_date, SUM(points) AS points, (" +
-                    "       SELECT COUNT(DISTINCT p.user_id) " +
-                    "       FROM proposals AS p " +
-                    "       WHERE DATE(p.creation_date) = p.proposal_date " +
-                    "       AND p.proposal_date = l.proposal_date" +
-                    "   ) AS users_count " +
-                    "   FROM leaders AS l " +
-                    $"  WHERE proposal_date = DATE(creation_date) " +
-                    "   GROUP BY proposal_date" +
-                    ") AS tmp " +
-                    "JOIN players AS y ON tmp.proposal_date = y.proposal_date " +
-                    "WHERE users_count >= 5 " +
-                    "AND y.proposal_date >= @startdate " +
-                    "AND y.proposal_date <= @enddate",
-                    new
-                    {
-                        startdate = minDate.Date,
-                        enddate = maxDate.Date
                     })
                 .ConfigureAwait(false);
         }

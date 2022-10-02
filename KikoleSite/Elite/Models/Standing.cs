@@ -13,8 +13,8 @@ namespace KikoleSite.Elite.Models
 
         public Stage Stage { get; internal set; }
         public Level Level { get; internal set; }
-        public DateTime StartDate { get { return _startDate; } internal set { _startDate = value.Date; } }
-        public DateTime? EndDate { get { return _endDate; } internal set { _endDate = value?.Date; } }
+        public DateTime StartDate { get => _startDate; internal set => _startDate = value.Date; }
+        public DateTime? EndDate { get => _endDate; internal set => _endDate = value?.Date; }
         public Player Author { get; internal set; }
         public Player Slayer { get; internal set; }
         public IReadOnlyCollection<long> Times => _times;

@@ -23,11 +23,6 @@ namespace KikoleSite.Api.Interfaces
         DateTime Tomorrow { get; }
 
         /// <summary>
-        /// Yeterday at midnight.
-        /// </summary>
-        DateTime Yesterday { get; }
-
-        /// <summary>
         /// Gets it the current date plus specified minutes is tomorrow.
         /// </summary>
         /// <param name="minutes">Minutes to add.</param>

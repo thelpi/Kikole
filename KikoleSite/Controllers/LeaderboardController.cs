@@ -79,7 +79,7 @@ namespace KikoleSite.Controllers
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token))
             {
-                return Json(new {});
+                return Json(new { });
             }
 
             var datas = await _apiProvider
