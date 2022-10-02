@@ -12,6 +12,7 @@ using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -34,7 +35,8 @@ namespace KikoleSite.Controllers
             IClubRepository clubRepository,
             IBadgeService badgeService,
             ILeaderService leaderService,
-            IDiscussionRepository discussionRepository)
+            IDiscussionRepository discussionRepository,
+            IConfiguration configuration)
             : base(userRepository,
                 crypter,
                 resources,
@@ -42,7 +44,8 @@ namespace KikoleSite.Controllers
                 clock,
                 playerService,
                 clubRepository,
-                badgeService)
+                badgeService,
+                configuration)
         {
             _localizer = localizer;
             _discussionRepository = discussionRepository;

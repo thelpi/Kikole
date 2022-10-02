@@ -9,6 +9,7 @@ using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -25,7 +26,8 @@ namespace KikoleSite.Controllers
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
-            IBadgeService badgeService)
+            IBadgeService badgeService,
+            IConfiguration configuration)
             : base(userRepository,
                 crypter,
                 resources,
@@ -33,7 +35,8 @@ namespace KikoleSite.Controllers
                 clock,
                 playerService,
                 clubRepository,
-                badgeService)
+                badgeService,
+                configuration)
         {
             _localizer = localizer;
         }
@@ -401,7 +404,7 @@ namespace KikoleSite.Controllers
             Response.Cookies.Delete(cookieName);
             Response.Cookies.Append(
                 cookieName,
-                cookieValue.Encrypt(),
+                Encrypt(cookieValue),
                     new CookieOptions
                     {
                         Expires = expiration,

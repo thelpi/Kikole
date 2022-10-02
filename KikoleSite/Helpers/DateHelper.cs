@@ -22,5 +22,47 @@ namespace KikoleSite.Helpers
         {
             return (int)Math.Ceiling(ts.TotalMinutes);
         }
+
+        internal static DateTime Min(this DateTime dt1, DateTime dt2)
+        {
+            return dt1 > dt2 ? dt2 : dt1;
+        }
+
+        internal static DateTime Max(this DateTime dt1, DateTime dt2)
+        {
+            return dt1 < dt2 ? dt2 : dt1;
+        }
+
+        internal static bool IsToday(this DateTime date)
+        {
+            return date.Date == DateTime.Now.Date;
+        }
+
+        internal static bool IsFirstOfMonth(this DateTime date, DateTime? reference = null)
+        {
+            reference = (reference ?? DateTime.Now).Date;
+            date = date.Date;
+            return date.Year == reference.Value.Year
+                && date.Month == reference.Value.Month
+                && date.Day == 1;
+        }
+
+        internal static bool IsAfterInMonth(this DateTime date, DateTime? reference = null)
+        {
+            reference = (reference ?? DateTime.Now).Date;
+            date = date.Date;
+            return date.Year == reference.Value.Year
+                && date.Month == reference.Value.Month
+                && date.Day >= reference.Value.Day;
+        }
+
+        internal static bool IsEndOfMonth(this DateTime date, DateTime? reference = null)
+        {
+            reference = (reference ?? DateTime.Now).Date;
+            date = date.Date;
+            return date.Year == reference.Value.Year
+                && date.Month == reference.Value.Month
+                && date.AddDays(1).Month > reference.Value.Month;
+        }
     }
 }

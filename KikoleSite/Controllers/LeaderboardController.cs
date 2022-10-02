@@ -11,6 +11,7 @@ using KikoleSite.Models.Enums;
 using KikoleSite.Models.Statistics;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -31,7 +32,8 @@ namespace KikoleSite.Controllers
             IClubRepository clubRepository,
             IBadgeService badgeService,
             ILeaderService leaderService,
-            IStatisticService statisticService)
+            IStatisticService statisticService,
+            IConfiguration configuration)
             : base(userRepository,
                 crypter,
                 resources,
@@ -39,7 +41,8 @@ namespace KikoleSite.Controllers
                 clock,
                 playerService,
                 clubRepository,
-                badgeService)
+                badgeService,
+                configuration)
         {
             _localizer = localizer;
             _statisticService = statisticService;

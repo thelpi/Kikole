@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using KikoleSite.Models.Enums;
-using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Helpers
 {
@@ -17,8 +13,6 @@ namespace KikoleSite.Helpers
         public const string DayPatternEn = "MM-dd";
         public const string DayPatternFr = "dd/MM";
         public const string Iso8859Code = "ISO-8859-8";
-
-        static readonly string EncryptionKey = Startup.StaticConfig.GetValue<string>("EncryptionCookieKey");
 
         public static string ToNaString(this object data)
         {
@@ -78,96 +72,6 @@ namespace KikoleSite.Helpers
             return !data.HasValue
                 ? NA
                 : data.Value.ToYesNo();
-        }
-
-        internal static string Encrypt(this string plainText)
-        {
-            try
-            {
-                byte[] array;
-                using (var aes = Aes.Create())
-                {
-                    aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
-                    aes.IV = new byte[16];
-                    var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-                    using var memoryStream = new MemoryStream();
-                    using var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
-                    using (var streamWriter = new StreamWriter(cryptoStream))
-                    {
-                        streamWriter.Write(plainText);
-                    }
-                    array = memoryStream.ToArray();
-                }
-                return Convert.ToBase64String(array);
-            }
-            catch
-            {
-                // TODO: log
-                return plainText;
-            }
-        }
-
-        internal static string Decrypt(this string encryptedText)
-        {
-            try
-            {
-                var buffer = Convert.FromBase64String(encryptedText);
-                using var aes = Aes.Create();
-                aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
-                aes.IV = new byte[16];
-                var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                using var memoryStream = new MemoryStream(buffer);
-                using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
-                using var streamReader = new StreamReader(cryptoStream);
-                return streamReader.ReadToEnd();
-            }
-            catch
-            {
-                // TODO: log
-                return encryptedText;
-            }
-        }
-
-        internal static DateTime Min(this DateTime dt1, DateTime dt2)
-        {
-            return dt1 > dt2 ? dt2 : dt1;
-        }
-
-        internal static DateTime Max(this DateTime dt1, DateTime dt2)
-        {
-            return dt1 < dt2 ? dt2 : dt1;
-        }
-
-        internal static bool IsToday(this DateTime date)
-        {
-            return date.Date == DateTime.Now.Date;
-        }
-
-        internal static bool IsFirstOfMonth(this DateTime date, DateTime? reference = null)
-        {
-            reference = (reference ?? DateTime.Now).Date;
-            date = date.Date;
-            return date.Year == reference.Value.Year
-                && date.Month == reference.Value.Month
-                && date.Day == 1;
-        }
-
-        internal static bool IsAfterInMonth(this DateTime date, DateTime? reference = null)
-        {
-            reference = (reference ?? DateTime.Now).Date;
-            date = date.Date;
-            return date.Year == reference.Value.Year
-                && date.Month == reference.Value.Month
-                && date.Day >= reference.Value.Day;
-        }
-
-        internal static bool IsEndOfMonth(this DateTime date, DateTime? reference = null)
-        {
-            reference = (reference ?? DateTime.Now).Date;
-            date = date.Date;
-            return date.Year == reference.Value.Year
-                && date.Month == reference.Value.Month
-                && date.AddDays(1).Month > reference.Value.Month;
         }
 
         internal static string GetMonthName(this DateTime date)

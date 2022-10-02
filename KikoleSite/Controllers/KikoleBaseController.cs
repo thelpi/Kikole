@@ -2,7 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
@@ -12,6 +15,7 @@ using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -28,6 +32,7 @@ namespace KikoleSite.Controllers
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
+        private readonly string _encryptionKey;
         private readonly ConcurrentDictionary<ulong, DateTime> _usersCheckCache; // static???
         private readonly IInternationalRepository _internationalRepository;
 
@@ -46,7 +51,8 @@ namespace KikoleSite.Controllers
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
-            IBadgeService badgeService)
+            IBadgeService badgeService,
+            IConfiguration configuration)
         {
             _userRepository = userRepository;
             _crypter = crypter;
@@ -57,6 +63,7 @@ namespace KikoleSite.Controllers
             _clubRepository = clubRepository;
             _badgeService = badgeService;
             _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
+            _encryptionKey = configuration.GetValue<string>("EncryptionCookieKey");
         }
 
         [HttpPost]
@@ -105,7 +112,7 @@ namespace KikoleSite.Controllers
         protected (string token, string login) GetAuthenticationCookie()
         {
             var cookieValue = Request.Cookies.TryGetValue(_cryptedAuthenticationCookieName, out string cookieValueTmp)
-                ? cookieValueTmp.Decrypt()
+                ? Decrypt(cookieValueTmp)
                 : null;
             if (cookieValue != null)
             {
@@ -238,6 +245,54 @@ namespace KikoleSite.Controllers
                 return false;
 
             return user.UserTypeId >= (ulong)minimalType;
+        }
+
+        protected string Encrypt(string plainText)
+        {
+            try
+            {
+                byte[] array;
+                using (var aes = Aes.Create())
+                {
+                    aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
+                    aes.IV = new byte[16];
+                    var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+                    using var memoryStream = new MemoryStream();
+                    using var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
+                    using (var streamWriter = new StreamWriter(cryptoStream))
+                    {
+                        streamWriter.Write(plainText);
+                    }
+                    array = memoryStream.ToArray();
+                }
+                return Convert.ToBase64String(array);
+            }
+            catch
+            {
+                // TODO: log
+                return plainText;
+            }
+        }
+
+        private string Decrypt(string encryptedText)
+        {
+            try
+            {
+                var buffer = Convert.FromBase64String(encryptedText);
+                using var aes = Aes.Create();
+                aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
+                aes.IV = new byte[16];
+                var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                using var memoryStream = new MemoryStream(buffer);
+                using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
+                using var streamReader = new StreamReader(cryptoStream);
+                return streamReader.ReadToEnd();
+            }
+            catch
+            {
+                // TODO: log
+                return encryptedText;
+            }
         }
     }
 }
