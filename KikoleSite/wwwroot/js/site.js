@@ -1,4 +1,12 @@
-﻿/* positions autovalidation */
+﻿/* loading google graph lib */
+$(document).ready(function () {
+    if (document.getElementById('googleChartEnabler')) {
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(drawStatisticPageCharts);
+    }
+});
+
+/* positions autovalidation */
 $(function () {
     $("#positionSubmission").on("change", function (e) {
         if ($("#positionSubmission").val() != "0") {
@@ -103,6 +111,7 @@ var autocompleteLogins = function (logins, fieldId) {
     });
 };
 
+/* collapsible blocks management  */
 var coll = document.getElementsByClassName("collapsible");
 for (var i = 0; i < coll.length; i++) {
     coll[i].addEventListener("click", function () {

@@ -1,12 +1,5 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 
-<script>
-    $(document).ready(function () {
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(drawStatisticPageCharts);
-    });
-</script>
-
 <button type="button" class="collapsible">@localizer["PlayersDistributionTitle"]</button>
 <div class="collapsiblecontent" style="display: none">
     <div id="playerDistributionCountryChart"></div>
@@ -21,3 +14,5 @@
     <div id="weekActiveUsersChart"></div>
     <div id="monthActiveUsersChart"></div>
 </div>
+
+<div style="display: none" id="googleChartEnabler"></div>
