@@ -212,3 +212,7 @@ function daysBetween(startDate, endDate) {
         return Math.floor((endDateReal - startDateReal) / millisecondsPerDay);
     }
 }
+
+function navigateDaysHandler(e) {
+    window.location.href = "/?day=" + daysBetween(e.target.value, Date.now());
+}
