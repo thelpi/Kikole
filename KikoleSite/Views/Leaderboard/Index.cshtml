@@ -121,39 +121,10 @@
 
 <script>
     $(function () {
-        $.ajax({
-            url: '/leaderboard-details?sortType=@Model.SortType&minimalDate=@Model.MinimalDate.ToString("yyyy-MM-dd")&maximalDate=@Model.MaximalDate.ToString("yyyy-MM-dd")',
-            type: "GET",
-            dataType: "json",
-            beforeSend: function () {
-                $("#loading-image").show();
-                $("#globalLeaderboardTable").hide();
-            },
-            success: function (data) {
-                var i = 0;
-                var tabBody = $("#globalLeaderboardTable").find('tbody');
-                data.forEach(e => {
-                    var background = i % 2 == 0 ? "white" : "azure";
-                    tabBody.append(`<tr style="background-color: ` + background + `">
-                        <td style="text-align: center">` + e.rank + `</td>
-                        <td style="color: crimson"><a href="/Leaderboard?userId=` + e.userId + `">` + e.userName + `</a></td>
-                        <td style="text-align: right">` + e.points + `</td>
-                        <td style="text-align: right">` + e.bestTimeString + `</td>
-                        <td style="text-align: right">` + e.kikolesFound + `</td>
-                        <td style="text-align: right">` + e.kikolesAttempted + `</td>
-                        <td style="text-align: right">` + e.kikolesProposed + `</td>
-                    </tr>`);
-                    i++;
-                });
-                if (i == 0) {
-                    tabBody.append('<tr style="background-color: white"><td colspan="7">@localizer["NoUserInTable"]</td></tr>');
-                }
-                $("#loading-image").hide();
-                $("#globalLeaderboardTable").show();
-            },
-            error: function (data) {
-                alert('Call error: ' + JSON.stringify(data));
-            }
-        });
+        var sortTypeJs = @Html.Raw(Json.Serialize(Model.SortType));
+        var minimalDateJs = @Html.Raw(Json.Serialize(Model.MinimalDate.ToString("yyyy-MM-dd")));
+        var maximalDateJs = @Html.Raw(Json.Serialize(Model.MaximalDate.ToString("yyyy-MM-dd")));
+        var noUserInTableTextJs = @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value));
+        loadGlobalLeaderboard(sortTypeJs, minimalDateJs, maximalDateJs, noUserInTableTextJs);
     });
 </script>

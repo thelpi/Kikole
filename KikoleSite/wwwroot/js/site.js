@@ -1,10 +1,48 @@
-﻿/* loading google graph lib */
-$(document).ready(function () {
+﻿$(document).ready(function () {
+    /* loading google graph lib */
     if (document.getElementById('googleChartEnabler')) {
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(drawStatisticPageCharts);
     }
 });
+
+/* leaderboard loading */
+var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText) {
+    $.ajax({
+        url: '/leaderboard-details?sortType=' + sortType + '&minimalDate=' + dateMin + '&maximalDate=' + dateMax,
+        type: "GET",
+        dataType: "json",
+        beforeSend: function () {
+            $("#loading-image").show();
+            $("#globalLeaderboardTable").hide();
+        },
+        success: function (data) {
+            var i = 0;
+            var tabBody = $("#globalLeaderboardTable").find('tbody');
+            data.forEach(e => {
+                var background = i % 2 == 0 ? "white" : "azure";
+                tabBody.append(`<tr style="background-color: ` + background + `">
+                        <td style="text-align: center">` + e.rank + `</td>
+                        <td style="color: crimson"><a href="/Leaderboard?userId=` + e.userId + `">` + e.userName + `</a></td>
+                        <td style="text-align: right">` + e.points + `</td>
+                        <td style="text-align: right">` + e.bestTimeString + `</td>
+                        <td style="text-align: right">` + e.kikolesFound + `</td>
+                        <td style="text-align: right">` + e.kikolesAttempted + `</td>
+                        <td style="text-align: right">` + e.kikolesProposed + `</td>
+                    </tr>`);
+                i++;
+            });
+            if (i == 0) {
+                tabBody.append('<tr style="background-color: white"><td colspan="7">' + noUserInTableText + '</td></tr>');
+            }
+            $("#loading-image").hide();
+            $("#globalLeaderboardTable").show();
+        },
+        error: function (data) {
+            alert('Call error: ' + JSON.stringify(data));
+        }
+    });
+};
 
 /* positions autovalidation */
 $(function () {
