@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class PalmaresModel
     {

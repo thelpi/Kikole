@@ -8,7 +8,7 @@ using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Api.Models.Requests;
-using KikoleSite.Models;
+using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;

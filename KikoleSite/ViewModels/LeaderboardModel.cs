@@ -5,7 +5,7 @@ using System.Linq;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class LeaderboardModel
     {

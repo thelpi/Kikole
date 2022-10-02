@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using KikoleSite.Api.Models;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class PlayerSubmissionModel
     {

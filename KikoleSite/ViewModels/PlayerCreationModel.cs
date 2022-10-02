@@ -2,7 +2,7 @@
 using KikoleSite.Api.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class PlayerCreationModel
     {

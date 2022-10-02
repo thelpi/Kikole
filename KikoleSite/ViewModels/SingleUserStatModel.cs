@@ -1,7 +1,7 @@
 ﻿using System;
 using KikoleSite.Api.Models;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class SingleUserStatModel
     {

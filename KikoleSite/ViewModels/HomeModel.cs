@@ -5,7 +5,7 @@ using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class HomeModel
     {

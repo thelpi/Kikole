@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace KikoleSite.Models
+namespace KikoleSite.ViewModels
 {
     public class PlayerSubmissionsModel
     {

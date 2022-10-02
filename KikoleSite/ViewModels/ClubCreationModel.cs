@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Models
+﻿namespace KikoleSite.ViewModels
 {
     public class ClubCreationModel
     {

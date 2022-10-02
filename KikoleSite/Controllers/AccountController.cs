@@ -5,7 +5,7 @@ using KikoleSite.Api.Interfaces;
 using KikoleSite.Api.Interfaces.Repositories;
 using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models.Requests;
-using KikoleSite.Models;
+using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
