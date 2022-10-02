@@ -20,6 +20,7 @@ namespace KikoleSite.Controllers
         private readonly IStringLocalizer<AdminController> _localizer;
         private readonly IDiscussionRepository _discussionRepository;
         private readonly ILeaderService _leaderService;
+        private readonly IMessageRepository _messageRepository;
 
         public AdminController(IStringLocalizer<AdminController> localizer,
             IUserRepository userRepository,
@@ -37,7 +38,6 @@ namespace KikoleSite.Controllers
                 crypter,
                 resources,
                 internationalRepository,
-                messageRepository,
                 clock,
                 playerService,
                 clubRepository,
@@ -46,6 +46,7 @@ namespace KikoleSite.Controllers
             _localizer = localizer;
             _discussionRepository = discussionRepository;
             _leaderService = leaderService;
+            _messageRepository = messageRepository;
         }
 
         [HttpGet]

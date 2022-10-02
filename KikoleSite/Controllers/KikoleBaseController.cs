@@ -27,12 +27,12 @@ namespace KikoleSite.Controllers
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
-        private readonly ConcurrentDictionary<ulong, DateTime> _usersCheckCache;
+        private readonly ConcurrentDictionary<ulong, DateTime> _usersCheckCache; // static???
+        private readonly IInternationalRepository _internationalRepository;
+
         protected readonly IUserRepository _userRepository;
         protected readonly ICrypter _crypter;
         protected readonly IStringLocalizer<Translations> _resources;
-        private readonly IInternationalRepository _internationalRepository;
-        protected readonly IMessageRepository _messageRepository;
         protected readonly IClock _clock;
         protected readonly IPlayerService _playerService;
         protected readonly IClubRepository _clubRepository;
@@ -42,7 +42,6 @@ namespace KikoleSite.Controllers
             ICrypter crypter,
             IStringLocalizer<Translations> resources,
             IInternationalRepository internationalRepository,
-            IMessageRepository messageRepository,
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
@@ -52,26 +51,11 @@ namespace KikoleSite.Controllers
             _crypter = crypter;
             _resources = resources;
             _internationalRepository = internationalRepository;
-            _messageRepository = messageRepository;
             _clock = clock;
             _playerService = playerService;
             _clubRepository = clubRepository;
             _badgeService = badgeService;
             _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
-        }
-
-        protected string GetSubmitAction()
-        {
-            var submitKeys = HttpContext.Request.Form.Keys.Where(x => x.StartsWith("submit-"));
-
-            if (submitKeys.Count() != 1)
-                return null;
-
-            var submitKeySplit = submitKeys.First().Split('-');
-            if (submitKeySplit.Length != 2)
-                return null;
-
-            return submitKeySplit[1];
         }
 
         [HttpPost]
@@ -93,6 +77,20 @@ namespace KikoleSite.Controllers
                     c.Value.Sanitize().Contains(prefix.Sanitize()));
 
             return Json(countries);
+        }
+
+        protected string GetSubmitAction()
+        {
+            var submitKeys = HttpContext.Request.Form.Keys.Where(x => x.StartsWith("submit-"));
+
+            if (submitKeys.Count() != 1)
+                return null;
+
+            var submitKeySplit = submitKeys.First().Split('-');
+            if (submitKeySplit.Length != 2)
+                return null;
+
+            return submitKeySplit[1];
         }
 
         protected IReadOnlyDictionary<ulong, string> GetPositions()
@@ -118,37 +116,9 @@ namespace KikoleSite.Controllers
             return (null, null);
         }
 
-        protected void SetAuthenticationCookie(string token, string login)
-        {
-            SetCookie(_cryptedAuthenticationCookieName,
-                $"{token}{CookiePartsSeparator}{login}",
-                DateTime.Now.AddMonths(1));
-        }
-
         protected void ResetAuthenticationCookie()
         {
             Response.Cookies.Delete(_cryptedAuthenticationCookieName);
-        }
-
-        private string GetCookieContent(string cookieName)
-        {
-            return Request.Cookies.TryGetValue(cookieName, out string cookieValue)
-                ? cookieValue.Decrypt()
-                : null;
-        }
-
-        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
-        {
-            Response.Cookies.Delete(cookieName);
-            Response.Cookies.Append(
-                cookieName,
-                cookieValue.Encrypt(),
-                    new CookieOptions
-                    {
-                        Expires = expiration,
-                        IsEssential = true,
-                        Secure = false
-                    });
         }
 
         protected async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)
@@ -265,6 +235,27 @@ namespace KikoleSite.Controllers
             return await _playerService
                 .GetKnownPlayerNamesAsync(userId)
                 .ConfigureAwait(false);
+        }
+
+        protected void SetCookie(string cookieName, string cookieValue, DateTime expiration)
+        {
+            Response.Cookies.Delete(cookieName);
+            Response.Cookies.Append(
+                cookieName,
+                cookieValue.Encrypt(),
+                    new CookieOptions
+                    {
+                        Expires = expiration,
+                        IsEssential = true,
+                        Secure = false
+                    });
+        }
+
+        private string GetCookieContent(string cookieName)
+        {
+            return Request.Cookies.TryGetValue(cookieName, out string cookieValue)
+                ? cookieValue.Decrypt()
+                : null;
         }
     }
 }

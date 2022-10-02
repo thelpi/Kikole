@@ -20,7 +20,6 @@ namespace KikoleSite.Controllers
             ICrypter crypter,
             IStringLocalizer<Translations> resources,
             IInternationalRepository internationalRepository,
-            IMessageRepository messageRepository,
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
@@ -29,7 +28,6 @@ namespace KikoleSite.Controllers
                 crypter,
                 resources,
                 internationalRepository,
-                messageRepository,
                 clock,
                 playerService,
                 clubRepository,
@@ -387,6 +385,13 @@ namespace KikoleSite.Controllers
                 return _resources["ResetPasswordError"];
 
             return null;
+        }
+
+        private void SetAuthenticationCookie(string token, string login)
+        {
+            SetCookie(_cryptedAuthenticationCookieName,
+                $"{token}{CookiePartsSeparator}{login}",
+                DateTime.Now.AddMonths(1));
         }
     }
 }
