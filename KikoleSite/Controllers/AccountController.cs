@@ -24,11 +24,7 @@ namespace KikoleSite.Controllers
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
-            IProposalService proposalService,
-            IBadgeService badgeService,
-            ILeaderService leaderService,
-            IStatisticService statisticService,
-            IDiscussionRepository discussionRepository)
+            IBadgeService badgeService)
             : base(userRepository,
                 crypter,
                 resources,
@@ -37,11 +33,7 @@ namespace KikoleSite.Controllers
                 clock,
                 playerService,
                 clubRepository,
-                proposalService,
-                badgeService,
-                leaderService,
-                statisticService,
-                discussionRepository)
+                badgeService)
         {
             _localizer = localizer;
         }

@@ -36,11 +36,7 @@ namespace KikoleSite.Controllers
         protected readonly IClock _clock;
         protected readonly IPlayerService _playerService;
         protected readonly IClubRepository _clubRepository;
-        protected readonly IProposalService _proposalService;
         protected readonly IBadgeService _badgeService;
-        protected readonly ILeaderService _leaderService;
-        protected readonly IStatisticService _statisticService;
-        protected readonly IDiscussionRepository _discussionRepository;
 
         protected KikoleBaseController(IUserRepository userRepository,
             ICrypter crypter,
@@ -50,11 +46,7 @@ namespace KikoleSite.Controllers
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
-            IProposalService proposalService,
-            IBadgeService badgeService,
-            ILeaderService leaderService,
-            IStatisticService statisticService,
-            IDiscussionRepository discussionRepository)
+            IBadgeService badgeService)
         {
             _userRepository = userRepository;
             _crypter = crypter;
@@ -64,11 +56,7 @@ namespace KikoleSite.Controllers
             _clock = clock;
             _playerService = playerService;
             _clubRepository = clubRepository;
-            _proposalService = proposalService;
             _badgeService = badgeService;
-            _leaderService = leaderService;
-            _statisticService = statisticService;
-            _discussionRepository = discussionRepository;
             _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
         }
 

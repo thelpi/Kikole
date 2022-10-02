@@ -17,6 +17,8 @@ namespace KikoleSite.Controllers
     public class LeaderboardController : KikoleBaseController
     {
         private readonly IStringLocalizer<LeaderboardController> _localizer;
+        private readonly IStatisticService _statisticService;
+        private readonly ILeaderService _leaderService;
 
         public LeaderboardController(IStringLocalizer<LeaderboardController> localizer,
             IUserRepository userRepository,
@@ -27,11 +29,9 @@ namespace KikoleSite.Controllers
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
-            IProposalService proposalService,
             IBadgeService badgeService,
             ILeaderService leaderService,
-            IStatisticService statisticService,
-            IDiscussionRepository discussionRepository)
+            IStatisticService statisticService)
             : base(userRepository,
                 crypter,
                 resources,
@@ -40,13 +40,11 @@ namespace KikoleSite.Controllers
                 clock,
                 playerService,
                 clubRepository,
-                proposalService,
-                badgeService,
-                leaderService,
-                statisticService,
-                discussionRepository)
+                badgeService)
         {
             _localizer = localizer;
+            _statisticService = statisticService;
+            _leaderService = leaderService;
         }
 
         [HttpGet]

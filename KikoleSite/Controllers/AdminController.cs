@@ -18,6 +18,8 @@ namespace KikoleSite.Controllers
     public class AdminController : KikoleBaseController
     {
         private readonly IStringLocalizer<AdminController> _localizer;
+        private readonly IDiscussionRepository _discussionRepository;
+        private readonly ILeaderService _leaderService;
 
         public AdminController(IStringLocalizer<AdminController> localizer,
             IUserRepository userRepository,
@@ -28,10 +30,8 @@ namespace KikoleSite.Controllers
             IClock clock,
             IPlayerService playerService,
             IClubRepository clubRepository,
-            IProposalService proposalService,
             IBadgeService badgeService,
             ILeaderService leaderService,
-            IStatisticService statisticService,
             IDiscussionRepository discussionRepository)
             : base(userRepository,
                 crypter,
@@ -41,13 +41,11 @@ namespace KikoleSite.Controllers
                 clock,
                 playerService,
                 clubRepository,
-                proposalService,
-                badgeService,
-                leaderService,
-                statisticService,
-                discussionRepository)
+                badgeService)
         {
             _localizer = localizer;
+            _discussionRepository = discussionRepository;
+            _leaderService = leaderService;
         }
 
         [HttpGet]
