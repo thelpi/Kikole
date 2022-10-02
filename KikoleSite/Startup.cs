@@ -49,8 +49,6 @@ namespace KikoleSite
                 .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization();
 
-            services.AddSingleton<IApiProvider, ApiProvider>();
-
             services
                 // repositories
                 .AddSingleton<IPlayerRepository, PlayerRepository>()

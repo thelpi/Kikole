@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Interfaces.Repositories;
+using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
+using KikoleSite.Api.Models.Requests;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
@@ -16,8 +21,33 @@ namespace KikoleSite.Controllers
     {
         private readonly IStringLocalizer<HomeController> _localizer;
 
-        public HomeController(IApiProvider apiProvider, IStringLocalizer<HomeController> localizer)
-            : base(apiProvider)
+        public HomeController(IStringLocalizer<HomeController> localizer,
+            IUserRepository userRepository,
+            ICrypter crypter,
+            IStringLocalizer<Translations> resources,
+            IInternationalRepository internationalRepository,
+            IMessageRepository messageRepository,
+            IClock clock,
+            IPlayerService playerService,
+            IClubRepository clubRepository,
+            IProposalService proposalService,
+            IBadgeService badgeService,
+            ILeaderService leaderService,
+            IStatisticService statisticService,
+            IDiscussionRepository discussionRepository)
+            : base(userRepository,
+                crypter,
+                resources,
+                internationalRepository,
+                messageRepository,
+                clock,
+                playerService,
+                clubRepository,
+                proposalService,
+                badgeService,
+                leaderService,
+                statisticService,
+                discussionRepository)
         {
             _localizer = localizer;
         }
@@ -58,8 +88,8 @@ namespace KikoleSite.Controllers
                 model.ErrorMessage = _localizer["InvalidMessage"];
             else
             {
-                var result = await _apiProvider
-                    .CreateDiscussionAsync(model.Email, model.Message, token)
+                var result = await CreateDiscussionAsync(
+                        model.Email, model.Message, token)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -120,19 +150,15 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = GetAuthenticationCookie();
 
-            var msg = await _apiProvider
-                .GetCurrentMessageAsync()
-                .ConfigureAwait(false);
+            var msg = await GetCurrentMessageAsync().ConfigureAwait(false);
 
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
-                .ConfigureAwait(false);
+            var chart = await GetProposalChartAsync().ConfigureAwait(false);
 
             var model = new HomeModel { Points = chart.BasePoints, Message = msg };
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
-                && (day.Value >= 0 || await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+                && (day.Value >= 0 || await IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 var dt = DateTime.Now.Date.AddDays(-day.Value);
                 if (dt >= chart.FirstDate.Date)
@@ -145,9 +171,7 @@ namespace KikoleSite.Controllers
                 }
                 else if (dt == chart.FirstDate.Date.AddDays(-1))
                 {
-                    var known = await _apiProvider
-                        .GetUserKnownPlayersAsync(token)
-                        .ConfigureAwait(false);
+                    var known = await GetUserKnownPlayersAsync(token).ConfigureAwait(false);
                     if (known.Count == ((DateTime.Now.Date - chart.FirstDate.Date).Days + 1))
                     {
                         model = new HomeModel
@@ -190,9 +214,7 @@ namespace KikoleSite.Controllers
                 return Redirect("/");
             }
 
-            var msg = await _apiProvider
-                .GetCurrentMessageAsync()
-                .ConfigureAwait(false);
+            var msg = await GetCurrentMessageAsync().ConfigureAwait(false);
 
             model.Message = msg;
 
@@ -205,8 +227,9 @@ namespace KikoleSite.Controllers
 
             var now = DateTime.Now;
 
-            var response = await _apiProvider
-                .SubmitProposalAsync(value, (uint)model.CurrentDay,
+            var response = await SubmitProposalAsync(
+                    value,
+                    (uint)model.CurrentDay,
                     proposalType,
                     token,
                     Request.HttpContext.Connection.RemoteIpAddress.ToString())
@@ -228,7 +251,7 @@ namespace KikoleSite.Controllers
                     null,
                     token,
                     login,
-                    await _apiProvider.GetProposalChartAsync().ConfigureAwait(false),
+                    await GetProposalChartAsync().ConfigureAwait(false),
                     model,
                     now.Date.AddDays(-model.CurrentDay))
                 .ConfigureAwait(false);
@@ -242,13 +265,17 @@ namespace KikoleSite.Controllers
             HomeModel model,
             DateTime proposalDate)
         {
-            var playerCreator = await _apiProvider
-                .IsPlayerOfTheDayUser(proposalDate, token)
+            var playerCreator = await IsPlayerOfTheDayUser(
+                    proposalDate, token)
                 .ConfigureAwait(false);
 
-            var clue = await _apiProvider.GetClueAsync(proposalDate, false).ConfigureAwait(false);
+            var clue = await GetClueAsync(
+                    proposalDate, false)
+                .ConfigureAwait(false);
 
-            var easyClue = await _apiProvider.GetClueAsync(proposalDate, true).ConfigureAwait(false);
+            var easyClue = await GetClueAsync(
+                    proposalDate, true)
+                .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(token))
             {
@@ -258,13 +285,11 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var proposals = await _apiProvider
-                        .GetProposalsAsync(proposalDate, token)
+                    var proposals = await GetProposalsAsync(
+                            proposalDate, token)
                         .ConfigureAwait(false);
 
-                    var countries = await _apiProvider
-                        .GetCountriesAsync()
-                        .ConfigureAwait(false);
+                    var countries = await GetCountriesAsync().ConfigureAwait(false);
 
                     var positions = GetPositions();
 
@@ -279,12 +304,10 @@ namespace KikoleSite.Controllers
                 model.MessageToDisplay = errorMessageForced;
             }
 
-            var isPowerUser = await _apiProvider
-                .IsPowerUserAsync(token)
+            var isPowerUser = await IsPowerUserAsync(token)
                 .ConfigureAwait(false);
 
-            var isAdminUser = await _apiProvider
-                .IsAdminUserAsync(token)
+            var isAdminUser = await IsAdminUserAsync(token)
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(model.PlayerName) && string.IsNullOrWhiteSpace(model.EasyClue))
@@ -305,13 +328,9 @@ namespace KikoleSite.Controllers
 
             if (!string.IsNullOrWhiteSpace(model.PlayerName))
             {
-                var pp = await _apiProvider
-                    .GetFullPlayerAsync(proposalDate)
-                    .ConfigureAwait(false);
+                var pp = await GetFullPlayerAsync(proposalDate).ConfigureAwait(false);
 
-                var countries = await _apiProvider
-                    .GetCountriesAsync()
-                    .ConfigureAwait(false);
+                var countries = await GetCountriesAsync().ConfigureAwait(false);
 
                 model.CountryName = countries.FirstOrDefault(c => c.Key == pp.Player.CountryId).Value;
                 model.Position = ((Positions)pp.Player.PositionId).GetLabel();
@@ -320,6 +339,129 @@ namespace KikoleSite.Controllers
             }
 
             return View("Index", model);
+        }
+
+        private async Task<string> GetCurrentMessageAsync()
+        {
+            var message = await _messageRepository
+                .GetMessageAsync(_clock.Now)
+                .ConfigureAwait(false);
+
+            return message?.Message;
+        }
+
+        private async Task<string> CreateDiscussionAsync(string email, string message, string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return _resources["InvalidUser"];
+
+            await _discussionRepository
+                .CreateDiscussionAsync(new Api.Models.Dtos.DiscussionDto
+                {
+                    Email = email,
+                    UserId = userId,
+                    Message = message
+                })
+                .ConfigureAwait(false);
+
+            return null;
+        }
+
+        private async Task<Api.Models.Dtos.PlayerFullDto> GetFullPlayerAsync(DateTime date)
+        {
+            return await _playerService
+                .GetPlayerOfTheDayFullInfoAsync(date)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<ProposalResponse> SubmitProposalAsync(string value, uint daysBeforeNow, ProposalTypes proposalType, string authToken, string ip)
+        {
+            var request = BaseProposalRequest.Create(_clock.Now, value, daysBeforeNow, proposalType, ip);
+
+            if (request == null)
+                return null;
+
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return null;
+
+            var validityRequest = request.IsValid(_resources);
+            if (!string.IsNullOrWhiteSpace(validityRequest))
+                return null;
+
+            var firstDate = await _playerService
+                .GetFirstSubmittedPlayerDateAsync(true)
+                .ConfigureAwait(false);
+
+            if (request.PlayerSubmissionDate < firstDate.Date || request.PlayerSubmissionDate > _clock.Today)
+                return null;
+
+            var pInfo = await _playerService
+                .GetPlayerOfTheDayFullInfoAsync(request.PlayerSubmissionDate)
+                .ConfigureAwait(false);
+
+            var (response, proposalsAlready, leader) = await _proposalService
+                .ManageProposalResponseAsync(request, userId, pInfo)
+                .ConfigureAwait(false);
+
+            if (leader != null)
+            {
+                var leaderBadges = await _badgeService
+                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, Helper.GetLanguage())
+                    .ConfigureAwait(false);
+
+                foreach (var b in leaderBadges)
+                    response.AddBadge(b);
+            }
+
+            var proposalBadges = await _badgeService
+                .PrepareNonLeaderBadgesAsync(userId, request, Helper.GetLanguage())
+                .ConfigureAwait(false);
+
+            foreach (var b in proposalBadges)
+                response.AddBadge(b);
+
+            return response;
+        }
+
+        private async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return null;
+
+            var proposals = await _proposalService
+                .GetProposalsAsync(proposalDate, userId)
+                .ConfigureAwait(false);
+
+            return proposals;
+        }
+
+        private async Task<string> GetClueAsync(DateTime proposalDate, bool isEasy)
+        {
+            var clue = await _playerService
+                .GetPlayerClueAsync(proposalDate, isEasy, Helper.GetLanguage())
+                .ConfigureAwait(false);
+
+            return clue;
+        }
+
+        private async Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate, string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return null;
+
+            var p = await _playerService
+                .GetPlayerOfTheDayFromUserPovAsync(userId, proposalDate)
+                .ConfigureAwait(false);
+
+            return p;
         }
     }
 }

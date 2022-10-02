@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Interfaces.Repositories;
+using KikoleSite.Api.Interfaces.Services;
+using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
+using KikoleSite.Api.Models.Statistics;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -13,8 +18,33 @@ namespace KikoleSite.Controllers
     {
         private readonly IStringLocalizer<LeaderboardController> _localizer;
 
-        public LeaderboardController(IApiProvider apiProvider, IStringLocalizer<LeaderboardController> localizer)
-            : base(apiProvider)
+        public LeaderboardController(IStringLocalizer<LeaderboardController> localizer,
+            IUserRepository userRepository,
+            ICrypter crypter,
+            IStringLocalizer<Translations> resources,
+            IInternationalRepository internationalRepository,
+            IMessageRepository messageRepository,
+            IClock clock,
+            IPlayerService playerService,
+            IClubRepository clubRepository,
+            IProposalService proposalService,
+            IBadgeService badgeService,
+            ILeaderService leaderService,
+            IStatisticService statisticService,
+            IDiscussionRepository discussionRepository)
+            : base(userRepository,
+                crypter,
+                resources,
+                internationalRepository,
+                messageRepository,
+                clock,
+                playerService,
+                clubRepository,
+                proposalService,
+                badgeService,
+                leaderService,
+                statisticService,
+                discussionRepository)
         {
             _localizer = localizer;
         }
@@ -27,8 +57,8 @@ namespace KikoleSite.Controllers
                 return await IndexInternal().ConfigureAwait(false);
             }
 
-            var stats = await _apiProvider
-                .GetUserStatsAsync(userId)
+            var stats = await GetUserStatsAsync(
+                    userId)
                 .ConfigureAwait(false);
 
             if (stats == null)
@@ -38,22 +68,18 @@ namespace KikoleSite.Controllers
 
             var (token, login) = GetAuthenticationCookie();
 
-            var badges = await _apiProvider
-                .GetUserBadgesAsync(userId, token)
+            var badges = await GetUserBadgesAsync(
+                    userId, token)
                 .ConfigureAwait(false);
 
-            var allBadges = (await _apiProvider
-                .GetBadgesAsync()
-                .ConfigureAwait(false))
-                .ToList();
+            var allBadges = await GetBadgesAsync().ConfigureAwait(false);
 
-            var knownAnswers = new List<string>();
+            IReadOnlyCollection<string> knownAnswers = new List<string>();
             if (!string.IsNullOrWhiteSpace(token))
             {
-                knownAnswers = (await _apiProvider
-                    .GetUserKnownPlayersAsync(token)
-                    .ConfigureAwait(false))
-                    .ToList();
+                knownAnswers = await GetUserKnownPlayersAsync(
+                        token)
+                    .ConfigureAwait(false);
             }
 
             return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, login == stats.Login));
@@ -82,8 +108,8 @@ namespace KikoleSite.Controllers
                 return Json(new { });
             }
 
-            var datas = await _apiProvider
-                .GetPlayersDistributionAsync(token)
+            var datas = await GetPlayersDistributionAsync(
+                    token)
                 .ConfigureAwait(false);
 
             return Json(new
@@ -102,9 +128,7 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<JsonResult> GetStatisticActiveUsers()
         {
-            var datas = await _apiProvider
-                .GetStatisticActiveUsersAsync()
-                .ConfigureAwait(false);
+            var datas = await GetStatisticActiveUsersAsync().ConfigureAwait(false);
 
             return Json(new
             {
@@ -135,8 +159,8 @@ namespace KikoleSite.Controllers
         [HttpGet("leaderboard-details")]
         public async Task<JsonResult> GetLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
         {
-            var ld = await _apiProvider
-                .GetLeaderboardAsync(sortType, minimalDate, maximalDate)
+            var ld = await GetLeaderboardAsync(
+                    sortType, minimalDate, maximalDate)
                 .ConfigureAwait(false);
 
             return Json(ld);
@@ -147,9 +171,7 @@ namespace KikoleSite.Controllers
         {
             var model = new PalmaresModel();
 
-            var data = await _apiProvider
-                .GetPalmaresAsync()
-                .ConfigureAwait(false);
+            var data = await GetPalmaresAsync().ConfigureAwait(false);
 
             model.MonthlyPalmares = data.MonthlyPalmares
                 .Select(x => (
@@ -172,8 +194,8 @@ namespace KikoleSite.Controllers
         {
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
-            model.Dayboard = await _apiProvider
-                .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
+            model.Dayboard = await GetDayboardAsync(
+                    model.LeaderboardDay.Date, model.DaySortType)
                 .ConfigureAwait(false);
 
             model.BoardName = _localizer["CustomLeaderboard"];
@@ -196,6 +218,76 @@ namespace KikoleSite.Controllers
                     model.BoardName = _localizer["LastDaysLeaderboard", Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))];
                 }
             }
+        }
+
+        private async Task<Palmares> GetPalmaresAsync()
+        {
+            return await _leaderService
+                .GetPalmaresAsync()
+                .ConfigureAwait(false);
+        }
+
+        private async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
+        {
+            return await _leaderService
+                .GetLeaderboardAsync(minimalDate, maximalDate, leaderSort)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort)
+        {
+            return await _leaderService
+                .GetDayboardAsync(day, sort)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<UserStat> GetUserStatsAsync(ulong id)
+        {
+            if (id == 0)
+                return null;
+
+            var userStatistics = await _leaderService
+                .GetUserStatisticsAsync(id)
+                .ConfigureAwait(false);
+
+            if (userStatistics == null)
+                return null;
+
+            return userStatistics;
+        }
+
+        private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, string authToken)
+        {
+            var connectedUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            var badgesFull = await _badgeService
+                 .GetUserBadgesAsync(userId, connectedUserId, Helper.GetLanguage())
+                 .ConfigureAwait(false);
+
+            return badgesFull;
+        }
+
+        private async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
+        {
+            return await _badgeService
+                .GetAllBadgesAsync(Helper.GetLanguage())
+                .ConfigureAwait(false);
+        }
+
+        private async Task<PlayersDistribution> GetPlayersDistributionAsync(string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            return await _statisticService
+                .GetPlayersDistributionAsync(userId, Helper.GetLanguage(), 25)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<ActiveUsers> GetStatisticActiveUsersAsync()
+        {
+            return await _statisticService
+                .GetActiveUsersAsync()
+                .ConfigureAwait(false);
         }
     }
 }

@@ -1,4 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Globalization;
+using System.Threading.Tasks;
+using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Interfaces.Repositories;
+using KikoleSite.Api.Interfaces.Services;
+using KikoleSite.Api.Models.Requests;
 using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -9,8 +15,33 @@ namespace KikoleSite.Controllers
     {
         private readonly IStringLocalizer<AccountController> _localizer;
 
-        public AccountController(IApiProvider apiProvider, IStringLocalizer<AccountController> localizer)
-             : base(apiProvider)
+        public AccountController(IStringLocalizer<AccountController> localizer,
+            IUserRepository userRepository,
+            ICrypter crypter,
+            IStringLocalizer<Translations> resources,
+            IInternationalRepository internationalRepository,
+            IMessageRepository messageRepository,
+            IClock clock,
+            IPlayerService playerService,
+            IClubRepository clubRepository,
+            IProposalService proposalService,
+            IBadgeService badgeService,
+            ILeaderService leaderService,
+            IStatisticService statisticService,
+            IDiscussionRepository discussionRepository)
+            : base(userRepository,
+                crypter,
+                resources,
+                internationalRepository,
+                messageRepository,
+                clock,
+                playerService,
+                clubRepository,
+                proposalService,
+                badgeService,
+                leaderService,
+                statisticService,
+                discussionRepository)
         {
             _localizer = localizer;
         }
@@ -46,8 +77,8 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var (success, value) = await _apiProvider
-                        .LoginAsync(model.LoginSubmission, model.PasswordSubmission)
+                    var (success, value) = await LoginAsync(
+                            model.LoginSubmission, model.PasswordSubmission)
                         .ConfigureAwait(false);
                     if (success)
                     {
@@ -67,8 +98,8 @@ namespace KikoleSite.Controllers
                 else
                 {
                     // get question from login
-                    var (ok, msg) = await _apiProvider
-                        .GetLoginQuestionAsync(model.LoginRecoverySubmission)
+                    var (ok, msg) = await GetLoginQuestionAsync(
+                            model.LoginRecoverySubmission)
                         .ConfigureAwait(false);
                     if (ok)
                         model.QuestionRecovery = msg;
@@ -87,8 +118,8 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var response = await _apiProvider
-                        .ResetPasswordAsync(model.LoginRecoverySubmission, model.RecoveryACreate, model.PasswordCreate1Submission)
+                    var response = await ResetPasswordAsync(
+                            model.LoginRecoverySubmission, model.RecoveryACreate, model.PasswordCreate1Submission)
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(response))
                         model.Error = response;
@@ -106,8 +137,8 @@ namespace KikoleSite.Controllers
                 else
                 {
                     var (token, login) = GetAuthenticationCookie();
-                    var response = await _apiProvider
-                        .ChangeQAndAAsync(token, model.RecoveryQCreate, model.RecoveryACreate)
+                    var response = await ChangeQAndAAsync(
+                            token, model.RecoveryQCreate, model.RecoveryACreate)
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(response))
                         model.Error = response;
@@ -145,8 +176,8 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var value = await _apiProvider
-                        .CreateAccountAsync(model.LoginCreateSubmission,
+                    var value = await CreateAccountAsync(
+                            model.LoginCreateSubmission,
                             model.PasswordCreate1Submission,
                             model.RecoveryQCreate,
                             model.RecoveryACreate,
@@ -179,8 +210,8 @@ namespace KikoleSite.Controllers
                 else
                 {
                     var (token, login) = GetAuthenticationCookie();
-                    var response = await _apiProvider
-                        .ChangePasswordAsync(token, model.PasswordSubmission, model.PasswordCreate1Submission)
+                    var response = await ChangePasswordAsync(
+                            token, model.PasswordSubmission, model.PasswordCreate1Submission)
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(response))
                         model.Error = response;
@@ -194,6 +225,176 @@ namespace KikoleSite.Controllers
             }
 
             return View(model);
+        }
+
+        private async Task<(bool, string)> LoginAsync(string login, string password)
+        {
+            if (string.IsNullOrWhiteSpace(login))
+                return (false, _resources["InvalidLogin"]);
+
+            if (string.IsNullOrWhiteSpace(password))
+                return (false, _resources["InvalidPassword"]);
+
+            var existingUser = await _userRepository
+                .GetUserByLoginAsync(login.Sanitize())
+                .ConfigureAwait(false);
+
+            if (existingUser == null)
+                return (false, _resources["UserDoesNotExist"]);
+
+            if (!_crypter.Encrypt(password).Equals(existingUser.Password))
+                return (false, _resources["PasswordDoesNotMatch"]);
+
+            var value = $"{existingUser.Id}_{existingUser.UserTypeId}";
+
+            var token = $"{value}_{_crypter.Encrypt(value)}";
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return (false, CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"
+                    ? "Echec de l'authentification : jeton invalide"
+                    : "Authentication failed: invalid token");
+            }
+
+            return (true, token);
+        }
+
+        private async Task<(bool, string)> GetLoginQuestionAsync(string login)
+        {
+            if (string.IsNullOrWhiteSpace(login))
+                return (false, _resources["InvalidLogin"]);
+
+            var user = await _userRepository
+                .GetUserByLoginAsync(login)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return (false, _resources["UserDoesNotExist"]);
+
+            return (true, user.PasswordResetQuestion);
+        }
+
+        private async Task<string> ResetPasswordAsync(string login, string answer, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(login))
+                return _resources["InvalidLogin"];
+
+            if (string.IsNullOrWhiteSpace(answer))
+                return _resources["InvalidQOrA"];
+
+            if (string.IsNullOrWhiteSpace(newPassword))
+                return _resources["InvalidPassword"];
+
+            var response = await _userRepository
+                .ResetUserUnknownPasswordAsync(
+                    login,
+                    _crypter.Encrypt(answer),
+                    _crypter.Encrypt(newPassword))
+                .ConfigureAwait(false);
+
+            if (!response)
+                return _resources["ResetPasswordError"];
+
+            return null;
+        }
+
+        private async Task<string> ChangeQAndAAsync(string authToken,
+            string question, string answer)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return _resources["InvalidUser"];
+
+            if (string.IsNullOrWhiteSpace(question)
+                || string.IsNullOrWhiteSpace(answer))
+                return _resources["InvalidQOrA"];
+
+            await _userRepository
+                .ResetUserQAndAAsync(userId, question, _crypter.Encrypt(answer))
+                .ConfigureAwait(false);
+
+            return null;
+        }
+
+        private async Task<string> CreateAccountAsync(string login, string password, string question, string answer, string ip, Guid registrationId)
+        {
+            var request = new UserRequest
+            {
+                Login = login,
+                Password = password,
+                PasswordResetQuestion = question,
+                PasswordResetAnswer = answer?.Trim(),
+                Ip = ip
+            };
+
+            if (request == null)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            var validityRequest = request.IsValid(_resources);
+            if (!string.IsNullOrWhiteSpace(validityRequest))
+                return string.Format(_resources["InvalidRequest"], validityRequest);
+
+            var existingUser = await _userRepository
+                .GetUserByLoginAsync(request.Login.Sanitize())
+                .ConfigureAwait(false);
+
+            if (existingUser != null)
+                return _resources["AlreadyExistsAccount"];
+
+            var registration = await _userRepository
+                .GetRegistrationGuidAsync(registrationId.ToString())
+                .ConfigureAwait(false);
+
+            if (registration == null)
+                return _resources["InvalidRegistrationId"];
+
+            if (registration.UserId.HasValue)
+                return _resources["UsedRegistrationId"];
+
+            var userId = await _userRepository
+                .CreateUserAsync(request.ToDto(_crypter))
+                .ConfigureAwait(false);
+
+            if (userId == 0)
+                return _resources["UserCreationFailure"];
+
+            await _userRepository
+                .LinkRegistrationGuidToUserAsync(registrationId.ToString(), userId)
+                .ConfigureAwait(false);
+
+            return null;
+        }
+
+        private async Task<string> ChangePasswordAsync(string authToken,
+            string currentPassword, string newPassword)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return _resources["InvalidUser"];
+
+            if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
+                return _resources["InvalidPassword"];
+
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return _resources["UserDoesNotExist"];
+
+            var success = await _userRepository
+                .ResetUserKnownPasswordAsync(
+                    user.Login,
+                    _crypter.Encrypt(currentPassword),
+                    _crypter.Encrypt(newPassword))
+                .ConfigureAwait(false);
+
+            if (!success)
+                return _resources["ResetPasswordError"];
+
+            return null;
         }
     }
 }

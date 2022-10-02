@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Api.Interfaces;
+using KikoleSite.Api.Interfaces.Repositories;
+using KikoleSite.Api.Interfaces.Services;
 using KikoleSite.Api.Models;
 using KikoleSite.Api.Models.Enums;
 using KikoleSite.Api.Models.Requests;
@@ -16,8 +19,33 @@ namespace KikoleSite.Controllers
     {
         private readonly IStringLocalizer<AdminController> _localizer;
 
-        public AdminController(IApiProvider apiProvider, IStringLocalizer<AdminController> localizer)
-            : base(apiProvider)
+        public AdminController(IStringLocalizer<AdminController> localizer,
+            IUserRepository userRepository,
+            ICrypter crypter,
+            IStringLocalizer<Translations> resources,
+            IInternationalRepository internationalRepository,
+            IMessageRepository messageRepository,
+            IClock clock,
+            IPlayerService playerService,
+            IClubRepository clubRepository,
+            IProposalService proposalService,
+            IBadgeService badgeService,
+            ILeaderService leaderService,
+            IStatisticService statisticService,
+            IDiscussionRepository discussionRepository)
+            : base(userRepository,
+                crypter,
+                resources,
+                internationalRepository,
+                messageRepository,
+                clock,
+                playerService,
+                clubRepository,
+                proposalService,
+                badgeService,
+                leaderService,
+                statisticService,
+                discussionRepository)
         {
             _localizer = localizer;
         }
@@ -27,7 +55,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -37,7 +65,7 @@ namespace KikoleSite.Controllers
             {
                 MessageDateStart = DateTime.Today.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second),
                 MessageDateEnd = DateTime.Today.AddDays(2).AddSeconds(-1),
-                Discussions = await _apiProvider.GetDiscussionsAsync().ConfigureAwait(false)
+                Discussions = await GetDiscussionsAsync().ConfigureAwait(false)
             });
         }
 
@@ -46,7 +74,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -56,27 +84,21 @@ namespace KikoleSite.Controllers
             switch (action)
             {
                 case "recomputebadges":
-                    await _apiProvider
-                        .ResetBadgesAsync()
-                        .ConfigureAwait(false);
+                    await ResetBadgesAsync().ConfigureAwait(false);
                     break;
                 case "recomputeleaders":
-                    await _apiProvider
-                        .ComputeMissingLeadersAsync()
-                        .ConfigureAwait(false);
+                    await ComputeMissingLeadersAsync().ConfigureAwait(false);
                     break;
                 case "reassignplayers":
-                    await _apiProvider
-                        .ReassignPlayersOfTheDayAsync()
-                        .ConfigureAwait(false);
+                    await ReassignPlayersOfTheDayAsync().ConfigureAwait(false);
                     break;
                 case "insertmessage":
                     if (model == null)
                     {
                         return RedirectToAction("ErrorIndex", "Home");
                     }
-                    await _apiProvider
-                        .CreateMessageAsync(model.Message ?? string.Empty, model.MessageDateStart, model.MessageDateEnd)
+                    await CreateMessageAsync(
+                            model.Message ?? string.Empty, model.MessageDateStart, model.MessageDateEnd)
                         .ConfigureAwait(false);
                     model.Message = null;
                     model.ActionFeedback = "Annonce créée";
@@ -91,7 +113,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -112,7 +134,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -134,8 +156,7 @@ namespace KikoleSite.Controllers
 
             if (action == "accepted" || action == "refusal")
             {
-                var result = await _apiProvider
-                    .ValidatePlayerSubmissionAsync(
+                var result = await ValidatePlayerSubmissionAsync(
                         new PlayerSubmissionValidationRequest
                         {
                             ClueEditLanguages = new Dictionary<Languages, string>
@@ -185,20 +206,19 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
+                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
 
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
+            var chart = await GetProposalChartAsync()
                 .ConfigureAwait(false);
 
             var model = new PlayerCreationModel();
             if (withOkMessage)
                 model.InfoMessage = _localizer["PlayerOk"];
             SetPositionsOnModel(model, chart);
-            model.DisplayPlayerSubmissionLink = await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false);
+            model.DisplayPlayerSubmissionLink = await IsAdminUserAsync(token).ConfigureAwait(false);
             return View(model);
         }
 
@@ -207,13 +227,12 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
+                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
 
-            var chart = await _apiProvider
-                .GetProposalChartAsync()
+            var chart = await GetProposalChartAsync()
                 .ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(model.Name))
@@ -244,8 +263,7 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            var countries = await _apiProvider
-                .GetCountriesAsync()
+            var countries = await GetCountriesAsync()
                 .ConfigureAwait(false);
 
             if (model.Country == null
@@ -276,9 +294,7 @@ namespace KikoleSite.Controllers
             };
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
 
-            var clubsReferential = await _apiProvider
-                .GetClubsAsync()
-                .ConfigureAwait(false);
+            var clubsReferential = await GetClubsAsync().ConfigureAwait(false);
 
             byte iPos = 1;
             var clubs = new List<PlayerClubRequest>();
@@ -305,9 +321,7 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            var isAdmin = await _apiProvider
-                .IsAdminUserAsync(token)
-                .ConfigureAwait(false);
+            var isAdmin = await IsAdminUserAsync(token).ConfigureAwait(false);
 
             var req = new PlayerRequest
             {
@@ -331,8 +345,8 @@ namespace KikoleSite.Controllers
                 HideCreator = model.HideCreator
             };
 
-            var response = await _apiProvider
-                .CreatePlayerAsync(req, token)
+            var response = await CreatePlayerAsync(
+                    req, token)
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(response))
@@ -350,7 +364,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
+                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -363,7 +377,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsPowerUserAsync(token).ConfigureAwait(false)))
+                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -385,8 +399,8 @@ namespace KikoleSite.Controllers
 
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
 
-            var response = await _apiProvider
-                .CreateClubAsync(model.MainName, names, token)
+            var response = await CreateClubAsync(
+                    model.MainName, names, token)
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(response))
@@ -396,7 +410,7 @@ namespace KikoleSite.Controllers
             }
 
             // force cache reset
-            await _apiProvider.GetClubsAsync(true).ConfigureAwait(false);
+            await GetClubsAsync(true).ConfigureAwait(false);
 
             model = new ClubCreationModel
             {
@@ -410,14 +424,14 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false))
+                || !(await IsAdminUserAsync(token).ConfigureAwait(false))
                 || playerId == 0)
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
 
-            var (clueEn, clueFr, easyClueEn, easyClueFr, error) = await _apiProvider
-                .GetPlayerCluesAsync(playerId, token)
+            var (clueEn, clueFr, easyClueEn, easyClueFr, error) = await GetPlayerCluesAsync(
+                    playerId, token)
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(error))
@@ -442,7 +456,7 @@ namespace KikoleSite.Controllers
         {
             var (token, _) = GetAuthenticationCookie();
             if (string.IsNullOrWhiteSpace(token)
-                || !(await _apiProvider.IsAdminUserAsync(token).ConfigureAwait(false)))
+                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -457,8 +471,8 @@ namespace KikoleSite.Controllers
                 return View("PlayerEdit", model);
             }
 
-            var result = await _apiProvider
-                .UpdatePlayerCluesAsync(model.PlayerId, model.ClueEn, model.EasyClueEn, model.ClueFr, model.EasyClueFr, token)
+            var result = await UpdatePlayerCluesAsync(
+                    model.PlayerId, model.ClueEn, model.EasyClueEn, model.ClueFr, model.EasyClueFr, token)
                 .ConfigureAwait(false);
 
             model.Success = string.IsNullOrWhiteSpace(result);
@@ -469,13 +483,11 @@ namespace KikoleSite.Controllers
 
         private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList(string token)
         {
-            var pls = await _apiProvider
-                .GetPlayerSubmissionsAsync(token)
+            var pls = await GetPlayerSubmissionsAsync(
+                    token)
                 .ConfigureAwait(false);
 
-            var countries = await _apiProvider
-                .GetCountriesAsync()
-                .ConfigureAwait(false);
+            var countries = await GetCountriesAsync().ConfigureAwait(false);
 
             return pls
                 .Select(p => new PlayerSubmissionModel
@@ -511,6 +523,175 @@ namespace KikoleSite.Controllers
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
             model.Chart = chart;
+        }
+
+        private async Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames, string authToken)
+        {
+            var request = new ClubRequest
+            {
+                Name = name,
+                AllowedNames = allowedNames
+            };
+
+            if (request == null)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            var validityRequest = request.IsValid(_resources);
+            if (!string.IsNullOrWhiteSpace(validityRequest))
+                return string.Format(_resources["InvalidRequest"], validityRequest);
+
+            var playerId = await _clubRepository
+                .CreateClubAsync(request.ToDto())
+                .ConfigureAwait(false);
+
+            if (playerId == 0)
+                return _resources["ClubCreationFailure"];
+
+            return null;
+        }
+
+        private async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return _resources["InvalidUser"];
+
+            if (player == null)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            var validityRequest = player.IsValid(_clock.Today, _resources);
+            if (!string.IsNullOrWhiteSpace(validityRequest))
+                return string.Format(_resources["InvalidRequest"], validityRequest);
+
+            await _playerService
+                .CreatePlayerAsync(player, userId)
+                .ConfigureAwait(false);
+
+            return null;
+        }
+
+        private async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
+        {
+            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (userId == 0)
+                return null;
+
+            var players = await _playerService
+                .GetPlayerSubmissionsAsync()
+                .ConfigureAwait(false);
+
+            return players;
+        }
+
+        private async Task<string> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request, string authToken)
+        {
+            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (request == null || callerUserId == 0)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            var validityCheck = request.IsValid(_resources);
+            if (!string.IsNullOrWhiteSpace(validityCheck))
+                return string.Format(_resources["InvalidRequest"], validityCheck);
+
+            var (result, userId, badges) = await _playerService
+                .ValidatePlayerSubmissionAsync(request)
+                .ConfigureAwait(false);
+
+            if (result == PlayerSubmissionErrors.PlayerNotFound)
+                return _resources["PlayerDoesNotExist"];
+
+            if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
+                return _resources["RejectAndProposalDateCombined"];
+
+            foreach (var badge in badges)
+            {
+                await _badgeService
+                    .AddBadgeToUserAsync(badge, userId)
+                    .ConfigureAwait(false);
+            }
+
+            return null;
+        }
+
+        private async Task<string> UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn, string clueFr, string easyClueFr, string authToken)
+        {
+            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+
+            if (callerUserId == 0)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            var isAdmin = await IsAdminUserAsync(authToken).ConfigureAwait(false);
+            if (!isAdmin)
+                return string.Format(_resources["InvalidRequest"], "null");
+
+            await _playerService
+                .UpdatePlayerCluesAsync(playerId, clueEn, easyClueEn,
+                    new Dictionary<Languages, string> { { Languages.fr, clueFr } },
+                    new Dictionary<Languages, string> { { Languages.fr, easyClueFr } })
+                .ConfigureAwait(false);
+
+            return null;
+        }
+
+        private async Task<(string clueEn, string clueFr, string easyClueEn, string easyClueFr, string error)> GetPlayerCluesAsync(ulong playerId, string authToken)
+        {
+            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
+            if (callerUserId == 0)
+                return (null, null, null, null, "KO");
+
+            var isAdmin = await IsAdminUserAsync(authToken).ConfigureAwait(false);
+            if (!isAdmin)
+                return (null, null, null, null, "KO");
+
+            var clues = await _playerService
+                .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr })
+                .ConfigureAwait(false);
+
+            return (clues[Languages.en].clue, clues[Languages.fr].clue, clues[Languages.en].easyclue, clues[Languages.fr].easyclue, null);
+        }
+
+        private async Task<IReadOnlyCollection<Api.Models.Dtos.DiscussionDto>> GetDiscussionsAsync()
+        {
+            return await _discussionRepository
+                .GetDiscussionsAsync()
+                .ConfigureAwait(false);
+        }
+
+        private async Task ResetBadgesAsync()
+        {
+            await _badgeService
+                .ResetBadgesAsync(Helper.GetLanguage())
+                .ConfigureAwait(false);
+        }
+
+        private async Task ComputeMissingLeadersAsync()
+        {
+            await _leaderService
+                .ComputeMissingLeadersAsync()
+                .ConfigureAwait(false);
+        }
+
+        private async Task ReassignPlayersOfTheDayAsync()
+        {
+            await _playerService
+                .ReassignPlayersOfTheDayAsync()
+                .ConfigureAwait(false);
+        }
+
+        private async Task CreateMessageAsync(string message, DateTime? startDate, DateTime? endDate)
+        {
+            await _messageRepository
+                .InsertMessageAsync(new Api.Models.Dtos.MessageDto
+                {
+                    DisplayTo = endDate,
+                    DisplayFrom = startDate,
+                    CreationDate = _clock.Now,
+                    Message = message
+                })
+                .ConfigureAwait(false);
         }
     }
 }
