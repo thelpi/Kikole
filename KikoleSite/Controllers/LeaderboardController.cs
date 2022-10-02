@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Interfaces.Services;
@@ -257,7 +258,7 @@ namespace KikoleSite.Controllers
             var connectedUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             var badgesFull = await _badgeService
-                 .GetUserBadgesAsync(userId, connectedUserId, Helper.GetLanguage())
+                 .GetUserBadgesAsync(userId, connectedUserId, ViewHelper.GetLanguage())
                  .ConfigureAwait(false);
 
             return badgesFull;
@@ -266,7 +267,7 @@ namespace KikoleSite.Controllers
         private async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
         {
             return await _badgeService
-                .GetAllBadgesAsync(Helper.GetLanguage())
+                .GetAllBadgesAsync(ViewHelper.GetLanguage())
                 .ConfigureAwait(false);
         }
 
@@ -275,7 +276,7 @@ namespace KikoleSite.Controllers
             var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
 
             return await _statisticService
-                .GetPlayersDistributionAsync(userId, Helper.GetLanguage(), 25)
+                .GetPlayersDistributionAsync(userId, ViewHelper.GetLanguage(), 25)
                 .ConfigureAwait(false);
         }
 

@@ -6,9 +6,9 @@ using System.Text;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleSite
+namespace KikoleSite.Helpers
 {
-    public static class Helper
+    public static class ViewHelper
     {
         public const string NA = "N/A";
         public const string TimeSpanPattern = @"hh\:mm";
@@ -126,17 +126,6 @@ namespace KikoleSite
                 // TODO: log
                 return encryptedText;
             }
-        }
-
-        internal static string Sanitize(this string value)
-        {
-            return value.Trim().RemoveDiacritics().ToLowerInvariant();
-        }
-
-        internal static string RemoveDiacritics(this string value)
-        {
-            var tempBytes = Encoding.GetEncoding(Iso8859Code).GetBytes(value);
-            return Encoding.UTF8.GetString(tempBytes);
         }
 
         internal static DateTime Min(this DateTime dt1, DateTime dt2)

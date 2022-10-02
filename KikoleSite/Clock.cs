@@ -1,7 +1,7 @@
 ﻿using System;
 using KikoleSite.Interfaces;
 
-namespace KikoleSite.Helpers
+namespace KikoleSite
 {
     /// <summary>
     /// Clock implementation.

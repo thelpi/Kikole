@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Interfaces.Services;
@@ -168,7 +169,7 @@ namespace KikoleSite.Controllers
         {
             if (_countriesCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
             {
-                var lng = Helper.GetLanguage();
+                var lng = ViewHelper.GetLanguage();
 
                 var countries = await _internationalRepository
                     .GetCountriesAsync((ulong)lng)

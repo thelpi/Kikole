@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Interfaces.Services;
@@ -409,7 +410,7 @@ namespace KikoleSite.Controllers
             if (leader != null)
             {
                 var leaderBadges = await _badgeService
-                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, Helper.GetLanguage())
+                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, ViewHelper.GetLanguage())
                     .ConfigureAwait(false);
 
                 foreach (var b in leaderBadges)
@@ -417,7 +418,7 @@ namespace KikoleSite.Controllers
             }
 
             var proposalBadges = await _badgeService
-                .PrepareNonLeaderBadgesAsync(userId, request, Helper.GetLanguage())
+                .PrepareNonLeaderBadgesAsync(userId, request, ViewHelper.GetLanguage())
                 .ConfigureAwait(false);
 
             foreach (var b in proposalBadges)
@@ -443,7 +444,7 @@ namespace KikoleSite.Controllers
         private async Task<string> GetClueAsync(DateTime proposalDate, bool isEasy)
         {
             var clue = await _playerService
-                .GetPlayerClueAsync(proposalDate, isEasy, Helper.GetLanguage())
+                .GetPlayerClueAsync(proposalDate, isEasy, ViewHelper.GetLanguage())
                 .ConfigureAwait(false);
 
             return clue;

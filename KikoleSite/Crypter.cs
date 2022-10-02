@@ -5,7 +5,7 @@ using System.Text;
 using KikoleSite.Interfaces;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleSite.Helpers
+namespace KikoleSite
 {
     public class Crypter : ICrypter
     {

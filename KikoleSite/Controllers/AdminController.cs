@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Interfaces.Services;
@@ -399,7 +400,7 @@ namespace KikoleSite.Controllers
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
 
             var response = await CreateClubAsync(
-                    model.MainName, names, token)
+                    model.MainName, names)
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(response))
@@ -524,7 +525,7 @@ namespace KikoleSite.Controllers
             model.Chart = chart;
         }
 
-        private async Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames, string authToken)
+        private async Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames)
         {
             var request = new ClubRequest
             {
@@ -662,7 +663,7 @@ namespace KikoleSite.Controllers
         private async Task ResetBadgesAsync()
         {
             await _badgeService
-                .ResetBadgesAsync(Helper.GetLanguage())
+                .ResetBadgesAsync(ViewHelper.GetLanguage())
                 .ConfigureAwait(false);
         }
 
