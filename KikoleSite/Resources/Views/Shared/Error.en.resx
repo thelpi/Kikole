@@ -121,7 +121,7 @@
     <value>Back to home</value>
   </data>
   <data name="ErrorMessage" xml:space="preserve">
-    <value>An error has occured; for safety measure, your session has been reinitialized.</value>
+    <value>An error has occured.</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>An error has occured</value>

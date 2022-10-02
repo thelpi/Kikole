@@ -35,7 +35,6 @@ namespace KikoleSite
                     }
                     context.Exception = null;
                     context.ExceptionHandled = true;
-                    context.HttpContext.Response.Cookies.Delete(Controllers.KikoleBaseController._cryptedAuthenticationCookieName);
                     context.Result = new ViewResult { ViewName = "~/Views/Shared/Error.cshtml" };
                 }
                 catch { }

@@ -121,7 +121,7 @@
     <value>Retour à l'accueil</value>
   </data>
   <data name="ErrorMessage" xml:space="preserve">
-    <value>Une erreur s'est produite ; par sécurité, votre session a été réinitialisée.</value>
+    <value>Une erreur s'est produite.</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Une erreur est survenue</value>
