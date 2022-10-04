@@ -21,6 +21,8 @@ namespace KikoleSite.Controllers
 {
     public class HomeController : KikoleBaseController
     {
+        private const string GiveUpSubmitAction = "GiveUp";
+
         private readonly IStringLocalizer<HomeController> _localizer;
         private readonly IDiscussionRepository _discussionRepository;
         private readonly IProposalService _proposalService;
@@ -210,33 +212,101 @@ namespace KikoleSite.Controllers
         {
             var (token, login) = GetAuthenticationCookie();
 
-            if (model == null
-                || !Enum.TryParse<ProposalTypes>(GetSubmitAction(), out var proposalType)
-                || string.IsNullOrWhiteSpace(token))
+            if (model == null || string.IsNullOrWhiteSpace(token))
             {
                 return Redirect("/");
             }
 
-            var msg = await GetCurrentMessageAsync().ConfigureAwait(false);
+            var userId = await ExtractUserIdFromTokenAsync(token).ConfigureAwait(false);
 
-            model.Message = msg;
-
-            var value = model.GetValueFromProposalType(proposalType);
-            if (string.IsNullOrWhiteSpace(value))
+            if (userId == 0)
             {
-                return await Index(model.CurrentDay, _localizer["InvalidRequest"])
-                    .ConfigureAwait(false);
+                return Redirect("/");
             }
 
-            var now = DateTime.Now;
+            var proposalType = ProposalTypes.Name;
+            var value = string.Empty;
+            var submitAction = GetSubmitAction();
+            var isGiveUp = submitAction == GiveUpSubmitAction;
 
-            var response = await SubmitProposalAsync(
-                    value,
-                    (uint)model.CurrentDay,
-                    proposalType,
-                    token,
-                    Request.HttpContext.Connection.RemoteIpAddress.ToString())
+            if (!isGiveUp)
+            {
+                if (!Enum.TryParse(submitAction, out proposalType))
+                {
+                    return Redirect("/");
+                }
+
+                value = model.GetValueFromProposalType(proposalType);
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return await Index(
+                            model.CurrentDay, _localizer["InvalidRequest"])
+                        .ConfigureAwait(false);
+                }
+            }
+
+            var daysBefore = (uint)model.CurrentDay;
+
+            var pInfo = await _playerService
+                .GetPlayerOfTheDayFullInfoAsync(_clock.Now.AddDays(-daysBefore).Date)
                 .ConfigureAwait(false);
+
+            var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+
+            ProposalResponse response;
+            if (isGiveUp)
+            {
+                do
+                {
+                    var (responseTmp, _, _) = await _proposalService
+                        .ManageProposalResponseAsync(
+                            BaseProposalRequest.Create(_clock.Now, $"GiveUp-{_clock.Now:hhmmss}", daysBefore, ProposalTypes.Name, ip),
+                            userId,
+                            pInfo)
+                        .ConfigureAwait(false);
+
+                    response = responseTmp;
+                }
+                while (response.TotalPoints > 0);
+
+                (response, _, _) = await _proposalService
+                    .ManageProposalResponseAsync(
+                        BaseProposalRequest.Create(_clock.Now, pInfo.Player.Name, daysBefore, ProposalTypes.Name, ip),
+                        userId,
+                        pInfo)
+                    .ConfigureAwait(false);
+
+                // no badges management in case of giveup
+            }
+            else
+            {
+                var request = BaseProposalRequest.Create(_clock.Now, value, daysBefore, proposalType, ip);
+
+                var (responseTmp, proposalsAlready, leader) = await _proposalService
+                    .ManageProposalResponseAsync(request, userId, pInfo)
+                    .ConfigureAwait(false);
+
+                response = responseTmp;
+
+                if (leader != null)
+                {
+                    var leaderBadges = await _badgeService
+                        .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, ViewHelper.GetLanguage())
+                        .ConfigureAwait(false);
+
+                    foreach (var b in leaderBadges)
+                        response.AddBadge(b);
+                }
+
+                var proposalBadges = await _badgeService
+                    .PrepareNonLeaderBadgesAsync(userId, request, ViewHelper.GetLanguage())
+                    .ConfigureAwait(false);
+
+                foreach (var b in proposalBadges)
+                    response.AddBadge(b);
+
+                model.Badges = response.CollectedBadges;
+            }
 
             model.IsErrorMessage = !response.Successful;
             if (proposalType == ProposalTypes.Clue)
@@ -248,7 +318,7 @@ namespace KikoleSite.Controllers
                     : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
             }
 
-            model.Badges = response.CollectedBadges;
+            model.Message = await GetCurrentMessageAsync().ConfigureAwait(false);
 
             return await SetAndGetViewModelAsync(
                     null,
@@ -256,7 +326,7 @@ namespace KikoleSite.Controllers
                     login,
                     await GetProposalChartAsync().ConfigureAwait(false),
                     model,
-                    now.Date.AddDays(-model.CurrentDay))
+                    _clock.Today.AddDays(-model.CurrentDay))
                 .ConfigureAwait(false);
         }
 
@@ -377,57 +447,6 @@ namespace KikoleSite.Controllers
             return await _playerService
                 .GetPlayerOfTheDayFullInfoAsync(date)
                 .ConfigureAwait(false);
-        }
-
-        private async Task<ProposalResponse> SubmitProposalAsync(string value, uint daysBeforeNow, ProposalTypes proposalType, string authToken, string ip)
-        {
-            var request = BaseProposalRequest.Create(_clock.Now, value, daysBeforeNow, proposalType, ip);
-
-            if (request == null)
-                return null;
-
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return null;
-
-            var validityRequest = request.IsValid(_resources);
-            if (!string.IsNullOrWhiteSpace(validityRequest))
-                return null;
-
-            var firstDate = await _playerService
-                .GetFirstSubmittedPlayerDateAsync(true)
-                .ConfigureAwait(false);
-
-            if (request.PlayerSubmissionDate < firstDate.Date || request.PlayerSubmissionDate > _clock.Today)
-                return null;
-
-            var pInfo = await _playerService
-                .GetPlayerOfTheDayFullInfoAsync(request.PlayerSubmissionDate)
-                .ConfigureAwait(false);
-
-            var (response, proposalsAlready, leader) = await _proposalService
-                .ManageProposalResponseAsync(request, userId, pInfo)
-                .ConfigureAwait(false);
-
-            if (leader != null)
-            {
-                var leaderBadges = await _badgeService
-                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, ViewHelper.GetLanguage())
-                    .ConfigureAwait(false);
-
-                foreach (var b in leaderBadges)
-                    response.AddBadge(b);
-            }
-
-            var proposalBadges = await _badgeService
-                .PrepareNonLeaderBadgesAsync(userId, request, ViewHelper.GetLanguage())
-                .ConfigureAwait(false);
-
-            foreach (var b in proposalBadges)
-                response.AddBadge(b);
-
-            return response;
         }
 
         private async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken)

@@ -150,6 +150,17 @@
                     </div>
                 </form>
             }
+            @if (Model.CurrentDay > 0)
+            {
+                <!-- give up -->
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <div style="margin-top: 15px">
+                        <input type="submit" onclick="return confirm('@localizer["GiveUpConfirmation"]')" value="@localizer["GiveUp"]" name="submit-GiveUp" style="width: 200px; margin-right: 20px" />
+                        <span>(<span style="color: crimson">@localizer["NoPoints"]</span>)</span>
+                    </div>
+                </form>
+            }
             <!-- clubs -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)

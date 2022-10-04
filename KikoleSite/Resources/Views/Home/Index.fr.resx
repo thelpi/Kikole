@@ -246,4 +246,13 @@
   <data name="FinalPosition" xml:space="preserve">
     <value>Position :</value>
   </data>
+  <data name="GiveUp" xml:space="preserve">
+    <value>Montrer la réponse</value>
+  </data>
+  <data name="NoPoints" xml:space="preserve">
+    <value>retire tous les points</value>
+  </data>
+  <data name="GiveUpConfirmation" xml:space="preserve">
+    <value>Etes vous sûr ?</value>
+  </data>
 </root>
