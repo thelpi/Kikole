@@ -82,10 +82,10 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
+        public async Task<IReadOnlyCollection<PlayerDto>> GetKnownPlayerNamesAsync(ulong userId)
         {
-            return await ExecuteReaderAsync<string>(
-                    "SELECT DISTINCT y.name " +
+            return await ExecuteReaderAsync<PlayerDto>(
+                    "SELECT DISTINCT y.id, y.name " +
                     "FROM players AS y " +
                     "LEFT JOIN proposals AS p ON y.proposal_date = p.proposal_date " +
                     "WHERE (" +

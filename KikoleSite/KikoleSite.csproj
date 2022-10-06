@@ -28,6 +28,9 @@
     <Content Update="Views\Leaderboard\Palmares.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
+    <Content Update="Views\Leaderboard\KikolesStats.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
     <Content Update="Views\Leaderboard\User.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>

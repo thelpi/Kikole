@@ -156,6 +156,25 @@ namespace KikoleSite.Controllers
             return View(model);
         }
 
+        [HttpGet("kikoles-stats")]
+        public async Task<JsonResult> GetKikolesStatisticsAsync(ulong userId)
+        {
+            var (token, _) = GetAuthenticationCookie();
+
+            var sessionUserId = await ExtractUserIdFromTokenAsync(token).ConfigureAwait(false);
+
+            if (userId == 0 || sessionUserId != userId)
+            {
+                return Json(new List<PlayerStatistics>());
+            }
+
+            var datas = await _statisticService
+                .GetPlayersStatisticsAsync(userId)
+                .ConfigureAwait(false);
+
+            return Json(datas);
+        }
+
         [HttpGet("leaderboard-details")]
         public async Task<JsonResult> GetLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
         {
@@ -188,6 +207,29 @@ namespace KikoleSite.Controllers
                 .ToList();
 
             return View("Palmares", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> KikolesStats()
+        {
+            var (token, _) = GetAuthenticationCookie();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var userId = await ExtractUserIdFromTokenAsync(token).ConfigureAwait(false);
+            if (userId == 0)
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var model = new KikolesStatsModel
+            {
+                UserId = userId
+            };
+
+            return View("KikolesStats", model);
         }
 
         private async Task SetModelPropertiesAsync(LeaderboardModel model)

@@ -162,6 +162,9 @@
   <data name="KFoundHeader" xml:space="preserve">
     <value>Kikoles found (created)</value>
   </data>
+  <data name="KikolesStatisticsPageLink" xml:space="preserve">
+    <value>Stats about kikoles</value>
+  </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>
   </data>
@@ -190,7 +193,7 @@
     <value>Sort type:</value>
   </data>
   <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Stats about kikoles and website</value>
+    <value>Stats about website</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Time</value>

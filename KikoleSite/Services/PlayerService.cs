@@ -230,9 +230,13 @@ namespace KikoleSite.Services
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
         {
-            return await _playerRepository
+            var players = await _playerRepository
                 .GetKnownPlayerNamesAsync(userId)
                 .ConfigureAwait(false);
+
+            return players
+                .Select(_ => _.Name)
+                .ToList();
         }
 
         /// <inheritdoc />

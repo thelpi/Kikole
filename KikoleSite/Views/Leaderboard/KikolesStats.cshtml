@@ -1,0 +1,31 @@
+﻿@model KikolesStatsModel
+@{
+    var loaderSize = 50;
+    var loaderMargin = $"-{(loaderSize / 2)}px";
+}
+<h3>Statistiques sur les kikolés</h3>
+<img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/ajax-loader.gif" style="display: none; left: 50%; margin-left: @loaderMargin; margin-top: 100px;" />
+<table style="margin-top: 10px" id="kikolesStatsTab">
+    <thead>
+        <tr>
+            <th style="text-align: center">Date</th>
+            <th style="text-align: center">Nom</th>
+            <th style="text-align: center">Créateur</th>
+            <th style="text-align: center">Moyenne de points (jour même)</th>
+            <th style="text-align: center">Joueurs ayant tentés (jour même)</th>
+            <th style="text-align: center">Joueurs ayant trouvés (jour même)</th>
+            <th style="text-align: center">Moyenne de points (total)</th>
+            <th style="text-align: center">Joueurs ayant tentés (total)</th>
+            <th style="text-align: center">Joueurs ayant trouvés (total)</th>
+            <th style="text-align: center">Meilleur temps</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    $(function () {
+        var userId = @Html.Raw(Json.Serialize(Model.UserId));
+        loadKikolesStats(userId);
+    });
+</script>

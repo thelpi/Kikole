@@ -162,6 +162,9 @@
   <data name="KFoundHeader" xml:space="preserve">
     <value>Kikolés trouvés / créés</value>
   </data>
+  <data name="KikolesStatisticsPageLink" xml:space="preserve">
+    <value>Stats sur les kikolés</value>
+  </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>
   </data>
@@ -190,7 +193,7 @@
     <value>Type de tri :</value>
   </data>
   <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Stats sur les kikolés et le site</value>
+    <value>Stats sur le site</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Temps</value>

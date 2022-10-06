@@ -6,6 +6,42 @@
     }
 });
 
+var loadKikolesStats = function (userId) {
+    $.ajax({
+        url: '/kikoles-stats?userId=' + userId,
+        type: "GET",
+        dataType: "json",
+        beforeSend: function () {
+            $("#loading-image").show();
+            $("#globalLeaderboardTable").hide();
+        },
+        success: function (data) {
+            var tabBody = $("#kikolesStatsTab").find('tbody');
+            data.forEach(e => {
+                var background = i % 2 == 0 ? "white" : "azure";
+                tabBody.append(`<tr style="background-color: ` + background + `">
+                        <td><a href="/?day=` + e.daysBefore + `">` + e.date + `</a></td>
+                        <td>` + e.name + `</td>
+                        <td>` + e.creator + `</td>
+                        <td>` + e.averagePointsSameDay + `</td>
+                        <td>` + e.triesCountSameDay + `</td>
+                        <td>` + e.successesCountSameDay + `</td>
+                        <td>` + e.averagePointsTotal + `</td>
+                        <td>` + e.triesCountTotal + `</td>
+                        <td>` + e.successesCountTotal + `</td>
+                        <td>` + e.bestTime + `</td>
+                    </tr>`);
+                i++;
+            });
+            $("#loading-image").hide();
+            $("#globalLeaderboardTable").show();
+        },
+        error: function (data) {
+            alert('Call error: ' + JSON.stringify(data));
+        }
+    });
+};
+
 /* leaderboard loading */
 var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText) {
     $.ajax({
