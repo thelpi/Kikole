@@ -7,9 +7,7 @@ using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Interfaces.Services;
-using KikoleSite.Models;
 using KikoleSite.Models.Enums;
-using KikoleSite.Models.Statistics;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +17,8 @@ namespace KikoleSite.Controllers
 {
     public class LeaderboardController : KikoleBaseController
     {
+        private const int DistributionSizeLimit = 25;
+
         private readonly IStringLocalizer<LeaderboardController> _localizer;
         private readonly IStatisticService _statisticService;
         private readonly ILeaderService _leaderService;
@@ -53,35 +53,44 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] ulong userId)
         {
+            // /!\ userId is not UserId
             if (userId == 0)
             {
-                return await IndexInternal().ConfigureAwait(false);
+                return await Index(null).ConfigureAwait(false);
             }
 
-            var stats = await GetUserStatsAsync(userId).ConfigureAwait(false);
+            var stats = await _leaderService
+                .GetUserStatisticsAsync(userId)
+                .ConfigureAwait(false);
 
             if (stats == null)
             {
-                return await IndexInternal().ConfigureAwait(false);
+                return await Index(null).ConfigureAwait(false);
             }
 
-            var badges = await GetUserBadgesAsync(userId).ConfigureAwait(false);
+            var language = ViewHelper.GetLanguage();
 
-            var allBadges = await GetBadgesAsync().ConfigureAwait(false);
+            var badges = await _badgeService
+                 .GetUserBadgesAsync(userId, UserId, language)
+                 .ConfigureAwait(false);
 
-            IReadOnlyCollection<string> knownAnswers = new List<string>();
-            if (UserId > 0)
-            {
-                knownAnswers = await GetUserKnownPlayersAsync().ConfigureAwait(false);
-            }
+            var allBadges = await _badgeService
+                .GetAllBadgesAsync(language)
+                .ConfigureAwait(false);
 
-            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, UserLogin == stats.Login));
+            var knownAnswers = UserId > 0
+                ? await GetUserKnownPlayersAsync().ConfigureAwait(false)
+                : new List<string>();
+
+            var isUser = UserLogin.Equals(stats.Login, StringComparison.InvariantCultureIgnoreCase);
+
+            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, isUser));
         }
 
         [HttpPost]
         public async Task<IActionResult> Index(LeaderboardModel model)
         {
-            await SetModelPropertiesAsync(model).ConfigureAwait(false);
+            model = await InitializeModelAsync(model).ConfigureAwait(false);
 
             return View(model);
         }
@@ -96,7 +105,9 @@ namespace KikoleSite.Controllers
         [Authorization]
         public async Task<JsonResult> GetStatisticPlayersDistribution()
         {
-            var datas = await GetPlayersDistributionAsync().ConfigureAwait(false);
+            var datas = await _statisticService
+                .GetPlayersDistributionAsync(UserId, ViewHelper.GetLanguage(), DistributionSizeLimit)
+                .ConfigureAwait(false);
 
             return Json(new
             {
@@ -114,7 +125,9 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<JsonResult> GetStatisticActiveUsers()
         {
-            var datas = await GetStatisticActiveUsersAsync().ConfigureAwait(false);
+            var datas = await _statisticService
+                .GetActiveUsersAsync()
+                .ConfigureAwait(false);
 
             return Json(new
             {
@@ -125,21 +138,6 @@ namespace KikoleSite.Controllers
                 daily = datas.DailyDatas.Select(_ =>
                     new KeyValuePair<string, int>(_.Key.GetNumDayLabel(), _.Value))
             });
-        }
-
-        private async Task<IActionResult> IndexInternal(LeaderboardModel model = null)
-        {
-            model ??= new LeaderboardModel();
-
-            model.MinimalDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            model.MaximalDate = DateTime.Now.Date;
-            model.SortType = LeaderSorts.TotalPoints;
-            model.LeaderboardDay = DateTime.Now.Date;
-            model.DaySortType = DayLeaderSorts.BestTime;
-
-            await SetModelPropertiesAsync(model).ConfigureAwait(false);
-
-            return View(model);
         }
 
         [HttpGet("kikoles-stats")]
@@ -156,8 +154,8 @@ namespace KikoleSite.Controllers
         [HttpGet("leaderboard-details")]
         public async Task<JsonResult> GetLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
         {
-            var ld = await GetLeaderboardAsync(
-                    sortType, minimalDate, maximalDate)
+            var ld = await _leaderService
+                .GetLeaderboardAsync(minimalDate, maximalDate, sortType)
                 .ConfigureAwait(false);
 
             return Json(ld);
@@ -166,25 +164,11 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Palmares()
         {
-            var model = new PalmaresModel();
+            var data = await _leaderService
+                .GetPalmaresAsync()
+                .ConfigureAwait(false);
 
-            var data = await GetPalmaresAsync().ConfigureAwait(false);
-
-            model.MonthlyPalmares = data.MonthlyPalmares
-                .Select(x => (
-                    new DateTime(x.Key.year, x.Key.month, 1),
-                    new[]
-                    {
-                        (x.Value.first.Id, x.Value.first.Login),
-                        (x.Value.second.Id, x.Value.second.Login),
-                        (x.Value.third.Id, x.Value.third.Login)
-                    }))
-                .ToList();
-            model.GlobalPalmares = data.GlobalPalmares
-                .Select(x => (x.user.Login, x.first, x.second, x.third))
-                .ToList();
-
-            return View("Palmares", model);
+            return View("Palmares", new PalmaresModel(data));
         }
 
         [HttpGet]
@@ -194,12 +178,24 @@ namespace KikoleSite.Controllers
             return View("KikolesStats");
         }
 
-        private async Task SetModelPropertiesAsync(LeaderboardModel model)
+        private async Task<LeaderboardModel> InitializeModelAsync(LeaderboardModel model)
         {
+            if (model == null)
+            {
+                model = new LeaderboardModel
+                {
+                    MinimalDate = _clock.FirstOfMonth,
+                    MaximalDate = DateTime.Now.Date,
+                    SortType = LeaderSorts.TotalPoints,
+                    LeaderboardDay = DateTime.Now.Date,
+                    DaySortType = DayLeaderSorts.BestTime
+                };
+            }
+
             model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
 
-            model.Dayboard = await GetDayboardAsync(
-                    model.LeaderboardDay.Date, model.DaySortType)
+            model.Dayboard = await _leaderService
+                .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
                 .ConfigureAwait(false);
 
             model.BoardName = _localizer["CustomLeaderboard"];
@@ -222,70 +218,8 @@ namespace KikoleSite.Controllers
                     model.BoardName = _localizer["LastDaysLeaderboard", Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))];
                 }
             }
-        }
 
-        private async Task<Palmares> GetPalmaresAsync()
-        {
-            return await _leaderService
-                .GetPalmaresAsync()
-                .ConfigureAwait(false);
-        }
-
-        private async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(LeaderSorts leaderSort, DateTime minimalDate, DateTime maximalDate)
-        {
-            return await _leaderService
-                .GetLeaderboardAsync(minimalDate, maximalDate, leaderSort)
-                .ConfigureAwait(false);
-        }
-
-        private async Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort)
-        {
-            return await _leaderService
-                .GetDayboardAsync(day, sort)
-                .ConfigureAwait(false);
-        }
-
-        private async Task<UserStat> GetUserStatsAsync(ulong id)
-        {
-            if (id == 0)
-                return null;
-
-            var userStatistics = await _leaderService
-                .GetUserStatisticsAsync(id)
-                .ConfigureAwait(false);
-
-            if (userStatistics == null)
-                return null;
-
-            return userStatistics;
-        }
-
-        private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId)
-        {
-            return await _badgeService
-                 .GetUserBadgesAsync(userId, UserId, ViewHelper.GetLanguage())
-                 .ConfigureAwait(false);
-        }
-
-        private async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
-        {
-            return await _badgeService
-                .GetAllBadgesAsync(ViewHelper.GetLanguage())
-                .ConfigureAwait(false);
-        }
-
-        private async Task<PlayersDistribution> GetPlayersDistributionAsync()
-        {
-            return await _statisticService
-                .GetPlayersDistributionAsync(UserId, ViewHelper.GetLanguage(), 25)
-                .ConfigureAwait(false);
-        }
-
-        private async Task<ActiveUsers> GetStatisticActiveUsersAsync()
-        {
-            return await _statisticService
-                .GetActiveUsersAsync()
-                .ConfigureAwait(false);
+            return model;
         }
     }
 }
