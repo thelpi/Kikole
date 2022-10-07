@@ -17,6 +17,7 @@ namespace KikoleSite.Controllers
 {
     public class LeaderboardController : KikoleBaseController
     {
+        private const string AnonymizedPlayerName = "***";
         private const int DistributionSizeLimit = 25;
 
         private readonly IStringLocalizer<LeaderboardController> _localizer;
@@ -58,7 +59,7 @@ namespace KikoleSite.Controllers
             }
 
             var stats = await _leaderService
-                .GetUserStatisticsAsync(userId)
+                .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName)
                 .ConfigureAwait(false);
 
             if (stats == null)
@@ -76,13 +77,7 @@ namespace KikoleSite.Controllers
                 .GetAllBadgesAsync(language)
                 .ConfigureAwait(false);
 
-            var knownAnswers = UserId > 0
-                ? await GetUserKnownPlayersAsync().ConfigureAwait(false)
-                : new List<string>();
-
-            var isUser = UserLogin.Equals(stats.Login, StringComparison.InvariantCultureIgnoreCase);
-
-            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, isUser));
+            return View("User", new UserStatsModel(stats, badges, allBadges, userId == UserId));
         }
 
         [HttpPost]
@@ -143,7 +138,7 @@ namespace KikoleSite.Controllers
         public async Task<JsonResult> GetKikolesStatisticsAsync()
         {
             var datas = await _statisticService
-                .GetPlayersStatisticsAsync(UserId)
+                .GetPlayersStatisticsAsync(UserId, AnonymizedPlayerName)
                 .ConfigureAwait(false);
 
             return Json(datas);

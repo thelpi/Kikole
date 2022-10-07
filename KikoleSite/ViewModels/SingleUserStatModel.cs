@@ -27,9 +27,9 @@ namespace KikoleSite.ViewModels
 
         public bool IsCreator { get; }
 
-        public SingleUserStatModel(DailyUserStat apiStat, bool knowPlayer)
+        public SingleUserStatModel(DailyUserStat apiStat)
         {
-            Answer = knowPlayer ? apiStat.Answer : "***";
+            Answer = apiStat.Answer;
             Date = apiStat.Date;
             Points = apiStat.Points;
             PointsPosition = apiStat.PointsPosition;

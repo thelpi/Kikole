@@ -12,6 +12,6 @@ namespace KikoleSite.Interfaces.Services
 
         Task<ActiveUsers> GetActiveUsersAsync(DateTime? startDate = null, DateTime? endDate = null);
 
-        Task<IReadOnlyCollection<PlayerStatistics>> GetPlayersStatisticsAsync(ulong userId);
+        Task<IReadOnlyCollection<PlayerStatistics>> GetPlayersStatisticsAsync(ulong userId, string anonymizedName);
     }
 }

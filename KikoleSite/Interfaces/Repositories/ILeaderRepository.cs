@@ -11,6 +11,8 @@ namespace KikoleSite.Interfaces.Repositories
 
         Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, bool onTimeOnly);
 
+        Task<IReadOnlyCollection<LeaderDto>> GetUserLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, bool onTimeOnly, ulong userId);
+
         Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date, bool onTimeOnly);
     }
 }

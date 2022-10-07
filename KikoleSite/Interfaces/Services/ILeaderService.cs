@@ -32,8 +32,10 @@ namespace KikoleSite.Interfaces.Services
         /// Get user statistics.
         /// </summary>
         /// <param name="userId">User identifier.</param>
+        /// <param name="requestUserId">User that made the request.</param>
+        /// <param name="anonymizedName">Anonymized player name.</param>
         /// <returns>User statistics; <c>Null</c> if user doesn't exist.</returns>
-        Task<UserStat> GetUserStatisticsAsync(ulong userId);
+        Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName);
 
         /// <summary>
         /// Computes missing leaders (administration tool).

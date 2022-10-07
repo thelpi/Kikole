@@ -165,8 +165,10 @@ namespace KikoleSite.Controllers
                 }
                 else if (dt == chart.FirstDate.Date.AddDays(-1))
                 {
-                    var known = await GetUserKnownPlayersAsync().ConfigureAwait(false);
-                    if (known.Count == ((DateTime.Now.Date - chart.FirstDate.Date).Days + 1))
+                    var foundAll = await _playerService
+                        .GetHasFoundEveryPlayerAsync(UserId)
+                        .ConfigureAwait(false);
+                    if (foundAll)
                     {
                         model = new HomeModel
                         {

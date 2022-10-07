@@ -82,21 +82,6 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyCollection<PlayerDto>> GetKnownPlayerNamesAsync(ulong userId)
-        {
-            return await ExecuteReaderAsync<PlayerDto>(
-                    "SELECT DISTINCT y.id, y.name " +
-                    "FROM players AS y " +
-                    "LEFT JOIN proposals AS p ON y.proposal_date = p.proposal_date " +
-                    "WHERE (" +
-                    "   (p.user_id = @userId AND p.successful = 1 AND p.proposal_type_id = @pType) " +
-                    "   OR y.creation_user_id = @userId" +
-                    ") AND y.proposal_date IS NOT NULL " +
-                    "AND y.proposal_date <= DATE(NOW())",
-                    new { userId, pType = (ulong)Models.Enums.ProposalTypes.Name })
-                .ConfigureAwait(false);
-        }
-
         public async Task<PlayerDto> GetPlayerByIdAsync(ulong id)
         {
             return await GetDtoAsync<PlayerDto>(

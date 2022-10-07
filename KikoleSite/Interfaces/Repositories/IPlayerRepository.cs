@@ -21,8 +21,6 @@ namespace KikoleSite.Interfaces.Repositories
 
         Task<DateTime> GetLatestProposalDateAsync();
 
-        Task<IReadOnlyCollection<PlayerDto>> GetKnownPlayerNamesAsync(ulong userId);
-
         Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);
 
         Task ValidatePlayerProposalAsync(ulong playerId, DateTime date);

@@ -52,5 +52,22 @@ namespace KikoleSite.Repositories
                     })
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<LeaderDto>> GetUserLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, bool onTimeOnly, ulong userId)
+        {
+            return await ExecuteReaderAsync<LeaderDto>(
+                    "SELECT * FROM leaders " +
+                    "WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
+                    "AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
+                    $"AND {(onTimeOnly ? $"proposal_date = DATE(creation_date)" : "1 = 1")} " +
+                    $"AND user_id = @userId ",
+                    new
+                    {
+                        minimal_date = minimalDate?.Date,
+                        maximal_date = maximalDate?.Date,
+                        userId
+                    })
+                .ConfigureAwait(false);
+        }
     }
 }

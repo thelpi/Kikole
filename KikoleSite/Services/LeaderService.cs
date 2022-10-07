@@ -129,7 +129,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<UserStat> GetUserStatisticsAsync(ulong userId)
+        public async Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName)
         {
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
@@ -137,6 +137,10 @@ namespace KikoleSite.Services
 
             if (user == null)
                 return null;
+
+            var requestUser = await _userRepository
+                .GetUserByIdAsync(requestUserId)
+                .ConfigureAwait(false);
 
             var stats = new List<DailyUserStat>();
 
@@ -165,9 +169,19 @@ namespace KikoleSite.Services
                 var isCreator = (pDay.ProposalDate.Value.Date < now || pDay.HideCreator == 0)
                     && userId == pDay.CreationUserId;
 
+                var pName = pDay.Name;
+
+                if (requestUserId == 0)
+                    pName = anonymizedName;
+                else if (!leaders.Any(_ => _.UserId == requestUserId) && pDay.CreationUserId != requestUserId)
+                {
+                    if (!(requestUser?.UserTypeId == (ulong)UserTypes.Administrator))
+                        pName = anonymizedName;
+                }
+
                 var singleStat = isCreator
-                    ? new DailyUserStat(currentDate, pDay.Name, GetSubmittedPlayerPoints(leaders, currentDate))
-                    : new DailyUserStat(userId, currentDate, pDay.Name, proposals.Any(_ => _.IsCurrentDay), proposals.Count > 0, leaders, meLeader);
+                    ? new DailyUserStat(currentDate, pName, GetSubmittedPlayerPoints(leaders, currentDate))
+                    : new DailyUserStat(userId, currentDate, pName, proposals.Any(_ => _.IsCurrentDay), proposals.Count > 0, leaders, meLeader);
 
                 stats.Add(singleStat);
                 currentDate = currentDate.AddDays(1);

@@ -60,7 +60,6 @@ namespace KikoleSite.ViewModels
         public UserStatsModel(UserStat apiStat,
             IReadOnlyCollection<UserBadge> badges,
             IReadOnlyCollection<Badge> allBadges,
-            IReadOnlyCollection<string> knownAnswers,
             bool isHimself)
         {
             Login = apiStat.Login;
@@ -76,7 +75,7 @@ namespace KikoleSite.ViewModels
             AverageTimeDayOne = apiStat.AverageTimeDayOne.ToNaString();
             BestTime = apiStat.BestTime.ToNaString();
             Stats = apiStat.Stats
-                .Select(s => new SingleUserStatModel(s, knownAnswers.Contains(s.Answer)))
+                .Select(s => new SingleUserStatModel(s))
                 .ToList();
             Badges = badges;
             MissingBadges = allBadges

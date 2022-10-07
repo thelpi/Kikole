@@ -168,13 +168,6 @@ namespace KikoleSite.Controllers
             return _proposalChartCache;
         }
 
-        protected async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync()
-        {
-            return await _playerService
-                .GetKnownPlayerNamesAsync(UserId)
-                .ConfigureAwait(false);
-        }
-
         protected void SetAuthenticationCookie(string token, string login)
         {
             SetCookie(CryptedAuthenticationCookieName,

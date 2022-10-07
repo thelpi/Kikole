@@ -68,13 +68,6 @@ namespace KikoleSite.Interfaces.Services
         Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync();
 
         /// <summary>
-        /// Gets known player names for a user.
-        /// </summary>
-        /// <param name="userId">User identifier.</param>
-        /// <returns>Collection of player' names.</returns>
-        Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId);
-
-        /// <summary>
         /// Valides a player submission.
         /// </summary>
         /// <param name="request">Request.</param>
@@ -108,5 +101,12 @@ namespace KikoleSite.Interfaces.Services
         /// <param name="languages">Languages to collect.</param>
         /// <returns>Both clues in every language.</returns>
         Task<IReadOnlyDictionary<Languages, (string clue, string easyclue)>> GetPlayerCluesAsync(ulong playerId, IReadOnlyCollection<Languages> languages);
+
+        /// <summary>
+        /// Gets if a user has found every players; doesn't include the special first player.
+        /// </summary>
+        /// <param name="userId">User identifier.</param>
+        /// <returns><c>True</c> if every player found.</returns>
+        Task<bool> GetHasFoundEveryPlayerAsync(ulong userId);
     }
 }

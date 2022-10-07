@@ -22,6 +22,7 @@ namespace KikoleSite.Services
         private readonly IPlayerHandler _playerHandler;
         private readonly IPlayerRepository _playerRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ILeaderRepository _leaderRepository;
         private readonly IClock _clock;
         private readonly Random _randomizer;
 
@@ -31,17 +32,20 @@ namespace KikoleSite.Services
         /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
         /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
+        /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="clock">Clock service.</param>
         /// <param name="randomizer">Randomizer.</param>
         public PlayerService(IPlayerHandler playerHandler,
             IPlayerRepository playerRepository,
             IUserRepository userRepository,
+            ILeaderRepository leaderRepository,
             IClock clock,
             Random randomizer)
         {
             _playerHandler = playerHandler;
             _playerRepository = playerRepository;
             _userRepository = userRepository;
+            _leaderRepository = leaderRepository;
             _clock = clock;
             _randomizer = randomizer;
         }
@@ -228,18 +232,6 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<string>> GetKnownPlayerNamesAsync(ulong userId)
-        {
-            var players = await _playerRepository
-                .GetKnownPlayerNamesAsync(userId)
-                .ConfigureAwait(false);
-
-            return players
-                .Select(_ => _.Name)
-                .ToList();
-        }
-
-        /// <inheritdoc />
         public async Task<(PlayerSubmissionErrors, ulong, IReadOnlyCollection<Badges>)> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
         {
             var badges = new List<Badges>();
@@ -303,6 +295,28 @@ namespace KikoleSite.Services
                     .ConfigureAwait(false);
                 i++;
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> GetHasFoundEveryPlayerAsync(ulong userId)
+        {
+            var firstPlayerDate = await _playerRepository
+                .GetFirstDateAsync()
+                .ConfigureAwait(false);
+
+            var createdPlayers = await _playerRepository
+                .GetPlayersByCreatorAsync(userId, true)
+                .ConfigureAwait(false);
+
+            var leaders = await _leaderRepository
+                .GetUserLeadersAsync(firstPlayerDate, null, false, userId)
+                .ConfigureAwait(false);
+
+            var countToFind = (_clock.Today - firstPlayerDate).Days + 1;
+
+            var createdCount = createdPlayers.Count(_ => _.ProposalDate <= _clock.Today);
+
+            return leaders.Count + createdCount == countToFind;
         }
 
         private async Task<DateTime> GetNextDateAsync()

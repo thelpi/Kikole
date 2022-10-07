@@ -103,6 +103,16 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsActivityAsync()
+        {
+            return await ExecuteReaderAsync<ProposalDto>(
+                    "SELECT DISTINCT user_id, proposal_date, DATE(creation_date) AS creation_date " +
+                    "FROM proposals " +
+                    $"WHERE user_id IN ({SubSqlValidUsers})",
+                    new object())
+                .ConfigureAwait(false);
+        }
+
         private async Task<IReadOnlyCollection<ProposalDto>> GetProposalsInternalAsync(
             string where, DateTime proposalDate, ulong userId)
         {
