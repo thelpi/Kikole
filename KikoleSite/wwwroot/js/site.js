@@ -6,9 +6,9 @@
     }
 });
 
-var loadKikolesStats = function (userId) {
+var loadKikolesStats = function () {
     $.ajax({
-        url: '/kikoles-stats?userId=' + userId,
+        url: '/kikoles-stats',
         type: "GET",
         dataType: "json",
         beforeSend: function () {

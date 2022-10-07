@@ -9,7 +9,6 @@ using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -27,7 +26,7 @@ namespace KikoleSite.Controllers
             IPlayerService playerService,
             IClubRepository clubRepository,
             IBadgeService badgeService,
-            IConfiguration configuration)
+            IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
                 resources,
@@ -36,7 +35,7 @@ namespace KikoleSite.Controllers
                 playerService,
                 clubRepository,
                 badgeService,
-                configuration)
+                httpContextAccessor)
         {
             _localizer = localizer;
         }
@@ -44,12 +43,10 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var (_, login) = GetAuthenticationCookie();
-
             return View(new AccountModel
             {
-                IsAuthenticated = login != null,
-                Login = login
+                IsAuthenticated = UserId > 0,
+                Login = UserLogin
             });
         }
 
@@ -131,9 +128,8 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var (token, login) = GetAuthenticationCookie();
                     var response = await ChangeQAndAAsync(
-                            token, model.RecoveryQCreate, model.RecoveryACreate)
+                            model.RecoveryQCreate, model.RecoveryACreate)
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(response))
                         model.Error = response;
@@ -141,7 +137,7 @@ namespace KikoleSite.Controllers
                     {
                         model.SuccessInfo = _localizer["QandAUpdated"];
                         model.IsAuthenticated = true;
-                        model.Login = login;
+                        model.Login = UserLogin;
                     }
                 }
             }
@@ -204,16 +200,15 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var (token, login) = GetAuthenticationCookie();
                     var response = await ChangePasswordAsync(
-                            token, model.PasswordSubmission, model.PasswordCreate1Submission)
+                            model.PasswordSubmission, model.PasswordCreate1Submission)
                         .ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(response))
                         model.Error = response;
                     else
                     {
                         model.IsAuthenticated = true;
-                        model.Login = login;
+                        model.Login = UserLogin;
                         model.SuccessInfo = _localizer["PasswordChanged"];
                     }
                 }
@@ -293,12 +288,9 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private async Task<string> ChangeQAndAAsync(string authToken,
-            string question, string answer)
+        private async Task<string> ChangeQAndAAsync(string question, string answer)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
+            if (UserId == 0)
                 return _resources["InvalidUser"];
 
             if (string.IsNullOrWhiteSpace(question)
@@ -306,7 +298,7 @@ namespace KikoleSite.Controllers
                 return _resources["InvalidQOrA"];
 
             await _userRepository
-                .ResetUserQAndAAsync(userId, question, _crypter.Encrypt(answer))
+                .ResetUserQAndAAsync(UserId, question, _crypter.Encrypt(answer))
                 .ConfigureAwait(false);
 
             return null;
@@ -361,19 +353,16 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private async Task<string> ChangePasswordAsync(string authToken,
-            string currentPassword, string newPassword)
+        private async Task<string> ChangePasswordAsync(string currentPassword, string newPassword)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
+            if (UserId == 0)
                 return _resources["InvalidUser"];
 
             if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
                 return _resources["InvalidPassword"];
 
             var user = await _userRepository
-                .GetUserByIdAsync(userId)
+                .GetUserByIdAsync(UserId)
                 .ConfigureAwait(false);
 
             if (user == null)
@@ -390,27 +379,6 @@ namespace KikoleSite.Controllers
                 return _resources["ResetPasswordError"];
 
             return null;
-        }
-
-        private void SetAuthenticationCookie(string token, string login)
-        {
-            SetCookie(_cryptedAuthenticationCookieName,
-                $"{token}{CookiePartsSeparator}{login}",
-                DateTime.Now.AddMonths(1));
-        }
-
-        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
-        {
-            Response.Cookies.Delete(cookieName);
-            Response.Cookies.Append(
-                cookieName,
-                Encrypt(cookieValue),
-                    new CookieOptions
-                    {
-                        Expires = expiration,
-                        IsEssential = true,
-                        Secure = false
-                    });
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
@@ -10,8 +11,8 @@ using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Statistics;
 using KikoleSite.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -33,7 +34,7 @@ namespace KikoleSite.Controllers
             IBadgeService badgeService,
             ILeaderService leaderService,
             IStatisticService statisticService,
-            IConfiguration configuration)
+            IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
                 resources,
@@ -42,7 +43,7 @@ namespace KikoleSite.Controllers
                 playerService,
                 clubRepository,
                 badgeService,
-                configuration)
+                httpContextAccessor)
         {
             _localizer = localizer;
             _statisticService = statisticService;
@@ -57,32 +58,24 @@ namespace KikoleSite.Controllers
                 return await IndexInternal().ConfigureAwait(false);
             }
 
-            var stats = await GetUserStatsAsync(
-                    userId)
-                .ConfigureAwait(false);
+            var stats = await GetUserStatsAsync(userId).ConfigureAwait(false);
 
             if (stats == null)
             {
                 return await IndexInternal().ConfigureAwait(false);
             }
 
-            var (token, login) = GetAuthenticationCookie();
-
-            var badges = await GetUserBadgesAsync(
-                    userId, token)
-                .ConfigureAwait(false);
+            var badges = await GetUserBadgesAsync(userId).ConfigureAwait(false);
 
             var allBadges = await GetBadgesAsync().ConfigureAwait(false);
 
             IReadOnlyCollection<string> knownAnswers = new List<string>();
-            if (!string.IsNullOrWhiteSpace(token))
+            if (UserId > 0)
             {
-                knownAnswers = await GetUserKnownPlayersAsync(
-                        token)
-                    .ConfigureAwait(false);
+                knownAnswers = await GetUserKnownPlayersAsync().ConfigureAwait(false);
             }
 
-            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, login == stats.Login));
+            return View("User", new UserStatsModel(stats, badges, allBadges, knownAnswers, UserLogin == stats.Login));
         }
 
         [HttpPost]
@@ -100,17 +93,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        [Authorization]
         public async Task<JsonResult> GetStatisticPlayersDistribution()
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return Json(new { });
-            }
-
-            var datas = await GetPlayersDistributionAsync(
-                    token)
-                .ConfigureAwait(false);
+            var datas = await GetPlayersDistributionAsync().ConfigureAwait(false);
 
             return Json(new
             {
@@ -157,19 +143,11 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet("kikoles-stats")]
-        public async Task<JsonResult> GetKikolesStatisticsAsync(ulong userId)
+        [Authorization]
+        public async Task<JsonResult> GetKikolesStatisticsAsync()
         {
-            var (token, _) = GetAuthenticationCookie();
-
-            var sessionUserId = await ExtractUserIdFromTokenAsync(token).ConfigureAwait(false);
-
-            if (userId == 0 || sessionUserId != userId)
-            {
-                return Json(new List<PlayerStatistics>());
-            }
-
             var datas = await _statisticService
-                .GetPlayersStatisticsAsync(userId)
+                .GetPlayersStatisticsAsync(UserId)
                 .ConfigureAwait(false);
 
             return Json(datas);
@@ -210,26 +188,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> KikolesStats()
+        [Authorization]
+        public IActionResult KikolesStats()
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
-            var userId = await ExtractUserIdFromTokenAsync(token).ConfigureAwait(false);
-            if (userId == 0)
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
-            var model = new KikolesStatsModel
-            {
-                UserId = userId
-            };
-
-            return View("KikolesStats", model);
+            return View("KikolesStats");
         }
 
         private async Task SetModelPropertiesAsync(LeaderboardModel model)
@@ -298,15 +260,11 @@ namespace KikoleSite.Controllers
             return userStatistics;
         }
 
-        private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, string authToken)
+        private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId)
         {
-            var connectedUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            var badgesFull = await _badgeService
-                 .GetUserBadgesAsync(userId, connectedUserId, ViewHelper.GetLanguage())
+            return await _badgeService
+                 .GetUserBadgesAsync(userId, UserId, ViewHelper.GetLanguage())
                  .ConfigureAwait(false);
-
-            return badgesFull;
         }
 
         private async Task<IReadOnlyCollection<Badge>> GetBadgesAsync()
@@ -316,12 +274,10 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
         }
 
-        private async Task<PlayersDistribution> GetPlayersDistributionAsync(string authToken)
+        private async Task<PlayersDistribution> GetPlayersDistributionAsync()
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
             return await _statisticService
-                .GetPlayersDistributionAsync(userId, ViewHelper.GetLanguage(), 25)
+                .GetPlayersDistributionAsync(UserId, ViewHelper.GetLanguage(), 25)
                 .ConfigureAwait(false);
         }
 

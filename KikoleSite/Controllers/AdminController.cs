@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
@@ -10,9 +11,9 @@ using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 using KikoleSite.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -36,7 +37,7 @@ namespace KikoleSite.Controllers
             IBadgeService badgeService,
             ILeaderService leaderService,
             IDiscussionRepository discussionRepository,
-            IConfiguration configuration)
+            IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
                 resources,
@@ -45,7 +46,7 @@ namespace KikoleSite.Controllers
                 playerService,
                 clubRepository,
                 badgeService,
-                configuration)
+                httpContextAccessor)
         {
             _localizer = localizer;
             _discussionRepository = discussionRepository;
@@ -54,15 +55,9 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> Actions()
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             // default : from now without ms to tomorrow 23:59:59
             return View(new AdminModel
             {
@@ -73,15 +68,9 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
+        [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> Actions(AdminModel model)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             var action = GetSubmitAction();
 
             switch (action)
@@ -112,17 +101,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> PlayerSubmission()
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
-            var players = await GetPlayerSubmissionsList(token)
-                .ConfigureAwait(false);
+            var players = await GetPlayerSubmissionsList().ConfigureAwait(false);
 
             var model = new PlayerSubmissionsModel
             {
@@ -133,22 +115,15 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
+        [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             if (model == null)
             {
                 return RedirectToAction("PlayerSubmission", "Admin");
             }
 
-            model.Players = await GetPlayerSubmissionsList(token)
-                .ConfigureAwait(false);
+            model.Players = await GetPlayerSubmissionsList().ConfigureAwait(false);
 
             if (model.Players.Count == 0)
             {
@@ -175,8 +150,7 @@ namespace KikoleSite.Controllers
                             IsAccepted = action == "accepted",
                             PlayerId = model.SelectedId,
                             RefusalReason = model.RefusalReason
-                        },
-                        token)
+                        })
                     .ConfigureAwait(false);
 
                 if (!string.IsNullOrWhiteSpace(result))
@@ -205,38 +179,24 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        [Authorization(UserTypes.PowerUser)]
         public async Task<IActionResult> Index(bool withOkMessage)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
-            var chart = await GetProposalChartAsync()
-                .ConfigureAwait(false);
+            var chart = await GetProposalChartAsync().ConfigureAwait(false);
 
             var model = new PlayerCreationModel();
             if (withOkMessage)
                 model.InfoMessage = _localizer["PlayerOk"];
             SetPositionsOnModel(model, chart);
-            model.DisplayPlayerSubmissionLink = await IsAdminUserAsync(token).ConfigureAwait(false);
+            model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
             return View(model);
         }
 
         [HttpPost]
+        [Authorization(UserTypes.PowerUser)]
         public async Task<IActionResult> Index(PlayerCreationModel model)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
-            var chart = await GetProposalChartAsync()
-                .ConfigureAwait(false);
+            var chart = await GetProposalChartAsync().ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(model.Name))
             {
@@ -324,7 +284,7 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            var isAdmin = await IsAdminUserAsync(token).ConfigureAwait(false);
+            var isAdmin = IsTypeOfUser(UserTypes.Administrator);
 
             var req = new PlayerRequest
             {
@@ -348,9 +308,7 @@ namespace KikoleSite.Controllers
                 HideCreator = model.HideCreator
             };
 
-            var response = await CreatePlayerAsync(
-                    req, token)
-                .ConfigureAwait(false);
+            var response = await CreatePlayerAsync(req).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(response))
             {
@@ -363,28 +321,16 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Club()
+        [Authorization(UserTypes.PowerUser)]
+        public IActionResult Club()
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             return View("Club", new ClubCreationModel());
         }
 
         [HttpPost]
+        [Authorization(UserTypes.PowerUser)]
         public async Task<IActionResult> Club(ClubCreationModel model)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsPowerUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             if (string.IsNullOrWhiteSpace(model.MainName))
             {
                 model.ErrorMessage = _localizer["ClubNameMiss"];
@@ -423,19 +369,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> PlayerEdit(ulong playerId)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsAdminUserAsync(token).ConfigureAwait(false))
-                || playerId == 0)
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
-            var (clueEn, clueFr, easyClueEn, easyClueFr, error) = await GetPlayerCluesAsync(
-                    playerId, token)
-                .ConfigureAwait(false);
+            var (clueEn, clueFr, easyClueEn, easyClueFr, error) = await GetPlayerCluesAsync(playerId).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(error))
             {
@@ -455,15 +392,9 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
+        [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> PlayerEdit(PlayerEditModel model)
         {
-            var (token, _) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token)
-                || !(await IsAdminUserAsync(token).ConfigureAwait(false)))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             if (string.IsNullOrWhiteSpace(model.ClueEn)
                 || string.IsNullOrWhiteSpace(model.ClueFr)
                 || string.IsNullOrWhiteSpace(model.EasyClueEn)
@@ -475,7 +406,7 @@ namespace KikoleSite.Controllers
             }
 
             var result = await UpdatePlayerCluesAsync(
-                    model.PlayerId, model.ClueEn, model.EasyClueEn, model.ClueFr, model.EasyClueFr, token)
+                    model.PlayerId, model.ClueEn, model.EasyClueEn, model.ClueFr, model.EasyClueFr)
                 .ConfigureAwait(false);
 
             model.Success = string.IsNullOrWhiteSpace(result);
@@ -484,11 +415,9 @@ namespace KikoleSite.Controllers
             return View("PlayerEdit", model);
         }
 
-        private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList(string token)
+        private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
         {
-            var pls = await GetPlayerSubmissionsAsync(
-                    token)
-                .ConfigureAwait(false);
+            var pls = await GetPlayerSubmissionsAsync().ConfigureAwait(false);
 
             var countries = await GetCountriesAsync().ConfigureAwait(false);
 
@@ -553,13 +482,8 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private async Task<string> CreatePlayerAsync(PlayerRequest player, string authToken)
+        private async Task<string> CreatePlayerAsync(PlayerRequest player)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return _resources["InvalidUser"];
-
             if (player == null)
                 return string.Format(_resources["InvalidRequest"], "null");
 
@@ -568,31 +492,22 @@ namespace KikoleSite.Controllers
                 return string.Format(_resources["InvalidRequest"], validityRequest);
 
             await _playerService
-                .CreatePlayerAsync(player, userId)
+                .CreatePlayerAsync(player, UserId)
                 .ConfigureAwait(false);
 
             return null;
         }
 
-        private async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(string authToken)
+        private async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync()
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return null;
-
-            var players = await _playerService
+            return await _playerService
                 .GetPlayerSubmissionsAsync()
                 .ConfigureAwait(false);
-
-            return players;
         }
 
-        private async Task<string> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request, string authToken)
+        private async Task<string> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
         {
-            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (request == null || callerUserId == 0)
+            if (request == null)
                 return string.Format(_resources["InvalidRequest"], "null");
 
             var validityCheck = request.IsValid(_resources);
@@ -619,17 +534,8 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private async Task<string> UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn, string clueFr, string easyClueFr, string authToken)
+        private async Task<string> UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn, string clueFr, string easyClueFr)
         {
-            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (callerUserId == 0)
-                return string.Format(_resources["InvalidRequest"], "null");
-
-            var isAdmin = await IsAdminUserAsync(authToken).ConfigureAwait(false);
-            if (!isAdmin)
-                return string.Format(_resources["InvalidRequest"], "null");
-
             await _playerService
                 .UpdatePlayerCluesAsync(playerId, clueEn, easyClueEn,
                     new Dictionary<Languages, string> { { Languages.fr, clueFr } },
@@ -639,16 +545,8 @@ namespace KikoleSite.Controllers
             return null;
         }
 
-        private async Task<(string clueEn, string clueFr, string easyClueEn, string easyClueFr, string error)> GetPlayerCluesAsync(ulong playerId, string authToken)
+        private async Task<(string clueEn, string clueFr, string easyClueEn, string easyClueFr, string error)> GetPlayerCluesAsync(ulong playerId)
         {
-            var callerUserId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-            if (callerUserId == 0)
-                return (null, null, null, null, "KO");
-
-            var isAdmin = await IsAdminUserAsync(authToken).ConfigureAwait(false);
-            if (!isAdmin)
-                return (null, null, null, null, "KO");
-
             var clues = await _playerService
                 .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr })
                 .ConfigureAwait(false);

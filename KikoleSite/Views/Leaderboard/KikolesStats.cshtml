@@ -1,5 +1,4 @@
-﻿@model KikolesStatsModel
-@{
+﻿@{
     var loaderSize = 50;
     var loaderMargin = $"-{(loaderSize / 2)}px";
 }
@@ -25,7 +24,6 @@
 
 <script>
     $(function () {
-        var userId = @Html.Raw(Json.Serialize(Model.UserId));
-        loadKikolesStats(userId);
+        loadKikolesStats();
     });
 </script>

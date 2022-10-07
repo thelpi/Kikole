@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using KikoleSite.Controllers.Filters;
 using KikoleSite.Handlers;
-using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Handlers;
 using KikoleSite.Interfaces.Repositories;
@@ -45,9 +45,15 @@ namespace KikoleSite
             });
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
-            services.AddMvc(options => options.Filters.Add<ControllerErrorFilter>())
+            services.AddMvc(options =>
+                {
+                    options.Filters.Add<ErrorFilter>();
+                    options.Filters.Add<AuthorizationFilter>();
+                })
                 .AddViewLocalization(Microsoft.AspNetCore.Mvc.Razor.LanguageViewLocationExpanderFormat.Suffix)
                 .AddDataAnnotationsLocalization();
+
+            services.AddHttpContextAccessor();
 
             services
                 // repositories

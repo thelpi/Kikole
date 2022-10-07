@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
 using KikoleSite.Interfaces.Repositories;
@@ -14,7 +15,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
@@ -40,7 +40,7 @@ namespace KikoleSite.Controllers
             IProposalService proposalService,
             IBadgeService badgeService,
             IDiscussionRepository discussionRepository,
-            IConfiguration configuration)
+            IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
                 resources,
@@ -49,7 +49,7 @@ namespace KikoleSite.Controllers
                 playerService,
                 clubRepository,
                 badgeService,
-                configuration)
+                httpContextAccessor)
         {
             _localizer = localizer;
             _discussionRepository = discussionRepository;
@@ -64,29 +64,21 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet]
+        [Authorization]
         public IActionResult Contact()
         {
-            var (token, login) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
-
             var model = new ContactModel
             {
-                LoggedAs = login
+                LoggedAs = UserLogin
             };
 
             return View(model);
         }
 
         [HttpPost]
+        [Authorization]
         public async Task<IActionResult> Contact(ContactModel model)
         {
-            var (token, login) = GetAuthenticationCookie();
-            if (string.IsNullOrWhiteSpace(token))
-                return RedirectToAction("ErrorIndex", "Home");
-
             if (string.IsNullOrWhiteSpace(model.Email))
                 model.ErrorMessage = _localizer["InvalidEmail"];
             else if (string.IsNullOrWhiteSpace(model.Message))
@@ -94,7 +86,7 @@ namespace KikoleSite.Controllers
             else
             {
                 var result = await CreateDiscussionAsync(
-                        model.Email, model.Message, token)
+                        model.Email, model.Message)
                     .ConfigureAwait(false);
 
                 if (string.IsNullOrWhiteSpace(result))
@@ -106,7 +98,7 @@ namespace KikoleSite.Controllers
                     model.SuccessMessage = result;
             }
 
-            model.LoggedAs = login;
+            model.LoggedAs = UserLogin;
             return View(model);
         }
 
@@ -153,8 +145,6 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
-            var (token, login) = GetAuthenticationCookie();
-
             var msg = await GetCurrentMessageAsync().ConfigureAwait(false);
 
             var chart = await GetProposalChartAsync().ConfigureAwait(false);
@@ -163,7 +153,7 @@ namespace KikoleSite.Controllers
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
-                && (day.Value >= 0 || await IsAdminUserAsync(token).ConfigureAwait(false)))
+                && (day.Value >= 0 || IsTypeOfUser(UserTypes.Administrator)))
             {
                 var dt = DateTime.Now.Date.AddDays(-day.Value);
                 if (dt >= chart.FirstDate.Date)
@@ -176,7 +166,7 @@ namespace KikoleSite.Controllers
                 }
                 else if (dt == chart.FirstDate.Date.AddDays(-1))
                 {
-                    var known = await GetUserKnownPlayersAsync(token).ConfigureAwait(false);
+                    var known = await GetUserKnownPlayersAsync().ConfigureAwait(false);
                     if (known.Count == ((DateTime.Now.Date - chart.FirstDate.Date).Days + 1))
                     {
                         model = new HomeModel
@@ -199,8 +189,6 @@ namespace KikoleSite.Controllers
 
             return await SetAndGetViewModelAsync(
                     errorMessageForced,
-                    token,
-                    login,
                     chart,
                     model,
                     DateTime.Now.Date.AddDays(-model.CurrentDay)
@@ -208,18 +196,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpPost]
+        [Authorization]
         public async Task<IActionResult> Index(HomeModel model)
         {
-            var (token, login) = GetAuthenticationCookie();
-
-            if (model == null || string.IsNullOrWhiteSpace(token))
-            {
-                return Redirect("/");
-            }
-
-            var userId = await ExtractUserIdFromTokenAsync(token).ConfigureAwait(false);
-
-            if (userId == 0)
+            if (model == null)
             {
                 return Redirect("/");
             }
@@ -261,7 +241,7 @@ namespace KikoleSite.Controllers
                     var (responseTmp, _, _) = await _proposalService
                         .ManageProposalResponseAsync(
                             BaseProposalRequest.Create(_clock.Now, $"GiveUp-{_clock.Now:hhmmss}", daysBefore, ProposalTypes.Name, ip),
-                            userId,
+                            UserId,
                             pInfo)
                         .ConfigureAwait(false);
 
@@ -272,7 +252,7 @@ namespace KikoleSite.Controllers
                 (response, _, _) = await _proposalService
                     .ManageProposalResponseAsync(
                         BaseProposalRequest.Create(_clock.Now, pInfo.Player.Name, daysBefore, ProposalTypes.Name, ip),
-                        userId,
+                        UserId,
                         pInfo)
                     .ConfigureAwait(false);
 
@@ -283,7 +263,7 @@ namespace KikoleSite.Controllers
                 var request = BaseProposalRequest.Create(_clock.Now, value, daysBefore, proposalType, ip);
 
                 var (responseTmp, proposalsAlready, leader) = await _proposalService
-                    .ManageProposalResponseAsync(request, userId, pInfo)
+                    .ManageProposalResponseAsync(request, UserId, pInfo)
                     .ConfigureAwait(false);
 
                 response = responseTmp;
@@ -299,7 +279,7 @@ namespace KikoleSite.Controllers
                 }
 
                 var proposalBadges = await _badgeService
-                    .PrepareNonLeaderBadgesAsync(userId, request, ViewHelper.GetLanguage())
+                    .PrepareNonLeaderBadgesAsync(UserId, request, ViewHelper.GetLanguage())
                     .ConfigureAwait(false);
 
                 foreach (var b in proposalBadges)
@@ -322,8 +302,6 @@ namespace KikoleSite.Controllers
 
             return await SetAndGetViewModelAsync(
                     null,
-                    token,
-                    login,
                     await GetProposalChartAsync().ConfigureAwait(false),
                     model,
                     _clock.Today.AddDays(-model.CurrentDay))
@@ -332,15 +310,11 @@ namespace KikoleSite.Controllers
 
         private async Task<IActionResult> SetAndGetViewModelAsync(
             string errorMessageForced,
-            string token,
-            string login,
             ProposalChart chart,
             HomeModel model,
             DateTime proposalDate)
         {
-            var playerCreator = await IsPlayerOfTheDayUser(
-                    proposalDate, token)
-                .ConfigureAwait(false);
+            var playerCreator = await IsPlayerOfTheDayUser(proposalDate).ConfigureAwait(false);
 
             var clue = await GetClueAsync(
                     proposalDate, false)
@@ -350,7 +324,7 @@ namespace KikoleSite.Controllers
                     proposalDate, true)
                 .ConfigureAwait(false);
 
-            if (!string.IsNullOrWhiteSpace(token))
+            if (UserId > 0)
             {
                 if (!string.IsNullOrWhiteSpace(playerCreator?.Name))
                 {
@@ -358,9 +332,7 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var proposals = await GetProposalsAsync(
-                            proposalDate, token)
-                        .ConfigureAwait(false);
+                    var proposals = await GetProposalsAsync(proposalDate).ConfigureAwait(false);
 
                     var countries = await GetCountriesAsync().ConfigureAwait(false);
 
@@ -377,17 +349,15 @@ namespace KikoleSite.Controllers
                 model.MessageToDisplay = errorMessageForced;
             }
 
-            var isPowerUser = await IsPowerUserAsync(token)
-                .ConfigureAwait(false);
+            var isPowerUser = IsTypeOfUser(UserTypes.PowerUser);
 
-            var isAdminUser = await IsAdminUserAsync(token)
-                .ConfigureAwait(false);
+            var isAdminUser = IsTypeOfUser(UserTypes.Administrator);
 
             if (!string.IsNullOrWhiteSpace(model.PlayerName) && string.IsNullOrWhiteSpace(model.EasyClue))
                 model.EasyClue = easyClue;
 
             model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
-            model.LoggedAs = login;
+            model.LoggedAs = UserLogin;
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
@@ -423,18 +393,13 @@ namespace KikoleSite.Controllers
             return message?.Message;
         }
 
-        private async Task<string> CreateDiscussionAsync(string email, string message, string authToken)
+        private async Task<string> CreateDiscussionAsync(string email, string message)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return _resources["InvalidUser"];
-
             await _discussionRepository
                 .CreateDiscussionAsync(new Models.Dtos.DiscussionDto
                 {
                     Email = email,
-                    UserId = userId,
+                    UserId = UserId,
                     Message = message
                 })
                 .ConfigureAwait(false);
@@ -449,18 +414,11 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
         }
 
-        private async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, string authToken)
+        private async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
-                return null;
-
-            var proposals = await _proposalService
-                .GetProposalsAsync(proposalDate, userId)
+            return await _proposalService
+                .GetProposalsAsync(proposalDate, UserId)
                 .ConfigureAwait(false);
-
-            return proposals;
         }
 
         private async Task<string> GetClueAsync(DateTime proposalDate, bool isEasy)
@@ -472,18 +430,14 @@ namespace KikoleSite.Controllers
             return clue;
         }
 
-        private async Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate, string authToken)
+        private async Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            if (userId == 0)
+            if (UserId == 0)
                 return null;
 
-            var p = await _playerService
-                .GetPlayerOfTheDayFromUserPovAsync(userId, proposalDate)
+            return await _playerService
+                .GetPlayerOfTheDayFromUserPovAsync(UserId, proposalDate)
                 .ConfigureAwait(false);
-
-            return p;
         }
     }
 }

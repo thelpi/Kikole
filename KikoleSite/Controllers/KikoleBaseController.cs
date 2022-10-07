@@ -2,10 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using KikoleSite.Helpers;
 using KikoleSite.Interfaces;
@@ -15,25 +12,34 @@ using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
     public abstract class KikoleBaseController : Controller
     {
-        internal const string _cryptedAuthenticationCookieName = "AccountFormCrypt";
+        internal const string CryptedAuthenticationCookieName = "AccountFormCrypt";
         internal const string CookiePartsSeparator = "§§§";
+        internal const string UserIdItemData = "UserId";
+        internal const string UserLoginItemData = "UserLogin";
+        internal const string UserTypeItemData = "UserType";
 
-        // minutes
-        private const int DelayBetweenUserChecks = 10;
+        protected ulong UserId => _httpContextAccessor.HttpContext.Items.ContainsKey(UserIdItemData)
+            ? Convert.ToUInt64(_httpContextAccessor.HttpContext.Items[UserIdItemData])
+            : 0;
+
+        protected string UserLogin => _httpContextAccessor.HttpContext.Items.ContainsKey(UserLoginItemData)
+            ? _httpContextAccessor.HttpContext.Items[UserLoginItemData]?.ToString()
+            : null;
+
+        protected UserTypes UserType => _httpContextAccessor.HttpContext.Items.ContainsKey(UserTypeItemData)
+            ? Enum.Parse<UserTypes>(_httpContextAccessor.HttpContext.Items[UserTypeItemData].ToString())
+            : UserTypes.StandardUser;
 
         private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
-        private readonly string _encryptionKey;
-        private readonly ConcurrentDictionary<ulong, DateTime> _usersCheckCache; // static???
         private readonly IInternationalRepository _internationalRepository;
 
         protected readonly IUserRepository _userRepository;
@@ -43,6 +49,7 @@ namespace KikoleSite.Controllers
         protected readonly IPlayerService _playerService;
         protected readonly IClubRepository _clubRepository;
         protected readonly IBadgeService _badgeService;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
         protected KikoleBaseController(IUserRepository userRepository,
             ICrypter crypter,
@@ -52,7 +59,7 @@ namespace KikoleSite.Controllers
             IPlayerService playerService,
             IClubRepository clubRepository,
             IBadgeService badgeService,
-            IConfiguration configuration)
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _crypter = crypter;
@@ -62,8 +69,7 @@ namespace KikoleSite.Controllers
             _playerService = playerService;
             _clubRepository = clubRepository;
             _badgeService = badgeService;
-            _usersCheckCache = new ConcurrentDictionary<ulong, DateTime>();
-            _encryptionKey = configuration.GetValue<string>("EncryptionCookieKey");
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost]
@@ -89,7 +95,7 @@ namespace KikoleSite.Controllers
 
         protected string GetSubmitAction()
         {
-            var submitKeys = HttpContext.Request.Form.Keys.Where(x => x.StartsWith("submit-"));
+            var submitKeys = _httpContextAccessor.HttpContext.Request.Form.Keys.Where(x => x.StartsWith("submit-"));
 
             if (submitKeys.Count() != 1)
                 return null;
@@ -109,53 +115,9 @@ namespace KikoleSite.Controllers
                 .ToDictionary(_ => (ulong)_, _ => _.GetLabel());
         }
 
-        protected (string token, string login) GetAuthenticationCookie()
-        {
-            var cookieValue = Request.Cookies.TryGetValue(_cryptedAuthenticationCookieName, out string cookieValueTmp)
-                ? Decrypt(cookieValueTmp)
-                : null;
-            if (cookieValue != null)
-            {
-                var cookieParts = cookieValue.Split(CookiePartsSeparator);
-                if (cookieParts.Length > 1)
-                {
-                    return (cookieParts[0], cookieParts[1]);
-                }
-            }
-
-            return (null, null);
-        }
-
         protected void ResetAuthenticationCookie()
         {
-            Response.Cookies.Delete(_cryptedAuthenticationCookieName);
-        }
-
-        protected async Task<ulong> ExtractUserIdFromTokenAsync(string token)
-        {
-            if (string.IsNullOrWhiteSpace(token))
-                return 0;
-
-            var tokenParts = token.Split('_', StringSplitOptions.RemoveEmptyEntries);
-            if (tokenParts.Length != 3
-                || !ulong.TryParse(tokenParts[0], out var userId)
-                || !ulong.TryParse(tokenParts[1], out var userTypeId)
-                || !Enum.GetValues(typeof(UserTypes)).Cast<UserTypes>().Any(_ => (ulong)_ == userTypeId))
-                return 0;
-
-            if (!_crypter.Encrypt($"{userId}_{userTypeId}").Equals(tokenParts[2]))
-                return 0;
-
-            if (!_usersCheckCache.ContainsKey(userId) || (_clock.Now - _usersCheckCache[userId]).TotalMinutes > DelayBetweenUserChecks)
-            {
-                var user = await _userRepository.GetUserByIdAsync(userId).ConfigureAwait(false);
-                if (user == null)
-                    return 0;
-                else
-                    _usersCheckCache.AddOrUpdate(userId, _clock.Now, (k, v) => _clock.Now);
-            }
-
-            return userId;
+            Response.Cookies.Delete(CryptedAuthenticationCookieName);
         }
 
         protected async Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false)
@@ -210,89 +172,37 @@ namespace KikoleSite.Controllers
             return _proposalChartCache;
         }
 
-        protected async Task<bool> IsPowerUserAsync(string authToken)
+        protected async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync()
         {
-            return await IsTypeOfUserAsync(
-                    authToken, UserTypes.PowerUser)
-                .ConfigureAwait(false);
-        }
-
-        protected async Task<bool> IsAdminUserAsync(string authToken)
-        {
-            return await IsTypeOfUserAsync(
-                    authToken, UserTypes.Administrator)
-                .ConfigureAwait(false);
-        }
-
-        protected async Task<IReadOnlyCollection<string>> GetUserKnownPlayersAsync(string authToken)
-        {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
             return await _playerService
-                .GetKnownPlayerNamesAsync(userId)
+                .GetKnownPlayerNamesAsync(UserId)
                 .ConfigureAwait(false);
         }
 
-        private async Task<bool> IsTypeOfUserAsync(string authToken, UserTypes minimalType)
+        protected void SetAuthenticationCookie(string token, string login)
         {
-            var userId = await ExtractUserIdFromTokenAsync(authToken).ConfigureAwait(false);
-
-            var user = await _userRepository
-                .GetUserByIdAsync(userId)
-                .ConfigureAwait(false);
-
-            if (user == null)
-                return false;
-
-            return user.UserTypeId >= (ulong)minimalType;
+            SetCookie(CryptedAuthenticationCookieName,
+                $"{token}{CookiePartsSeparator}{login}",
+                _clock.Now.AddMonths(1));
         }
 
-        protected string Encrypt(string plainText)
+        protected bool IsTypeOfUser(UserTypes minimalType)
         {
-            try
-            {
-                byte[] array;
-                using (var aes = Aes.Create())
-                {
-                    aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
-                    aes.IV = new byte[16];
-                    var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-                    using var memoryStream = new MemoryStream();
-                    using var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
-                    using (var streamWriter = new StreamWriter(cryptoStream))
+            return (ulong)UserType >= (ulong)minimalType;
+        }
+
+        private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
+        {
+            Response.Cookies.Delete(cookieName);
+            Response.Cookies.Append(
+                cookieName,
+                _crypter.EncryptCookie(cookieValue),
+                    new CookieOptions
                     {
-                        streamWriter.Write(plainText);
-                    }
-                    array = memoryStream.ToArray();
-                }
-                return Convert.ToBase64String(array);
-            }
-            catch
-            {
-                // TODO: log
-                return plainText;
-            }
-        }
-
-        private string Decrypt(string encryptedText)
-        {
-            try
-            {
-                var buffer = Convert.FromBase64String(encryptedText);
-                using var aes = Aes.Create();
-                aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
-                aes.IV = new byte[16];
-                var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                using var memoryStream = new MemoryStream(buffer);
-                using var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
-                using var streamReader = new StreamReader(cryptoStream);
-                return streamReader.ReadToEnd();
-            }
-            catch
-            {
-                // TODO: log
-                return encryptedText;
-            }
+                        Expires = expiration,
+                        IsEssential = true,
+                        Secure = false
+                    });
         }
     }
 }
