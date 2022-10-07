@@ -117,11 +117,53 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyExistsAccount" xml:space="preserve">
+    <value>A account already exists with this login</value>
+  </data>
+  <data name="BothAcceptedAndCancelledChallenge" xml:space="preserve">
+    <value>Challenge both accepted and refused</value>
+  </data>
+  <data name="CantAutoAcceptChallenge" xml:space="preserve">
+    <value>Can't accept your own challenge</value>
+  </data>
+  <data name="CantChallengeYourself" xml:space="preserve">
+    <value>You can't challenge yourself</value>
+  </data>
+  <data name="ChallengeAlreadyAccepted" xml:space="preserve">
+    <value>You can't cancel an accepted challenge</value>
+  </data>
+  <data name="ChallengeAlreadyAnswered" xml:space="preserve">
+    <value>You've already respond to this challenge</value>
+  </data>
+  <data name="ChallengeAlreadyExist" xml:space="preserve">
+    <value>Can't create challenge; a challenge against this opponent is already planned or requested</value>
+  </data>
+  <data name="ChallengeCreatorIsAdmin" xml:space="preserve">
+    <value>Can't create challenge; you're administrator</value>
+  </data>
+  <data name="ChallengeHostIsInvalid" xml:space="preserve">
+    <value>Invalid host account</value>
+  </data>
+  <data name="ChallengeNotFound" xml:space="preserve">
+    <value>Challenge not found</value>
+  </data>
+  <data name="ChallengeOpponentIsAdmin" xml:space="preserve">
+    <value>Can't create challenge; opponent account is administrator</value>
+  </data>
+  <data name="ChallengeOpponentIsInvalid" xml:space="preserve">
+    <value>Can't create challenge; invalid opponent account</value>
+  </data>
+  <data name="ClubCreationFailure" xml:space="preserve">
+    <value>Club creation failure</value>
+  </data>
   <data name="ClubNameMiss" xml:space="preserve">
     <value>Main name is mandatory</value>
   </data>
   <data name="ClubOk" xml:space="preserve">
     <value>Club created!</value>
+  </data>
+  <data name="ClueAvailable" xml:space="preserve">
+    <value>A new clue is available</value>
   </data>
   <data name="CreatingError" xml:space="preserve">
     <value>Error while creating: {0}</value>
@@ -129,14 +171,89 @@
   <data name="DuplicateClub" xml:space="preserve">
     <value>At least one club duplicated</value>
   </data>
+  <data name="EmptyClubsList" xml:space="preserve">
+    <value>Empty clubs list</value>
+  </data>
+  <data name="InvalidAllowedNames" xml:space="preserve">
+    <value>Invalid allowed names</value>
+  </data>
+  <data name="InvalidBirthYear" xml:space="preserve">
+    <value>Invalid year of birth</value>
+  </data>
+  <data name="InvalidChallengeId" xml:space="preserve">
+    <value>Invalid challenge identifier</value>
+  </data>
+  <data name="InvalidClubs" xml:space="preserve">
+    <value>At least one invalid club</value>
+  </data>
+  <data name="InvalidClue" xml:space="preserve">
+    <value>Invalid clue</value>
+  </data>
   <data name="InvalidCountry" xml:space="preserve">
     <value>Country is invalid</value>
+  </data>
+  <data name="InvalidCountry1" xml:space="preserve">
+    <value>Invalid country</value>
+  </data>
+  <data name="InvalidDate" xml:space="preserve">
+    <value>Invalid date</value>
+  </data>
+  <data name="InvalidDateRange" xml:space="preserve">
+    <value>Start/End dates are invalid or inconsistent</value>
+  </data>
+  <data name="InvalidGuestUserId" xml:space="preserve">
+    <value>Invalid guest identifier</value>
+  </data>
+  <data name="InvalidLanguage" xml:space="preserve">
+    <value>Invalid language</value>
+  </data>
+  <data name="InvalidLogin" xml:space="preserve">
+    <value>Invalid login</value>
+  </data>
+  <data name="InvalidName" xml:space="preserve">
+    <value>Invalid name</value>
+  </data>
+  <data name="InvalidOpponentAccount" xml:space="preserve">
+    <value>Opponent is an invalid account</value>
+  </data>
+  <data name="InvalidPassword" xml:space="preserve">
+    <value>Invalid password</value>
+  </data>
+  <data name="InvalidPlayerId" xml:space="preserve">
+    <value>Invalid player identifier</value>
+  </data>
+  <data name="InvalidPointsRate" xml:space="preserve">
+    <value>Invalid points rate</value>
   </data>
   <data name="InvalidPosition" xml:space="preserve">
     <value>Position is invalid</value>
   </data>
+  <data name="InvalidPosition1" xml:space="preserve">
+    <value>Invalid position</value>
+  </data>
+  <data name="InvalidProposalDate" xml:space="preserve">
+    <value>Invalid proposal date</value>
+  </data>
+  <data name="InvalidQOrA" xml:space="preserve">
+    <value>Invalid question or answer</value>
+  </data>
+  <data name="InvalidRegistrationId" xml:space="preserve">
+    <value>This registration identifier is invalid</value>
+  </data>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>Invalid request: {0}</value>
+  </data>
   <data name="InvalidSelectedPlayer" xml:space="preserve">
     <value>Invalid selected player</value>
+  </data>
+  <data name="InvalidSortType" xml:space="preserve">
+    <value>Invalid sort type</value>
+  </data>
+  <data name="InvalidUser" xml:space="preserve">
+    <value>Invalid user</value>
+  </data>
+  <data name="InvalidValue" xml:space="preserve">
+    <value>Invalid value</value>
   </data>
   <data name="InvalidYear" xml:space="preserve">
     <value>Year is invalid</value>
@@ -153,7 +270,46 @@
   <data name="OneClubMin" xml:space="preserve">
     <value>One club is mandatory</value>
   </data>
+  <data name="PasswordDoesNotMatch" xml:space="preserve">
+    <value>The password doesn't match</value>
+  </data>
+  <data name="PlayerCreationFailure" xml:space="preserve">
+    <value>Player creation failure</value>
+  </data>
+  <data name="PlayerDoesNotExist" xml:space="preserve">
+    <value>The player doesn't exist</value>
+  </data>
   <data name="PlayerOk" xml:space="preserve">
     <value>Player created!</value>
+  </data>
+  <data name="RefusalWithoutReason" xml:space="preserve">
+    <value>Refusal reason not specified</value>
+  </data>
+  <data name="RejectAndProposalDateCombined" xml:space="preserve">
+    <value>Unable to set both reject date and proposal date</value>
+  </data>
+  <data name="ResetPasswordError" xml:space="preserve">
+    <value>Error while reseting the password</value>
+  </data>
+  <data name="TipOlderPlayer" xml:space="preserve">
+    <value>The player is older</value>
+  </data>
+  <data name="TipOlderPlayerShort" xml:space="preserve">
+    <value>older</value>
+  </data>
+  <data name="TipYoungerPlayer" xml:space="preserve">
+    <value>The player is younger</value>
+  </data>
+  <data name="TipYoungerPlayerShort" xml:space="preserve">
+    <value>younger</value>
+  </data>
+  <data name="UsedRegistrationId" xml:space="preserve">
+    <value>This registration identifier is already used</value>
+  </data>
+  <data name="UserCreationFailure" xml:space="preserve">
+    <value>User creation failure</value>
+  </data>
+  <data name="UserDoesNotExist" xml:space="preserve">
+    <value>The user doesn't exist</value>
   </data>
 </root>

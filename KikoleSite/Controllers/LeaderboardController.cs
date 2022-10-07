@@ -26,7 +26,6 @@ namespace KikoleSite.Controllers
         public LeaderboardController(IStringLocalizer<LeaderboardController> localizer,
             IUserRepository userRepository,
             ICrypter crypter,
-            IStringLocalizer<Translations> resources,
             IInternationalRepository internationalRepository,
             IClock clock,
             IPlayerService playerService,
@@ -37,7 +36,6 @@ namespace KikoleSite.Controllers
             IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
-                resources,
                 internationalRepository,
                 clock,
                 playerService,

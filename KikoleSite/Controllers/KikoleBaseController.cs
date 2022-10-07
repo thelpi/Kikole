@@ -12,7 +12,6 @@ using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
@@ -44,7 +43,6 @@ namespace KikoleSite.Controllers
 
         protected readonly IUserRepository _userRepository;
         protected readonly ICrypter _crypter;
-        protected readonly IStringLocalizer<Translations> _resources;
         protected readonly IClock _clock;
         protected readonly IPlayerService _playerService;
         protected readonly IClubRepository _clubRepository;
@@ -53,7 +51,6 @@ namespace KikoleSite.Controllers
 
         protected KikoleBaseController(IUserRepository userRepository,
             ICrypter crypter,
-            IStringLocalizer<Translations> resources,
             IInternationalRepository internationalRepository,
             IClock clock,
             IPlayerService playerService,
@@ -63,7 +60,6 @@ namespace KikoleSite.Controllers
         {
             _userRepository = userRepository;
             _crypter = crypter;
-            _resources = resources;
             _internationalRepository = internationalRepository;
             _clock = clock;
             _playerService = playerService;

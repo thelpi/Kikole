@@ -117,11 +117,35 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyExistsAccount" xml:space="preserve">
+    <value>A account already exists with this login</value>
+  </data>
+  <data name="AuthenticationFailed" xml:space="preserve">
+    <value>Authentication failed: invalid token</value>
+  </data>
   <data name="InvalidForm" xml:space="preserve">
     <value>Invalid form values</value>
   </data>
+  <data name="InvalidLogin" xml:space="preserve">
+    <value>Invalid login</value>
+  </data>
+  <data name="InvalidPassword" xml:space="preserve">
+    <value>Invalid password</value>
+  </data>
+  <data name="InvalidQOrA" xml:space="preserve">
+    <value>Invalid question or answer</value>
+  </data>
   <data name="InvalidRegistrationGuidFormat" xml:space="preserve">
     <value>The registration code has an invalid format</value>
+  </data>
+  <data name="InvalidRegistrationId" xml:space="preserve">
+    <value>This registration identifier is invalid</value>
+  </data>
+  <data name="InvalidRequest" xml:space="preserve">
+    <value>Invalid request: {0}</value>
+  </data>
+  <data name="InvalidUser" xml:space="preserve">
+    <value>Invalid user</value>
   </data>
   <data name="NotMatchingPassword" xml:space="preserve">
     <value>Passwords are not the same</value>
@@ -129,16 +153,31 @@
   <data name="PasswordChanged" xml:space="preserve">
     <value>Your password has been changed</value>
   </data>
+  <data name="PasswordDoesNotMatch" xml:space="preserve">
+    <value>The password doesn't match</value>
+  </data>
   <data name="PasswordReset" xml:space="preserve">
     <value>Password has been reset</value>
   </data>
   <data name="QandAUpdated" xml:space="preserve">
     <value>Question and answer updated</value>
   </data>
+  <data name="ResetPasswordError" xml:space="preserve">
+    <value>Error while reseting the password</value>
+  </data>
   <data name="TooShortLogin" xml:space="preserve">
     <value>Login is too short (3 caracters min.)</value>
   </data>
   <data name="TooShortPassword" xml:space="preserve">
     <value>Password is too short (6 caracters min.)</value>
+  </data>
+  <data name="UsedRegistrationId" xml:space="preserve">
+    <value>This registration identifier is already used</value>
+  </data>
+  <data name="UserCreationFailure" xml:space="preserve">
+    <value>User creation failure</value>
+  </data>
+  <data name="UserDoesNotExist" xml:space="preserve">
+    <value>The user doesn't exist</value>
   </data>
 </root>

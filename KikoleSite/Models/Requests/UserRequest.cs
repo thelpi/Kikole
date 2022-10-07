@@ -20,17 +20,6 @@ namespace KikoleSite.Models.Requests
 
         public string Ip { get; set; }
 
-        internal string IsValid(IStringLocalizer resources)
-        {
-            if (string.IsNullOrWhiteSpace(Login))
-                return resources["InvalidLogin"];
-
-            if (string.IsNullOrWhiteSpace(Password))
-                return resources["InvalidPassword"];
-
-            return null;
-        }
-
         internal UserDto ToDto(ICrypter crypter)
         {
             var realPasswordResetAnswer = string.IsNullOrWhiteSpace(PasswordResetAnswer)

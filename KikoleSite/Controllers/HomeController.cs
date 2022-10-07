@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Controllers.Attributes;
@@ -31,7 +30,6 @@ namespace KikoleSite.Controllers
         public HomeController(IStringLocalizer<HomeController> localizer,
             IUserRepository userRepository,
             ICrypter crypter,
-            IStringLocalizer<Translations> resources,
             IInternationalRepository internationalRepository,
             IMessageRepository messageRepository,
             IClock clock,
@@ -43,7 +41,6 @@ namespace KikoleSite.Controllers
             IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
-                resources,
                 internationalRepository,
                 clock,
                 playerService,
@@ -85,17 +82,17 @@ namespace KikoleSite.Controllers
                 model.ErrorMessage = _localizer["InvalidMessage"];
             else
             {
-                var result = await CreateDiscussionAsync(
-                        model.Email, model.Message)
+                await _discussionRepository
+                    .CreateDiscussionAsync(new Models.Dtos.DiscussionDto
+                    {
+                        Email = model.Email,
+                        UserId = UserId,
+                        Message = model.Message
+                    })
                     .ConfigureAwait(false);
 
-                if (string.IsNullOrWhiteSpace(result))
-                {
-                    model.SuccessMessage = _localizer["SuccessContactSent"];
-                    model.Message = null;
-                }
-                else
-                    model.SuccessMessage = result;
+                model.SuccessMessage = _localizer["SuccessContactSent"];
+                model.Message = null;
             }
 
             model.LoggedAs = UserLogin;
@@ -145,7 +142,9 @@ namespace KikoleSite.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] int? day, [FromQuery] string errorMessageForced)
         {
-            var msg = await GetCurrentMessageAsync().ConfigureAwait(false);
+            var msg = (await _messageRepository
+                .GetMessageAsync(_clock.Now)
+                .ConfigureAwait(false))?.Message;
 
             var chart = await GetProposalChartAsync().ConfigureAwait(false);
 
@@ -298,7 +297,9 @@ namespace KikoleSite.Controllers
                     : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
             }
 
-            model.Message = await GetCurrentMessageAsync().ConfigureAwait(false);
+            model.Message = (await _messageRepository
+                .GetMessageAsync(_clock.Now)
+                .ConfigureAwait(false))?.Message;
 
             return await SetAndGetViewModelAsync(
                     null,
@@ -314,14 +315,18 @@ namespace KikoleSite.Controllers
             HomeModel model,
             DateTime proposalDate)
         {
-            var playerCreator = await IsPlayerOfTheDayUser(proposalDate).ConfigureAwait(false);
+            var playerCreator = UserId > 0
+                ? await _playerService
+                    .GetPlayerOfTheDayFromUserPovAsync(UserId, proposalDate)
+                    .ConfigureAwait(false)
+                : null;
 
-            var clue = await GetClueAsync(
-                    proposalDate, false)
+            var clue = await _playerService
+                .GetPlayerClueAsync(proposalDate, false, ViewHelper.GetLanguage())
                 .ConfigureAwait(false);
 
-            var easyClue = await GetClueAsync(
-                    proposalDate, true)
+            var easyClue = await _playerService
+                .GetPlayerClueAsync(proposalDate, true, ViewHelper.GetLanguage())
                 .ConfigureAwait(false);
 
             if (UserId > 0)
@@ -332,7 +337,9 @@ namespace KikoleSite.Controllers
                 }
                 else
                 {
-                    var proposals = await GetProposalsAsync(proposalDate).ConfigureAwait(false);
+                    var proposals = await _proposalService
+                        .GetProposalsAsync(proposalDate, UserId)
+                        .ConfigureAwait(false);
 
                     var countries = await GetCountriesAsync().ConfigureAwait(false);
 
@@ -371,7 +378,9 @@ namespace KikoleSite.Controllers
 
             if (!string.IsNullOrWhiteSpace(model.PlayerName))
             {
-                var pp = await GetFullPlayerAsync(proposalDate).ConfigureAwait(false);
+                var pp = await _playerService
+                    .GetPlayerOfTheDayFullInfoAsync(proposalDate)
+                    .ConfigureAwait(false);
 
                 var countries = await GetCountriesAsync().ConfigureAwait(false);
 
@@ -382,62 +391,6 @@ namespace KikoleSite.Controllers
             }
 
             return View("Index", model);
-        }
-
-        private async Task<string> GetCurrentMessageAsync()
-        {
-            var message = await _messageRepository
-                .GetMessageAsync(_clock.Now)
-                .ConfigureAwait(false);
-
-            return message?.Message;
-        }
-
-        private async Task<string> CreateDiscussionAsync(string email, string message)
-        {
-            await _discussionRepository
-                .CreateDiscussionAsync(new Models.Dtos.DiscussionDto
-                {
-                    Email = email,
-                    UserId = UserId,
-                    Message = message
-                })
-                .ConfigureAwait(false);
-
-            return null;
-        }
-
-        private async Task<Models.Dtos.PlayerFullDto> GetFullPlayerAsync(DateTime date)
-        {
-            return await _playerService
-                .GetPlayerOfTheDayFullInfoAsync(date)
-                .ConfigureAwait(false);
-        }
-
-        private async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate)
-        {
-            return await _proposalService
-                .GetProposalsAsync(proposalDate, UserId)
-                .ConfigureAwait(false);
-        }
-
-        private async Task<string> GetClueAsync(DateTime proposalDate, bool isEasy)
-        {
-            var clue = await _playerService
-                .GetPlayerClueAsync(proposalDate, isEasy, ViewHelper.GetLanguage())
-                .ConfigureAwait(false);
-
-            return clue;
-        }
-
-        private async Task<PlayerCreator> IsPlayerOfTheDayUser(DateTime proposalDate)
-        {
-            if (UserId == 0)
-                return null;
-
-            return await _playerService
-                .GetPlayerOfTheDayFromUserPovAsync(UserId, proposalDate)
-                .ConfigureAwait(false);
         }
     }
 }

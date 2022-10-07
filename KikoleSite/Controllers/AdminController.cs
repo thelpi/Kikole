@@ -28,7 +28,6 @@ namespace KikoleSite.Controllers
         public AdminController(IStringLocalizer<AdminController> localizer,
             IUserRepository userRepository,
             ICrypter crypter,
-            IStringLocalizer<Translations> resources,
             IInternationalRepository internationalRepository,
             IMessageRepository messageRepository,
             IClock clock,
@@ -40,7 +39,6 @@ namespace KikoleSite.Controllers
             IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
-                resources,
                 internationalRepository,
                 clock,
                 playerService,
@@ -61,9 +59,11 @@ namespace KikoleSite.Controllers
             // default : from now without ms to tomorrow 23:59:59
             return View(new AdminModel
             {
-                MessageDateStart = DateTime.Today.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).AddSeconds(DateTime.Now.Second),
-                MessageDateEnd = DateTime.Today.AddDays(2).AddSeconds(-1),
-                Discussions = await GetDiscussionsAsync().ConfigureAwait(false)
+                MessageDateStart = _clock.NowSeconds,
+                MessageDateEnd = _clock.TomorrowEnd,
+                Discussions = await _discussionRepository
+                    .GetDiscussionsAsync()
+                    .ConfigureAwait(false)
             });
         }
 
@@ -76,22 +76,34 @@ namespace KikoleSite.Controllers
             switch (action)
             {
                 case "recomputebadges":
-                    await ResetBadgesAsync().ConfigureAwait(false);
+                    await _badgeService
+                        .ResetBadgesAsync(ViewHelper.GetLanguage())
+                        .ConfigureAwait(false);
                     break;
                 case "recomputeleaders":
-                    await ComputeMissingLeadersAsync().ConfigureAwait(false);
+                    await _leaderService
+                        .ComputeMissingLeadersAsync()
+                        .ConfigureAwait(false);
                     break;
                 case "reassignplayers":
-                    await ReassignPlayersOfTheDayAsync().ConfigureAwait(false);
+                    await _playerService
+                        .ReassignPlayersOfTheDayAsync()
+                        .ConfigureAwait(false);
                     break;
                 case "insertmessage":
                     if (model == null)
-                    {
                         return RedirectToAction("ErrorIndex", "Home");
-                    }
-                    await CreateMessageAsync(
-                            model.Message ?? string.Empty, model.MessageDateStart, model.MessageDateEnd)
+
+                    await _messageRepository
+                        .InsertMessageAsync(new Models.Dtos.MessageDto
+                        {
+                            DisplayTo = model.MessageDateEnd,
+                            DisplayFrom = model.MessageDateStart,
+                            CreationDate = _clock.Now,
+                            Message = model.Message ?? string.Empty
+                        })
                         .ConfigureAwait(false);
+
                     model.Message = null;
                     model.ActionFeedback = "Annonce créée";
                     break;
@@ -119,47 +131,58 @@ namespace KikoleSite.Controllers
         public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
         {
             if (model == null)
-            {
                 return RedirectToAction("PlayerSubmission", "Admin");
-            }
 
             model.Players = await GetPlayerSubmissionsList().ConfigureAwait(false);
 
             if (model.Players.Count == 0)
-            {
                 return RedirectToAction("PlayerSubmission", "Admin");
-            }
 
             var action = GetSubmitAction();
 
             if (action == "accepted" || action == "refusal")
             {
-                var result = await ValidatePlayerSubmissionAsync(
-                        new PlayerSubmissionValidationRequest
-                        {
-                            ClueEditLanguages = new Dictionary<Languages, string>
-                            {
-                                { Languages.fr, model.ClueOverwriteFr }
-                            },
-                            ClueEditEn = model.ClueOverwriteEn,
-                            EasyClueEditLanguages = new Dictionary<Languages, string>
-                            {
-                                { Languages.fr, model.EasyClueOverwriteFr }
-                            },
-                            EasyClueEditEn = model.EasyClueOverwriteEn,
-                            IsAccepted = action == "accepted",
-                            PlayerId = model.SelectedId,
-                            RefusalReason = model.RefusalReason
-                        })
-                    .ConfigureAwait(false);
-
-                if (!string.IsNullOrWhiteSpace(result))
+                var request = new PlayerSubmissionValidationRequest
                 {
-                    model.ErrorMessage = result;
-                }
+                    ClueEditLanguages = new Dictionary<Languages, string>
+                    {
+                        { Languages.fr, model.ClueOverwriteFr }
+                    },
+                    ClueEditEn = model.ClueOverwriteEn,
+                    EasyClueEditLanguages = new Dictionary<Languages, string>
+                    {
+                        { Languages.fr, model.EasyClueOverwriteFr }
+                    },
+                    EasyClueEditEn = model.EasyClueOverwriteEn,
+                    IsAccepted = action == "accepted",
+                    PlayerId = model.SelectedId,
+                    RefusalReason = model.RefusalReason
+                };
+
+                var validityCheck = request.IsValid(_localizer);
+                if (!string.IsNullOrWhiteSpace(validityCheck))
+                    model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityCheck);
                 else
                 {
-                    return RedirectToAction("PlayerSubmission", "Admin");
+                    var (result, userId, badges) = await _playerService
+                        .ValidatePlayerSubmissionAsync(request)
+                        .ConfigureAwait(false);
+
+                    if (result == PlayerSubmissionErrors.PlayerNotFound)
+                        model.ErrorMessage = _localizer["PlayerDoesNotExist"];
+                    else if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
+                        model.ErrorMessage = _localizer["RejectAndProposalDateCombined"];
+                    else
+                    {
+                        foreach (var badge in badges)
+                        {
+                            await _badgeService
+                                .AddBadgeToUserAsync(badge, userId)
+                                .ConfigureAwait(false);
+                        }
+
+                        return RedirectToAction("PlayerSubmission", "Admin");
+                    }
                 }
             }
             else if (action == "pchoice")
@@ -171,9 +194,7 @@ namespace KikoleSite.Controllers
                 }
             }
             else
-            {
                 return RedirectToAction("PlayerSubmission", "Admin");
-            }
 
             return View(model);
         }
@@ -308,16 +329,20 @@ namespace KikoleSite.Controllers
                 HideCreator = model.HideCreator
             };
 
-            var response = await CreatePlayerAsync(req).ConfigureAwait(false);
-
-            if (!string.IsNullOrWhiteSpace(response))
+            var validityRequest = req.IsValid(_clock.Today, _localizer);
+            if (!string.IsNullOrWhiteSpace(validityRequest))
             {
-                model.ErrorMessage = _localizer["CreatingError", response];
+                model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
                 SetPositionsOnModel(model, chart);
                 return View(model);
             }
-
-            return RedirectToAction("Index", "Admin", new { withOkMessage = true });
+            else
+            {
+                await _playerService
+                    .CreatePlayerAsync(req, UserId)
+                    .ConfigureAwait(false);
+                return RedirectToAction("Index", "Admin", new { withOkMessage = true });
+            }
         }
 
         [HttpGet]
@@ -348,23 +373,33 @@ namespace KikoleSite.Controllers
 
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
 
-            var response = await CreateClubAsync(
-                    model.MainName, names)
-                .ConfigureAwait(false);
-
-            if (!string.IsNullOrWhiteSpace(response))
+            var request = new ClubRequest
             {
-                model.ErrorMessage = _localizer["CreatingError", response];
-                return View("Club", model);
-            }
-
-            // force cache reset
-            await GetClubsAsync(true).ConfigureAwait(false);
-
-            model = new ClubCreationModel
-            {
-                InfoMessage = _localizer["ClubOk"]
+                Name = model.MainName,
+                AllowedNames = names
             };
+
+            var validityRequest = request.IsValid(_localizer);
+            if (!string.IsNullOrWhiteSpace(validityRequest))
+                model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
+            else
+            {
+                var playerId = await _clubRepository
+                    .CreateClubAsync(request.ToDto())
+                    .ConfigureAwait(false);
+
+                if (playerId == 0)
+                    model.ErrorMessage = _localizer["ClubCreationFailure"];
+                else
+                {
+                    await GetClubsAsync(true).ConfigureAwait(false);
+                    model = new ClubCreationModel
+                    {
+                        InfoMessage = _localizer["ClubOk"]
+                    };
+                }
+            }
+ 
             return View("Club", model);
         }
 
@@ -372,20 +407,17 @@ namespace KikoleSite.Controllers
         [Authorization(UserTypes.Administrator)]
         public async Task<IActionResult> PlayerEdit(ulong playerId)
         {
-            var (clueEn, clueFr, easyClueEn, easyClueFr, error) = await GetPlayerCluesAsync(playerId).ConfigureAwait(false);
-
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                return RedirectToAction("ErrorIndex", "Home");
-            }
+            var clues = await _playerService
+                .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr })
+                .ConfigureAwait(false);
 
             var model = new PlayerEditModel
             {
                 PlayerId = playerId,
-                ClueEn = clueEn,
-                ClueFr = clueFr,
-                EasyClueEn = easyClueEn,
-                EasyClueFr = easyClueFr
+                ClueEn = clues[Languages.en].clue,
+                ClueFr = clues[Languages.fr].clue,
+                EasyClueEn = clues[Languages.en].easyclue,
+                EasyClueFr = clues[Languages.fr].easyclue
             };
 
             return View("PlayerEdit", model);
@@ -405,19 +437,24 @@ namespace KikoleSite.Controllers
                 return View("PlayerEdit", model);
             }
 
-            var result = await UpdatePlayerCluesAsync(
-                    model.PlayerId, model.ClueEn, model.EasyClueEn, model.ClueFr, model.EasyClueFr)
+            await _playerService
+                .UpdatePlayerCluesAsync(
+                    model.PlayerId,
+                    model.ClueEn,
+                    model.EasyClueEn,
+                    new Dictionary<Languages, string> { { Languages.fr, model.ClueFr } },
+                    new Dictionary<Languages, string> { { Languages.fr, model.EasyClueFr } })
                 .ConfigureAwait(false);
 
-            model.Success = string.IsNullOrWhiteSpace(result);
-            model.Message = result;
+            model.Success = true;
+            model.Message = null;
 
             return View("PlayerEdit", model);
         }
 
         private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
         {
-            var pls = await GetPlayerSubmissionsAsync().ConfigureAwait(false);
+            var pls = await _playerService.GetPlayerSubmissionsAsync().ConfigureAwait(false);
 
             var countries = await GetCountriesAsync().ConfigureAwait(false);
 
@@ -455,144 +492,6 @@ namespace KikoleSite.Controllers
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
             model.Chart = chart;
-        }
-
-        private async Task<string> CreateClubAsync(string name, IReadOnlyList<string> allowedNames)
-        {
-            var request = new ClubRequest
-            {
-                Name = name,
-                AllowedNames = allowedNames
-            };
-
-            if (request == null)
-                return string.Format(_resources["InvalidRequest"], "null");
-
-            var validityRequest = request.IsValid(_resources);
-            if (!string.IsNullOrWhiteSpace(validityRequest))
-                return string.Format(_resources["InvalidRequest"], validityRequest);
-
-            var playerId = await _clubRepository
-                .CreateClubAsync(request.ToDto())
-                .ConfigureAwait(false);
-
-            if (playerId == 0)
-                return _resources["ClubCreationFailure"];
-
-            return null;
-        }
-
-        private async Task<string> CreatePlayerAsync(PlayerRequest player)
-        {
-            if (player == null)
-                return string.Format(_resources["InvalidRequest"], "null");
-
-            var validityRequest = player.IsValid(_clock.Today, _resources);
-            if (!string.IsNullOrWhiteSpace(validityRequest))
-                return string.Format(_resources["InvalidRequest"], validityRequest);
-
-            await _playerService
-                .CreatePlayerAsync(player, UserId)
-                .ConfigureAwait(false);
-
-            return null;
-        }
-
-        private async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync()
-        {
-            return await _playerService
-                .GetPlayerSubmissionsAsync()
-                .ConfigureAwait(false);
-        }
-
-        private async Task<string> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
-        {
-            if (request == null)
-                return string.Format(_resources["InvalidRequest"], "null");
-
-            var validityCheck = request.IsValid(_resources);
-            if (!string.IsNullOrWhiteSpace(validityCheck))
-                return string.Format(_resources["InvalidRequest"], validityCheck);
-
-            var (result, userId, badges) = await _playerService
-                .ValidatePlayerSubmissionAsync(request)
-                .ConfigureAwait(false);
-
-            if (result == PlayerSubmissionErrors.PlayerNotFound)
-                return _resources["PlayerDoesNotExist"];
-
-            if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
-                return _resources["RejectAndProposalDateCombined"];
-
-            foreach (var badge in badges)
-            {
-                await _badgeService
-                    .AddBadgeToUserAsync(badge, userId)
-                    .ConfigureAwait(false);
-            }
-
-            return null;
-        }
-
-        private async Task<string> UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn, string clueFr, string easyClueFr)
-        {
-            await _playerService
-                .UpdatePlayerCluesAsync(playerId, clueEn, easyClueEn,
-                    new Dictionary<Languages, string> { { Languages.fr, clueFr } },
-                    new Dictionary<Languages, string> { { Languages.fr, easyClueFr } })
-                .ConfigureAwait(false);
-
-            return null;
-        }
-
-        private async Task<(string clueEn, string clueFr, string easyClueEn, string easyClueFr, string error)> GetPlayerCluesAsync(ulong playerId)
-        {
-            var clues = await _playerService
-                .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr })
-                .ConfigureAwait(false);
-
-            return (clues[Languages.en].clue, clues[Languages.fr].clue, clues[Languages.en].easyclue, clues[Languages.fr].easyclue, null);
-        }
-
-        private async Task<IReadOnlyCollection<Models.Dtos.DiscussionDto>> GetDiscussionsAsync()
-        {
-            return await _discussionRepository
-                .GetDiscussionsAsync()
-                .ConfigureAwait(false);
-        }
-
-        private async Task ResetBadgesAsync()
-        {
-            await _badgeService
-                .ResetBadgesAsync(ViewHelper.GetLanguage())
-                .ConfigureAwait(false);
-        }
-
-        private async Task ComputeMissingLeadersAsync()
-        {
-            await _leaderService
-                .ComputeMissingLeadersAsync()
-                .ConfigureAwait(false);
-        }
-
-        private async Task ReassignPlayersOfTheDayAsync()
-        {
-            await _playerService
-                .ReassignPlayersOfTheDayAsync()
-                .ConfigureAwait(false);
-        }
-
-        private async Task CreateMessageAsync(string message, DateTime? startDate, DateTime? endDate)
-        {
-            await _messageRepository
-                .InsertMessageAsync(new Models.Dtos.MessageDto
-                {
-                    DisplayTo = endDate,
-                    DisplayFrom = startDate,
-                    CreationDate = _clock.Now,
-                    Message = message
-                })
-                .ConfigureAwait(false);
         }
     }
 }
