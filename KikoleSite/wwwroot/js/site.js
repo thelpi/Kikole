@@ -17,24 +17,76 @@ var loadKikolesStats = function (sort, desc) {
             $("#sort-block").hide();
         },
         success: function (data) {
-            var tabBody = $("#kikolesStatsTab").find('tbody');
-            tabBody.empty();
+            var table = document.getElementById('kikolesStatsTab');
+            var tbodyRef = table.getElementsByTagName('tbody')[0];
+            var newtbody = document.createElement('tbody');
             data.forEach(e => {
                 var background = i % 2 == 0 ? "white" : "azure";
-                tabBody.append(`<tr style="background-color: ` + background + `">
-                        <td><a href="/?day=` + e.daysBefore + `">` + e.date + `</a></td>
-                        <td>` + e.name + `</td>
-                        <td>` + e.creator + `</td>
-                        <td>` + e.averagePointsSameDay + `</td>
-                        <td>` + e.triesCountSameDay + `</td>
-                        <td>` + e.successesCountSameDay + `</td>
-                        <td>` + e.averagePointsTotal + `</td>
-                        <td>` + e.triesCountTotal + `</td>
-                        <td>` + e.successesCountTotal + `</td>
-                        <td>` + e.bestTime + `</td>
-                    </tr>`);
+                var newRow = newtbody.insertRow();
+                newRow.style.backgroundColor = background;
+
+                var dateToParse = new Date(Date.parse(e.date));
+                var newCell = newRow.insertCell();
+                var dayLink = document.createElement('a');
+                dayLink.href = '/?day=' + e.daysBefore;
+                var newText = document.createTextNode(dateToParse.ddmmyyyy());
+                dayLink.appendChild(newText);
+                newCell.appendChild(dayLink);
+                newCell.style.paddingLeft = '10px';
+                newCell.style.paddingRight = '10px';
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.name);
+                newCell.appendChild(newText);
+                newCell.style.paddingLeft = '10px';
+                newCell.style.paddingRight = '10px';
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.creator);
+                newCell.appendChild(newText);
+                newCell.style.paddingLeft = '10px';
+                newCell.style.paddingRight = '10px';
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.averagePointsSameDay);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.triesCountSameDay);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.successesCountSameDay);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.averagePointsTotal);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.triesCountTotal);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.successesCountTotal);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.bestTime);
+                newCell.appendChild(newText);
+                newCell.style.textAlign = 'center';
                 i++;
             });
+            table.replaceChild(newtbody, tbodyRef);
             $("#loading-image").hide();
             $("#kikolesStatsTab").show();
             $("#sort-block").show();
@@ -302,3 +354,21 @@ function daysBetween(startDate, endDate) {
 function navigateDaysHandler(e) {
     window.location.href = "/?day=" + daysBetween(e.target.value, Date.now());
 }
+
+Date.prototype.yyyymmdd = function () {
+    var mm = this.getMonth() + 1; // getMonth() is zero-based
+    var dd = this.getDate();
+    return [this.getFullYear(),
+        (mm > 9 ? '' : '0') + mm,
+        (dd > 9 ? '' : '0') + dd
+    ].join('-');
+};
+
+Date.prototype.ddmmyyyy = function () {
+    var mm = this.getMonth() + 1; // getMonth() is zero-based
+    var dd = this.getDate();
+    return [(dd > 9 ? '' : '0') + dd,
+        (mm > 9 ? '' : '0') + mm,
+        this.getFullYear()
+    ].join('/');
+};
