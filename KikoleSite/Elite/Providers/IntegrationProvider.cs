@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using KikoleSite.Interfaces;
 using KikoleSite.Elite.Configurations;
 using KikoleSite.Elite.Dtos;
 using KikoleSite.Elite.Enums;
@@ -12,6 +11,7 @@ using KikoleSite.Elite.Extensions;
 using KikoleSite.Elite.Models;
 using KikoleSite.Elite.Models.Integration;
 using KikoleSite.Elite.Repositories;
+using KikoleSite.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Elite.Providers

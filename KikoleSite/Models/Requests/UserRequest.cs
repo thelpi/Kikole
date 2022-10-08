@@ -2,7 +2,6 @@
 using KikoleSite.Interfaces;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
-using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Models.Requests
 {

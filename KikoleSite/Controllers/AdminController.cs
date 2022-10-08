@@ -399,7 +399,7 @@ namespace KikoleSite.Controllers
                     };
                 }
             }
- 
+
             return View("Club", model);
         }
 
