@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Statistics;
 
-namespace KikoleSite.Interfaces.Services
+namespace KikoleSite.Services
 {
     public interface IStatisticService
     {

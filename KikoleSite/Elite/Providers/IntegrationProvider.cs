@@ -11,7 +11,6 @@ using KikoleSite.Elite.Extensions;
 using KikoleSite.Elite.Models;
 using KikoleSite.Elite.Models.Integration;
 using KikoleSite.Elite.Repositories;
-using KikoleSite.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Elite.Providers

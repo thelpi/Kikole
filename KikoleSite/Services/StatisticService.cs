@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Helpers;
-using KikoleSite.Interfaces;
-using KikoleSite.Interfaces.Repositories;
-using KikoleSite.Interfaces.Services;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Statistics;
+using KikoleSite.Repositories;
 
 namespace KikoleSite.Services
 {

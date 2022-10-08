@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 
-namespace KikoleSite.Interfaces.Services
+namespace KikoleSite.Services
 {
     /// <summary>
     /// Leader service interface.

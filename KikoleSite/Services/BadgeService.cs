@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Interfaces;
-using KikoleSite.Interfaces.Handlers;
-using KikoleSite.Interfaces.Repositories;
-using KikoleSite.Interfaces.Services;
+using KikoleSite.Handlers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
+using KikoleSite.Repositories;
 
 namespace KikoleSite.Services
 {

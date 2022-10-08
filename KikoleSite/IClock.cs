@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KikoleSite.Interfaces
+namespace KikoleSite
 {
     /// <summary>
     /// Clock interface.

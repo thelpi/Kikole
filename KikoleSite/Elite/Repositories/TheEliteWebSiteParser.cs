@@ -89,11 +89,11 @@ namespace KikoleSite.Elite.Repositories
             };
 
         private readonly TheEliteWebsiteConfiguration _configuration;
-        private readonly Interfaces.IClock _clock;
+        private readonly IClock _clock;
 
         public TheEliteWebSiteParser(
             IOptions<TheEliteWebsiteConfiguration> configuration,
-            Interfaces.IClock clock)
+            IClock clock)
         {
             _configuration = configuration.Value;
             _clock = clock;

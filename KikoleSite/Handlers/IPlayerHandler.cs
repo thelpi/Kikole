@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Interfaces.Handlers
+namespace KikoleSite.Handlers
 {
     /// <summary>
     /// Player handler interface.

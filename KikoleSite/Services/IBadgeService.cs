@@ -5,7 +5,7 @@ using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 
-namespace KikoleSite.Interfaces.Services
+namespace KikoleSite.Services
 {
     /// <summary>
     /// Badge service interface.

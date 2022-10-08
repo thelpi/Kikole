@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KikoleSite.Interfaces;
-using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;

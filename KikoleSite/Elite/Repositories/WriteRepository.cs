@@ -8,7 +8,7 @@ namespace KikoleSite.Elite.Repositories
 {
     public sealed class WriteRepository : KikoleSite.Repositories.BaseRepository, IWriteRepository
     {
-        public WriteRepository(Interfaces.IClock clock, IConfiguration configuration)
+        public WriteRepository(IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
 
         public async Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry)

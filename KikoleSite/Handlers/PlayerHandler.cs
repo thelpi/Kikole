@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Interfaces.Handlers;
-using KikoleSite.Interfaces.Repositories;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Repositories;
 
 namespace KikoleSite.Handlers
 {

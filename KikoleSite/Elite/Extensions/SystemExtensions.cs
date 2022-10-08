@@ -20,7 +20,7 @@ namespace KikoleSite.Elite
             return Enum.GetValues(typeof(T)).Cast<T>();
         }
 
-        public static IEnumerable<DateTime> LoopBetweenDates(this DateTime startDate, DateStep stepType, Interfaces.IClock clock)
+        public static IEnumerable<DateTime> LoopBetweenDates(this DateTime startDate, DateStep stepType, IClock clock)
         {
             return LoopBetweenDates(startDate, clock.Now, stepType, 1);
         }

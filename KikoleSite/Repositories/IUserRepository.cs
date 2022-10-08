@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Interfaces.Repositories
+namespace KikoleSite.Repositories
 {
     public interface IUserRepository
     {

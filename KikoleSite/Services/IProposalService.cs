@@ -5,7 +5,7 @@ using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Requests;
 
-namespace KikoleSite.Interfaces.Services
+namespace KikoleSite.Services
 {
     /// <summary>
     /// Proposal service interface.

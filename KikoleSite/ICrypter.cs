@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Interfaces
+﻿namespace KikoleSite
 {
     public interface ICrypter
     {

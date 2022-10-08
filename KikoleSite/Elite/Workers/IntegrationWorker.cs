@@ -11,13 +11,13 @@ namespace KikoleSite.Elite.Workers
     public class IntegrationWorker : TimedHostedService
     {
         private readonly FileLogger _logger;
-        private readonly Interfaces.IClock _clock;
+        private readonly IClock _clock;
         private readonly IIntegrationProvider _integrationProvider;
         private readonly ICacheManager _cacheManager;
 
         public IntegrationWorker(
             FileLogger logger,
-            Interfaces.IClock clock,
+            IClock clock,
             IIntegrationProvider integrationProvider,
             ICacheManager cacheManager)
         {

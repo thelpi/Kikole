@@ -12,7 +12,7 @@ namespace KikoleSite.Elite.Repositories
         private IReadOnlyList<PlayerDto> _playersCache = null;
         private readonly object cacheLock = new object();
 
-        public ReadRepository(Interfaces.IClock clock, IConfiguration configuration)
+        public ReadRepository(IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
 
         public async Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate)
