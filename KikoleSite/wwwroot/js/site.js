@@ -13,10 +13,12 @@ var loadKikolesStats = function (sort, desc) {
         dataType: "json",
         beforeSend: function () {
             $("#loading-image").show();
-            $("#globalLeaderboardTable").hide();
+            $("#kikolesStatsTab").hide();
+            $("#sort-block").hide();
         },
         success: function (data) {
             var tabBody = $("#kikolesStatsTab").find('tbody');
+            tabBody.empty();
             data.forEach(e => {
                 var background = i % 2 == 0 ? "white" : "azure";
                 tabBody.append(`<tr style="background-color: ` + background + `">
@@ -34,7 +36,8 @@ var loadKikolesStats = function (sort, desc) {
                 i++;
             });
             $("#loading-image").hide();
-            $("#globalLeaderboardTable").show();
+            $("#kikolesStatsTab").show();
+            $("#sort-block").show();
         },
         error: function (data) {
             alert('Call error: ' + JSON.stringify(data));
