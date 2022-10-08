@@ -6,9 +6,9 @@
     }
 });
 
-var loadKikolesStats = function () {
+var loadKikolesStats = function (sort, desc) {
     $.ajax({
-        url: '/kikoles-stats',
+        url: '/kikoles-stats?sort=' + sort + '&desc=' + desc,
         type: "GET",
         dataType: "json",
         beforeSend: function () {

@@ -134,10 +134,10 @@ namespace KikoleSite.Controllers
 
         [HttpGet("kikoles-stats")]
         [Authorization]
-        public async Task<JsonResult> GetKikolesStatisticsAsync()
+        public async Task<JsonResult> GetKikolesStatisticsAsync([FromQuery] PlayerSorts sort, [FromQuery] bool desc)
         {
             var datas = await _statisticService
-                .GetPlayersStatisticsAsync(UserId, AnonymizedPlayerName)
+                .GetPlayersStatisticsAsync(UserId, AnonymizedPlayerName, sort, desc)
                 .ConfigureAwait(false);
 
             return Json(datas);

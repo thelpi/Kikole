@@ -101,8 +101,14 @@ namespace KikoleSite.Services
             };
         }
 
-        public async Task<IReadOnlyCollection<PlayerStatistics>> GetPlayersStatisticsAsync(ulong userId, string anonymizedName)
+        public async Task<IReadOnlyCollection<PlayerStatistics>> GetPlayersStatisticsAsync(ulong userId, string anonymizedName, PlayerSorts sort, bool desc)
         {
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            var isAdmin = user?.UserTypeId == (ulong)UserTypes.Administrator;
+
             var players = await _playerRepository
                 .GetPlayersOfTheDayAsync(null, _clock.Now)
                 .ConfigureAwait(false);
@@ -125,7 +131,7 @@ namespace KikoleSite.Services
                 .GetProposalsActivityAsync()
                 .ConfigureAwait(false);
 
-            return players
+            var results = players
                 .Select(p =>
                 {
                     var proposals = allProposals.Where(_ => _.ProposalDate == p.ProposalDate.Value);
@@ -135,7 +141,7 @@ namespace KikoleSite.Services
                     return new PlayerStatistics
                     {
                         Date = p.ProposalDate.Value,
-                        Name = leaders.Any(_ => _.UserId == userId) || userId == p.CreationUserId
+                        Name = leaders.Any(_ => _.UserId == userId) || userId == p.CreationUserId || isAdmin
                             ? p.Name
                             : anonymizedName,
                         Creator = usersCache[p.CreationUserId],
@@ -153,8 +159,46 @@ namespace KikoleSite.Services
                             ? (int)leaders.Average(_ => _.Points)
                             : 0
                     };
-                })
-                .ToList();
+                });
+
+            switch (sort)
+            {
+                case PlayerSorts.AttempsCountOverall:
+                    results = results.OrderBy(_ => _.TriesCountTotal);
+                    break;
+                case PlayerSorts.AttempsCountSameDay:
+                    results = results.OrderBy(_ => _.TriesCountSameDay);
+                    break;
+                case PlayerSorts.BestTime:
+                    results = results.OrderBy(_ => _.BestTime);
+                    break;
+                case PlayerSorts.CreatorLogin:
+                    results = results.OrderBy(_ => _.Creator);
+                    break;
+                case PlayerSorts.LeadersCountOverall:
+                    results = results.OrderBy(_ => _.SuccessesCountTotal);
+                    break;
+                case PlayerSorts.LeadersCountSameDay:
+                    results = results.OrderBy(_ => _.SuccessesCountSameDay);
+                    break;
+                case PlayerSorts.Name:
+                    results = results.OrderBy(_ => _.Name);
+                    break;
+                case PlayerSorts.PointsOverall:
+                    results = results.OrderBy(_ => _.AveragePointsTotal);
+                    break;
+                case PlayerSorts.PointsSameDay:
+                    results = results.OrderBy(_ => _.AveragePointsSameDay);
+                    break;
+                case PlayerSorts.ProposalDate:
+                    results = results.OrderBy(_ => _.Date);
+                    break;
+            }
+
+            if (desc)
+                results = results.Reverse();
+
+            return results.ToList();
         }
 
         private static List<PlayersDistributionItem<T2>> ToDistributionItemsList<T1, T2>(
