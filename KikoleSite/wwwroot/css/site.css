@@ -35,3 +35,19 @@ body {
         display: none;
     }
 }
+
+.odd {
+    background-color: azure
+}
+
+.even {
+    background-color: white
+}
+
+.creator {
+    background-color: lavender
+}
+
+.redtext{
+    color: crimson
+}

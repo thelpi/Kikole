@@ -143,28 +143,28 @@
 &lt;p&gt;Exemple : Lev Yachine is Russian, because "Soviet Union" is not available.&lt;/p&gt;</value>
   </data>
   <data name="BadGuessClub" xml:space="preserve">
-    <value>An incorrect club proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>An incorrect club proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessCountry" xml:space="preserve">
-    <value>An incorrect country proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>An incorrect country proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessName" xml:space="preserve">
-    <value>An incorrect player proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>An incorrect player proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessPosition" xml:space="preserve">
-    <value>An incorrect position proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>An incorrect position proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessYear" xml:space="preserve">
-    <value>An incorrect year proposition costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>An incorrect year proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="ClueGuess" xml:space="preserve">
-    <value>Asking for a second clue costs &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
+    <value>Asking for a second clue costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
   </data>
   <data name="GoodGuess" xml:space="preserve">
     <value>A good guess on any category costs &lt;span style="color: forestgreen; font-size: large"&gt;no points&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
-    <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikole?"&lt;/span&gt; is a game where you have to guess a new football player &lt;span style="color: crimson"&gt;every day&lt;/span&gt;.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikole?"&lt;/span&gt; is a game where you have to guess a new football player &lt;span class="redtext"&gt;every day&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;Your opponents have the same player to guess, so be the best and you'll appear on our &lt;a href="/Leaderboard"&gt;leaderboard&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.&lt;/p&gt;
 &lt;p&gt;Notice that the player can be active or retired, moreover feminine players are possible but quite rare.&lt;/p&gt;

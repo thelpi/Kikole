@@ -114,7 +114,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
                 var background = i % 2 == 0 ? "white" : "azure";
                 tabBody.append(`<tr style="background-color: ` + background + `">
                         <td style="text-align: center">` + e.rank + `</td>
-                        <td style="color: crimson"><a href="/Leaderboard?userId=` + e.userId + `">` + e.userName + `</a></td>
+                        <td class="redtext"><a href="/Leaderboard?userId=` + e.userId + `">` + e.userName + `</a></td>
                         <td style="text-align: right">` + e.points + `</td>
                         <td style="text-align: right">` + e.bestTimeString + `</td>
                         <td style="text-align: right">` + e.kikolesFound + `</td>

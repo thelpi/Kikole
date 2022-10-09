@@ -4,42 +4,42 @@
 
 <div style="margin-top: 15px">
     <label style="width: 150px; text-align: right">@localizer["Username"]</label>
-    <label style="color: crimson">@Model.Login</label>
+    <label class="redtext">@Model.Login</label>
 </div>
 <div style="margin-top: 5px">
     <label style="width: 150px; text-align: right">@localizer["RegistrationDate"]</label>
-    <label style="color: crimson">@Model.RegistrationDate.ToNaString()</label>
+    <label class="redtext">@Model.RegistrationDate.ToNaString()</label>
 </div>
 <div style="margin-top: 5px">
     <label style="width: 150px; text-align: right">@localizer["BestTime"]</label>
-    <label style="color: crimson">@Model.BestTime</label>
+    <label class="redtext">@Model.BestTime</label>
 </div>
 
 <fieldset style="margin-top: 5px">
     <legend>@localizer["CurrentDay"]</legend>
     <div>
         <label style="width: 150px; text-align: right">@localizer["Attempts"]</label>
-        <label style="color: crimson">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</label>
+        <label class="redtext">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["Successes"]</label>
-        <label style="color: crimson">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</label>
+        <label class="redtext">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["TotalScore"]</label>
-        <label style="color: crimson">@Model.TotalPointsDayOne</label>
+        <label class="redtext">@Model.TotalPointsDayOne</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["AveragePoints"]</label>
-        <label style="color: crimson">@Model.PointsPerAttemptDayOne</label>
+        <label class="redtext">@Model.PointsPerAttemptDayOne</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["BestScore"]</label>
-        <label style="color: crimson">@Model.BestPointsDayOne</label>
+        <label class="redtext">@Model.BestPointsDayOne</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["AverageTime"]</label>
-        <label style="color: crimson">@Model.AverageTimeDayOne</label>
+        <label class="redtext">@Model.AverageTimeDayOne</label>
     </div>
 </fieldset>
 
@@ -47,27 +47,27 @@
     <legend>@localizer["IncludingOutOfTime"]</legend>
     <div>
         <label style="width: 150px; text-align: right">@localizer["Attempts"]</label>
-        <label style="color: crimson">@Model.Attempts (@Model.AttemptRate %)</label>
+        <label class="redtext">@Model.Attempts (@Model.AttemptRate %)</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["Successes"]</label>
-        <label style="color: crimson">@Model.Successes (@Model.SuccessRate %)</label>
+        <label class="redtext">@Model.Successes (@Model.SuccessRate %)</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["TotalScore"]</label>
-        <label style="color: crimson">@Model.TotalPoints</label>
+        <label class="redtext">@Model.TotalPoints</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["AveragePoints"]</label>
-        <label style="color: crimson">@Model.PointsPerAttempt</label>
+        <label class="redtext">@Model.PointsPerAttempt</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["BestScore"]</label>
-        <label style="color: crimson">@Model.BestPoints</label>
+        <label class="redtext">@Model.BestPoints</label>
     </div>
     <div style="margin-top: 5px">
         <label style="width: 150px; text-align: right">@localizer["AverageTime"]</label>
-        <label style="color: crimson">@Model.AverageTime</label>
+        <label class="redtext">@Model.AverageTime</label>
     </div>
 </fieldset>
 
@@ -93,8 +93,8 @@
         {
             var weightAttempt = stat.AttemptDayOne == true ? "bold" : "normal";
             var weightSuccess = stat.SuccessDayOne == true ? "bold" : "normal";
-            var background = stat.IsCreator ? "lavender" : (i % 2 == 0 ? "white" : "azure");
-            <tr style="background-color: @background">
+            var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
+            <tr class="@trClass">
                 <td>@stat.Date.ToNaString()</td>
                 <td>@stat.Answer</td>
                 <td style="font-weight: @weightAttempt">@stat.Attempt.ToYesNo()</td>
@@ -137,7 +137,7 @@ else
                 else
                 {
                     var v = badge.Users - 1;
-                    <div style="text-align:center"><span style="color: crimson">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
+                    <div style="text-align:center"><span class="redtext">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
                 }
             }
             else
@@ -148,7 +148,7 @@ else
                 }
                 else
                 {
-                    <div style="text-align:center"><span style="color: crimson">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
+                    <div style="text-align:center"><span class="redtext">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
                 }
             }
         </div>
@@ -166,15 +166,15 @@ else
     foreach (var badge in Model.MissingBadges)
     {
         <div style="float: left; margin-top: 5px; width: 350px; min-height: 120px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
-            <div style="text-align:center; color: crimson; font-size: large">@badge.Name</div>
+            <div class="redtext" style="text-align:center; font-size: large">@badge.Name</div>
             <div style="text-align:center">@badge.Description</div>
             @if (badge.Users == 0)
             {
-                <div style="text-align:center; font-weight: bold"><span style="color: crimson">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
+                <div style="text-align:center; font-weight: bold"><span class="redtext">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
             }
             else
             {
-                <div style="text-align:center; font-weight: bold"><span style="color: crimson">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
+                <div style="text-align:center; font-weight: bold"><span class="redtext">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
             }
         </div>
     }

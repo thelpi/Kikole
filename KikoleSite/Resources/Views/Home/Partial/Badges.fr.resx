@@ -130,6 +130,6 @@
     <value>autre utilisateur a ce badge.</value>
   </data>
   <data name="SoloWithBadge" xml:space="preserve">
-    <value>Vous êtes &lt;span style="color: crimson"&gt;le seul&lt;/span&gt; à avoir ce badge !</value>
+    <value>Vous êtes &lt;span class="redtext"&gt;le seul&lt;/span&gt; à avoir ce badge !</value>
   </data>
 </root>

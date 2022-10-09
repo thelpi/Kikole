@@ -143,28 +143,28 @@
 &lt;p&gt;Exemple : Lev Yachine est considéré Russe, puisque "Union Soviétique" n'est pas disponible.&lt;/p&gt;</value>
   </data>
   <data name="BadGuessClub" xml:space="preserve">
-    <value>Une proposition incorrecte pour un des clubs coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour un des clubs coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessCountry" xml:space="preserve">
-    <value>Une proposition incorrecte pour la nationalité coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour la nationalité coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessName" xml:space="preserve">
-    <value>Une proposition incorrecte pour le nom du joueur coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour le nom du joueur coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessPosition" xml:space="preserve">
-    <value>Une proposition incorrecte pour la position coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour la position coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessYear" xml:space="preserve">
-    <value>Une proposition incorrecte pour l'année de naissance coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Une proposition incorrecte pour l'année de naissance coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="ClueGuess" xml:space="preserve">
-    <value>Demander un second indice coûte &lt;span style="color: crimson; font-size: large"&gt;{0}&lt;/span&gt; % des points.</value>
+    <value>Demander un second indice coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; % des points.</value>
   </data>
   <data name="GoodGuess" xml:space="preserve">
     <value>Une proposition correcte dans n'importe quelle catégorie ne coûte &lt;span style="color: forestgreen; font-size: large"&gt;aucun point&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
-    <value>&lt;p&gt;&lt;span style="color: crimson; font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu où vous devez deviner un nouveau footballeur &lt;span style="color: crimson"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu où vous devez deviner un nouveau footballeur &lt;span class="redtext"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;Vos adversaires doivent deviner le même joueur, donc soyez le meilleur pour apparaître dans le &lt;a href="/Leaderboard"&gt;classement&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;Pour trouver le joueur du jour, vous pouvez faire des propositions concernant son année de naissance, poste, nationalité et carrière en club. Un indice de départ est également donné.&lt;/p&gt;
 &lt;p&gt;Veuillez noter que le joueur peut être actif ou retraité, de plus les joueuses sont parfois possibles bien que rare.&lt;/p&gt;

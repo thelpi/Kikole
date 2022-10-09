@@ -196,7 +196,7 @@
     <value>n'a ce badge</value>
   </data>
   <data name="OnlyOne" xml:space="preserve">
-    <value>Vous êtes &lt;span style="color: crimson"&gt;le seul&lt;/span&gt; à avoir ce badge !</value>
+    <value>Vous êtes &lt;span class="redtext"&gt;le seul&lt;/span&gt; à avoir ce badge !</value>
   </data>
   <data name="OtherUser" xml:space="preserve">
     <value>autre utilisateur a ce badge</value>
@@ -217,7 +217,7 @@
     <value>Impossible à obtenir</value>
   </data>
   <data name="OnlyOneNotMe" xml:space="preserve">
-    <value>&lt;span style="color: crimson"&gt;Seul&lt;/span&gt; à avoir ce badge !</value>
+    <value>&lt;span class="redtext"&gt;Seul&lt;/span&gt; à avoir ce badge !</value>
   </data>
   <data name="OtherUsersNotMe" xml:space="preserve">
     <value>utilisateurs ont ce badge</value>

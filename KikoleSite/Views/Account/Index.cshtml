@@ -3,7 +3,7 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.Error))
 {
-    <div style="color:crimson; margin-top: 10px; font-weight: bold">@Model.Error</div>
+    <div class="redtext" style="margin-top: 10px; font-weight: bold">@Model.Error</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
 {
@@ -16,7 +16,7 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
             <label style="width: 150px; text-align: right">@localizer["LoggedAs"]</label>
-            <label style="width: 200px; color: crimson">@Model.Login</label>
+            <label class="redtext" style="width: 200px">@Model.Login</label>
         </div>
         <label style="width: 150px;"></label>
         <input type="submit" value="@localizer["LogOut"]" name="submit-logoff" style="margin-top: 5px" />
@@ -118,7 +118,7 @@ else
         {
             <div style="margin-top: 5px">
                 <label style="width: 150px; text-align: right">@localizer["LoginRecover"]</label>
-                <label style="width: 200px; color: crimson">@Model.LoginRecoverySubmission</label>
+                <label class="redtext" style="width: 200px">@Model.LoginRecoverySubmission</label>
                 @Html.HiddenFor(m => m.LoginRecoverySubmission)
             </div>
             <div style="margin-top: 5px">

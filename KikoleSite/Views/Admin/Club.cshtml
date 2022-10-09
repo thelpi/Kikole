@@ -3,7 +3,7 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div style="color:crimson; margin-top: 10px">Error: @Model.ErrorMessage</div>
+    <div class="redtext" style="margin-top: 10px">Error: @Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
