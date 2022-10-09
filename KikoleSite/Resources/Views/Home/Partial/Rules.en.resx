@@ -161,7 +161,7 @@
     <value>Asking for a second clue costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
   </data>
   <data name="GoodGuess" xml:space="preserve">
-    <value>A good guess on any category costs &lt;span style="color: forestgreen; font-size: large"&gt;no points&lt;/span&gt;.</value>
+    <value>A good guess on any category costs &lt;span class="greentext" style="font-size: large"&gt;no points&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
     <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikole?"&lt;/span&gt; is a game where you have to guess a new football player &lt;span class="redtext"&gt;every day&lt;/span&gt;.&lt;/p&gt;
@@ -175,6 +175,6 @@
     <value>Score is computed with following rules:</value>
   </data>
   <data name="StarterPoints" xml:space="preserve">
-    <value>You start with &lt;span style="color: forestgreen; font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>You start with &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
 </root>

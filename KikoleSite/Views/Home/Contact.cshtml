@@ -9,12 +9,12 @@
     }
     @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
     {
-        <div style="margin-top: 10px; color:forestgreen; font-size: large">
+        <div class="greentext" style="margin-top: 10px; font-size: large">
             @Model.SuccessMessage
         </div>
     }
     <div style="margin-top: 10px">
-        <label>@localizer["LoggedAs"] <span style="color: forestgreen">@Model.LoggedAs</span></label>
+        <label>@localizer["LoggedAs"] <span class="greentext">@Model.LoggedAs</span></label>
     </div>
     <h3>@localizer["ContactAdmin"]</h3>
     <form method="post" action="/Home/Contact">
