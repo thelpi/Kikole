@@ -3,42 +3,42 @@
 @model UserStatsModel
 
 <div style="margin-top: 15px">
-    <label style="width: 150px; text-align: right">@localizer["Username"]</label>
+    <label class="mainFormSectionLabel">@localizer["Username"]</label>
     <label class="redtext">@Model.Login</label>
 </div>
 <div style="margin-top: 5px">
-    <label style="width: 150px; text-align: right">@localizer["RegistrationDate"]</label>
+    <label class="mainFormSectionLabel">@localizer["RegistrationDate"]</label>
     <label class="redtext">@Model.RegistrationDate.ToNaString()</label>
 </div>
 <div style="margin-top: 5px">
-    <label style="width: 150px; text-align: right">@localizer["BestTime"]</label>
+    <label class="mainFormSectionLabel">@localizer["BestTime"]</label>
     <label class="redtext">@Model.BestTime</label>
 </div>
 
 <fieldset style="margin-top: 5px">
     <legend>@localizer["CurrentDay"]</legend>
     <div>
-        <label style="width: 150px; text-align: right">@localizer["Attempts"]</label>
+        <label class="mainFormSectionLabel">@localizer["Attempts"]</label>
         <label class="redtext">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["Successes"]</label>
+        <label class="mainFormSectionLabel">@localizer["Successes"]</label>
         <label class="redtext">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["TotalScore"]</label>
+        <label class="mainFormSectionLabel">@localizer["TotalScore"]</label>
         <label class="redtext">@Model.TotalPointsDayOne</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["AveragePoints"]</label>
+        <label class="mainFormSectionLabel">@localizer["AveragePoints"]</label>
         <label class="redtext">@Model.PointsPerAttemptDayOne</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["BestScore"]</label>
+        <label class="mainFormSectionLabel">@localizer["BestScore"]</label>
         <label class="redtext">@Model.BestPointsDayOne</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["AverageTime"]</label>
+        <label class="mainFormSectionLabel">@localizer["AverageTime"]</label>
         <label class="redtext">@Model.AverageTimeDayOne</label>
     </div>
 </fieldset>
@@ -46,27 +46,27 @@
 <fieldset style="margin-top: 5px">
     <legend>@localizer["IncludingOutOfTime"]</legend>
     <div>
-        <label style="width: 150px; text-align: right">@localizer["Attempts"]</label>
+        <label class="mainFormSectionLabel">@localizer["Attempts"]</label>
         <label class="redtext">@Model.Attempts (@Model.AttemptRate %)</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["Successes"]</label>
+        <label class="mainFormSectionLabel">@localizer["Successes"]</label>
         <label class="redtext">@Model.Successes (@Model.SuccessRate %)</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["TotalScore"]</label>
+        <label class="mainFormSectionLabel">@localizer["TotalScore"]</label>
         <label class="redtext">@Model.TotalPoints</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["AveragePoints"]</label>
+        <label class="mainFormSectionLabel">@localizer["AveragePoints"]</label>
         <label class="redtext">@Model.PointsPerAttempt</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["BestScore"]</label>
+        <label class="mainFormSectionLabel">@localizer["BestScore"]</label>
         <label class="redtext">@Model.BestPoints</label>
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["AverageTime"]</label>
+        <label class="mainFormSectionLabel">@localizer["AverageTime"]</label>
         <label class="redtext">@Model.AverageTime</label>
     </div>
 </fieldset>

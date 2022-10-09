@@ -15,7 +15,7 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
     <h3>@localizer["LogOut"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["LoggedAs"]</label>
+            <label class="mainFormSectionLabel">@localizer["LoggedAs"]</label>
             <label class="redtext" style="width: 200px">@Model.Login</label>
         </div>
         <label style="width: 150px;"></label>
@@ -25,15 +25,15 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
     <h3>@localizer["ChangePassword"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["CurrentPwd"]</label>
+            <label class="mainFormSectionLabel">@localizer["CurrentPwd"]</label>
             @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["NewPwd"]</label>
+            <label class="mainFormSectionLabel">@localizer["NewPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["RepeatPwd"]</label>
+            <label class="mainFormSectionLabel">@localizer["RepeatPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
@@ -43,11 +43,11 @@ else if (!string.IsNullOrWhiteSpace(Model.SuccessInfo))
     <h3>@localizer["ChangeQAndA"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["RecQuestion"]</label>
+            <label class="mainFormSectionLabel">@localizer["RecQuestion"]</label>
             @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["RecAnswer"]</label>
+            <label class="mainFormSectionLabel">@localizer["RecAnswer"]</label>
             @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
@@ -59,11 +59,11 @@ else
     <h3>@localizer["LogIn"]</h3>
     <form method="post" action="/Account">
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["SetLogin"]</label>
+            <label class="mainFormSectionLabel">@localizer["SetLogin"]</label>
             @Html.TextBoxFor(m => m.LoginSubmission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["SetPwd"]</label>
+            <label class="mainFormSectionLabel">@localizer["SetPwd"]</label>
             @Html.PasswordFor(m => m.PasswordSubmission, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
@@ -74,29 +74,29 @@ else
     <form method="post" action="/Account">
         <p><a href="/Home/Contest">@localizer["FreeRegistrationClosed"]</a></p>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["SetRegistrationId"]</label>
+            <label class="mainFormSectionLabel">@localizer["SetRegistrationId"]</label>
             @Html.TextBoxFor(m => m.RegistrationId, new { @style = "width: 200px" })
         </div>
         <div style="font-size: small; margin-top: 5px">@localizer["TipRegistrationId"]</div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["SetLogin"]</label>
+            <label class="mainFormSectionLabel">@localizer["SetLogin"]</label>
             @Html.TextBoxFor(m => m.LoginCreateSubmission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["SetPwd"]</label>
+            <label class="mainFormSectionLabel">@localizer["SetPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["RepeatPwd"]</label>
+            <label class="mainFormSectionLabel">@localizer["RepeatPwd"]</label>
             @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
         </div>
         <div style="font-size: small; margin-top: 5px">@localizer["TipRecovery"]</div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["RecQuestion"]</label>
+            <label class="mainFormSectionLabel">@localizer["RecQuestion"]</label>
             @Html.TextBoxFor(m => m.RecoveryQCreate, new { @style = "width: 200px" })
         </div>
         <div style="margin-top: 5px">
-            <label style="width: 150px; text-align: right">@localizer["RecAnswer"]</label>
+            <label class="mainFormSectionLabel">@localizer["RecAnswer"]</label>
             @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
         </div>
         <label style="width: 150px;"></label>
@@ -108,7 +108,7 @@ else
         @if (string.IsNullOrWhiteSpace(Model.QuestionRecovery))
         {
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">@localizer["LoginRecover"]</label>
+                <label class="mainFormSectionLabel">@localizer["LoginRecover"]</label>
                 @Html.TextBoxFor(m => m.LoginRecoverySubmission, new { @style = "width: 200px" })
             </div>
             <label style="width: 150px;"></label>
@@ -117,24 +117,24 @@ else
         else
         {
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">@localizer["LoginRecover"]</label>
+                <label class="mainFormSectionLabel">@localizer["LoginRecover"]</label>
                 <label class="redtext" style="width: 200px">@Model.LoginRecoverySubmission</label>
                 @Html.HiddenFor(m => m.LoginRecoverySubmission)
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">@localizer["RecQuestion"]</label>
+                <label class="mainFormSectionLabel">@localizer["RecQuestion"]</label>
                 <label style="width: 200px">@Model.QuestionRecovery</label>
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">@localizer["RecAnswer"]</label>
+                <label class="mainFormSectionLabel">@localizer["RecAnswer"]</label>
                 @Html.PasswordFor(m => m.RecoveryACreate, new { @style = "width: 200px" })
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">@localizer["NewPwd"]</label>
+                <label class="mainFormSectionLabel">@localizer["NewPwd"]</label>
                 @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @style = "width: 200px" })
             </div>
             <div style="margin-top: 5px">
-                <label style="width: 150px; text-align: right">@localizer["RepeatPwd"]</label>
+                <label class="mainFormSectionLabel">@localizer["RepeatPwd"]</label>
                 @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @style = "width: 200px" })
             </div>
             <label style="width: 150px;"></label>

@@ -5,15 +5,15 @@
 <form action="/Leaderboard" method="post">
     <h3>@localizer["CustomizeLeaderboard"]</h3>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["SortType"]</label>
+        <label class="mainFormSectionLabel">@localizer["SortType"]</label>
         @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["FromDate"]</label>
+        <label class="mainFormSectionLabel">@localizer["FromDate"]</label>
         @Html.EditorFor(m => m.MinimalDate)
     </div>
     <div style="margin-top: 5px">
-        <label style="width: 150px; text-align: right">@localizer["ToDate"]</label>
+        <label class="mainFormSectionLabel">@localizer["ToDate"]</label>
         @Html.EditorFor(m => m.MaximalDate)
     </div>
     <div style="margin-top: 5px">

@@ -37,21 +37,26 @@ body {
 }
 
 .odd {
-    background-color: azure
+    background-color: azure;
 }
 
 .even {
-    background-color: white
+    background-color: white;
 }
 
 .creator {
-    background-color: lavender
+    background-color: lavender;
 }
 
 .redtext {
-    color: crimson
+    color: crimson;
 }
 
 .greentext {
-    color: forestgreen
+    color: forestgreen;
+}
+
+.mainFormSectionLabel {
+    width: 150px;
+    text-align: right;
 }
