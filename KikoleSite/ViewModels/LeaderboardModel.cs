@@ -31,8 +31,6 @@ namespace KikoleSite.ViewModels
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime LeaderboardDay { get; set; }
 
-        public string BoardName { get; set; }
-
         public LeaderSorts SortType { get; set; }
 
         public DayLeaderSorts DaySortType { get; set; }

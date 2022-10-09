@@ -153,6 +153,9 @@
   <data name="FromDate" xml:space="preserve">
     <value>Depuis :</value>
   </data>
+  <data name="GeneralLeaderboard" xml:space="preserve">
+    <value>Classement général</value>
+  </data>
   <data name="GetRanking" xml:space="preserve">
     <value>Classer</value>
   </data>

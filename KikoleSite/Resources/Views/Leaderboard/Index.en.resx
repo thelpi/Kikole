@@ -153,6 +153,9 @@
   <data name="FromDate" xml:space="preserve">
     <value>From date:</value>
   </data>
+  <data name="GeneralLeaderboard" xml:space="preserve">
+    <value>Overall ranking</value>
+  </data>
   <data name="GetRanking" xml:space="preserve">
     <value>Get ranking</value>
   </data>

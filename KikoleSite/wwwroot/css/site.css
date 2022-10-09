@@ -61,6 +61,11 @@ body {
     text-align: right;
 }
 
+.mainFormSectionLabelSmall {
+    width: 100px;
+    text-align: right;
+}
+
 .mediumTopMargin {
     margin-top: 10px;
 }
@@ -88,10 +93,10 @@ body {
     font-size: 15px;
 }
 
-    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-    .active, .collapsible:hover {
-        background-color: #ccc;
-    }
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+    background-color: #ccc;
+}
 
 /* Style the collapsible content. Note: hidden by default */
 collapsiblecontent {

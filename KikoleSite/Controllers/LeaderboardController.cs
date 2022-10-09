@@ -10,7 +10,6 @@ using KikoleSite.Services;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Controllers
 {
@@ -19,12 +18,10 @@ namespace KikoleSite.Controllers
         private const string AnonymizedPlayerName = "***";
         private const int DistributionSizeLimit = 25;
 
-        private readonly IStringLocalizer<LeaderboardController> _localizer;
         private readonly IStatisticService _statisticService;
         private readonly ILeaderService _leaderService;
 
-        public LeaderboardController(IStringLocalizer<LeaderboardController> localizer,
-            IUserRepository userRepository,
+        public LeaderboardController(IUserRepository userRepository,
             ICrypter crypter,
             IInternationalRepository internationalRepository,
             IClock clock,
@@ -43,7 +40,6 @@ namespace KikoleSite.Controllers
                 badgeService,
                 httpContextAccessor)
         {
-            _localizer = localizer;
             _statisticService = statisticService;
             _leaderService = leaderService;
         }
@@ -189,27 +185,6 @@ namespace KikoleSite.Controllers
             model.Dayboard = await _leaderService
                 .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
                 .ConfigureAwait(false);
-
-            model.BoardName = _localizer["CustomLeaderboard"];
-            var isCurrentMonthStart = model.MinimalDate.IsFirstOfMonth();
-            var isCurrentMonthEnd = model.MaximalDate.IsAfterInMonth();
-            if (isCurrentMonthStart && isCurrentMonthEnd)
-            {
-                model.BoardName = _localizer["MonthLeaderboard"];
-            }
-            else
-            {
-                var isMonthStart = model.MinimalDate.IsFirstOfMonth(model.MinimalDate);
-                var isMonthEnd = model.MaximalDate.IsEndOfMonth(model.MinimalDate);
-                if (isMonthStart && isMonthEnd)
-                {
-                    model.BoardName = _localizer["MonthNameLeaderboard", model.MinimalDate.GetMonthName()];
-                }
-                else if (model.MaximalDate.Date == DateTime.Now.Date)
-                {
-                    model.BoardName = _localizer["LastDaysLeaderboard", Convert.ToInt32(Math.Floor((model.MaximalDate.Date - model.MinimalDate.Date).TotalDays))];
-                }
-            }
 
             return model;
         }

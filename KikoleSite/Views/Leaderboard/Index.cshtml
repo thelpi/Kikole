@@ -3,45 +3,6 @@
 @model LeaderboardModel
 
 <form action="/Leaderboard" method="post">
-    <h3>@localizer["CustomizeLeaderboard"]</h3>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["SortType"]</label>
-        @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["FromDate"]</label>
-        @Html.EditorFor(m => m.MinimalDate)
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["ToDate"]</label>
-        @Html.EditorFor(m => m.MaximalDate)
-    </div>
-    <div class="smallTopMargin">
-        <input style="margin-left: 155px" type="submit" value="@localizer["GetRanking"]" />
-    </div>
-
-    <h3>@Model.BoardName</h3>
-    <span>(@Html.Raw(string.Format(localizer["LeaderboardDesc"].Value, Model.SortType.GetLabel(), Model.MinimalDate.ToNaString(), Model.MaximalDate.ToNaString())))</span>
-    @{
-        var loaderSize = 50;
-        var loaderMargin = $"-{(loaderSize / 2)}px";
-    }
-    <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/ajax-loader.gif" style="display: none; left: 50%; margin-left: @loaderMargin; margin-top: 100px;" />
-    <table id="globalLeaderboardTable" class="smallTopMargin">
-        <thead>
-            <tr>
-                <th style="text-align: center; width: 50px">@localizer["PosShortHeader"]</th>
-                <th class="redtext" style="text-align: center; width: 150px">@localizer["UsernameHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["PointsHeader"]</th>
-                <th style="text-align: center; width: 100px">@localizer["BestTimeHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["FoundHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["AttemptedHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["ProposedHeader"]</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
     <h3>@localizer["DailyLeaderboard"]</h3>
     @Html.EditorFor(m => m.LeaderboardDay)
     @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
@@ -114,6 +75,39 @@
             }
         </tbody>
     </table>
+
+    <h3>@localizer["GeneralLeaderboard"]</h3>
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
+        @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
+    </div>
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabelSmall">@localizer["FromDate"]</label>
+        @Html.EditorFor(m => m.MinimalDate)
+    </div>
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabelSmall">@localizer["ToDate"]</label>
+        @Html.EditorFor(m => m.MaximalDate)
+    </div>
+    @{
+        var loaderSize = 50;
+        var loaderMargin = $"-{(loaderSize / 2)}px";
+    }
+    <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/ajax-loader.gif" style="display: none; left: 50%; margin-left: @loaderMargin; margin-top: 100px;" />
+    <table id="globalLeaderboardTable" class="smallTopMargin">
+        <thead>
+            <tr>
+                <th style="text-align: center; width: 50px">@localizer["PosShortHeader"]</th>
+                <th class="redtext" style="text-align: center; width: 150px">@localizer["UsernameHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["PointsHeader"]</th>
+                <th style="text-align: center; width: 100px">@localizer["BestTimeHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["FoundHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["AttemptedHeader"]</th>
+                <th style="text-align: center; width: 75px">@localizer["ProposedHeader"]</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </form>
 <h3>@localizer["NewPageBuilding"]</h3>
 <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
@@ -124,10 +118,19 @@
 
 <script>
     $(function () {
-        var sortTypeJs = @Html.Raw(Json.Serialize(Model.SortType));
-        var minimalDateJs = @Html.Raw(Json.Serialize(Model.MinimalDate.ToString("yyyy-MM-dd")));
-        var maximalDateJs = @Html.Raw(Json.Serialize(Model.MaximalDate.ToString("yyyy-MM-dd")));
+        var sortType = document.getElementById('SortType');
+        var fromDate = document.getElementById('MinimalDate');
+        var toDate = document.getElementById('MaximalDate');
         var noUserInTableTextJs = @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value));
-        loadGlobalLeaderboard(sortTypeJs, minimalDateJs, maximalDateJs, noUserInTableTextJs);
+        sortType.onchange = function () {
+            loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
+        };
+        fromDate.onchange = function () {
+            loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
+        };
+        toDate.onchange = function () {
+            loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
+        };
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
     });
 </script>

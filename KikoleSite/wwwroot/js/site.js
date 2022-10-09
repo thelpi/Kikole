@@ -110,6 +110,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
         success: function (data) {
             var i = 0;
             var tabBody = $("#globalLeaderboardTable").find('tbody');
+            tabBody.empty();
             data.forEach(e => {
                 var background = i % 2 == 0 ? "white" : "azure";
                 tabBody.append(`<tr style="background-color: ` + background + `">
