@@ -3,47 +3,47 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="redtext" style="margin-top: 10px">@Model.ErrorMessage</div>
+    <div class="redtext" class="mediumTopMargin">@Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
-    <div class="greentext" style="margin-top: 10px">@Model.InfoMessage</div>
+    <div class="greentext" class="mediumTopMargin">@Model.InfoMessage</div>
 }
 
 @if (Model.DisplayPlayerSubmissionLink)
 {
-    <div style="margin-top: 10px"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
+    <div class="mediumTopMargin"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
 }
 
 <h3>@localizer["SubmitPlayerTitle"]</h3>
 <form method="post" action="/Admin">
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div><label>@localizer["Name"]</label></div>
         <input type="text" name="Name" style="width: 250px" />
         <div style="font-size: small">(@localizer["WikiPlayerName"])</div>
     </div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <label>@localizer["AlternativeNames"]</label>
     </div>
     @for (var i = 0; i < 5; i++)
     {
         var name = $"AlternativeName{i}";
-        <div style="margin-top: 5px">
+        <div class="smallTopMargin">
             <input type="text" name="@name" style="width: 250px" />
         </div>
     }
     <div style="font-size: small">(@localizer["AltNameTip1"])</div>
     <div style="font-size: small">(@localizer["AltNameTip2"])</div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div>
             <label>@localizer["YearOfBirth"]</label>
         </div>
         <input type="text" id="birthYearValue" name="YearOfBirth" style="width: 100px" />
     </div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div>
             <label>@localizer["Nationality"]</label>
         </div>
@@ -56,28 +56,28 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 
     @if (Model.DisplayPlayerSubmissionLink)
     {
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["ClueEn"]</label>
             </div>
             <input type="text" name="ClueEn" style="width: 300px" />
         </div>
 
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["ClueFr"]</label>
             </div>
             <input type="text" name="ClueFr" style="width: 300px" />
         </div>
 
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["EasyClueEn"]</label>
             </div>
             <input type="text" name="EasyClueEn" style="width: 300px" />
         </div>
 
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["EasyClueFr"]</label>
             </div>
@@ -86,7 +86,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     }
     else
     {
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["Clue"]</label>
             </div>
@@ -95,7 +95,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             <div style="font-size: small">(@localizer["AdminOverrideClue"])</div>
         </div>
 
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["EasyClue"]</label>
             </div>
@@ -105,13 +105,13 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         </div>
     }
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div><label>@localizer["Position"]</label></div>
         @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px" })
         <div style="font-size: small">(@localizer["AvoidAmbiguousPos"])</div>
     </div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div>
             <label>@localizer["ClubsCareer"]</label>
         </div>
@@ -123,7 +123,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         {
             var name = $"Club{i}";
             var loanChk = $"IsLoan{i}";
-            <div style="margin-top: 5px">
+            <div class="smallTopMargin">
                 <input type="text" id="@name" name="@name" style="width: 250px" />
                 <span>@localizer["IsLoan"]</span>
                 @Html.CheckBox(loanChk)
@@ -133,16 +133,16 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div style="font-size: small">(@localizer["ClubsTip1"])</div>
     <div style="font-size: small">(@localizer["ClubsTip2"])</div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <label>@localizer["RemainsAnonymous"]</label> @Html.CheckBoxFor(m => m.HideCreator)
     </div>
     <div style="font-size: small">(@localizer["RemainsAnonymousTip"])</div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <input type="submit" name="submit-club" value="@localizer["SubmitPlayerGo"]" />
     </div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         @Html.Raw(string.Format(localizer["ChartLaius"].Value, Model.Chart.SubmissionMaxPoints, Model.Chart.SubmissionLosePointsByLeader, Model.Chart.SubmissionThresholdlosePoints, Model.Chart.SubmissionBasePoints))
     </div>
 </form>

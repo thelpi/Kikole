@@ -3,50 +3,50 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="redtext" style="margin-top: 10px">Error: @Model.ErrorMessage</div>
+    <div class="redtext" class="mediumTopMargin">Error: @Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
-    <div class="greentext" style="margin-top: 10px">@Model.InfoMessage</div>
+    <div class="greentext" class="mediumTopMargin">@Model.InfoMessage</div>
 }
 
 @if (Model.SelectedPlayer != null)
 {
     <form method="post" action="/Admin/PlayerSubmission">
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <div>
                 <label>@localizer["CreatorLogin"]</label>
                 <div>@Model.SelectedPlayer.Login</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["Name"]</label>
                 <div>@Model.SelectedPlayer.Name</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["AllowedNames"]</label>
                 <div>@Model.SelectedPlayer.AllowedNames</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["YearOfBirth"]</label>
                 <div>@Model.SelectedPlayer.YearOfBirth</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["Country"]</label>
                 <div>@Model.SelectedPlayer.Country</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["Clue"]</label>
                 <div>@Model.SelectedPlayer.Clue</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["EasyClue"]</label>
                 <div>@Model.SelectedPlayer.EasyClue</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["Position"]</label>
                 <div>@Model.SelectedPlayer.Position</div>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 <label>@localizer["Clubs"]</label>
                 @foreach (var club in Model.SelectedPlayer.Clubs.OrderBy(x => x.HistoryPosition))
                 {
@@ -60,7 +60,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                     }
                 }
             </div>
-            <div style="margin-top: 5px">
+            <div class="smallTopMargin">
                 <label>@localizer["CheckClubName"]</label>
                 <div>
                     <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
@@ -68,7 +68,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             </div>
         </div>
         @Html.HiddenFor(m => m.SelectedId)
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <label>@localizer["AcceptPlayer"]</label>
             <div>
                 <input type="text" name="ClueOverwriteEn" style="width: 300px" /> (@localizer["EnShort"])
@@ -85,7 +85,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             </div>
             <input type="submit" value="@localizer["Ok"]" name="submit-accepted" />
         </div>
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <label>@localizer["RefusePlayer"]</label>
             <div>
                 <input type="text" name="RefusalReason" style="width: 300px" />
@@ -98,14 +98,14 @@ else
 {
     if (Model.Players.Count == 0)
     {
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <label>@localizer["NoPlayerToValidate"]</label>
         </div>
     }
     else
     {
         <form method="post" action="/Admin/PlayerSubmission">
-            <div style="margin-top: 20px">
+            <div class="largeTopMargin">
                 <label>@localizer["SelectPlayer"]</label>
                 <div>
                     @Html.DropDownListFor(m => m.SelectedId, Model.Players.Select(p => new SelectListItem(p.Name, p.Id.ToString())))

@@ -4,19 +4,19 @@
 
 <form action="/Leaderboard" method="post">
     <h3>@localizer["CustomizeLeaderboard"]</h3>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["SortType"]</label>
         @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["FromDate"]</label>
         @Html.EditorFor(m => m.MinimalDate)
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["ToDate"]</label>
         @Html.EditorFor(m => m.MaximalDate)
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <input style="margin-left: 155px" type="submit" value="@localizer["GetRanking"]" />
     </div>
 
@@ -27,7 +27,7 @@
         var loaderMargin = $"-{(loaderSize / 2)}px";
     }
     <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/ajax-loader.gif" style="display: none; left: 50%; margin-left: @loaderMargin; margin-top: 100px;" />
-    <table id="globalLeaderboardTable" style="margin-top: 5px">
+    <table id="globalLeaderboardTable" class="smallTopMargin">
         <thead>
             <tr>
                 <th style="text-align: center; width: 50px">@localizer["PosShortHeader"]</th>
@@ -46,7 +46,7 @@
     @Html.EditorFor(m => m.LeaderboardDay)
     @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
     <input type="submit" value="Ok" />
-    <table style="margin-top: 5px">
+    <table class="smallTopMargin">
         <thead>
             <tr>
                 <th style="width: 50px">@localizer["PosShortHeader"]</th>
@@ -87,7 +87,7 @@
     {
         <label>@string.Format(localizer["ActiveUsersToday"].Value, Model.Dayboard.DayAttemps, Model.Dayboard.DaySuccessRate)</label>
     }
-    <table style="margin-top: 5px">
+    <table class="smallTopMargin">
         <thead>
             <tr>
                 <th class="redtext" style="width: 150px">@localizer["UsernameHeaderInGoing"]</th>

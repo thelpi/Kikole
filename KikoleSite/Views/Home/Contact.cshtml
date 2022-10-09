@@ -3,17 +3,17 @@
 <div>
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
-        <div class="redtext" style="margin-top: 10px; font-size: large">
+        <div class="redtext mediumTopMargin" style="font-size: large">
             @Model.ErrorMessage
         </div>
     }
     @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
     {
-        <div class="greentext" style="margin-top: 10px; font-size: large">
+        <div class="greentext mediumTopMargin" style="font-size: large">
             @Model.SuccessMessage
         </div>
     }
-    <div style="margin-top: 10px">
+    <div class="mediumTopMargin">
         <label>@localizer["LoggedAs"] <span class="greentext">@Model.LoggedAs</span></label>
     </div>
     <h3>@localizer["ContactAdmin"]</h3>

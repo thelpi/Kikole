@@ -4,13 +4,13 @@
 <div>
     @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && Model.IsErrorMessageForced)
     {
-        <div style="margin-top: 20px">
+        <div class="largeTopMargin">
             <label class="redtext">@Model.MessageToDisplay</label>
         </div>
     }
     @if (Model.AlmostThere)
     {
-        <div class="redtext" style="margin-top: 20px; font-size: large">
+        <div class="redtext largeTopMargin" style="font-size: large">
             @localizer["AlmostThere"]
         </div>
     }
@@ -18,7 +18,7 @@
     {
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {
-            <div class="redtext" style="margin-top: 20px; font-size: large">
+            <div class="redtext largeTopMargin" style="font-size: large">
                 <fieldset style="padding: 15px; border-color: red; border-width: 1px; border-style: solid ">
                     @Html.Raw(Model.Message)
                 </fieldset>
@@ -28,7 +28,7 @@
         <div style="margin-top: 40px">
             <label>@localizer["YouAreNotLogged"]</label>
         </div>
-        <div style="margin-top: 10px">
+        <div class="mediumTopMargin">
             @localizer["AccountMandatory"]
         </div>
     }
@@ -36,20 +36,20 @@
     {
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {
-            <div class="redtext" style="margin-top: 20px; font-size: large">
+            <div class="redtext largeTopMargin" style="font-size: large">
                 @Html.Raw(Model.Message)
             </div>
         }
         @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
         {
-            <div style="margin-top: 20px; font-size: large">
+            <div class="largeTopMargin" style="font-size: large">
                 @Html.Raw(string.Format(localizer["SubmittedBy"].Value, Model.PlayerCreator))
             </div>
         }
-        <div style="margin-top: 10px">
+        <div class="mediumTopMargin">
             <label>@localizer["LoggedAs"] <span class="greentext">@Model.LoggedAs</span></label>
         </div>
-        <div style="margin-top: 10px">
+        <div class="mediumTopMargin">
             @if (!Model.NoPreviousDay)
             {
                 <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
@@ -70,7 +70,7 @@
         {
             if (Model.CurrentDay == 0 && !Model.IsCreator)
             {
-                <div style="margin-top: 5px">
+                <div class="smallTopMargin">
                     <label>@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</label>
                 </div>
                 <div>@Html.Raw(string.Format(localizer["FinalScore"].Value, Model.Points))</div>
@@ -78,32 +78,32 @@
             }
             else if (Model.CurrentDay == 0)
             {
-                <div style="margin-top: 5px">
+                <div class="smallTopMargin">
                     <label>@localizer["PlayerIs"] <span class="redtext" style="font-style: italic">@Model.PlayerName</span></label>
                 </div>
             }
             else
             {
-                <div style="margin-top: 5px">
+                <div class="smallTopMargin">
                     <label>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, DateTime.Now.AddDays(-Model.CurrentDay).ToNaString()))</label>
                 </div>
             }
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 @localizer["FinalPosition"] <span style="font-style:italic">@Model.Position</span>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 @localizer["FinalBirthYear"] <span style="font-style:italic">@Model.BirthYear</span>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 @localizer["FinalNationality"] <span style="font-style:italic">@Model.CountryName</span>
             </div>
-            <div style="margin-top: 10px">
+            <div class="mediumTopMargin">
                 @localizer["FinalClubs"]
                 @foreach (var club in Model.KnownPlayerClubs.OrderBy(x => x.HistoryPosition))
                 {
@@ -118,7 +118,7 @@
         {
             if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && !Model.IsErrorMessageForced)
             {
-                <div style="margin-top: 5px">
+                <div class="smallTopMargin">
                     @if (Model.IsErrorMessage)
                     {
                         <label class="redtext">@Model.MessageToDisplay</label>
@@ -129,7 +129,7 @@
                     }
                 </div>
             }
-            <div style="margin-top: 5px">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
+            <div class="smallTopMargin">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
             await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
             <div style="margin-top: 30px; font-size: larger">
                 @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
@@ -191,7 +191,7 @@
                     }
                     @if (Model.IncorrectClubs?.Count > 0)
                     {
-                        <div style="margin-top: 10px">
+                        <div class="mediumTopMargin">
                             @foreach (var iClub in Model.IncorrectClubs)
                             {
                                 <div style="font-size: small; text-decoration: line-through">@iClub</div>
@@ -200,7 +200,7 @@
                     }
                     @if (Model.CanCreateClub)
                     {
-                        <div style="margin-top: 10px">
+                        <div class="mediumTopMargin">
                             <a href="/Admin/Club" target="_blank">@localizer["HelpToCreateClub"]</a> (@localizer["NewTab"])
                         </div>
                         <div style="font-size: small">(@localizer["CreateClubIsGood"])</div>
@@ -225,7 +225,7 @@
                         <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
                         @if (Model.IncorrectCountries?.Count > 0)
                         {
-                            <div style="margin-top: 10px">
+                            <div class="mediumTopMargin">
                                 @foreach (var iCountry in Model.IncorrectCountries)
                                 {
                                     <div style="font-size: small; text-decoration: line-through">@iCountry</div>
@@ -257,7 +257,7 @@
                         </div>
                         @if (Model.IncorrectYears?.Count > 0)
                         {
-                            <div style="margin-top: 10px">
+                            <div class="mediumTopMargin">
                                 @foreach (var (iYear, iTip) in Model.IncorrectYears)
                                 {
                                     <div style="font-size: small"><span style="text-decoration: line-through">@iYear</span> (@iTip)</div>
@@ -289,7 +289,7 @@
                         </div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
-                            <div style="margin-top: 10px">
+                            <div class="mediumTopMargin">
                                 @foreach (var iPosition in Model.IncorrectPositions)
                                 {
                                     <div style="font-size: small; text-decoration: line-through">@iPosition</div>
@@ -321,7 +321,7 @@
                 </div>
                 @if (Model.IncorrectNames?.Count > 0)
                 {
-                    <div style="margin-top: 10px">
+                    <div class="mediumTopMargin">
                         @foreach (var iName in Model.IncorrectNames)
                         {
                             <div style="font-size: small; text-decoration: line-through">@iName</div>

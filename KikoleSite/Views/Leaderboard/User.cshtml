@@ -6,73 +6,73 @@
     <label class="mainFormSectionLabel">@localizer["Username"]</label>
     <label class="redtext">@Model.Login</label>
 </div>
-<div style="margin-top: 5px">
+<div class="smallTopMargin">
     <label class="mainFormSectionLabel">@localizer["RegistrationDate"]</label>
     <label class="redtext">@Model.RegistrationDate.ToNaString()</label>
 </div>
-<div style="margin-top: 5px">
+<div class="smallTopMargin">
     <label class="mainFormSectionLabel">@localizer["BestTime"]</label>
     <label class="redtext">@Model.BestTime</label>
 </div>
 
-<fieldset style="margin-top: 5px">
+<fieldset class="smallTopMargin">
     <legend>@localizer["CurrentDay"]</legend>
     <div>
         <label class="mainFormSectionLabel">@localizer["Attempts"]</label>
         <label class="redtext">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["Successes"]</label>
         <label class="redtext">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["TotalScore"]</label>
         <label class="redtext">@Model.TotalPointsDayOne</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["AveragePoints"]</label>
         <label class="redtext">@Model.PointsPerAttemptDayOne</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["BestScore"]</label>
         <label class="redtext">@Model.BestPointsDayOne</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["AverageTime"]</label>
         <label class="redtext">@Model.AverageTimeDayOne</label>
     </div>
 </fieldset>
 
-<fieldset style="margin-top: 5px">
+<fieldset class="smallTopMargin">
     <legend>@localizer["IncludingOutOfTime"]</legend>
     <div>
         <label class="mainFormSectionLabel">@localizer["Attempts"]</label>
         <label class="redtext">@Model.Attempts (@Model.AttemptRate %)</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["Successes"]</label>
         <label class="redtext">@Model.Successes (@Model.SuccessRate %)</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["TotalScore"]</label>
         <label class="redtext">@Model.TotalPoints</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["AveragePoints"]</label>
         <label class="redtext">@Model.PointsPerAttempt</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["BestScore"]</label>
         <label class="redtext">@Model.BestPoints</label>
     </div>
-    <div style="margin-top: 5px">
+    <div class="smallTopMargin">
         <label class="mainFormSectionLabel">@localizer["AverageTime"]</label>
         <label class="redtext">@Model.AverageTime</label>
     </div>
 </fieldset>
 
 <h3>@localizer["StatsByDay"]</h3>
-<table style="margin-top: 10px">
+<table class="mediumTopMargin">
     <thead>
         <tr>
             <th style="width: 100px">@localizer["DateHeader"]</th>
@@ -121,7 +121,7 @@ else
     foreach (var badge in Model.Badges)
     {
         var color = !badge.Hidden ? "transparent" : "gold";
-        <div style="float: left; margin-top: 5px; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+        <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
             <div class="greentext" style="text-align:center; font-size: large">@badge.Name</div>
             <div style="text-align:center">@badge.Description</div>
             @if (!badge.Hidden)
@@ -165,7 +165,7 @@ else
 {
     foreach (var badge in Model.MissingBadges)
     {
-        <div style="float: left; margin-top: 5px; width: 350px; min-height: 120px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
+        <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
             <div class="redtext" style="text-align:center; font-size: large">@badge.Name</div>
             <div style="text-align:center">@badge.Description</div>
             @if (badge.Users == 0)

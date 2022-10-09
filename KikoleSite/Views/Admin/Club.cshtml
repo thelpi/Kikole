@@ -3,16 +3,16 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="redtext" style="margin-top: 10px">Error: @Model.ErrorMessage</div>
+    <div class="redtext" class="mediumTopMargin">Error: @Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
-    <div class="greentext" style="margin-top: 10px">@Model.InfoMessage</div>
+    <div class="greentext" class="mediumTopMargin">@Model.InfoMessage</div>
 }
 
 <h3>@localizer["CreateClubTitle"]</h3>
 <form method="post" action="/Admin/Club">
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div>
             <label>@localizer["SearchAlreadyExists"]</label>
         </div>
@@ -20,27 +20,27 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
         </div>
     </div>
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div><label>@localizer["MainNameEn"]</label></div>
         <input type="text" name="MainName" style="width: 250px" />
     </div>
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <div><label>@localizer["MainNameFr"]</label></div>
         <input type="text" name="AlternativeName0" style="width: 250px" />
     </div>
 
-    <div style="margin-top: 20px"><label>@localizer["AlternativeNames"]</label></div>
+    <div class="largeTopMargin"><label>@localizer["AlternativeNames"]</label></div>
     @for (var i = 1; i < 4; i++)
     {
         var name = $"AlternativeName{i}";
-        <div style="margin-top: 5px">
+        <div class="smallTopMargin">
             <input type="text" name="@name" style="width: 250px" />
         </div>
     }
     <div style="font-size: small">(@localizer["AlternativeTip"])</div>
     <div style="font-size: small">(@localizer["DontMindDiacritics"])</div>
 
-    <div style="margin-top: 20px">
+    <div class="largeTopMargin">
         <input type="submit" name="submit-club" value="@localizer["DoCreate"]" />
     </div>
 </form>

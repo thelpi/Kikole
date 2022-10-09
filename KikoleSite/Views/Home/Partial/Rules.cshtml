@@ -1,9 +1,9 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model KikoleSite.Models.ProposalChart
-<div style="margin-top: 10px">
+<div class="mediumTopMargin">
     @localizer["Rules"]
 </div>
-<div style="margin-top: 10px">
+<div class="mediumTopMargin">
     @localizer["ScoreIntro"]
     <ul>
         <li>@Html.Raw(string.Format(localizer["StarterPoints"].Value, Model.BasePoints))</li>

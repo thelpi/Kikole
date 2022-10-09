@@ -13,24 +13,24 @@
     <div>
         <input type="submit" value="@localizer["RecomputeBadges"]" name="submit-recomputebadges" />
     </div>
-    <div style="margin-top: 10px">
+    <div class="mediumTopMargin">
         <input type="submit" value="@localizer["RecomputeLeaders"]" name="submit-recomputeleaders" />
     </div>
-    <div style="margin-top: 10px">
+    <div class="mediumTopMargin">
         <input type="submit" value="@localizer["ReassignPlayers"]" name="submit-reassignplayers" />
     </div>
-    <fieldset style="margin-top: 10px">
+    <fieldset class="mediumTopMargin">
         <legend>@localizer["AddGlobalMessage"]</legend>
         <div>
             @Html.TextBoxFor(m => m.Message, new { @style = "width: 400px" });
         </div>
-        <div style="margin-top: 5px">
+        <div class="smallTopMargin">
             @Html.EditorFor(m => m.MessageDateStart);
         </div>
-        <div style="margin-top: 5px">
+        <div class="smallTopMargin">
             @Html.EditorFor(m => m.MessageDateEnd);
         </div>
-        <input style="margin-top: 5px" type="submit" value="@localizer["ActionAddMessage"]" name="submit-insertmessage" />
+        <input class="smallTopMargin" type="submit" value="@localizer["ActionAddMessage"]" name="submit-insertmessage" />
     </fieldset>
 </form>
 
