@@ -113,41 +113,23 @@
     </tbody>
 </table>
 
+<h3>
+    <a href="/Leaderboard/Palmares">@localizer["PalmaresLink"]</a>
+</h3>
+
 <h3>@localizer["NewPageBuilding"]</h3>
-<a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
-<br />
-<a href="/Leaderboard/Palmares">@localizer["PalmaresLink"]</a>
-<br />
-<a href="/Leaderboard/KikolesStats">@localizer["KikolesStatisticsPageLink"]</a>
+<h4>
+    <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
+</h4>
+<h4>
+    <a href="/Leaderboard/KikolesStats">@localizer["KikolesStatisticsPageLink"]</a>
+</h4>
 
 <script>
     $(function () {
-        var noUserInTableTextJs = @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value));
-        var noTimeYetTextJs = @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value));
-        var noPointsYetTextJs = @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value));
-
-        /* global */
-        var sortType = document.getElementById('SortType');
-        var fromDate = document.getElementById('MinimalDate');
-        var toDate = document.getElementById('MaximalDate');
-        sortType.onchange = function () {
-            loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
-        };
-        fromDate.onchange = function () {
-            loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
-        };
-        toDate.onchange = function () {
-            loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
-        };
-
-        /* daily */
-        var dailySortType = document.getElementById('DaySortType');
-        var dailyDate = document.getElementById('LeaderboardDay');
-        dailySortType.onchange = function () {
-            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs, noTimeYetTextJs, noPointsYetTextJs);
-        };
-        dailyDate.onchange = function () {
-            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs, noTimeYetTextJs, noPointsYetTextJs);
-        };
+        initializeLeaderboards(
+            @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value)),
+            @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value)),
+            @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value)));
     });
 </script>

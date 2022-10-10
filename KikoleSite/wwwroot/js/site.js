@@ -92,6 +92,32 @@ var loadKikolesStats = function (sort, desc) {
     });
 };
 
+var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText) {
+    /* global */
+    var sortType = document.getElementById('SortType');
+    var fromDate = document.getElementById('MinimalDate');
+    var toDate = document.getElementById('MaximalDate');
+    sortType.onchange = function () {
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText);
+    };
+    fromDate.onchange = function () {
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText);
+    };
+    toDate.onchange = function () {
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText);
+    };
+
+    /* daily */
+    var dailySortType = document.getElementById('DaySortType');
+    var dailyDate = document.getElementById('LeaderboardDay');
+    dailySortType.onchange = function () {
+        loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText);
+    };
+    dailyDate.onchange = function () {
+        loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText);
+    };
+};
+
 /* leaderboard loading */
 var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText) {
     $.ajax({
