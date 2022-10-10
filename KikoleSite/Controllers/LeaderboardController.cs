@@ -50,7 +50,8 @@ namespace KikoleSite.Controllers
             // /!\ userId is not UserId
             if (userId == 0)
             {
-                return await Index(null).ConfigureAwait(false);
+                var model = await InitializeModelAsync(null).ConfigureAwait(false);
+                return View(model);
             }
 
             var stats = await _leaderService
@@ -59,7 +60,8 @@ namespace KikoleSite.Controllers
 
             if (stats == null)
             {
-                return await Index(null).ConfigureAwait(false);
+                var model = await InitializeModelAsync(null).ConfigureAwait(false);
+                return View(model);
             }
 
             var language = ViewHelper.GetLanguage();
@@ -73,14 +75,6 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             return View("User", new UserStatsModel(stats, badges, allBadges, userId == UserId));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Index(LeaderboardModel model)
-        {
-            model = await InitializeModelAsync(model).ConfigureAwait(false);
-
-            return View(model);
         }
 
         [HttpGet]

@@ -177,6 +177,12 @@
   <data name="NewPageBuilding" xml:space="preserve">
     <value>Statistiques</value>
   </data>
+  <data name="NotYetPoints" xml:space="preserve">
+    <value>N/A</value>
+  </data>
+  <data name="NotYetTime" xml:space="preserve">
+    <value>En cours</value>
+  </data>
   <data name="NoUserInTable" xml:space="preserve">
     <value>Aucun.e</value>
   </data>

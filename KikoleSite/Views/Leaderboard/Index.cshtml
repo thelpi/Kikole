@@ -2,141 +2,117 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model LeaderboardModel
 
-<form action="/Leaderboard" method="post">
-    <h3>@localizer["DailyLeaderboard"]</h3>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
-        @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabelSmall">@localizer["Date"]</label>
-        @Html.EditorFor(m => m.LeaderboardDay)
-    </div>
-    <table id="dailyLeaderboardTable" class="smallTopMargin">
-        <thead>
-            <tr>
-                <th class="tabDataHead">@localizer["PosShortHeader"]</th>
-                <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
-                <th class="tabDataHead">@localizer["TimeHeader"]</th>
-                <th class="tabDataHead">@localizer["PointsHeader"]</th>
+<h3>@localizer["DailyLeaderboard"]</h3>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
+    @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
+</div>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabelSmall">@localizer["Date"]</label>
+    @Html.EditorFor(m => m.LeaderboardDay)
+</div>
+<table id="dailyLeaderboardTable" class="smallTopMargin">
+    <thead>
+        <tr>
+            <th class="tabDataHead">@localizer["PosShortHeader"]</th>
+            <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
+            <th class="tabDataHead">@localizer["TimeHeader"]</th>
+            <th class="tabDataHead">@localizer["PointsHeader"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 0;
+            var lastRank = 1;
+        }
+        @foreach (var leader in Model.Dayboard.Leaders)
+        {
+            var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
+            <tr class="@trClass">
+                <td class="tabData">@leader.Rank</td>
+                <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
+                <td class="tabData">@leader.TimeString</td>
+                <td class="tabData">@leader.Points</td>
             </tr>
-        </thead>
-        <tbody>
-            @{
-                var i = 0;
-            }
-            @if (Model.Dayboard.Leaders.Count > 0)
-            {
-                i = 0;
-                foreach (var leader in Model.Dayboard.Leaders)
-                {
-                    var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
-                    <tr class="@trClass">
-                        <td class="tabData">@leader.Rank</td>
-                        <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                        <td class="tabData">@leader.TimeString</td>
-                        <td class="tabData">@leader.Points</td>
-                    </tr>
-                    i++;
-                }
-            }
-            else
-            {
-                <tr class="even">
-                    <td colspan="4">@localizer["NoUserInTable"]</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <table id="dailySearchersTable" class="smallTopMargin">
-        <thead>
-            <tr>
-                <th class="tabDataHead redtext" style="width: 150px">@localizer["UsernameHeaderInGoing"]</th>
+            lastRank = leader.Rank + 1;
+            i++;
+        }
+        @foreach (var search in Model.Dayboard.Searchers)
+        {
+            var trClass = i % 2 == 0 ? "even" : "odd";
+            <tr class="@trClass">
+                <td class="tabData">@lastRank</td>
+                <td class="tabData redtext"><a href="/Leaderboard?userId=@search.UserId">@search.UserName</a></td>
+                <td class="tabData">@localizer["NotYetTime"]</td>
+                <td class="tabData">@localizer["NotYetPoints"]</td>
             </tr>
-        </thead>
-        <tbody>
-            @if (Model.Dayboard.Searchers.Count > 0)
-            {
-                i = 0;
-                foreach (var searcher in Model.Dayboard.Searchers)
-                {
-                    var trClass = (i % 2 == 0 ? "even" : "odd");
-                    <tr class="@trClass">
-                        <td class="tabData redtext"><a href="/Leaderboard?userId=@searcher.UserId">@searcher.UserName</a></td>
-                    </tr>
-                    i++;
-                }
-            }
-            else
-            {
-                <tr class="even">
-                    <td>@localizer["NoUserInTable"]</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            i++;
+        }
+        @if (i == 0)
+        {
+            <tr class="even">
+                <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-    <h3>@localizer["GeneralLeaderboard"]</h3>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
-        @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabelSmall">@localizer["FromDate"]</label>
-        @Html.EditorFor(m => m.MinimalDate)
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabelSmall">@localizer["ToDate"]</label>
-        @Html.EditorFor(m => m.MaximalDate)
-    </div>
-    @{
-        var loaderSize = 50;
-        var loaderMargin = $"-{(loaderSize / 2)}px";
-    }
-    <img id="loading-image" width="@loaderSize" height="@loaderSize" src="/images/ajax-loader.gif" style="display: none; left: 50%; margin-left: @loaderMargin; margin-top: 100px;" />
-    <table id="globalLeaderboardTable" class="smallTopMargin">
-        <thead>
-            <tr>
-                <th class="tabDataHead">@localizer["PosShortHeader"]</th>
-                <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
-                <th class="tabDataHead">@localizer["PointsHeader"]</th>
-                <th class="tabDataHead">@localizer["BestTimeHeader"]</th>
-                <th class="tabDataHead">@localizer["FoundHeader"]</th>
-                <th class="tabDataHead">@localizer["AttemptedHeader"]</th>
-                <th class="tabDataHead">@localizer["ProposedHeader"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                i = 0;
-            }
-            @if (Model.GlobalLeaderboard.Count > 0)
+<h3>@localizer["GeneralLeaderboard"]</h3>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
+    @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
+</div>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabelSmall">@localizer["FromDate"]</label>
+    @Html.EditorFor(m => m.MinimalDate)
+</div>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabelSmall">@localizer["ToDate"]</label>
+    @Html.EditorFor(m => m.MaximalDate)
+</div>
+<table id="globalLeaderboardTable" class="smallTopMargin">
+    <thead>
+        <tr>
+            <th class="tabDataHead">@localizer["PosShortHeader"]</th>
+            <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
+            <th class="tabDataHead">@localizer["PointsHeader"]</th>
+            <th class="tabDataHead">@localizer["BestTimeHeader"]</th>
+            <th class="tabDataHead">@localizer["FoundHeader"]</th>
+            <th class="tabDataHead">@localizer["AttemptedHeader"]</th>
+            <th class="tabDataHead">@localizer["ProposedHeader"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            i = 0;
+        }
+        @if (Model.GlobalLeaderboard.Count > 0)
+        {
+            i = 0;
+            foreach (var leader in Model.GlobalLeaderboard)
             {
-                i = 0;
-                foreach (var leader in Model.GlobalLeaderboard)
-                {
-                    var trClass = i % 2 == 0 ? "even" : "odd";
-                    <tr class="@trClass">
-                        <td class="tabData">@leader.Rank</td>
-                        <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                        <td class="tabData">@leader.Points</td>
-                        <td class="tabData">@leader.BestTimeString</td>
-                        <td class="tabData">@leader.KikolesFound</td>
-                        <td class="tabData">@leader.KikolesAttempted</td>
-                        <td class="tabData">@leader.KikolesProposed</td>
-                    </tr>
-                    i++;
-                }
-            }
-            else
-            {
-                <tr class="even">
-                    <td colspan="7">@localizer["NoUserInTable"]</td>
+                var trClass = i % 2 == 0 ? "even" : "odd";
+                <tr class="@trClass">
+                    <td class="tabData">@leader.Rank</td>
+                    <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
+                    <td class="tabData">@leader.Points</td>
+                    <td class="tabData">@leader.BestTimeString</td>
+                    <td class="tabData">@leader.KikolesFound</td>
+                    <td class="tabData">@leader.KikolesAttempted</td>
+                    <td class="tabData">@leader.KikolesProposed</td>
                 </tr>
+                i++;
             }
-        </tbody>
-    </table>
-</form>
+        }
+        else
+        {
+            <tr class="even">
+                <td colspan="7" class="tabData">@localizer["NoUserInTable"]</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 <h3>@localizer["NewPageBuilding"]</h3>
 <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
 <br />
@@ -147,6 +123,8 @@
 <script>
     $(function () {
         var noUserInTableTextJs = @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value));
+        var noTimeYetTextJs = @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value));
+        var noPointsYetTextJs = @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value));
 
         /* global */
         var sortType = document.getElementById('SortType');
@@ -166,10 +144,10 @@
         var dailySortType = document.getElementById('DaySortType');
         var dailyDate = document.getElementById('LeaderboardDay');
         dailySortType.onchange = function () {
-            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs);
+            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs, noTimeYetTextJs, noPointsYetTextJs);
         };
         dailyDate.onchange = function () {
-            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs);
+            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs, noTimeYetTextJs, noPointsYetTextJs);
         };
     });
 </script>

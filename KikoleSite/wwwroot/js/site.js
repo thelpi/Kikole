@@ -23,7 +23,7 @@ var loadKikolesStats = function (sort, desc) {
             data.forEach(e => {
                 var background = i % 2 == 0 ? "even" : "odd";
                 var newRow = newtbody.insertRow();
-                newRow.style.backgroundColor = background;
+                newRow.classList.add(background);
 
                 var dateToParse = new Date(Date.parse(e.date));
                 var newCell = newRow.insertCell();
@@ -98,10 +98,6 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
         url: '/global-leaderboard-details?sortType=' + sortType + '&minimalDate=' + dateMin + '&maximalDate=' + dateMax,
         type: "GET",
         dataType: "json",
-        beforeSend: function () {
-            $("#loading-image").show();
-            $("#globalLeaderboardTable").hide();
-        },
         success: function (data) {
             var table = document.getElementById('globalLeaderboardTable');
             var tbodyRef = table.getElementsByTagName('tbody')[0];
@@ -158,11 +154,10 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(noUserInTableText);
                 newCell.appendChild(newText);
+                newCell.classList.add('tabData');
                 newCell.colSpan = 7;
             }
             table.replaceChild(newtbody, tbodyRef);
-            $("#loading-image").hide();
-            $("#globalLeaderboardTable").show();
         },
         error: function (data) {
             alert('Call error: ' + JSON.stringify(data));
@@ -170,7 +165,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
     });
 };
 
-var loadDailyLeadeboard = function (sortType, date, noUserInTableText) {
+var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText) {
     $.ajax({
         url: '/daily-leaderboard-details?sortType=' + sortType + '&date=' + date,
         type: "GET",
@@ -180,6 +175,7 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText) {
             var tbodyRef = table.getElementsByTagName('tbody')[0];
             var newtbody = document.createElement('tbody');
             var i = 0;
+            var lastRank = 1;
             data.leaders.forEach(e => {
                 var trClass = i % 2 == 0 ? "even" : "odd";
                 if (e.isCreator) {
@@ -212,25 +208,19 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText) {
                 newCell.appendChild(newText);
                 newCell.classList.add('tabData');
 
+                lastRank = e.rank + 1;
                 i++;
             });
-            if (i == 0) {
-                var newRow = newtbody.insertRow();
-                newRow.classList.add('even');
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(noUserInTableText);
-                newCell.appendChild(newText);
-                newCell.colSpan = 4;
-            }
-            table.replaceChild(newtbody, tbodyRef);
 
-            var table = document.getElementById('dailySearchersTable');
-            var tbodyRef = table.getElementsByTagName('tbody')[0];
-            var newtbody = document.createElement('tbody');
             data.searchers.forEach(e => {
                 var trClass = i % 2 == 0 ? "even" : "odd";
                 var newRow = newtbody.insertRow();
                 newRow.classList.add(trClass);
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(lastRank);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var userLink = document.createElement('a');
@@ -240,14 +230,27 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText) {
                 newCell.classList.add('tabData');
                 newCell.classList.add('redtext');
 
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(noTimeYetText);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(noPointsYetText);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
                 i++;
             });
+
             if (i == 0) {
                 var newRow = newtbody.insertRow();
                 newRow.classList.add('even');
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(noUserInTableText);
                 newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+                newCell.colSpan = 4;
             }
             table.replaceChild(newtbody, tbodyRef);
         },
