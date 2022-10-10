@@ -95,7 +95,7 @@ var loadKikolesStats = function (sort, desc) {
 /* leaderboard loading */
 var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText) {
     $.ajax({
-        url: '/leaderboard-details?sortType=' + sortType + '&minimalDate=' + dateMin + '&maximalDate=' + dateMax,
+        url: '/global-leaderboard-details?sortType=' + sortType + '&minimalDate=' + dateMin + '&maximalDate=' + dateMax,
         type: "GET",
         dataType: "json",
         beforeSend: function () {
@@ -163,6 +163,93 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
             table.replaceChild(newtbody, tbodyRef);
             $("#loading-image").hide();
             $("#globalLeaderboardTable").show();
+        },
+        error: function (data) {
+            alert('Call error: ' + JSON.stringify(data));
+        }
+    });
+};
+
+var loadDailyLeadeboard = function (sortType, date, noUserInTableText) {
+    $.ajax({
+        url: '/daily-leaderboard-details?sortType=' + sortType + '&date=' + date,
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+            var table = document.getElementById('dailyLeaderboardTable');
+            var tbodyRef = table.getElementsByTagName('tbody')[0];
+            var newtbody = document.createElement('tbody');
+            var i = 0;
+            data.leaders.forEach(e => {
+                var trClass = i % 2 == 0 ? "even" : "odd";
+                if (e.isCreator) {
+                    trClass = 'creator';
+                }
+
+                var newRow = newtbody.insertRow();
+                newRow.classList.add(trClass);
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.rank);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var userLink = document.createElement('a');
+                userLink.href = '/Leaderboard?userId=' + e.userId;
+                userLink.append(document.createTextNode(e.userName));
+                newCell.appendChild(userLink);
+                newCell.classList.add('tabData');
+                newCell.classList.add('redtext');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.timeString);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.points);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                i++;
+            });
+            if (i == 0) {
+                var newRow = newtbody.insertRow();
+                newRow.classList.add('even');
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(noUserInTableText);
+                newCell.appendChild(newText);
+                newCell.colSpan = 4;
+            }
+            table.replaceChild(newtbody, tbodyRef);
+
+            var table = document.getElementById('dailySearchersTable');
+            var tbodyRef = table.getElementsByTagName('tbody')[0];
+            var newtbody = document.createElement('tbody');
+            data.searchers.forEach(e => {
+                var trClass = i % 2 == 0 ? "even" : "odd";
+                var newRow = newtbody.insertRow();
+                newRow.classList.add(trClass);
+
+                var newCell = newRow.insertCell();
+                var userLink = document.createElement('a');
+                userLink.href = '/Leaderboard?userId=' + e.userId;
+                userLink.append(document.createTextNode(e.userName));
+                newCell.appendChild(userLink);
+                newCell.classList.add('tabData');
+                newCell.classList.add('redtext');
+
+                i++;
+            });
+            if (i == 0) {
+                var newRow = newtbody.insertRow();
+                newRow.classList.add('even');
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(noUserInTableText);
+                newCell.appendChild(newText);
+            }
+            table.replaceChild(newtbody, tbodyRef);
         },
         error: function (data) {
             alert('Call error: ' + JSON.stringify(data));

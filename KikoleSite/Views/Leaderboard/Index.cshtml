@@ -4,10 +4,15 @@
 
 <form action="/Leaderboard" method="post">
     <h3>@localizer["DailyLeaderboard"]</h3>
-    @Html.EditorFor(m => m.LeaderboardDay)
-    @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
-    <input type="submit" value="Ok" />
-    <table class="smallTopMargin">
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
+        @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
+    </div>
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabelSmall">@localizer["Date"]</label>
+        @Html.EditorFor(m => m.LeaderboardDay)
+    </div>
+    <table id="dailyLeaderboardTable" class="smallTopMargin">
         <thead>
             <tr>
                 <th class="tabDataHead">@localizer["PosShortHeader"]</th>
@@ -29,7 +34,7 @@
                     <tr class="@trClass">
                         <td class="tabData">@leader.Rank</td>
                         <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                        <td class="tabData">@leader.Time.ToNaString()</td>
+                        <td class="tabData">@leader.TimeString</td>
                         <td class="tabData">@leader.Points</td>
                     </tr>
                     i++;
@@ -43,15 +48,10 @@
             }
         </tbody>
     </table>
-    <label>@string.Format(localizer["ActiveUsers"].Value, Model.Dayboard.TotalAttemps, Model.Dayboard.TotalSuccessRate)</label><br />
-    @if (Model.Dayboard.TotalAttemps != Model.Dayboard.DayAttemps)
-    {
-        <label>@string.Format(localizer["ActiveUsersToday"].Value, Model.Dayboard.DayAttemps, Model.Dayboard.DaySuccessRate)</label>
-    }
-    <table class="smallTopMargin">
+    <table id="dailySearchersTable" class="smallTopMargin">
         <thead>
             <tr>
-                <th class="redtext" style="width: 150px">@localizer["UsernameHeaderInGoing"]</th>
+                <th class="tabDataHead redtext" style="width: 150px">@localizer["UsernameHeaderInGoing"]</th>
             </tr>
         </thead>
         <tbody>
@@ -62,7 +62,7 @@
                 {
                     var trClass = (i % 2 == 0 ? "even" : "odd");
                     <tr class="@trClass">
-                        <td class="redtext"><a href="/Leaderboard?userId=@searcher.UserId">@searcher.UserName</a></td>
+                        <td class="tabData redtext"><a href="/Leaderboard?userId=@searcher.UserId">@searcher.UserName</a></td>
                     </tr>
                     i++;
                 }
@@ -118,10 +118,12 @@
 
 <script>
     $(function () {
+        var noUserInTableTextJs = @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value));
+
+        /* global */
         var sortType = document.getElementById('SortType');
         var fromDate = document.getElementById('MinimalDate');
         var toDate = document.getElementById('MaximalDate');
-        var noUserInTableTextJs = @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value));
         sortType.onchange = function () {
             loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
         };
@@ -132,5 +134,15 @@
             loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
         };
         loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
+
+        /* daily */
+        var dailySortType = document.getElementById('DaySortType');
+        var dailyDate = document.getElementById('LeaderboardDay');
+        dailySortType.onchange = function () {
+            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs);
+        };
+        dailyDate.onchange = function () {
+            loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableTextJs);
+        };
     });
 </script>

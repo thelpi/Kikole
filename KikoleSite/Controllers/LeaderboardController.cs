@@ -139,14 +139,24 @@ namespace KikoleSite.Controllers
             return Json(datas);
         }
 
-        [HttpGet("leaderboard-details")]
-        public async Task<JsonResult> GetLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
+        [HttpGet("global-leaderboard-details")]
+        public async Task<JsonResult> GetGlobalLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
         {
             var ld = await _leaderService
                 .GetLeaderboardAsync(minimalDate, maximalDate, sortType)
                 .ConfigureAwait(false);
 
             return Json(ld);
+        }
+
+        [HttpGet("daily-leaderboard-details")]
+        public async Task<JsonResult> GetDailyLeaderboardDetailsAsync(DayLeaderSorts sortType, DateTime date)
+        {
+            var dailyBoard = await _leaderService
+                .GetDayboardAsync(date, sortType)
+                .ConfigureAwait(false);
+
+            return Json(dailyBoard);
         }
 
         [HttpGet]

@@ -144,6 +144,9 @@
   <data name="DailyLeaderboard" xml:space="preserve">
     <value>Daily leaderboard</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date:</value>
+  </data>
   <data name="EasyKikoleMonth" xml:space="preserve">
     <value>Easiest kikoles of the month</value>
   </data>
