@@ -36,5 +36,7 @@ namespace KikoleSite.ViewModels
         public DayLeaderSorts DaySortType { get; set; }
 
         public Dayboard Dayboard { get; set; }
+
+        public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; }
     }
 }

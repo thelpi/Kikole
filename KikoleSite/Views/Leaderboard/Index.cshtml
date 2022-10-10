@@ -106,7 +106,35 @@
                 <th class="tabDataHead">@localizer["ProposedHeader"]</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            @{
+                i = 0;
+            }
+            @if (Model.GlobalLeaderboard.Count > 0)
+            {
+                i = 0;
+                foreach (var leader in Model.GlobalLeaderboard)
+                {
+                    var trClass = i % 2 == 0 ? "even" : "odd";
+                    <tr class="@trClass">
+                        <td class="tabData">@leader.Rank</td>
+                        <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
+                        <td class="tabData">@leader.Points</td>
+                        <td class="tabData">@leader.BestTimeString</td>
+                        <td class="tabData">@leader.KikolesFound</td>
+                        <td class="tabData">@leader.KikolesAttempted</td>
+                        <td class="tabData">@leader.KikolesProposed</td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr class="even">
+                    <td colspan="7">@localizer["NoUserInTable"]</td>
+                </tr>
+            }
+        </tbody>
     </table>
 </form>
 <h3>@localizer["NewPageBuilding"]</h3>
@@ -133,7 +161,6 @@
         toDate.onchange = function () {
             loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
         };
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableTextJs);
 
         /* daily */
         var dailySortType = document.getElementById('DaySortType');

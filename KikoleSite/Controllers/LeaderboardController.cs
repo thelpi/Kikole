@@ -196,6 +196,10 @@ namespace KikoleSite.Controllers
                 .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
                 .ConfigureAwait(false);
 
+            model.GlobalLeaderboard = await _leaderService
+                .GetLeaderboardAsync(model.MinimalDate, model.MaximalDate, model.SortType)
+                .ConfigureAwait(false);
+
             return model;
         }
     }
