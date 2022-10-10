@@ -105,3 +105,13 @@ collapsiblecontent {
     overflow: hidden;
     background-color: #f1f1f1;
 }
+
+.tabData {
+    text-align: center;
+}
+
+.tabDataHead {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+}

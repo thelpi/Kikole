@@ -10,10 +10,10 @@
     <table class="smallTopMargin">
         <thead>
             <tr>
-                <th style="width: 50px">@localizer["PosShortHeader"]</th>
-                <th class="redtext" style="width: 150px">@localizer["UsernameHeader"]</th>
-                <th style="width: 100px">@localizer["TimeHeader"]</th>
-                <th>@localizer["PointsHeader"]</th>
+                <th class="tabDataHead">@localizer["PosShortHeader"]</th>
+                <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
+                <th class="tabDataHead">@localizer["TimeHeader"]</th>
+                <th class="tabDataHead">@localizer["PointsHeader"]</th>
             </tr>
         </thead>
         <tbody>
@@ -27,17 +27,17 @@
                 {
                     var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
                     <tr class="@trClass">
-                        <td>@leader.Rank</td>
-                        <td class="redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                        <td>@leader.Time.ToNaString()</td>
-                        <td>@leader.Points</td>
+                        <td class="tabData">@leader.Rank</td>
+                        <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
+                        <td class="tabData">@leader.Time.ToNaString()</td>
+                        <td class="tabData">@leader.Points</td>
                     </tr>
                     i++;
                 }
             }
             else
             {
-                <tr style="background-color: white">
+                <tr class="even">
                     <td colspan="4">@localizer["NoUserInTable"]</td>
                 </tr>
             }
@@ -60,8 +60,8 @@
                 i = 0;
                 foreach (var searcher in Model.Dayboard.Searchers)
                 {
-                    var background = (i % 2 == 0 ? "white" : "azure");
-                    <tr style="background-color: @background">
+                    var trClass = (i % 2 == 0 ? "even" : "odd");
+                    <tr class="@trClass">
                         <td class="redtext"><a href="/Leaderboard?userId=@searcher.UserId">@searcher.UserName</a></td>
                     </tr>
                     i++;
@@ -69,7 +69,7 @@
             }
             else
             {
-                <tr style="background-color: white">
+                <tr class="even">
                     <td>@localizer["NoUserInTable"]</td>
                 </tr>
             }
@@ -97,13 +97,13 @@
     <table id="globalLeaderboardTable" class="smallTopMargin">
         <thead>
             <tr>
-                <th style="text-align: center; width: 50px">@localizer["PosShortHeader"]</th>
-                <th class="redtext" style="text-align: center; width: 150px">@localizer["UsernameHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["PointsHeader"]</th>
-                <th style="text-align: center; width: 100px">@localizer["BestTimeHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["FoundHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["AttemptedHeader"]</th>
-                <th style="text-align: center; width: 75px">@localizer["ProposedHeader"]</th>
+                <th class="tabDataHead">@localizer["PosShortHeader"]</th>
+                <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
+                <th class="tabDataHead">@localizer["PointsHeader"]</th>
+                <th class="tabDataHead">@localizer["BestTimeHeader"]</th>
+                <th class="tabDataHead">@localizer["FoundHeader"]</th>
+                <th class="tabDataHead">@localizer["AttemptedHeader"]</th>
+                <th class="tabDataHead">@localizer["ProposedHeader"]</th>
             </tr>
         </thead>
         <tbody></tbody>

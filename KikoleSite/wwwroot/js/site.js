@@ -21,7 +21,7 @@ var loadKikolesStats = function (sort, desc) {
             var tbodyRef = table.getElementsByTagName('tbody')[0];
             var newtbody = document.createElement('tbody');
             data.forEach(e => {
-                var background = i % 2 == 0 ? "white" : "azure";
+                var background = i % 2 == 0 ? "even" : "odd";
                 var newRow = newtbody.insertRow();
                 newRow.style.backgroundColor = background;
 
@@ -32,58 +32,53 @@ var loadKikolesStats = function (sort, desc) {
                 var newText = document.createTextNode(dateToParse.ddmmyyyy());
                 dayLink.appendChild(newText);
                 newCell.appendChild(dayLink);
-                newCell.style.paddingLeft = '10px';
-                newCell.style.paddingRight = '10px';
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.name);
                 newCell.appendChild(newText);
-                newCell.style.paddingLeft = '10px';
-                newCell.style.paddingRight = '10px';
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.creator);
                 newCell.appendChild(newText);
-                newCell.style.paddingLeft = '10px';
-                newCell.style.paddingRight = '10px';
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.averagePointsSameDay);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.triesCountSameDay);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.successesCountSameDay);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.averagePointsTotal);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.triesCountTotal);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.successesCountTotal);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.bestTime);
                 newCell.appendChild(newText);
-                newCell.style.textAlign = 'center';
+                newCell.classList.add('tabData');
+
                 i++;
             });
             table.replaceChild(newtbody, tbodyRef);
@@ -108,25 +103,64 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
             $("#globalLeaderboardTable").hide();
         },
         success: function (data) {
+            var table = document.getElementById('globalLeaderboardTable');
+            var tbodyRef = table.getElementsByTagName('tbody')[0];
+            var newtbody = document.createElement('tbody');
             var i = 0;
-            var tabBody = $("#globalLeaderboardTable").find('tbody');
-            tabBody.empty();
             data.forEach(e => {
-                var background = i % 2 == 0 ? "white" : "azure";
-                tabBody.append(`<tr style="background-color: ` + background + `">
-                        <td style="text-align: center">` + e.rank + `</td>
-                        <td class="redtext"><a href="/Leaderboard?userId=` + e.userId + `">` + e.userName + `</a></td>
-                        <td style="text-align: right">` + e.points + `</td>
-                        <td style="text-align: right">` + e.bestTimeString + `</td>
-                        <td style="text-align: right">` + e.kikolesFound + `</td>
-                        <td style="text-align: right">` + e.kikolesAttempted + `</td>
-                        <td style="text-align: right">` + e.kikolesProposed + `</td>
-                    </tr>`);
+                var trClass = i % 2 == 0 ? "even" : "odd";
+                var newRow = newtbody.insertRow();
+                newRow.classList.add(trClass);
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.rank);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var userLink = document.createElement('a');
+                userLink.href = '/Leaderboard?userId=' + e.userId;
+                userLink.append(document.createTextNode(e.userName));
+                newCell.appendChild(userLink);
+                newCell.classList.add('tabData');
+                newCell.classList.add('redtext');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.points);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.bestTimeString);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.kikolesFound);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.kikolesAttempted);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(e.kikolesProposed);
+                newCell.appendChild(newText);
+                newCell.classList.add('tabData');
+
                 i++;
             });
             if (i == 0) {
-                tabBody.append('<tr style="background-color: white"><td colspan="7">' + noUserInTableText + '</td></tr>');
+                var newRow = newtbody.insertRow();
+                newRow.classList.add('even');
+                var newCell = newRow.insertCell();
+                var newText = document.createTextNode(noUserInTableText);
+                newCell.appendChild(newText);
+                newCell.colSpan = 7;
             }
+            table.replaceChild(newtbody, tbodyRef);
             $("#loading-image").hide();
             $("#globalLeaderboardTable").show();
         },
