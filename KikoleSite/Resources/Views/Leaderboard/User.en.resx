@@ -148,7 +148,7 @@
     <value>pts p/ attempt</value>
   </data>
   <data name="StatsByDay" xml:space="preserve">
-    <value>Stats by day</value>
+    <value>Daily statistics</value>
   </data>
   <data name="Successes" xml:space="preserve">
     <value>Successes:</value>

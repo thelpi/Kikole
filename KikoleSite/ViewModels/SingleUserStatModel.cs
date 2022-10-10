@@ -27,6 +27,8 @@ namespace KikoleSite.ViewModels
 
         public bool IsCreator { get; }
 
+        public int DaysBefore => (int)(DateTime.Now - Date).TotalDays;
+
         public SingleUserStatModel(DailyUserStat apiStat)
         {
             Answer = apiStat.Answer;

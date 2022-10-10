@@ -2,18 +2,18 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model UserStatsModel
 
-<div style="margin-top: 15px">
-    <label class="mainFormSectionLabel">@localizer["Username"]</label>
-    <label class="redtext">@Model.Login</label>
-</div>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabel">@localizer["RegistrationDate"]</label>
-    <label class="redtext">@Model.RegistrationDate.ToNaString()</label>
-</div>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabel">@localizer["BestTime"]</label>
-    <label class="redtext">@Model.BestTime</label>
-</div>
+<h3>@localizer["GeneralInfo"]</h3>
+<fieldset class="smallTopMargin">
+    <legend class="redtext">@Model.Login</legend>
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabel">@localizer["RegistrationDate"]</label>
+        <label class="redtext">@Model.RegistrationDate.ToNaString()</label>
+    </div>
+    <div class="smallTopMargin">
+        <label class="mainFormSectionLabel">@localizer["BestTime"]</label>
+        <label class="redtext">@Model.BestTime</label>
+    </div>
+</fieldset>
 
 <fieldset class="smallTopMargin">
     <legend>@localizer["CurrentDay"]</legend>
@@ -75,14 +75,14 @@
 <table class="mediumTopMargin">
     <thead>
         <tr>
-            <th style="width: 100px">@localizer["DateHeader"]</th>
-            <th style="width: 180px">@localizer["AnswerHeader"]</th>
-            <th style="width: 80px">@localizer["AttemptHeader"] *</th>
-            <th style="width: 80px">@localizer["SuccessHeader"] *</th>
-            <th style="width: 80px">@localizer["PointsHeader"]</th>
-            <th style="width: 80px">@localizer["PointsRankHeader"]</th>
-            <th style="width: 80px">@localizer["TimeHeader"]</th>
-            <th style="width: 80px">@localizer["TimeRankHeader"]</th>
+            <th class="tabDataHead">@localizer["DateHeader"]</th>
+            <th class="tabDataHead">@localizer["AnswerHeader"]</th>
+            <th class="tabDataHead">@localizer["AttemptHeader"] *</th>
+            <th class="tabDataHead">@localizer["SuccessHeader"] *</th>
+            <th class="tabDataHead">@localizer["PointsHeader"]</th>
+            <th class="tabDataHead">@localizer["PointsRankHeader"]</th>
+            <th class="tabDataHead">@localizer["TimeHeader"]</th>
+            <th class="tabDataHead">@localizer["TimeRankHeader"]</th>
         </tr>
     </thead>
     <tbody>
@@ -91,18 +91,18 @@
         }
         @foreach (var stat in Model.Stats)
         {
-            var weightAttempt = stat.AttemptDayOne == true ? "bold" : "normal";
-            var weightSuccess = stat.SuccessDayOne == true ? "bold" : "normal";
+            var attemptTdClass = stat.AttemptDayOne == true ? "tabDataBold" : "tabData";
+            var successTdClass = stat.SuccessDayOne == true ? "tabDataBold" : "tabData";
             var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
             <tr class="@trClass">
-                <td>@stat.Date.ToNaString()</td>
-                <td>@stat.Answer</td>
-                <td style="font-weight: @weightAttempt">@stat.Attempt.ToYesNo()</td>
-                <td style="font-weight: @weightSuccess">@stat.Success.ToYesNo()</td>
-                <td>@stat.Points.ToNaString()</td>
-                <td>@stat.PointsPosition.ToNaString()</td>
-                <td>@stat.Time.ToNaString()</td>
-                <td>@stat.TimePosition.ToNaString()</td>
+                <td class="tabData"><a href="/?day=@stat.DaysBefore">@stat.Date.ToNaString()</a></td>
+                <td class="tabData">@stat.Answer</td>
+                <td class="@attemptTdClass">@stat.Attempt.ToYesNo()</td>
+                <td class="@successTdClass">@stat.Success.ToYesNo()</td>
+                <td class="tabData">@stat.Points.ToNaString()</td>
+                <td class="tabData">@stat.PointsPosition.ToNaString()</td>
+                <td class="tabData">@stat.Time.ToNaString()</td>
+                <td class="tabData">@stat.TimePosition.ToNaString()</td>
             </tr>
             i++;
         }
@@ -111,72 +111,76 @@
 <div>@localizer["BoldFirstDay"]</div>
 
 <h3>@localizer["BadgesHead"]</h3>
-<h4>@localizer["BadgeYouOwn"]</h4>
-@if (Model.Badges.Count == 0)
-{
-    <div>@localizer["NoBadge"]</div>
-}
-else
-{
-    foreach (var badge in Model.Badges)
+<fieldset class="smallTopMargin">
+    <legend>@localizer["BadgeYouOwn"]</legend>
+    @if (Model.Badges.Count == 0)
     {
-        var color = !badge.Hidden ? "transparent" : "gold";
-        <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
-            <div class="greentext" style="text-align:center; font-size: large">@badge.Name</div>
-            <div style="text-align:center">@badge.Description</div>
-            @if (!badge.Hidden)
-            {
-                <div style="text-align:center">@localizer["GotThe"] @badge.GetDate.ToNaString()</div>
-            }
-            @if (Model.IsHimself)
-            {
-                if (badge.Users == 1)
-                {
-                    <div style="text-align:center; font-weight: bold">@localizer["OnlyOne"]</div>
-                }
-                else
-                {
-                    var v = badge.Users - 1;
-                    <div style="text-align:center"><span class="redtext">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
-                }
-            }
-            else
-            {
-                if (badge.Users == 1)
-                {
-                    <div style="text-align:center; font-weight: bold">@localizer["OnlyOneNotMe"]</div>
-                }
-                else
-                {
-                    <div style="text-align:center"><span class="redtext">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
-                }
-            }
-        </div>
+        <div>@localizer["NoBadge"]</div>
     }
-    <div style="clear: both" />
-}
+    else
+    {
+        foreach (var badge in Model.Badges)
+        {
+            var color = !badge.Hidden ? "transparent" : "gold";
+            <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
+                <div class="greentext" style="text-align:center; font-size: large">@badge.Name</div>
+                <div style="text-align:center">@badge.Description</div>
+                @if (!badge.Hidden)
+                {
+                    <div style="text-align:center">@localizer["GotThe"] @badge.GetDate.ToNaString()</div>
+                }
+                @if (Model.IsHimself)
+                {
+                    if (badge.Users == 1)
+                    {
+                        <div style="text-align:center; font-weight: bold">@localizer["OnlyOne"]</div>
+                    }
+                    else
+                    {
+                        var v = badge.Users - 1;
+                        <div style="text-align:center"><span class="redtext">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
+                    }
+                }
+                else
+                {
+                    if (badge.Users == 1)
+                    {
+                        <div style="text-align:center; font-weight: bold">@localizer["OnlyOneNotMe"]</div>
+                    }
+                    else
+                    {
+                        <div style="text-align:center"><span class="redtext">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
+                    }
+                }
+            </div>
+        }
+        <div style="clear: both" />
+    }
+</fieldset>
 
-<h4>@localizer["BadgeYouDontOwn"]</h4>
-@if (Model.MissingBadges.Count == 0)
-{
-    <div>@localizer["EveryBadge"]</div>
-}
-else
-{
-    foreach (var badge in Model.MissingBadges)
+<fieldset class="smallTopMargin">
+    <legend>@localizer["BadgeYouDontOwn"]</legend>
+    @if (Model.MissingBadges.Count == 0)
     {
-        <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
-            <div class="redtext" style="text-align:center; font-size: large">@badge.Name</div>
-            <div style="text-align:center">@badge.Description</div>
-            @if (badge.Users == 0)
-            {
-                <div style="text-align:center; font-weight: bold"><span class="redtext">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
-            }
-            else
-            {
-                <div style="text-align:center; font-weight: bold"><span class="redtext">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
-            }
-        </div>
+        <div>@localizer["EveryBadge"]</div>
     }
-    <div style="clear: both" />
-}
+    else
+    {
+        foreach (var badge in Model.MissingBadges)
+        {
+            <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
+                <div class="redtext" style="text-align:center; font-size: large">@badge.Name</div>
+                <div style="text-align:center">@badge.Description</div>
+                @if (badge.Users == 0)
+                {
+                    <div style="text-align:center; font-weight: bold"><span class="redtext">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
+                }
+                else
+                {
+                    <div style="text-align:center; font-weight: bold"><span class="redtext">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
+                }
+            </div>
+        }
+        <div style="clear: both" />
+    }
+</fieldset>
