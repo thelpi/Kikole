@@ -124,13 +124,13 @@
     <value>Tenté ?</value>
   </data>
   <data name="Attempts" xml:space="preserve">
-    <value>Tentatives :</value>
+    <value>Tentatives</value>
   </data>
   <data name="AverageTime" xml:space="preserve">
-    <value>Temps moyen :</value>
+    <value>Temps moyen</value>
   </data>
   <data name="BestScore" xml:space="preserve">
-    <value>Meilleur score :</value>
+    <value>Meilleur score</value>
   </data>
   <data name="BestTime" xml:space="preserve">
     <value>Meilleur temps :</value>
@@ -151,7 +151,7 @@
     <value>Statistiques quotidiennes</value>
   </data>
   <data name="Successes" xml:space="preserve">
-    <value>Succès :</value>
+    <value>Succès</value>
   </data>
   <data name="SuccessHeader" xml:space="preserve">
     <value>Trouvé ?</value>
@@ -163,7 +163,7 @@
     <value>Rang tmp</value>
   </data>
   <data name="TotalScore" xml:space="preserve">
-    <value>Score total :</value>
+    <value>Score total</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Utilisateur :</value>
@@ -232,7 +232,7 @@
     <value>Temps moyen le 1er jour :</value>
   </data>
   <data name="AveragePoints" xml:space="preserve">
-    <value>Moyenne de points :</value>
+    <value>Moyenne de points</value>
   </data>
   <data name="BoldFirstDay" xml:space="preserve">
     <value>* en gras, kikolés tentés / trouvés le jour même.</value>
@@ -245,5 +245,11 @@
   </data>
   <data name="RegistrationDate" xml:space="preserve">
     <value>Date d'inscription :</value>
+  </data>
+  <data name="AllDays" xml:space="preserve">
+    <value>Tous les jours</value>
+  </data>
+  <data name="DayOne" xml:space="preserve">
+    <value>Le 1er jour</value>
   </data>
 </root>

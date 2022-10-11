@@ -13,62 +13,48 @@
         <label class="mainFormSectionLabel">@localizer["BestTime"]</label>
         <label class="redtext">@Model.BestTime</label>
     </div>
-</fieldset>
 
-<fieldset class="smallTopMargin">
-    <legend>@localizer["CurrentDay"]</legend>
-    <div>
-        <label class="mainFormSectionLabel">@localizer["Attempts"]</label>
-        <label class="redtext">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["Successes"]</label>
-        <label class="redtext">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["TotalScore"]</label>
-        <label class="redtext">@Model.TotalPointsDayOne</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["AveragePoints"]</label>
-        <label class="redtext">@Model.PointsPerAttemptDayOne</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["BestScore"]</label>
-        <label class="redtext">@Model.BestPointsDayOne</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["AverageTime"]</label>
-        <label class="redtext">@Model.AverageTimeDayOne</label>
-    </div>
-</fieldset>
-
-<fieldset class="smallTopMargin">
-    <legend>@localizer["IncludingOutOfTime"]</legend>
-    <div>
-        <label class="mainFormSectionLabel">@localizer["Attempts"]</label>
-        <label class="redtext">@Model.Attempts (@Model.AttemptRate %)</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["Successes"]</label>
-        <label class="redtext">@Model.Successes (@Model.SuccessRate %)</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["TotalScore"]</label>
-        <label class="redtext">@Model.TotalPoints</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["AveragePoints"]</label>
-        <label class="redtext">@Model.PointsPerAttempt</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["BestScore"]</label>
-        <label class="redtext">@Model.BestPoints</label>
-    </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["AverageTime"]</label>
-        <label class="redtext">@Model.AverageTime</label>
-    </div>
+    <table class="smallTopMargin">
+        <thead>
+            <tr>
+                <th class="tabDataHead"></th>
+                <th class="tabDataHead">@localizer["DayOne"]</th>
+                <th class="tabDataHead">@localizer["AllDays"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="even">
+                <td class="tabData">@localizer["Attempts"]</td>
+                <td class="tabData">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</td>
+                <td class="tabData">@Model.Attempts (@Model.AttemptRate %)</td>
+            </tr>
+            <tr class="odd">
+                <td class="tabData">@localizer["Successes"]</td>
+                <td class="tabData">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</td>
+                <td class="tabData">@Model.Successes (@Model.SuccessRate %)</td>
+            </tr>
+            <tr class="even">
+                <td class="tabData">@localizer["TotalScore"]</td>
+                <td class="tabData">@Model.TotalPointsDayOne</td>
+                <td class="tabData">@Model.TotalPoints</td>
+            </tr>
+            <tr class="odd">
+                <td class="tabData">@localizer["AveragePoints"]</td>
+                <td class="tabData">@Model.PointsPerAttemptDayOne</td>
+                <td class="tabData">@Model.PointsPerAttempt</td>
+            </tr>
+            <tr class="even">
+                <td class="tabData">@localizer["BestScore"]</td>
+                <td class="tabData">@Model.BestPointsDayOne</td>
+                <td class="tabData">@Model.BestPoints</td>
+            </tr>
+            <tr class="odd">
+                <td class="tabData">@localizer["AverageTime"]</td>
+                <td class="tabData">@Model.AverageTimeDayOne</td>
+                <td class="tabData">@Model.AverageTime</td>
+            </tr>
+        </tbody>
+    </table>
 </fieldset>
 
 <h3>@localizer["StatsByDay"]</h3>

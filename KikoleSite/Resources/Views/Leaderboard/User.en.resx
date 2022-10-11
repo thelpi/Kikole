@@ -124,13 +124,13 @@
     <value>Tried?</value>
   </data>
   <data name="Attempts" xml:space="preserve">
-    <value>Attempts:</value>
+    <value>Attempts</value>
   </data>
   <data name="AverageTime" xml:space="preserve">
-    <value>Average time:</value>
+    <value>Average time</value>
   </data>
   <data name="BestScore" xml:space="preserve">
-    <value>Best score:</value>
+    <value>Best score</value>
   </data>
   <data name="BestTime" xml:space="preserve">
     <value>Best time:</value>
@@ -151,7 +151,7 @@
     <value>Daily statistics</value>
   </data>
   <data name="Successes" xml:space="preserve">
-    <value>Successes:</value>
+    <value>Successes</value>
   </data>
   <data name="SuccessHeader" xml:space="preserve">
     <value>Found?</value>
@@ -163,7 +163,7 @@
     <value>Time rank</value>
   </data>
   <data name="TotalScore" xml:space="preserve">
-    <value>Total score:</value>
+    <value>Total score</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Username:</value>
@@ -245,5 +245,11 @@
   </data>
   <data name="RegistrationDate" xml:space="preserve">
     <value>Registration date:</value>
+  </data>
+  <data name="AllDays" xml:space="preserve">
+    <value>All days</value>
+  </data>
+  <data name="DayOne" xml:space="preserve">
+    <value>First day</value>
   </data>
 </root>
