@@ -346,8 +346,35 @@ namespace KikoleSite.Controllers
 
         [HttpGet]
         [Authorization(UserTypes.PowerUser)]
-        public IActionResult Club()
+        public async Task<IActionResult> Club([FromQuery] ulong clubId)
         {
+            if (clubId > 0)
+            {
+                if (UserType != UserTypes.Administrator)
+                    return RedirectToAction("ErrorIndex", "Home");
+
+                var club = await _clubRepository
+                    .GetClubAsync(clubId)
+                    .ConfigureAwait(false);
+
+                if (club == null)
+                    return RedirectToAction("ErrorIndex", "Home");
+
+                var names = club.AllowedNames.Disjoin().ToList();
+                var model = new ClubCreationModel
+                {
+                    MainName = club.Name,
+                    AlternativeName0 = names.Count > 0 ? names[0] : null,
+                    AlternativeName1 = names.Count > 1 ? names[1] : null,
+                    AlternativeName2 = names.Count > 2 ? names[2] : null,
+                    AlternativeName3 = names.Count > 3 ? names[3] : null,
+                    AlternativeName4 = names.Count > 4 ? names[4] : null,
+                    Id = clubId
+                };
+
+                return View("Club", model);
+            }
+
             return View("Club", new ClubCreationModel());
         }
 
@@ -363,11 +390,11 @@ namespace KikoleSite.Controllers
 
             var names = new[]
             {
-                model.AlternativeName0, model.AlternativeName1,
-                model.AlternativeName2, model.AlternativeName3,
-                model.AlternativeName4, model.AlternativeName5,
-                model.AlternativeName6, model.AlternativeName7,
-                model.AlternativeName8, model.AlternativeName9
+                model.AlternativeName0,
+                model.AlternativeName1,
+                model.AlternativeName2,
+                model.AlternativeName3,
+                model.AlternativeName4
             };
 
             names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
@@ -375,7 +402,8 @@ namespace KikoleSite.Controllers
             var request = new ClubRequest
             {
                 Name = model.MainName,
-                AllowedNames = names
+                AllowedNames = names,
+                Id = model.Id
             };
 
             var validityRequest = request.IsValid(_localizer);
@@ -383,20 +411,24 @@ namespace KikoleSite.Controllers
                 model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
             else
             {
-                var playerId = await _clubRepository
-                    .CreateClubAsync(request.ToDto())
-                    .ConfigureAwait(false);
-
-                if (playerId == 0)
-                    model.ErrorMessage = _localizer["ClubCreationFailure"];
+                if (model.Id == 0)
+                {
+                    await _clubRepository
+                        .CreateClubAsync(request.ToDto())
+                        .ConfigureAwait(false);
+                }
                 else
                 {
-                    await GetClubsAsync(true).ConfigureAwait(false);
-                    model = new ClubCreationModel
-                    {
-                        InfoMessage = _localizer["ClubOk"]
-                    };
+                    await _clubRepository
+                        .UpdateClubAsync(request.ToDto())
+                        .ConfigureAwait(false);
                 }
+
+                await GetClubsAsync(true).ConfigureAwait(false);
+                model = new ClubCreationModel
+                {
+                    InfoMessage = _localizer["ClubOk"]
+                };
             }
 
             return View("Club", model);

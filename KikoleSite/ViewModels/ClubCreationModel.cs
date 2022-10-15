@@ -18,14 +18,6 @@
 
         public string AlternativeName4 { get; set; }
 
-        public string AlternativeName5 { get; set; }
-
-        public string AlternativeName6 { get; set; }
-
-        public string AlternativeName7 { get; set; }
-
-        public string AlternativeName8 { get; set; }
-
-        public string AlternativeName9 { get; set; }
+        public ulong Id { get; set; }
     }
 }

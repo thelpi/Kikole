@@ -21,6 +21,21 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task UpdateClubAsync(ClubDto club)
+        {
+            await ExecuteNonQueryAsync(
+                    "UPDATE clubs " +
+                    "SET name = @name, allowed_names = @allowed_names " +
+                    "WHERE id = @id", 
+                    new
+                    {
+                        name = club.Name,
+                        allowed_names = club.AllowedNames,
+                        id = club.Id
+                    })
+                .ConfigureAwait(false);
+        }
+
         public async Task<ClubDto> GetClubAsync(ulong clubId)
         {
             return await GetDtoAsync<ClubDto>(

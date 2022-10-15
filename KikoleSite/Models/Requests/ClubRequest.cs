@@ -29,7 +29,8 @@ namespace KikoleSite.Models.Requests
             return new ClubDto
             {
                 AllowedNames = AllowedNames.SanitizeJoin(Name),
-                Name = Name
+                Name = Name,
+                Id = Id
             };
         }
     }
