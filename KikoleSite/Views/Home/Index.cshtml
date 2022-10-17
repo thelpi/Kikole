@@ -89,10 +89,10 @@
                 </div>
             }
             <div class="mediumTopMargin">
-                @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
+                @localizer["DayClue"] <span style="font-style:italic">@Html.Raw(Model.Clue)</span>
             </div>
             <div class="mediumTopMargin">
-                @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
+                @localizer["EasyDayClue"] <span style="font-style:italic">@Html.Raw(Model.EasyClue)</span>
             </div>
             <div class="mediumTopMargin">
                 @localizer["FinalPosition"] <span style="font-style:italic">@Model.Position</span>
@@ -132,12 +132,12 @@
             <div class="smallTopMargin">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
             await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
             <div style="margin-top: 30px; font-size: larger">
-                @localizer["DayClue"] <span style="font-style:italic">@Model.Clue</span>
+                @localizer["DayClue"] <span style="font-style:italic">@Html.Raw(Model.Clue)</span>
             </div>
             @if (!string.IsNullOrWhiteSpace(Model.EasyClue))
             {
                 <div style="margin-top: 30px; font-size: larger">
-                    @localizer["EasyDayClue"] <span style="font-style:italic">@Model.EasyClue</span>
+                    @localizer["EasyDayClue"] <span style="font-style:italic">@Html.Raw(Model.EasyClue)</span>
                 </div>
             }
             else
