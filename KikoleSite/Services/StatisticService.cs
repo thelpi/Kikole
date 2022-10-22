@@ -110,7 +110,7 @@ namespace KikoleSite.Services
             var isAdmin = user?.UserTypeId == (ulong)UserTypes.Administrator;
 
             var players = await _playerRepository
-                .GetPlayersOfTheDayAsync(null, _clock.Now)
+                .GetPlayersOfTheDayAsync(null, _clock.Yesterday)
                 .ConfigureAwait(false);
 
             var allLeaders = await _leaderRepository

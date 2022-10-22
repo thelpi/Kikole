@@ -422,7 +422,8 @@ namespace KikoleSite.Services
         public async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
             ulong userId,
             ulong connectedUserId,
-            Languages language)
+            Languages language,
+            bool foundToday)
         {
             var isAllowedToSeeHiddenBadge = connectedUserId == userId;
             if (connectedUserId > 0 && !isAllowedToSeeHiddenBadge)
@@ -441,6 +442,11 @@ namespace KikoleSite.Services
             var dtos = await _badgeRepository
                 .GetUserBadgesAsync(userId)
                 .ConfigureAwait(false);
+
+            if (!foundToday)
+            {
+                dtos = dtos.Where(_ => _.GetDate.Date < _clock.Today).ToList();
+            }
 
             var badgesFull = new List<UserBadge>();
             foreach (var dto in dtos)

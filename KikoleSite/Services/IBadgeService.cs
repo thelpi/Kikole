@@ -61,8 +61,9 @@ namespace KikoleSite.Services
         /// <param name="userId">User identifier.</param>
         /// <param name="connectedUserId">User identifier who request information.</param>
         /// <param name="language">User language.</param>
+        /// <param name="foundToday"><paramref name="connectedUserId"/> has found the player of today?</param>
         /// <returns>Collection of <see cref="UserBadge"/> sorted by rareness.</returns>
-        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, ulong connectedUserId, Languages language);
+        Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(ulong userId, ulong connectedUserId, Languages language, bool foundToday);
 
         /// <summary>
         /// Resets and recomputes datas on every badge.

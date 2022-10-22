@@ -34,8 +34,9 @@ namespace KikoleSite.Services
         /// <param name="userId">User identifier.</param>
         /// <param name="requestUserId">User that made the request.</param>
         /// <param name="anonymizedName">Anonymized player name.</param>
+        /// <param name="requestUserFoundToday"><paramref name="requestUserId"/> has found the player of today?</param>
         /// <returns>User statistics; <c>Null</c> if user doesn't exist.</returns>
-        Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName);
+        Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName, bool requestUserFoundToday);
 
         /// <summary>
         /// Computes missing leaders (administration tool).

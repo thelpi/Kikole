@@ -57,8 +57,12 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
+            var foundToday = await _proposalService
+                .HasFoundTodayPlayerAsync(UserId)
+                .ConfigureAwait(false);
+
             var stats = await _leaderService
-                .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName)
+                .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName, foundToday)
                 .ConfigureAwait(false);
 
             if (stats == null)
@@ -70,7 +74,7 @@ namespace KikoleSite.Controllers
             var language = ViewHelper.GetLanguage();
 
             var badges = await _badgeService
-                 .GetUserBadgesAsync(userId, UserId, language)
+                 .GetUserBadgesAsync(userId, UserId, language, foundToday)
                  .ConfigureAwait(false);
 
             var allBadges = await _badgeService
@@ -111,7 +115,7 @@ namespace KikoleSite.Controllers
         public async Task<JsonResult> GetStatisticActiveUsers()
         {
             var datas = await _statisticService
-                .GetActiveUsersAsync()
+                .GetActiveUsersAsync(null, _clock.Yesterday)
                 .ConfigureAwait(false);
 
             return Json(new

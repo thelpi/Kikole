@@ -127,7 +127,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName)
+        public async Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName, bool requestUserFoundToday)
         {
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
@@ -147,8 +147,10 @@ namespace KikoleSite.Services
                 .ConfigureAwait(false);
             currentDate = currentDate.Date;
 
-            var now = _clock.Today;
-            while (currentDate <= now)
+            var stopDate = requestUserFoundToday
+                ? _clock.Today
+                : _clock.Yesterday;
+            while (currentDate <= stopDate)
             {
                 var pDay = await _playerRepository
                     .GetPlayerOfTheDayAsync(currentDate)
@@ -164,7 +166,7 @@ namespace KikoleSite.Services
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
-                var isCreator = (pDay.ProposalDate.Value.Date < now || pDay.HideCreator == 0)
+                var isCreator = (pDay.ProposalDate.Value.Date < stopDate || pDay.HideCreator == 0)
                     && userId == pDay.CreationUserId;
 
                 var pName = pDay.Name;
