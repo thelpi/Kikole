@@ -20,6 +20,7 @@ namespace KikoleSite.Controllers
 
         private readonly IStatisticService _statisticService;
         private readonly ILeaderService _leaderService;
+        private readonly IProposalService _proposalService;
 
         public LeaderboardController(IUserRepository userRepository,
             ICrypter crypter,
@@ -30,6 +31,7 @@ namespace KikoleSite.Controllers
             IBadgeService badgeService,
             ILeaderService leaderService,
             IStatisticService statisticService,
+            IProposalService proposalService,
             IHttpContextAccessor httpContextAccessor)
             : base(userRepository,
                 crypter,
@@ -42,6 +44,7 @@ namespace KikoleSite.Controllers
         {
             _statisticService = statisticService;
             _leaderService = leaderService;
+            _proposalService = proposalService;
         }
 
         [HttpGet]
@@ -136,8 +139,8 @@ namespace KikoleSite.Controllers
         [HttpGet("global-leaderboard-details")]
         public async Task<JsonResult> GetGlobalLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
         {
-            var ld = await _leaderService
-                .GetLeaderboardAsync(minimalDate, maximalDate, sortType)
+            var (ld, _) = await GetLeaderboardAsync(
+                    minimalDate, maximalDate, sortType, null)
                 .ConfigureAwait(false);
 
             return Json(ld);
@@ -146,8 +149,8 @@ namespace KikoleSite.Controllers
         [HttpGet("daily-leaderboard-details")]
         public async Task<JsonResult> GetDailyLeaderboardDetailsAsync(DayLeaderSorts sortType, DateTime date)
         {
-            var dailyBoard = await _leaderService
-                .GetDayboardAsync(date, sortType)
+            var (dailyBoard, _) = await GetDailyboardAsync(
+                    date, sortType, null)
                 .ConfigureAwait(false);
 
             return Json(dailyBoard);
@@ -177,24 +180,92 @@ namespace KikoleSite.Controllers
                 model = new LeaderboardModel
                 {
                     MinimalDate = _clock.FirstOfMonth,
-                    MaximalDate = DateTime.Now.Date,
+                    MaximalDate = _clock.Today,
                     SortType = LeaderSorts.TotalPoints,
-                    LeaderboardDay = DateTime.Now.Date,
+                    LeaderboardDay = _clock.Today,
                     DaySortType = DayLeaderSorts.BestTime
                 };
             }
 
-            model.MinimalDate = model.MinimalDate.Min(model.MaximalDate);
-
-            model.Dayboard = await _leaderService
-                .GetDayboardAsync(model.LeaderboardDay.Date, model.DaySortType)
+            var (dailyBoard, foundToday) = await GetDailyboardAsync(
+                    model.LeaderboardDay, model.DaySortType, null)
                 .ConfigureAwait(false);
 
-            model.GlobalLeaderboard = await _leaderService
-                .GetLeaderboardAsync(model.MinimalDate, model.MaximalDate, model.SortType)
+            model.Dayboard = dailyBoard;
+
+            (model.GlobalLeaderboard, _) = await GetLeaderboardAsync(
+                    model.MinimalDate, model.MaximalDate, model.SortType, foundToday)
                 .ConfigureAwait(false);
 
             return model;
+        }
+
+        private async Task<(IReadOnlyCollection<Models.LeaderboardItem>, bool)> GetLeaderboardAsync(
+            DateTime minDate, DateTime maxDate, LeaderSorts sortType, bool? foundToday)
+        {
+            var foundTodayEnsured = foundToday ?? await _proposalService
+                .HasFoundTodayPlayerAsync(UserId)
+                .ConfigureAwait(false);
+
+            minDate = EnsureDate(minDate, foundTodayEnsured);
+            maxDate = EnsureDate(maxDate, foundTodayEnsured);
+
+            if (maxDate < minDate)
+            {
+                var swap = minDate;
+                minDate = maxDate;
+                maxDate = swap;
+            }
+
+            var board = await _leaderService
+                .GetLeaderboardAsync(minDate, maxDate, sortType)
+                .ConfigureAwait(false);
+
+            return (board, foundTodayEnsured);
+        }
+
+        private async Task<(Models.Dayboard, bool)> GetDailyboardAsync(
+            DateTime date, DayLeaderSorts sortType, bool? foundToday)
+        {
+            var foundTodayEnsured = foundToday ?? await _proposalService
+                .HasFoundTodayPlayerAsync(UserId)
+                .ConfigureAwait(false);
+
+            date = EnsureDate(date, true);
+
+            Models.Dayboard dayboard;
+            if (date == _clock.Today && !foundTodayEnsured)
+            {
+                dayboard = new Models.Dayboard
+                {
+                    Date = date,
+                    Sort = sortType,
+                    Hidden = true
+                };
+            }
+            else
+            {
+                dayboard = await _leaderService
+                    .GetDayboardAsync(date, sortType)
+                    .ConfigureAwait(false);
+            }
+
+            return (dayboard, foundTodayEnsured);
+        }
+
+        private DateTime EnsureDate(DateTime date, bool foundToday)
+        {
+            if (date.Date > _clock.Today)
+            {
+                date = _clock.Today;
+            }
+
+            if (!foundToday && date.Date == _clock.Today)
+            {
+                date = _clock.Yesterday;
+            }
+
+            return date.Date;
         }
     }
 }

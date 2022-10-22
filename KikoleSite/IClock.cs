@@ -23,6 +23,11 @@ namespace KikoleSite
         DateTime Tomorrow { get; }
 
         /// <summary>
+        /// Yesterday at midnight.
+        /// </summary>
+        DateTime Yesterday { get; }
+
+        /// <summary>
         /// The first day of the current month.
         /// </summary>
         DateTime FirstOfMonth { get; }

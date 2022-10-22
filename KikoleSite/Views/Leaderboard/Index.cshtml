@@ -21,37 +21,44 @@
         </tr>
     </thead>
     <tbody>
-        @{
+        @if (!Model.Dayboard.Hidden)
+        {
             var i = 0;
             var lastRank = 1;
+            foreach (var leader in Model.Dayboard.Leaders)
+            {
+                var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
+                <tr class="@trClass">
+                    <td class="tabData">@leader.Rank</td>
+                    <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
+                    <td class="tabData">@leader.TimeString</td>
+                    <td class="tabData">@leader.Points</td>
+                </tr>
+                lastRank = leader.Rank + 1;
+                i++;
+            }
+            foreach (var search in Model.Dayboard.Searchers)
+            {
+                var trClass = i % 2 == 0 ? "even" : "odd";
+                <tr class="@trClass">
+                    <td class="tabData">@lastRank</td>
+                    <td class="tabData redtext"><a href="/Leaderboard?userId=@search.UserId">@search.UserName</a></td>
+                    <td class="tabData">@localizer["NotYetTime"]</td>
+                    <td class="tabData">@localizer["NotYetPoints"]</td>
+                </tr>
+                i++;
+            }
+            if (i == 0)
+            {
+                <tr class="even">
+                    <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
+                </tr>
+            }
         }
-        @foreach (var leader in Model.Dayboard.Leaders)
-        {
-            var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
-            <tr class="@trClass">
-                <td class="tabData">@leader.Rank</td>
-                <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                <td class="tabData">@leader.TimeString</td>
-                <td class="tabData">@leader.Points</td>
-            </tr>
-            lastRank = leader.Rank + 1;
-            i++;
-        }
-        @foreach (var search in Model.Dayboard.Searchers)
-        {
-            var trClass = i % 2 == 0 ? "even" : "odd";
-            <tr class="@trClass">
-                <td class="tabData">@lastRank</td>
-                <td class="tabData redtext"><a href="/Leaderboard?userId=@search.UserId">@search.UserName</a></td>
-                <td class="tabData">@localizer["NotYetTime"]</td>
-                <td class="tabData">@localizer["NotYetPoints"]</td>
-            </tr>
-            i++;
-        }
-        @if (i == 0)
+        else
         {
             <tr class="even">
-                <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
+                <td colspan="4" class="tabData">@localizer["HiddenDayboard"]</td>
             </tr>
         }
     </tbody>
@@ -84,14 +91,14 @@
     </thead>
     <tbody>
         @{
-            i = 0;
+            var j = 0;
         }
         @if (Model.GlobalLeaderboard.Count > 0)
         {
-            i = 0;
+            j = 0;
             foreach (var leader in Model.GlobalLeaderboard)
             {
-                var trClass = i % 2 == 0 ? "even" : "odd";
+                var trClass = j % 2 == 0 ? "even" : "odd";
                 <tr class="@trClass">
                     <td class="tabData">@leader.Rank</td>
                     <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
@@ -101,7 +108,7 @@
                     <td class="tabData">@leader.KikolesAttempted</td>
                     <td class="tabData">@leader.KikolesProposed</td>
                 </tr>
-                i++;
+                j++;
             }
         }
         else
@@ -130,6 +137,7 @@
         initializeLeaderboards(
             @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value)),
             @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value)),
-            @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value)));
+            @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value)),
+            @Html.Raw(Json.Serialize(localizer["HiddenDayboard"].Value)));
     });
 </script>

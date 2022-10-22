@@ -339,7 +339,7 @@ namespace KikoleSite.Services
 
                 var ldItems = await ComputeLeaderboardItemsAsync(
                         new DateTime(date.Year, date.Month, 1),
-                        nextMonth.AddDays(-1),
+                        date == currentMonth ? _clock.Yesterday : nextMonth.AddDays(-1),
                         true)
                     .ConfigureAwait(false);
 

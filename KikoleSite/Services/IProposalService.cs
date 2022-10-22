@@ -30,5 +30,12 @@ namespace KikoleSite.Services
         /// <param name="userId">User identifier.</param>
         /// <returns>Collection of proposals.</returns>
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
+
+        /// <summary>
+        /// Gets if the user has found the player of the day.
+        /// </summary>
+        /// <param name="userId">The user to check.</param>
+        /// <returns><c>True</c> if found, or if user is administrator, or the creator today.</returns>
+        Task<bool> HasFoundTodayPlayerAsync(ulong userId);
     }
 }

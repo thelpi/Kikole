@@ -6,6 +6,7 @@ using KikoleSite.Handlers;
 using KikoleSite.Helpers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using Microsoft.Extensions.Localization;
@@ -20,6 +21,7 @@ namespace KikoleSite.Services
     {
         private readonly IProposalRepository _proposalRepository;
         private readonly ILeaderRepository _leaderRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IPlayerHandler _playerHandler;
         private readonly IStringLocalizer<Translations> _resources;
         private readonly IClock _clock;
@@ -29,17 +31,20 @@ namespace KikoleSite.Services
         /// </summary>
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
+        /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
         /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
         /// <param name="resources">Translation resources.</param>
         /// <param name="clock">Clock service.</param>
         public ProposalService(IProposalRepository proposalRepository,
             ILeaderRepository leaderRepository,
+            IUserRepository userRepository,
             IPlayerHandler playerHandler,
             IStringLocalizer<Translations> resources,
             IClock clock)
         {
             _proposalRepository = proposalRepository;
             _leaderRepository = leaderRepository;
+            _userRepository = userRepository;
             _playerHandler = playerHandler;
             _resources = resources;
             _clock = clock;
@@ -107,6 +112,36 @@ namespace KikoleSite.Services
             }
 
             return (response, proposalsAlready, leader);
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> HasFoundTodayPlayerAsync(ulong userId)
+        {
+            if (userId == 0)
+                return false;
+
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+
+            if (user == null)
+                return false;
+
+            if (user.UserTypeId == (int)UserTypes.Administrator)
+                return true;
+
+            var leaders = await _leaderRepository
+                .GetUserLeadersAsync(_clock.Today, _clock.Today, true, userId)
+                .ConfigureAwait(false);
+
+            if (leaders.Count > 0)
+                return true;
+
+            var p = await _playerHandler
+                .GetPlayerOfTheDayFullInfoAsync(_clock.Today)
+                .ConfigureAwait(false);
+
+            return p.Player.CreationUserId == userId;
         }
 
         private List<ProposalResponse> GetProposalResponsesWithPoints(

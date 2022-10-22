@@ -18,6 +18,9 @@ namespace KikoleSite
         public DateTime Tomorrow => Today.AddDays(1);
 
         /// <inheritdoc />
+        public DateTime Yesterday => Today.AddDays(-1);
+
+        /// <inheritdoc />
         public DateTime FirstOfMonth => new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
         /// <inheritdoc />

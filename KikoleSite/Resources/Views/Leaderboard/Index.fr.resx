@@ -165,6 +165,9 @@
   <data name="HardKikoleMonth" xml:space="preserve">
     <value>Kikolés les plus difficiles</value>
   </data>
+  <data name="HiddenDayboard" xml:space="preserve">
+    <value>Les résultats d'aujourd'hui sont masqués !</value>
+  </data>
   <data name="KFoundHeader" xml:space="preserve">
     <value>Kikolés trouvés / créés</value>
   </data>
