@@ -142,10 +142,7 @@ namespace KikoleSite.Services
 
             var stats = new List<DailyUserStat>();
 
-            var currentDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-            currentDate = currentDate.Date;
+            var currentDate = ProposalChart.FirstDate;
 
             var stopDate = requestUserFoundToday
                 ? _clock.Today
@@ -209,11 +206,11 @@ namespace KikoleSite.Services
                         .GetProposalsAsync(playerOfTheDay.ProposalDate.Value, userId)
                         .ConfigureAwait(false);
 
-                    var points = ProposalChart.Default.BasePoints;
+                    var points = ProposalChart.BasePoints;
 
                     foreach (var proposal in proposals.OrderBy(p => p.CreationDate))
                     {
-                        var (minusPoints, isRate) = ProposalChart.Default.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
+                        var (minusPoints, isRate) = ProposalChart.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
                         if (proposal.Successful == 0)
                         {
                             if (isRate)
@@ -329,10 +326,7 @@ namespace KikoleSite.Services
 
             var users = new Dictionary<ulong, (User, int, int, int)>();
 
-            var date = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-            date = new DateTime(date.Year, date.Month, 1);
+            var date = ProposalChart.FirstMonth;
 
             var currentMonth = new DateTime(_clock.Today.Year, _clock.Today.Month, 1);
             while (date <= currentMonth)
@@ -456,14 +450,14 @@ namespace KikoleSite.Services
         private int GetSubmittedPlayerPoints(IEnumerable<LeaderDto> datesLeaders, DateTime date)
         {
             // ONLY DAY ONE COST POINTS
-            var leadersCosting = ProposalChart.Default.SubmissionBonusPoints
+            var leadersCosting = ProposalChart.SubmissionBonusPoints
                 - datesLeaders
                     .Where(d => d.ProposalDate.Date == date
-                        && d.Points >= ProposalChart.Default.SubmissionThresholdlosePoints
+                        && d.Points >= ProposalChart.SubmissionThresholdlosePoints
                         && d.IsCurrentDay)
-                    .Sum(d => ProposalChart.Default.SubmissionLosePointsByLeader);
+                    .Sum(d => ProposalChart.SubmissionLosePointsByLeader);
 
-            return ProposalChart.Default.SubmissionBasePoints
+            return ProposalChart.SubmissionBasePoints
                 + Math.Max(leadersCosting, 0);
         }
     }

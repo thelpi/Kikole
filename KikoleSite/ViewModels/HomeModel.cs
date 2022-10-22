@@ -20,7 +20,6 @@ namespace KikoleSite.ViewModels
 
         public bool AlmostThere { get; set; }
         public IReadOnlyCollection<UserBadge> Badges { get; set; }
-        public ProposalChart Chart { get; set; }
         public int Points { get; set; }
         public string MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }

@@ -145,24 +145,22 @@ namespace KikoleSite.Controllers
                 .GetMessageAsync(_clock.Now)
                 .ConfigureAwait(false))?.Message;
 
-            var chart = await GetProposalChartAsync().ConfigureAwait(false);
-
-            var model = new HomeModel { Points = chart.BasePoints, Message = msg };
+            var model = new HomeModel { Points = ProposalChart.BasePoints, Message = msg };
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
                 && (day.Value >= 0 || IsTypeOfUser(UserTypes.Administrator)))
             {
                 var dt = DateTime.Now.Date.AddDays(-day.Value);
-                if (dt >= chart.FirstDate.Date)
+                if (dt >= ProposalChart.FirstDate.Date)
                 {
                     model = new HomeModel
                     {
-                        Points = chart.BasePoints,
+                        Points = ProposalChart.BasePoints,
                         CurrentDay = day.Value
                     };
                 }
-                else if (dt == chart.FirstDate.Date.AddDays(-1))
+                else if (dt == ProposalChart.FirstDate.Date.AddDays(-1))
                 {
                     var foundAll = await _playerService
                         .GetHasFoundEveryPlayerAsync(UserId)
@@ -171,7 +169,7 @@ namespace KikoleSite.Controllers
                     {
                         model = new HomeModel
                         {
-                            Points = chart.BasePoints,
+                            Points = ProposalChart.BasePoints,
                             CurrentDay = day.Value
                         };
                     }
@@ -189,7 +187,6 @@ namespace KikoleSite.Controllers
 
             return await SetAndGetViewModelAsync(
                     errorMessageForced,
-                    chart,
                     model,
                     DateTime.Now.Date.AddDays(-model.CurrentDay)
                 ).ConfigureAwait(false);
@@ -304,7 +301,6 @@ namespace KikoleSite.Controllers
 
             return await SetAndGetViewModelAsync(
                     null,
-                    await GetProposalChartAsync().ConfigureAwait(false),
                     model,
                     _clock.Today.AddDays(-model.CurrentDay))
                 .ConfigureAwait(false);
@@ -312,7 +308,6 @@ namespace KikoleSite.Controllers
 
         private async Task<IActionResult> SetAndGetViewModelAsync(
             string errorMessageForced,
-            ProposalChart chart,
             HomeModel model,
             DateTime proposalDate)
         {
@@ -370,9 +365,8 @@ namespace KikoleSite.Controllers
                 .Concat(GetPositions()
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
-            model.Chart = chart;
             model.Clue = clue;
-            model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == chart.FirstDate;
+            model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == ProposalChart.FirstDate;
             model.CanCreateClub = isPowerUser;
             model.IsAdmin = isAdminUser;
             model.PlayerId = playerCreator?.PlayerId ?? 0;

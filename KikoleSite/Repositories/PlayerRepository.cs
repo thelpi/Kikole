@@ -174,16 +174,6 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<DateTime> GetFirstDateAsync()
-        {
-            return await ExecuteScalarAsync<DateTime>(
-                    "SELECT DATE_ADD(MIN(proposal_date), INTERVAL 1 DAY) " +
-                    "FROM players " +
-                    "WHERE proposal_date IS NOT NULL",
-                    new object())
-                .ConfigureAwait(false);
-        }
-
         public async Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date)
         {
             await ExecuteNonQueryAsync(

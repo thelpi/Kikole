@@ -3,11 +3,11 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="redtext" class="mediumTopMargin">Error: @Model.ErrorMessage</div>
+    <div class="redtext mediumTopMargin">Error: @Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
-    <div class="greentext" class="mediumTopMargin">@Model.InfoMessage</div>
+    <div class="greentext mediumTopMargin">@Model.InfoMessage</div>
 }
 
 @if (Model.SelectedPlayer != null)

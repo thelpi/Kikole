@@ -21,13 +21,6 @@ namespace KikoleSite.Services
         Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date);
 
         /// <summary>
-        /// Gets the date of the first player submitted.
-        /// </summary>
-        /// <param name="withFirst">Include the first special date y/n.</param>
-        /// <returns>Date of first player submitted.</returns>
-        Task<DateTime> GetFirstSubmittedPlayerDateAsync(bool withFirst);
-
-        /// <summary>
         /// Creates a full player.
         /// </summary>
         /// <param name="request">Player request.</param>

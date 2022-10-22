@@ -35,7 +35,6 @@ namespace KikoleSite.Controllers
             : UserTypes.StandardUser;
 
         private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
-        private static ProposalChart _proposalChartCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
         private readonly IInternationalRepository _internationalRepository;
@@ -151,20 +150,6 @@ namespace KikoleSite.Controllers
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
-        }
-
-        protected async Task<ProposalChart> GetProposalChartAsync()
-        {
-            if (_proposalChartCache == null)
-            {
-                ProposalChart.Default.FirstDate = await _playerService
-                    .GetFirstSubmittedPlayerDateAsync(false)
-                    .ConfigureAwait(false);
-
-                _proposalChartCache = ProposalChart.Default;
-            }
-
-            return _proposalChartCache;
         }
 
         protected void SetAuthenticationCookie(string token, string login)

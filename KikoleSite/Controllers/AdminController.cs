@@ -200,14 +200,12 @@ namespace KikoleSite.Controllers
 
         [HttpGet]
         [Authorization(UserTypes.PowerUser)]
-        public async Task<IActionResult> Index(bool withOkMessage)
+        public IActionResult Index(bool withOkMessage)
         {
-            var chart = await GetProposalChartAsync().ConfigureAwait(false);
-
             var model = new PlayerCreationModel();
             if (withOkMessage)
                 model.InfoMessage = _localizer["PlayerOk"];
-            SetPositionsOnModel(model, chart);
+            SetPositionsOnModel(model);
             model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
             return View(model);
         }
@@ -216,33 +214,31 @@ namespace KikoleSite.Controllers
         [Authorization(UserTypes.PowerUser)]
         public async Task<IActionResult> Index(PlayerCreationModel model)
         {
-            var chart = await GetProposalChartAsync().ConfigureAwait(false);
-
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 model.ErrorMessage = _localizer["MandatName"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
             if (model.YearOfBirth == null || !ushort.TryParse(model.YearOfBirth, out var yearValue))
             {
                 model.ErrorMessage = _localizer["InvalidYear"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
             if (string.IsNullOrWhiteSpace(model.ClueEn))
             {
                 model.ErrorMessage = _localizer["MandatClue"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
             if (string.IsNullOrWhiteSpace(model.EasyClueEn))
             {
                 model.ErrorMessage = _localizer["MandatClue"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
@@ -254,7 +250,7 @@ namespace KikoleSite.Controllers
                 || !countries.Any(c => countryId == c.Key))
             {
                 model.ErrorMessage = _localizer["InvalidCountry"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
@@ -263,7 +259,7 @@ namespace KikoleSite.Controllers
                 || !GetPositions().Any(p => p.Key == positionId))
             {
                 model.ErrorMessage = _localizer["InvalidPosition"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
@@ -300,7 +296,7 @@ namespace KikoleSite.Controllers
             if (clubs.Count == 0)
             {
                 model.ErrorMessage = _localizer["OneClubMin"];
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
 
@@ -332,7 +328,7 @@ namespace KikoleSite.Controllers
             if (!string.IsNullOrWhiteSpace(validityRequest))
             {
                 model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
-                SetPositionsOnModel(model, chart);
+                SetPositionsOnModel(model);
                 return View(model);
             }
             else
@@ -516,13 +512,12 @@ namespace KikoleSite.Controllers
             }
         }
 
-        private void SetPositionsOnModel(PlayerCreationModel model, ProposalChart chart)
+        private void SetPositionsOnModel(PlayerCreationModel model)
         {
             model.Positions = new[] { new SelectListItem("", "0") }
                 .Concat(GetPositions()
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
-            model.Chart = chart;
         }
     }
 }

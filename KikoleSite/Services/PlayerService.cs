@@ -57,16 +57,6 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<DateTime> GetFirstSubmittedPlayerDateAsync(bool withFirst)
-        {
-            var date = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-
-            return withFirst ? date.AddDays(-1) : date;
-        }
-
-        /// <inheritdoc />
         public async Task UpdatePlayerCluesAsync(ulong playerId,
             string clue,
             string easyClue,
@@ -298,19 +288,15 @@ namespace KikoleSite.Services
         /// <inheritdoc />
         public async Task<bool> GetHasFoundEveryPlayerAsync(ulong userId)
         {
-            var firstPlayerDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-
             var createdPlayers = await _playerRepository
                 .GetPlayersByCreatorAsync(userId, true)
                 .ConfigureAwait(false);
 
             var leaders = await _leaderRepository
-                .GetUserLeadersAsync(firstPlayerDate, null, false, userId)
+                .GetUserLeadersAsync(ProposalChart.FirstDate, null, false, userId)
                 .ConfigureAwait(false);
 
-            var countToFind = (_clock.Today - firstPlayerDate).Days + 1;
+            var countToFind = (_clock.Today - ProposalChart.FirstDate).Days + 1;
 
             var createdCount = createdPlayers.Count(_ => _.ProposalDate <= _clock.Today);
 

@@ -251,11 +251,7 @@ namespace KikoleSite.Services
                     .ConfigureAwait(false);
             }
 
-            var firstDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-
-            firstDate = firstDate.AddDays(-1);
+            var firstDate = ProposalChart.FirstDate.AddDays(-1);
 
             var endDate = _clock.Today;
 
@@ -314,16 +310,12 @@ namespace KikoleSite.Services
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
 
-            var firstDate = await _playerRepository
-                .GetFirstDateAsync()
-                .ConfigureAwait(false);
-
             var leadersHistory = await GetLeadersHistoryAsync(
-                    leader.ProposalDate, firstDate.Date)
+                    leader.ProposalDate, ProposalChart.FirstDate)
                 .ConfigureAwait(false);
 
             var playersHistory = await _playerRepository
-                .GetPlayersOfTheDayAsync(firstDate.Date, leader.ProposalDate)
+                .GetPlayersOfTheDayAsync(ProposalChart.FirstDate, leader.ProposalDate)
                 .ConfigureAwait(false);
 
             return await PrepareNewLeaderBadgesInternalAsync(

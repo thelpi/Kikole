@@ -3,11 +3,11 @@
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="redtext" class="mediumTopMargin">@Model.ErrorMessage</div>
+    <div class="redtext mediumTopMargin">@Model.ErrorMessage</div>
 }
 else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 {
-    <div class="greentext" class="mediumTopMargin">@Model.InfoMessage</div>
+    <div class="greentext mediumTopMargin">@Model.InfoMessage</div>
 }
 
 @if (Model.DisplayPlayerSubmissionLink)
@@ -143,6 +143,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     </div>
 
     <div class="largeTopMargin">
-        @Html.Raw(string.Format(localizer["ChartLaius"].Value, Model.Chart.SubmissionMaxPoints, Model.Chart.SubmissionLosePointsByLeader, Model.Chart.SubmissionThresholdlosePoints, Model.Chart.SubmissionBasePoints))
+        @Html.Raw(string.Format(localizer["ChartLaius"].Value, KikoleSite.Models.ProposalChart.SubmissionMaxPoints, KikoleSite.Models.ProposalChart.SubmissionLosePointsByLeader, KikoleSite.Models.ProposalChart.SubmissionThresholdlosePoints, KikoleSite.Models.ProposalChart.SubmissionBasePoints))
     </div>
 </form>

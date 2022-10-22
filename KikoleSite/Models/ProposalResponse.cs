@@ -99,7 +99,7 @@ namespace KikoleSite.Models
             if (Successful && ProposalType.CanBeMiss())
                 LostPoints = (0, false);
             else
-                LostPoints = ProposalChart.Default.ProposalTypesCost[ProposalType];
+                LostPoints = ProposalChart.ProposalTypesCost[ProposalType];
         }
 
         internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, IStringLocalizer resources)

@@ -24,7 +24,7 @@
                 </fieldset>
             </div>
         }
-        await Html.RenderPartialAsync("Partial/Rules", Model.Chart).ConfigureAwait(false);
+        await Html.RenderPartialAsync("Partial/Rules").ConfigureAwait(false);
         <div style="margin-top: 40px">
             <label>@localizer["YouAreNotLogged"]</label>
         </div>
@@ -146,7 +146,7 @@
                     @Html.HiddenFor(m => m.CurrentDay)
                     <div style="margin-top: 15px">
                         <input type="submit" value="@localizer["NeedAnotherClue"]" name="submit-Clue" style="width: 200px; margin-right: 20px" />
-                        <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points</span> % @localizer["PointsPercent"])</span>
+                        <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points</span> % @localizer["PointsPercent"])</span>
                     </div>
                 </form>
             }
@@ -168,7 +168,7 @@
                     @Html.HiddenFor(m => m.CurrentDay)
                     <div style="margin-top: 15px">
                         <input type="submit" value="@localizer["LeaderboardAccess"]" name="submit-Leaderboard" style="width: 200px; margin-right: 20px" />
-                        <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points</span> @localizer["Points"])</span>
+                        <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points</span> @localizer["Points"])</span>
                     </div>
                 </form>
             }
@@ -183,7 +183,7 @@
                         <div>
                             <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
                             <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
-                            <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Club].points</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Club].points</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         <div style="font-size: small">(@localizer["TipAboutClubs"])</div>
                     </div>
@@ -231,7 +231,7 @@
                             <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
                             <input type="hidden" id="countryId" name="CountryNameSubmission" />
                             <input type="submit" value="Ok" id="submitCountry" name="submit-Country" style="visibility: hidden; width: 0px" />
-                            <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Country].points</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Country].points</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
                         @if (Model.IncorrectCountries?.Count > 0)
@@ -264,7 +264,7 @@
                         <div>
                             <input type="text" id="birthYearValue" name="BirthYearSubmission" style="width: 100px" />
                             <input type="submit" value="Ok" id="submitYear" name="submit-Year" style="visibility:hidden; width: 0px" />
-                            <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Year].points</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Year].points</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         @if (Model.IncorrectYears?.Count > 0)
                         {
@@ -296,7 +296,7 @@
                         <div>
                             @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @style = "width: 150px", @id = "positionSubmission" })
                             <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
-                            <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Position].points</span> @localizer["PointsIfIncorrect"])</span>
+                            <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Position].points</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
@@ -326,7 +326,7 @@
                     <div>
                         <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" class="redtext" style="width: 300px" />
                         <input type="submit" value="Submit" name="submit-Name" style="visibility:hidden; width: 0px" />
-                        <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points</span> @localizer["PointsIfIncorrect"])</span>
+                        <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points</span> @localizer["PointsIfIncorrect"])</span>
                     </div>
                     <div style="font-size: small">(@localizer["UseWikiTitle"])</div>
                 </div>
@@ -341,7 +341,7 @@
                 }
             </form>
             <hr />
-            await Html.RenderPartialAsync("Partial/Rules", Model.Chart).ConfigureAwait(false);
+            await Html.RenderPartialAsync("Partial/Rules").ConfigureAwait(false);
         }
     }
 </div>

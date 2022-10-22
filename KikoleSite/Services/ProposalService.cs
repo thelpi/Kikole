@@ -156,7 +156,7 @@ namespace KikoleSite.Services
             PlayerFullDto player,
             out int points)
         {
-            var totalPoints = ProposalChart.Default.BasePoints;
+            var totalPoints = ProposalChart.BasePoints;
             var proposals = proposalDtos
                 .OrderBy(pDto => pDto.CreationDate)
                 .Select(pDto =>

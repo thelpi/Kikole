@@ -36,7 +36,5 @@ namespace KikoleSite.Repositories
         Task<string> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
 
         Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
-
-        Task<DateTime> GetFirstDateAsync();
     }
 }

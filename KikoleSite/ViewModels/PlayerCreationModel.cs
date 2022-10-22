@@ -111,7 +111,5 @@ namespace KikoleSite.ViewModels
         public bool DisplayPlayerSubmissionLink { get; set; }
 
         public bool HideCreator { get; set; }
-
-        public ProposalChart Chart { get; set; }
     }
 }
