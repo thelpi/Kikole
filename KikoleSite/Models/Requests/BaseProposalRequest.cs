@@ -86,6 +86,9 @@ namespace KikoleSite.Models.Requests
                 case ProposalTypes.Clue:
                     request = new ClueProposalRequest();
                     break;
+                case ProposalTypes.Leaderboard:
+                    request = new LeaderboardProposalRequest();
+                    break;
                 case ProposalTypes.Country:
                     request = new CountryProposalRequest();
                     break;

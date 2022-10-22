@@ -7,6 +7,7 @@
         Year,
         Country,
         Clue,
-        Position
+        Position,
+        Leaderboard
     }
 }

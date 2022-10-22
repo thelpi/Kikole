@@ -16,6 +16,7 @@ namespace KikoleSite.ViewModels
         public string EasyClue { get; set; }
         public string Message { get; set; }
         public string PlayerCreator { get; set; }
+        public bool LeaderboardAvailable { get; set; }
 
         public bool AlmostThere { get; set; }
         public IReadOnlyCollection<UserBadge> Badges { get; set; }
@@ -61,6 +62,7 @@ namespace KikoleSite.ViewModels
                 ProposalTypes.Year => BirthYearSubmission,
                 ProposalTypes.Position => PositionSubmission,
                 ProposalTypes.Clue => "GetClue",// anything not empty
+                ProposalTypes.Leaderboard => "GetLeaderboard",// anything not empty
                 _ => null,
             };
         }
@@ -79,6 +81,9 @@ namespace KikoleSite.ViewModels
             Points = response.TotalPoints;
             switch (response.ProposalType)
             {
+                case ProposalTypes.Leaderboard:
+                    LeaderboardAvailable = true;
+                    break;
                 case ProposalTypes.Clue:
                     EasyClue = easyClue;
                     break;

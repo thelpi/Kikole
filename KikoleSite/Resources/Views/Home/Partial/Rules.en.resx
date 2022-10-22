@@ -160,6 +160,9 @@
   <data name="ClueGuess" xml:space="preserve">
     <value>Asking for a second clue costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
   </data>
+  <data name="GetLeaderboard" xml:space="preserve">
+    <value>Asking for a view no the daily leaderboard costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+  </data>
   <data name="GoodGuess" xml:space="preserve">
     <value>A good guess on any category costs &lt;span class="greentext" style="font-size: large"&gt;no points&lt;/span&gt;.</value>
   </data>

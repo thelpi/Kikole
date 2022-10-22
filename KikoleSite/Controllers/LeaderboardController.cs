@@ -58,7 +58,7 @@ namespace KikoleSite.Controllers
             }
 
             var foundToday = await _proposalService
-                .HasFoundTodayPlayerAsync(UserId)
+                .CanSeeTodayLeaderboardAsync(UserId)
                 .ConfigureAwait(false);
 
             var stats = await _leaderService
@@ -208,7 +208,7 @@ namespace KikoleSite.Controllers
             DateTime minDate, DateTime maxDate, LeaderSorts sortType, bool? foundToday)
         {
             var foundTodayEnsured = foundToday ?? await _proposalService
-                .HasFoundTodayPlayerAsync(UserId)
+                .CanSeeTodayLeaderboardAsync(UserId)
                 .ConfigureAwait(false);
 
             minDate = EnsureDate(minDate, foundTodayEnsured);
@@ -232,7 +232,7 @@ namespace KikoleSite.Controllers
             DateTime date, DayLeaderSorts sortType, bool? foundToday)
         {
             var foundTodayEnsured = foundToday ?? await _proposalService
-                .HasFoundTodayPlayerAsync(UserId)
+                .CanSeeTodayLeaderboardAsync(UserId)
                 .ConfigureAwait(false);
 
             date = EnsureDate(date, true);

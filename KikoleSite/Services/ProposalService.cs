@@ -115,7 +115,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<bool> HasFoundTodayPlayerAsync(ulong userId)
+        public async Task<bool> CanSeeTodayLeaderboardAsync(ulong userId)
         {
             if (userId == 0)
                 return false;
@@ -128,6 +128,13 @@ namespace KikoleSite.Services
                 return false;
 
             if (user.UserTypeId == (int)UserTypes.Administrator)
+                return true;
+
+            var proposals = await _proposalRepository
+                .GetProposalsAsync(_clock.Today, userId)
+                .ConfigureAwait(false);
+
+            if (proposals.Any(_ => _.ProposalTypeId == (ulong)ProposalTypes.Leaderboard))
                 return true;
 
             var leaders = await _leaderRepository

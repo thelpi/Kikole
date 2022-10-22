@@ -234,6 +234,9 @@
   <data name="InvalidValue" xml:space="preserve">
     <value>Invalid value</value>
   </data>
+  <data name="LeaderboardAvailable" xml:space="preserve">
+    <value>The leaderboard of the day is available</value>
+  </data>
   <data name="PasswordDoesNotMatch" xml:space="preserve">
     <value>The password doesn't match</value>
   </data>

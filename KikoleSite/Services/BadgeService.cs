@@ -149,12 +149,14 @@ namespace KikoleSite.Services
                         // Every proposal is correct
                         // Year, nationality and position are filled
                         // Easy clue is not requested
+                        // Leaderboard is not requested
                         // Same count of club proposals than career clubs
                         if (ph.Any(_ => _.Successful == 0)
                             || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Year)
                             || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Position)
                             || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Country)
                             || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Clue)
+                            || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Leaderboard)
                             || ph.Count(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Club) != p.Clubs.Count)
                             return false;
 

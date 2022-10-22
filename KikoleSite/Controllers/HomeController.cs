@@ -289,7 +289,7 @@ namespace KikoleSite.Controllers
             }
 
             model.IsErrorMessage = !response.Successful;
-            if (proposalType == ProposalTypes.Clue)
+            if (!proposalType.CanBeMiss())
                 model.MessageToDisplay = response.Tip;
             else
             {

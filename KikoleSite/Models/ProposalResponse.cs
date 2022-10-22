@@ -88,6 +88,7 @@ namespace KikoleSite.Models
                         : (object)sourceValue;
                     break;
 
+                case ProposalTypes.Leaderboard:
                 case ProposalTypes.Clue:
                     if (!success.HasValue)
                         Successful = true;
@@ -95,7 +96,7 @@ namespace KikoleSite.Models
                     break;
             }
 
-            if (Successful && ProposalType != ProposalTypes.Clue)
+            if (Successful && ProposalType.CanBeMiss())
                 LostPoints = (0, false);
             else
                 LostPoints = ProposalChart.Default.ProposalTypesCost[ProposalType];

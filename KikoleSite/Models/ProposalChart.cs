@@ -30,7 +30,8 @@ namespace KikoleSite.Models
                 { ProposalTypes.Name, (400, false) },
                 { ProposalTypes.Position, (75, false) },
                 { ProposalTypes.Year, (25, false) },
-                { ProposalTypes.Clue, (50, true) }
+                { ProposalTypes.Clue, (50, true) },
+                { ProposalTypes.Leaderboard, (25, false) }
             };
 
         public DateTime FirstDate { get; internal set; }

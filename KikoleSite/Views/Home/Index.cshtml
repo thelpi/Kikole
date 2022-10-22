@@ -161,6 +161,17 @@
                     </div>
                 </form>
             }
+            else if (!Model.LeaderboardAvailable)
+            {
+                <!-- gives leaderboard -->
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <div style="margin-top: 15px">
+                        <input type="submit" value="@localizer["LeaderboardAccess"]" name="submit-Leaderboard" style="width: 200px; margin-right: 20px" />
+                        <span>(-<span class="redtext">@Model.Chart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points</span> @localizer["Points"])</span>
+                    </div>
+                </form>
+            }
             <!-- clubs -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)

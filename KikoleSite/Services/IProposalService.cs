@@ -32,10 +32,18 @@ namespace KikoleSite.Services
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
 
         /// <summary>
-        /// Gets if the user has found the player of the day.
+        /// Checks if an user can see the daily leaderboard today.
         /// </summary>
-        /// <param name="userId">The user to check.</param>
-        /// <returns><c>True</c> if found, or if user is administrator, or the creator today.</returns>
-        Task<bool> HasFoundTodayPlayerAsync(ulong userId);
+        /// <param name="userId">User identifier.</param>
+        /// <returns>
+        /// <c>True</c> if leaderboard is available; 4 ways:
+        /// <list type="bullet">
+        /// <item>User is administrator.</item>
+        /// <item>User has found the player today.</item>
+        /// <item>User has requested the leaderboard (against points).</item>
+        /// <item>User has created today's player.</item>
+        /// </list>
+        /// </returns>
+        Task<bool> CanSeeTodayLeaderboardAsync(ulong userId);
     }
 }

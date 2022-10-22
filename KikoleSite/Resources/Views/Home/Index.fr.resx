@@ -255,4 +255,7 @@
   <data name="GiveUpConfirmation" xml:space="preserve">
     <value>Etes vous sûr ?</value>
   </data>
+  <data name="LeaderboardAccess" xml:space="preserve">
+    <value>Accès au classement du jour</value>
+  </data>
 </root>
