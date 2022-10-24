@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Handlers;
 using KikoleSite.Helpers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
+using Microsoft.Extensions.Localization;
 
 namespace KikoleSite.Services
 {
@@ -21,6 +23,8 @@ namespace KikoleSite.Services
         private readonly IUserRepository _userRepository;
         private readonly IProposalRepository _proposalRepository;
         private readonly IClock _clock;
+        private readonly IStringLocalizer<Translations> _resources;
+        private readonly IPlayerHandler _playerHandler;
 
         /// <summary>
         /// Ctor.
@@ -29,18 +33,24 @@ namespace KikoleSite.Services
         /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
         /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
         /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
+        /// <param name="resources">Instance of <see cref="IStringLocalizer"/>.</param>
+        /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
         /// <param name="clock">Clock service.</param>
         public LeaderService(IPlayerRepository playerRepository,
             ILeaderRepository leaderRepository,
             IUserRepository userRepository,
             IProposalRepository proposalRepository,
-            IClock clock)
+            IClock clock,
+            IStringLocalizer<Translations> resources,
+            IPlayerHandler playerHandler)
         {
             _playerRepository = playerRepository;
             _leaderRepository = leaderRepository;
             _userRepository = userRepository;
             _proposalRepository = proposalRepository;
             _clock = clock;
+            _resources = resources;
+            _playerHandler = playerHandler;
         }
 
         /// <inheritdoc />
@@ -251,15 +261,15 @@ namespace KikoleSite.Services
                 .GetProposalsAsync(day, false)
                 .ConfigureAwait(false);
 
-            var player = await _playerRepository
-                .GetPlayerOfTheDayAsync(day)
+            var player = await _playerHandler
+                .GetPlayerOfTheDayFullInfoAsync(day)
                 .ConfigureAwait(false);
 
             var leaderUsers = leaders.Select(_ => _.UserId);
 
             var allUsersId = leaderUsers
                 .Concat(proposals.Select(_ => _.UserId))
-                .Append(player.CreationUserId)
+                .Append(player.Player.CreationUserId)
                 .Distinct();
 
             var users = (await GetUsersFromIdsAsync(allUsersId).ConfigureAwait(false))
@@ -276,7 +286,7 @@ namespace KikoleSite.Services
                     UserName = users[_.UserId].Login
                 });
 
-            if (users.ContainsKey(player.CreationUserId))
+            if (users.ContainsKey(player.Player.CreationUserId))
             {
                 leaderItems = leaderItems.Append(new DayboardLeaderItem
                 {
@@ -284,8 +294,8 @@ namespace KikoleSite.Services
                     IsCreator = true,
                     Points = GetSubmittedPlayerPoints(leaders, day),
                     Time = new TimeSpan(23, 59, 59),
-                    UserId = player.CreationUserId,
-                    UserName = users[player.CreationUserId].Login
+                    UserId = player.Player.CreationUserId,
+                    UserName = users[player.Player.CreationUserId].Login
                 });
             }
 
@@ -299,23 +309,30 @@ namespace KikoleSite.Services
                     break;
             }
 
-            var searchItems = proposals
+            var searchers = new List<DayboardSearcherItem>(proposals.Count);
+            foreach (var propUserGroup in proposals
                 .Where(_ => !leaderUsers.Contains(_.UserId))
-                .GroupBy(_ => _.UserId)
-                .Select(_ => new DayboardSearcherItem
+                .GroupBy(_ => _.UserId))
+            {
+                var dsi = new DayboardSearcherItem
                 {
-                    Date = _.Select(p => p.CreationDate).Min().Date,
-                    LastActivity = _.Select(p => p.CreationDate).Max(),
-                    UserId = _.Key,
-                    UserName = users[_.Key].Login
-                })
-                .OrderBy(_ => _.Date);
+                    Date = propUserGroup.Select(p => p.CreationDate).Min().Date,
+                    LastActivity = propUserGroup.Select(p => p.CreationDate).Max(),
+                    UserId = propUserGroup.Key,
+                    UserName = users[propUserGroup.Key].Login
+                };
+
+                ProposalService.GetProposalResponsesWithPoints(propUserGroup, player, out int points, _resources);
+                dsi.Points = points;
+
+                searchers.Add(dsi);
+            }
 
             return new Dayboard
             {
                 Date = day,
                 Sort = sort,
-                Searchers = searchItems.ToList(),
+                Searchers = searchers.OrderBy(_ => _.Date).ToList(),
                 Leaders = leaderItems.ToList()
             };
         }

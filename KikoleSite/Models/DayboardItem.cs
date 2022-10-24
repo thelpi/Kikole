@@ -7,5 +7,6 @@ namespace KikoleSite.Models
         public DateTime Date { get; set; }
         public ulong UserId { get; set; }
         public string UserName { get; set; }
+        public int Points { get; set; }
     }
 }

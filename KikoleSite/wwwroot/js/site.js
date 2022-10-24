@@ -263,7 +263,7 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYet
                     newCell.classList.add('tabData');
 
                     var newCell = newRow.insertCell();
-                    var newText = document.createTextNode(noPointsYetText);
+                    var newText = document.createTextNode('(' + e.points + ')');
                     newCell.appendChild(newText);
                     newCell.classList.add('tabData');
 

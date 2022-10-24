@@ -64,7 +64,7 @@ namespace KikoleSite.Services
                     .GetPlayerOfTheDayFullInfoAsync(proposalDate)
                     .ConfigureAwait(false);
 
-                r = GetProposalResponsesWithPoints(datas, pInfo, out _);
+                r = GetProposalResponsesWithPoints(datas, pInfo, out _, _resources);
             }
 
             return r;
@@ -84,7 +84,7 @@ namespace KikoleSite.Services
 
             var proposalMade = request.MatchAny(proposalsAlready);
 
-            GetProposalResponsesWithPoints(proposalsAlready, pInfo, out int sourcePoints);
+            GetProposalResponsesWithPoints(proposalsAlready, pInfo, out int sourcePoints, _resources);
 
             response = response.WithTotalPoints(sourcePoints, proposalMade);
 
@@ -151,17 +151,18 @@ namespace KikoleSite.Services
             return p.Player.CreationUserId == userId;
         }
 
-        private List<ProposalResponse> GetProposalResponsesWithPoints(
+        internal static List<ProposalResponse> GetProposalResponsesWithPoints(
             IEnumerable<ProposalDto> proposalDtos,
             PlayerFullDto player,
-            out int points)
+            out int points,
+            IStringLocalizer<Translations> resources)
         {
             var totalPoints = ProposalChart.BasePoints;
             var proposals = proposalDtos
                 .OrderBy(pDto => pDto.CreationDate)
                 .Select(pDto =>
                 {
-                    var pr = new ProposalResponse(pDto, player, _resources)
+                    var pr = new ProposalResponse(pDto, player, resources)
                         .WithTotalPoints(totalPoints, false);
                     totalPoints = pr.TotalPoints;
                     return pr;
