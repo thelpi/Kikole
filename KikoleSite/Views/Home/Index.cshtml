@@ -88,6 +88,12 @@
                     <label>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, DateTime.Now.AddDays(-Model.CurrentDay).ToNaString()))</label>
                 </div>
             }
+            @if (Model.IsAdmin)
+            {
+                <div class="mediumTopMargin">
+                    @localizer["AllowedNames"] <span style="font-style:italic">@Model.PlayerAllowedNames</span>
+                </div>
+            }
             <div class="mediumTopMargin">
                 @localizer["DayClue"] <span style="font-style:italic">@Html.Raw(Model.Clue)</span>
             </div>
@@ -100,6 +106,12 @@
             <div class="mediumTopMargin">
                 @localizer["FinalBirthYear"] <span style="font-style:italic">@Model.BirthYear</span>
             </div>
+            @if (Model.HasContinentManaged)
+            {
+                <div class="mediumTopMargin">
+                    @localizer["FinalContinent"] <span style="font-style:italic">@Model.ContinentName</span>
+                </div>
+            }
             <div class="mediumTopMargin">
                 @localizer["FinalNationality"] <span style="font-style:italic">@Model.CountryName</span>
             </div>
@@ -376,8 +388,8 @@
                     </div>
                 }
             </form>
-            <hr />
-            await Html.RenderPartialAsync("Partial/Rules").ConfigureAwait(false);
         }
+        <hr />
+        await Html.RenderPartialAsync("Partial/Rules").ConfigureAwait(false);
     }
 </div>

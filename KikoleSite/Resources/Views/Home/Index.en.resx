@@ -261,4 +261,10 @@
   <data name="ContinentTitle" xml:space="preserve">
     <value>Continent:</value>
   </data>
+  <data name="FinalContinent" xml:space="preserve">
+    <value>Continent:</value>
+  </data>
+  <data name="AllowedNames" xml:space="preserve">
+    <value>Allowed names:</value>
+  </data>
 </root>

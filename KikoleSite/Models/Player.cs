@@ -13,8 +13,6 @@ namespace KikoleSite.Models
 
         public IReadOnlyCollection<PlayerClub> Clubs { get; }
 
-        public IReadOnlyCollection<string> AllowedNames { get; }
-
         public ushort YearOfBirth { get; }
 
         public Continents Continent { get; }
@@ -37,7 +35,6 @@ namespace KikoleSite.Models
             Id = p.Player.Id;
             ProposalDate = p.Player.ProposalDate;
             RejectDate = p.Player.RejectDate;
-            AllowedNames = p.Player.AllowedNames.Disjoin();
             Clubs = p.PlayerClubs
                 .Select(c => new PlayerClub(c, p.Clubs))
                 .ToList();

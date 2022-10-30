@@ -329,7 +329,7 @@ namespace KikoleSite.Controllers
             {
                 if (!string.IsNullOrWhiteSpace(playerCreator?.Name))
                 {
-                    model.SetFinalFormIsUserIsCreator(playerCreator.Name);
+                    model.SetFinalFormIsUserIsCreator(playerCreator.Name, playerCreator.AllowedNames);
                 }
                 else
                 {

@@ -45,6 +45,16 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 
     <div class="largeTopMargin">
         <div>
+            <label>@localizer["Continent"]</label>
+        </div>
+        <div>
+            <input type="text" id="continentName" name="ContinentNameSubmissionValue" style="width: 300px" />
+            <input type="hidden" id="continentId" name="Continent" />
+        </div>
+    </div>
+
+    <div class="largeTopMargin">
+        <div>
             <label>@localizer["Nationality"]</label>
         </div>
         <div>

@@ -27,6 +27,7 @@ namespace KikoleSite.ViewModels
         public bool IsErrorMessageForced { get; set; }
         public string BirthYear { get; set; }
         public string PlayerName { get; set; }
+        public string PlayerAllowedNames { get; set; }
         public string CountryName { get; set; }
         public string ContinentName { get; set; }
         public string Position { get; set; }
@@ -71,9 +72,10 @@ namespace KikoleSite.ViewModels
             };
         }
 
-        internal void SetFinalFormIsUserIsCreator(string playerName)
+        internal void SetFinalFormIsUserIsCreator(string playerName, IReadOnlyList<string> playerAllowedNames)
         {
             PlayerName = playerName;
+            PlayerAllowedNames = string.Join(", ", playerAllowedNames);
             IsCreator = true;
         }
 
