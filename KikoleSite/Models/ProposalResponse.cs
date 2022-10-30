@@ -55,10 +55,20 @@ namespace KikoleSite.Models
                         Successful = c != null;
                     if (Successful)
                     {
-                        Value = player.PlayerClubs
-                            .Where(_ => _.ClubId == c.Id)
-                            .Select(_ => new PlayerClub(_, player.Clubs))
-                            .ToList();
+                        if (c == null)
+                        {
+                            // weird case from the beginning when there was no autocompletion on clubs
+                            // the value is not really used in that case anyway
+                            // it just need to be not null
+                            Value = new List<PlayerClub>();
+                        }
+                        else
+                        {
+                            Value = player.PlayerClubs
+                                .Where(_ => _.ClubId == c.Id)
+                                .Select(_ => new PlayerClub(_, player.Clubs))
+                                .ToList();
+                        }
                     }
                     else
                         Value = sourceValue;
