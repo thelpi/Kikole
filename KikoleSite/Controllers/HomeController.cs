@@ -145,50 +145,39 @@ namespace KikoleSite.Controllers
                 .GetMessageAsync(_clock.Now)
                 .ConfigureAwait(false))?.Message;
 
-            var model = new HomeModel(_clock) { Points = ProposalChart.BasePoints, Message = msg };
+            var model = new HomeModel
+            {
+                CurrentDate = _clock.Today,
+                Points = ProposalChart.BasePoints,
+                Message = msg
+            };
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
                 && (day.Value >= 0 || IsTypeOfUser(UserTypes.Administrator)))
             {
-                var dt = _clock.Today.AddDays(-day.Value);
-                if (dt >= ProposalChart.FirstDate)
+                model.CurrentDay = day.Value;
+                if (model.DateOfDay < ProposalChart.HiddenDate)
                 {
-                    model = new HomeModel(_clock)
-                    {
-                        Points = ProposalChart.BasePoints,
-                        CurrentDay = day.Value
-                    };
+                    return RedirectToAction("Index");
                 }
-                else if (dt == ProposalChart.HiddenDate)
+
+                if (model.DateOfDay == ProposalChart.HiddenDate)
                 {
                     var displayHidden = await _playerService
                         .CanDisplayHiddenPlayerAsync(UserId)
                         .ConfigureAwait(false);
-                    if (displayHidden)
+                    if (!displayHidden)
                     {
-                        model = new HomeModel(_clock)
-                        {
-                            Points = ProposalChart.BasePoints,
-                            CurrentDay = day.Value
-                        };
-                    }
-                    else
-                    {
-                        model = new HomeModel(_clock) { AlmostThere = true };
+                        model.DisplayHiddenPageAsHidden = true;
                         return View(model);
                     }
-                }
-                else
-                {
-                    return RedirectToAction("Index");
                 }
             }
 
             return await SetAndGetViewModelAsync(
                     errorMessageForced,
-                    model,
-                    _clock.Today.AddDays(-model.CurrentDay)
+                    model
                 ).ConfigureAwait(false);
         }
 
@@ -200,6 +189,8 @@ namespace KikoleSite.Controllers
             {
                 return Redirect("/");
             }
+
+            model.CurrentDate = _clock.Today;
 
             var proposalType = ProposalTypes.Name;
             var value = string.Empty;
@@ -301,16 +292,16 @@ namespace KikoleSite.Controllers
 
             return await SetAndGetViewModelAsync(
                     null,
-                    model,
-                    _clock.Today.AddDays(-model.CurrentDay))
+                    model)
                 .ConfigureAwait(false);
         }
 
         private async Task<IActionResult> SetAndGetViewModelAsync(
             string errorMessageForced,
-            HomeModel model,
-            DateTime proposalDate)
+            HomeModel model)
         {
+            var proposalDate = model.DateOfDay;
+
             var playerCreator = UserId > 0
                 ? await _playerService
                     .GetPlayerOfTheDayFromUserPovAsync(UserId, proposalDate)

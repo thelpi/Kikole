@@ -9,8 +9,6 @@ namespace KikoleSite.ViewModels
 {
     public class HomeModel
     {
-        private readonly IClock _clock;
-
         public ulong PlayerId { get; set; }
         public bool IsAdmin { get; set; }
         public bool CanCreateClub { get; set; }
@@ -20,8 +18,9 @@ namespace KikoleSite.ViewModels
         public string PlayerCreator { get; set; }
         public bool LeaderboardAvailable { get; set; }
         public bool HasContinentManaged { get; set; }
+        public DateTime CurrentDate { get; set; }
 
-        public bool AlmostThere { get; set; }
+        public bool DisplayHiddenPageAsHidden { get; set; }
         public IReadOnlyCollection<UserBadge> Badges { get; set; }
         public int Points { get; set; }
         public string MessageToDisplay { get; set; }
@@ -55,13 +54,7 @@ namespace KikoleSite.ViewModels
 
         public int NextDay => CurrentDay - 1;
         public int PreviousDay => CurrentDay + 1;
-
-        public DateTime DateOfDay => _clock.Now.AddDays(-CurrentDay);
-
-        public HomeModel(IClock clock)
-        {
-            _clock = clock;
-        }
+        public DateTime DateOfDay => CurrentDate.AddDays(-CurrentDay);
 
         internal string GetValueFromProposalType(ProposalTypes proposalType)
         {

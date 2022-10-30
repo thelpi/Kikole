@@ -8,7 +8,7 @@
             <label class="redtext">@Model.MessageToDisplay</label>
         </div>
     }
-    @if (Model.AlmostThere)
+    @if (Model.DisplayHiddenPageAsHidden)
     {
         <div class="redtext largeTopMargin" style="font-size: large">
             @localizer["AlmostThere"]
