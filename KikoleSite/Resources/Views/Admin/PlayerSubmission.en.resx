@@ -132,6 +132,9 @@
   <data name="Clue" xml:space="preserve">
     <value>Clue</value>
   </data>
+  <data name="Continent" xml:space="preserve">
+    <value>Continent</value>
+  </data>
   <data name="Country" xml:space="preserve">
     <value>Country</value>
   </data>

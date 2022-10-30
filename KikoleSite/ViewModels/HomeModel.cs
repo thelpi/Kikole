@@ -17,6 +17,7 @@ namespace KikoleSite.ViewModels
         public string Message { get; set; }
         public string PlayerCreator { get; set; }
         public bool LeaderboardAvailable { get; set; }
+        public bool HasContinentManaged { get; set; }
 
         public bool AlmostThere { get; set; }
         public IReadOnlyCollection<UserBadge> Badges { get; set; }
@@ -27,11 +28,13 @@ namespace KikoleSite.ViewModels
         public string BirthYear { get; set; }
         public string PlayerName { get; set; }
         public string CountryName { get; set; }
+        public string ContinentName { get; set; }
         public string Position { get; set; }
         public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
         public string ClubNameSubmission { get; set; }
         public string PlayerNameSubmission { get; set; }
         public string CountryNameSubmission { get; set; }
+        public string ContinentNameSubmission { get; set; }
         public string BirthYearSubmission { get; set; }
         public string PositionSubmission { get; set; }
         public IReadOnlyList<SelectListItem> Positions { get; set; }
@@ -42,6 +45,7 @@ namespace KikoleSite.ViewModels
 
         public IReadOnlyList<string> IncorrectClubs { get; set; }
         public IReadOnlyList<string> IncorrectCountries { get; set; }
+        public IReadOnlyList<string> IncorrectContinents { get; set; }
         public IReadOnlyList<(string, string)> IncorrectYears { get; set; }
         public IReadOnlyList<string> IncorrectPositions { get; set; }
         public IReadOnlyList<string> IncorrectNames { get; set; }
@@ -57,6 +61,7 @@ namespace KikoleSite.ViewModels
             {
                 ProposalTypes.Club => ClubNameSubmission,
                 ProposalTypes.Country => CountryNameSubmission,
+                ProposalTypes.Continent => ContinentNameSubmission,
                 ProposalTypes.Name => PlayerNameSubmission,
                 ProposalTypes.Year => BirthYearSubmission,
                 ProposalTypes.Position => PositionSubmission,
@@ -74,6 +79,7 @@ namespace KikoleSite.ViewModels
 
         internal void SetPropertiesFromProposal(ProposalResponse response,
             IReadOnlyDictionary<ulong, string> countries,
+            IReadOnlyDictionary<ulong, string> continents,
             IReadOnlyDictionary<ulong, string> positions,
             string easyClue)
         {
@@ -110,6 +116,17 @@ namespace KikoleSite.ViewModels
                         if (ulong.TryParse(cValue, out ulong cId) && countries.ContainsKey(cId))
                             cValue = countries[cId];
                         IncorrectCountries = AddToList(IncorrectCountries, cValue);
+                    }
+                    break;
+                case ProposalTypes.Continent:
+                    var ccValue = response.Value.ToString();
+                    if (response.Successful)
+                        ContinentName = continents[ulong.Parse(ccValue)];
+                    else
+                    {
+                        if (ulong.TryParse(ccValue, out ulong cId) && continents.ContainsKey(cId))
+                            ccValue = continents[cId];
+                        IncorrectContinents = AddToList(IncorrectContinents, ccValue);
                     }
                     break;
                 case ProposalTypes.Position:

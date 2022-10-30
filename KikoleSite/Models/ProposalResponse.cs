@@ -72,6 +72,14 @@ namespace KikoleSite.Models
                         : (object)sourceValue;
                     break;
 
+                case ProposalTypes.Continent:
+                    if (!success.HasValue)
+                        Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(sourceValue);
+                    Value = Successful
+                        ? player.Player.ContinentId
+                        : (object)sourceValue;
+                    break;
+
                 case ProposalTypes.Position:
                     if (!success.HasValue)
                         Successful = player.Player.PositionId == ulong.Parse(sourceValue);

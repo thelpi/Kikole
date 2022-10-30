@@ -21,11 +21,17 @@ namespace KikoleSite.Models
                 { ProposalTypes.Position, (75, false) },
                 { ProposalTypes.Year, (25, false) },
                 { ProposalTypes.Clue, (50, true) },
-                { ProposalTypes.Leaderboard, (25, false) }
+                { ProposalTypes.Leaderboard, (25, false) },
+                { ProposalTypes.Continent, (100, false) }
             };
 
         public static DateTime FirstDate = new DateTime(2022, 03, 05).Date;
 
+#if DEBUG
+        public static DateTime ContinentValuatedStart = new DateTime(2022, 10, 30).Date;
+#else
+        public static DateTime ContinentValuatedStart = new DateTime(2022, 11, 01).Date;
+#endif
         public static DateTime FirstMonth => new DateTime(FirstDate.Year, FirstDate.Month, 1);
 
         public static int SubmissionMaxPoints => SubmissionBasePoints + SubmissionBonusPoints;

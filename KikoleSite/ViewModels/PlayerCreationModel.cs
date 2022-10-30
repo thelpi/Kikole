@@ -36,6 +36,8 @@ namespace KikoleSite.ViewModels
 
         public string Country { get; set; }
 
+        public string Continent { get; set; }
+
         public string Club0 { get; set; }
 
         public string Club1 { get; set; }

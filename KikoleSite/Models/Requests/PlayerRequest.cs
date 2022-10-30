@@ -16,6 +16,8 @@ namespace KikoleSite.Models.Requests
 
         public Countries Country { get; set; }
 
+        public Continents Continent { get; set; }
+
         public DateTime? ProposalDate { get; set; }
 
         public IReadOnlyList<string> AllowedNames { get; set; }
@@ -72,6 +74,7 @@ namespace KikoleSite.Models.Requests
         {
             return new PlayerDto
             {
+                ContinentId = (ulong)Continent,
                 CountryId = (ulong)Country,
                 Name = Name,
                 ProposalDate = ProposalDate,

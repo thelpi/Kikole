@@ -20,6 +20,7 @@ namespace KikoleSite.Repositories
                     ("allowed_names", player.AllowedNames),
                     ("year_of_birth", player.YearOfBirth),
                     ("country_id", player.CountryId),
+                    ("continent_id", player.ContinentId),
                     ("proposal_date", player.ProposalDate),
                     ("creation_date", Clock.Now),
                     ("clue", player.Clue),

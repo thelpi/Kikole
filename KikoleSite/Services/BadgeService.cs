@@ -155,6 +155,7 @@ namespace KikoleSite.Services
                             || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Year)
                             || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Position)
                             || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Country)
+                            || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Continent)
                             || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Clue)
                             || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Leaderboard)
                             || ph.Count(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Club) != p.Clubs.Count)

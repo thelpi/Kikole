@@ -189,6 +189,9 @@
   <data name="InvalidClue" xml:space="preserve">
     <value>Indice invalide</value>
   </data>
+  <data name="InvalidContinent" xml:space="preserve">
+    <value>Le continent est invalide</value>
+  </data>
   <data name="InvalidCountry" xml:space="preserve">
     <value>La nationalité est invalide</value>
   </data>

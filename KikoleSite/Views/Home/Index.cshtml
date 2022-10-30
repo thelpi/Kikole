@@ -218,6 +218,42 @@
                     }
                 </fieldset>
             </form>
+            @if (Model.HasContinentManaged)
+            {
+                <!-- continent -->
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <div style="margin-top: 30px">
+                        <div>
+                            <label>@localizer["ContinentTitle"]</label>
+                        </div>
+                        @if (string.IsNullOrWhiteSpace(Model.ContinentName))
+                        {
+                            <div>
+                                <input type="text" id="continentName" name="ContinentNameSubmissionValue" style="width: 300px" />
+                                <input type="hidden" id="continentId" name="ContinentNameSubmission" />
+                                <input type="submit" value="Ok" id="submitContinent" name="submit-Continent" style="visibility: hidden; width: 0px" />
+                                <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Continent].points</span> @localizer["PointsIfIncorrect"])</span>
+                            </div>
+                            @if (Model.IncorrectContinents?.Count > 0)
+                            {
+                                <div class="mediumTopMargin">
+                                    @foreach (var iContinent in Model.IncorrectContinents)
+                                    {
+                                        <div style="font-size: small; text-decoration: line-through">@iContinent</div>
+                                    }
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>
+                                <label>@Model.ContinentName</label>
+                            </div>
+                        }
+                    </div>
+                </form>
+            }
             <!-- nationality -->
             <form method="post" action="/">
                 @Html.HiddenFor(m => m.CurrentDay)

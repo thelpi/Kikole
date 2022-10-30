@@ -19,6 +19,8 @@ namespace KikoleSite.ViewModels
 
         public string Country { get; set; }
 
+        public string Continent { get; set; }
+
         public string Clue { get; set; }
 
         public string EasyClue { get; set; }

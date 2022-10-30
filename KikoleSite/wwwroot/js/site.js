@@ -356,6 +356,38 @@ $(function () {
     });
 });
 
+/* continents autocompletion */
+$(function () {
+    $("#continentName").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '/Home/AutoCompleteContinents/',
+                data: {
+                    "prefix": request.term
+                },
+                type: "POST",
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return {
+                            label: item.Value,
+                            value: item.Key
+                        };
+                    }))
+                }
+            });
+        },
+        select: function (e, i) {
+            $("#continentId").val(i.item.value);
+            $("#continentName").val(i.item.label);
+            if ($("#submitContinent").length > 0) {
+                $("#submitContinent").click();
+            }
+            return false;
+        },
+        minLength: 1
+    });
+});
+
 /* clubs autocompletion */
 var autocompleteClubs = function (clubIdName, submit) {
     $(clubIdName).autocomplete({

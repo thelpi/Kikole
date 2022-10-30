@@ -92,6 +92,9 @@ namespace KikoleSite.Models.Requests
                 case ProposalTypes.Country:
                     request = new CountryProposalRequest();
                     break;
+                case ProposalTypes.Continent:
+                    request = new ContinentProposalRequest();
+                    break;
                 case ProposalTypes.Position:
                     request = new PositionProposalRequest();
                     break;

@@ -8,6 +8,7 @@
         Country,
         Clue,
         Position,
-        Leaderboard
+        Leaderboard,
+        Continent
     }
 }

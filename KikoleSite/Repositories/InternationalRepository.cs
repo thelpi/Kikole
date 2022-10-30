@@ -14,7 +14,21 @@ namespace KikoleSite.Repositories
         public async Task<IReadOnlyCollection<CountryDto>> GetCountriesAsync(ulong languageId)
         {
             return await ExecuteReaderAsync<CountryDto>(
-                    "SELECT code, name FROM countries JOIN country_translations ON id = country_id WHERE language_id = @language_id",
+                    "SELECT code, name " +
+                    "FROM countries " +
+                    "JOIN country_translations ON id = country_id " +
+                    "WHERE language_id = @language_id",
+                    new { language_id = languageId })
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyCollection<ContinentDto>> GetContinentsAsync(ulong languageId)
+        {
+            return await ExecuteReaderAsync<ContinentDto>(
+                    "SELECT id, ct.name " +
+                    "FROM continents " +
+                    "JOIN continent_translations AS ct ON id = continent_id " +
+                    "WHERE language_id = @language_id",
                     new { language_id = languageId })
                 .ConfigureAwait(false);
         }

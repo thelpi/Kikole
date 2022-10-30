@@ -35,6 +35,10 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                 <div>@Model.SelectedPlayer.Country</div>
             </div>
             <div class="mediumTopMargin">
+                <label>@localizer["Continent"]</label>
+                <div>@Model.SelectedPlayer.Continent</div>
+            </div>
+            <div class="mediumTopMargin">
                 <label>@localizer["Clue"]</label>
                 <div>@Model.SelectedPlayer.Clue</div>
             </div>

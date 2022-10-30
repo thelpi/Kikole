@@ -137,6 +137,7 @@ namespace KikoleSite.Helpers
                 ProposalTypes.Club => IsFrench() ? $"{(withFrenchDe ? "de " : "")}club" : "club",
                 ProposalTypes.Year => IsFrench() ? $"{(withFrenchDe ? "d'" : "")}année" : "year",
                 ProposalTypes.Country => IsFrench() ? $"{(withFrenchDe ? "de " : "")}nationalité" : "country",
+                ProposalTypes.Continent => IsFrench() ? $"{(withFrenchDe ? "de " : "")}continent" : "continent",
                 ProposalTypes.Position => IsFrench() ? $"{(withFrenchDe ? "de " : "")}position" : "position",
                 _ => throw new NotImplementedException(),
             };

@@ -17,6 +17,8 @@ namespace KikoleSite.Models
 
         public ushort YearOfBirth { get; }
 
+        public Continents Continent { get; }
+
         public Countries Country { get; }
 
         public DateTime? ProposalDate { get; }
@@ -41,6 +43,7 @@ namespace KikoleSite.Models
                 .ToList();
             Clue = p.Player.Clue;
             EasyClue = p.Player.EasyClue;
+            Continent = (Continents)p.Player.ContinentId;
             Country = (Countries)p.Player.CountryId;
             Position = (Positions)p.Player.PositionId;
             YearOfBirth = p.Player.YearOfBirth;

@@ -7,5 +7,7 @@ namespace KikoleSite.Repositories
     public interface IInternationalRepository
     {
         Task<IReadOnlyCollection<CountryDto>> GetCountriesAsync(ulong languageId);
+
+        Task<IReadOnlyCollection<ContinentDto>> GetContinentsAsync(ulong languageId);
     }
 }

@@ -10,6 +10,8 @@ namespace KikoleSite.Models.Dtos
 
         public ushort YearOfBirth { get; set; }
 
+        public ulong ContinentId { get; set; }
+
         public ulong CountryId { get; set; }
 
         public DateTime? ProposalDate { get; set; }

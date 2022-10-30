@@ -35,6 +35,7 @@ namespace KikoleSite.Controllers
             : UserTypes.StandardUser;
 
         private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
+        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _continentsCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
         private readonly IInternationalRepository _internationalRepository;
@@ -75,6 +76,16 @@ namespace KikoleSite.Controllers
                     || c.AllowedNames?.Any(_ => _.Sanitize().Contains(prefix.Sanitize())) == true);
 
             return Json(clubs.Select(x => x.Name));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> AutoCompleteContinents(string prefix)
+        {
+            var continents = (await GetContinentsAsync().ConfigureAwait(false))
+                .Where(c =>
+                    c.Value.Sanitize().Contains(prefix.Sanitize()));
+
+            return Json(continents);
         }
 
         [HttpPost]
@@ -150,6 +161,30 @@ namespace KikoleSite.Controllers
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
+        }
+
+        protected async Task<IReadOnlyDictionary<ulong, string>> GetContinentsAsync()
+        {
+            if (_continentsCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
+            {
+                var lng = ViewHelper.GetLanguage();
+
+                var continents = await _internationalRepository
+                    .GetContinentsAsync((ulong)lng)
+                    .ConfigureAwait(false);
+
+                var apiCountries = continents.Select(c => new Continent(c)).OrderBy(c => c.Name).ToList();
+
+                var dict = apiCountries.ToDictionary(ac => (ulong)ac.Id, ac => ac.Name);
+
+                _continentsCache ??= new ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>();
+                _continentsCache.AddOrUpdate(
+                    CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+                    dict,
+                    (k, v) => dict);
+            }
+
+            return _continentsCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
         }
 
         protected void SetAuthenticationCookie(string token, string login)

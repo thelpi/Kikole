@@ -258,4 +258,7 @@
   <data name="LeaderboardAccess" xml:space="preserve">
     <value>Accès au classement du jour</value>
   </data>
+  <data name="ContinentTitle" xml:space="preserve">
+    <value>Continent :</value>
+  </data>
 </root>

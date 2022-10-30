@@ -242,6 +242,18 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
+            var continents = await GetContinentsAsync()
+                .ConfigureAwait(false);
+
+            if (model.Continent == null
+                || !ulong.TryParse(model.Continent, out var continentId)
+                || !continents.Any(c => continentId == c.Key))
+            {
+                model.ErrorMessage = _localizer["InvalidContinent"];
+                SetPositionsOnModel(model);
+                return View(model);
+            }
+
             var countries = await GetCountriesAsync()
                 .ConfigureAwait(false);
 
@@ -318,6 +330,7 @@ namespace KikoleSite.Controllers
                     { Languages.fr, model.EasyClueFr }
                 },
                 Country = (Countries)countryId,
+                Continent = (Continents)continentId,
                 Name = model.Name,
                 Position = (Positions)positionId,
                 YearOfBirth = yearValue,
@@ -485,6 +498,8 @@ namespace KikoleSite.Controllers
 
             var countries = await GetCountriesAsync().ConfigureAwait(false);
 
+            var continents = await GetContinentsAsync().ConfigureAwait(false);
+
             return pls
                 .Select(p => new PlayerSubmissionModel
                 {
@@ -493,6 +508,7 @@ namespace KikoleSite.Controllers
                     Clue = p.Clue,
                     EasyClue = p.EasyClue,
                     Country = countries[(ulong)p.Country],
+                    Continent = continents[(ulong)p.Continent],
                     Id = p.Id,
                     Login = p.Login,
                     Name = p.Name,
