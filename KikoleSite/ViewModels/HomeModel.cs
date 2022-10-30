@@ -9,6 +9,8 @@ namespace KikoleSite.ViewModels
 {
     public class HomeModel
     {
+        private readonly IClock _clock;
+
         public ulong PlayerId { get; set; }
         public bool IsAdmin { get; set; }
         public bool CanCreateClub { get; set; }
@@ -54,7 +56,12 @@ namespace KikoleSite.ViewModels
         public int NextDay => CurrentDay - 1;
         public int PreviousDay => CurrentDay + 1;
 
-        public HomeModel() { }
+        public DateTime DateOfDay => _clock.Now.AddDays(-CurrentDay);
+
+        public HomeModel(IClock clock)
+        {
+            _clock = clock;
+        }
 
         internal string GetValueFromProposalType(ProposalTypes proposalType)
         {

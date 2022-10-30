@@ -14,7 +14,6 @@ namespace KikoleSite.Models.Statistics
         public int TriesCountTotal { get; set; }
         public int SuccessesCountTotal { get; set; }
         public int BestTime { get; set; }
-
-        public int DaysBefore => (int)(DateTime.Now - Date).TotalDays;
+        public int DaysBefore { get; set; }
     }
 }

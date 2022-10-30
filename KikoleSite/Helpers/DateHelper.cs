@@ -33,36 +33,31 @@ namespace KikoleSite.Helpers
             return dt1 < dt2 ? dt2 : dt1;
         }
 
-        internal static bool IsToday(this DateTime date)
+        internal static bool IsFirstOfMonth(this DateTime date, DateTime reference)
         {
-            return date.Date == DateTime.Now.Date;
-        }
-
-        internal static bool IsFirstOfMonth(this DateTime date, DateTime? reference = null)
-        {
-            reference = (reference ?? DateTime.Now).Date;
+            reference = reference.Date;
             date = date.Date;
-            return date.Year == reference.Value.Year
-                && date.Month == reference.Value.Month
+            return date.Year == reference.Year
+                && date.Month == reference.Month
                 && date.Day == 1;
         }
 
-        internal static bool IsAfterInMonth(this DateTime date, DateTime? reference = null)
+        internal static bool IsAfterInMonth(this DateTime date, DateTime reference)
         {
-            reference = (reference ?? DateTime.Now).Date;
+            reference = reference.Date;
             date = date.Date;
-            return date.Year == reference.Value.Year
-                && date.Month == reference.Value.Month
-                && date.Day >= reference.Value.Day;
+            return date.Year == reference.Year
+                && date.Month == reference.Month
+                && date.Day >= reference.Day;
         }
 
-        internal static bool IsEndOfMonth(this DateTime date, DateTime? reference = null)
+        internal static bool IsEndOfMonth(this DateTime date, DateTime reference)
         {
-            reference = (reference ?? DateTime.Now).Date;
+            reference = reference.Date;
             date = date.Date;
-            return date.Year == reference.Value.Year
-                && date.Month == reference.Value.Month
-                && date.AddDays(1).Month > reference.Value.Month;
+            return date.Year == reference.Year
+                && date.Month == reference.Month
+                && date.AddDays(1).Month > reference.Month;
         }
     }
 }

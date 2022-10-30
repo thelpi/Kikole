@@ -145,16 +145,16 @@ namespace KikoleSite.Controllers
                 .GetMessageAsync(_clock.Now)
                 .ConfigureAwait(false))?.Message;
 
-            var model = new HomeModel { Points = ProposalChart.BasePoints, Message = msg };
+            var model = new HomeModel(_clock) { Points = ProposalChart.BasePoints, Message = msg };
 
             if (day.HasValue
                 && model.CurrentDay != day.Value
                 && (day.Value >= 0 || IsTypeOfUser(UserTypes.Administrator)))
             {
-                var dt = DateTime.Now.Date.AddDays(-day.Value);
+                var dt = _clock.Today.AddDays(-day.Value);
                 if (dt >= ProposalChart.FirstDate)
                 {
-                    model = new HomeModel
+                    model = new HomeModel(_clock)
                     {
                         Points = ProposalChart.BasePoints,
                         CurrentDay = day.Value
@@ -167,7 +167,7 @@ namespace KikoleSite.Controllers
                         .ConfigureAwait(false);
                     if (displayHidden)
                     {
-                        model = new HomeModel
+                        model = new HomeModel(_clock)
                         {
                             Points = ProposalChart.BasePoints,
                             CurrentDay = day.Value
@@ -175,7 +175,7 @@ namespace KikoleSite.Controllers
                     }
                     else
                     {
-                        model = new HomeModel { AlmostThere = true };
+                        model = new HomeModel(_clock) { AlmostThere = true };
                         return View(model);
                     }
                 }
@@ -188,7 +188,7 @@ namespace KikoleSite.Controllers
             return await SetAndGetViewModelAsync(
                     errorMessageForced,
                     model,
-                    DateTime.Now.Date.AddDays(-model.CurrentDay)
+                    _clock.Today.AddDays(-model.CurrentDay)
                 ).ConfigureAwait(false);
         }
 
@@ -225,7 +225,7 @@ namespace KikoleSite.Controllers
             var daysBefore = (uint)model.CurrentDay;
 
             var pInfo = await _playerService
-                .GetPlayerOfTheDayFullInfoAsync(_clock.Now.AddDays(-daysBefore).Date)
+                .GetPlayerOfTheDayFullInfoAsync(_clock.Today.AddDays(-daysBefore))
                 .ConfigureAwait(false);
 
             var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();

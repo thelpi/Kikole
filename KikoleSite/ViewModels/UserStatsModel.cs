@@ -60,7 +60,8 @@ namespace KikoleSite.ViewModels
         public UserStatsModel(UserStat apiStat,
             IReadOnlyCollection<UserBadge> badges,
             IReadOnlyCollection<Badge> allBadges,
-            bool isHimself)
+            bool isHimself,
+            IClock clock)
         {
             Login = apiStat.Login;
             Attempts = apiStat.Attempts;
@@ -75,7 +76,7 @@ namespace KikoleSite.ViewModels
             AverageTimeDayOne = apiStat.AverageTimeDayOne.ToNaString();
             BestTime = apiStat.BestTime.ToNaString();
             Stats = apiStat.Stats
-                .Select(s => new SingleUserStatModel(s))
+                .Select(s => new SingleUserStatModel(s, clock))
                 .ToList();
             Badges = badges;
             MissingBadges = allBadges

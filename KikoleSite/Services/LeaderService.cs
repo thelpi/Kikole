@@ -345,7 +345,7 @@ namespace KikoleSite.Services
 
             var date = ProposalChart.FirstMonth;
 
-            var currentMonth = new DateTime(_clock.Today.Year, _clock.Today.Month, 1);
+            var currentMonth = _clock.FirstOfMonth;
             while (date <= currentMonth)
             {
                 var nextMonth = date.AddMonths(1);

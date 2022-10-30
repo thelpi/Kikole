@@ -21,13 +21,13 @@ namespace KikoleSite
         public DateTime Yesterday => Today.AddDays(-1);
 
         /// <inheritdoc />
-        public DateTime FirstOfMonth => new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        public DateTime FirstOfMonth => new DateTime(Now.Year, Now.Month, 1);
 
         /// <inheritdoc />
-        public DateTime TomorrowEnd => DateTime.Today.AddDays(2).AddSeconds(1);
+        public DateTime TomorrowEnd => Today.AddDays(2).AddSeconds(-1);
 
         /// <inheritdoc />
-        public DateTime NowSeconds => DateTime.Now.AddMilliseconds(-DateTime.Now.Millisecond);
+        public DateTime NowSeconds => Now.AddMilliseconds(-Now.Millisecond);
 
         /// <inheritdoc />
         public bool IsTomorrowIn(int minutes)

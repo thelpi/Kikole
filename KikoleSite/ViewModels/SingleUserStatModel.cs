@@ -27,12 +27,13 @@ namespace KikoleSite.ViewModels
 
         public bool IsCreator { get; }
 
-        public int DaysBefore => (int)(DateTime.Now - Date).TotalDays;
+        public int DaysBefore { get; }
 
-        public SingleUserStatModel(DailyUserStat apiStat)
+        public SingleUserStatModel(DailyUserStat apiStat, IClock clock)
         {
             Answer = apiStat.Answer;
             Date = apiStat.Date;
+            DaysBefore = (int)(clock.Now - Date).TotalDays;
             Points = apiStat.Points;
             PointsPosition = apiStat.PointsPosition;
             Time = apiStat.Time;

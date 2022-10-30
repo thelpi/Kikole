@@ -157,7 +157,8 @@ namespace KikoleSite.Services
                             : (int)leaders.Where(_ => _.IsCurrentDay).Average(_ => _.Points),
                         AveragePointsTotal = leaders.Any()
                             ? (int)leaders.Average(_ => _.Points)
-                            : 0
+                            : 0,
+                        DaysBefore = (int)(_clock.Now - p.ProposalDate.Value).TotalDays
                     };
                 });
 

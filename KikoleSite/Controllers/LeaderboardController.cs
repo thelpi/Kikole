@@ -81,7 +81,7 @@ namespace KikoleSite.Controllers
                 .GetAllBadgesAsync(language)
                 .ConfigureAwait(false);
 
-            return View("User", new UserStatsModel(stats, badges, allBadges, userId == UserId));
+            return View("User", new UserStatsModel(stats, badges, allBadges, userId == UserId, _clock));
         }
 
         [HttpGet]

@@ -19,8 +19,13 @@ namespace KikoleSite.Elite.ViewDatas
         public PlayerWorldRecordsItemData WorldRecords { get; set; }
         public IReadOnlyCollection<SweepItemData> Three00PtsSweeps { get; set; }
         public IReadOnlyCollection<SweepItemData> UntiedSweeps { get; set; }
+        public DateTime DefaultLastDate { get; }
 
         public DateTime DefaultFirstDate => Game.GetEliteFirstDate();
-        public DateTime DefaultLastDate => DateTime.Today;
+
+        public PlayerViewData(IClock clock)
+        {
+            DefaultLastDate = clock.Today;
+        }
     }
 }

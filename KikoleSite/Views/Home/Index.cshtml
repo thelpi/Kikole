@@ -54,7 +54,7 @@
             {
                 <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
             }
-            <input type="date" onchange="navigateDaysHandler(event);" value="@DateTime.Now.AddDays(-Model.CurrentDay).ToString("yyyy-MM-dd")">
+            <input type="date" onchange="navigateDaysHandler(event);" value="@Model.DateOfDay.ToString("yyyy-MM-dd")">
             @if (Model.CurrentDay > 0 || Model.IsAdmin)
             {
                 <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
@@ -85,7 +85,7 @@
             else
             {
                 <div class="smallTopMargin">
-                    <label>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, DateTime.Now.AddDays(-Model.CurrentDay).ToNaString()))</label>
+                    <label>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, Model.DateOfDay.ToNaString()))</label>
                 </div>
             }
             @if (Model.IsAdmin)

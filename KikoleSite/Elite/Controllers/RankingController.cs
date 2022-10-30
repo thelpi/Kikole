@@ -145,7 +145,7 @@ namespace KikoleSite.Elite.Controllers
                         .GetSweepsAsync(game, playerId, false, null, null)
                         .ConfigureAwait(false);
 
-                    return new PlayerViewData
+                    return new PlayerViewData(_clock)
                     {
                         Game = game,
                         Id = p.Id,
