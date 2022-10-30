@@ -152,7 +152,7 @@ namespace KikoleSite.Controllers
                 && (day.Value >= 0 || IsTypeOfUser(UserTypes.Administrator)))
             {
                 var dt = DateTime.Now.Date.AddDays(-day.Value);
-                if (dt >= ProposalChart.FirstDate.Date)
+                if (dt >= ProposalChart.FirstDate)
                 {
                     model = new HomeModel
                     {
@@ -160,12 +160,12 @@ namespace KikoleSite.Controllers
                         CurrentDay = day.Value
                     };
                 }
-                else if (dt == ProposalChart.FirstDate.Date.AddDays(-1))
+                else if (dt == ProposalChart.HiddenDate)
                 {
-                    var foundAll = await _playerService
-                        .GetHasFoundEveryPlayerAsync(UserId)
+                    var displayHidden = await _playerService
+                        .CanDisplayHiddenPlayerAsync(UserId)
                         .ConfigureAwait(false);
-                    if (foundAll)
+                    if (displayHidden)
                     {
                         model = new HomeModel
                         {
@@ -368,7 +368,7 @@ namespace KikoleSite.Controllers
                     .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
                 .ToList();
             model.Clue = clue;
-            model.NoPreviousDay = DateTime.Now.Date.AddDays(-model.CurrentDay) == ProposalChart.FirstDate;
+            model.NoPreviousDay = _clock.Today.AddDays(-model.CurrentDay) == ProposalChart.FirstDate;
             model.CanCreateClub = isPowerUser;
             model.IsAdmin = isAdminUser;
             model.PlayerId = playerCreator?.PlayerId ?? 0;

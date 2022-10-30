@@ -27,6 +27,8 @@ namespace KikoleSite.Models
 
         public static DateTime FirstDate = new DateTime(2022, 03, 05).Date;
 
+        public static DateTime HiddenDate => FirstDate.AddDays(-1);
+
 #if DEBUG
         public static DateTime ContinentValuatedStart = new DateTime(2022, 10, 30).Date;
 #else

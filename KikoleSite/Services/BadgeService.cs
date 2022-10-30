@@ -252,19 +252,17 @@ namespace KikoleSite.Services
                     .ConfigureAwait(false);
             }
 
-            var firstDate = ProposalChart.FirstDate.AddDays(-1);
-
             var endDate = _clock.Today;
 
             var playersHistoryFull = await _playerRepository
-                .GetPlayersOfTheDayAsync(firstDate.Date, endDate)
+                .GetPlayersOfTheDayAsync(ProposalChart.HiddenDate, endDate)
                 .ConfigureAwait(false);
 
             var leadersHistoryFull = await GetLeadersHistoryAsync(
-                    endDate, firstDate.Date)
+                    endDate, ProposalChart.HiddenDate)
                 .ConfigureAwait(false);
 
-            var date = firstDate.Date;
+            var date = ProposalChart.HiddenDate;
             while (date <= endDate)
             {
                 var leaders = leadersHistoryFull

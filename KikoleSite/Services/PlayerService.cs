@@ -286,8 +286,17 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<bool> GetHasFoundEveryPlayerAsync(ulong userId)
+        public async Task<bool> CanDisplayHiddenPlayerAsync(ulong userId)
         {
+            var leaderFound = await _leaderRepository
+                .GetUserLeadersAsync(ProposalChart.HiddenDate, ProposalChart.HiddenDate, false, userId)
+                .ConfigureAwait(false);
+
+            if (leaderFound.Count > 0)
+            {
+                return true;
+            }
+
             var createdPlayers = await _playerRepository
                 .GetPlayersByCreatorAsync(userId, true)
                 .ConfigureAwait(false);

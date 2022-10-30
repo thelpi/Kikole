@@ -96,10 +96,10 @@ namespace KikoleSite.Services
         Task<IReadOnlyDictionary<Languages, (string clue, string easyclue)>> GetPlayerCluesAsync(ulong playerId, IReadOnlyCollection<Languages> languages);
 
         /// <summary>
-        /// Gets if a user has found every players; doesn't include the special first player.
+        /// Checks if the special player can be displayed.
         /// </summary>
         /// <param name="userId">User identifier.</param>
-        /// <returns><c>True</c> if every player found.</returns>
-        Task<bool> GetHasFoundEveryPlayerAsync(ulong userId);
+        /// <returns><c>True</c> if displayable.</returns>
+        Task<bool> CanDisplayHiddenPlayerAsync(ulong userId);
     }
 }
