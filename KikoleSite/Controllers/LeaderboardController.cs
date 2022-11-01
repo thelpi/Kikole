@@ -211,6 +211,15 @@ namespace KikoleSite.Controllers
                 .CanSeeTodayLeaderboardAsync(UserId)
                 .ConfigureAwait(false);
 
+            // this case usually happens the first of the month
+            // the former code switch to the previous month
+            if (!foundTodayEnsured
+                && minDate >= _clock.Today
+                && maxDate >= _clock.Today)
+            {
+                return (new List<Models.LeaderboardItem>(), foundTodayEnsured);
+            }
+
             minDate = EnsureDate(minDate, foundTodayEnsured);
             maxDate = EnsureDate(maxDate, foundTodayEnsured);
 
