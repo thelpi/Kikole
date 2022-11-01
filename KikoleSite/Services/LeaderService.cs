@@ -362,76 +362,17 @@ namespace KikoleSite.Services
                     .ThenBy(x => x.BestTime)
                     .ToList();
 
-                var first = orderedLdItems[0];
-                User firstUser = null;
-                if (!users.ContainsKey(first.UserId))
+                var firstUser = GetUserAtPalmaresPosition(users, orderedLdItems, 0);
+                var secondUser = GetUserAtPalmaresPosition(users, orderedLdItems, 1);
+                var thirdUser = GetUserAtPalmaresPosition(users, orderedLdItems, 2);
+
+                if (firstUser != null && secondUser != null && thirdUser != null)
                 {
-                    firstUser = new User(
-                        new UserDto
-                        {
-                            Id = first.UserId,
-                            Login = first.UserName
-                        });
-                    users.Add(first.UserId, (firstUser, 1, 0, 0));
-                }
-                else
-                {
-                    firstUser = users[first.UserId].Item1;
-                    users[first.UserId] = (
+                    months.Add((date.Month, date.Year), (
                         firstUser,
-                        users[first.UserId].Item2 + 1,
-                        users[first.UserId].Item3,
-                        users[first.UserId].Item4);
-                }
-
-                var second = orderedLdItems[1];
-                User secondUser = null;
-                if (!users.ContainsKey(second.UserId))
-                {
-                    secondUser = new User(
-                        new UserDto
-                        {
-                            Id = second.UserId,
-                            Login = second.UserName
-                        });
-                    users.Add(second.UserId, (secondUser, 0, 1, 0));
-                }
-                else
-                {
-                    secondUser = users[second.UserId].Item1;
-                    users[second.UserId] = (
                         secondUser,
-                        users[second.UserId].Item2,
-                        users[second.UserId].Item3 + 1,
-                        users[second.UserId].Item4);
+                        thirdUser));
                 }
-
-                var third = orderedLdItems[2];
-                User thirdUser = null;
-                if (!users.ContainsKey(third.UserId))
-                {
-                    thirdUser = new User(
-                        new UserDto
-                        {
-                            Id = third.UserId,
-                            Login = third.UserName
-                        });
-                    users.Add(third.UserId, (thirdUser, 0, 0, 1));
-                }
-                else
-                {
-                    thirdUser = users[third.UserId].Item1;
-                    users[third.UserId] = (
-                        thirdUser,
-                        users[third.UserId].Item2,
-                        users[third.UserId].Item3,
-                        users[third.UserId].Item4 + 1);
-                }
-
-                months.Add((date.Month, date.Year), (
-                    firstUser,
-                    secondUser,
-                    thirdUser));
 
                 date = nextMonth;
             }
@@ -446,6 +387,38 @@ namespace KikoleSite.Services
                     .ThenByDescending(x => x.Item4)
                     .ToList()
             };
+        }
+
+        private static User GetUserAtPalmaresPosition(Dictionary<ulong, (User, int, int, int)> users, List<LeaderboardItem> orderedLdItems, int i)
+        {
+            if (i >= orderedLdItems.Count)
+                return null;
+
+            var adds = (i == 0 ? 1 : 0, i == 1 ? 1 : 0, i == 2 ? 1 : 0);
+
+            var item = orderedLdItems[i];
+            User user;
+            if (!users.ContainsKey(item.UserId))
+            {
+                user = new User(
+                    new UserDto
+                    {
+                        Id = item.UserId,
+                        Login = item.UserName
+                    });
+                users.Add(item.UserId, (user, adds.Item1, adds.Item2, adds.Item3));
+            }
+            else
+            {
+                user = users[item.UserId].Item1;
+                users[item.UserId] = (
+                    user,
+                    users[item.UserId].Item2 + adds.Item1,
+                    users[item.UserId].Item3 + adds.Item2,
+                    users[item.UserId].Item4 + adds.Item3);
+            }
+
+            return user;
         }
 
         private async Task<List<UserDto>> GetUsersFromIdsAsync(IEnumerable<ulong> allUsersId)
