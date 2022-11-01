@@ -57,12 +57,12 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            var foundToday = await _proposalService
-                .CanSeeTodayLeaderboardAsync(UserId)
+            var todayGrant = await _proposalService
+                .GetGrantAccessForDayAsync(UserId, _clock.Today)
                 .ConfigureAwait(false);
 
             var stats = await _leaderService
-                .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName, foundToday)
+                .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName, todayGrant != DayGrantTypes.None)
                 .ConfigureAwait(false);
 
             if (stats == null)
@@ -74,7 +74,7 @@ namespace KikoleSite.Controllers
             var language = ViewHelper.GetLanguage();
 
             var badges = await _badgeService
-                 .GetUserBadgesAsync(userId, UserId, language, foundToday)
+                 .GetUserBadgesAsync(userId, UserId, language, todayGrant != DayGrantTypes.None)
                  .ConfigureAwait(false);
 
             var allBadges = await _badgeService
@@ -194,12 +194,11 @@ namespace KikoleSite.Controllers
             if (user == null || user.UserTypeId == (int)UserTypes.Administrator)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            var canSee = actualDate.Date < _clock.Today
-                || await _proposalService
-                    .CanSeeTodayLeaderboardAsync(UserId)
-                    .ConfigureAwait(false);
+            var canSee = await _proposalService
+                .GetGrantAccessForDayAsync(UserId, actualDate.Date)
+                .ConfigureAwait(false);
 
-            if (!canSee)
+            if (canSee != DayGrantTypes.Creator && canSee != DayGrantTypes.Found && canSee != DayGrantTypes.Admin)
                 return RedirectToAction("ErrorIndex", "Home");
 
             var player = await _playerService
@@ -272,24 +271,24 @@ namespace KikoleSite.Controllers
             return model;
         }
 
-        private async Task<(IReadOnlyCollection<Models.LeaderboardItem>, bool)> GetLeaderboardAsync(
-            DateTime minDate, DateTime maxDate, LeaderSorts sortType, bool? foundToday)
+        private async Task<(IReadOnlyCollection<Models.LeaderboardItem>, DayGrantTypes)> GetLeaderboardAsync(
+            DateTime minDate, DateTime maxDate, LeaderSorts sortType, DayGrantTypes? todayGrant)
         {
-            var foundTodayEnsured = foundToday ?? await _proposalService
-                .CanSeeTodayLeaderboardAsync(UserId)
+            var todayGrantEnsured = todayGrant ?? await _proposalService
+                .GetGrantAccessForDayAsync(UserId, _clock.Today)
                 .ConfigureAwait(false);
 
             // this case usually happens the first of the month
             // the former code switch to the previous month
-            if (!foundTodayEnsured
+            if (todayGrantEnsured == DayGrantTypes.None
                 && minDate >= _clock.Today
                 && maxDate >= _clock.Today)
             {
-                return (new List<Models.LeaderboardItem>(), foundTodayEnsured);
+                return (new List<Models.LeaderboardItem>(), todayGrantEnsured);
             }
 
-            minDate = EnsureDate(minDate, foundTodayEnsured);
-            maxDate = EnsureDate(maxDate, foundTodayEnsured);
+            minDate = EnsureDate(minDate, todayGrantEnsured);
+            maxDate = EnsureDate(maxDate, todayGrantEnsured);
 
             if (maxDate < minDate)
             {
@@ -302,20 +301,20 @@ namespace KikoleSite.Controllers
                 .GetLeaderboardAsync(minDate, maxDate, sortType)
                 .ConfigureAwait(false);
 
-            return (board, foundTodayEnsured);
+            return (board, todayGrantEnsured);
         }
 
-        private async Task<(Models.Dayboard, bool)> GetDailyboardAsync(
-            DateTime date, DayLeaderSorts sortType, bool? foundToday)
+        private async Task<(Models.Dayboard, DayGrantTypes)> GetDailyboardAsync(
+            DateTime date, DayLeaderSorts sortType, DayGrantTypes? todayGrant)
         {
-            var foundTodayEnsured = foundToday ?? await _proposalService
-                .CanSeeTodayLeaderboardAsync(UserId)
+            var todayGrantEnsured = todayGrant ?? await _proposalService
+                .GetGrantAccessForDayAsync(UserId, _clock.Today)
                 .ConfigureAwait(false);
 
-            date = EnsureDate(date, true);
+            date = EnsureDate(date, DayGrantTypes.Found); // anything but "None"
 
             Models.Dayboard dayboard;
-            if (date == _clock.Today && !foundTodayEnsured)
+            if (date == _clock.Today && todayGrantEnsured == DayGrantTypes.None)
             {
                 dayboard = new Models.Dayboard
                 {
@@ -331,17 +330,17 @@ namespace KikoleSite.Controllers
                     .ConfigureAwait(false);
             }
 
-            return (dayboard, foundTodayEnsured);
+            return (dayboard, todayGrantEnsured);
         }
 
-        private DateTime EnsureDate(DateTime date, bool foundToday)
+        private DateTime EnsureDate(DateTime date, DayGrantTypes todayGrant)
         {
             if (date.Date > _clock.Today)
             {
                 date = _clock.Today;
             }
 
-            if (!foundToday && date.Date == _clock.Today)
+            if (todayGrant == DayGrantTypes.None && date.Date == _clock.Today)
             {
                 date = _clock.Yesterday;
             }

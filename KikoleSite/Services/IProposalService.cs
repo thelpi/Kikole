@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 
 namespace KikoleSite.Services
@@ -32,18 +33,11 @@ namespace KikoleSite.Services
         Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
 
         /// <summary>
-        /// Checks if an user can see the daily leaderboard today.
+        /// Checks grant access of a user for the specified day.
         /// </summary>
         /// <param name="userId">User identifier.</param>
-        /// <returns>
-        /// <c>True</c> if leaderboard is available; 4 ways:
-        /// <list type="bullet">
-        /// <item>User is administrator.</item>
-        /// <item>User has found the player today.</item>
-        /// <item>User has requested the leaderboard (against points).</item>
-        /// <item>User has created today's player.</item>
-        /// </list>
-        /// </returns>
-        Task<bool> CanSeeTodayLeaderboardAsync(ulong userId);
+        /// <param name="date">Day to check.</param>
+        /// <returns>Grant type.</returns>
+        Task<DayGrantTypes> GetGrantAccessForDayAsync(ulong userId, DateTime date);
     }
 }

@@ -115,40 +115,43 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<bool> CanSeeTodayLeaderboardAsync(ulong userId)
+        public async Task<DayGrantTypes> GetGrantAccessForDayAsync(ulong userId, DateTime date)
         {
             if (userId == 0)
-                return false;
+                return DayGrantTypes.None;
 
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
                 .ConfigureAwait(false);
 
             if (user == null)
-                return false;
+                return DayGrantTypes.None;
 
             if (user.UserTypeId == (int)UserTypes.Administrator)
-                return true;
+                return DayGrantTypes.Admin;
 
-            var proposals = await _proposalRepository
-                .GetProposalsAsync(_clock.Today, userId)
+            var p = await _playerHandler
+                .GetPlayerOfTheDayFullInfoAsync(date.Date)
                 .ConfigureAwait(false);
 
-            if (proposals.Any(_ => _.ProposalTypeId == (ulong)ProposalTypes.Leaderboard))
-                return true;
+            if (p.Player.CreationUserId == userId)
+                return DayGrantTypes.Creator;
 
             var leaders = await _leaderRepository
-                .GetUserLeadersAsync(_clock.Today, _clock.Today, true, userId)
+                .GetUserLeadersAsync(date.Date, date.Date, true, userId)
                 .ConfigureAwait(false);
 
             if (leaders.Count > 0)
-                return true;
+                return DayGrantTypes.Found;
 
-            var p = await _playerHandler
-                .GetPlayerOfTheDayFullInfoAsync(_clock.Today)
+            var proposals = await _proposalRepository
+                .GetProposalsAsync(date.Date, userId)
                 .ConfigureAwait(false);
 
-            return p.Player.CreationUserId == userId;
+            if (proposals.Any(_ => _.ProposalTypeId == (ulong)ProposalTypes.Leaderboard))
+                return DayGrantTypes.PaidBoard;
+
+            return DayGrantTypes.None;
         }
 
         internal static List<ProposalResponse> GetProposalResponsesWithPoints(
