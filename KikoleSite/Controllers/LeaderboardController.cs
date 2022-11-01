@@ -177,6 +177,74 @@ namespace KikoleSite.Controllers
             return View("KikolesStats");
         }
 
+        [HttpGet]
+        [Authorization]
+        public async Task<IActionResult> UserDay(ulong userId, string date)
+        {
+            if (!DateTime.TryParse(date, out var actualDate)
+                || actualDate.Date > _clock.Today
+                || actualDate.Date < Models.ProposalChart.HiddenDate)
+            {
+                return RedirectToAction("ErrorIndex", "Home");
+            }
+
+            var user = await _userRepository
+                .GetUserByIdAsync(userId)
+                .ConfigureAwait(false);
+            if (user == null || user.UserTypeId == (int)UserTypes.Administrator)
+                return RedirectToAction("ErrorIndex", "Home");
+
+            var canSee = actualDate.Date < _clock.Today
+                || await _proposalService
+                    .CanSeeTodayLeaderboardAsync(UserId)
+                    .ConfigureAwait(false);
+
+            if (!canSee)
+                return RedirectToAction("ErrorIndex", "Home");
+
+            var player = await _playerService
+                .GetPlayerOfTheDayFullInfoAsync(actualDate.Date)
+                .ConfigureAwait(false);
+
+            if (player.Player.CreationUserId == userId)
+                return RedirectToAction("ErrorIndex", "Home");
+
+            var db = await _leaderService
+                .GetDayboardAsync(actualDate.Date, DayLeaderSorts.BestTime)
+                .ConfigureAwait(false);
+
+            var proposals = await _proposalService
+                .GetProposalsAsync(actualDate.Date, userId)
+                .ConfigureAwait(false);
+
+            var items = new List<UserDayItemModel>(proposals.Count);
+            var pts = Models.ProposalChart.BasePoints;
+            foreach (var proposal in proposals)
+            {
+                items.Add(new UserDayItemModel
+                {
+                    Date = proposal.Date,
+                    PointsLost = pts - proposal.TotalPoints,
+                    PointsRemaining = proposal.TotalPoints,
+                    Success = proposal.Successful,
+                    Type = proposal.ProposalType,
+                    Value = proposal.RawValue
+                });
+                pts = proposal.TotalPoints;
+            }
+
+            var model = new UserDayModel
+            {
+                ProposalDate = actualDate.Date,
+                PlayerName = player.Player.Name,
+                UserLogin = user.Login,
+                ProposalDetails = items,
+                UserScore = db.Leaders.FirstOrDefault(_ => _.UserId == userId)?.Points ?? pts
+            };
+
+            return View("UserDay", model);
+        }
+
         private async Task<LeaderboardModel> InitializeModelAsync(LeaderboardModel model)
         {
             if (model == null)

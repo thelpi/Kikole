@@ -32,7 +32,7 @@
                     <td class="tabData">@leader.Rank</td>
                     <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
                     <td class="tabData">@leader.TimeString</td>
-                    <td class="tabData">@leader.Points</td>
+                    <td class="tabData"><a href="/Leaderboard/UserDay?userId=@leader.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">@leader.Points</a></td>
                 </tr>
                 lastRank = leader.Rank + 1;
                 i++;
@@ -44,7 +44,7 @@
                     <td class="tabData">@lastRank</td>
                     <td class="tabData redtext"><a href="/Leaderboard?userId=@search.UserId">@search.UserName</a></td>
                     <td class="tabData">@localizer["NotYetTime"]</td>
-                    <td class="tabData">(@search.Points)</td>
+                    <td class="tabData"><a href="/Leaderboard/UserDay?userId=@search.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">(@search.Points)</a></td>
                 </tr>
                 i++;
             }

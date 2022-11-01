@@ -60,6 +60,11 @@ namespace KikoleSite.Helpers
             return data.ToString(IsFrench() ? DateTimePatternFr : DateTimePatternEn);
         }
 
+        public static string ToStringHour(this DateTime data)
+        {
+            return data.ToString($"{(IsFrench() ? DateTimePatternFr : DateTimePatternEn)} hh:mm:ss");
+        }
+
         public static string ToYesNo(this bool data)
         {
             return data
@@ -139,6 +144,25 @@ namespace KikoleSite.Helpers
                 ProposalTypes.Country => IsFrench() ? $"{(withFrenchDe ? "de " : "")}nationalité" : "country",
                 ProposalTypes.Continent => IsFrench() ? $"{(withFrenchDe ? "de " : "")}continent" : "continent",
                 ProposalTypes.Position => IsFrench() ? $"{(withFrenchDe ? "de " : "")}position" : "position",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        public static string GetSimpleLabel(this ProposalTypes type)
+        {
+            if (!IsFrench())
+                return type.ToString();
+
+            return type switch
+            {
+                ProposalTypes.Name => "Nom",
+                ProposalTypes.Club => "Club",
+                ProposalTypes.Year => "Année",
+                ProposalTypes.Country => "Pays",
+                ProposalTypes.Continent => "Continent",
+                ProposalTypes.Position =>  "Position",
+                ProposalTypes.Leaderboard => "Classement",
+                ProposalTypes.Clue => "Indice",
                 _ => throw new NotImplementedException(),
             };
         }

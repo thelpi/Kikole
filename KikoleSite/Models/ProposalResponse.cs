@@ -17,6 +17,10 @@ namespace KikoleSite.Models
 
         public object Value { get; }
 
+        public string RawValue { get; }
+
+        public DateTime Date { get; }
+
         public string Tip { get; }
 
         public (int, bool) LostPoints { get; }
@@ -38,6 +42,8 @@ namespace KikoleSite.Models
 
             if (success.HasValue)
                 Successful = success.Value;
+
+            RawValue = sourceValue;
 
             switch (ProposalType)
             {
@@ -80,6 +86,9 @@ namespace KikoleSite.Models
                     Value = Successful
                         ? player.Player.CountryId
                         : (object)sourceValue;
+                    RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
+                        ? tmpRawCountry.ToString()
+                        : RawValue;
                     break;
 
                 case ProposalTypes.Continent:
@@ -88,6 +97,9 @@ namespace KikoleSite.Models
                     Value = Successful
                         ? player.Player.ContinentId
                         : (object)sourceValue;
+                    RawValue = Enum.TryParse<Continents>(sourceValue, out var tmpRawContinent)
+                        ? tmpRawContinent.ToString()
+                        : RawValue;
                     break;
 
                 case ProposalTypes.Position:
@@ -96,6 +108,9 @@ namespace KikoleSite.Models
                     Value = Successful
                         ? player.Player.PositionId
                         : (object)sourceValue;
+                    RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
+                        ? tmpRawPosition.ToString()
+                        : RawValue;
                     break;
 
                 case ProposalTypes.Year:
@@ -111,6 +126,7 @@ namespace KikoleSite.Models
                     if (!success.HasValue)
                         Successful = true;
                     Value = null;
+                    RawValue = string.Empty;
                     break;
             }
 
@@ -123,6 +139,7 @@ namespace KikoleSite.Models
         internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
             : this(request.ProposalType, request.Value, null, player)
         {
+            Date = request.ProposalDateTime;
             Tip = request.GetTip(player.Player, resources);
         }
 
@@ -136,6 +153,7 @@ namespace KikoleSite.Models
                     ? resources["TipOlderPlayerShort"]
                     : resources["TipYoungerPlayerShort"];
             }
+            Date = dto.CreationDate;
         }
 
         internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)

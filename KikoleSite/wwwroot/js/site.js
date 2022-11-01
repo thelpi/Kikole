@@ -231,8 +231,10 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYet
                     newCell.classList.add('tabData');
 
                     var newCell = newRow.insertCell();
-                    var newText = document.createTextNode(e.points);
-                    newCell.appendChild(newText);
+                    var userLink = document.createElement('a');
+                    userLink.href = '/Leaderboard/UserDay?userId=' + e.userId + '&date=' + data.date;
+                    userLink.append(document.createTextNode(e.points));
+                    newCell.appendChild(userLink);
                     newCell.classList.add('tabData');
 
                     lastRank = e.rank + 1;
@@ -263,8 +265,10 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYet
                     newCell.classList.add('tabData');
 
                     var newCell = newRow.insertCell();
-                    var newText = document.createTextNode('(' + e.points + ')');
-                    newCell.appendChild(newText);
+                    var userLink = document.createElement('a');
+                    userLink.href = '/Leaderboard/UserDay?userId=' + e.userId + '&date=' + data.date;
+                    userLink.append(document.createTextNode('(' + e.points + ')'));
+                    newCell.appendChild(userLink);
                     newCell.classList.add('tabData');
 
                     i++;

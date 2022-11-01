@@ -57,7 +57,7 @@ namespace KikoleSite.Services
                 .GetProposalsAsync(proposalDate, userId)
                 .ConfigureAwait(false);
 
-            var r = new List<ProposalResponse>(0);
+            var r = new List<ProposalResponse>();
             if (datas.Count > 0)
             {
                 var pInfo = await _playerHandler

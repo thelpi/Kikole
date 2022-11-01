@@ -1,0 +1,41 @@
+﻿@using KikoleSite.Helpers
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model UserDayModel
+
+<h3>@localizer["ActionDetailsFor"] <span class="redtext">@Model.UserLogin</span> - @localizer["PlayerOf"] <span class="greentext">@Model.ProposalDate.ToNaString()</span></h3>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabel">@localizer["PlayerToFind"]</label>
+    <label class="redtext">@Model.PlayerName</label>
+</div>
+<div class="smallTopMargin">
+    <label class="mainFormSectionLabel">@localizer["FinalScore"]</label>
+    <label class="redtext">@Model.UserScore</label>
+</div>
+
+<table class="smallTopMargin">
+    <thead>
+        <tr>
+            <th class="tabDataHead">@localizer["Date"]</th>
+            <th class="tabDataHead">@localizer["Type"]</th>
+            <th class="tabDataHead">@localizer["Value"]</th>
+            <th class="tabDataHead">@localizer["IsSuccess"]</th>
+            <th class="tabDataHead">@localizer["LostPoints"]</th>
+            <th class="tabDataHead">@localizer["RemainingPoints"]</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ProposalDetails)
+        {
+            var tdSucessClass = item.Success ? "fillCorrect" : "fillIncorrect";
+            var typeClass = $"fill{(int)item.Type}";
+            <tr>
+                <td class="tabData">@item.Date.ToStringHour()</td>
+                <td class="tabData @typeClass">@item.Type.GetSimpleLabel()</td>
+                <td class="tabData">@item.Value</td>
+                <td class="tabData @tdSucessClass">@item.Success.ToYesNo()</td>
+                <td class="tabData">@item.PointsLost</td>
+                <td class="tabData">@item.PointsRemaining</td>
+            </tr>
+        }
+    </tbody>
+</table>

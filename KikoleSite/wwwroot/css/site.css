@@ -44,6 +44,46 @@ body {
     background-color: white;
 }
 
+.fillCorrect {
+    background-color: palegreen;
+}
+
+.fillIncorrect {
+    background-color: lightcoral;
+}
+
+.fill1 {
+    background-color: peachpuff;
+}
+
+.fill2 {
+    background-color: palevioletred;
+}
+
+.fill3 {
+    background-color: aquamarine;
+}
+
+.fill4 {
+    background-color: darkseagreen;
+}
+
+.fill5 {
+    background-color: goldenrod;
+}
+
+.fill6 {
+    background-color: lightsteelblue;
+}
+
+.fill7 {
+    background-color: mediumspringgreen;
+}
+
+.fill8 {
+    background-color: orchid;
+}
+
 .creator {
     background-color: lavender;
 }
