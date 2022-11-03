@@ -120,6 +120,9 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
 
 /* leaderboard loading */
 var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText) {
+    if (!dateMin || !dateMax) {
+        return;
+    }
     $.ajax({
         url: '/global-leaderboard-details?sortType=' + sortType + '&minimalDate=' + dateMin + '&maximalDate=' + dateMax,
         type: "GET",
@@ -192,6 +195,9 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
 };
 
 var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText) {
+    if (!date) {
+        return;
+    }
     $.ajax({
         url: '/daily-leaderboard-details?sortType=' + sortType + '&date=' + date,
         type: "GET",

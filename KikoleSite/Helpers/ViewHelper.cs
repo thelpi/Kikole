@@ -62,7 +62,7 @@ namespace KikoleSite.Helpers
 
         public static string ToStringHour(this DateTime data)
         {
-            return data.ToString($"{(IsFrench() ? DateTimePatternFr : DateTimePatternEn)} hh:mm:ss");
+            return data.ToString($"{(IsFrench() ? DateTimePatternFr : DateTimePatternEn)} HH:mm:ss");
         }
 
         public static string ToYesNo(this bool data)

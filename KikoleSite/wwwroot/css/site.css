@@ -53,31 +53,31 @@ body {
 }
 
 .fill1 {
-    background-color: peachpuff;
+    background-color: lightblue;
 }
 
 .fill2 {
-    background-color: palevioletred;
+    background-color: lightskyblue;
 }
 
 .fill3 {
-    background-color: aquamarine;
-}
-
-.fill4 {
-    background-color: darkseagreen;
-}
-
-.fill5 {
-    background-color: goldenrod;
-}
-
-.fill6 {
     background-color: lightsteelblue;
 }
 
+.fill4 {
+    background-color: powderblue;
+}
+
+.fill5 {
+    background-color: skyblue;
+}
+
+.fill6 {
+    background-color: turquoise;
+}
+
 .fill7 {
-    background-color: mediumspringgreen;
+    background-color: paleturquoise;
 }
 
 .fill8 {
@@ -159,4 +159,18 @@ collapsiblecontent {
 .tabDataBold {
     text-align: center;
     font-weight: bold;
+}
+
+.tabDataUpDown {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.tabDataHeadUpDown {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.tabDataHeadBg {
+    background-color: lightgrey;
 }

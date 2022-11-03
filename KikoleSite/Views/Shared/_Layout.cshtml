@@ -19,7 +19,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kikole?</title>
 
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css?v=1" />
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     </environment>
@@ -65,7 +65,7 @@
     <environment exclude="Development">
         <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     </environment>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site.js?v=1" asp-append-version="true"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
 
     @RenderSection("Scripts", required: false)
