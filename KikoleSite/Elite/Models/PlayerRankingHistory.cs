@@ -53,7 +53,7 @@ namespace KikoleSite.Elite.Models
             PointsHighlights = rpm;
 
             var groupHistoryRank = new List<DateInfo>();
-            int currentRank = -1;
+            var currentRank = -1;
             var counter = 1;
             foreach (var rk in rankings)
             {

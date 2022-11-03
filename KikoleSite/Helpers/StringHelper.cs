@@ -7,9 +7,9 @@ namespace KikoleSite.Helpers
 {
     internal static class StringHelper
     {
-        const string Iso8859Code = "ISO-8859-8";
-        const char Separator = ';';
-        const decimal NameToleranceMax = 0.5M;
+        private const string Iso8859Code = "ISO-8859-8";
+        private const char Separator = ';';
+        private const decimal NameToleranceMax = 0.5M;
 
         internal static bool ContainsApproximately(this string source, string value)
         {
@@ -67,22 +67,22 @@ namespace KikoleSite.Helpers
                 return s.Length;
             }
 
-            int n = s.Length;
-            int m = t.Length;
-            int[,] d = new int[n + 1, m + 1];
+            var n = s.Length;
+            var m = t.Length;
+            var d = new int[n + 1, m + 1];
 
             // initialize the top and right of the table to 0, 1, 2, ...
-            for (int i = 0; i <= n; d[i, 0] = i++) ;
-            for (int j = 1; j <= m; d[0, j] = j++) ;
+            for (var i = 0; i <= n; d[i, 0] = i++) ;
+            for (var j = 1; j <= m; d[0, j] = j++) ;
 
-            for (int i = 1; i <= n; i++)
+            for (var i = 1; i <= n; i++)
             {
-                for (int j = 1; j <= m; j++)
+                for (var j = 1; j <= m; j++)
                 {
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                    int min1 = d[i - 1, j] + 1;
-                    int min2 = d[i, j - 1] + 1;
-                    int min3 = d[i - 1, j - 1] + cost;
+                    var cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                    var min1 = d[i - 1, j] + 1;
+                    var min2 = d[i, j - 1] + 1;
+                    var min3 = d[i - 1, j - 1] + cost;
                     d[i, j] = Math.Min(Math.Min(min1, min2), min3);
                 }
             }

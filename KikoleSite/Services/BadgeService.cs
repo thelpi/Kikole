@@ -643,7 +643,7 @@ namespace KikoleSite.Services
             Func<LeaderDto, object, object> aggFunc,
             Func<object, bool> checkFunc)
         {
-            object agg = initialValue;
+            var agg = initialValue;
             var i = 0;
             var dateToConsider = leader.ProposalDate;
             do

@@ -160,7 +160,7 @@ namespace KikoleSite.Helpers
                 ProposalTypes.Year => "Année",
                 ProposalTypes.Country => "Pays",
                 ProposalTypes.Continent => "Continent",
-                ProposalTypes.Position =>  "Position",
+                ProposalTypes.Position => "Position",
                 ProposalTypes.Leaderboard => "Classement",
                 ProposalTypes.Clue => "Indice",
                 _ => throw new NotImplementedException(),

@@ -322,7 +322,7 @@ namespace KikoleSite.Services
                     UserName = users[propUserGroup.Key].Login
                 };
 
-                ProposalService.GetProposalResponsesWithPoints(propUserGroup, player, out int points, _resources);
+                ProposalService.GetProposalResponsesWithPoints(propUserGroup, player, out var points, _resources);
                 dsi.Points = points;
 
                 searchers.Add(dsi);

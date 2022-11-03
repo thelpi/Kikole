@@ -511,7 +511,7 @@ namespace KikoleSite.Elite.Providers
                             if (time.HasValue)
                             {
                                 for (var i = 0; i < playersCountForTime; i++)
-                                    points = StageLeaderboard.PointsChart.TryGetValue(points, out int tmpPoints) ? tmpPoints : points - 1;
+                                    points = StageLeaderboard.PointsChart.TryGetValue(points, out var tmpPoints) ? tmpPoints : points - 1;
                             }
                             rank += playersCountForTime;
                             playersCountForTime = 1;

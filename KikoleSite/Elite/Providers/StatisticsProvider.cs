@@ -323,7 +323,7 @@ namespace KikoleSite.Elite.Providers
 
                         // compute points
                         long? time = null;
-                        int playersCountForTime = 1;
+                        var playersCountForTime = 1;
                         var points = StageLeaderboard.BasePoints;
                         foreach (var entry in entriesAtDate)
                         {
@@ -332,7 +332,7 @@ namespace KikoleSite.Elite.Providers
                                 if (time.HasValue)
                                 {
                                     for (var i = 0; i < playersCountForTime; i++)
-                                        points = StageLeaderboard.PointsChart.TryGetValue(points, out int tmpPoints) ? tmpPoints : points - 1;
+                                        points = StageLeaderboard.PointsChart.TryGetValue(points, out var tmpPoints) ? tmpPoints : points - 1;
                                 }
                                 playersCountForTime = 1;
                                 time = entry.Time;
@@ -512,7 +512,7 @@ namespace KikoleSite.Elite.Providers
                 foreach (var timesGroup in entryGroup.GroupBy(l => l.Time).OrderBy(l => l.Key))
                 {
                     var rank = timesGroup.First().Rank;
-                    bool isUntied = rank == 1 && timesGroup.Count() == 1;
+                    var isUntied = rank == 1 && timesGroup.Count() == 1;
 
                     foreach (var timeEntry in timesGroup)
                     {
@@ -843,7 +843,7 @@ namespace KikoleSite.Elite.Providers
                     .ToList();
 
                 long? time = null;
-                int playersCountForTime = 1;
+                var playersCountForTime = 1;
                 var points = StageLeaderboard.BasePoints;
                 foreach (var rec in bestByPlayer)
                 {
@@ -852,7 +852,7 @@ namespace KikoleSite.Elite.Providers
                         if (time.HasValue)
                         {
                             for (var i = 0; i < playersCountForTime; i++)
-                                points = StageLeaderboard.PointsChart.TryGetValue(points, out int tmpPoints) ? tmpPoints : points - 1;
+                                points = StageLeaderboard.PointsChart.TryGetValue(points, out var tmpPoints) ? tmpPoints : points - 1;
                         }
                         AddOrUpdate(points, rec);
                         playersCountForTime = 1;

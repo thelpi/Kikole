@@ -58,7 +58,7 @@ namespace KikoleSite.Repositories
 
         protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters, T defaultValue = default)
         {
-            T result = defaultValue;
+            var result = defaultValue;
 
             using (var connection = new MySqlConnection(_connectionString))
             {

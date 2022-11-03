@@ -26,7 +26,7 @@ namespace KikoleSite.Repositories
             await ExecuteNonQueryAsync(
                     "UPDATE clubs " +
                     "SET name = @name, allowed_names = @allowed_names " +
-                    "WHERE id = @id", 
+                    "WHERE id = @id",
                     new
                     {
                         name = club.Name,

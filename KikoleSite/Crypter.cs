@@ -9,8 +9,8 @@ namespace KikoleSite
 {
     public class Crypter : ICrypter
     {
-        const string Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        const int GenerateWordSize = 16;
+        private const string Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        private const int GenerateWordSize = 16;
 
         private readonly string _cookieEncryptionKey;
         private readonly string _encryptionKey;

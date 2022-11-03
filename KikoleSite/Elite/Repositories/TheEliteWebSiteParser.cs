@@ -167,7 +167,7 @@ namespace KikoleSite.Elite.Repositories
             var ageString = ExtractPlayerProperty(pageContent, AgePattern);
 
             int? maxYob = null, minYob = null;
-            if (!string.IsNullOrWhiteSpace(ageString) && int.TryParse(ageString, out int age))
+            if (!string.IsNullOrWhiteSpace(ageString) && int.TryParse(ageString, out var age))
             {
                 maxYob = _clock.Today.Year - age;
                 minYob = maxYob - 1;
@@ -218,7 +218,7 @@ namespace KikoleSite.Elite.Repositories
                     continue;
                 }
 
-                var time = ExtractTime(rowDatas[3], out bool failToExtractTime);
+                var time = ExtractTime(rowDatas[3], out var failToExtractTime);
                 if (failToExtractTime || !time.HasValue)
                 {
                     continue;
@@ -352,7 +352,7 @@ namespace KikoleSite.Elite.Repositories
             var uri = new Uri(string.Concat(_configuration.BaseUri, partUri));
 
             string data = null;
-            int attemps = 0;
+            var attemps = 0;
             while (attemps < _configuration.PageAttemps)
             {
                 using var webClient = new WebClient();
@@ -390,14 +390,14 @@ namespace KikoleSite.Elite.Repositories
             timeString = timeString.Replace(UntiedTimeLabel, string.Empty).Trim();
             if (timeString.IndexOf(TimePartsSeparator) >= 0)
             {
-                string[] timeComponents = timeString.Split(TimePartsSeparator);
+                var timeComponents = timeString.Split(TimePartsSeparator);
                 if (timeComponents.Length > 3)
                 {
                     //logs.Add("Invalid time value");
                     failToExtractTime = true;
                     return null;
                 }
-                int hours = 0;
+                var hours = 0;
                 if (timeComponents.Length > 2)
                 {
                     if (!int.TryParse(timeComponents[0], out hours))
@@ -409,13 +409,13 @@ namespace KikoleSite.Elite.Repositories
                     timeComponents[0] = timeComponents[1];
                     timeComponents[1] = timeComponents[2];
                 }
-                if (!int.TryParse(timeComponents[0], out int minutes))
+                if (!int.TryParse(timeComponents[0], out var minutes))
                 {
                     //logs.Add("Invalid time value");
                     failToExtractTime = true;
                     return null;
                 }
-                if (!int.TryParse(timeComponents[1], out int seconds))
+                if (!int.TryParse(timeComponents[1], out var seconds))
                 {
                     //logs.Add("Invalid time value");
                     failToExtractTime = true;
@@ -441,7 +441,7 @@ namespace KikoleSite.Elite.Repositories
 
             if (dateString != ModelExtensions.DefaultLabel)
             {
-                string[] dateComponents = dateString.Split(DatePartsSeparator);
+                var dateComponents = dateString.Split(DatePartsSeparator);
                 if (dateComponents.Length != 3)
                 {
                     //logs.Add("No date found !");
@@ -466,13 +466,13 @@ namespace KikoleSite.Elite.Repositories
                         return null;
                     }
                 }
-                if (!int.TryParse(dateComponents[0], out int day))
+                if (!int.TryParse(dateComponents[0], out var day))
                 {
                     //logs.Add("No date found !");
                     failToExtractDate = true;
                     return null;
                 }
-                if (!int.TryParse(dateComponents[2], out int year))
+                if (!int.TryParse(dateComponents[2], out var year))
                 {
                     //logs.Add("No date found !");
                     failToExtractDate = true;
@@ -496,7 +496,7 @@ namespace KikoleSite.Elite.Repositories
         {
             exit = false;
 
-            string dateString = link.ParentNode.ParentNode.ChildNodes[1].InnerText;
+            var dateString = link.ParentNode.ParentNode.ChildNodes[1].InnerText;
 
             if (string.IsNullOrWhiteSpace(dateString))
             {
@@ -504,7 +504,7 @@ namespace KikoleSite.Elite.Repositories
                 return null;
             }
 
-            DateTime? date = ParseDateFromString(dateString, out bool failToExtractDate);
+            var date = ParseDateFromString(dateString, out var failToExtractDate);
             if (failToExtractDate)
             {
                 exit = true;
@@ -534,7 +534,7 @@ namespace KikoleSite.Elite.Repositories
                 return null;
             }
 
-            DateTime? date = ExtractAndCheckDate(link, out bool exit);
+            var date = ExtractAndCheckDate(link, out var exit);
             if (exit)
             {
                 return null;

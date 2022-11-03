@@ -31,7 +31,7 @@ namespace KikoleSite.Elite.Models
 
         internal virtual int AddStageAndLevelDatas(RankingDto ranking, bool untied)
         {
-            int points = (100 - ranking.Rank) - 2;
+            var points = (100 - ranking.Rank) - 2;
             if (points < 0)
             {
                 points = 0;

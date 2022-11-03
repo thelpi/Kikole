@@ -84,7 +84,7 @@ namespace KikoleSite.Services
 
             var proposalMade = request.MatchAny(proposalsAlready);
 
-            GetProposalResponsesWithPoints(proposalsAlready, pInfo, out int sourcePoints, _resources);
+            GetProposalResponsesWithPoints(proposalsAlready, pInfo, out var sourcePoints, _resources);
 
             response = response.WithTotalPoints(sourcePoints, proposalMade);
 

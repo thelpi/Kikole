@@ -37,7 +37,7 @@ namespace KikoleSite.Elite
 
         public static IEnumerable<DateTime> LoopBetweenDates(this DateTime startDate, DateTime endDate, DateStep stepType, int stepValue)
         {
-            for (DateTime date = startDate.Truncat(stepType); date <= endDate.Truncat(stepType); date = _dateStepDelegates[stepType](date, stepValue))
+            for (var date = startDate.Truncat(stepType); date <= endDate.Truncat(stepType); date = _dateStepDelegates[stepType](date, stepValue))
             {
                 yield return date;
             }

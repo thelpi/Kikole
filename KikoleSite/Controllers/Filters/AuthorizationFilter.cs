@@ -102,7 +102,7 @@ namespace KikoleSite.Controllers.Filters
 
         private (string token, string login) GetAuthenticationCookie(HttpRequest request)
         {
-            var cookieValue = request.Cookies.TryGetValue(KikoleBaseController.CryptedAuthenticationCookieName, out string cookieValueTmp)
+            var cookieValue = request.Cookies.TryGetValue(KikoleBaseController.CryptedAuthenticationCookieName, out var cookieValueTmp)
                 ? _crypter.DecryptCookie(cookieValueTmp)
                 : null;
             if (cookieValue != null)

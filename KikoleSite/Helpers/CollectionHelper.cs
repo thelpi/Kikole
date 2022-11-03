@@ -18,7 +18,7 @@ namespace KikoleSite.Helpers
                 : leaders.OrderBy(keyFunc);
 
             T? currentValue = null;
-            int currentPos = 0;
+            var currentPos = 0;
             return orderedLeaders
                 .Select((l, i) =>
                 {

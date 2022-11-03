@@ -521,7 +521,7 @@ namespace KikoleSite.Controllers
 
         private void AddClubIfValid(List<PlayerClubRequest> clubs, string value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
         {
-            ulong? id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
+            var id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
             if (id.HasValue)
             {
                 clubs.Add(new PlayerClubRequest { ClubId = id.Value, HistoryPosition = i, IsLoan = isLoan });

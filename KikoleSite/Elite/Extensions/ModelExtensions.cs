@@ -208,7 +208,7 @@ namespace KikoleSite.Elite.Extensions
             where T : Ranking
             where TValue : IEquatable<TValue>
         {
-            for (int i = 0; i < rankings.Count; i++)
+            for (var i = 0; i < rankings.Count; i++)
             {
                 rankings[i].SetRank(
                     i == 0 ? null : rankings[i - 1],

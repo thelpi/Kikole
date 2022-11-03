@@ -115,7 +115,7 @@ namespace KikoleSite.ViewModels
                         CountryName = countries[ulong.Parse(cValue)];
                     else
                     {
-                        if (ulong.TryParse(cValue, out ulong cId) && countries.ContainsKey(cId))
+                        if (ulong.TryParse(cValue, out var cId) && countries.ContainsKey(cId))
                             cValue = countries[cId];
                         IncorrectCountries = AddToList(IncorrectCountries, cValue);
                     }
@@ -126,7 +126,7 @@ namespace KikoleSite.ViewModels
                         ContinentName = continents[ulong.Parse(ccValue)];
                     else
                     {
-                        if (ulong.TryParse(ccValue, out ulong cId) && continents.ContainsKey(cId))
+                        if (ulong.TryParse(ccValue, out var cId) && continents.ContainsKey(cId))
                             ccValue = continents[cId];
                         IncorrectContinents = AddToList(IncorrectContinents, ccValue);
                     }
@@ -137,7 +137,7 @@ namespace KikoleSite.ViewModels
                         Position = positions[Convert.ToUInt16(pValue)];
                     else
                     {
-                        if (ulong.TryParse(pValue, out ulong pId) && positions.ContainsKey(pId))
+                        if (ulong.TryParse(pValue, out var pId) && positions.ContainsKey(pId))
                             pValue = positions[pId];
                         IncorrectPositions = AddToList(IncorrectPositions, pValue);
                     }
