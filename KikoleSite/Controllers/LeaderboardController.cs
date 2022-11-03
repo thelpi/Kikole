@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
+using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
@@ -287,8 +288,8 @@ namespace KikoleSite.Controllers
                 return (new List<Models.LeaderboardItem>(), todayGrantEnsured);
             }
 
-            minDate = EnsureDate(minDate, todayGrantEnsured);
-            maxDate = EnsureDate(maxDate, todayGrantEnsured);
+            minDate = await EnsureDateAsync(minDate, todayGrantEnsured).ConfigureAwait(false);
+            maxDate = await EnsureDateAsync(maxDate, todayGrantEnsured).ConfigureAwait(false);
 
             if (maxDate < minDate)
             {
@@ -311,12 +312,12 @@ namespace KikoleSite.Controllers
                 .GetGrantAccessForDayAsync(UserId, _clock.Today)
                 .ConfigureAwait(false);
 
-            date = EnsureDate(date, DayGrantTypes.Found); // anything but "None"
+            date = await EnsureDateAsync(date, DayGrantTypes.Found).ConfigureAwait(false); // any DayGrantTypes but "None"
 
-            Models.Dayboard dayboard;
+            Dayboard dayboard;
             if (date == _clock.Today && todayGrantEnsured == DayGrantTypes.None)
             {
-                dayboard = new Models.Dayboard
+                dayboard = new Dayboard
                 {
                     Date = date,
                     Sort = sortType,
@@ -333,7 +334,7 @@ namespace KikoleSite.Controllers
             return (dayboard, todayGrantEnsured);
         }
 
-        private DateTime EnsureDate(DateTime date, DayGrantTypes todayGrant)
+        private async Task<DateTime> EnsureDateAsync(DateTime date, DayGrantTypes todayGrant)
         {
             if (date.Date > _clock.Today)
             {
@@ -343,6 +344,16 @@ namespace KikoleSite.Controllers
             if (todayGrant == DayGrantTypes.None && date.Date == _clock.Today)
             {
                 date = _clock.Yesterday;
+            }
+
+            if (date.Date <= ProposalChart.HiddenDate)
+            {
+                date = ProposalChart.HiddenDate;
+                var displayHidden = await _playerService
+                    .CanDisplayHiddenPlayerAsync(UserId)
+                    .ConfigureAwait(false);
+                if (!displayHidden)
+                    date = ProposalChart.FirstDate;
             }
 
             return date.Date;
