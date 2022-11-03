@@ -439,6 +439,11 @@ namespace KikoleSite.Services
 
         private int GetSubmittedPlayerPoints(IEnumerable<LeaderDto> datesLeaders, DateTime date)
         {
+            if (date >= ProposalChart.SubmissionNewChartStart)
+            {
+                return ProposalChart.SubmissionPoints;
+            }
+
             // ONLY DAY ONE COST POINTS
             var leadersCosting = ProposalChart.SubmissionBonusPoints
                 - datesLeaders

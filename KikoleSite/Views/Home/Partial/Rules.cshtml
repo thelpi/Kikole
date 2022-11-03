@@ -17,6 +17,7 @@
         <li>@Html.Raw(string.Format(localizer["ClueGuess"].Value, ProposalChart.ProposalTypesCost[ProposalTypes.Clue].points))</li>
         <li>@Html.Raw(string.Format(localizer["GetLeaderboard"].Value, ProposalChart.ProposalTypesCost[ProposalTypes.Leaderboard].points))</li>
         <li>@localizer["GoodGuess"]</li>
+        <li>@Html.Raw(string.Format(localizer["SubmissionPoints"].Value, ProposalChart.SubmissionPoints))</li>
     </ul>
 </div>
 <h4 id="country-rules">@localizer["AboutCountry"]</h4>

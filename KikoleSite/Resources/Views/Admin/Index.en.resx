@@ -211,4 +211,8 @@
   <data name="Continent" xml:space="preserve">
     <value>Continent</value>
   </data>
+  <data name="NewChartLaius" xml:space="preserve">
+    <value>&lt;p&gt;If your kikole is accepted by the moderator, he'll be scheduled for the next available day.&lt;/p&gt;
+&lt;p&gt;On this day, you won't be able to play but you'll win {0} points.&lt;/p&gt;</value>
+  </data>
 </root>

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using KikoleSite.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.ViewModels
@@ -113,5 +112,7 @@ namespace KikoleSite.ViewModels
         public bool DisplayPlayerSubmissionLink { get; set; }
 
         public bool HideCreator { get; set; }
+
+        public bool IsSubmissionNewChart { get; set; }
     }
 }

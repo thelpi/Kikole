@@ -183,4 +183,7 @@
   <data name="StarterPoints" xml:space="preserve">
     <value>Vous commencez avec &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
+  <data name="SubmissionPoints" xml:space="preserve">
+    <value>Si vous proposez un kikolé et qu'il est accepté, vous gagnerez &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points ce jour là.</value>
+  </data>
 </root>

@@ -207,6 +207,7 @@ namespace KikoleSite.Controllers
                 model.InfoMessage = _localizer["PlayerOk"];
             SetPositionsOnModel(model);
             model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
+            model.IsSubmissionNewChart = _clock.Today >= ProposalChart.SubmissionNewChartStart;
             return View(model);
         }
 
