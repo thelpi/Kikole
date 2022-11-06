@@ -215,4 +215,13 @@
     <value>&lt;p&gt;If your kikole is accepted by the moderator, he'll be scheduled for the next available day.&lt;/p&gt;
 &lt;p&gt;On this day, you won't be able to play but you'll win {0} points.&lt;/p&gt;</value>
   </data>
+  <data name="Federation" xml:space="preserve">
+    <value>Federation</value>
+  </data>
+  <data name="ClubsTip3" xml:space="preserve">
+    <value>Warning! The federation is not necessarily a country ("Scotland" for instance)</value>
+  </data>
+  <data name="ClubName" xml:space="preserve">
+    <value>Club name</value>
+  </data>
 </root>

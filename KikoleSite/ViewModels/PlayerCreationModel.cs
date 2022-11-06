@@ -97,6 +97,36 @@ namespace KikoleSite.ViewModels
 
         public bool IsLoan14 { get; set; }
 
+        public string Federation0 { get; set; }
+
+        public string Federation1 { get; set; }
+
+        public string Federation2 { get; set; }
+
+        public string Federation3 { get; set; }
+
+        public string Federation4 { get; set; }
+
+        public string Federation5 { get; set; }
+
+        public string Federation6 { get; set; }
+
+        public string Federation7 { get; set; }
+
+        public string Federation8 { get; set; }
+
+        public string Federation9 { get; set; }
+
+        public string Federation10 { get; set; }
+
+        public string Federation11 { get; set; }
+
+        public string Federation12 { get; set; }
+
+        public string Federation13 { get; set; }
+
+        public string Federation14 { get; set; }
+
         public string Position { get; set; }
 
         public IReadOnlyList<SelectListItem> Positions { get; set; }

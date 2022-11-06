@@ -93,6 +93,13 @@ namespace KikoleSite.Services
                     .ConfigureAwait(false);
             }
 
+            foreach (var federation in request.Federations)
+            {
+                await _playerRepository
+                    .CreatePlayerFederationsAsync(playerId, federation)
+                    .ConfigureAwait(false);
+            }
+
             return playerId;
         }
 

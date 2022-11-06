@@ -24,6 +24,8 @@ namespace KikoleSite.Models.Requests
 
         public IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
 
+        public IReadOnlyList<Federations> Federations { get; set; }
+
         public string ClueEn { get; set; }
 
         public string EasyClueEn { get; set; }

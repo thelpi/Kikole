@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Repositories
@@ -39,6 +40,15 @@ namespace KikoleSite.Repositories
                     ("club_id", playerClub.ClubId),
                     ("history_position", playerClub.HistoryPosition),
                     ("is_loan", playerClub.IsLoan))
+                .ConfigureAwait(false);
+        }
+
+        public async Task CreatePlayerFederationsAsync(ulong playerId, Federations federation)
+        {
+            await ExecuteInsertAsync(
+                    "player_federations",
+                    ("player_id", playerId),
+                    ("federation_id", (ulong)federation))
                 .ConfigureAwait(false);
         }
 

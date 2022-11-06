@@ -129,18 +129,37 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             <a href="/Admin/Club" target="_blank">@localizer["AddClubTab"]</a>
         </div>
         <div style="font-size: small">(@localizer["ClubsTip1"])</div>
-        @for (var i = 0; i < 15; i++)
-        {
-            var name = $"Club{i}";
-            var loanChk = $"IsLoan{i}";
-            <div class="smallTopMargin">
-                <input type="text" id="@name" name="@name" style="width: 250px" />
-                <span>@localizer["IsLoan"]</span>
-                @Html.CheckBox(loanChk)
-            </div>
-        }
+        <div style="font-size: small">(@localizer["ClubsTip3"])</div>
+        <table class="smallTopMargin">
+            <thead>
+                <tr>
+                    <th class="tabData">@localizer["ClubName"]</th>
+                    <th class="tabDataHead">@localizer["IsLoan"]</th>
+                    <th class="tabData">@localizer["Federation"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < 15; i++)
+                {
+                    var name = $"Club{i}";
+                    var loanChk = $"IsLoan{i}";
+                    var fedName = $"Federation{i}";
+                    var trClass = i % 2 == 0 ? "even" : "odd";
+                    <tr class="@trClass">
+                        <td class="tabData">
+                            <input type="text" id="@name" name="@name" style="width: 250px" />
+                        </td>
+                        <td class="tabData">
+                            @Html.CheckBox(loanChk)
+                        </td>
+                        <td class="tabData">
+                            <input type="text" id="@fedName" name="@fedName" style="width: 150px" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-    <div style="font-size: small">(@localizer["ClubsTip1"])</div>
     <div style="font-size: small">(@localizer["ClubsTip2"])</div>
 
     <div class="largeTopMargin">

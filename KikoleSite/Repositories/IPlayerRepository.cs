@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Repositories
 {
@@ -10,6 +11,8 @@ namespace KikoleSite.Repositories
         Task<ulong> CreatePlayerAsync(PlayerDto player);
 
         Task CreatePlayerClubsAsync(PlayerClubDto playerClub);
+
+        Task CreatePlayerFederationsAsync(ulong playerId, Federations federation);
 
         Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date);
 
