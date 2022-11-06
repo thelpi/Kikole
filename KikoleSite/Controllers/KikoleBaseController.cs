@@ -99,6 +99,17 @@ namespace KikoleSite.Controllers
             return Json(countries);
         }
 
+        [HttpPost]
+        public async Task<JsonResult> AutoCompleteFederations(string prefix)
+        {
+            var federations = (await GetFederationsAsync().ConfigureAwait(false))
+                .Where(f =>
+                    f.Name.Sanitize().Contains(prefix.Sanitize()))
+                .Select(f => new KeyValuePair<ulong, string>((ulong)f.Code, f.Name));
+
+            return Json(federations);
+        }
+
         protected string GetSubmitAction()
         {
             var submitKeys = _httpContextAccessor.HttpContext.Request.Form.Keys.Where(x => x.StartsWith("submit-"));

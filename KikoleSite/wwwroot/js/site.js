@@ -425,10 +425,42 @@ var autocompleteClubs = function (clubIdName, submit) {
         minLength: 1
     });
 };
+
+/* federations autocompletion */
+var autocompleteFederations = function (federationIdName, submit) {
+    $(federationIdName).autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '/Home/AutoCompleteFederations/',
+                data: {
+                    "prefix": request.term
+                },
+                type: "POST",
+                success: function (data) {
+                    response($.map(data, function (item) {
+                        return item.Value;
+                    }))
+                }
+            });
+        },
+        select: function (e, i) {
+            $(federationIdName).val(i.item.value);
+            if (submit && $("#submitFederation").length > 0) {
+                $("#submitFederation").click();
+            }
+            return false;
+        },
+        minLength: 1
+    });
+};
+
+/* initialize clubs and federations autocomplete */
 $(function() {
     autocompleteClubs("#clubName", true);
+    autocompleteFederations("#federationName", true);
     for (let i = 0; i < 15; i++) {
         autocompleteClubs("#Club" + i, false);
+        autocompleteFederations("#Federation" + i, false);
     }
 });
 
