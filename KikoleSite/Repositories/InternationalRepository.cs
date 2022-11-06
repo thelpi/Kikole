@@ -32,5 +32,16 @@ namespace KikoleSite.Repositories
                     new { language_id = languageId })
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<FederationDto>> GetFederationsAsync(ulong languageId)
+        {
+            return await ExecuteReaderAsync<FederationDto>(
+                    "SELECT code, name " +
+                    "FROM federations " +
+                    "JOIN federation_translations ON id = federation_id " +
+                    "WHERE language_id = @language_id",
+                    new { language_id = languageId })
+                .ConfigureAwait(false);
+        }
     }
 }

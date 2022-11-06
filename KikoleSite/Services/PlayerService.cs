@@ -191,7 +191,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync()
+        public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(IEnumerable<Federation> federations)
         {
             var dtos = await _playerRepository
                 .GetPendingValidationPlayersAsync()
@@ -213,7 +213,7 @@ namespace KikoleSite.Services
                     .GetPlayerFullInfoAsync(p)
                     .ConfigureAwait(false);
 
-                players.Add(new Player(pInfo, users.Values));
+                players.Add(new Player(pInfo, users.Values, federations));
             }
 
             return players;

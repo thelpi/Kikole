@@ -9,5 +9,7 @@ namespace KikoleSite.Repositories
         Task<IReadOnlyCollection<CountryDto>> GetCountriesAsync(ulong languageId);
 
         Task<IReadOnlyCollection<ContinentDto>> GetContinentsAsync(ulong languageId);
+
+        Task<IReadOnlyCollection<FederationDto>> GetFederationsAsync(ulong languageId);
     }
 }

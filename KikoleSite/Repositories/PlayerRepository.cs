@@ -184,5 +184,13 @@ namespace KikoleSite.Repositories
                     new { playerId, proposalDate = date.Date })
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyList<PlayerFederationDto>> GetPlayerFederationsAsync(ulong playerId)
+        {
+            return await GetDtosAsync<PlayerFederationDto>(
+                    "player_federations",
+                    ("player_id", playerId))
+                .ConfigureAwait(false);
+        }
     }
 }

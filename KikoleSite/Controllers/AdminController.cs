@@ -495,11 +495,13 @@ namespace KikoleSite.Controllers
 
         private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
         {
-            var pls = await _playerService.GetPlayerSubmissionsAsync().ConfigureAwait(false);
-
             var countries = await GetCountriesAsync().ConfigureAwait(false);
 
             var continents = await GetContinentsAsync().ConfigureAwait(false);
+
+            var federations = await GetFederationsAsync().ConfigureAwait(false);
+
+            var pls = await _playerService.GetPlayerSubmissionsAsync(federations).ConfigureAwait(false);
 
             return pls
                 .Select(p => new PlayerSubmissionModel

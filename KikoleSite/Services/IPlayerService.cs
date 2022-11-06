@@ -57,8 +57,9 @@ namespace KikoleSite.Services
         /// <summary>
         /// Gets pending player submissions.
         /// </summary>
+        /// <param name="federations">Collection of <see cref="Federation"/>.</param>
         /// <returns>Collection of <see cref="Player"/>.</returns>
-        Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync();
+        Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(IEnumerable<Federation> federations);
 
         /// <summary>
         /// Valides a player submission.

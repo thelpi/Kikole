@@ -19,6 +19,8 @@ namespace KikoleSite.Repositories
 
         Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
+        Task<IReadOnlyList<PlayerFederationDto>> GetPlayerFederationsAsync(ulong playerId);
+
         Task<DateTime> GetLatestProposalDateAsync();
 
         Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);

@@ -36,6 +36,7 @@ namespace KikoleSite.Controllers
 
         private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
         private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _continentsCache;
+        private static ConcurrentDictionary<string, IReadOnlyList<Federation>> _federationsCache;
         private static IReadOnlyCollection<Club> _clubsCache;
 
         private readonly IInternationalRepository _internationalRepository;
@@ -161,6 +162,28 @@ namespace KikoleSite.Controllers
             }
 
             return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
+        }
+
+        protected async Task<IReadOnlyList<Federation>> GetFederationsAsync()
+        {
+            if (_federationsCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
+            {
+                var lng = ViewHelper.GetLanguage();
+
+                var federations = await _internationalRepository
+                    .GetFederationsAsync((ulong)lng)
+                    .ConfigureAwait(false);
+
+                var apiFederations = federations.Select(f => new Federation(f)).OrderBy(c => c.Name).ToList();
+
+                _federationsCache ??= new ConcurrentDictionary<string, IReadOnlyList<Federation>>();
+                _federationsCache.AddOrUpdate(
+                    CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+                    apiFederations,
+                    (k, v) => apiFederations);
+            }
+
+            return _federationsCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
         }
 
         protected async Task<IReadOnlyDictionary<ulong, string>> GetContinentsAsync()
