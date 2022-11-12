@@ -267,4 +267,13 @@
   <data name="AllowedNames" xml:space="preserve">
     <value>Noms autorisés :</value>
   </data>
+  <data name="FederationsSoFar" xml:space="preserve">
+    <value>Fédérations :</value>
+  </data>
+  <data name="FederationsTitle" xml:space="preserve">
+    <value>Fédérations :</value>
+  </data>
+  <data name="FinalFederations" xml:space="preserve">
+    <value>Fédérations :</value>
+  </data>
 </root>

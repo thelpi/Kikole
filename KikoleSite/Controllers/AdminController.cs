@@ -288,26 +288,24 @@ namespace KikoleSite.Controllers
 
             var clubsReferential = await GetClubsAsync().ConfigureAwait(false);
 
-            var fedsReferential = await GetFederationsAsync().ConfigureAwait(false);
-
             byte iPos = 1;
             var clubs = new List<PlayerClubRequest>();
             var federations = new List<Federations>();
-            AddClubIfValid(clubs, model.Club0, clubsReferential, ref iPos, model.IsLoan0, federations, model.Federation0, fedsReferential);
-            AddClubIfValid(clubs, model.Club1, clubsReferential, ref iPos, model.IsLoan1, federations, model.Federation1, fedsReferential);
-            AddClubIfValid(clubs, model.Club2, clubsReferential, ref iPos, model.IsLoan2, federations, model.Federation2, fedsReferential);
-            AddClubIfValid(clubs, model.Club3, clubsReferential, ref iPos, model.IsLoan3, federations, model.Federation3, fedsReferential);
-            AddClubIfValid(clubs, model.Club4, clubsReferential, ref iPos, model.IsLoan4, federations, model.Federation4, fedsReferential);
-            AddClubIfValid(clubs, model.Club5, clubsReferential, ref iPos, model.IsLoan5, federations, model.Federation5, fedsReferential);
-            AddClubIfValid(clubs, model.Club6, clubsReferential, ref iPos, model.IsLoan6, federations, model.Federation6, fedsReferential);
-            AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7, federations, model.Federation7, fedsReferential);
-            AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8, federations, model.Federation8, fedsReferential);
-            AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9, federations, model.Federation9, fedsReferential);
-            AddClubIfValid(clubs, model.Club10, clubsReferential, ref iPos, model.IsLoan10, federations, model.Federation10, fedsReferential);
-            AddClubIfValid(clubs, model.Club11, clubsReferential, ref iPos, model.IsLoan11, federations, model.Federation11, fedsReferential);
-            AddClubIfValid(clubs, model.Club12, clubsReferential, ref iPos, model.IsLoan12, federations, model.Federation12, fedsReferential);
-            AddClubIfValid(clubs, model.Club13, clubsReferential, ref iPos, model.IsLoan13, federations, model.Federation13, fedsReferential);
-            AddClubIfValid(clubs, model.Club14, clubsReferential, ref iPos, model.IsLoan14, federations, model.Federation14, fedsReferential);
+            AddClubIfValid(clubs, model.Club0, clubsReferential, ref iPos, model.IsLoan0, federations, model.FederationId0);
+            AddClubIfValid(clubs, model.Club1, clubsReferential, ref iPos, model.IsLoan1, federations, model.FederationId1);
+            AddClubIfValid(clubs, model.Club2, clubsReferential, ref iPos, model.IsLoan2, federations, model.FederationId2);
+            AddClubIfValid(clubs, model.Club3, clubsReferential, ref iPos, model.IsLoan3, federations, model.FederationId3);
+            AddClubIfValid(clubs, model.Club4, clubsReferential, ref iPos, model.IsLoan4, federations, model.FederationId4);
+            AddClubIfValid(clubs, model.Club5, clubsReferential, ref iPos, model.IsLoan5, federations, model.FederationId5);
+            AddClubIfValid(clubs, model.Club6, clubsReferential, ref iPos, model.IsLoan6, federations, model.FederationId6);
+            AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7, federations, model.FederationId7);
+            AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8, federations, model.FederationId8);
+            AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9, federations, model.FederationId9);
+            AddClubIfValid(clubs, model.Club10, clubsReferential, ref iPos, model.IsLoan10, federations, model.FederationId10);
+            AddClubIfValid(clubs, model.Club11, clubsReferential, ref iPos, model.IsLoan11, federations, model.FederationId11);
+            AddClubIfValid(clubs, model.Club12, clubsReferential, ref iPos, model.IsLoan12, federations, model.FederationId12);
+            AddClubIfValid(clubs, model.Club13, clubsReferential, ref iPos, model.IsLoan13, federations, model.FederationId13);
+            AddClubIfValid(clubs, model.Club14, clubsReferential, ref iPos, model.IsLoan14, federations, model.FederationId14);
 
             if (clubs.Count == 0)
             {
@@ -525,14 +523,13 @@ namespace KikoleSite.Controllers
                 .ToList();
         }
 
-        private void AddClubIfValid(List<PlayerClubRequest> clubs, string value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan, List<Federations> federations, string fedValue, IReadOnlyCollection<Federation> fedsReferential)
+        private void AddClubIfValid(List<PlayerClubRequest> clubs, string value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan, List<Federations> federations, string fedValue)
         {
             var id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
-            var fedId = fedsReferential.FirstOrDefault(f => fedValue == f.Name)?.Code;
-            if (id.HasValue && fedId.HasValue)
+            if (Enum.TryParse<Federations>(fedValue, out var fedId))
             {
                 clubs.Add(new PlayerClubRequest { ClubId = id.Value, HistoryPosition = i, IsLoan = isLoan });
-                federations.Add(fedId.Value);
+                federations.Add(fedId);
                 i++;
             }
         }

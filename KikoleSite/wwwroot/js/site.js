@@ -427,8 +427,8 @@ var autocompleteClubs = function (clubIdName, submit) {
 };
 
 /* federations autocompletion */
-var autocompleteFederations = function (federationIdName, submit) {
-    $(federationIdName).autocomplete({
+var autocompleteFederations = function (federationNameInputId, federationIdInputId, submit) {
+    $(federationNameInputId).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url: '/Home/AutoCompleteFederations/',
@@ -438,13 +438,17 @@ var autocompleteFederations = function (federationIdName, submit) {
                 type: "POST",
                 success: function (data) {
                     response($.map(data, function (item) {
-                        return item.Value;
+                        return {
+                            label: item.Value,
+                            value: item.Key
+                        };
                     }))
                 }
             });
         },
         select: function (e, i) {
-            $(federationIdName).val(i.item.value);
+            $(federationNameInputId).val(i.item.label);
+            $(federationIdInputId).val(i.item.value);
             if (submit && $("#submitFederation").length > 0) {
                 $("#submitFederation").click();
             }
@@ -457,10 +461,10 @@ var autocompleteFederations = function (federationIdName, submit) {
 /* initialize clubs and federations autocomplete */
 $(function() {
     autocompleteClubs("#clubName", true);
-    autocompleteFederations("#federationName", true);
+    autocompleteFederations("#federationName", "#federationId", true);
     for (let i = 0; i < 15; i++) {
         autocompleteClubs("#Club" + i, false);
-        autocompleteFederations("#Federation" + i, false);
+        autocompleteFederations("#FederationName" + i, "#federationId" + i, false);
     }
 });
 

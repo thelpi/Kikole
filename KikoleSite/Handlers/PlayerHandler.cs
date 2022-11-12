@@ -58,11 +58,16 @@ namespace KikoleSite.Handlers
                 }
             }
 
+            var playerFederations = await _playerRepository
+                .GetPlayerFederationsAsync(p.Id)
+                .ConfigureAwait(false);
+
             return new PlayerFullDto
             {
                 Clubs = playerClubsDetails.Values.ToList(),
                 Player = p,
-                PlayerClubs = playerClubs
+                PlayerClubs = playerClubs,
+                PlayerFederations = playerFederations
             };
         }
     }

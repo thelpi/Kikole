@@ -144,6 +144,7 @@ namespace KikoleSite.Helpers
                 ProposalTypes.Country => IsFrench() ? $"{(withFrenchDe ? "de " : "")}nationalité" : "country",
                 ProposalTypes.Continent => IsFrench() ? $"{(withFrenchDe ? "de " : "")}continent" : "continent",
                 ProposalTypes.Position => IsFrench() ? $"{(withFrenchDe ? "de " : "")}position" : "position",
+                ProposalTypes.Federation => IsFrench() ? $"{(withFrenchDe ? "de " : "")}fédération" : "federation",
                 _ => throw new NotImplementedException(),
             };
         }
@@ -163,6 +164,7 @@ namespace KikoleSite.Helpers
                 ProposalTypes.Position => "Position",
                 ProposalTypes.Leaderboard => "Classement",
                 ProposalTypes.Clue => "Indice",
+                ProposalTypes.Federation => "Féderation",
                 _ => throw new NotImplementedException(),
             };
         }

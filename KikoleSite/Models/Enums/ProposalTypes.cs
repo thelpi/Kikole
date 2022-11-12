@@ -9,6 +9,7 @@
         Clue,
         Position,
         Leaderboard,
-        Continent
+        Continent,
+        Federation
     }
 }

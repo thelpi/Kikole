@@ -40,7 +40,7 @@ namespace KikoleSite.Models
                 .Select(c => new PlayerClub(c, p.Clubs))
                 .ToList();
             Federations = p.PlayerFederations
-                .Select(f => new PlayerFederation(f, federations))
+                .Select(f => new PlayerFederation(f.FederationId, federations))
                 .ToList();
             Clue = p.Player.Clue;
             EasyClue = p.Player.EasyClue;

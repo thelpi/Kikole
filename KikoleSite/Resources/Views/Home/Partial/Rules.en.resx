@@ -151,6 +151,9 @@
   <data name="BadGuessCountry" xml:space="preserve">
     <value>An incorrect country proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
+  <data name="BadGuessFederation" xml:space="preserve">
+    <value>An incorrect federation proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+  </data>
   <data name="BadGuessName" xml:space="preserve">
     <value>An incorrect player proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>

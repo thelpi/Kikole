@@ -18,6 +18,7 @@ namespace KikoleSite.ViewModels
         public string PlayerCreator { get; set; }
         public bool LeaderboardAvailable { get; set; }
         public bool HasContinentManaged { get; set; }
+        public bool HasFederationsManaged { get; set; }
         public DateTime CurrentDate { get; set; }
 
         public bool DisplayHiddenPageAsHidden { get; set; }
@@ -33,12 +34,14 @@ namespace KikoleSite.ViewModels
         public string ContinentName { get; set; }
         public string Position { get; set; }
         public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
+        public IReadOnlyList<PlayerFederation> KnownPlayerFederations { get; set; }
         public string ClubNameSubmission { get; set; }
         public string PlayerNameSubmission { get; set; }
         public string CountryNameSubmission { get; set; }
         public string ContinentNameSubmission { get; set; }
         public string BirthYearSubmission { get; set; }
         public string PositionSubmission { get; set; }
+        public string FederationSubmission { get; set; }
         public IReadOnlyList<SelectListItem> Positions { get; set; }
         public string LoggedAs { get; set; }
         public int CurrentDay { get; set; }
@@ -46,6 +49,7 @@ namespace KikoleSite.ViewModels
         public bool IsCreator { get; set; }
 
         public IReadOnlyList<string> IncorrectClubs { get; set; }
+        public IReadOnlyList<string> IncorrectFederations { get; set; }
         public IReadOnlyList<string> IncorrectCountries { get; set; }
         public IReadOnlyList<string> IncorrectContinents { get; set; }
         public IReadOnlyList<(string, string)> IncorrectYears { get; set; }
@@ -66,6 +70,7 @@ namespace KikoleSite.ViewModels
                 ProposalTypes.Name => PlayerNameSubmission,
                 ProposalTypes.Year => BirthYearSubmission,
                 ProposalTypes.Position => PositionSubmission,
+                ProposalTypes.Federation => FederationSubmission,
                 ProposalTypes.Clue => "GetClue",// anything not empty
                 ProposalTypes.Leaderboard => "GetLeaderboard",// anything not empty
                 _ => null,
@@ -83,6 +88,7 @@ namespace KikoleSite.ViewModels
             IReadOnlyDictionary<ulong, string> countries,
             IReadOnlyDictionary<ulong, string> continents,
             IReadOnlyDictionary<ulong, string> positions,
+            IEnumerable<Federation> federations,
             string easyClue)
         {
             Points = response.TotalPoints;
@@ -118,6 +124,19 @@ namespace KikoleSite.ViewModels
                         if (ulong.TryParse(cValue, out var cId) && countries.ContainsKey(cId))
                             cValue = countries[cId];
                         IncorrectCountries = AddToList(IncorrectCountries, cValue);
+                    }
+                    break;
+                case ProposalTypes.Federation:
+                    if (response.Successful)
+                    {
+                        var federationSubmissions = KnownPlayerFederations?.ToList() ?? new List<PlayerFederation>();
+                        if (ulong.TryParse(response.Value?.ToString(), out ulong tmpFederationId))
+                            federationSubmissions.Add(new PlayerFederation(tmpFederationId, federations));
+                        KnownPlayerFederations = federationSubmissions.OrderBy(cs => cs.Name).ToList();
+                    }
+                    else
+                    {
+                        IncorrectFederations = AddToList(IncorrectFederations, response.Value.ToString());
                     }
                     break;
                 case ProposalTypes.Continent:

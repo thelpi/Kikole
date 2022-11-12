@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Controllers.Attributes;
@@ -332,10 +333,12 @@ namespace KikoleSite.Controllers
 
                     var continents = await GetContinentsAsync().ConfigureAwait(false);
 
+                    var federations = await GetFederationsAsync().ConfigureAwait(false);
+
                     var positions = GetPositions();
 
                     foreach (var p in proposals)
-                        model.SetPropertiesFromProposal(p, countries, continents, positions, easyClue);
+                        model.SetPropertiesFromProposal(p, countries, continents, positions, federations, easyClue);
                 }
             }
 
@@ -364,6 +367,7 @@ namespace KikoleSite.Controllers
             model.IsAdmin = isAdminUser;
             model.PlayerId = playerCreator?.PlayerId ?? 0;
             model.HasContinentManaged = proposalDate >= ProposalChart.ContinentValuatedStart;
+            model.HasFederationsManaged = proposalDate >= ProposalChart.FederationsValuatedStart;
 
             if (!string.IsNullOrWhiteSpace(model.PlayerName))
             {
@@ -375,11 +379,14 @@ namespace KikoleSite.Controllers
 
                 var continents = await GetContinentsAsync().ConfigureAwait(false);
 
+                var federations = await GetFederationsAsync().ConfigureAwait(false);
+
                 model.CountryName = countries.FirstOrDefault(c => c.Key == pp.Player.CountryId).Value;
                 model.ContinentName = continents.FirstOrDefault(c => c.Key == pp.Player.ContinentId).Value;
                 model.Position = ((Positions)pp.Player.PositionId).GetLabel();
                 model.KnownPlayerClubs = pp.PlayerClubs.Select(pc => new PlayerClub(pc, pp.Clubs)).ToList();
                 model.BirthYear = pp.Player.YearOfBirth.ToNaString();
+                model.KnownPlayerFederations = pp.PlayerFederations?.Select(pf => new PlayerFederation(pf.FederationId, federations)).ToList() ?? new List<PlayerFederation>();
             }
 
             return View("Index", model);

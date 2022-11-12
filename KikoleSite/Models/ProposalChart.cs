@@ -23,7 +23,8 @@ namespace KikoleSite.Models
                 { ProposalTypes.Year, (25, false) },
                 { ProposalTypes.Clue, (50, true) },
                 { ProposalTypes.Leaderboard, (25, false) },
-                { ProposalTypes.Continent, (100, false) }
+                { ProposalTypes.Continent, (100, false) },
+                { ProposalTypes.Federation, (100, false) }
             };
 
         public static readonly DateTime FirstDate = new DateTime(2022, 03, 05).Date;
@@ -34,6 +35,12 @@ namespace KikoleSite.Models
         public static readonly DateTime ContinentValuatedStart = new DateTime(2022, 10, 30).Date;
 #else
         public static readonly DateTime ContinentValuatedStart = new DateTime(2022, 11, 01).Date;
+#endif
+
+#if DEBUG
+        public static readonly DateTime FederationsValuatedStart = new DateTime(2022, 11, 06).Date;
+#else
+        public static readonly DateTime FederationsValuatedStart = new DateTime(2099, 11, 01).Date;
 #endif
 
 #if DEBUG

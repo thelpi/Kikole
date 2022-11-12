@@ -125,6 +125,16 @@
                     <div style="font-style:italic">@name</div>
                 }
             </div>
+            @if (Model.HasFederationsManaged)
+            {
+                <div class="mediumTopMargin">
+                    @localizer["FinalFederations"]
+                    @foreach (var fed in Model.KnownPlayerFederations)
+                    {
+                        <div style="font-style:italic">@fed.Name</div>
+                    }
+                </div>
+            }
         }
         else
         {
@@ -230,9 +240,51 @@
                     }
                 </fieldset>
             </form>
+            <!-- federations -->
+            @if (Model.HasFederationsManaged)
+            {
+                <form method="post" action="/">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <fieldset style="margin-top: 30px">
+                        <div>
+                            <div>
+                                <label>@localizer["FederationsTitle"]</label>
+                            </div>
+                            <div>
+                                <input type="text" name="FederationSubmissionValue" id="federationName" style="width: 300px" />
+                                <input type="hidden" id="federationId" name="FederationSubmission" />
+                                <input type="submit" value="Ok" name="submit-Federation" id="submitFederation" style="visibility:hidden; width: 0px" />
+                                <span>(-<span class="redtext">@KikoleSite.Models.ProposalChart.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Federation].points</span> @localizer["PointsIfIncorrect"])</span>
+                            </div>
+                        </div>
+                        @if (Model.KnownPlayerFederations?.Count > 0)
+                        {
+                            <div style="margin-top: 15px">
+                                <label>@localizer["FederationsSoFar"]</label>
+                                <ul>
+                                    @foreach (var fed in Model.KnownPlayerFederations)
+                                    {
+                                        <li>@fed.Name</li>
+                                    }
+                                </ul>
+                            </div>
+                            <div style="font-size: small">(@localizer["ClubTipOne"])</div>
+                        }
+                        @if (Model.IncorrectFederations?.Count > 0)
+                        {
+                            <div class="mediumTopMargin">
+                                @foreach (var iFed in Model.IncorrectFederations)
+                                {
+                                    <div style="font-size: small; text-decoration: line-through">@iFed</div>
+                                }
+                            </div>
+                        }
+                    </fieldset>
+                </form>
+            }
+            <!-- continent -->
             @if (Model.HasContinentManaged)
             {
-                <!-- continent -->
                 <form method="post" action="/">
                     @Html.HiddenFor(m => m.CurrentDay)
                     <div style="margin-top: 30px">

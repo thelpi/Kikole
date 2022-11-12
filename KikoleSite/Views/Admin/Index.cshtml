@@ -143,7 +143,8 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                 {
                     var name = $"Club{i}";
                     var loanChk = $"IsLoan{i}";
-                    var fedName = $"Federation{i}";
+                    var fedName = $"FederationName{i}";
+                    var fedId = $"FederationId{i}";
                     var trClass = i % 2 == 0 ? "even" : "odd";
                     <tr class="@trClass">
                         <td class="tabData">
@@ -154,6 +155,7 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
                         </td>
                         <td class="tabData">
                             <input type="text" id="@fedName" name="@fedName" style="width: 150px" />
+                            <input type="hidden" id="@fedId" name="@fedId" />
                         </td>
                     </tr>
                 }

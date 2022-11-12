@@ -102,6 +102,18 @@ namespace KikoleSite.Models
                         : RawValue;
                     break;
 
+                case ProposalTypes.Federation:
+                    var f = player.PlayerFederations.FirstOrDefault(_ => _.FederationId == (ulong)Enum.Parse<Federations>(sourceValue));
+                    if (!success.HasValue)
+                        Successful = f != null;
+                    Value = Successful && f != null
+                        ? f.FederationId
+                        : (object)sourceValue;
+                    RawValue = Enum.TryParse<Federations>(sourceValue, out var tmpRawFederation)
+                        ? tmpRawFederation.ToString()
+                        : RawValue;
+                    break;
+
                 case ProposalTypes.Position:
                     if (!success.HasValue)
                         Successful = player.Player.PositionId == ulong.Parse(sourceValue);
