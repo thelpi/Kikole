@@ -1,0 +1,27 @@
+﻿@model IReadOnlyCollection<KikoleSite.Elite.ViewDatas.RelativeDifficultyItemData>
+
+<table>
+    <tbody>
+        <tr>
+            <th><font color="#FF9900">Rank</font></th>
+            <th><font color="#FF9900">Stage</font></th>
+            <th><font color="#FF9900">Date</font></th>
+            <th><font color="#FF9900">Time</font></th>
+            <th><font color="#FF9900">Author</font></th>
+            <th><font color="#FF9900">Dupes or better</font></th>
+            <th><font color="#FF9900">Relative Difficulty</font></th>
+        </tr>
+        @foreach (var rd in Model)
+        {
+            <tr>
+                <td class="rank">@rd.Rank</td>
+                <td>@rd.Stage - @rd.Level</td>
+                <td>@rd.Date.ToString("yyyy-MM-dd")</td>
+                <td>@rd.Time.ToString(@"mm\:ss")</td>
+                <td><font color="#@rd.PlayerColor">@rd.PlayerName</font></td>
+                <td>@rd.DupesOrBetter</td>
+                <td><strong>@rd.RelativeDifficulty</strong></td>
+            </tr>
+        }
+    </tbody>
+</table>

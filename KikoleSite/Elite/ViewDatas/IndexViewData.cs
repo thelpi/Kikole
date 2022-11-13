@@ -35,5 +35,7 @@ namespace KikoleSite.Elite.ViewDatas
 
         [DataType(DataType.Date, ErrorMessage = "Date only")]
         public DateTime? RankingDate { get; set; }
+
+        public bool RemoveCurrentUntied { get; set; }
     }
 }

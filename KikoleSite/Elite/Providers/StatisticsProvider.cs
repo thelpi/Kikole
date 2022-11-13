@@ -444,6 +444,58 @@ namespace KikoleSite.Elite.Providers
                 : (entries.Min(_ => _.Date), entries.Max(_ => _.Date));
         }
 
+        public async Task<IReadOnlyCollection<RelativeEntry>> GetRelativeDifficultyEntriesAsync(
+            Game game,
+            DateTime date,
+            bool withoutCurrentUntieds)
+        {
+            var finalEntries = new List<RelativeEntry>();
+
+            var players = await GetPlayersInternalAsync()
+                .ConfigureAwait(false);
+
+            foreach (var stage in game.GetStages())
+            {
+                foreach (var level in SystemExtensions.Enumerate<Level>())
+                {
+                    var stageLevelEntries = (await _readRepository
+                        .GetEntriesAsync(stage, level, null, date.Date)
+                        .ConfigureAwait(false))
+                        .ToList();
+
+                    stageLevelEntries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
+
+                    var groupedEntries = stageLevelEntries
+                        .GroupBy(x => (x.PlayerId, x.Time))
+                        .Select(x => x.OrderBy(x => x.Date).First())
+                        .ToList();
+
+                    var superGroupedEntries = stageLevelEntries
+                        .GroupBy(x => x.Time)
+                        .Select(x => x.OrderBy(x => x.Date).First())
+                        .ToList();
+
+                    foreach (var singleEntry in superGroupedEntries)
+                    {
+                        var newEntry = new RelativeEntry(players[singleEntry.PlayerId], singleEntry);
+                        finalEntries.Add(newEntry);
+                        var dupeEntries = groupedEntries
+                            .Where(x => x.Time <= singleEntry.Time && x.Id != singleEntry.Id);
+                        foreach (var dupeEntry in dupeEntries)
+                        {
+                            newEntry.AddDupeOrBetter(dupeEntry.PlayerId);
+                        }
+                    }
+                }
+            }
+
+            return finalEntries
+                .Select(x => x.WithRelativeDifficulty(date))
+                .Where(x => !withoutCurrentUntieds || x.Count > 1)
+                .OrderByDescending(x => x.RelativeDifficulty)
+                .ToList();
+        }
+
         public async Task<IReadOnlyCollection<SweepLight>> GetSweepsAsync(
             Game game,
             long? playerId,

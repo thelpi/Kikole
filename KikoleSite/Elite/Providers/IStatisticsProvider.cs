@@ -44,5 +44,10 @@ namespace KikoleSite.Elite.Providers
             bool untied,
             Engine? engine,
             bool? stillOngoing);
+
+        Task<IReadOnlyCollection<RelativeEntry>> GetRelativeDifficultyEntriesAsync(
+            Game game,
+            DateTime date,
+            bool withoutCurrentUntieds);
     }
 }

@@ -47,6 +47,24 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
+        internal static RelativeDifficultyItemData ToRelativeDifficultyItemData(this RelativeEntry entry, int rank)
+        {
+            return new RelativeDifficultyItemData
+            {
+                Date = entry.Date,
+                DupesOrBetter = entry.Count,
+                RelativeDifficulty = entry.RelativeDifficulty,
+                Level = entry.Level,
+                PlayerColor = entry.Player.Color,
+                PlayerName = entry.Stage.GetGame() == Game.GoldenEye
+                    ? entry.Player.RealName
+                    : entry.Player.SurName,
+                Rank = rank,
+                Stage = entry.Stage,
+                Time = entry.Time
+            };
+        }
+
         internal static PlayerRankingDetailsViewData ToPlayerRankingDetailsViewData(this RankingEntry entry, string imagePath)
         {
             var localDetails = new Dictionary<Stage, IReadOnlyDictionary<Level, (int, int, long?, DateTime?)>>();

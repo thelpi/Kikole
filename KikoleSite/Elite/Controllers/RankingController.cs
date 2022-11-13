@@ -527,7 +527,7 @@ namespace KikoleSite.Elite.Controllers
             if (viewData == null)
                 return await IndexAsync("Invalid form.").ConfigureAwait(false);
 
-            if (CheckGameParameter(viewData.Game, out var game))
+            if (!CheckGameParameter(viewData.Game, out var game))
                 return await IndexAsync("Invalid game value.").ConfigureAwait(false);
 
             var (success, _) = await CheckPlayerParameterAsync(viewData.PlayerId, true).ConfigureAwait(false);
@@ -555,6 +555,30 @@ namespace KikoleSite.Elite.Controllers
                     return rankingEntries
                         .Single(r => r.Player.Id == viewData.PlayerId)
                         .ToPlayerRankingDetailsViewData(StageImagePath);
+                }).ConfigureAwait(false);
+        }
+        
+        [HttpPost("relative-difficulty")]
+        public async Task<IActionResult> GetRelativeDifficultyAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
+
+            var date = viewData.RankingDate ?? _clock.Today;
+
+            return await ViewAsync(
+                "RelativeDifficulty",
+                $"Relative difficulty of times at {date:yyyy-MM-dd}",
+                async () =>
+                {
+                    var data = await _statisticsProvider
+                        .GetRelativeDifficultyEntriesAsync(game, date, viewData.RemoveCurrentUntied)
+                        .ConfigureAwait(false);
+
+                    return data.Select((x, i) => x.ToRelativeDifficultyItemData(i + 1)).ToList();
                 }).ConfigureAwait(false);
         }
 
