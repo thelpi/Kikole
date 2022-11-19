@@ -557,7 +557,7 @@ namespace KikoleSite.Elite.Controllers
                         .ToPlayerRankingDetailsViewData(StageImagePath);
                 }).ConfigureAwait(false);
         }
-        
+
         [HttpPost("relative-difficulty")]
         public async Task<IActionResult> GetRelativeDifficultyAsync(IndexViewData viewData)
         {

@@ -111,10 +111,10 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
     var dailySortType = document.getElementById('DaySortType');
     var dailyDate = document.getElementById('LeaderboardDay');
     dailySortType.onchange = function () {
-        loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText);
     };
     dailyDate.onchange = function () {
-        loadDailyLeadeboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText);
     };
 };
 
@@ -194,7 +194,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
     });
 };
 
-var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText) {
+var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText) {
     if (!date) {
         return;
     }
@@ -237,10 +237,15 @@ var loadDailyLeadeboard = function (sortType, date, noUserInTableText, noTimeYet
                     newCell.classList.add('tabData');
 
                     var newCell = newRow.insertCell();
-                    var userLink = document.createElement('a');
-                    userLink.href = '/Leaderboard/UserDay?userId=' + e.userId + '&date=' + data.date;
-                    userLink.append(document.createTextNode(e.points));
-                    newCell.appendChild(userLink);
+                    var newText = document.createTextNode(e.points);
+                    if (e.isCreator) {
+                        newCell.appendChild(newText);
+                    } else {
+                        var userLink = document.createElement('a');
+                        userLink.href = '/Leaderboard/UserDay?userId=' + e.userId + '&date=' + data.date;
+                        userLink.append(newText);
+                        newCell.appendChild(userLink);
+                    }
                     newCell.classList.add('tabData');
 
                     lastRank = e.rank + 1;

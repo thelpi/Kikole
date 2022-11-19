@@ -184,7 +184,7 @@ namespace KikoleSite.Controllers
         {
             if (!DateTime.TryParse(date, out var actualDate)
                 || actualDate.Date > _clock.Today
-                || actualDate.Date < Models.ProposalChart.HiddenDate)
+                || actualDate.Date < ProposalChart.HiddenDate)
             {
                 return RedirectToAction("ErrorIndex", "Home");
             }
@@ -218,7 +218,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
 
             var items = new List<UserDayItemModel>(proposals.Count);
-            var pts = Models.ProposalChart.BasePoints;
+            var pts = ProposalChart.BasePoints;
             foreach (var proposal in proposals)
             {
                 items.Add(new UserDayItemModel
