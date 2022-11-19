@@ -148,6 +148,9 @@ namespace KikoleSite.Services
                 .GetProposalsAsync(date.Date, userId)
                 .ConfigureAwait(false);
 
+            if (proposals.Any(_ => _.Successful > 0 && _.ProposalTypeId == (ulong)ProposalTypes.Name))
+                return DayGrantTypes.Found;
+
             if (proposals.Any(_ => _.ProposalTypeId == (ulong)ProposalTypes.Leaderboard))
                 return DayGrantTypes.PaidBoard;
 
