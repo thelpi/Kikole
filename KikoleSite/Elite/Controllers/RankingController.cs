@@ -582,6 +582,33 @@ namespace KikoleSite.Elite.Controllers
                 }).ConfigureAwait(false);
         }
 
+        [HttpPost("latest-points")]
+        public async Task<IActionResult> GetLatestPointsAsync(IndexViewData viewData)
+        {
+            if (viewData == null)
+                return await IndexAsync("Invalid form.").ConfigureAwait(false);
+
+            if (!CheckGameParameter(viewData.Game, out var game))
+                return await IndexAsync("Invalid game value.").ConfigureAwait(false);
+
+            return await ViewAsync(
+                "LatestPoints",
+                $"Latest occurence of each time",
+                async () =>
+                {
+                    var data = await _statisticsProvider
+                        .GetLatestPointsAsync(
+                            game,
+                            Math.Max(Math.Min(viewData.MinimalPoints, 100), 1),
+                            viewData.DiscardEntryWhenBetter)
+                        .ConfigureAwait(false);
+
+                    return data
+                        .Select((x, i) => x.ToLatestPointsItemData(i + 1, _clock.Tomorrow))
+                        .ToList();
+                }).ConfigureAwait(false);
+        }
+
         #endregion Features
 
         #region Old routes for features

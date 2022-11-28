@@ -1,0 +1,25 @@
+﻿@model IReadOnlyCollection<KikoleSite.Elite.ViewDatas.LatestPointsItemData>
+
+<table>
+    <tbody>
+        <tr>
+            <th><font color="#FF9900">Rank</font></th>
+            <th><font color="#FF9900">Stage</font></th>
+            <th><font color="#FF9900">Time (points)</font></th>
+            <th><font color="#FF9900">Latest (days)</font></th>
+            <th><font color="#FF9900">Performed by</font></th>
+            <th><font color="#FF9900">Occurences</font></th>
+        </tr>
+        @foreach (var rd in Model)
+        {
+            <tr>
+                <td class="rank">@rd.Rank</td>
+                <td>@rd.Stage - @rd.Level</td>
+                <td>@rd.Time.ToString(@"mm\:ss") (@rd.Points)</td>
+                <td>@rd.LatestDate.ToString("yyyy-MM-dd") (@rd.Days)</td>
+                <td><font color="#@rd.LatestPlayerColor">@rd.LatestPlayerName</font></td>
+                <td>@rd.Occurences</td>
+            </tr>
+        }
+    </tbody>
+</table>

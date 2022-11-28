@@ -248,6 +248,26 @@ namespace KikoleSite.Elite.ViewDatas
             };
         }
 
+        internal static LatestPointsItemData ToLatestPointsItemData(this LatestPoint latestPoint, int rank, DateTime tomorrow)
+        {
+            var latest = latestPoint.Occurences.OrderByDescending(x => x.Value).First();
+            return new LatestPointsItemData
+            {
+                LatestDate = latest.Value,
+                LatestPlayerColor = latest.Key.Color,
+                LatestPlayerName = latestPoint.Stage.GetGame() == Game.GoldenEye
+                    ? latest.Key.RealName
+                    : latest.Key.SurName,
+                Level = latestPoint.Level,
+                Occurences = latestPoint.Occurences.Count,
+                Points = latestPoint.Points,
+                Rank = rank,
+                Stage = latestPoint.Stage,
+                Time = new TimeSpan(0, 0, (int)latestPoint.Time),
+                Days = (int)(tomorrow - latest.Value).TotalDays
+            };
+        }
+
         private static List<(string, string, string)> GetPlayersRankedAtStageAndLevelTime(List<RankingEntry> rankingEntries, Stage stage, Level level, int bestTime)
         {
             return rankingEntries

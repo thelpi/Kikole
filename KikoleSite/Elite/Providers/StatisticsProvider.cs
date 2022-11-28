@@ -458,19 +458,11 @@ namespace KikoleSite.Elite.Providers
             {
                 foreach (var level in SystemExtensions.Enumerate<Level>())
                 {
-                    var stageLevelEntries = (await _readRepository
-                        .GetEntriesAsync(stage, level, null, date.Date)
-                        .ConfigureAwait(false))
-                        .ToList();
+                    var groupedEntries = await GetBasicEntriesInternalAsync(
+                            date, stage, level)
+                        .ConfigureAwait(false);
 
-                    stageLevelEntries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
-
-                    var groupedEntries = stageLevelEntries
-                        .GroupBy(x => (x.PlayerId, x.Time))
-                        .Select(x => x.OrderBy(x => x.Date).First())
-                        .ToList();
-
-                    var superGroupedEntries = stageLevelEntries
+                    var superGroupedEntries = groupedEntries
                         .GroupBy(x => x.Time)
                         .Select(x => x.OrderBy(x => x.Date).First())
                         .ToList();
@@ -493,6 +485,21 @@ namespace KikoleSite.Elite.Providers
                 .Select(x => x.WithRelativeDifficulty(date))
                 .Where(x => !withoutCurrentUntieds || x.Count > 1)
                 .OrderByDescending(x => x.RelativeDifficulty)
+                .ToList();
+        }
+
+        private async Task<List<EntryDto>> GetBasicEntriesInternalAsync(DateTime date, Stage stage, Level level)
+        {
+            var stageLevelEntries = (await _readRepository
+                .GetEntriesAsync(stage, level, null, date.Date)
+                .ConfigureAwait(false))
+                .ToList();
+
+            stageLevelEntries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
+
+            return stageLevelEntries
+                .GroupBy(x => (x.PlayerId, x.Time))
+                .Select(x => x.OrderBy(x => x.Date).First())
                 .ToList();
         }
 
@@ -544,6 +551,81 @@ namespace KikoleSite.Elite.Providers
             }
 
             return sweeps.OrderByDescending(x => x.Days).ToList();
+        }
+
+        public async Task<IReadOnlyCollection<LatestPoint>> GetLatestPointsAsync(
+            Game game,
+            int minimalPoints,
+            bool discardEntryWhenBetter)
+        {
+            var players = await GetPlayersInternalAsync().ConfigureAwait(false);
+
+            var latestPoints = new List<LatestPoint>();
+
+            foreach (var stage in game.GetStages())
+            {
+                foreach (var level in SystemExtensions.Enumerate<Level>())
+                {
+                    var entries = await GetBasicEntriesInternalAsync(
+                            _clock.Tomorrow, stage, level)
+                        .ConfigureAwait(false);
+
+                    var entriesAt = new Dictionary<int, List<EntryDto>>();
+
+                    var pls = new List<long>();
+
+                    long? time = null;
+                    var playersCountForTime = 1;
+                    var points = StageLeaderboard.BasePoints;
+                    var rank = 0;
+                    foreach (var entry in entries.OrderBy(x => x.Time).ThenBy(x => x.Date.Value))
+                    {
+                        if (discardEntryWhenBetter && pls.Contains(entry.PlayerId))
+                            continue;
+                        pls.Add(entry.PlayerId);
+
+                        if (!time.HasValue || time != entry.Time)
+                        {
+                            if (time.HasValue)
+                            {
+                                for (var i = 0; i < playersCountForTime; i++)
+                                    points = StageLeaderboard.PointsChart.TryGetValue(points, out var tmpPoints) ? tmpPoints : points - 1;
+                            }
+                            rank += playersCountForTime;
+                            playersCountForTime = 1;
+                            time = entry.Time;
+                        }
+                        else
+                            playersCountForTime++;
+
+                        if (points < minimalPoints)
+                            break;
+
+                        if (!entriesAt.ContainsKey(points))
+                            entriesAt.Add(points, new List<EntryDto>(5));
+
+                        entriesAt[points].Add(entry);
+                    }
+
+                    foreach (var kPoints in entriesAt.Keys)
+                    {
+                        latestPoints.Add(new LatestPoint
+                        {
+                            Stage = stage,
+                            Level = level,
+                            Points = kPoints,
+                            Occurences = entriesAt[kPoints].ToDictionary(
+                                x => new Player(players[x.PlayerId]),
+                                x => x.Date.Value),
+                            Time = entriesAt[kPoints].First().Time
+                        });
+                    }
+                }
+            }
+
+            return latestPoints
+                .OrderBy(x => x.Occurences.Values.Max())
+                .ToList();
         }
 
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)

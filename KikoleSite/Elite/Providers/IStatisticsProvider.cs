@@ -49,5 +49,10 @@ namespace KikoleSite.Elite.Providers
             Game game,
             DateTime date,
             bool withoutCurrentUntieds);
+
+        Task<IReadOnlyCollection<LatestPoint>> GetLatestPointsAsync(
+            Game game,
+            int minimalPoints,
+            bool discardEntryWhenBetter);
     }
 }

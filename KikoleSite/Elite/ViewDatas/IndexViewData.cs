@@ -37,5 +37,9 @@ namespace KikoleSite.Elite.ViewDatas
         public DateTime? RankingDate { get; set; }
 
         public bool RemoveCurrentUntied { get; set; }
+
+        public int MinimalPoints { get; set; }
+
+        public bool DiscardEntryWhenBetter { get; set; }
     }
 }

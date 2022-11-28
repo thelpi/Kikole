@@ -329,7 +329,7 @@
     </form>
 </div>
 
-<button type="button" class="collapsible">Relative difficulty of time</button>
+<button type="button" class="collapsible">[DUBIOUS] Relative difficulty of time</button>
 <div class="collapsiblecontent" style="display: none">
     <fieldset>
         <p>A view on the relative difficulty of each time, at a specific point in time.</p>
@@ -352,6 +352,38 @@
         <div class="formBlock">
             <label class="formLabel" for="RemoveCurrentUntied">Remove current untieds:</label>
             @Html.CheckBoxFor(m => m.RemoveCurrentUntied, new { @id = "RemoveCurrentUntied" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel"></label>
+            <input type="submit" value="Ok" />
+        </div>
+    </form>
+</div>
+
+<button type="button" class="collapsible">Longest standing times without dupe</button>
+<div class="collapsiblecontent" style="display: none">
+    <fieldset>
+        <p>Longest standing times without being duped; those are not necessarily world records.</p>
+        <p>The last checkbox allows to discard a time entry when its author has beaten his time.</p>
+        <p>Example: the latest "Train Agent 0:57" is from Henrik Norgren, but the latest currently is Marc Rützou three  years prior.</p>
+    </fieldset>
+    <form method="post" action="/the-elite/latest-points">
+        <div class="formBlock">
+            <label class="formLabel" for="Game">Game:</label>
+            @Html.DropDownListFor(m => m.Game,
+                new[] {
+                    new SelectListItem { Value = "1", Text = "GoldenEye" },
+                    new SelectListItem { Value = "2", Text = "Perfect Dark" }
+                },
+                new { @id = "Game" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="MinimalPoints">Min. points:</label>
+            @Html.TextBoxFor(m => m.MinimalPoints, new { @id = "MinimalPoints" })
+        </div>
+        <div class="formBlock">
+            <label class="formLabel" for="DiscardEntryWhenBetter">Current only:</label>
+            @Html.CheckBoxFor(m => m.DiscardEntryWhenBetter, new { @id = "DiscardEntryWhenBetter" })
         </div>
         <div class="formBlock">
             <label class="formLabel"></label>
