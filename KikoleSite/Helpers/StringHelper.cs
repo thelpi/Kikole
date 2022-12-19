@@ -91,7 +91,7 @@ namespace KikoleSite.Helpers
 
         internal static bool IsEnumValue<T>(this string value)
         {
-            if (typeof(T).IsEnum)
+            if (!typeof(T).IsEnum)
                 throw new InvalidOperationException("The targeted type should be an enum.");
 
             if (value == null)
