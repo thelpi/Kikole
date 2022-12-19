@@ -205,7 +205,7 @@ namespace KikoleSite.Controllers
                 }
 
                 value = model.GetValueFromProposalType(proposalType);
-                if (string.IsNullOrWhiteSpace(value))
+                if (!IsValidInput(proposalType, value))
                 {
                     return await Index(
                             model.CurrentDay, _localizer["InvalidRequest"])
@@ -294,6 +294,26 @@ namespace KikoleSite.Controllers
                     null,
                     model)
                 .ConfigureAwait(false);
+        }
+
+        private static bool IsValidInput(ProposalTypes proposalType, string value)
+        {
+            switch (proposalType)
+            {
+                case ProposalTypes.Year:
+                    return int.TryParse(value, out var yearV) && yearV >= 1850 && yearV <= 2010;
+                case ProposalTypes.Position:
+                    return value.IsEnumValue<Positions>();
+                case ProposalTypes.Continent:
+                    return value.IsEnumValue<Continents>();
+                case ProposalTypes.Country:
+                    return value.IsEnumValue<Countries>();
+                case ProposalTypes.Club:
+                case ProposalTypes.Name:
+                    return !string.IsNullOrWhiteSpace(value) && !int.TryParse(value, out _);
+                default:
+                    return true;
+            }
         }
 
         private async Task<IActionResult> SetAndGetViewModelAsync(

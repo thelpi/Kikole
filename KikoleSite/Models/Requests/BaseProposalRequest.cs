@@ -37,14 +37,6 @@ namespace KikoleSite.Models.Requests
             return null;
         }
 
-        internal virtual string IsValid(IStringLocalizer resources)
-        {
-            if (string.IsNullOrWhiteSpace(Value))
-                return resources["InvalidValue"];
-
-            return null;
-        }
-
         internal ProposalDto ToDto(ulong userId, bool successful)
         {
             return new ProposalDto

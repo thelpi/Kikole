@@ -88,5 +88,27 @@ namespace KikoleSite.Helpers
             }
             return d[n, m];
         }
+
+        internal static bool IsEnumValue<T>(this string value)
+        {
+            if (typeof(T).IsEnum)
+                throw new InvalidOperationException("The targeted type should be an enum.");
+
+            if (value == null)
+                return false;
+
+            if (int.TryParse(value, out var enumId))
+            {
+                if (!Enum.GetValues(typeof(T)).Cast<int>().Contains(enumId))
+                    return false;
+            }
+            else
+            {
+                if (!Enum.IsDefined(typeof(T), value))
+                    return false;
+            }
+
+            return true;
+        }
     }
 }

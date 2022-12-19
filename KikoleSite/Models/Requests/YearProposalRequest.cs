@@ -14,16 +14,5 @@ namespace KikoleSite.Models.Requests
                 ? resources["TipOlderPlayer"]
                 : resources["TipYoungerPlayer"];
         }
-
-        internal override string IsValid(IStringLocalizer resources)
-        {
-            if (Value == null)
-                return resources["InvalidValue"];
-
-            if (!ushort.TryParse(Value, out _))
-                return resources["InvalidValue"];
-
-            return null;
-        }
     }
 }
