@@ -226,9 +226,18 @@ namespace KikoleSite.Controllers
             {
                 do
                 {
+                    var innerPr = new ProposalRequest
+                    {
+                        DaysBeforeNow = daysBefore,
+                        ProposalDateTime = _clock.Now,
+                        Ip = ip,
+                        ProposalType = ProposalTypes.Name,
+                        Value = $"GiveUp-{_clock.Now:hhmmss}"
+                    };
+
                     var (responseTmp, _, _) = await _proposalService
                         .ManageProposalResponseAsync(
-                            BaseProposalRequest.Create(_clock.Now, $"GiveUp-{_clock.Now:hhmmss}", daysBefore, ProposalTypes.Name, ip),
+                            innerPr,
                             UserId,
                             pInfo)
                         .ConfigureAwait(false);
@@ -237,9 +246,18 @@ namespace KikoleSite.Controllers
                 }
                 while (response.TotalPoints > 0);
 
+                var pr = new ProposalRequest
+                {
+                    DaysBeforeNow = daysBefore,
+                    ProposalDateTime = _clock.Now,
+                    Ip = ip,
+                    ProposalType = ProposalTypes.Name,
+                    Value = pInfo.Player.Name
+                };
+
                 (response, _, _) = await _proposalService
                     .ManageProposalResponseAsync(
-                        BaseProposalRequest.Create(_clock.Now, pInfo.Player.Name, daysBefore, ProposalTypes.Name, ip),
+                        pr,
                         UserId,
                         pInfo)
                     .ConfigureAwait(false);
@@ -248,7 +266,14 @@ namespace KikoleSite.Controllers
             }
             else
             {
-                var request = BaseProposalRequest.Create(_clock.Now, value, daysBefore, proposalType, ip);
+                var request = new ProposalRequest
+                {
+                    DaysBeforeNow = daysBefore,
+                    ProposalDateTime = _clock.Now,
+                    Ip = ip,
+                    ProposalType = proposalType,
+                    Value = value
+                };
 
                 var (responseTmp, proposalsAlready, leader) = await _proposalService
                     .ManageProposalResponseAsync(request, UserId, pInfo)

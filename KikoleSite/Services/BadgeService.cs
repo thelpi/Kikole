@@ -324,7 +324,7 @@ namespace KikoleSite.Services
 
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<UserBadge>> PrepareNonLeaderBadgesAsync(
-            ulong userId, BaseProposalRequest request, Languages language)
+            ulong userId, ProposalRequest request, Languages language)
         {
             var collectedBadges = new List<ulong>();
 

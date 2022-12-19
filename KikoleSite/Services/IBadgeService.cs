@@ -35,7 +35,7 @@ namespace KikoleSite.Services
         /// <returns>Collection of <see cref="UserBadge"/>.</returns>
         Task<IReadOnlyCollection<UserBadge>> PrepareNonLeaderBadgesAsync(
             ulong userId,
-            BaseProposalRequest request,
+            ProposalRequest request,
             Languages language);
 
         /// <summary>

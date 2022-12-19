@@ -71,8 +71,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto)> ManageProposalResponseAsync<T>(T request, ulong userId, PlayerFullDto pInfo)
-            where T : BaseProposalRequest
+        public async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo)
         {
             LeaderDto leader = null;
 

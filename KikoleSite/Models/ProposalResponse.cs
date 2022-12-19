@@ -136,7 +136,7 @@ namespace KikoleSite.Models
                 LostPoints = ProposalChart.ProposalTypesCost[ProposalType];
         }
 
-        internal ProposalResponse(BaseProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
+        internal ProposalResponse(ProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
             : this(request.ProposalType, request.Value, null, player)
         {
             Date = request.ProposalDateTime;
