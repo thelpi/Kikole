@@ -1,6 +1,6 @@
 ﻿namespace KikoleSite.Elite.Enums
 {
-    public enum ControlStyle
+    public enum ControlStyles
     {
         OnePointOne,
         OnePointTwo,

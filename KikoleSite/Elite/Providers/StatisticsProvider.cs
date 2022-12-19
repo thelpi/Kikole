@@ -580,7 +580,8 @@ namespace KikoleSite.Elite.Providers
                     var rank = 0;
                     foreach (var entry in entries.OrderBy(x => x.Time).ThenBy(x => x.Date.Value))
                     {
-                        if (discardEntryWhenBetter && pls.Contains(entry.PlayerId))
+                        var alreadyP = pls.Contains(entry.PlayerId);
+                        if (discardEntryWhenBetter && alreadyP)
                             continue;
                         pls.Add(entry.PlayerId);
 
@@ -595,7 +596,7 @@ namespace KikoleSite.Elite.Providers
                             playersCountForTime = 1;
                             time = entry.Time;
                         }
-                        else
+                        else if (!alreadyP)
                             playersCountForTime++;
 
                         if (points < minimalPoints)

@@ -62,16 +62,16 @@ namespace KikoleSite.Elite.Extensions
             { Stage.MaianSOS, "Maian SOS" },
             { Stage.War, "WAR!" },
         };
-        private static readonly IReadOnlyDictionary<string, ControlStyle> _controlStyleConverters = new Dictionary<string, ControlStyle>
+        private static readonly IReadOnlyDictionary<string, ControlStyles> _controlStyleConverters = new Dictionary<string, ControlStyles>
         {
-            { "1.1", ControlStyle.OnePointOne },
-            { "1.2", ControlStyle.OnePointTwo },
-            { "1.3", ControlStyle.OnePointThree },
-            { "1.4", ControlStyle.OnePointFour },
-            { "2.1", ControlStyle.TwoPointOne },
-            { "2.2", ControlStyle.TwoPointTwo },
-            { "2.3", ControlStyle.TwoPointThree },
-            { "2.4", ControlStyle.TwoPointFour }
+            { "1.1", ControlStyles.OnePointOne },
+            { "1.2", ControlStyles.OnePointTwo },
+            { "1.3", ControlStyles.OnePointThree },
+            { "1.4", ControlStyles.OnePointFour },
+            { "2.1", ControlStyles.TwoPointOne },
+            { "2.2", ControlStyles.TwoPointTwo },
+            { "2.3", ControlStyles.TwoPointThree },
+            { "2.4", ControlStyles.TwoPointFour }
         };
         private static readonly Dictionary<Game, DateTime> _eliteBeginDate = new Dictionary<Game, DateTime>
         {
@@ -140,10 +140,10 @@ namespace KikoleSite.Elite.Extensions
             { (Level.Hard, Game.PerfectDark), "PA" },
         };
 
-        public static ControlStyle? ToControlStyle(string controlStyleLabel)
+        public static ControlStyles? ToControlStyle(string controlStyleLabel)
         {
             return controlStyleLabel != null && _controlStyleConverters.ContainsKey(controlStyleLabel) ?
-                _controlStyleConverters[controlStyleLabel] : default(ControlStyle?);
+                _controlStyleConverters[controlStyleLabel] : default(ControlStyles?);
         }
 
         public static IReadOnlyCollection<Stage> GetStages(this Game game)

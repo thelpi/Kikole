@@ -15,7 +15,7 @@ namespace KikoleSite.Elite.Models
         public long Id { get; }
         public string RealName { get; }
         public string SurName { get; }
-        public ControlStyle? ControlStyle { get; }
+        public ControlStyles? ControlStyle { get; }
         public string Color { get; }
         public string Country { get; }
         public int? YearOfBirth { get; }
