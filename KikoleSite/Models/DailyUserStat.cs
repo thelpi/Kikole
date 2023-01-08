@@ -41,7 +41,7 @@ namespace KikoleSite.Models
             string playerName,
             bool attemptDayOne,
             bool attempt,
-            IReadOnlyCollection<LeaderDto> leaders,
+            IEnumerable<LeaderDto> leaders,
             LeaderDto meLeader)
         {
             Date = currentDate;

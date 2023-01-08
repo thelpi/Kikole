@@ -37,6 +37,22 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDateStart, DateTime playerProposalDateEnd, ulong userId)
+        {
+            return await ExecuteReaderAsync<ProposalDto>(
+                    $"SELECT * FROM proposals " +
+                    $"WHERE user_id = @user_id " +
+                    $"AND proposal_date <= @proposal_date_end " +
+                    $"AND proposal_date >= @proposal_date_start",
+                    new
+                    {
+                        user_id = userId,
+                        proposal_date_end = playerProposalDateEnd.Date,
+                        proposal_date_start = playerProposalDateStart.Date,
+                    })
+                .ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateTime playerProposalDate)
         {
             return await ExecuteReaderAsync<ulong>(

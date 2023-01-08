@@ -157,19 +157,26 @@ namespace KikoleSite.Services
             var stopDate = requestUserFoundToday
                 ? _clock.Today
                 : _clock.Yesterday;
+
+            var pDays = await _playerRepository
+                .GetPlayersOfTheDayAsync(currentDate, stopDate)
+                .ConfigureAwait(false);
+
+            var allProposals = await _proposalRepository
+                .GetProposalsAsync(currentDate, stopDate, userId)
+                .ConfigureAwait(false);
+
+            var allLeaders = await _leaderRepository
+                .GetLeadersAsync(currentDate, stopDate, false)
+                .ConfigureAwait(false);
+
             while (currentDate <= stopDate)
             {
-                var pDay = await _playerRepository
-                    .GetPlayerOfTheDayAsync(currentDate)
-                    .ConfigureAwait(false);
+                var pDay = pDays.First(x => x.ProposalDate == currentDate);
 
-                var proposals = await _proposalRepository
-                    .GetProposalsAsync(currentDate, userId)
-                    .ConfigureAwait(false);
+                var proposals = allProposals.Where(x => x.ProposalDate == currentDate);
 
-                var leaders = await _leaderRepository
-                    .GetLeadersAtDateAsync(currentDate, false)
-                    .ConfigureAwait(false);
+                var leaders = allLeaders.Where(x => x.ProposalDate == currentDate);
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
@@ -188,7 +195,7 @@ namespace KikoleSite.Services
 
                 var singleStat = isCreator
                     ? new DailyUserStat(currentDate, pName, GetSubmittedPlayerPoints(leaders, currentDate))
-                    : new DailyUserStat(userId, currentDate, pName, proposals.Any(_ => _.IsCurrentDay), proposals.Count > 0, leaders, meLeader);
+                    : new DailyUserStat(userId, currentDate, pName, proposals.Any(_ => _.IsCurrentDay), proposals.Any(), leaders, meLeader);
 
                 stats.Add(singleStat);
                 currentDate = currentDate.AddDays(1);
