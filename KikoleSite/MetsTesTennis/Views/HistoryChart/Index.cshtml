@@ -4,11 +4,12 @@
 <table>
     <thead>
         <tr>
+            <th></th>
             @foreach (var slotHeader in Model.SlotHeaders)
             {
-            <td>
+            <th>
                 <img src="/images/mets-tes-tennis/tournaments/@(slotHeader.MainTournamentId).png" width="100" height="100" alt="@slotHeader.MainTournamentName" title="@slotHeader.MainTournamentName" style="object-fit: contain" />
-            </td>
+            </th>
             }
         </tr>
     </thead>
@@ -16,6 +17,7 @@
         @foreach (var yearChart in Model.YearCharts)
         {
         <tr>
+            <td>@yearChart.Year</td>
             @foreach (var slotHeader in Model.SlotHeaders)
             {
                 var edition = yearChart.GetSlotEdition(slotHeader);
