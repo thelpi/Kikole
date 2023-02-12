@@ -7,33 +7,55 @@
             <th></th>
             @foreach (var slotHeader in Model.SlotHeaders)
             {
-            <th>
-                <img src="/images/mets-tes-tennis/tournaments/@(slotHeader.MainTournamentId).png" width="100" height="100" alt="@slotHeader.MainTournamentName" title="@slotHeader.MainTournamentName" style="object-fit: contain" />
-            </th>
+                <td>
+                    <table>
+                        @{
+                            var k = 0;
+                            var length = Math.Round(Math.Sqrt(slotHeader.Tournaments.Count));
+                            for (var i = 0; i < length; i++)
+                            {
+                                <tr>
+                                    @for (var j = 0; j < length; j++)
+                                    {
+                                        <td>
+                                            @if (k < slotHeader.Tournaments.Count)
+                                            {
+                                                <img src="/images/mets-tes-tennis/tournaments/@(slotHeader.Tournaments[k].Item1).png" width="@Math.Round(100 / (decimal)length)" height="@Math.Round(100 / (decimal)length)" alt="@slotHeader.Tournaments[k].Item2" title="@slotHeader.Tournaments[k].Item2" style="object-fit: contain" onerror="this.onerror=null;this.src='/images/mets-tes-tennis/levels/@((int)slotHeader.SlotLevel).png'" />
+                                            }
+                                            @{
+                                                k++;
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </table>
+                </td>
             }
         </tr>
     </thead>
     <tbody>
         @foreach (var yearChart in Model.YearCharts)
         {
-        <tr>
-            <td>@yearChart.Year</td>
-            @foreach (var slotHeader in Model.SlotHeaders)
-            {
-                var edition = yearChart.GetSlotEdition(slotHeader);
-                if (edition == null)
+            <tr>
+                <td>@yearChart.Year</td>
+                @foreach (var slotHeader in Model.SlotHeaders)
                 {
-                    <td style="background-color: black"></td>
+                    var edition = yearChart.GetSlotEdition(slotHeader);
+                    if (edition == null)
+                    {
+                        <td style="background-color: black"></td>
+                    }
+                    else
+                    {
+                        var color = edition.Surface.ToColor(edition.Indoor);
+                        <td>
+                            <img src="/images/mets-tes-tennis/players/@(edition.WinnerId).png" width="100" height="100" alt="@edition.WinnerName" title="@edition.WinnerName" style="object-fit: contain; background-color: @color" />
+                        </td>
+                    }
                 }
-                else
-                {
-                    var color = edition.Surface.ToColor(edition.Indoor);
-                    <td>
-                        <img src="/images/mets-tes-tennis/players/@(edition.WinnerId).png" width="100" height="100" alt="@edition.WinnerName" title="@edition.WinnerName" style="object-fit: contain; background-color: @color" />
-                    </td>
-                }
-            }
-        </tr>
+            </tr>
         }
     </tbody>
 </table>

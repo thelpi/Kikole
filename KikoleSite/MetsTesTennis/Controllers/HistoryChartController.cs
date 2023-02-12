@@ -81,15 +81,12 @@ namespace KikoleSite.MetsTesTennis.Controllers
 
         private static void SetSlotMainTournament(List<YearChartItemData> years, SlotHeaderItemData slot)
         {
-            var slotMainTournament = years
+            slot.Tournaments = years
                 .SelectMany(y => y.EditionCharts)
                 .Where(ec => ec.SlotId == slot.SlotId)
                 .GroupBy(ec => ec.TournamentId)
-                .OrderByDescending(ecg => ecg.Count())
-                .First();
-
-            slot.MainTournamentId = slotMainTournament.Key;
-            slot.MainTournamentName = slotMainTournament.First().TournamentName;
+                .Select(x => (x.Key, x.First().TournamentName))
+                .ToList();
         }
 
         private static void RemoveSlotsWithoutTournament(List<YearChartItemData> years, List<SlotHeaderItemData> slots)
