@@ -5,7 +5,7 @@ namespace KikoleSite.MetsTesTennis.Models
 {
     public class SlotHeaderItemData
     {
-        public IReadOnlyList<(ulong, string)> Tournaments { get; set; }
+        public IReadOnlyList<(ulong id, string name)> Tournaments { get; set; }
 
         public ushort SlotId { get; set; }
 

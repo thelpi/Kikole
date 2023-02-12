@@ -20,7 +20,7 @@
                                         <td>
                                             @if (k < slotHeader.Tournaments.Count)
                                             {
-                                                <img src="/images/mets-tes-tennis/tournaments/@(slotHeader.Tournaments[k].Item1).png" width="@Math.Round(100 / (decimal)length)" height="@Math.Round(100 / (decimal)length)" alt="@slotHeader.Tournaments[k].Item2" title="@slotHeader.Tournaments[k].Item2" style="object-fit: contain" onerror="this.onerror=null;this.src='/images/mets-tes-tennis/levels/@((int)slotHeader.SlotLevel).png'" />
+                                                <img src="/images/mets-tes-tennis/tournaments/@(slotHeader.Tournaments[k].id).png" width="@Math.Round(100 / (decimal)length)" height="@Math.Round(100 / (decimal)length)" alt="@slotHeader.Tournaments[k].name" title="@slotHeader.Tournaments[k].name" style="object-fit: contain" onerror="this.onerror=null;this.src='/images/mets-tes-tennis/levels/@((int)slotHeader.SlotLevel).png'" />
                                             }
                                             @{
                                                 k++;
