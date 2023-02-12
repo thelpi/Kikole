@@ -88,6 +88,10 @@ namespace KikoleSite
                 .AddSingleton<Elite.Loggers.FileLogger>()
                 .AddHostedService<Elite.Workers.IntegrationWorker>()
                 .AddSingleton<Elite.Repositories.ICacheManager, Elite.Repositories.CacheManager>();
+
+            // mets tes tennis
+            services
+                .AddSingleton<MetsTesTennis.SqlRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

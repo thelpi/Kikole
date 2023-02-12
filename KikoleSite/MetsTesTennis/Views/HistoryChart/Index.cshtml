@@ -1,0 +1,37 @@
+﻿@using KikoleSite.MetsTesTennis.Views;
+@model KikoleSite.MetsTesTennis.Models.HistoryChartViewData
+
+<table>
+    <thead>
+        <tr>
+            @foreach (var slotHeader in Model.SlotHeaders)
+            {
+            <td>
+                <img src="/images/mets-tes-tennis/tournaments/@(slotHeader.MainTournamentId).png" width="100" height="100" alt="@slotHeader.MainTournamentName" title="@slotHeader.MainTournamentName" style="object-fit: contain" />
+            </td>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var yearChart in Model.YearCharts)
+        {
+        <tr>
+            @foreach (var slotHeader in Model.SlotHeaders)
+            {
+                var edition = yearChart.GetSlotEdition(slotHeader);
+                if (edition == null)
+                {
+                    <td style="background-color: black"></td>
+                }
+                else
+                {
+                    var color = edition.Surface.ToColor(edition.Indoor);
+                    <td>
+                        <img src="/images/mets-tes-tennis/players/@(edition.WinnerId).png" width="100" height="100" alt="@edition.WinnerName" title="@edition.WinnerName" style="object-fit: contain; background-color: @color" />
+                    </td>
+                }
+            }
+        </tr>
+        }
+    </tbody>
+</table>
