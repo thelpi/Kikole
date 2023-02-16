@@ -352,8 +352,8 @@ $(function () {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.Value,
-                            value: item.Key
+                            label: item.value,
+                            value: item.key
                         };
                     }))
                 }
@@ -384,8 +384,8 @@ $(function () {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.Value,
-                            value: item.Key
+                            label: item.value,
+                            value: item.key
                         };
                     }))
                 }
@@ -475,10 +475,10 @@ function drawStatisticPageCharts() {
         type: "GET",
         async: false,
         success: function (data) {
-            data.country.forEach(item => playerDistributionCountryDatas.push([item.Key, item.Value]));
-            data.position.forEach(item => playerDistributionPositionDatas.push([item.Key, item.Value]));
-            data.decade.forEach(item => playerDistributionDecadeDatas.push([item.Key, item.Value]));
-            data.club.forEach(item => playerDistributionClubDatas.push([item.Key, item.Value]));
+            data.country.forEach(item => playerDistributionCountryDatas.push([item.key, item.value]));
+            data.position.forEach(item => playerDistributionPositionDatas.push([item.key, item.value]));
+            data.decade.forEach(item => playerDistributionDecadeDatas.push([item.key, item.value]));
+            data.club.forEach(item => playerDistributionClubDatas.push([item.key, item.value]));
         }
     });
     buildPlayerDistributionPieChartGraph('playerDistributionCountryChart', playerDistributionCountryDatas, 'Distribution by country');
@@ -495,9 +495,9 @@ function drawStatisticPageCharts() {
         type: "GET",
         async: false,
         success: function (data) {
-            data.weekly.forEach(item => weekActivityDatas.push([item.Key, item.Value]));
-            data.monthly.forEach(item => monthActivityDatas.push([item.Key, item.Value]));
-            data.daily.forEach(item => dayActivityDatas.push([item.Key, item.Value]));
+            data.weekly.forEach(item => weekActivityDatas.push([item.key, item.value]));
+            data.monthly.forEach(item => monthActivityDatas.push([item.key, item.value]));
+            data.daily.forEach(item => dayActivityDatas.push([item.key, item.value]));
         }
     });
     buildActiveUsersLineChartGraph('dayActiveUsersChart', dayActivityDatas, 'Date');
