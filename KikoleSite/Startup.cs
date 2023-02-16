@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,6 +41,9 @@ namespace KikoleSite
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
             });
+
+            services.AddControllersWithViews(options =>
+                options.ModelBinderProviders.RemoveType<DateTimeModelBinderProvider>());
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddMvc(options =>
