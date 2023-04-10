@@ -1,48 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using KikoleSite.Models.Dtos;
-using KikoleSite.Models.Enums;
+using KikoleSite.Elite.Dtos;
+using KikoleSite.Elite.Enums;
+using KikoleSite.Elite.Extensions;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Elite.Models
 {
-    public class Player : PlayerCreator
+    public class Player
     {
-        public ulong Id { get; }
+        // Virtual date where submitted times should have a date, except for newcomers.
+        internal static readonly DateTime LastEmptyDate = new DateTime(2013, 1, 1);
+        // Default player's hexadecimal color.
+        internal const string DefaultPlayerHexColor = "000000";
 
-        public IReadOnlyCollection<PlayerClub> Clubs { get; }
+        public long Id { get; }
+        public string RealName { get; }
+        public string SurName { get; }
+        public ControlStyles? ControlStyle { get; }
+        public string Color { get; }
+        public string Country { get; }
+        public int? YearOfBirth { get; }
 
-        public ushort YearOfBirth { get; }
-
-        public Continents Continent { get; }
-
-        public Countries Country { get; }
-
-        public DateTime? ProposalDate { get; }
-
-        public string Clue { get; }
-
-        public string EasyClue { get; }
-
-        public Positions Position { get; }
-
-        public DateTime? RejectDate { get; }
-
-        internal Player(PlayerFullDto p, IEnumerable<UserDto> users)
-            : base(users.Single(u => u.Id == p.Player.CreationUserId), p.Player)
+        internal Player(PlayerDto dto)
         {
-            Id = p.Player.Id;
-            ProposalDate = p.Player.ProposalDate;
-            RejectDate = p.Player.RejectDate;
-            Clubs = p.PlayerClubs
-                .Select(c => new PlayerClub(c, p.Clubs))
-                .ToList();
-            Clue = p.Player.Clue;
-            EasyClue = p.Player.EasyClue;
-            Continent = (Continents)p.Player.ContinentId;
-            Country = (Countries)p.Player.CountryId;
-            Position = (Positions)p.Player.PositionId;
-            YearOfBirth = p.Player.YearOfBirth;
+            Id = dto.Id;
+            RealName = dto.RealName;
+            SurName = dto.SurName;
+            ControlStyle = ModelExtensions.ToControlStyle(dto.ControlStyle);
+            Color = dto.Color;
+            Country = dto.Country;
+            YearOfBirth = dto.MinYearOfBirth;
+        }
+
+        public string ToString(Game game)
+        {
+            return game == Game.PerfectDark
+                ? SurName
+                : RealName;
         }
     }
 }
