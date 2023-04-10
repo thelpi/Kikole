@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Loggers;
-using KikoleSite.Elite.Providers;
-using KikoleSite.Elite.Repositories;
+using KikoleSite.Loggers;
+using KikoleSite.Providers;
+using KikoleSite.Repositories;
 
-namespace KikoleSite.Elite.Workers
+namespace KikoleSite.Workers
 {
     public class IntegrationWorker : TimedHostedService
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.ViewDatas
+namespace KikoleSite.ViewDatas
 {
     public class ChronologyCanvasViewData
     {

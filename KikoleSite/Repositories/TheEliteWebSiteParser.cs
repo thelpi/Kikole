@@ -8,13 +8,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using HtmlAgilityPack;
-using KikoleSite.Elite.Configurations;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
+using KikoleSite.Configurations;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace KikoleSite.Elite.Repositories
+namespace KikoleSite.Repositories
 {
     public class TheEliteWebSiteParser : ITheEliteWebSiteParser
     {

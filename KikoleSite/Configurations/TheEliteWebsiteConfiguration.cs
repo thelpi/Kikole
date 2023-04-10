@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Elite.Configurations
+﻿namespace KikoleSite.Configurations
 {
     public class TheEliteWebsiteConfiguration
     {

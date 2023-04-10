@@ -3,15 +3,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
-using KikoleSite.Elite.Models;
-using KikoleSite.Elite.Providers;
-using KikoleSite.Elite.ViewDatas;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
+using KikoleSite.Models;
+using KikoleSite.Providers;
+using KikoleSite.ViewDatas;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace KikoleSite.Elite.Controllers
+namespace KikoleSite.Controllers
 {
     [Route("the-elite")]
     public class SimulatedRankingController : Controller

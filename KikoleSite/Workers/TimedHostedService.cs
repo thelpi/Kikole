@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace KikoleSite.Elite.Workers
+namespace KikoleSite.Workers
 {
     public abstract class TimedHostedService : IHostedService, IDisposable
     {

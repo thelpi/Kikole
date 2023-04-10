@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace KikoleSite.Elite.ViewDatas
+namespace KikoleSite.ViewDatas
 {
     public class PlayerWorldRecordsItemData
     {

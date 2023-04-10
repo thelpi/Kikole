@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleSite.Elite.Repositories
+namespace KikoleSite.Repositories
 {
     public sealed class ReadRepository : KikoleSite.Repositories.BaseRepository, IReadRepository
     {

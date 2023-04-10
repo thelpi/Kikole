@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.Models
+namespace KikoleSite.Models
 {
     public class LatestPoint
     {

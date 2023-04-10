@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using KikoleSite.Elite.Dtos;
+using KikoleSite.Dtos;
 
-namespace KikoleSite.Elite.Models.Integration
+namespace KikoleSite.Models.Integration
 {
     public class RefreshPlayersResult
     {

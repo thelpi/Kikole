@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using KikoleSite.Elite.Configurations;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
-using KikoleSite.Elite.Models;
-using KikoleSite.Elite.Models.Integration;
-using KikoleSite.Elite.Repositories;
+using KikoleSite.Configurations;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
+using KikoleSite.Models;
+using KikoleSite.Models.Integration;
+using KikoleSite.Repositories;
 using Microsoft.Extensions.Options;
 
-namespace KikoleSite.Elite.Providers
+namespace KikoleSite.Providers
 {
     public sealed class IntegrationProvider : IIntegrationProvider
     {

@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Elite.Dtos
+﻿namespace KikoleSite.Dtos
 {
     public class EntryWebDto : EntryBaseDto
     {

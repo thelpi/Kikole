@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace KikoleSite.Elite.Extensions
+namespace KikoleSite.Extensions
 {
     public static class ViewExtensions
     {

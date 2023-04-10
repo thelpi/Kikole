@@ -1,4 +1,4 @@
-﻿@model KikoleSite.Elite.ViewDatas.PlayerViewData
+﻿@model KikoleSite.ViewDatas.PlayerViewData
 
 @{
     var gameId = (int)Model.Game;
@@ -91,7 +91,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.UntiedWorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedWorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedWorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -103,7 +103,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.UntiedSlayWorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedSlayWorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedSlayWorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -115,7 +115,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.SlayWorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.SlayWorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.SlayWorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -127,7 +127,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.WorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.Elite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.WorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.WorldRecords }).ConfigureAwait(false);
     }
     else
     {

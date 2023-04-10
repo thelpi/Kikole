@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
 
-namespace KikoleSite.Elite.Models
+namespace KikoleSite.Models
 {
     public class RankingEntry : RankingEntryLight
     {

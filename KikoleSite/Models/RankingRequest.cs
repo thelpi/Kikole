@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.Models
+namespace KikoleSite.Models
 {
     public class RankingRequest
     {

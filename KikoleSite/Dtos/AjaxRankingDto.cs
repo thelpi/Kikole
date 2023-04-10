@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace KikoleSite.Elite.Dtos
+namespace KikoleSite.Dtos
 {
     public class AjaxRankingDto
     {

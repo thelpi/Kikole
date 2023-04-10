@@ -1,7 +1,7 @@
 ﻿using System;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.ViewDatas
+namespace KikoleSite.ViewDatas
 {
     public class LatestPointsItemData
     {

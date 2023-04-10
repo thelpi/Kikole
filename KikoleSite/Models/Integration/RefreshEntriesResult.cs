@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace KikoleSite.Elite.Models.Integration
+namespace KikoleSite.Models.Integration
 {
     public class RefreshEntriesResult
     {

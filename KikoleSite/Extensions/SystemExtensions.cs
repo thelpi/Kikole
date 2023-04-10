@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Enums;
 using KikoleSite.Helpers;
 
-namespace KikoleSite.Elite
+namespace KikoleSite
 {
     public static class SystemExtensions
     {

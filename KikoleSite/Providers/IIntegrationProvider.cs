@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Models.Integration;
+using KikoleSite.Enums;
+using KikoleSite.Models.Integration;
 
-namespace KikoleSite.Elite.Providers
+namespace KikoleSite.Providers
 {
     public interface IIntegrationProvider
     {

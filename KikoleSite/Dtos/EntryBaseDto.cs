@@ -1,7 +1,7 @@
 ﻿using System;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.Dtos
+namespace KikoleSite.Dtos
 {
     public class EntryBaseDto
     {

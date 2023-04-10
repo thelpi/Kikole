@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KikoleSite.Elite.ViewDatas
+namespace KikoleSite.ViewDatas
 {
     public class TimeRankingItemData
     {

@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
 
-namespace KikoleSite.Elite.Repositories
+namespace KikoleSite.Repositories
 {
     public class CacheManager : ICacheManager
     {

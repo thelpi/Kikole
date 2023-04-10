@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleSite.Elite.Loggers
+namespace KikoleSite.Loggers
 {
     public class FileLogger
     {

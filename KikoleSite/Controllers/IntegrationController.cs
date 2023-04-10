@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Providers;
+using KikoleSite.Enums;
+using KikoleSite.Providers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleSite.Elite.Controllers
+namespace KikoleSite.Controllers
 {
     [Route("the-elite")]
     public class IntegrationController : Controller

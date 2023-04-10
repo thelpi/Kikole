@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Elite.Enums
+﻿namespace KikoleSite.Enums
 {
     public enum NoDateEntryRankingRule
     {

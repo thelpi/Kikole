@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KikoleSite.Elite.Models
+namespace KikoleSite.Models
 {
     public class Ranking
     {

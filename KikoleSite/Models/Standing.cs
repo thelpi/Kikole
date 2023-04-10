@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
 
-namespace KikoleSite.Elite.Models
+namespace KikoleSite.Models
 {
     public class Standing : Ranking
     {

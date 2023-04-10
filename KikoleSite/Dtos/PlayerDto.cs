@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KikoleSite.Elite.Dtos
+namespace KikoleSite.Dtos
 {
     public class PlayerDto
     {

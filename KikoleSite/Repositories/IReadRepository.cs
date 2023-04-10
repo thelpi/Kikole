@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.Repositories
+namespace KikoleSite.Repositories
 {
     public interface IReadRepository
     {

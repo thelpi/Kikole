@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Models;
+using KikoleSite.Enums;
+using KikoleSite.Models;
 
-namespace KikoleSite.Elite.Extensions
+namespace KikoleSite.Extensions
 {
     public static class ModelExtensions
     {

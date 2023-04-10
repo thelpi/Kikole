@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Elite.Workers
+﻿namespace KikoleSite.Workers
 {
     public enum TaskStackBehavior
     {

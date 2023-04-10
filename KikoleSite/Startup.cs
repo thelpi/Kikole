@@ -44,22 +44,18 @@ namespace KikoleSite
             services.AddHttpContextAccessor();
 
             services
-                // helpers
+                .Configure<Configurations.TheEliteWebsiteConfiguration>(Configuration.GetSection("TheEliteWebsite"))
+                .Configure<Configurations.RankingConfiguration>(Configuration.GetSection("Ranking"))
+                .AddSingleton<Repositories.IReadRepository, Repositories.ReadRepository>()
+                .AddSingleton<Repositories.IWriteRepository, Repositories.WriteRepository>()
+                .AddSingleton<Repositories.ITheEliteWebSiteParser, Repositories.TheEliteWebSiteParser>()
+                .AddSingleton<Providers.IStatisticsProvider, Providers.StatisticsProvider>()
+                .AddSingleton<Providers.IIntegrationProvider, Providers.IntegrationProvider>()
+                .AddSingleton<Loggers.FileLogger>()
+                .AddHostedService<Workers.IntegrationWorker>()
+                .AddSingleton<Repositories.ICacheManager, Repositories.CacheManager>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton(new Random());
-
-            // elite
-            services
-                .Configure<Elite.Configurations.TheEliteWebsiteConfiguration>(Configuration.GetSection("TheEliteWebsite"))
-                .Configure<Elite.Configurations.RankingConfiguration>(Configuration.GetSection("Ranking"))
-                .AddSingleton<Elite.Repositories.IReadRepository, Elite.Repositories.ReadRepository>()
-                .AddSingleton<Elite.Repositories.IWriteRepository, Elite.Repositories.WriteRepository>()
-                .AddSingleton<Elite.Repositories.ITheEliteWebSiteParser, Elite.Repositories.TheEliteWebSiteParser>()
-                .AddSingleton<Elite.Providers.IStatisticsProvider, Elite.Providers.StatisticsProvider>()
-                .AddSingleton<Elite.Providers.IIntegrationProvider, Elite.Providers.IntegrationProvider>()
-                .AddSingleton<Elite.Loggers.FileLogger>()
-                .AddHostedService<Elite.Workers.IntegrationWorker>()
-                .AddSingleton<Elite.Repositories.ICacheManager, Elite.Repositories.CacheManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

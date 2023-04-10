@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
-using KikoleSite.Elite.Models;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
+using KikoleSite.Models;
 
-namespace KikoleSite.Elite.ViewDatas
+namespace KikoleSite.ViewDatas
 {
     internal static class Extensions
     {

@@ -1,11 +1,11 @@
-﻿@model KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData
+﻿@model KikoleSite.ViewDatas.ChronologyCanvasViewData
 @{ 
     var gameId = (int)Model.Game;
     var typeId = (int)Model.ChronologyType;
     var engineIdJs = Model.Engine.HasValue ? ((int)Model.Engine).ToString() : "null";
     var playerIdJs = Model.PlayerId.HasValue ? Model.PlayerId.ToString() : "null";
     var anonymiseJs = Model.Anonymise ? 1 : 0;
-    var totalWidth = KikoleSite.Elite.ViewDatas.ChronologyCanvasViewData.TotalWidth;
+    var totalWidth = KikoleSite.ViewDatas.ChronologyCanvasViewData.TotalWidth;
     var leftImgWidth = 75;
     var height = 48;
     var height3 = height / 3;

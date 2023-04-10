@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Models;
+using KikoleSite.Enums;
+using KikoleSite.Models;
 
-namespace KikoleSite.Elite.Providers
+namespace KikoleSite.Providers
 {
     public interface IStatisticsProvider
     {

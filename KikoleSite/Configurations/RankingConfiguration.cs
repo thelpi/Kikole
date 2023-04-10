@@ -1,6 +1,6 @@
-﻿using KikoleSite.Elite.Enums;
+﻿using KikoleSite.Enums;
 
-namespace KikoleSite.Elite.Configurations
+namespace KikoleSite.Configurations
 {
     public class RankingConfiguration
     {

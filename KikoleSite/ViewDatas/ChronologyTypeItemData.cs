@@ -1,4 +1,4 @@
-﻿namespace KikoleSite.Elite.ViewDatas
+﻿namespace KikoleSite.ViewDatas
 {
     public enum ChronologyTypeItemData
     {

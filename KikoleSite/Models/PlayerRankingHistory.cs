@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace KikoleSite.Elite.Models
+namespace KikoleSite.Models
 {
     public class PlayerRankingHistory
     {

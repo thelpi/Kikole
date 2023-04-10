@@ -3,15 +3,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Elite.Configurations;
-using KikoleSite.Elite.Dtos;
-using KikoleSite.Elite.Enums;
-using KikoleSite.Elite.Extensions;
-using KikoleSite.Elite.Models;
-using KikoleSite.Elite.Repositories;
+using KikoleSite.Configurations;
+using KikoleSite.Dtos;
+using KikoleSite.Enums;
+using KikoleSite.Extensions;
+using KikoleSite.Models;
+using KikoleSite.Repositories;
 using Microsoft.Extensions.Options;
 
-namespace KikoleSite.Elite.Providers
+namespace KikoleSite.Providers
 {
     public sealed class StatisticsProvider : IStatisticsProvider
     {
