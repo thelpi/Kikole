@@ -338,7 +338,9 @@ namespace KikoleSite.Providers
                                 time = entry.Time;
                             }
                             else
+                            {
                                 playersCountForTime++;
+                            }
 
                             localRankings.Add(entry.PlayerId, new PlayerStageLevelRankingLight
                             {
@@ -597,7 +599,9 @@ namespace KikoleSite.Providers
                             time = entry.Time;
                         }
                         else if (!alreadyP)
+                        {
                             playersCountForTime++;
+                        }
 
                         if (points < minimalPoints)
                             break;
@@ -855,7 +859,9 @@ namespace KikoleSite.Providers
                     var player = players[entry.PlayerId];
 
                     if (entry.Time == bestTime && currentWr != null)
+                    {
                         currentWr.AddHolder(player, entryDate, entry.Engine);
+                    }
                     else
                     {
                         currentWr?.AddSlayer(player, entryDate);
@@ -912,14 +918,20 @@ namespace KikoleSite.Providers
 
                 IEqualityComparer<StageLeaderboardItem> comparer = EqualityComparer<StageLeaderboardItem>.Default;
                 if (groupOption == LeaderboardGroupOptions.FirstRankedFirst)
+                {
                     comparer = new StageLeaderboardItemSamePlayer();
+                }
                 else if (singlePlayer)
                 {
                     if (groupOption == LeaderboardGroupOptions.Ranked)
+                    {
                         comparer = new StageLeaderboardItemSameTier();
+                    }
                     else if (groupOption == LeaderboardGroupOptions.RankedFirst
                         || groupOption == LeaderboardGroupOptions.RankedTop10)
+                    {
                         comparer = new StageLeaderboardItemSameRank();
+                    }
                 }
 
                 consolidedLeaderboards.Add(leaderboards[0]);
@@ -932,7 +944,9 @@ namespace KikoleSite.Providers
                 }
             }
             else
+            {
                 consolidedLeaderboards = leaderboards;
+            }
 
             return consolidedLeaderboards;
         }

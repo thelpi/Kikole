@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Controllers
 {
-    [Route("the-elite")]
     public class IntegrationController : Controller
     {
         private readonly IIntegrationProvider _integrationProvider;

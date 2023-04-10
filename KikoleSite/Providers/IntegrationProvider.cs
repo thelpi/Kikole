@@ -518,7 +518,9 @@ namespace KikoleSite.Providers
                             time = entry.Time;
                         }
                         else
+                        {
                             playersCountForTime++;
+                        }
 
                         var rk = new StageLevelRankingDto
                         {

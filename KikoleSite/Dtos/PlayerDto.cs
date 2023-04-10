@@ -27,7 +27,9 @@ namespace KikoleSite.Dtos
                 && former.MinYearOfBirth.HasValue && former.MaxYearOfBirth.HasValue)
             {
                 if (former.MaxYearOfBirth == MinYearOfBirth)
+                {
                     MaxYearOfBirth = null;
+                }
                 else if (former.MinYearOfBirth == MaxYearOfBirth)
                 {
                     MinYearOfBirth = MaxYearOfBirth;

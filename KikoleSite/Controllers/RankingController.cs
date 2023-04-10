@@ -13,8 +13,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KikoleSite.Controllers
 {
-    [Route("the-elite")]
-    public class SimulatedRankingController : Controller
+    public class RankingController : Controller
     {
         private const int MaxRankDisplay = 500;
         private const int DefaultLeaderboardDayStep = 7;
@@ -28,7 +27,7 @@ namespace KikoleSite.Controllers
         private static readonly ConcurrentDictionary<(long, Game), (bool loading, PlayerRankingHistory data)> _generatedRankings
             = new ConcurrentDictionary<(long, Game), (bool loading, PlayerRankingHistory data)>();
 
-        public SimulatedRankingController(
+        public RankingController(
             IStatisticsProvider statisticsProvider,
             IClock clock)
         {
@@ -300,7 +299,9 @@ namespace KikoleSite.Controllers
         {
             if (!_generatedRankings.ContainsKey((playerId, game))
                 || _generatedRankings[(playerId, game)].loading)
+            {
                 return Json(new { message = "Data are not available yet." });
+            }
 
             var data = _generatedRankings[(playerId, game)].data;
             if (data.RequestedDate == _clock.Today)
