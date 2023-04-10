@@ -417,7 +417,7 @@ namespace KikoleSite.Controllers
                 StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
             };
 
-            return View($"Elite/Views/ChronologyCanvas.cshtml", model);
+            return View($"Views/ChronologyCanvas.cshtml", model);
         }
 
         [HttpPost("rankings-chronology")]
@@ -448,7 +448,7 @@ namespace KikoleSite.Controllers
                 StageImages = game.GetStages().ToDictionary(_ => _, _ => string.Format(StageImagePath, (int)_))
             };
 
-            return View($"Elite/Views/ChronologyCanvas.cshtml", model);
+            return View($"Views/ChronologyCanvas.cshtml", model);
         }
 
         [HttpPost("player-dystopia-rankings")]
@@ -881,10 +881,10 @@ namespace KikoleSite.Controllers
         {
             try
             {
-                return View($"Elite/Views/Template.cshtml", new BaseViewData
+                return View($"Views/Template.cshtml", new BaseViewData
                 {
                     Data = await getDatasFunc().ConfigureAwait(false),
-                    Name = $"~/Elite/Views/{viewName}.cshtml",
+                    Name = $"~/Views/{viewName}.cshtml",
                     Title = title
                 });
             }

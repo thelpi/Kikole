@@ -91,7 +91,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.UntiedWorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedWorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedWorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -103,7 +103,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.UntiedSlayWorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedSlayWorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.UntiedSlayWorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -115,7 +115,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.SlayWorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.SlayWorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.SlayWorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -127,7 +127,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.WorldRecords.WorldRecords?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.WorldRecords }).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Views/LongestStanding.cshtml", new KikoleSite.ViewDatas.LongestStandingViewData { Standings = Model.WorldRecords.WorldRecords }).ConfigureAwait(false);
     }
     else
     {
@@ -139,7 +139,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.Three00PtsSweeps?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/Sweeps.cshtml", Model.Three00PtsSweeps).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Views/Sweeps.cshtml", Model.Three00PtsSweeps).ConfigureAwait(false);
     }
     else
     {
@@ -151,7 +151,7 @@
 <div class="collapsiblecontent" style="display: none">
     @if (Model.UntiedSweeps?.Count > 0)
     {
-        await Html.RenderPartialAsync("~/Elite/Views/Sweeps.cshtml", Model.UntiedSweeps).ConfigureAwait(false);
+        await Html.RenderPartialAsync("~/Views/Sweeps.cshtml", Model.UntiedSweeps).ConfigureAwait(false);
     }
     else
     {
@@ -259,7 +259,7 @@
         var googleChartCallback = function(firstCall) {
             var sourceDatas = [['Date', 'Rank']];
             $.ajax({
-                url: '/the-elite/games/@gameId/players/@Model.Id/ranking-history',
+                url: '/games/@gameId/players/@Model.Id/ranking-history',
                 data: {},
                 type: "GET",
                 dataType: "json",
