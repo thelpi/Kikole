@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using KikoleSite.Loggers;
 using KikoleSite.Providers;
-using KikoleSite.Repositories;
 
 namespace KikoleSite.Workers
 {
@@ -13,24 +12,21 @@ namespace KikoleSite.Workers
         private readonly FileLogger _logger;
         private readonly IClock _clock;
         private readonly IIntegrationProvider _integrationProvider;
-        private readonly ICacheManager _cacheManager;
 
         public IntegrationWorker(
             FileLogger logger,
             IClock clock,
-            IIntegrationProvider integrationProvider,
-            ICacheManager cacheManager)
+            IIntegrationProvider integrationProvider)
         {
             _logger = logger;
             _clock = clock;
             _integrationProvider = integrationProvider;
-            _cacheManager = cacheManager;
         }
 
         protected override TimeSpan DueTime =>
 #if DEBUG
             // Never
-            TimeSpan.FromMilliseconds(-1);
+            TimeSpan.FromMilliseconds(1);
 #else
             // At next midnight
             TimeSpan.FromMilliseconds((int)Math.Ceiling((_clock.Tomorrow - _clock.Now).TotalMilliseconds));
@@ -43,10 +39,6 @@ namespace KikoleSite.Workers
         // TODO: use the stoppingToken!
         protected override async Task RunJobAsync(CancellationToken stoppingToken)
         {
-            await _cacheManager
-                .ToggleCacheLockAsync(true)
-                .ConfigureAwait(false);
-
             var isGlobalRefresh = _clock.Today.Day == 1;
 
             var refreshPlayersResult = await _integrationProvider
@@ -76,10 +68,6 @@ namespace KikoleSite.Workers
 
                 _logger.Log(refreshEntriesResult.Errors?.ToArray());
             }
-
-            await _cacheManager
-                .ToggleCacheLockAsync(false)
-                .ConfigureAwait(false);
         }
     }
 }

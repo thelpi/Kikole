@@ -4,14 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using KikoleSite.Configurations;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
-using KikoleSite.Extensions;
 using KikoleSite.Models;
 using KikoleSite.Models.Integration;
 using KikoleSite.Repositories;
-using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Providers
 {
@@ -21,20 +18,17 @@ namespace KikoleSite.Providers
         private readonly IReadRepository _readRepository;
         private readonly ITheEliteWebSiteParser _siteParser;
         private readonly IClock _clock;
-        private readonly RankingConfiguration _configuration;
 
         public IntegrationProvider(
             IWriteRepository writeRepository,
             IReadRepository readRepository,
             ITheEliteWebSiteParser siteParser,
-            IClock clock,
-            IOptions<RankingConfiguration> configuration)
+            IClock clock)
         {
             _writeRepository = writeRepository;
             _readRepository = readRepository;
             _siteParser = siteParser;
             _clock = clock;
-            _configuration = configuration.Value;
         }
 
         public async Task<RefreshPlayersResult> RefreshPlayersAsync(
@@ -173,22 +167,16 @@ namespace KikoleSite.Providers
 
             if (addTimesForNewPlayers && createdPlayers.Count > 0)
             {
-                var (_, geUpdatedEntries, geLogs) = await RefreshPlayersEntriesAsync(
+                var (_, geLogs) = await RefreshPlayersEntriesAsync(
                         Game.GoldenEye, createdPlayers)
                     .ConfigureAwait(false);
 
-                var (_, pdUpdateEntries, pdLogs) = await RefreshPlayersEntriesAsync(
+                var (_, pdLogs) = await RefreshPlayersEntriesAsync(
                         Game.PerfectDark, createdPlayers)
                     .ConfigureAwait(false);
 
                 errors.AddRange(geLogs);
                 errors.AddRange(pdLogs);
-
-                var allEntriesUpdated = geUpdatedEntries
-                    .Concat(pdUpdateEntries)
-                    .ToList();
-
-                await RegenerateRankingsAsync(allEntriesUpdated).ConfigureAwait(false);
             }
 
             return new RefreshPlayersResult
@@ -205,11 +193,9 @@ namespace KikoleSite.Providers
                 .GetPlayersAsync()
                 .ConfigureAwait(false);
 
-            var (entriesCount, updatedEntries, errors) = await RefreshPlayersEntriesAsync(
+            var (entriesCount, errors) = await RefreshPlayersEntriesAsync(
                     game, validPlayers)
                 .ConfigureAwait(false);
-
-            await RegenerateRankingsAsync(updatedEntries).ConfigureAwait(false);
 
             return new RefreshEntriesResult
             {
@@ -264,8 +250,6 @@ namespace KikoleSite.Providers
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            await RegenerateRankingsAsync(newEntries).ConfigureAwait(false);
-
             return new RefreshEntriesResult
             {
                 Errors = groupsErrors.ToList(),
@@ -313,8 +297,6 @@ namespace KikoleSite.Providers
                 .Concat(deletedEntriesGe)
                 .ToList();
 
-            await RegenerateRankingsAsync(allEntriesUpdated).ConfigureAwait(false);
-
             return new RefreshEntriesResult
             {
                 Errors = errors,
@@ -322,7 +304,7 @@ namespace KikoleSite.Providers
             };
         }
 
-        private async Task<(int count, IReadOnlyCollection<EntryDto> updatedEntries, IReadOnlyCollection<string> errors)> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
+        private async Task<(int count, IReadOnlyCollection<string> errors)> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
         {
             var errors = new ConcurrentBag<string>();
             var updatedEntries = new ConcurrentBag<EntryDto>();
@@ -350,7 +332,7 @@ namespace KikoleSite.Providers
                 })).ConfigureAwait(false);
             }
 
-            return (count, updatedEntries, errors);
+            return (count, errors);
         }
 
         private async Task ManageGroupOfEntriesAsync(
@@ -461,85 +443,6 @@ namespace KikoleSite.Providers
             }
 
             return (newEntries, deletedEntries, errors);
-        }
-
-        private async Task RegenerateRankingsAsync(IReadOnlyCollection<EntryDto> entries)
-        {
-#if DEBUG
-            var oldestEntryByStageLevel = entries
-                .GroupBy(x => (x.Stage, x.Level))
-                .ToDictionary(x => x.Key, x => x.Min(_ => _.Date ?? _.Stage.GetGame().GetEliteFirstDate()));
-
-            foreach (var (stage, level) in oldestEntryByStageLevel.Keys)
-            {
-                var oldestDate = oldestEntryByStageLevel[(stage, level)];
-
-                await _writeRepository
-                    .RemoveRankingsAfterDateAsync(stage, level, oldestDate)
-                    .ConfigureAwait(false);
-
-                var stageLevelEntries = (await _readRepository
-                    .GetEntriesAsync(stage, level, null, null)
-                    .ConfigureAwait(false))
-                    .ToList();
-
-                stageLevelEntries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
-
-                var dates = stageLevelEntries
-                    .Where(x => x.Date >= oldestDate)
-                    .Select(x => x.Date.Value);
-
-                foreach (var date in dates)
-                {
-                    // keeps the best time for each player
-                    var entriesAtDate = stageLevelEntries
-                        .Where(x => x.Date <= date)
-                        .GroupBy(x => x.PlayerId)
-                        .Select(x => x.OrderBy(x => x.Time).ThenBy(x => x.Date).First())
-                        .OrderBy(x => x.Time)
-                        .ToList();
-
-                    // compute points
-                    long? time = null;
-                    var playersCountForTime = 1;
-                    var points = StageLeaderboard.BasePoints;
-                    var rank = 0;
-                    foreach (var entry in entriesAtDate)
-                    {
-                        if (!time.HasValue || time != entry.Time)
-                        {
-                            if (time.HasValue)
-                            {
-                                for (var i = 0; i < playersCountForTime; i++)
-                                    points = StageLeaderboard.PointsChart.TryGetValue(points, out var tmpPoints) ? tmpPoints : points - 1;
-                            }
-                            rank += playersCountForTime;
-                            playersCountForTime = 1;
-                            time = entry.Time;
-                        }
-                        else
-                        {
-                            playersCountForTime++;
-                        }
-
-                        var rk = new StageLevelRankingDto
-                        {
-                            Date = date,
-                            Level = level,
-                            PlayerId = entry.PlayerId,
-                            Stage = stage,
-                            Time = (int)entry.Time,
-                            Points = points,
-                            Rank = rank
-                        };
-
-                        await _writeRepository
-                            .ReplaceRankingAsync(rk)
-                            .ConfigureAwait(false);
-                    }
-                }
-            }
-#endif
         }
     }
 }

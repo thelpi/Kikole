@@ -53,7 +53,6 @@ namespace KikoleSite
                 .AddSingleton<Providers.IIntegrationProvider, Providers.IntegrationProvider>()
                 .AddSingleton<Loggers.FileLogger>()
                 .AddHostedService<Workers.IntegrationWorker>()
-                .AddSingleton<Repositories.ICacheManager, Repositories.CacheManager>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton(new Random());
         }

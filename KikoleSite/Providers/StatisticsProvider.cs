@@ -15,7 +15,6 @@ namespace KikoleSite.Providers
 {
     public sealed class StatisticsProvider : IStatisticsProvider
     {
-        private readonly ICacheManager _cacheManager;
         private readonly IReadRepository _readRepository;
         private readonly RankingConfiguration _configuration;
         private readonly IClock _clock;
@@ -26,13 +25,11 @@ namespace KikoleSite.Providers
         public StatisticsProvider(
             IReadRepository readRepository,
             IOptions<RankingConfiguration> configuration,
-            IClock clock,
-            ICacheManager cacheManager)
+            IClock clock)
         {
             _readRepository = readRepository;
             _configuration = configuration.Value;
             _clock = clock;
-            _cacheManager = cacheManager;
         }
 
         public async Task<IReadOnlyCollection<Standing>> GetLongestStandingsAsync(
@@ -252,8 +249,8 @@ namespace KikoleSite.Providers
             {
                 foreach (var level in SystemExtensions.Enumerate<Level>())
                 {
-                    var sourceEntries = await _cacheManager
-                        .GetStageLevelEntriesAsync(stage, level)
+                    var sourceEntries = await _readRepository
+                        .GetEntriesAsync(stage, level, null, null)
                         .ConfigureAwait(false);
                     entries.Add((stage, level), sourceEntries.ToList());
                 }
@@ -437,8 +434,8 @@ namespace KikoleSite.Providers
             Game game,
             long playerId)
         {
-            var entries = await _cacheManager
-                .GetPlayerEntriesAsync(game, playerId)
+            var entries = await _readRepository
+                .GetPlayerEntriesAsync(playerId, game)
                 .ConfigureAwait(false);
 
             return entries.Count == 0
@@ -795,8 +792,8 @@ namespace KikoleSite.Providers
             IReadOnlyDictionary<long, IReadOnlyCollection<long>> countryPlayersGroup = null)
         {
             // Gets every entry for the stage and level
-            var tmpEntriesSource = await _cacheManager
-                .GetStageLevelEntriesAsync(stage, level)
+            var tmpEntriesSource = await _readRepository
+                .GetEntriesAsync(stage, level, null, null)
                 .ConfigureAwait(false);
 
             // if country grouping, replace player by "country player"
