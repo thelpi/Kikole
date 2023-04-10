@@ -44,7 +44,7 @@ namespace KikoleSite.Repositories
 
             var players = await ExecuteReaderAsync<PlayerDto>(
                     "SELECT id, url_name, real_name, surname,  color, control_style, is_banned, country " +
-                    "FROM elite_players " +
+                    "FROM players " +
                     "WHERE is_banned = @is_banned",
                     new
                     {
@@ -99,7 +99,7 @@ namespace KikoleSite.Repositories
             return await ExecuteReaderAsync<EntryDto>(
                     "SELECT id, date, level_id AS Level, player_id, " +
                     "stage_id AS Stage, system_id AS Engine, time " +
-                    "FROM elite_entries " +
+                    "FROM entries " +
                     "WHERE (@start_date IS NULL OR date >= @start_date) " +
                     "AND (@end_date IS NULL OR date < @end_date) " +
                     "AND (@stage_id IS NULL OR stage_id = @stage_id) " +

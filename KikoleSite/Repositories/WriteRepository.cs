@@ -14,7 +14,7 @@ namespace KikoleSite.Repositories
         public async Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry)
         {
             return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
-                    "REPLACE INTO elite_entries " +
+                    "REPLACE INTO entries " +
                     "(player_id, level_id, stage_id, date, time, system_id, creation_date) " +
                     "VALUES " +
                     "(@player_id, @level_id, @stage_id, @date, @time, @system_id, NOW())",
@@ -33,7 +33,7 @@ namespace KikoleSite.Repositories
         public async Task<long> InsertPlayerAsync(string urlName, string defaultHexColor)
         {
             return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
-                    "INSERT INTO elite_players " +
+                    "INSERT INTO players " +
                     "(url_name, real_name, surname, color, control_style, creation_date) " +
                     "VALUES " +
                     "(@url_name, @real_name, @surname, @color, @control_style, NOW())",
@@ -51,7 +51,7 @@ namespace KikoleSite.Repositories
         public async Task DeletePlayerEntriesAsync(Game game, long playerId)
         {
             await ExecuteNonQueryAsync(
-                    $"DELETE FROM elite_entries WHERE player_id = @player_id AND stage_id {(game == Game.GoldenEye ? "<= 20" : "> 20")}",
+                    $"DELETE FROM entries WHERE player_id = @player_id AND stage_id {(game == Game.GoldenEye ? "<= 20" : "> 20")}",
                     new
                     {
                         player_id = playerId
@@ -62,7 +62,7 @@ namespace KikoleSite.Repositories
         public async Task UpdatePlayerAsync(PlayerDto player)
         {
             await ExecuteNonQueryAsync(
-                    "UPDATE elite_players " +
+                    "UPDATE players " +
                     "SET real_name = @real_name, " +
                     "   surname = @surname, " +
                     "   color = @color, " +
@@ -89,7 +89,7 @@ namespace KikoleSite.Repositories
         public async Task BanPlayerAsync(long playerId)
         {
             await ExecuteNonQueryAsync(
-                    "UPDATE elite_players " +
+                    "UPDATE players " +
                     "SET is_banned = 1 " +
                     "WHERE id = @id",
                     new
@@ -104,7 +104,7 @@ namespace KikoleSite.Repositories
             if (entriesId?.Length > 0)
             {
                 await ExecuteNonQueryAsync(
-                        $"DELETE FROM elite_entries WHERE id IN ({string.Join(",", entriesId)})",
+                        $"DELETE FROM entries WHERE id IN ({string.Join(",", entriesId)})",
                         null)
                     .ConfigureAwait(false);
             }
