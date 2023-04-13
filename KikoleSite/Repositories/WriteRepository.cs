@@ -109,41 +109,5 @@ namespace KikoleSite.Repositories
                     .ConfigureAwait(false);
             }
         }
-
-        public async Task<long> ReplaceRankingAsync(StageLevelRankingDto ranking)
-        {
-            return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
-                    "INSERT INTO elite_stage_level_rankings " +
-                    "(player_id, level_id, stage_id, date, time, points, rank, creation_date) " +
-                    "VALUES " +
-                    "(@player_id, @level_id, @stage_id, @date, @time, @points, @rank, NOW())",
-                    new
-                    {
-                        player_id = ranking.PlayerId,
-                        level_id = (long)ranking.Level,
-                        stage_id = (long)ranking.Stage,
-                        date = ranking.Date,
-                        time = ranking.Time,
-                        points = ranking.Points,
-                        rank = ranking.Rank
-                    })
-                .ConfigureAwait(false);
-        }
-
-        public async Task RemoveRankingsAfterDateAsync(Stage stage, Level level, DateTime dateMinInclude)
-        {
-            await ExecuteNonQueryAsync(
-                    "DELETE FROM elite_stage_level_rankings " +
-                    "WHERE date >= @date " +
-                    "AND stage_id = @stage_id " +
-                    "AND level_id = @level_id",
-                    new
-                    {
-                        stage_id = (long)stage,
-                        level_id = (long)level,
-                        date = dateMinInclude.Date
-                    })
-                .ConfigureAwait(false);
-        }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Repositories
 {
-    public sealed class ReadRepository : KikoleSite.Repositories.BaseRepository, IReadRepository
+    public sealed class ReadRepository : BaseRepository, IReadRepository
     {
         private IReadOnlyList<PlayerDto> _playersCache = null;
         private readonly object cacheLock = new object();
@@ -67,29 +67,6 @@ namespace KikoleSite.Repositories
         {
             return await GetEntriesByCriteriaInternalAsync(
                     null, null, null, null, playerId, game)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<IReadOnlyCollection<StageLevelRankingDto>> GetStageLevelRankingsAsync(Stage stage, Level level, DateTime date)
-        {
-            return await ExecuteReaderAsync<StageLevelRankingDto>(
-                    "SELECT * " +
-                    "FROM elite_stage_level_rankings " +
-                    "WHERE date = (" +
-                    "   SELECT MAX(r2.date) " +
-                    "   FROM elite_stage_level_rankings AS r2 " +
-                    "   WHERE r2.stage_id = @stage_id " +
-                    "   AND r2.level_id = @level_id " +
-                    "   AND r2.date <= @date" +
-                    ") " +
-                    "AND stage_id = @stage_id " +
-                    "AND level_id = @level_id",
-                    new
-                    {
-                        stage_id = (long)stage,
-                        level_id = (long)level,
-                        date = date.Date
-                    })
                 .ConfigureAwait(false);
         }
 

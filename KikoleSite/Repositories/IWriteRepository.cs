@@ -18,9 +18,5 @@ namespace KikoleSite.Repositories
         Task BanPlayerAsync(long playerId);
 
         Task DeleteEntriesAsync(params long[] entriesId);
-
-        Task<long> ReplaceRankingAsync(StageLevelRankingDto ranking);
-
-        Task RemoveRankingsAfterDateAsync(Stage stage, Level level, DateTime dateMinInclude);
     }
 }
