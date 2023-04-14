@@ -747,7 +747,9 @@ namespace KikoleSite.Providers
                     Stage = entry.Stage,
                     Time = entry.Time,
                     EntryDate = entry.Date.Value,
-                    IsSimulatedDate = entry.IsSimulatedDate
+                    IsSimulatedDate = entry.IsSimulatedDate,
+                    EntryId = entry.Id,
+                    Points = 0 // weird but computed later
                 };
 
                 rankingsToInsert.Add(ranking);

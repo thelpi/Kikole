@@ -70,6 +70,21 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyList<RankingDto>> GetRankingsAsync(Stage stage, Level level, DateTime date)
+        {
+            return await ExecuteReaderAsync<RankingDto>(
+                    "SELECT id, player_id, stage_id AS Stage, level_id AS Level, date, entry_id, points, time, rank " +
+                    "FROM rankings " +
+                    "WHERE stage_id = @stage_id AND level_id = @level_id AND date = @date",
+                    new
+                    {
+                        stage_id = (byte)stage,
+                        level_id = (byte)level,
+                        date
+                    })
+                .ConfigureAwait(false);
+        }
+
         private async Task<IReadOnlyCollection<EntryDto>> GetEntriesByCriteriaInternalAsync(
             Stage? stage, Level? level, DateTime? startDate, DateTime? endDate, uint? playerId, Game? game)
         {

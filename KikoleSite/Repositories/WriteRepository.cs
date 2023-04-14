@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
 using Microsoft.Extensions.Configuration;
@@ -107,6 +108,58 @@ namespace KikoleSite.Repositories
                         null)
                     .ConfigureAwait(false);
             }
+        }
+
+        public async Task<RankingDto> InsertRankingAsync(RankingDto ranking)
+        {
+            var id = await ExecuteNonQueryAndGetInsertedIdAsync<ulong>(
+                    "INSERT INTO rankings " +
+                    "(date, stage_id, level_id, player_id, time, points, rank, entry_id) " +
+                    "VALUES " +
+                    "(@date, @stage_id, @level_id, @player_id, @time, @points, @rank, @entry_id)",
+                    new
+                    {
+                        date = ranking.Date,
+                        stage_id = (byte)ranking.Stage,
+                        level_id = (byte)ranking.Level,
+                        player_id = ranking.PlayerId,
+                        time = ranking.Time,
+                        points = ranking.Points,
+                        rank = ranking.Rank,
+                        entry_id = ranking.EntryId
+                    })
+                .ConfigureAwait(false);
+
+            ranking.Id = id;
+            return ranking;
+        }
+
+        public async Task DeleteRankingAsync(ulong id)
+        {
+            await ExecuteNonQueryAsync(
+                    $"DELETE FROM rankings WHERE id = @id",
+                    new { id })
+                .ConfigureAwait(false);
+        }
+
+        public async Task DeleteRankingsAsync(Stage? stage, Level? level, uint? playerId, DateTime? startDate, DateTime? endDate)
+        {
+            await ExecuteNonQueryAsync(
+                    $"DELETE FROM rankings " +
+                    $"WHERE (stage_id = @stage_id OR @stage_id IS NULL) " +
+                    $"AND (level_id = @level_id OR @level_id IS NULL) " +
+                    $"AND (player_id = @player_id OR @player_id IS NULL) " +
+                    $"AND (date >= @start_date OR @start_date IS NULL) " +
+                    $"AND (date < @end_date OR @end_date IS NULL)",
+                    new
+                    {
+                        stage_id = (byte?)stage,
+                        level_id = (byte?)level,
+                        player_id = playerId,
+                        start_date = startDate,
+                        end_date = endDate,
+                    })
+                .ConfigureAwait(false);
         }
     }
 }
