@@ -13,7 +13,5 @@ namespace KikoleSite.Repositories
         Task<IReadOnlyCollection<EntryDto>> GetEntriesAsync(Stage? stage, Level? level, DateTime? startDate, DateTime? endDate);
 
         Task<IReadOnlyCollection<EntryDto>> GetPlayerEntriesAsync(uint playerId, Game game);
-
-        Task<IReadOnlyList<RankingDto>> GetRankingsAsync(Stage stage, Level level, DateTime date);
     }
 }

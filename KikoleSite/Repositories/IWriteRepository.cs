@@ -20,12 +20,12 @@ namespace KikoleSite.Repositories
 
         Task DeleteEntriesAsync(params uint[] entriesId);
 
-        Task<RankingDto> InsertRankingAsync(RankingDto ranking);
+        Task<uint> InsertRankingAsync(RankingDto ranking);
 
-        Task InsertRankingsAsync(IReadOnlyList<RankingDto> rankings);
+        Task InsertRankingEntriesAsync(IReadOnlyList<RankingEntryDto> rankingEntries);
 
-        Task DeleteRankingAsync(ulong id);
+        Task DeleteRankingAsync(uint id);
 
-        Task DeleteRankingsAsync(Stage? stage, Level? level, uint? playerId, DateTime? startDate, DateTime? endDate);
+        Task DeleteRankingsAsync(Stage stage, Level level, NoDateEntryRankingRule rule, DateTime? startDateInc, DateTime? endDateExc);
     }
 }

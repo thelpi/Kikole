@@ -327,9 +327,11 @@ namespace KikoleSite.Providers
         {
             startDate = startDate.Date;
 
+            var rule = _configuration.NoDateEntryRankingRule;
+
             // removes all rankings past or equal to the date
             await _writeRepository
-                .DeleteRankingsAsync(stage, level, null, startDate, null)
+                .DeleteRankingsAsync(stage, level, rule, startDate, null)
                 .ConfigureAwait(false);
 
             // gets base entries list
@@ -339,7 +341,7 @@ namespace KikoleSite.Providers
                 .ToList();
 
             // forces date
-            entries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
+            entries.ManageDateLessEntries(rule, _clock.Now);
 
             // all dates from start to now
             var allDates = entries
@@ -351,6 +353,16 @@ namespace KikoleSite.Providers
 
             foreach (var date in allDates)
             {
+                var rankingId = await _writeRepository
+                    .InsertRankingAsync(new RankingDto
+                    {
+                        Date = date,
+                        Level = level,
+                        Rule = rule,
+                        Stage = stage
+                    })
+                    .ConfigureAwait(false);
+
                 // takes the best time (and the oldest, if several with different engines) for each player
                 // before (or equal) date from the loop
                 var dateEntries = entries
@@ -360,7 +372,7 @@ namespace KikoleSite.Providers
                     .OrderBy(x => x.Time)
                     .ToList();
 
-                var rankings = new List<RankingDto>(dateEntries.Count);
+                var rankings = new List<RankingEntryDto>(dateEntries.Count);
 
                 var pos = 1;
                 var posAgg = 1;
@@ -384,20 +396,20 @@ namespace KikoleSite.Providers
 
                     var points = pos == 1 ? 100 : (pos == 2 ? 97 : Math.Max((100 - pos) - 2, 0));
 
-                    rankings.Add(new RankingDto
+                    rankings.Add(new RankingEntryDto
                     {
-                        Date = date,
                         EntryId = entry.Id,
-                        Level = entry.Level,
                         PlayerId = entry.PlayerId,
                         Points = points,
                         Rank = pos,
-                        Stage = entry.Stage,
-                        Time = entry.Time
+                        Time = entry.Time,
+                        RankingId = rankingId
                     });
                 }
 
-                await _writeRepository.InsertRankingsAsync(rankings).ConfigureAwait(false);
+                await _writeRepository
+                    .InsertRankingEntriesAsync(rankings)
+                    .ConfigureAwait(false);
             }
 
             return new RefreshRankingsResult();

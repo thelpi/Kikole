@@ -112,44 +112,36 @@ namespace KikoleSite.Repositories
             }
         }
 
-        public async Task<RankingDto> InsertRankingAsync(RankingDto ranking)
+        public async Task<uint> InsertRankingAsync(RankingDto ranking)
         {
-            var id = await ExecuteNonQueryAndGetInsertedIdAsync<ulong>(
-                    "INSERT INTO rankings " +
-                    "(date, stage_id, level_id, player_id, time, points, rank, entry_id) " +
-                    "VALUES " +
-                    "(@date, @stage_id, @level_id, @player_id, @time, @points, @rank, @entry_id)",
+            return await ExecuteNonQueryAndGetInsertedIdAsync<uint>($"INSERT INTO rankings " +
+                $"(stage_id, level_id, rule_id, date) " +
+                $"VALUES " +
+                $"(@stage_id, @level_id, @rule_id, @date)",
                     new
                     {
                         date = ranking.Date,
                         stage_id = (byte)ranking.Stage,
                         level_id = (byte)ranking.Level,
-                        player_id = ranking.PlayerId,
-                        time = ranking.Time,
-                        points = ranking.Points,
-                        rank = ranking.Rank,
-                        entry_id = ranking.EntryId
+                        rule_id = (byte)ranking.Rule
                     })
                 .ConfigureAwait(false);
-
-            ranking.Id = id;
-            return ranking;
         }
 
-        public async Task InsertRankingsAsync(IReadOnlyList<RankingDto> rankings)
+        public async Task InsertRankingEntriesAsync(IReadOnlyList<RankingEntryDto> rankingEntries)
         {
-            var parsedData = rankings.Select(r =>
-                $"('{r.Date:yyyy-MM-dd}', {(byte)r.Stage}, {(byte)r.Level}, {r.PlayerId}, {r.Time}, {r.Points}, {r.Rank}, {r.EntryId})");
+            var parsedData = rankingEntries.Select(r =>
+                $"('{r.RankingId}', {r.PlayerId}, {r.Time}, {r.Points}, {r.Rank}, {r.EntryId})");
 
-            await ExecuteNonQueryAsync($"INSERT INTO rankings " +
-                    $"(date, stage_id, level_id, player_id, time, points, rank, entry_id) " +
+            await ExecuteNonQueryAsync($"INSERT INTO ranking_entries " +
+                    $"(ranking_id, player_id, time, points, rank, entry_id) " +
                     $"VALUES " +
                     $"{string.Join(", ", parsedData)}",
                     null)
                 .ConfigureAwait(false);
         }
 
-        public async Task DeleteRankingAsync(ulong id)
+        public async Task DeleteRankingAsync(uint id)
         {
             await ExecuteNonQueryAsync(
                     $"DELETE FROM rankings WHERE id = @id",
@@ -157,22 +149,22 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task DeleteRankingsAsync(Stage? stage, Level? level, uint? playerId, DateTime? startDate, DateTime? endDate)
+        public async Task DeleteRankingsAsync(Stage stage, Level level, NoDateEntryRankingRule rule, DateTime? startDateInc, DateTime? endDateExc)
         {
             await ExecuteNonQueryAsync(
                     $"DELETE FROM rankings " +
-                    $"WHERE (stage_id = @stage_id OR @stage_id IS NULL) " +
-                    $"AND (level_id = @level_id OR @level_id IS NULL) " +
-                    $"AND (player_id = @player_id OR @player_id IS NULL) " +
+                    $"WHERE stage_id = @stage_id " +
+                    $"AND level_id = @level_id " +
+                    $"AND rule_id = @rule_id " +
                     $"AND (date >= @start_date OR @start_date IS NULL) " +
                     $"AND (date < @end_date OR @end_date IS NULL)",
                     new
                     {
-                        stage_id = (byte?)stage,
-                        level_id = (byte?)level,
-                        player_id = playerId,
-                        start_date = startDate,
-                        end_date = endDate,
+                        stage_id = (byte)stage,
+                        level_id = (byte)level,
+                        rule_id = (byte)rule,
+                        start_date = startDateInc,
+                        end_date = endDateExc
                     })
                 .ConfigureAwait(false);
         }

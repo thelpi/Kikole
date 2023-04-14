@@ -740,16 +740,12 @@ namespace KikoleSite.Providers
 
                 var ranking = new CustomRankingDto
                 {
-                    Date = request.RankingDate,
                     Level = entry.Level,
                     PlayerId = entry.PlayerId,
                     Rank = pos,
                     Stage = entry.Stage,
                     Time = entry.Time,
-                    EntryDate = entry.Date.Value,
-                    IsSimulatedDate = entry.IsSimulatedDate,
-                    EntryId = entry.Id,
-                    Points = 0 // weird but computed later
+                    EntryDate = entry.Date.Value
                 };
 
                 rankingsToInsert.Add(ranking);
