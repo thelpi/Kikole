@@ -24,6 +24,16 @@ namespace KikoleSite.Controllers
             _secret = configuration.GetValue<string>("TheEliteIntegrationSecret");
         }
 
+        [HttpGet("games/{game}/rankings/refresh")]
+        public JsonResult RefreshRankings([FromRoute] Game game, [FromQuery] string secret)
+        {
+            var json = StartAsyncTaskAndGetJson(() =>
+                _integrationProvider.ComputeRankingsAsync(game),
+                nameof(RefreshPlayers),
+                secret);
+            return Json(json);
+        }
+
         [HttpGet("players/refresh")]
         public JsonResult RefreshPlayers(
             [FromQuery] bool addTimesForNewPlayers,

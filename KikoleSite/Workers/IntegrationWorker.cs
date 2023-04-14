@@ -26,7 +26,7 @@ namespace KikoleSite.Workers
         protected override TimeSpan DueTime =>
 #if DEBUG
             // Never
-            TimeSpan.FromMilliseconds(1);
+            TimeSpan.FromMilliseconds(-1);
 #else
             // At next midnight
             TimeSpan.FromMilliseconds((int)Math.Ceiling((_clock.Tomorrow - _clock.Now).TotalMilliseconds));

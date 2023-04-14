@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using KikoleSite.Configurations;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
+using KikoleSite.Extensions;
 using KikoleSite.Models;
 using KikoleSite.Models.Integration;
 using KikoleSite.Repositories;
+using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Providers
 {
@@ -18,17 +21,20 @@ namespace KikoleSite.Providers
         private readonly IReadRepository _readRepository;
         private readonly ITheEliteWebSiteParser _siteParser;
         private readonly IClock _clock;
+        private readonly RankingConfiguration _configuration;
 
         public IntegrationProvider(
             IWriteRepository writeRepository,
             IReadRepository readRepository,
             ITheEliteWebSiteParser siteParser,
-            IClock clock)
+            IClock clock,
+            IOptions<RankingConfiguration> configuration)
         {
             _writeRepository = writeRepository;
             _readRepository = readRepository;
             _siteParser = siteParser;
             _clock = clock;
+            _configuration = configuration.Value;
         }
 
         public async Task<RefreshPlayersResult> RefreshPlayersAsync(
@@ -302,6 +308,99 @@ namespace KikoleSite.Providers
                 Errors = errors,
                 ReplacedEntriesCount = count
             };
+        }
+
+        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game)
+        {
+            foreach (var stage in game.GetStages())
+            {
+                foreach (var level in SystemExtensions.Enumerate<Level>())
+                {
+                    await ComputeRankingsFromDateAsync(stage, level, game.GetEliteFirstDate());
+                }
+            }
+
+            return new RefreshRankingsResult();
+        }
+
+        public async Task<RefreshRankingsResult> ComputeRankingsFromDateAsync(Stage stage, Level level, DateTime startDate)
+        {
+            startDate = startDate.Date;
+
+            // removes all rankings past or equal to the date
+            await _writeRepository
+                .DeleteRankingsAsync(stage, level, null, startDate, null)
+                .ConfigureAwait(false);
+
+            // gets base entries list
+            var entries = (await _readRepository
+                .GetEntriesAsync(stage, level, null, null)
+                .ConfigureAwait(false))
+                .ToList();
+
+            // forces date
+            entries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
+
+            // all dates from start to now
+            var allDates = entries
+                .Where(x => x.Date.Value.Date >= startDate)
+                .Select(x => x.Date.Value)
+                .Distinct()
+                .OrderBy(x => x.Date)
+                .ToList();
+
+            foreach (var date in allDates)
+            {
+                // takes the best time (and the oldest, if several with different engines) for each player
+                // before (or equal) date from the loop
+                var dateEntries = entries
+                    .Where(x => x.Date.Value.Date <= date)
+                    .GroupBy(x => x.PlayerId)
+                    .Select(x => x.OrderBy(y => y.Time).ThenBy(y => y.Date).First())
+                    .OrderBy(x => x.Time)
+                    .ToList();
+
+                var rankings = new List<RankingDto>(dateEntries.Count);
+
+                var pos = 1;
+                var posAgg = 1;
+                long? currentTime = null;
+                foreach (var entry in dateEntries)
+                {
+                    if (!currentTime.HasValue)
+                    {
+                        currentTime = entry.Time;
+                    }
+                    else if (currentTime == entry.Time)
+                    {
+                        posAgg++;
+                    }
+                    else
+                    {
+                        pos += posAgg;
+                        posAgg = 1;
+                        currentTime = entry.Time;
+                    }
+
+                    var points = pos == 1 ? 100 : (pos == 2 ? 97 : Math.Max((100 - pos) - 2, 0));
+
+                    rankings.Add(new RankingDto
+                    {
+                        Date = date,
+                        EntryId = entry.Id,
+                        Level = entry.Level,
+                        PlayerId = entry.PlayerId,
+                        Points = points,
+                        Rank = pos,
+                        Stage = entry.Stage,
+                        Time = entry.Time
+                    });
+                }
+
+                await _writeRepository.InsertRankingsAsync(rankings).ConfigureAwait(false);
+            }
+
+            return new RefreshRankingsResult();
         }
 
         private async Task<(int count, IReadOnlyCollection<string> errors)> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)

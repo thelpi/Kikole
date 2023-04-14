@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
@@ -132,6 +134,19 @@ namespace KikoleSite.Repositories
 
             ranking.Id = id;
             return ranking;
+        }
+
+        public async Task InsertRankingsAsync(IReadOnlyList<RankingDto> rankings)
+        {
+            var parsedData = rankings.Select(r =>
+                $"('{r.Date:yyyy-MM-dd}', {(byte)r.Stage}, {(byte)r.Level}, {r.PlayerId}, {r.Time}, {r.Points}, {r.Rank}, {r.EntryId})");
+
+            await ExecuteNonQueryAsync($"INSERT INTO rankings " +
+                    $"(date, stage_id, level_id, player_id, time, points, rank, entry_id) " +
+                    $"VALUES " +
+                    $"{string.Join(", ", parsedData)}",
+                    null)
+                .ConfigureAwait(false);
         }
 
         public async Task DeleteRankingAsync(ulong id)

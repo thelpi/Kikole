@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
@@ -20,6 +21,8 @@ namespace KikoleSite.Repositories
         Task DeleteEntriesAsync(params uint[] entriesId);
 
         Task<RankingDto> InsertRankingAsync(RankingDto ranking);
+
+        Task InsertRankingsAsync(IReadOnlyList<RankingDto> rankings);
 
         Task DeleteRankingAsync(ulong id);
 
