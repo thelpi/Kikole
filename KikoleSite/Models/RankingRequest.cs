@@ -10,9 +10,9 @@ namespace KikoleSite.Models
     {
         private DateTime _rankingDate;
         private DateTime? _rankingStartDate;
-        private (long, DateTime)? _playerVsLegacy;
-        private Dictionary<long, PlayerDto> _players;
-        private readonly Dictionary<string, (long fakeId, List<long> playersId)> _countryPlayersGroup = new Dictionary<string, (long, List<long>)>();
+        private (uint, DateTime)? _playerVsLegacy;
+        private Dictionary<uint, PlayerDto> _players;
+        private readonly Dictionary<string, (uint fakeId, List<uint> playersId)> _countryPlayersGroup = new Dictionary<string, (uint, List<uint>)>();
 
         public Game Game { get; set; }
 
@@ -28,12 +28,12 @@ namespace KikoleSite.Models
             set => _rankingStartDate = value?.Date;
         }
 
-        public (long, DateTime)? PlayerVsLegacy
+        public (uint, DateTime)? PlayerVsLegacy
         {
             get => _playerVsLegacy;
             set => _playerVsLegacy = value.HasValue
                     ? (value.Value.Item1, value.Value.Item2.Date)
-                    : default((long, DateTime)?);
+                    : default((uint, DateTime)?);
         }
 
         public bool FullDetails { get; set; }
@@ -46,7 +46,7 @@ namespace KikoleSite.Models
 
         public bool CountryGrouping { get; set; }
 
-        internal IReadOnlyDictionary<long, PlayerDto> Players
+        internal IReadOnlyDictionary<uint, PlayerDto> Players
         {
             get => _players;
             set
@@ -55,22 +55,22 @@ namespace KikoleSite.Models
                 if (CountryGrouping)
                 {
                     _players = MergePlayersIntoCountries();
-                    CountryPlayersGroup = _countryPlayersGroup.Values.ToDictionary(_ => _.fakeId, _ => (IReadOnlyCollection<long>)_.playersId);
+                    CountryPlayersGroup = _countryPlayersGroup.Values.ToDictionary(_ => _.fakeId, _ => (IReadOnlyCollection<uint>)_.playersId);
                 }
             }
         }
 
-        internal IReadOnlyDictionary<long, IReadOnlyCollection<long>> CountryPlayersGroup { get; private set; }
+        internal IReadOnlyDictionary<uint, IReadOnlyCollection<uint>> CountryPlayersGroup { get; private set; }
 
-        private Dictionary<long, PlayerDto> MergePlayersIntoCountries()
+        private Dictionary<uint, PlayerDto> MergePlayersIntoCountries()
         {
-            var i = 1;
+            uint i = 1;
             foreach (var pId in _players.Keys)
             {
                 var country = _players[pId].Country ?? string.Empty;
                 if (!_countryPlayersGroup.ContainsKey(country))
                 {
-                    _countryPlayersGroup.Add(country, (i, new List<long>()));
+                    _countryPlayersGroup.Add(country, (i, new List<uint>()));
                     i++;
                 }
                 _countryPlayersGroup[country].playersId.Add(pId);

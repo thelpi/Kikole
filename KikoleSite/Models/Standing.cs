@@ -9,7 +9,7 @@ namespace KikoleSite.Models
     {
         private DateTime _startDate;
         private DateTime? _endDate;
-        private readonly List<long> _times;
+        private readonly List<int> _times;
 
         public Stage Stage { get; internal set; }
         public Level Level { get; internal set; }
@@ -17,20 +17,20 @@ namespace KikoleSite.Models
         public DateTime? EndDate { get => _endDate; internal set => _endDate = value?.Date; }
         public Player Author { get; internal set; }
         public Player Slayer { get; internal set; }
-        public IReadOnlyCollection<long> Times => _times;
+        public IReadOnlyCollection<int> Times => _times;
         public int? Days { get; private set; }
         public int DaysBefore => (int)Math.Floor((StartDate - Stage.GetGame().GetEliteFirstDate()).TotalDays);
         public (DateTime, DateTime?) Period => (StartDate, EndDate);
 
-        internal Standing(long time)
+        internal Standing(int time)
         {
-            _times = new List<long>
+            _times = new List<int>
             {
                 time
             };
         }
 
-        internal void AddTime(long time)
+        internal void AddTime(int time)
         {
             if (!_times.Contains(time))
                 _times.Add(time);

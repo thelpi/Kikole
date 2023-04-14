@@ -1,19 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Repositories
 {
-    public sealed class WriteRepository : KikoleSite.Repositories.BaseRepository, IWriteRepository
+    public sealed class WriteRepository : BaseRepository, IWriteRepository
     {
         public WriteRepository(IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
 
-        public async Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry)
+        public async Task<uint> ReplaceTimeEntryAsync(EntryDto requestEntry)
         {
-            return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
+            return await ExecuteNonQueryAndGetInsertedIdAsync<uint>(
                     "REPLACE INTO entries " +
                     "(player_id, level_id, stage_id, date, time, system_id, creation_date) " +
                     "VALUES " +
@@ -21,18 +20,18 @@ namespace KikoleSite.Repositories
                     new
                     {
                         player_id = requestEntry.PlayerId,
-                        level_id = (long)requestEntry.Level,
-                        stage_id = (long)requestEntry.Stage,
+                        level_id = (byte)requestEntry.Level,
+                        stage_id = (byte)requestEntry.Stage,
                         requestEntry.Date,
                         requestEntry.Time,
-                        system_id = (long)requestEntry.Engine
+                        system_id = (byte)requestEntry.Engine
                     })
                 .ConfigureAwait(false);
         }
 
-        public async Task<long> InsertPlayerAsync(string urlName, string defaultHexColor)
+        public async Task<uint> InsertPlayerAsync(string urlName, string defaultHexColor)
         {
-            return (long)await ExecuteNonQueryAndGetInsertedIdAsync(
+            return await ExecuteNonQueryAndGetInsertedIdAsync<uint>(
                     "INSERT INTO players " +
                     "(url_name, real_name, surname, color, control_style, creation_date) " +
                     "VALUES " +
@@ -48,7 +47,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task DeletePlayerEntriesAsync(Game game, long playerId)
+        public async Task DeletePlayerEntriesAsync(Game game, uint playerId)
         {
             await ExecuteNonQueryAsync(
                     $"DELETE FROM entries WHERE player_id = @player_id AND stage_id {(game == Game.GoldenEye ? "<= 20" : "> 20")}",
@@ -86,7 +85,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task BanPlayerAsync(long playerId)
+        public async Task BanPlayerAsync(uint playerId)
         {
             await ExecuteNonQueryAsync(
                     "UPDATE players " +
@@ -99,7 +98,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task DeleteEntriesAsync(params long[] entriesId)
+        public async Task DeleteEntriesAsync(params uint[] entriesId)
         {
             if (entriesId?.Length > 0)
             {

@@ -4,7 +4,7 @@ namespace KikoleSite.Dtos
 {
     public class PlayerDto
     {
-        public long Id { get; set; }
+        public uint Id { get; set; }
         public string UrlName { get; set; }
         public string RealName { get; set; }
         public string SurName { get; set; }

@@ -21,7 +21,7 @@ namespace KikoleSite.Repositories
             Clock = clock;
         }
 
-        protected async Task<ulong> ExecuteNonQueryAndGetInsertedIdAsync(string sql, object parameters)
+        protected async Task<T> ExecuteNonQueryAndGetInsertedIdAsync<T>(string sql, object parameters) where T : struct
         {
             using var connection = new MySqlConnection(_connectionString);
             await connection
@@ -32,7 +32,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
 
             var results = await connection
-                .QueryAsync<ulong>(
+                .QueryAsync<T>(
                     "SELECT LAST_INSERT_ID()",
                     commandType: CommandType.Text)
                 .ConfigureAwait(false);

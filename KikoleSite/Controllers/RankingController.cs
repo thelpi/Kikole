@@ -76,7 +76,7 @@ namespace KikoleSite.Controllers
 
         [HttpGet("player-details")]
         public async Task<IActionResult> GetPlayerDetailsAsync(
-            [FromQuery] long playerId,
+            [FromQuery] uint playerId,
             [FromQuery] Game game)
         {
             if (!CheckGameParameter(game))
@@ -209,7 +209,7 @@ namespace KikoleSite.Controllers
             [FromRoute] Game game,
             [FromRoute] ChronologyTypeItemData chronologyType,
             [FromQuery] Engine? engine,
-            [FromQuery] long? playerId,
+            [FromQuery] uint? playerId,
             [FromQuery] byte anonymise)
         {
             if (!CheckGameParameter(game))
@@ -618,11 +618,11 @@ namespace KikoleSite.Controllers
         public async Task<IActionResult> GetLongestStandingAsync(
             [FromRoute] Game game,
             [FromQuery] bool? stillOngoing,
-            [FromQuery] long? playerId,
+            [FromQuery] uint? playerId,
             [FromQuery] DateTime? rankingDate,
             [FromQuery] StandingType standingType,
             [FromQuery] Engine? engine,
-            [FromQuery] long? slayerPlayerId)
+            [FromQuery] uint? slayerPlayerId)
         {
             return await GetLongestStandingAsync(
                 new IndexViewData
@@ -645,7 +645,7 @@ namespace KikoleSite.Controllers
         [HttpGet("games/{game}/player-rankings")]
         public async Task<IActionResult> GetRankingByPlayerAsync(
             [FromRoute] Game game,
-            [FromQuery] long playerId,
+            [FromQuery] uint playerId,
             [FromQuery] DateTime? rankingDate)
         {
             return await GetRankingByPlayerDystopiaAsync(
@@ -709,7 +709,7 @@ namespace KikoleSite.Controllers
         [HttpGet("games/{game}/players/{playerId}/ranking-details")]
         public async Task<IActionResult> GetPlayerRankingDetailsAsync(
             [FromRoute] Game game,
-            [FromRoute] long playerId,
+            [FromRoute] uint playerId,
             [FromQuery] DateTime? rankingDate,
             [FromQuery] DateTime? rankingStartDate,
             [FromQuery] Engine? engine,
@@ -733,7 +733,7 @@ namespace KikoleSite.Controllers
             [FromRoute] Game game,
             [FromQuery] ChronologyTypeItemData type,
             [FromQuery] Engine? engine,
-            [FromQuery] long? playerId,
+            [FromQuery] uint? playerId,
             [FromQuery] bool anonymise)
         {
             return await GetWorldRecordsChronologyAsync(
@@ -752,7 +752,7 @@ namespace KikoleSite.Controllers
         public async Task<IActionResult> GetRankingsChronologyAsync(
             [FromRoute] Game game,
             [FromQuery] ChronologyTypeItemData type,
-            [FromQuery] long playerId,
+            [FromQuery] uint playerId,
             [FromQuery] bool anonymise)
         {
             return await GetRankingsChronologyAsync(
@@ -843,7 +843,7 @@ namespace KikoleSite.Controllers
         private async Task<List<RankingEntry>> GetRankingsWithParamsAsync(
             Game game,
             DateTime rankingDate,
-            long? playerId,
+            uint? playerId,
             DateTime? rankingStartDate,
             Engine? engine,
             string country,

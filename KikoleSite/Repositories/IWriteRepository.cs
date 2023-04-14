@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
 
@@ -7,16 +6,16 @@ namespace KikoleSite.Repositories
 {
     public interface IWriteRepository
     {
-        Task<long> ReplaceTimeEntryAsync(EntryDto requestEntry);
+        Task<uint> ReplaceTimeEntryAsync(EntryDto requestEntry);
 
-        Task<long> InsertPlayerAsync(string urlName, string defaultHexColor);
+        Task<uint> InsertPlayerAsync(string urlName, string defaultHexColor);
 
-        Task DeletePlayerEntriesAsync(Game game, long playerId);
+        Task DeletePlayerEntriesAsync(Game game, uint playerId);
 
         Task UpdatePlayerAsync(PlayerDto player);
 
-        Task BanPlayerAsync(long playerId);
+        Task BanPlayerAsync(uint playerId);
 
-        Task DeleteEntriesAsync(params long[] entriesId);
+        Task DeleteEntriesAsync(params uint[] entriesId);
     }
 }

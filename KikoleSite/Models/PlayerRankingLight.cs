@@ -10,7 +10,7 @@ namespace KikoleSite.Models
         public int Points { get; set; }
         public TimeSpan Time { get; set; }
         public DateTime Date { get; set; }
-        public long PlayerId { get; set; }
+        public uint PlayerId { get; set; }
         public Game Game { get; set; }
 
         public string TimeString => Time.ToString("c");

@@ -5,7 +5,7 @@
         public string PlayerUrlName { get; set; }
         public string EngineUrl { get; set; }
 
-        internal EntryDto ToEntry(long playerId)
+        internal EntryDto ToEntry(uint playerId)
         {
             return new EntryDto
             {

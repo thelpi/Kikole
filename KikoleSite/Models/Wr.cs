@@ -19,7 +19,7 @@ namespace KikoleSite.Models
         public DateTime? SlayDate { get; private set; }
         public Player SlayPlayer { get; private set; }
 
-        internal Wr(Stage stage, Level level, long time, PlayerDto player, DateTime date, Engine engine)
+        internal Wr(Stage stage, Level level, int time, PlayerDto player, DateTime date, Engine engine)
             : base(stage, level, time)
         {
             _holders.Add((new Player(player), date.Date, engine));

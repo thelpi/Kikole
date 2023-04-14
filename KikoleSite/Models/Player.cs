@@ -12,7 +12,7 @@ namespace KikoleSite.Models
         // Default player's hexadecimal color.
         internal const string DefaultPlayerHexColor = "000000";
 
-        public long Id { get; }
+        public uint Id { get; }
         public string RealName { get; }
         public string SurName { get; }
         public ControlStyles? ControlStyle { get; }

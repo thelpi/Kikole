@@ -58,7 +58,7 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet("players/{playerId}/entries/refresh")]
-        public JsonResult RefreshPlayerEntries([FromRoute] long playerId, [FromQuery] string secret)
+        public JsonResult RefreshPlayerEntries([FromRoute] uint playerId, [FromQuery] string secret)
         {
             var json = StartAsyncTaskAndGetJson(() =>
                 _integrationProvider.RefreshPlayerEntriesAsync(playerId),

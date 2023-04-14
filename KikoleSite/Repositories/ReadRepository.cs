@@ -10,7 +10,7 @@ namespace KikoleSite.Repositories
     public sealed class ReadRepository : BaseRepository, IReadRepository
     {
         private IReadOnlyList<PlayerDto> _playersCache = null;
-        private readonly object cacheLock = new object();
+        private readonly object _cacheLock = new object();
 
         public ReadRepository(IClock clock, IConfiguration configuration)
             : base(configuration, clock) { }
@@ -33,7 +33,7 @@ namespace KikoleSite.Repositories
         {
             if (!banned && fromCache && _playersCache != null)
             {
-                lock (cacheLock)
+                lock (_cacheLock)
                 {
                     if (_playersCache != null)
                     {
@@ -54,7 +54,7 @@ namespace KikoleSite.Repositories
 
             if (!banned)
             {
-                lock (cacheLock)
+                lock (_cacheLock)
                 {
                     _playersCache = players;
                 }
@@ -63,7 +63,7 @@ namespace KikoleSite.Repositories
             return players;
         }
 
-        public async Task<IReadOnlyCollection<EntryDto>> GetPlayerEntriesAsync(long playerId, Game game)
+        public async Task<IReadOnlyCollection<EntryDto>> GetPlayerEntriesAsync(uint playerId, Game game)
         {
             return await GetEntriesByCriteriaInternalAsync(
                     null, null, null, null, playerId, game)
@@ -71,7 +71,7 @@ namespace KikoleSite.Repositories
         }
 
         private async Task<IReadOnlyCollection<EntryDto>> GetEntriesByCriteriaInternalAsync(
-            Stage? stage, Level? level, DateTime? startDate, DateTime? endDate, long? playerId, Game? game)
+            Stage? stage, Level? level, DateTime? startDate, DateTime? endDate, uint? playerId, Game? game)
         {
             return await ExecuteReaderAsync<EntryDto>(
                     "SELECT id, date, level_id AS Level, player_id, " +
@@ -85,8 +85,8 @@ namespace KikoleSite.Repositories
                     "AND (" + (game.HasValue ? (game == Game.GoldenEye ? "stage_id <= 20" : "stage_id > 20") : "1=1") + ") ",
                     new
                     {
-                        stage_id = (long?)stage,
-                        level_id = (int?)level,
+                        stage_id = (byte?)stage,
+                        level_id = (byte?)level,
                         start_date = startDate,
                         end_date = endDate,
                         player_id = playerId

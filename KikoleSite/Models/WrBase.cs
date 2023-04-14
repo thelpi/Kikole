@@ -6,9 +6,9 @@ namespace KikoleSite.Models
     {
         public Stage Stage { get; }
         public Level Level { get; }
-        public long Time { get; }
+        public int Time { get; }
 
-        internal WrBase(Stage stage, Level level, long time)
+        internal WrBase(Stage stage, Level level, int time)
         {
             Stage = stage;
             Level = level;

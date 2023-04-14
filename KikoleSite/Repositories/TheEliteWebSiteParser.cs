@@ -383,7 +383,7 @@ namespace KikoleSite.Repositories
             return data;
         }
 
-        private static long? ExtractTime(string timeString, out bool failToExtractTime)
+        private static int? ExtractTime(string timeString, out bool failToExtractTime)
         {
             failToExtractTime = false;
 
@@ -421,7 +421,7 @@ namespace KikoleSite.Repositories
                     failToExtractTime = true;
                     return null;
                 }
-                return (hours * 60 * 60) + (minutes * 60) + seconds;
+                return (ushort)((hours * 60 * 60) + (minutes * 60) + seconds);
             }
             else if (timeString != TimeNa)
             {

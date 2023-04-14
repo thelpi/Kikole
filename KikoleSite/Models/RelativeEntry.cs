@@ -7,7 +7,7 @@ namespace KikoleSite.Models
 {
     public class RelativeEntry
     {
-        private readonly List<long> _dupesOtherPlayers;
+        private readonly List<uint> _dupesOtherPlayers;
 
         public Stage Stage { get; }
         public Level Level { get; }
@@ -23,13 +23,13 @@ namespace KikoleSite.Models
         {
             Player = new Player(player);
             Date = entry.Date.Value;
-            Time = new TimeSpan(0, 0, (int)entry.Time);
+            Time = new TimeSpan(0, 0, entry.Time);
             Stage = entry.Stage;
             Level = entry.Level;
-            _dupesOtherPlayers = new List<long>();
+            _dupesOtherPlayers = new List<uint>(5);
         }
 
-        internal RelativeEntry AddDupeOrBetter(long playerId)
+        internal RelativeEntry AddDupeOrBetter(uint playerId)
         {
             if (!_dupesOtherPlayers.Contains(playerId))
                 _dupesOtherPlayers.Add(playerId);

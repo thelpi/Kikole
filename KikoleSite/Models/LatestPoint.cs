@@ -8,7 +8,7 @@ namespace KikoleSite.Models
     {
         public Stage Stage { get; set; }
         public Level Level { get; set; }
-        public long Time { get; set; }
+        public int Time { get; set; }
         public int Points { get; set; }
         public IReadOnlyDictionary<Player, DateTime> Occurences { get; set; }
     }

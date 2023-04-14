@@ -5,9 +5,8 @@ namespace KikoleSite.Dtos
 {
     public class RankingDto
     {
-        public long RankingTypeId { get; set; }
-        public long PlayerId { get; set; }
-        public long Time { get; set; }
+        public uint PlayerId { get; set; }
+        public int Time { get; set; }
         public Stage Stage { get; set; }
         public Level Level { get; set; }
         public DateTime Date { get; set; }

@@ -38,8 +38,8 @@ namespace KikoleSite.Providers
             StandingType standingType,
             bool? stillOngoing,
             Engine? engine,
-            long? playerId,
-            long? slayerPlayerId)
+            uint? playerId,
+            uint? slayerPlayerId)
         {
             var standings = new List<Standing>();
 
@@ -207,7 +207,7 @@ namespace KikoleSite.Providers
             Stage stage,
             LeaderboardGroupOptions groupOption,
             int daysStep,
-            long? playerId)
+            uint? playerId)
         {
             var players = await GetPlayersInternalAsync().ConfigureAwait(false);
 
@@ -241,7 +241,7 @@ namespace KikoleSite.Providers
 
         public async Task<PlayerRankingHistory> GetPlayerRankingHistoryAsync(
             Game game,
-            long playerId)
+            uint playerId)
         {
             // gets all entries
             var entries = new Dictionary<(Stage s, Level l), List<EntryDto>>();
@@ -345,7 +345,7 @@ namespace KikoleSite.Providers
                                 Level = level,
                                 PlayerId = entry.PlayerId,
                                 Stage = stage,
-                                Time = new TimeSpan(0, 0, (int)entry.Time),
+                                Time = new TimeSpan(0, 0, entry.Time),
                                 Points = points
                             });
                         }
@@ -432,7 +432,7 @@ namespace KikoleSite.Providers
 
         public async Task<(DateTime? firstDate, DateTime? lastDate)> GetPlayerActivityDatesAsync(
             Game game,
-            long playerId)
+            uint playerId)
         {
             var entries = await _readRepository
                 .GetPlayerEntriesAsync(playerId, game)
@@ -487,24 +487,9 @@ namespace KikoleSite.Providers
                 .ToList();
         }
 
-        private async Task<List<EntryDto>> GetBasicEntriesInternalAsync(DateTime date, Stage stage, Level level)
-        {
-            var stageLevelEntries = (await _readRepository
-                .GetEntriesAsync(stage, level, null, date.Date)
-                .ConfigureAwait(false))
-                .ToList();
-
-            stageLevelEntries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
-
-            return stageLevelEntries
-                .GroupBy(x => (x.PlayerId, x.Time))
-                .Select(x => x.OrderBy(x => x.Date).First())
-                .ToList();
-        }
-
         public async Task<IReadOnlyCollection<SweepLight>> GetSweepsAsync(
             Game game,
-            long? playerId,
+            uint? playerId,
             bool untied,
             Engine? engine,
             bool? stillOngoing)
@@ -627,6 +612,21 @@ namespace KikoleSite.Providers
 
             return latestPoints
                 .OrderBy(x => x.Occurences.Values.Max())
+                .ToList();
+        }
+
+        private async Task<List<EntryDto>> GetBasicEntriesInternalAsync(DateTime date, Stage stage, Level level)
+        {
+            var stageLevelEntries = (await _readRepository
+                .GetEntriesAsync(stage, level, null, date.Date)
+                .ConfigureAwait(false))
+                .ToList();
+
+            stageLevelEntries.ManageDateLessEntries(_configuration.NoDateEntryRankingRule, _clock.Now);
+
+            return stageLevelEntries
+                .GroupBy(x => (x.PlayerId, x.Time))
+                .Select(x => x.OrderBy(x => x.Date).First())
                 .ToList();
         }
 
@@ -786,10 +786,10 @@ namespace KikoleSite.Providers
         }
 
         private async Task<List<EntryDto>> GetStageLevelEntriesCoreAsync(
-            IReadOnlyDictionary<long, PlayerDto> players,
+            IReadOnlyDictionary<uint, PlayerDto> players,
             Stage stage,
             Level level,
-            IReadOnlyDictionary<long, IReadOnlyCollection<long>> countryPlayersGroup = null)
+            IReadOnlyDictionary<uint, IReadOnlyCollection<uint>> countryPlayersGroup = null)
         {
             // Gets every entry for the stage and level
             var tmpEntriesSource = await _readRepository
@@ -816,7 +816,7 @@ namespace KikoleSite.Providers
             return entries;
         }
 
-        private async Task<IReadOnlyDictionary<long, PlayerDto>> GetPlayersInternalAsync(string country = null, bool useCache = false)
+        private async Task<IReadOnlyDictionary<uint, PlayerDto>> GetPlayersInternalAsync(string country = null, bool useCache = false)
         {
             var playersList = await _readRepository
                 .GetPlayersAsync(banned: false, fromCache: useCache)
@@ -830,7 +830,7 @@ namespace KikoleSite.Providers
 
         private IReadOnlyCollection<Wr> GetStageLevelWorldRecords(
             IReadOnlyCollection<EntryDto> allEntries,
-            IReadOnlyDictionary<long, PlayerDto> players,
+            IReadOnlyDictionary<uint, PlayerDto> players,
             Stage stage,
             Level level,
             DateTime? endDate,
@@ -950,17 +950,17 @@ namespace KikoleSite.Providers
 
         private static StageLeaderboard GetSpecificDateStageLeaderboard(
             Stage stage,
-            IReadOnlyDictionary<long, PlayerDto> players,
+            IReadOnlyDictionary<uint, PlayerDto> players,
             List<EntryDto> entries,
             DateTime startDate,
             DateTime endDate,
-            long? playerId)
+            uint? playerId)
         {
             var dateEntries = entries
                 .Where(_ => _.Date < endDate)
                 .ToList();
 
-            var playersPoints = new Dictionary<long, (int points, DateTime latestDate)>();
+            var playersPoints = new Dictionary<uint, (int points, DateTime latestDate)>();
 
             // adds the player to the leaderboard, or update points and date for the player
             void AddOrUpdate(int entryPoints, EntryDto entry)
@@ -1037,7 +1037,7 @@ namespace KikoleSite.Providers
             };
         }
 
-        private async Task<List<EntryDto>> GetStageEntriesCoreAsync(Stage stage, IReadOnlyDictionary<long, PlayerDto> players)
+        private async Task<List<EntryDto>> GetStageEntriesCoreAsync(Stage stage, IReadOnlyDictionary<uint, PlayerDto> players)
         {
             var easyEntries = await GetStageLevelEntriesCoreAsync(players, stage, Level.Easy).ConfigureAwait(false);
             var mediumEntries = await GetStageLevelEntriesCoreAsync(players, stage, Level.Medium).ConfigureAwait(false);

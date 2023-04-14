@@ -7,7 +7,7 @@ namespace KikoleSite.Dtos
     {
         public Stage Stage { get; set; }
         public Level Level { get; set; }
-        public long Time { get; set; }
+        public int Time { get; set; }
         public DateTime? Date { get; set; }
         public Engine Engine { get; set; }
 

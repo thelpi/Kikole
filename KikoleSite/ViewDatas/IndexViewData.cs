@@ -15,7 +15,7 @@ namespace KikoleSite.ViewDatas
 
         public int ChronologyType { get; set; }
 
-        public long? PlayerId { get; set; }
+        public uint? PlayerId { get; set; }
 
         public int? Engine { get; set; }
 
@@ -29,7 +29,7 @@ namespace KikoleSite.ViewDatas
 
         public int StandingType { get; set; }
 
-        public long? SlayerPlayerId { get; set; }
+        public uint? SlayerPlayerId { get; set; }
 
         public string Country { get; set; }
 

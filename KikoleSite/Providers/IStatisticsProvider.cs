@@ -18,29 +18,29 @@ namespace KikoleSite.Providers
             StandingType standingType,
             bool? stillOngoing,
             Engine? engine,
-            long? playerId,
-            long? slayerPlayerId);
+            uint? playerId,
+            uint? slayerPlayerId);
 
         Task<IReadOnlyCollection<StageLeaderboard>> GetStageLeaderboardHistoryAsync(
             Stage stage,
             LeaderboardGroupOptions groupOption,
             int daysStep,
-            long? playerId);
+            uint? playerId);
 
         Task<IReadOnlyCollection<RankingEntryLight>> GetRankingEntriesAsync(
             RankingRequest request);
 
         Task<PlayerRankingHistory> GetPlayerRankingHistoryAsync(
             Game game,
-            long playerId);
+            uint playerId);
 
         Task<(DateTime? firstDate, DateTime? lastDate)> GetPlayerActivityDatesAsync(
             Game game,
-            long playerId);
+            uint playerId);
 
         Task<IReadOnlyCollection<SweepLight>> GetSweepsAsync(
             Game game,
-            long? playerId,
+            uint? playerId,
             bool untied,
             Engine? engine,
             bool? stillOngoing);

@@ -9,7 +9,7 @@ namespace KikoleSite.Models
         public DateTime DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
         public int Days { get; set; }
-        public long PlayerId { get; set; }
+        public uint PlayerId { get; set; }
         public bool Untied { get; set; }
         public Engine? Engine { get; set; }
     }

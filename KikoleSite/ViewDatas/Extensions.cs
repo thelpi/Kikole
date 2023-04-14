@@ -67,7 +67,7 @@ namespace KikoleSite.ViewDatas
 
         internal static PlayerRankingDetailsViewData ToPlayerRankingDetailsViewData(this RankingEntry entry, string imagePath)
         {
-            var localDetails = new Dictionary<Stage, IReadOnlyDictionary<Level, (int, int, long?, DateTime?)>>();
+            var localDetails = new Dictionary<Stage, IReadOnlyDictionary<Level, (int, int, int?, DateTime?)>>();
             foreach (var stage in entry.Game.GetStages())
                 localDetails.Add(stage, entry.Details.ContainsKey(stage) ? entry.Details[stage] : null);
 
@@ -75,15 +75,15 @@ namespace KikoleSite.ViewDatas
             {
                 DetailsByStage = localDetails.Keys.Select(sk => localDetails[sk].ToPlayerStageDetailsItemData(sk, imagePath)).ToList(),
                 EasyPoints = entry.LevelPoints[Level.Easy],
-                EasyTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Easy]),
+                EasyTime = new TimeSpan(0, 0, entry.LevelCumuledTime[Level.Easy]),
                 Game = entry.Game,
                 HardPoints = entry.LevelPoints[Level.Hard],
-                HardTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Hard]),
+                HardTime = new TimeSpan(0, 0, entry.LevelCumuledTime[Level.Hard]),
                 MediumPoints = entry.LevelPoints[Level.Medium],
-                MediumTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Medium]),
+                MediumTime = new TimeSpan(0, 0, entry.LevelCumuledTime[Level.Medium]),
                 OverallPoints = entry.Points,
                 OverallRanking = entry.Rank,
-                OverallTime = new TimeSpan(0, 0, (int)entry.CumuledTime),
+                OverallTime = new TimeSpan(0, 0, entry.CumuledTime),
                 PlayerName = entry.PlayerName
             };
         }
@@ -92,13 +92,13 @@ namespace KikoleSite.ViewDatas
         {
             return new TimeRankingItemData
             {
-                EasyTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Easy]),
-                HardTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Hard]),
-                MediumTime = new TimeSpan(0, 0, (int)entry.LevelCumuledTime[Level.Medium]),
+                EasyTime = new TimeSpan(0, 0, entry.LevelCumuledTime[Level.Easy]),
+                HardTime = new TimeSpan(0, 0, entry.LevelCumuledTime[Level.Hard]),
+                MediumTime = new TimeSpan(0, 0, entry.LevelCumuledTime[Level.Medium]),
                 PlayerColor = entry.Player.Color,
                 PlayerName = entry.PlayerName,
                 Rank = entry.Rank,
-                TotalTime = new TimeSpan(0, 0, (int)entry.CumuledTime)
+                TotalTime = new TimeSpan(0, 0, entry.CumuledTime)
             };
         }
 
@@ -216,7 +216,7 @@ namespace KikoleSite.ViewDatas
                     : item.Author.RealName,
                 Stage = item.Stage,
                 Times = item.Times
-                    .Select(_ => new TimeSpan(0, 0, (int)_))
+                    .Select(_ => new TimeSpan(0, 0, _))
                     .OrderByDescending(_ => _)
                     .ToList(),
                 Rank = item.Rank
@@ -263,7 +263,7 @@ namespace KikoleSite.ViewDatas
                 Points = latestPoint.Points,
                 Rank = rank,
                 Stage = latestPoint.Stage,
-                Time = new TimeSpan(0, 0, (int)latestPoint.Time),
+                Time = new TimeSpan(0, 0, latestPoint.Time),
                 Days = (int)(tomorrow - latest.Value).TotalDays
             };
         }
@@ -325,7 +325,7 @@ namespace KikoleSite.ViewDatas
         }
 
         private static PlayerStageDetailsItemData ToPlayerStageDetailsItemData(
-            this IReadOnlyDictionary<Level, (int, int, long?, DateTime?)> lt,
+            this IReadOnlyDictionary<Level, (int, int, int?, DateTime?)> lt,
             Stage s,
             string imagePath)
         {

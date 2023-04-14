@@ -257,7 +257,7 @@ namespace KikoleSite.Providers
             };
         }
 
-        public async Task<RefreshEntriesResult> RefreshPlayerEntriesAsync(long playerId)
+        public async Task<RefreshEntriesResult> RefreshPlayerEntriesAsync(uint playerId)
         {
             var errors = new ConcurrentBag<string>();
             var count = 0;
@@ -338,7 +338,7 @@ namespace KikoleSite.Providers
         private async Task ManageGroupOfEntriesAsync(
             IReadOnlyCollection<PlayerDto> validPlayers,
             IEnumerable<EntryWebDto> entriesToManage,
-            List<(long PlayerId, Stage Stage, Level Level, long Time, Engine Engine)> existingEntries,
+            List<(uint PlayerId, Stage Stage, Level Level, int Time, Engine Engine)> existingEntries,
             ConcurrentBag<string> groupsErrors,
             ConcurrentBag<EntryDto> newEntries)
         {
