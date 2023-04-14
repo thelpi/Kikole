@@ -131,10 +131,10 @@ namespace KikoleSite.Repositories
         public async Task InsertRankingEntriesAsync(IReadOnlyList<RankingEntryDto> rankingEntries)
         {
             var parsedData = rankingEntries.Select(r =>
-                $"('{r.RankingId}', {r.PlayerId}, {r.Time}, {r.Points}, {r.Rank}, {r.EntryId})");
+                $"('{r.RankingId}', {r.PlayerId}, {r.Time}, {r.Points}, {r.Rank}, {r.EntryId}, {(r.EntryDate.HasValue ? $"'{r.EntryDate.Value:yyyy-MM-dd}'" : "NULL")})");
 
             await ExecuteNonQueryAsync($"INSERT INTO ranking_entries " +
-                    $"(ranking_id, player_id, time, points, rank, entry_id) " +
+                    $"(ranking_id, player_id, time, points, rank, entry_id, entry_date) " +
                     $"VALUES " +
                     $"{string.Join(", ", parsedData)}",
                     null)

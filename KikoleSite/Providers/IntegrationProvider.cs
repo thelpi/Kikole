@@ -412,7 +412,8 @@ namespace KikoleSite.Providers
                         Points = points,
                         Rank = pos,
                         Time = entry.Time,
-                        RankingId = rankingId
+                        RankingId = rankingId,
+                        EntryDate = entry.IsSimulatedDate ? null : entry.Date
                     });
                 }
 

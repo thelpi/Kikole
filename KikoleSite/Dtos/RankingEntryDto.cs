@@ -1,4 +1,6 @@
-﻿namespace KikoleSite.Dtos
+﻿using System;
+
+namespace KikoleSite.Dtos
 {
     public class RankingEntryDto
     {
@@ -8,5 +10,6 @@
         public int Rank { get; set; }
         public int Time { get; set; }
         public uint EntryId { get; set; }
+        public DateTime? EntryDate { get; set; }
     }
 }
