@@ -3,7 +3,7 @@ using KikoleSite.Enums;
 
 namespace KikoleSite.Dtos
 {
-    public class RankingDto
+    public class CustomRankingDto
     {
         public uint PlayerId { get; set; }
         public int Time { get; set; }

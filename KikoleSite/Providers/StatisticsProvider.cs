@@ -665,9 +665,9 @@ namespace KikoleSite.Providers
                 .WithRanks(r => r.Points);
         }
 
-        private async Task<List<RankingDto>> GetFullGameRankingAsync(RankingRequest request)
+        private async Task<List<CustomRankingDto>> GetFullGameRankingAsync(RankingRequest request)
         {
-            var rankingEntries = new ConcurrentBag<RankingDto>();
+            var rankingEntries = new ConcurrentBag<CustomRankingDto>();
 
             var tasks = new List<Task>();
             foreach (var stage in request.Game.GetStages())
@@ -688,7 +688,7 @@ namespace KikoleSite.Providers
             return rankingEntries.ToList();
         }
 
-        private async Task<List<RankingDto>> GetStageLevelRankingAsync(
+        private async Task<List<CustomRankingDto>> GetStageLevelRankingAsync(
             RankingRequest request,
             Stage stage,
             Level level)
@@ -704,7 +704,7 @@ namespace KikoleSite.Providers
                         eGroup => eGroup.Key,
                         eGroup => eGroup.ToList()));
 
-            var rankingsToInsert = new List<RankingDto>();
+            var rankingsToInsert = new List<CustomRankingDto>();
 
             // For the current date + previous days
             // Gets the min time entry for each player
@@ -738,7 +738,7 @@ namespace KikoleSite.Providers
                     currentTime = entry.Time;
                 }
 
-                var ranking = new RankingDto
+                var ranking = new CustomRankingDto
                 {
                     Date = request.RankingDate,
                     Level = entry.Level,

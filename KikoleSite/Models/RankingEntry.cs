@@ -31,7 +31,7 @@ namespace KikoleSite.Models
             _levelCumuledTime = ToLevelDictionary(UnsetTimeValueSeconds * Game.GetStages().Count);
         }
 
-        internal override int AddStageAndLevelDatas(RankingDto ranking, bool untied)
+        internal override int AddStageAndLevelDatas(CustomRankingDto ranking, bool untied)
         {
             var points = base.AddStageAndLevelDatas(ranking, untied);
 
