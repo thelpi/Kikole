@@ -343,6 +343,15 @@ namespace KikoleSite.Providers
             // forces date
             entries.ManageDateLessEntries(rule, _clock.Now);
 
+            // Removes duplicate entries (same time, same player, different engine)
+            // There's a situation where a player submits the time with 2 engines the same day: we keep the lowest ID
+            var duplicateEntries = entries
+                .Where(x => entries.Any(y => y.PlayerId == x.PlayerId
+                    && y.Time == x.Time
+                    && (y.Date < x.Date || (y.Date == x.Date && y.Id < x.Id))))
+                .ToList();
+            duplicateEntries.ForEach(x => entries.Remove(x));
+
             // all dates from start to now
             var allDates = entries
                 .Where(x => x.Date.Value.Date >= startDate)
@@ -368,7 +377,7 @@ namespace KikoleSite.Providers
                 var dateEntries = entries
                     .Where(x => x.Date.Value.Date <= date)
                     .GroupBy(x => x.PlayerId)
-                    .Select(x => x.OrderBy(y => y.Time).ThenBy(y => y.Date).First())
+                    .Select(x => x.OrderBy(y => y.Time).First())
                     .OrderBy(x => x.Time)
                     .ToList();
 
