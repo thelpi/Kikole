@@ -149,10 +149,20 @@ namespace KikoleSite.Providers
                 .Where(p => !allPlayerUrls.Any(pUrl => p.IsSame(pUrl)))
                 .ToList();
 
+            DateTime? goldenEyeDateOfOldestBan = null;
+            DateTime? perfectDarkDateOfOldestBan = null;
             foreach (var pToBan in playersToBan)
             {
                 try
                 {
+                    goldenEyeDateOfOldestBan = await CompareMinimalDateFromPlayerToReferenceAsync(
+                            pToBan.Id, Game.GoldenEye, goldenEyeDateOfOldestBan)
+                        .ConfigureAwait(false);
+
+                    perfectDarkDateOfOldestBan = await CompareMinimalDateFromPlayerToReferenceAsync(
+                            pToBan.Id, Game.PerfectDark, perfectDarkDateOfOldestBan)
+                        .ConfigureAwait(false);
+
                     await _writeRepository
                         .DeletePlayerRankingsAsync(pToBan.Id)
                         .ConfigureAwait(false);
@@ -193,7 +203,9 @@ namespace KikoleSite.Providers
             {
                 CreatedPlayers = createdPlayers,
                 BannedPlayers = playersToBan,
-                Errors = errors
+                Errors = errors,
+                GoldenEyeDateOfOldestBan = goldenEyeDateOfOldestBan,
+                PerfectDarkDateOfOldestBan = perfectDarkDateOfOldestBan
             };
         }
 
@@ -427,6 +439,21 @@ namespace KikoleSite.Providers
             }
 
             return new RefreshRankingsResult();
+        }
+
+        private async Task<DateTime?> CompareMinimalDateFromPlayerToReferenceAsync(uint playerId, Game game, DateTime? currentReferenceDate)
+        {
+            var entries = await _readRepository
+                .GetPlayerEntriesAsync(playerId, game)
+                .ConfigureAwait(false);
+
+            if (entries.Count == 0)
+                return currentReferenceDate;
+
+            var localDate = entries.Min(x => x.Date) ?? game.GetEliteFirstDate();
+            return !currentReferenceDate.HasValue || localDate < currentReferenceDate
+                ? localDate
+                : currentReferenceDate;
         }
 
         private async Task<(int count, IReadOnlyCollection<string> errors)> RefreshPlayersEntriesAsync(Game game, IReadOnlyCollection<PlayerDto> validPlayers)
