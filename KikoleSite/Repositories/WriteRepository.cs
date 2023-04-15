@@ -149,6 +149,14 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task DeletePlayerRankingsAsync(uint playerId)
+        {
+            await ExecuteNonQueryAsync(
+                    $"DELETE FROM rankings WHERE EXISTS (SELECT 1 FROM ranking_entries WHERE player_id = @player_id AND ranking_id = id)",
+                    new { player_id = playerId })
+                .ConfigureAwait(false);
+        }
+
         public async Task DeleteRankingsAsync(Stage stage, Level level, NoDateEntryRankingRule rule, DateTime? startDateInc, DateTime? endDateExc)
         {
             await ExecuteNonQueryAsync(

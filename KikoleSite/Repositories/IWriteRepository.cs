@@ -26,6 +26,8 @@ namespace KikoleSite.Repositories
 
         Task DeleteRankingAsync(uint id);
 
+        Task DeletePlayerRankingsAsync(uint playerId);
+
         Task DeleteRankingsAsync(Stage stage, Level level, NoDateEntryRankingRule rule, DateTime? startDateInc, DateTime? endDateExc);
     }
 }

@@ -154,6 +154,10 @@ namespace KikoleSite.Providers
                 try
                 {
                     await _writeRepository
+                        .DeletePlayerRankingsAsync(pToBan.Id)
+                        .ConfigureAwait(false);
+
+                    await _writeRepository
                         .DeletePlayerEntriesAsync(Game.GoldenEye, pToBan.Id)
                         .ConfigureAwait(false);
 
