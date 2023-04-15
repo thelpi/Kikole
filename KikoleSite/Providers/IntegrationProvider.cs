@@ -369,14 +369,18 @@ namespace KikoleSite.Providers
             duplicateEntries.ForEach(x => entries.Remove(x));
 
             // all dates from start to now
-            var allDates = entries
-                .Where(x => x.Date.Value.Date >= startDate)
-                .Select(x => x.Date.Value)
-                .Distinct()
-                .OrderBy(x => x.Date)
-                .ToList();
+            var entriesByDate = entries
+                .GroupBy(x => x.Date.Value.Date)
+                .OrderBy(x => x.Key)
+                .ToDictionary(x => x.Key, x => x
+                    .GroupBy(y => y.PlayerId)
+                    .Select(y => y.OrderBy(z => z.Time).First())
+                    .ToList());
 
-            foreach (var date in allDates)
+            var rankings = new List<RankingEntryDto>(10000);
+
+            var localEntries = new Dictionary<uint, EntryDto>(entries.Count);
+            foreach (var date in entriesByDate.Keys)
             {
                 var rankingId = await _writeRepository
                     .InsertRankingAsync(new RankingDto
@@ -388,21 +392,15 @@ namespace KikoleSite.Providers
                     })
                     .ConfigureAwait(false);
 
-                // takes the best time (and the oldest, if several with different engines) for each player
-                // before (or equal) date from the loop
-                var dateEntries = entries
-                    .Where(x => x.Date.Value.Date <= date)
-                    .GroupBy(x => x.PlayerId)
-                    .Select(x => x.OrderBy(y => y.Time).First())
-                    .OrderBy(x => x.Time)
-                    .ToList();
-
-                var rankings = new List<RankingEntryDto>(dateEntries.Count);
+                foreach (var entry in entriesByDate[date])
+                {
+                    localEntries[entry.PlayerId] = entry;
+                }
 
                 var pos = 1;
                 var posAgg = 1;
                 long? currentTime = null;
-                foreach (var entry in dateEntries)
+                foreach (var entry in localEntries.Values.OrderBy(x => x.Time))
                 {
                     if (!currentTime.HasValue)
                     {
@@ -433,9 +431,13 @@ namespace KikoleSite.Providers
                     });
                 }
 
-                await _writeRepository
-                    .InsertRankingEntriesAsync(rankings)
-                    .ConfigureAwait(false);
+                if (rankings.Count >= 10000)
+                {
+                    await _writeRepository
+                        .InsertRankingEntriesAsync(rankings)
+                        .ConfigureAwait(false);
+                    rankings.Clear();
+                }
             }
 
             return new RefreshRankingsResult();
