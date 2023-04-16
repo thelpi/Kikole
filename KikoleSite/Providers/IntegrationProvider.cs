@@ -328,17 +328,25 @@ namespace KikoleSite.Providers
             };
         }
 
-        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game, DateTime? startDate)
+        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game, DateTime? startDate, Stage? stage, Level? level)
         {
             var playersDatesCache = new Dictionary<uint, (DateTime, DateTime)>();
 
             startDate = (startDate ?? game.GetEliteFirstDate()).Date;
 
-            foreach (var stage in game.GetStages())
+            foreach (var stageLoop in game.GetStages())
             {
-                foreach (var level in SystemExtensions.Enumerate<Level>())
+                if (stage.HasValue && stageLoop != stage)
                 {
-                    await ComputeRankingsFromDateAsync(stage, level, startDate.Value, playersDatesCache);
+                    continue;
+                }
+                foreach (var levelLoop in SystemExtensions.Enumerate<Level>())
+                {
+                    if (level.HasValue && levelLoop != level)
+                    {
+                        continue;
+                    }
+                    await ComputeRankingsFromDateAsync(stageLoop, levelLoop, startDate.Value, playersDatesCache);
                 }
             }
 
@@ -386,6 +394,12 @@ namespace KikoleSite.Providers
                     && (y.Date < x.Date || (y.Date == x.Date && y.Id < x.Id))))
                 .ToList();
             duplicateEntries.ForEach(x => entries.Remove(x));
+
+            // Removes entries (most likely from other engines) with a lower time and past the date of the best time
+            var worstLaterEntries = entries
+                .Where(x => entries.Any(y => x.PlayerId == y.PlayerId && x.Date > y.Date && x.Time >= y.Time))
+                .ToList();
+            worstLaterEntries.ForEach(x => entries.Remove(x));
 
             // all dates from start to now
             var entriesByDate = entries

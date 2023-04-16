@@ -25,10 +25,10 @@ namespace KikoleSite.Controllers
         }
 
         [HttpGet("rankings/{game}/refresh")]
-        public JsonResult RefreshRankings([FromRoute] Game game, [FromQuery] DateTime? startDate, [FromQuery] string secret)
+        public JsonResult RefreshRankings([FromRoute] Game game, [FromQuery] DateTime? startDate, [FromQuery] Stage? stage, [FromQuery] Level? level, [FromQuery] string secret)
         {
             var json = StartAsyncTaskAndGetJson(() =>
-                _integrationProvider.ComputeRankingsAsync(game, startDate),
+                _integrationProvider.ComputeRankingsAsync(game, startDate, stage, level),
                 nameof(RefreshPlayers),
                 secret);
             return Json(json);
