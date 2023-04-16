@@ -17,6 +17,8 @@ namespace KikoleSite.Providers
 {
     public sealed class IntegrationProvider : IIntegrationProvider
     {
+        private const int RankingInsertBatchSize = 10000;
+
         private readonly IWriteRepository _writeRepository;
         private readonly IReadRepository _readRepository;
         private readonly ITheEliteWebSiteParser _siteParser;
@@ -390,7 +392,7 @@ namespace KikoleSite.Providers
                     .Select(y => y.OrderBy(z => z.Time).First())
                     .ToList());
 
-            var rankings = new List<RankingEntryDto>(10000);
+            var rankings = new List<RankingEntryDto>(RankingInsertBatchSize);
 
             var localEntries = new Dictionary<uint, EntryDto>(entries.Count);
             foreach (var date in entriesByDate.Keys)
@@ -430,21 +432,21 @@ namespace KikoleSite.Providers
                         currentTime = entry.Time;
                     }
 
-                    var points = pos == 1 ? 100 : (pos == 2 ? 97 : Math.Max((100 - pos) - 2, 0));
-
-                    rankings.Add(new RankingEntryDto
+                    var rk = new RankingEntryDto
                     {
                         EntryId = entry.Id,
                         PlayerId = entry.PlayerId,
-                        Points = points,
                         Rank = pos,
                         Time = entry.Time,
                         RankingId = rankingId,
                         EntryDate = entry.IsSimulatedDate ? null : entry.Date
-                    });
+                    };
+                    rk.SetPoints();
+
+                    rankings.Add(rk);
                 }
 
-                if (rankings.Count >= 10000 || date == entriesByDate.Keys.Last())
+                if (rankings.Count >= RankingInsertBatchSize || date == entriesByDate.Keys.Last())
                 {
                     await _writeRepository
                         .InsertRankingEntriesAsync(rankings)

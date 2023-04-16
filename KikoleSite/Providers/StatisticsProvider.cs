@@ -508,7 +508,6 @@ namespace KikoleSite.Providers
                 foreach (var mWr in wrs.Where(x =>
                     x.Level == Level.Medium
                     && x.Stage == eWr.Stage
-                    && x.Author.Id == eWr.Author.Id
                     && x.Period.IsOverlap(eWr.Period)))
                 {
                     foreach (var hWr in wrs.Where(x =>
@@ -632,30 +631,26 @@ namespace KikoleSite.Providers
 
         private async Task<List<RankingEntryLight>> GetFullGameConsolidatedRankingAsync(RankingRequest request)
         {
-            // Gets ranking
-            var finalEntries = await GetFullGameRankingAsync(request)
-                .ConfigureAwait(false);
+            var finalEntries = await GetFullGameRankingAsync(request).ConfigureAwait(false);
 
             var rankingEntries = finalEntries
+                .SelectMany(e => e.RankingEntries)
                 .GroupBy(e => e.PlayerId)
                 .Select(e => request.FullDetails
                     ? new RankingEntry(request.Game, request.Players[e.Key])
                     : new RankingEntryLight(request.Game, request.Players[e.Key]))
                 .ToList();
 
-            foreach (var entryGroup in finalEntries.GroupBy(r => new { r.Stage, r.Level }))
+            foreach (var entryGroup in finalEntries)
             {
-                foreach (var timesGroup in entryGroup.GroupBy(l => l.Time).OrderBy(l => l.Key))
+                foreach (var timeEntry in entryGroup.RankingEntries)
                 {
-                    var rank = timesGroup.First().Rank;
-                    var isUntied = rank == 1 && timesGroup.Count() == 1;
-
-                    foreach (var timeEntry in timesGroup)
-                    {
-                        rankingEntries
-                            .Single(e => e.Player.Id == timeEntry.PlayerId)
-                            .AddStageAndLevelDatas(timeEntry, isUntied);
-                    }
+                    var untied = timeEntry.Rank == 1 && entryGroup.RankingEntries.Count(e => e.Rank == 1) == 1;
+                    if (request.IsCustom)
+                        timeEntry.SetPoints();
+                    rankingEntries
+                        .Single(e => e.Player.Id == timeEntry.PlayerId)
+                        .AddStageAndLevelData(entryGroup.Ranking, timeEntry, untied);
                 }
             }
 
@@ -665,9 +660,9 @@ namespace KikoleSite.Providers
                 .WithRanks(r => r.Points);
         }
 
-        private async Task<List<CustomRankingDto>> GetFullGameRankingAsync(RankingRequest request)
+        private async Task<List<(RankingDto Ranking, List<RankingEntryDto> RankingEntries)>> GetFullGameRankingAsync(RankingRequest request)
         {
-            var rankingEntries = new ConcurrentBag<CustomRankingDto>();
+            var rankingEntries = new ConcurrentBag<(RankingDto, List<RankingEntryDto>)>();
 
             var tasks = new List<Task>();
             foreach (var stage in request.Game.GetStages())
@@ -676,9 +671,33 @@ namespace KikoleSite.Providers
                 {
                     foreach (var level in SystemExtensions.Enumerate<Level>())
                     {
-                        var stageLevelRankings = await GetStageLevelRankingAsync(request, stage, level)
-                            .ConfigureAwait(false);
-                        rankingEntries.AddRange(stageLevelRankings);
+                        RankingDto ranking = null;
+                        List<RankingEntryDto> stageLevelRankings = null;
+                        if (!request.IsCustom)
+                        {
+                            ranking = await _readRepository
+                                .GetRankingAsync(stage, level, request.RankingDate, _configuration.NoDateEntryRankingRule)
+                                .ConfigureAwait(false);
+                            if (ranking != null)
+                            {
+                                stageLevelRankings = (await _readRepository
+                                    .GetRankingEntriesAsync(ranking.Id)
+                                    .ConfigureAwait(false))
+                                    .ToList();
+                            }
+                        }
+                        if (stageLevelRankings == null)
+                        {
+                            ranking = new RankingDto
+                            {
+                                Date = request.RankingDate,
+                                Level = level,
+                                Rule = _configuration.NoDateEntryRankingRule,
+                                Stage = stage,
+                            };
+                            stageLevelRankings = await GetStageLevelRankingAsync(request, stage, level).ConfigureAwait(false);
+                        }
+                        rankingEntries.Add((ranking, stageLevelRankings));
                     }
                 }));
             }
@@ -688,7 +707,7 @@ namespace KikoleSite.Providers
             return rankingEntries.ToList();
         }
 
-        private async Task<List<CustomRankingDto>> GetStageLevelRankingAsync(
+        private async Task<List<RankingEntryDto>> GetStageLevelRankingAsync(
             RankingRequest request,
             Stage stage,
             Level level)
@@ -704,7 +723,7 @@ namespace KikoleSite.Providers
                         eGroup => eGroup.Key,
                         eGroup => eGroup.ToList()));
 
-            var rankingsToInsert = new List<CustomRankingDto>();
+            var rankingsToInsert = new List<RankingEntryDto>();
 
             // For the current date + previous days
             // Gets the min time entry for each player
@@ -738,14 +757,13 @@ namespace KikoleSite.Providers
                     currentTime = entry.Time;
                 }
 
-                var ranking = new CustomRankingDto
+                var ranking = new RankingEntryDto
                 {
-                    Level = entry.Level,
                     PlayerId = entry.PlayerId,
                     Rank = pos,
-                    Stage = entry.Stage,
                     Time = entry.Time,
-                    EntryDate = entry.Date.Value
+                    EntryDate = entry.Date.Value,
+                    EntryId = entry.Id
                 };
 
                 rankingsToInsert.Add(ranking);

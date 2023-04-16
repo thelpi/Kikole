@@ -162,8 +162,7 @@ namespace KikoleSite
             this (DateTime s, DateTime? e) first,
             (DateTime s, DateTime? e) second)
         {
-            return (first.s < second.s && (first.e > second.s || !first.e.HasValue))
-                || (second.s < first.s && (second.e > first.s || !second.e.HasValue));
+            return first.s.Max(second.s) < (first.e ?? DateTime.MaxValue).Min(second.e ?? DateTime.MaxValue);
         }
 
         public static (DateTime s, DateTime? e)? GetOverlapPeriod(

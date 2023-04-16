@@ -29,32 +29,6 @@ namespace KikoleSite.Models
             CumuledTime = (UnsetTimeValueSeconds * Game.GetStages().Count) * 3;
         }
 
-        internal virtual int AddStageAndLevelDatas(CustomRankingDto ranking, bool untied)
-        {
-            var points = (100 - ranking.Rank) - 2;
-            if (points < 0)
-                points = 0;
-
-            if (ranking.Rank == 1)
-            {
-                points = 100;
-                RecordsCount++;
-                if (untied)
-                    UntiedRecordsCount++;
-            }
-            else if (ranking.Rank == 2)
-            {
-                points = 97;
-            }
-
-            Points += points;
-
-            if (ranking.Time < UnsetTimeValueSeconds)
-                CumuledTime -= UnsetTimeValueSeconds - ranking.Time;
-
-            return points;
-        }
-
         internal virtual void AddStageAndLevelData(RankingDto ranking, RankingEntryDto rankingEntry, bool untied)
         {
             if (rankingEntry.Rank == 1)

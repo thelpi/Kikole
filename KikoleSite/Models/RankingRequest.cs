@@ -96,5 +96,11 @@ namespace KikoleSite.Models
 
             return players.ToDictionary(r => r.Id, r => r);
         }
+
+        internal bool IsCustom => Engine.HasValue
+            || !IncludeUnknownEngine
+            || RankingStartDate.HasValue
+            || !string.IsNullOrWhiteSpace(Country)
+            || CountryGrouping;
     }
 }

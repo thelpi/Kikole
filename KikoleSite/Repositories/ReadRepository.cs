@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Dtos;
 using KikoleSite.Enums;
@@ -67,6 +68,36 @@ namespace KikoleSite.Repositories
         {
             return await GetEntriesByCriteriaInternalAsync(
                     null, null, null, null, playerId, game)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<RankingDto> GetRankingAsync(Stage stage, Level level, DateTime date, NoDateEntryRankingRule noDateRule)
+        {
+            var rankings = await ExecuteReaderAsync<RankingDto>(
+                    "SELECT id, date, rule_id AS Rule, stage_id AS Stage, level_id AS Level " +
+                    "FROM rankings " +
+                    "WHERE date <= @date AND rule_id = @rule_id AND stage_id = @stage_id AND level_id = @level_id " +
+                    "ORDER BY date DESC " +
+                    "LIMIT 0, 1",
+                    new
+                    {
+                        stage_id = (byte)stage,
+                        level_id = (byte)level,
+                        date,
+                        rule_id = (byte)noDateRule
+                    })
+                .ConfigureAwait(false);
+
+            return rankings.FirstOrDefault();
+        }
+
+        public async Task<IReadOnlyList<RankingEntryDto>> GetRankingEntriesAsync(uint rankingId)
+        {
+            return await ExecuteReaderAsync<RankingEntryDto>(
+                    "SELECT ranking_id, player_id, points, rank, time, entry_id, entry_date " +
+                    "FROM ranking_entries " +
+                    "WHERE ranking_id = @ranking_id",
+                    new { ranking_id = rankingId })
                 .ConfigureAwait(false);
         }
 
