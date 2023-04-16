@@ -56,6 +56,29 @@ namespace KikoleSite.Models
             return points;
         }
 
+        internal override void AddStageAndLevelData(RankingDto ranking, RankingEntryDto rankingEntry, bool untied)
+        {
+            base.AddStageAndLevelData(ranking, rankingEntry, untied);
+
+            if (rankingEntry.Rank == 1)
+            {
+                _levelRecordsCount[ranking.Level]++;
+                if (untied)
+                {
+                    _levelUntiedRecordsCount[ranking.Level]++;
+                }
+            }
+
+            _levelPoints[ranking.Level] += rankingEntry.Points;
+
+            GetDetailsByLevel(ranking.Stage).Add(ranking.Level, (rankingEntry.Rank, rankingEntry.Points, rankingEntry.Time, rankingEntry.EntryDate));
+
+            if (rankingEntry.Time < UnsetTimeValueSeconds)
+            {
+                _levelCumuledTime[ranking.Level] -= UnsetTimeValueSeconds - rankingEntry.Time;
+            }
+        }
+
         private Dictionary<Level, (int, int, int?, System.DateTime?)> GetDetailsByLevel(Stage stage)
         {
             Dictionary<Level, (int, int, int?, System.DateTime?)> detailsByLevel;

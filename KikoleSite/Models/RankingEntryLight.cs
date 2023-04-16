@@ -54,5 +54,20 @@ namespace KikoleSite.Models
 
             return points;
         }
+
+        internal virtual void AddStageAndLevelData(RankingDto ranking, RankingEntryDto rankingEntry, bool untied)
+        {
+            if (rankingEntry.Rank == 1)
+            {
+                RecordsCount++;
+                if (untied)
+                    UntiedRecordsCount++;
+            }
+
+            Points += rankingEntry.Points;
+
+            if (rankingEntry.Time < UnsetTimeValueSeconds)
+                CumuledTime -= UnsetTimeValueSeconds - rankingEntry.Time;
+        }
     }
 }
