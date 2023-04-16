@@ -328,18 +328,21 @@ namespace KikoleSite.Providers
 
         public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game)
         {
+            var playersDatesCache = new Dictionary<uint, (DateTime, DateTime)>();
+
             foreach (var stage in game.GetStages())
             {
                 foreach (var level in SystemExtensions.Enumerate<Level>())
                 {
-                    await ComputeRankingsFromDateAsync(stage, level, game.GetEliteFirstDate());
+                    await ComputeRankingsFromDateAsync(stage, level, game.GetEliteFirstDate(), playersDatesCache);
                 }
             }
 
             return new RefreshRankingsResult();
         }
 
-        public async Task<RefreshRankingsResult> ComputeRankingsFromDateAsync(Stage stage, Level level, DateTime startDate)
+        private async Task<RefreshRankingsResult> ComputeRankingsFromDateAsync(
+            Stage stage, Level level, DateTime startDate, Dictionary<uint, (DateTime Min, DateTime Max)> playersDatesCache)
         {
             startDate = startDate.Date;
 
@@ -356,8 +359,18 @@ namespace KikoleSite.Providers
                 .ConfigureAwait(false))
                 .ToList();
 
-            // forces date
-            entries.ManageDateLessEntries(rule, _clock.Now);
+            // manages empty dates
+            if (rule == NoDateEntryRankingRule.Ignore)
+            {
+                entries.RemoveAll(e => !e.Date.HasValue);
+            }
+            else
+            {
+                foreach (var entry in entries.Where(x => !x.Date.HasValue))
+                {
+                    await SetEmptyDateAsync(entry, entries, playersDatesCache).ConfigureAwait(false);
+                }
+            }
 
             // Removes duplicate entries (same time, same player, different engine)
             // There's a situation where a player submits the time with 2 engines the same day: we keep the lowest ID
@@ -431,7 +444,7 @@ namespace KikoleSite.Providers
                     });
                 }
 
-                if (rankings.Count >= 10000)
+                if (rankings.Count >= 10000 || date == entriesByDate.Keys.Last())
                 {
                     await _writeRepository
                         .InsertRankingEntriesAsync(rankings)
@@ -441,6 +454,84 @@ namespace KikoleSite.Providers
             }
 
             return new RefreshRankingsResult();
+        }
+
+        private async Task SetEmptyDateAsync(EntryDto entry, List<EntryDto> stageLevelEntries, Dictionary<uint, (DateTime Min, DateTime Max)> playersDatesCache)
+        {
+            var game = entry.Stage.GetGame();
+
+            if (!playersDatesCache.ContainsKey(entry.PlayerId))
+            {
+                var playerEntries = (await _readRepository
+                    .GetPlayerEntriesAsync(entry.PlayerId, game)
+                    .ConfigureAwait(false))
+                    .Where(x => x.Date.HasValue);
+                if (playerEntries.Any())
+                {
+                    playersDatesCache.Add(entry.PlayerId, (playerEntries.Min(x => x.Date.Value), playerEntries.Max(x => x.Date.Value)));
+                }
+                else
+                {
+                    // case where all player's entries are undated
+                    playersDatesCache.Add(entry.PlayerId, (game.GetEliteFirstDate(), _clock.Today));
+                }
+            }
+
+            // when everything is undated
+            if (playersDatesCache[entry.PlayerId].Min == game.GetEliteFirstDate() && playersDatesCache[entry.PlayerId].Max == _clock.Today)
+            {
+                entry.Date = playersDatesCache[entry.PlayerId].Min;
+                entry.IsSimulatedDate = true;
+                return;
+            }
+
+            // An entry for the player with an actual date and a better or equal time (closest to current)
+            var betterEntry = stageLevelEntries
+                .Where(x => x.PlayerId == entry.PlayerId && x.Date.HasValue && !x.IsSimulatedDate && x.Time <= entry.Time)
+                .OrderByDescending(x => x.Time)
+                .ThenBy(x => x.Date)
+                .FirstOrDefault();
+            var realMax = betterEntry?.Date ?? playersDatesCache[entry.PlayerId].Max;
+
+            // An entry for the player with an actual date and a worse or equal time (closest to current)
+            var worseEntry = stageLevelEntries
+                .Where(x => x.PlayerId == entry.PlayerId && x.Date.HasValue && !x.IsSimulatedDate && x.Time >= entry.Time)
+                .OrderBy(x => x.Time)
+                .ThenByDescending(x => x.Date)
+                .FirstOrDefault();
+            var realMin = worseEntry?.Date ?? playersDatesCache[entry.PlayerId].Min;
+
+            // if there's a range with two times on the same stage+level
+            // we always take the latest date
+            // e.g. the player has a time of 53 with date, then 52 without date and 51 with date:
+            // we assume the 51 has been performed so fast the player did not bother to fill the "52" entry properly
+            if (betterEntry != null && worseEntry != null)
+            {
+                entry.Date = betterEntry.Date;
+                entry.IsSimulatedDate = true;
+                return;
+            }
+
+            // Applies the rule on the range of dates
+            switch (_configuration.NoDateEntryRankingRule)
+            {
+                // TODO: "PlayerHabit" rule
+                case NoDateEntryRankingRule.Average:
+                case NoDateEntryRankingRule.PlayerHabit:
+                    entry.Date = realMin.AddDays((realMax - realMin).TotalDays / 2).Date;
+                    entry.IsSimulatedDate = true;
+                    break;
+                case NoDateEntryRankingRule.Max:
+                    entry.Date = realMax;
+                    entry.IsSimulatedDate = true;
+                    break;
+                case NoDateEntryRankingRule.Min:
+                    entry.Date = realMin;
+                    entry.IsSimulatedDate = true;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         private async Task<DateTime?> CompareMinimalDateFromPlayerToReferenceAsync(uint playerId, Game game, DateTime? currentReferenceDate)
