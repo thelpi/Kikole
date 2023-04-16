@@ -15,6 +15,6 @@ namespace KikoleSite.Providers
 
         Task<RefreshPlayersResult> RefreshPlayersAsync(bool addTimesForNewPlayers, bool refreshExistingPlayers);
 
-        Task<RefreshRankingsResult> ComputeRankingsAsync(Game game);
+        Task<RefreshRankingsResult> ComputeRankingsAsync(Game game, DateTime? startDate);
     }
 }

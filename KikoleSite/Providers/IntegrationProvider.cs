@@ -328,15 +328,17 @@ namespace KikoleSite.Providers
             };
         }
 
-        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game)
+        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game, DateTime? startDate)
         {
             var playersDatesCache = new Dictionary<uint, (DateTime, DateTime)>();
+
+            startDate = (startDate ?? game.GetEliteFirstDate()).Date;
 
             foreach (var stage in game.GetStages())
             {
                 foreach (var level in SystemExtensions.Enumerate<Level>())
                 {
-                    await ComputeRankingsFromDateAsync(stage, level, game.GetEliteFirstDate(), playersDatesCache);
+                    await ComputeRankingsFromDateAsync(stage, level, startDate.Value, playersDatesCache);
                 }
             }
 
@@ -346,7 +348,9 @@ namespace KikoleSite.Providers
         private async Task<RefreshRankingsResult> ComputeRankingsFromDateAsync(
             Stage stage, Level level, DateTime startDate, Dictionary<uint, (DateTime Min, DateTime Max)> playersDatesCache)
         {
-            startDate = startDate.Date;
+#if DEBUG
+            var debugTimeStart = DateTime.Now;
+#endif
 
             var rule = _configuration.NoDateEntryRankingRule;
 
@@ -397,6 +401,16 @@ namespace KikoleSite.Providers
             var localEntries = new Dictionary<uint, EntryDto>(entries.Count);
             foreach (var date in entriesByDate.Keys)
             {
+                foreach (var entry in entriesByDate[date])
+                {
+                    localEntries[entry.PlayerId] = entry;
+                }
+
+                if (date < startDate)
+                {
+                    continue;
+                }
+
                 var rankingId = await _writeRepository
                     .InsertRankingAsync(new RankingDto
                     {
@@ -406,11 +420,6 @@ namespace KikoleSite.Providers
                         Stage = stage
                     })
                     .ConfigureAwait(false);
-
-                foreach (var entry in entriesByDate[date])
-                {
-                    localEntries[entry.PlayerId] = entry;
-                }
 
                 var pos = 1;
                 var posAgg = 1;
@@ -454,6 +463,12 @@ namespace KikoleSite.Providers
                     rankings.Clear();
                 }
             }
+
+#if DEBUG
+            var debugTimeEnd = DateTime.Now;
+
+            System.Diagnostics.Debug.WriteLine($"Finished: {stage} - {level} - in {(int)Math.Floor((debugTimeEnd - debugTimeStart).TotalSeconds)} sec");
+#endif
 
             return new RefreshRankingsResult();
         }
