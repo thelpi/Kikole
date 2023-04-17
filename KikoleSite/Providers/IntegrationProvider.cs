@@ -17,6 +17,8 @@ namespace KikoleSite.Providers
 {
     public sealed class IntegrationProvider : IIntegrationProvider
     {
+        private const int RankingInsertBatchSize = 10000;
+
         private readonly IWriteRepository _writeRepository;
         private readonly IReadRepository _readRepository;
         private readonly ITheEliteWebSiteParser _siteParser;
@@ -326,15 +328,17 @@ namespace KikoleSite.Providers
             };
         }
 
-        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game)
+        public async Task<RefreshRankingsResult> ComputeRankingsAsync(Game game, DateTime? startDate)
         {
             var playersDatesCache = new Dictionary<uint, (DateTime, DateTime)>();
+
+            startDate = (startDate ?? game.GetEliteFirstDate()).Date;
 
             foreach (var stage in game.GetStages())
             {
                 foreach (var level in SystemExtensions.Enumerate<Level>())
                 {
-                    await ComputeRankingsFromDateAsync(stage, level, game.GetEliteFirstDate(), playersDatesCache);
+                    await ComputeRankingsFromDateAsync(stage, level, startDate.Value, playersDatesCache);
                 }
             }
 
@@ -344,6 +348,10 @@ namespace KikoleSite.Providers
         private async Task<RefreshRankingsResult> ComputeRankingsFromDateAsync(
             Stage stage, Level level, DateTime startDate, Dictionary<uint, (DateTime Min, DateTime Max)> playersDatesCache)
         {
+#if DEBUG
+            var debugTimeStart = DateTime.Now;
+#endif
+
             startDate = startDate.Date;
 
             var rule = _configuration.NoDateEntryRankingRule;
@@ -381,6 +389,12 @@ namespace KikoleSite.Providers
                 .ToList();
             duplicateEntries.ForEach(x => entries.Remove(x));
 
+            // Removes entries (most likely from other engines) with a lower time and past the date of the best time
+            var worstLaterEntries = entries
+                .Where(x => entries.Any(y => x.PlayerId == y.PlayerId && x.Date > y.Date && x.Time >= y.Time))
+                .ToList();
+            worstLaterEntries.ForEach(x => entries.Remove(x));
+
             // all dates from start to now
             var entriesByDate = entries
                 .GroupBy(x => x.Date.Value.Date)
@@ -390,11 +404,21 @@ namespace KikoleSite.Providers
                     .Select(y => y.OrderBy(z => z.Time).First())
                     .ToList());
 
-            var rankings = new List<RankingEntryDto>(10000);
+            var rankings = new List<RankingEntryDto>(RankingInsertBatchSize);
 
             var localEntries = new Dictionary<uint, EntryDto>(entries.Count);
             foreach (var date in entriesByDate.Keys)
             {
+                foreach (var entry in entriesByDate[date])
+                {
+                    localEntries[entry.PlayerId] = entry;
+                }
+
+                if (date < startDate)
+                {
+                    continue;
+                }
+
                 var rankingId = await _writeRepository
                     .InsertRankingAsync(new RankingDto
                     {
@@ -404,11 +428,6 @@ namespace KikoleSite.Providers
                         Stage = stage
                     })
                     .ConfigureAwait(false);
-
-                foreach (var entry in entriesByDate[date])
-                {
-                    localEntries[entry.PlayerId] = entry;
-                }
 
                 var pos = 1;
                 var posAgg = 1;
@@ -444,7 +463,7 @@ namespace KikoleSite.Providers
                     });
                 }
 
-                if (rankings.Count >= 10000 || date == entriesByDate.Keys.Last())
+                if (rankings.Count >= RankingInsertBatchSize || date == entriesByDate.Keys.Last())
                 {
                     await _writeRepository
                         .InsertRankingEntriesAsync(rankings)
@@ -452,6 +471,12 @@ namespace KikoleSite.Providers
                     rankings.Clear();
                 }
             }
+
+#if DEBUG
+            var debugTimeEnd = DateTime.Now;
+
+            System.Diagnostics.Debug.WriteLine($"Finished: {stage} - {level} - in {(int)Math.Floor((debugTimeEnd - debugTimeStart).TotalSeconds)} sec");
+#endif
 
             return new RefreshRankingsResult();
         }

@@ -508,7 +508,6 @@ namespace KikoleSite.Providers
                 foreach (var mWr in wrs.Where(x =>
                     x.Level == Level.Medium
                     && x.Stage == eWr.Stage
-                    && x.Author.Id == eWr.Author.Id
                     && x.Period.IsOverlap(eWr.Period)))
                 {
                     foreach (var hWr in wrs.Where(x =>
