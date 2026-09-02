@@ -120,39 +120,6 @@
   <data name="AlreadyExistsAccount" xml:space="preserve">
     <value>A account already exists with this login</value>
   </data>
-  <data name="BothAcceptedAndCancelledChallenge" xml:space="preserve">
-    <value>Challenge both accepted and refused</value>
-  </data>
-  <data name="CantAutoAcceptChallenge" xml:space="preserve">
-    <value>Can't accept your own challenge</value>
-  </data>
-  <data name="CantChallengeYourself" xml:space="preserve">
-    <value>You can't challenge yourself</value>
-  </data>
-  <data name="ChallengeAlreadyAccepted" xml:space="preserve">
-    <value>You can't cancel an accepted challenge</value>
-  </data>
-  <data name="ChallengeAlreadyAnswered" xml:space="preserve">
-    <value>You've already respond to this challenge</value>
-  </data>
-  <data name="ChallengeAlreadyExist" xml:space="preserve">
-    <value>Can't create challenge; a challenge against this opponent is already planned or requested</value>
-  </data>
-  <data name="ChallengeCreatorIsAdmin" xml:space="preserve">
-    <value>Can't create challenge; you're administrator</value>
-  </data>
-  <data name="ChallengeHostIsInvalid" xml:space="preserve">
-    <value>Invalid host account</value>
-  </data>
-  <data name="ChallengeNotFound" xml:space="preserve">
-    <value>Challenge not found</value>
-  </data>
-  <data name="ChallengeOpponentIsAdmin" xml:space="preserve">
-    <value>Can't create challenge; opponent account is administrator</value>
-  </data>
-  <data name="ChallengeOpponentIsInvalid" xml:space="preserve">
-    <value>Can't create challenge; invalid opponent account</value>
-  </data>
   <data name="ClubCreationFailure" xml:space="preserve">
     <value>Club creation failure</value>
   </data>
@@ -167,9 +134,6 @@
   </data>
   <data name="InvalidBirthYear" xml:space="preserve">
     <value>Invalid year of birth</value>
-  </data>
-  <data name="InvalidChallengeId" xml:space="preserve">
-    <value>Invalid challenge identifier</value>
   </data>
   <data name="InvalidClubs" xml:space="preserve">
     <value>At least one invalid club</value>

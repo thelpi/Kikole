@@ -126,9 +126,6 @@
   <data name="CareerClubSoFar" xml:space="preserve">
     <value>Career clubs:</value>
   </data>
-  <data name="ChallengeOngoing" xml:space="preserve">
-    <value>You have a challenge against &lt;span class="redtext"&gt;{0}&lt;/span&gt; today, for &lt;span class="redtext"&gt;{1}&lt;/span&gt;% of your points!</value>
-  </data>
   <data name="ClubsTitle" xml:space="preserve">
     <value>Clubs:</value>
   </data>
@@ -164,9 +161,6 @@
   </data>
   <data name="OneClubAtATime" xml:space="preserve">
     <value>one club at a time</value>
-  </data>
-  <data name="PendingChallenges" xml:space="preserve">
-    <value>You have pending challenges waiting for a &lt;a href="/Challenge"&gt;response&lt;/a&gt;.</value>
   </data>
   <data name="PlayerFoundCongrats" xml:space="preserve">
     <value>Congratulations! The player was &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt;.</value>

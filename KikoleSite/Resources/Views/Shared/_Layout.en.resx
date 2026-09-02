@@ -120,9 +120,6 @@
   <data name="Account" xml:space="preserve">
     <value>Account</value>
   </data>
-  <data name="ChallengeSomeone" xml:space="preserve">
-    <value>Challenge someone!</value>
-  </data>
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact</value>
   </data>

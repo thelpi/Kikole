@@ -123,39 +123,6 @@
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Echec de l'authentification : jeton invalide</value>
   </data>
-  <data name="BothAcceptedAndCancelledChallenge" xml:space="preserve">
-    <value>Challenge à la fois accepté et refusé</value>
-  </data>
-  <data name="CantAutoAcceptChallenge" xml:space="preserve">
-    <value>Vous ne pouvez pas accepter votre propre challenge</value>
-  </data>
-  <data name="CantChallengeYourself" xml:space="preserve">
-    <value>Vous ne pouvez pas vous challenger vous même</value>
-  </data>
-  <data name="ChallengeAlreadyAccepted" xml:space="preserve">
-    <value>Vous ne pouvez pas annuler un challenge accepté</value>
-  </data>
-  <data name="ChallengeAlreadyAnswered" xml:space="preserve">
-    <value>Vous avez déjà répondu à ce challenge</value>
-  </data>
-  <data name="ChallengeAlreadyExist" xml:space="preserve">
-    <value>Impossible de créer le challenge ; un challenge accepté ou en attente existe déjà avec l'adversaire</value>
-  </data>
-  <data name="ChallengeCreatorIsAdmin" xml:space="preserve">
-    <value>Impossible de créer le challenge ; vous êtes administrateur</value>
-  </data>
-  <data name="ChallengeHostIsInvalid" xml:space="preserve">
-    <value>Compte utilisateur du créateur invalide</value>
-  </data>
-  <data name="ChallengeNotFound" xml:space="preserve">
-    <value>Challenge inexistant</value>
-  </data>
-  <data name="ChallengeOpponentIsAdmin" xml:space="preserve">
-    <value>Impossible de créer le challenge ; l'adversaire est administrateur</value>
-  </data>
-  <data name="ChallengeOpponentIsInvalid" xml:space="preserve">
-    <value>Impossible de créer le challenge ; le compte de l'adversaire est invalide</value>
-  </data>
   <data name="ClubCreationFailure" xml:space="preserve">
     <value>Echec de la création du club</value>
   </data>
@@ -170,9 +137,6 @@
   </data>
   <data name="InvalidBirthYear" xml:space="preserve">
     <value>Année de naissance invalide</value>
-  </data>
-  <data name="InvalidChallengeId" xml:space="preserve">
-    <value>Identifiant de challenge invalide</value>
   </data>
   <data name="InvalidClubs" xml:space="preserve">
     <value>Au moins un club invalide</value>
