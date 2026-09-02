@@ -17,7 +17,6 @@ namespace KikoleSite.ViewModels
         public string Message { get; set; }
         public string PlayerCreator { get; set; }
         public bool LeaderboardAvailable { get; set; }
-        public bool HasContinentManaged { get; set; }
         public DateTime CurrentDate { get; set; }
 
         public bool DisplayHiddenPageAsHidden { get; set; }

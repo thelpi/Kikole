@@ -115,7 +115,7 @@ namespace KikoleSite.Services
 
                 var points = userLeaders.Sum(_ => _.Points);
                 foreach (var userPlayer in userPlayers)
-                    points += GetSubmittedPlayerPoints(leaders, userPlayer.ProposalDate.Value);
+                    points += ProposalChart.SubmissionPoints;
 
                 items.Add(new LeaderboardItem
                 {
@@ -194,7 +194,7 @@ namespace KikoleSite.Services
                 }
 
                 var singleStat = isCreator
-                    ? new DailyUserStat(currentDate, pName, GetSubmittedPlayerPoints(leaders, currentDate))
+                    ? new DailyUserStat(currentDate, pName, ProposalChart.SubmissionPoints)
                     : new DailyUserStat(userId, currentDate, pName, proposals.Any(_ => _.IsCurrentDay), proposals.Any(), leaders, meLeader);
 
                 stats.Add(singleStat);
@@ -299,7 +299,7 @@ namespace KikoleSite.Services
                 {
                     Date = day,
                     IsCreator = true,
-                    Points = GetSubmittedPlayerPoints(leaders, day),
+                    Points = ProposalChart.SubmissionPoints,
                     Time = new TimeSpan(23, 59, 59),
                     UserId = player.Player.CreationUserId,
                     UserName = users[player.Player.CreationUserId].Login
@@ -444,23 +444,5 @@ namespace KikoleSite.Services
             return users;
         }
 
-        private int GetSubmittedPlayerPoints(IEnumerable<LeaderDto> datesLeaders, DateTime date)
-        {
-            if (date >= ProposalChart.SubmissionNewChartStart)
-            {
-                return ProposalChart.SubmissionPoints;
-            }
-
-            // ONLY DAY ONE COST POINTS
-            var leadersCosting = ProposalChart.SubmissionBonusPoints
-                - datesLeaders
-                    .Where(d => d.ProposalDate.Date == date
-                        && d.Points >= ProposalChart.SubmissionThresholdlosePoints
-                        && d.IsCurrentDay)
-                    .Sum(d => ProposalChart.SubmissionLosePointsByLeader);
-
-            return ProposalChart.SubmissionBasePoints
-                + Math.Max(leadersCosting, 0);
-        }
     }
 }

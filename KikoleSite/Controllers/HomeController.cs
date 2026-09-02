@@ -408,7 +408,6 @@ namespace KikoleSite.Controllers
             model.CanCreateClub = isPowerUser;
             model.IsAdmin = isAdminUser;
             model.PlayerId = playerCreator?.PlayerId ?? 0;
-            model.HasContinentManaged = proposalDate >= ProposalChart.ContinentValuatedStart;
 
             if (!string.IsNullOrWhiteSpace(model.PlayerName))
             {

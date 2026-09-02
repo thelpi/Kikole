@@ -7,10 +7,6 @@ namespace KikoleSite.Models
     public static class ProposalChart
     {
         public static readonly int BasePoints = 1000;
-        public static readonly int SubmissionBasePoints = 500;
-        public static readonly int SubmissionBonusPoints = 1000;
-        public static readonly int SubmissionLosePointsByLeader = 100;
-        public static readonly int SubmissionThresholdlosePoints = 750;
         public static readonly int SubmissionPoints = 1000;
 
         public static readonly IReadOnlyDictionary<ProposalTypes, (int points, bool isRate)> ProposalTypesCost
@@ -26,24 +22,11 @@ namespace KikoleSite.Models
                 { ProposalTypes.Continent, (100, false) }
             };
 
-        public static readonly DateTime FirstDate = new DateTime(2022, 03, 05).Date;
+        // TODO: provisoire, a sortir en configuration ou a deduire du MIN(proposal_date) en base
+        public static readonly DateTime FirstDate = new DateTime(2026, 09, 02).Date;
 
         public static readonly DateTime HiddenDate = FirstDate.AddDays(-1);
 
-#if DEBUG
-        public static readonly DateTime ContinentValuatedStart = new DateTime(2022, 10, 30).Date;
-#else
-        public static readonly DateTime ContinentValuatedStart = new DateTime(2022, 11, 01).Date;
-#endif
-
-#if DEBUG
-        public static readonly DateTime SubmissionNewChartStart = FirstDate;
-#else
-        public static readonly DateTime SubmissionNewChartStart = new DateTime(2022, 11, 04).Date;
-#endif
-
         public static readonly DateTime FirstMonth = new DateTime(FirstDate.Year, FirstDate.Month, 1);
-
-        public static readonly int SubmissionMaxPoints = SubmissionBasePoints + SubmissionBonusPoints;
     }
 }

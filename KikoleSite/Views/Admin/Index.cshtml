@@ -153,13 +153,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     </div>
 
     <div class="largeTopMargin">
-        @if (Model.IsSubmissionNewChart)
-        {
-            @Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ProposalChart.SubmissionPoints))
-        }
-        else
-        {
-            @Html.Raw(string.Format(localizer["ChartLaius"].Value, KikoleSite.Models.ProposalChart.SubmissionMaxPoints, KikoleSite.Models.ProposalChart.SubmissionLosePointsByLeader, KikoleSite.Models.ProposalChart.SubmissionThresholdlosePoints, KikoleSite.Models.ProposalChart.SubmissionBasePoints))
-        }
+        @Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ProposalChart.SubmissionPoints))
     </div>
 </form>

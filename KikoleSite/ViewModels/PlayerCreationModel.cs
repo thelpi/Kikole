@@ -113,6 +113,5 @@ namespace KikoleSite.ViewModels
 
         public bool HideCreator { get; set; }
 
-        public bool IsSubmissionNewChart { get; set; }
     }
 }
