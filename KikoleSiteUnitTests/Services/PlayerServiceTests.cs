@@ -462,5 +462,176 @@ namespace KikoleSiteUnitTests.Services
             result.Login.Should().Be("createur");
             result.Name.Should().BeNull();  // le demandeur n'est ni createur ni admin
         }
+
+        [Fact]
+        public async Task GetPlayerOfTheDayFullInfoAsync_DelegatesToTheHandler()
+        {
+            var full = new PlayerFullDto
+            {
+                Player = new PlayerDto { Id = 1 },
+                Clubs = new List<ClubDto>(),
+                PlayerClubs = new List<PlayerClubDto>()
+            };
+            _playerHandler.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(FirstDate)).ReturnsAsync(full);
+
+            var result = await _service.GetPlayerOfTheDayFullInfoAsync(FirstDate);
+
+            result.Should().BeSameAs(full);
+        }
+
+        // ------------------------------------------------------------- GetPlayerCluesAsync
+
+        [Fact]
+        public async Task GetPlayerCluesAsync_EnglishComesFromThePlayerRow()
+        {
+            _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
+                .ReturnsAsync(new PlayerDto { Id = 1, Clue = "the clue", EasyClue = "the easy clue" });
+
+            var clues = await _service.GetPlayerCluesAsync(1, new[] { Languages.en });
+
+            clues.Should().ContainKey(Languages.en);
+            clues[Languages.en].clue.Should().Be("the clue");
+            clues[Languages.en].easyclue.Should().Be("the easy clue");
+            _playerRepository.Verify(
+                _ => _.GetClueAsync(It.IsAny<ulong>(), It.IsAny<byte>(), It.IsAny<ulong>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetPlayerCluesAsync_OtherLanguagesCostTwoLookupsEach()
+        {
+            _playerRepository.Setup(_ => _.GetClueAsync(1, 0, (ulong)Languages.fr)).ReturnsAsync("indice");
+            _playerRepository.Setup(_ => _.GetClueAsync(1, 1, (ulong)Languages.fr)).ReturnsAsync("indice facile");
+
+            var clues = await _service.GetPlayerCluesAsync(1, new[] { Languages.fr });
+
+            clues[Languages.fr].clue.Should().Be("indice");
+            clues[Languages.fr].easyclue.Should().Be("indice facile");
+            // l'anglais n'etant pas demande, la ligne du joueur n'est jamais lue
+            _playerRepository.Verify(_ => _.GetPlayerByIdAsync(It.IsAny<ulong>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetPlayerCluesAsync_ReturnsEveryRequestedLanguage()
+        {
+            _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
+                .ReturnsAsync(new PlayerDto { Id = 1, Clue = "en", EasyClue = "en easy" });
+            _playerRepository.Setup(_ => _.GetClueAsync(1, It.IsAny<byte>(), (ulong)Languages.fr))
+                .ReturnsAsync("fr");
+
+            var clues = await _service.GetPlayerCluesAsync(1, new[] { Languages.en, Languages.fr });
+
+            clues.Keys.Should().BeEquivalentTo(new[] { Languages.en, Languages.fr });
+        }
+
+        [Fact]
+        public async Task GetPlayerCluesAsync_WithoutAnyLanguage_ReturnsNothing()
+        {
+            var clues = await _service.GetPlayerCluesAsync(1, new List<Languages>());
+
+            clues.Should().BeEmpty();
+        }
+
+        // ------------------------------------------------------------- UpdatePlayerCluesAsync
+
+        [Fact]
+        public async Task UpdatePlayerCluesAsync_WritesTheEnglishRowAndTheTranslations()
+        {
+            await _service.UpdatePlayerCluesAsync(
+                1,
+                "new clue",
+                "new easy clue",
+                new Dictionary<Languages, string> { { Languages.fr, "  nouvel indice  " } },
+                new Dictionary<Languages, string> { { Languages.fr, "nouvel indice facile" } });
+
+            _playerRepository.Verify(
+                _ => _.UpdatePlayerCluesAsync(1, "new clue", "new easy clue"), Times.Once);
+            _playerRepository.Verify(
+                _ => _.InsertPlayerCluesByLanguageAsync(1, 0,
+                    It.Is<IReadOnlyDictionary<ulong, string>>(d => d[(ulong)Languages.fr] == "nouvel indice")),
+                Times.Once);
+            _playerRepository.Verify(
+                _ => _.InsertPlayerCluesByLanguageAsync(1, 1, It.IsAny<IReadOnlyDictionary<ulong, string>>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdatePlayerCluesAsync_WithoutTranslations_OnlyTouchesThePlayerRow()
+        {
+            await _service.UpdatePlayerCluesAsync(1, "clue", "easy clue", null, null);
+
+            _playerRepository.Verify(_ => _.UpdatePlayerCluesAsync(1, "clue", "easy clue"), Times.Once);
+            _playerRepository.Verify(
+                _ => _.InsertPlayerCluesByLanguageAsync(
+                    It.IsAny<ulong>(), It.IsAny<byte>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()),
+                Times.Never);
+        }
+
+        // ------------------------------------------------------------- GetPlayerSubmissionsAsync
+
+        private void SetupPendingSubmissions(params (ulong playerId, ulong creatorId)[] submissions)
+        {
+            var dtos = submissions
+                .Select(s => new PlayerDto
+                {
+                    Id = s.playerId,
+                    Name = "Joueur" + s.playerId,
+                    AllowedNames = "joueur" + s.playerId,
+                    CreationUserId = s.creatorId,
+                    CountryId = (ulong)Countries.FR,
+                    ContinentId = (ulong)Continents.Europe,
+                    PositionId = (ulong)Positions.Midfielder
+                })
+                .ToList();
+
+            _playerRepository.Setup(_ => _.GetPendingValidationPlayersAsync()).ReturnsAsync(dtos);
+
+            foreach (var creatorId in submissions.Select(s => s.creatorId).Distinct())
+            {
+                _userRepository.Setup(_ => _.GetUserByIdAsync(creatorId))
+                    .ReturnsAsync(new UserDto { Id = creatorId, Login = "createur" + creatorId });
+            }
+
+            _playerHandler
+                .Setup(_ => _.GetPlayerFullInfoAsync(It.IsAny<PlayerDto>()))
+                .ReturnsAsync<PlayerDto, IPlayerHandler, PlayerFullDto>(p => new PlayerFullDto
+                {
+                    Player = p,
+                    Clubs = new List<ClubDto>(),
+                    PlayerClubs = new List<PlayerClubDto>()
+                });
+        }
+
+        [Fact]
+        public async Task GetPlayerSubmissionsAsync_WhenNothingIsPending_ReturnsEmpty()
+        {
+            SetupPendingSubmissions();
+
+            (await _service.GetPlayerSubmissionsAsync()).Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetPlayerSubmissionsAsync_BuildsOnePlayerPerPendingSubmission()
+        {
+            SetupPendingSubmissions((1, 42), (2, 43));
+
+            var result = await _service.GetPlayerSubmissionsAsync();
+
+            result.Should().HaveCount(2);
+            result.Select(p => p.Id).Should().BeEquivalentTo(new ulong[] { 1, 2 });
+            result.Select(p => p.Login).Should().BeEquivalentTo(new[] { "createur42", "createur43" });
+        }
+
+        [Fact]
+        public async Task GetPlayerSubmissionsAsync_ACreatorWithSeveralSubmissionsIsFetchedOnce()
+        {
+            // le service dedoublonne les createurs avant d'interroger le depot ; il reste
+            // en revanche une requete par joueur pour la carriere (cf. N+1 dans le TODO)
+            SetupPendingSubmissions((1, 42), (2, 42), (3, 42));
+
+            var result = await _service.GetPlayerSubmissionsAsync();
+
+            result.Should().HaveCount(3);
+            _userRepository.Verify(_ => _.GetUserByIdAsync(42), Times.Once);
+        }
     }
 }

@@ -179,6 +179,35 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
       un **calculateur de score dédié** que les deux services consommeraient, ce qui
       supprime l'entorse au lieu de la déplacer. À faire **avant** d'ajouter d'autres
       appels de ce genre.
+- [ ] **Palmarès : le cumul global n'est pas la somme des podiums mensuels.** Dans
+      `LeaderService.GetPalmaresAsync`, la fonction interne `GetUserAtPalmaresPosition`
+      fait deux choses : elle retourne l'utilisateur à une position donnée **et** lui
+      crédite une médaille au passage. Or le garde-fou « les trois places sont pourvues »
+      n'est évalué qu'**après** les trois appels. Sur un mois comptant moins de trois
+      joueurs classés, le mois est écarté de la liste des podiums mais les deux premiers
+      ont déjà encaissé leur or et leur argent au cumul global. Les deux tableaux de la
+      page Palmarès affichent donc des totaux incohérents.
+
+      Ce n'est pas un cas exotique : la relance repart de zéro, et le jeu de données de
+      test ne contient que deux joueurs non-administrateurs. Le bug se déclenche dès la
+      première ouverture de la page en local.
+
+      **Arbitrage non tranché**, à décider avant de corriger :
+      - **A** — un mois sans podium complet ne rapporte aucune médaille. On sépare
+        « regarder qui occupe les trois places » de « distribuer les médailles », et on
+        ne distribue qu'une fois les trois places confirmées. Une quinzaine de lignes
+        dans une seule méthode. *Recommandé.*
+      - **B** — les médailles restent acquises et c'est l'affichage mensuel qui est trop
+        strict : on accepte alors d'afficher un podium incomplet, à deux voire un seul.
+        Plus invasif, touche aussi le modèle `Palmares` et la vue.
+
+      Le comportement actuel est figé par le test
+      `LeaderServicePalmaresTests.TheGlobalTableCountsMedalsFromMonthsThatHaveNoOfficialPodium`,
+      à inverser au moment de la correction.
+- [ ] **`Single()` sans garde-fou sur données incohérentes** — `PlayerClub` lève une
+      exception si un club de la carrière est absent de la liste, `Player` de même si le
+      créateur manque. Même motif que le `pDays.First(...)` de `LeaderService` : le code
+      casse au lieu de dégrader. Comportements figés par des tests de caractérisation.
 - [ ] **Retirer les `ConfigureAwait(false)`** — 287 occurrences dans 23 fichiers. Utile dans
       une bibliothèque, inutile ici : ASP.NET Core n'a pas de `SynchronizationContext`.
       C'est du bruit pur. À faire **après** la migration, pour ne pas mélanger les diffs.

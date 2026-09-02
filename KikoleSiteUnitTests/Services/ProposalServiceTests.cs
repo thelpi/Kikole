@@ -132,7 +132,9 @@ namespace KikoleSiteUnitTests.Services
             };
 
             Compute(chronological, out var expected);
-            Compute(chronological.Reverse().ToArray(), out var shuffled);
+            // Enumerable.Reverse explicite : en C# 14, chronological.Reverse() resout vers
+            // MemoryExtensions.Reverse(Span<T>), qui inverse sur place et retourne void
+            Compute(Enumerable.Reverse(chronological).ToArray(), out var shuffled);
 
             expected.Should().Be(100);
             shuffled.Should().Be(expected);
