@@ -58,25 +58,13 @@ namespace KikoleSiteUnitTests.Services
             foreach (var (id, login) in users)
             {
                 _userRepository.Setup(_ => _.GetUserByIdAsync(id))
-                    .ReturnsAsync(new UserDto
-                    {
-                        Id = id,
-                        Login = login,
-                        UserTypeId = (ulong)UserTypes.StandardUser
-                    });
+                    .ReturnsAsync(UserDtoBuilder.Valid().WithId(id).WithLogin(login).WithUserTypeId((ulong)UserTypes.StandardUser).Build());
             }
         }
 
         private static LeaderDto Leader(ulong userId, ushort points, int minutes, DateTime? date = null)
         {
-            return new LeaderDto
-            {
-                UserId = userId,
-                Points = points,
-                Time = minutes,
-                ProposalDate = date ?? Day,
-                CreationDate = (date ?? Day).AddMinutes(minutes)
-            };
+            return LeaderDtoBuilder.Valid().WithUserId(userId).WithPoints(points).WithTime(minutes).WithProposalDate(date ?? Day).WithCreationDate((date ?? Day).AddMinutes(minutes)).Build();
         }
 
         // ------------------------------------------------------------- GetLeaderboardAsync
@@ -127,7 +115,7 @@ namespace KikoleSiteUnitTests.Services
             SetupUsers((1, "joueur"));
             SetupLeaderboard(
                 new[] { Leader(1, 800, 60), Leader(1, 500, 30, Day.AddDays(1)) },
-                new[] { new PlayerDto { Id = 9, CreationUserId = 1, ProposalDate = Day.AddDays(2) } });
+                new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(1).WithProposalDate(Day.AddDays(2)).Build() });
 
             var result = await _service
                 .GetLeaderboardAsync(Day, Day.AddDays(2), LeaderSorts.TotalPoints);
@@ -146,7 +134,7 @@ namespace KikoleSiteUnitTests.Services
             SetupUsers((5, "createur"));
             SetupLeaderboard(
                 new List<LeaderDto>(),
-                new[] { new PlayerDto { Id = 9, CreationUserId = 5, ProposalDate = Day } });
+                new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithProposalDate(Day).Build() });
 
             var result = await _service
                 .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
@@ -161,7 +149,7 @@ namespace KikoleSiteUnitTests.Services
             SetupUsers((5, "createur"));
             SetupLeaderboard(
                 new List<LeaderDto>(),
-                new[] { new PlayerDto { Id = 9, CreationUserId = 5, ProposalDate = Day } });
+                new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithProposalDate(Day).Build() });
 
             var result = await _service
                 .GetLeaderboardAsync(Day, Day, LeaderSorts.BestTime);
@@ -213,7 +201,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task GetLeaderboardAsync_AdministratorsAreExcluded()
         {
             _userRepository.Setup(_ => _.GetUserByIdAsync(1))
-                .ReturnsAsync(new UserDto { Id = 1, Login = "admin", UserTypeId = (ulong)UserTypes.Administrator });
+                .ReturnsAsync(UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithUserTypeId((ulong)UserTypes.Administrator).Build());
             SetupLeaderboard(new[] { Leader(1, 900, 60) }, new List<PlayerDto>());
 
             var result = await _service
@@ -226,28 +214,12 @@ namespace KikoleSiteUnitTests.Services
 
         private static ProposalDto Proposal(ProposalTypes type, bool successful, int minutes)
         {
-            return new ProposalDto
-            {
-                ProposalTypeId = (ulong)type,
-                Successful = (byte)(successful ? 1 : 0),
-                ProposalDate = Day,
-                CreationDate = Day.AddMinutes(minutes)
-            };
+            return ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(minutes)).Build();
         }
 
         private void SetupMissingLeader(params ProposalDto[] proposals)
         {
-            var player = new PlayerDto
-            {
-                Id = 1,
-                Name = "Zidane",
-                AllowedNames = "zidane",
-                ProposalDate = Day,
-                YearOfBirth = 1972,
-                CountryId = (ulong)Countries.FR,
-                ContinentId = (ulong)Continents.Europe,
-                PositionId = (ulong)Positions.Midfielder
-            };
+            var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithProposalDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build();
 
             _playerRepository
                 .Setup(_ => _.GetPlayersOfTheDayAsync(null, Day))
@@ -328,13 +300,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task ComputeMissingLeadersAsync_RoundsTheElapsedMinutesUp()
         {
-            SetupMissingLeader(new ProposalDto
-            {
-                ProposalTypeId = (ulong)ProposalTypes.Name,
-                Successful = 1,
-                ProposalDate = Day,
-                CreationDate = Day.AddMinutes(61).AddSeconds(30)
-            });
+            SetupMissingLeader(ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(61).AddSeconds(30)).Build());
 
             await _service.ComputeMissingLeadersAsync();
 
@@ -387,16 +353,7 @@ namespace KikoleSiteUnitTests.Services
 
             var playerInfo = new PlayerFullDto
             {
-                Player = new PlayerDto
-                {
-                    Id = 1,
-                    Name = "Zidane",
-                    AllowedNames = "zidane",
-                    YearOfBirth = 1972,
-                    CountryId = (ulong)Countries.FR,
-                    ContinentId = (ulong)Continents.Europe,
-                    PositionId = (ulong)Positions.Midfielder
-                },
+                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
                 Clubs = new List<ClubDto>(),
                 PlayerClubs = new List<PlayerClubDto>()
             };
@@ -425,13 +382,7 @@ namespace KikoleSiteUnitTests.Services
             _playerHandler.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Day))
                 .ReturnsAsync(new PlayerFullDto
                 {
-                    Player = new PlayerDto
-                    {
-                        Id = 1,
-                        Name = "Zidane",
-                        AllowedNames = "zidane",
-                        CreationUserId = creatorId
-                    },
+                    Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithCreator(creatorId).Build(),
                     Clubs = new List<ClubDto>(),
                     PlayerClubs = new List<PlayerClubDto>()
                 });
@@ -471,15 +422,7 @@ namespace KikoleSiteUnitTests.Services
                 new[] { Leader(1, 800, 60) },
                 new[]
                 {
-                    new ProposalDto
-                    {
-                        UserId = 2,
-                        ProposalTypeId = (ulong)ProposalTypes.Club,
-                        Value = "Barcelone",
-                        Successful = 0,
-                        ProposalDate = Day,
-                        CreationDate = Day.AddMinutes(20)
-                    }
+                    ProposalDtoBuilder.Valid().WithUser(2).WithProposalTypeId((ulong)ProposalTypes.Club).WithValue("Barcelone").WithSuccessfulFlag(0).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(20)).Build()
                 },
                 creatorId: 5);
 
@@ -499,15 +442,7 @@ namespace KikoleSiteUnitTests.Services
                 new[] { Leader(1, 800, 60) },
                 new[]
                 {
-                    new ProposalDto
-                    {
-                        UserId = 1,
-                        ProposalTypeId = (ulong)ProposalTypes.Name,
-                        Value = "Zidane",
-                        Successful = 1,
-                        ProposalDate = Day,
-                        CreationDate = Day.AddMinutes(60)
-                    }
+                    ProposalDtoBuilder.Valid().WithUser(1).WithProposalTypeId((ulong)ProposalTypes.Name).WithValue("Zidane").WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(60)).Build()
                 },
                 creatorId: 5);
 

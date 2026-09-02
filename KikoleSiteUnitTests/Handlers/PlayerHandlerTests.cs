@@ -23,7 +23,7 @@ namespace KikoleSiteUnitTests.Handlers
             _handler = new PlayerHandler(_playerRepository.Object, _clubRepository.Object);
         }
 
-        private static PlayerDto Player => new PlayerDto { Id = 1, Name = "Zinédine Zidane" };
+        private static PlayerDto Player => PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").Build();
 
         private void SetupCareer(params (ulong clubId, string name)[] clubs)
         {
@@ -34,7 +34,7 @@ namespace KikoleSiteUnitTests.Handlers
                 playerClubs.Add(new PlayerClubDto { PlayerId = 1, ClubId = clubId, HistoryPosition = position++ });
                 _clubRepository
                     .Setup(_ => _.GetClubAsync(clubId))
-                    .ReturnsAsync(new ClubDto { Id = clubId, Name = name });
+                    .ReturnsAsync(ClubDtoBuilder.Valid().WithId(clubId).WithName(name).Build());
             }
 
             _playerRepository
@@ -79,8 +79,8 @@ namespace KikoleSiteUnitTests.Handlers
                     new PlayerClubDto { PlayerId = 1, ClubId = 3, HistoryPosition = 2 },
                     new PlayerClubDto { PlayerId = 1, ClubId = 2, HistoryPosition = 3 }
                 });
-            _clubRepository.Setup(_ => _.GetClubAsync(2)).ReturnsAsync(new ClubDto { Id = 2, Name = "Juventus" });
-            _clubRepository.Setup(_ => _.GetClubAsync(3)).ReturnsAsync(new ClubDto { Id = 3, Name = "Inter Milan" });
+            _clubRepository.Setup(_ => _.GetClubAsync(2)).ReturnsAsync(ClubDtoBuilder.Valid().WithId(2).WithName("Juventus").Build());
+            _clubRepository.Setup(_ => _.GetClubAsync(3)).ReturnsAsync(ClubDtoBuilder.Valid().WithId(3).WithName("Inter Milan").Build());
 
             var result = await _handler.GetPlayerFullInfoAsync(Player);
 

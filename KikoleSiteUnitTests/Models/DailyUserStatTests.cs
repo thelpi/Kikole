@@ -18,14 +18,7 @@ namespace KikoleSiteUnitTests.Models
 
         private static LeaderDto Leader(ulong userId, ushort points, int minutes, bool sameDay = true)
         {
-            return new LeaderDto
-            {
-                UserId = userId,
-                Points = points,
-                Time = minutes,
-                ProposalDate = Day,
-                CreationDate = sameDay ? Day.AddMinutes(minutes) : Day.AddDays(2)
-            };
+            return LeaderDtoBuilder.Valid().WithUserId(userId).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.AddMinutes(minutes) : Day.AddDays(2)).Build();
         }
 
         private static DailyUserStat Stat(
@@ -144,14 +137,7 @@ namespace KikoleSiteUnitTests.Models
 
         private static DailyUserStat Played(ushort points, int minutes, bool sameDay = true)
         {
-            var mine = new LeaderDto
-            {
-                UserId = Me,
-                Points = points,
-                Time = minutes,
-                ProposalDate = Day,
-                CreationDate = sameDay ? Day.AddMinutes(minutes) : Day.AddDays(2)
-            };
+            var mine = LeaderDtoBuilder.Valid().WithUserId(Me).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.AddMinutes(minutes) : Day.AddDays(2)).Build();
 
             return new DailyUserStat(Me, Day, "Zidane", sameDay, true, new[] { mine }, mine);
         }

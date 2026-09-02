@@ -11,8 +11,8 @@ namespace KikoleSite.Models
         public bool Hidden { get; set; }
         public DateTime Date { get; set; }
         public DayLeaderSorts Sort { get; set; }
-        public IReadOnlyCollection<DayboardLeaderItem> Leaders { get; set; } = null!;
-        public IReadOnlyCollection<DayboardSearcherItem> Searchers { get; set; } = null!;
+        public required IReadOnlyCollection<DayboardLeaderItem> Leaders { get; set; }
+        public required IReadOnlyCollection<DayboardSearcherItem> Searchers { get; set; }
         public int DayAttemps => Searchers?.Count(_ => _.Date == Date) ?? 0 + DaySuccess;
         public int TotalAttemps => Searchers?.Count ?? 0 + TotalSuccess;
         public int DaySuccess => Leaders?.Count(_ => _.Date == Date && !_.IsCreator) ?? 0;

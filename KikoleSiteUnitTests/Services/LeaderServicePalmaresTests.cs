@@ -69,25 +69,13 @@ namespace KikoleSiteUnitTests.Services
             _leaderRepository
                 .Setup(_ => _.GetLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<bool>()))
                 .ReturnsAsync(users
-                    .Select(u => new LeaderDto
-                    {
-                        UserId = u.id,
-                        Points = u.points,
-                        Time = u.minutes,
-                        ProposalDate = FirstMonth,
-                        CreationDate = FirstMonth.AddMinutes(u.minutes)
-                    })
+                    .Select(u => LeaderDtoBuilder.Valid().WithUserId(u.id).WithPoints(u.points).WithTime(u.minutes).WithProposalDate(FirstMonth).WithCreationDate(FirstMonth.AddMinutes(u.minutes)).Build())
                     .ToList());
 
             foreach (var u in users)
             {
                 _userRepository.Setup(_ => _.GetUserByIdAsync(u.id))
-                    .ReturnsAsync(new UserDto
-                    {
-                        Id = u.id,
-                        Login = u.login,
-                        UserTypeId = (ulong)UserTypes.StandardUser
-                    });
+                    .ReturnsAsync(UserDtoBuilder.Valid().WithId(u.id).WithLogin(u.login).WithUserTypeId((ulong)UserTypes.StandardUser).Build());
             }
         }
 

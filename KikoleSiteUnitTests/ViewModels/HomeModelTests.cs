@@ -57,20 +57,11 @@ namespace KikoleSiteUnitTests.ViewModels
         {
             return new PlayerFullDto
             {
-                Player = new PlayerDto
-                {
-                    Id = 1,
-                    Name = "Zinédine Zidane",
-                    AllowedNames = "zidane;zizou",
-                    YearOfBirth = 1972,
-                    CountryId = (ulong)KikoleSite.Models.Enums.Countries.FR,
-                    ContinentId = (ulong)KikoleSite.Models.Enums.Continents.Europe,
-                    PositionId = (ulong)Positions.Midfielder
-                },
+                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FR).WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
                 Clubs = new List<ClubDto>
                 {
-                    new ClubDto { Id = JuventusId, Name = "Juventus", AllowedNames = "juve;juventus" },
-                    new ClubDto { Id = RealMadridId, Name = "Real Madrid", AllowedNames = "real;real madrid" }
+                    ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").WithAllowedNames("juve;juventus").Build(),
+                    ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").WithAllowedNames("real;real madrid").Build()
                 },
                 PlayerClubs = new List<PlayerClubDto>
                 {

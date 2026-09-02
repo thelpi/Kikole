@@ -30,20 +30,11 @@ namespace KikoleSiteUnitTests.Models
         {
             return new PlayerFullDto
             {
-                Player = new PlayerDto
-                {
-                    Id = 1,
-                    Name = "Zinédine Zidane",
-                    AllowedNames = "zidane;zizou;zinedine zidane",
-                    YearOfBirth = 1972,
-                    CountryId = (ulong)Countries.FR,
-                    ContinentId = (ulong)Continents.Europe,
-                    PositionId = (ulong)Positions.Midfielder
-                },
+                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
                 Clubs = new List<ClubDto>
                 {
-                    new ClubDto { Id = RealMadridId, Name = "Real Madrid", AllowedNames = "real;real madrid" },
-                    new ClubDto { Id = JuventusId, Name = "Juventus", AllowedNames = "juve;juventus" }
+                    ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").WithAllowedNames("real;real madrid").Build(),
+                    ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").WithAllowedNames("juve;juventus").Build()
                 },
                 PlayerClubs = new List<PlayerClubDto>
                 {
@@ -300,7 +291,7 @@ namespace KikoleSiteUnitTests.Models
             response.CollectedBadges.Should().BeEmpty();
 
             var badge = new Badge(
-                new BadgeDto { Id = 1, Name = "Your first success", Description = "d" }, 1, null);
+                BadgeDtoBuilder.Valid().WithId(1).WithName("Your first success").WithDescription("d").Build(), 1, null);
             response.AddBadge(new UserBadge(badge, new DateTime(2026, 9, 2)));
 
             response.CollectedBadges.Should().HaveCount(1);

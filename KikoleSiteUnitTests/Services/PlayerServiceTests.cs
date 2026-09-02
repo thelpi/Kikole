@@ -163,7 +163,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task GetPlayerClueAsync_InEnglish_ReadsThePlayerRowDirectly(bool isEasy, string expected)
         {
             _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(FirstDate))
-                .ReturnsAsync(new PlayerDto { Id = 1, Clue = "the clue", EasyClue = "the easy clue" });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithClue("the clue").WithEasyClue("the easy clue").Build());
 
             var result = await _service
                 .GetPlayerClueAsync(FirstDate, isEasy, Languages.en);
@@ -180,7 +180,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task GetPlayerClueAsync_InAnotherLanguage_ReadsTheTranslation(bool isEasy, byte expectedFlag)
         {
             _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(FirstDate))
-                .ReturnsAsync(new PlayerDto { Id = 1, Clue = "the clue", EasyClue = "the easy clue" });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithClue("the clue").WithEasyClue("the easy clue").Build());
             _playerRepository.Setup(_ => _.GetClueAsync(1, expectedFlag, (ulong)Languages.fr))
                 .ReturnsAsync("indice traduit");
 
@@ -209,7 +209,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task ValidatePlayerSubmissionAsync_WhenAlreadyScheduled_IsRefused()
         {
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-                .ReturnsAsync(new PlayerDto { Id = 1, ProposalDate = FirstDate });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithProposalDate(FirstDate).Build());
 
             var (error, _, _) = await _service
                 .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
@@ -221,7 +221,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task ValidatePlayerSubmissionAsync_WhenAlreadyRefused_IsRefusedAgain()
         {
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-                .ReturnsAsync(new PlayerDto { Id = 1, RejectDate = FirstDate });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithRejectDate(FirstDate).Build());
 
             var (error, _, _) = await _service
                 .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
@@ -232,17 +232,11 @@ namespace KikoleSiteUnitTests.Services
         private void SetupPendingPlayer(int acceptedPlayersOfCreator)
         {
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-                .ReturnsAsync(new PlayerDto
-                {
-                    Id = 1,
-                    CreationUserId = 42,
-                    Clue = "current clue",
-                    EasyClue = "current easy clue"
-                });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithCreator(42).WithClue("current clue").WithEasyClue("current easy clue").Build());
             _playerRepository.Setup(_ => _.GetLatestProposalDateAsync()).ReturnsAsync(FirstDate.AddDays(2));
             _playerRepository.Setup(_ => _.GetPlayersByCreatorAsync(42, true))
                 .ReturnsAsync(Enumerable.Range(0, acceptedPlayersOfCreator)
-                    .Select(_ => new PlayerDto()).ToList());
+                    .Select(_ => PlayerDtoBuilder.Valid().Build()).ToList());
         }
 
         private static PlayerSubmissionValidationRequest Acceptance()
@@ -325,7 +319,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task ValidatePlayerSubmissionAsync_WhenRefused_NoDateIsAssignedAndNoBadgeIsGranted()
         {
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-                .ReturnsAsync(new PlayerDto { Id = 1, CreationUserId = 42 });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithCreator(42).Build());
 
             var request = new PlayerSubmissionValidationRequest
             {
@@ -367,7 +361,7 @@ namespace KikoleSiteUnitTests.Services
             _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(1), null))
                 .ReturnsAsync(new List<PlayerDto>
                 {
-                    new PlayerDto { Id = 1 }, new PlayerDto { Id = 2 }, new PlayerDto { Id = 3 }
+                    PlayerDtoBuilder.Valid().WithId(1).Build(), PlayerDtoBuilder.Valid().WithId(2).Build(), PlayerDtoBuilder.Valid().WithId(3).Build()
                 });
 
             var assigned = new List<DateTime>();
@@ -391,14 +385,14 @@ namespace KikoleSiteUnitTests.Services
             _clock.Setup(_ => _.Today).Returns(FirstDate.AddDays(daysSinceFirstDate));
             _leaderRepository
                 .Setup(_ => _.GetUserLeadersAsync(ProposalChart.HiddenDate, ProposalChart.HiddenDate, false, 7))
-                .ReturnsAsync(Enumerable.Range(0, hiddenDayLeaders).Select(_ => new LeaderDto()).ToList());
+                .ReturnsAsync(Enumerable.Range(0, hiddenDayLeaders).Select(_ => LeaderDtoBuilder.Valid().Build()).ToList());
             _leaderRepository
                 .Setup(_ => _.GetUserLeadersAsync(ProposalChart.FirstDate, null, false, 7))
-                .ReturnsAsync(Enumerable.Range(0, allLeaders).Select(_ => new LeaderDto()).ToList());
+                .ReturnsAsync(Enumerable.Range(0, allLeaders).Select(_ => LeaderDtoBuilder.Valid().Build()).ToList());
             _playerRepository
                 .Setup(_ => _.GetPlayersByCreatorAsync(7, true))
                 .ReturnsAsync(Enumerable.Range(0, createdPlayers)
-                    .Select(_ => new PlayerDto { ProposalDate = FirstDate }).ToList());
+                    .Select(_ => PlayerDtoBuilder.Valid().WithProposalDate(FirstDate).Build()).ToList());
         }
 
         [Fact]
@@ -446,14 +440,11 @@ namespace KikoleSiteUnitTests.Services
         public async Task GetPlayerOfTheDayFromUserPovAsync_BuildsTheCreatorViewFromBothUsers()
         {
             _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(FirstDate))
-                .ReturnsAsync(new PlayerDto
-                {
-                    Id = 1, Name = "Zinédine Zidane", AllowedNames = "zidane", CreationUserId = 42
-                });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane").WithCreator(42).Build());
             _userRepository.Setup(_ => _.GetUserByIdAsync(42))
-                .ReturnsAsync(new UserDto { Id = 42, Login = "createur", UserTypeId = (ulong)UserTypes.PowerUser });
+                .ReturnsAsync(UserDtoBuilder.Valid().WithId(42).WithLogin("createur").WithUserTypeId((ulong)UserTypes.PowerUser).Build());
             _userRepository.Setup(_ => _.GetUserByIdAsync(7))
-                .ReturnsAsync(new UserDto { Id = 7, Login = "joueur", UserTypeId = (ulong)UserTypes.StandardUser });
+                .ReturnsAsync(UserDtoBuilder.Valid().WithId(7).WithLogin("joueur").WithUserTypeId((ulong)UserTypes.StandardUser).Build());
 
             var result = await _service
                 .GetPlayerOfTheDayFromUserPovAsync(7, FirstDate);
@@ -468,7 +459,7 @@ namespace KikoleSiteUnitTests.Services
         {
             var full = new PlayerFullDto
             {
-                Player = new PlayerDto { Id = 1 },
+                Player = PlayerDtoBuilder.Valid().WithId(1).Build(),
                 Clubs = new List<ClubDto>(),
                 PlayerClubs = new List<PlayerClubDto>()
             };
@@ -485,7 +476,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task GetPlayerCluesAsync_EnglishComesFromThePlayerRow()
         {
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-                .ReturnsAsync(new PlayerDto { Id = 1, Clue = "the clue", EasyClue = "the easy clue" });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithClue("the clue").WithEasyClue("the easy clue").Build());
 
             var clues = await _service.GetPlayerCluesAsync(1, new[] { Languages.en });
 
@@ -514,7 +505,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task GetPlayerCluesAsync_ReturnsEveryRequestedLanguage()
         {
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-                .ReturnsAsync(new PlayerDto { Id = 1, Clue = "en", EasyClue = "en easy" });
+                .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithClue("en").WithEasyClue("en easy").Build());
             _playerRepository.Setup(_ => _.GetClueAsync(1, It.IsAny<byte>(), (ulong)Languages.fr))
                 .ReturnsAsync("fr");
 
@@ -571,16 +562,7 @@ namespace KikoleSiteUnitTests.Services
         private void SetupPendingSubmissions(params (ulong playerId, ulong creatorId)[] submissions)
         {
             var dtos = submissions
-                .Select(s => new PlayerDto
-                {
-                    Id = s.playerId,
-                    Name = "Joueur" + s.playerId,
-                    AllowedNames = "joueur" + s.playerId,
-                    CreationUserId = s.creatorId,
-                    CountryId = (ulong)Countries.FR,
-                    ContinentId = (ulong)Continents.Europe,
-                    PositionId = (ulong)Positions.Midfielder
-                })
+                .Select(s => PlayerDtoBuilder.Valid().WithId(s.playerId).WithName("Joueur" + s.playerId).WithAllowedNames("joueur" + s.playerId).WithCreator(s.creatorId).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build())
                 .ToList();
 
             _playerRepository.Setup(_ => _.GetPendingValidationPlayersAsync()).ReturnsAsync(dtos);
@@ -588,7 +570,7 @@ namespace KikoleSiteUnitTests.Services
             foreach (var creatorId in submissions.Select(s => s.creatorId).Distinct())
             {
                 _userRepository.Setup(_ => _.GetUserByIdAsync(creatorId))
-                    .ReturnsAsync(new UserDto { Id = creatorId, Login = "createur" + creatorId });
+                    .ReturnsAsync(UserDtoBuilder.Valid().WithId(creatorId).WithLogin("createur" + creatorId).Build());
             }
 
             _playerHandler

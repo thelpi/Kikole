@@ -305,8 +305,8 @@ namespace KikoleSiteUnitTests.Models.Requests
 
             var existing = new List<ProposalDto>
             {
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Club, Value = "Zidane" },
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Value = "Zidane" }
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Club).WithValue("Zidane").Build(),
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithValue("Zidane").Build()
             };
 
             request.MatchAny(existing).Should().BeTrue();
@@ -326,7 +326,7 @@ namespace KikoleSiteUnitTests.Models.Requests
 
             var existing = new List<ProposalDto>
             {
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Value = "Zidane" }
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithValue("Zidane").Build()
             };
 
             request.MatchAny(existing).Should().BeTrue();
@@ -341,7 +341,7 @@ namespace KikoleSiteUnitTests.Models.Requests
 
             var existing = new List<ProposalDto>
             {
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Club, Value = "Real Madrid" }
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Club).WithValue("Real Madrid").Build()
             };
 
             request.MatchAny(existing).Should().BeTrue();
@@ -354,7 +354,7 @@ namespace KikoleSiteUnitTests.Models.Requests
 
             var existing = new List<ProposalDto>
             {
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Value = "Zidane" }
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithValue("Zidane").Build()
             };
 
             request.MatchAny(existing).Should().BeFalse();
@@ -368,13 +368,13 @@ namespace KikoleSiteUnitTests.Models.Requests
 
             var existing = new List<ProposalDto>
             {
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Clue, Value = null }
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Clue).WithValue(null).Build()
             };
 
             request.MatchAny(existing).Should().BeTrue();
             request.MatchAny(new List<ProposalDto>
             {
-                new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Clue, Value = "x" }
+                ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Clue).WithValue("x").Build()
             }).Should().BeFalse();
         }
 

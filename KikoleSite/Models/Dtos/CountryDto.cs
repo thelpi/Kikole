@@ -2,8 +2,8 @@
 {
     public class CountryDto : BaseDto
     {
-        public string Code { get; set; } = null!;
+        public required string Code { get; set; }
 
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
     }
 }

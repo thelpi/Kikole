@@ -38,19 +38,10 @@ namespace KikoleSiteUnitTests.Services
         {
             return new PlayerFullDto
             {
-                Player = new PlayerDto
-                {
-                    Id = 1,
-                    Name = "Zinédine Zidane",
-                    AllowedNames = "zidane;zinedine zidane",
-                    YearOfBirth = 1972,
-                    CountryId = (ulong)Countries.FR,
-                    ContinentId = (ulong)Continents.Europe,
-                    PositionId = (ulong)Positions.Midfielder
-                },
+                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
                 Clubs = new List<ClubDto>
                 {
-                    new ClubDto { Id = RealMadridId, Name = "Real Madrid", AllowedNames = "real;real madrid" }
+                    ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").WithAllowedNames("real;real madrid").Build()
                 },
                 PlayerClubs = new List<PlayerClubDto>
                 {
@@ -61,14 +52,11 @@ namespace KikoleSiteUnitTests.Services
 
         private static ProposalDto Proposal(ProposalTypes type, string value, bool successful, int minutesOffset)
         {
-            return new ProposalDto
-            {
-                ProposalTypeId = (ulong)type,
+            return new ProposalDto { ProposalTypeId = (ulong)type,
                 Value = value,
                 Successful = (byte)(successful ? 1 : 0),
                 ProposalDate = new DateTime(2026, 9, 2),
-                CreationDate = new DateTime(2026, 9, 2, 18, 0, 0).AddMinutes(minutesOffset)
-            };
+                CreationDate = new DateTime(2026, 9, 2, 18, 0, 0).AddMinutes(minutesOffset) };
         }
 
         private List<ProposalResponse> Compute(IEnumerable<ProposalDto> proposals, out int points)
@@ -205,7 +193,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new PlayerFullDto
                 {
-                    Player = new PlayerDto { Id = 1, CreationUserId = 99 },
+                    Player = PlayerDtoBuilder.Valid().WithId(1).WithCreator(99).Build(),
                     Clubs = new List<ClubDto>(),
                     PlayerClubs = new List<PlayerClubDto>()
                 });
@@ -225,7 +213,7 @@ namespace KikoleSiteUnitTests.Services
         private void SetupUser(UserTypes type)
         {
             _userRepository.Setup(_ => _.GetUserByIdAsync(UserId))
-                .ReturnsAsync(new UserDto { Id = UserId, Login = "joueur", UserTypeId = (ulong)type });
+                .ReturnsAsync(UserDtoBuilder.Valid().WithId(UserId).WithLogin("joueur").WithUserTypeId((ulong)type).Build());
         }
 
         [Fact]
@@ -266,7 +254,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Day))
                 .ReturnsAsync(new PlayerFullDto
                 {
-                    Player = new PlayerDto { Id = 1, CreationUserId = UserId },
+                    Player = PlayerDtoBuilder.Valid().WithId(1).WithCreator(UserId).Build(),
                     Clubs = new List<ClubDto>(),
                     PlayerClubs = new List<PlayerClubDto>()
                 });
@@ -282,7 +270,7 @@ namespace KikoleSiteUnitTests.Services
             SetupUser(UserTypes.StandardUser);
             _leaderRepository
                 .Setup(_ => _.GetUserLeadersAsync(Day, Day, true, UserId))
-                .ReturnsAsync(new List<LeaderDto> { new LeaderDto { UserId = UserId } });
+                .ReturnsAsync(new List<LeaderDto> { LeaderDtoBuilder.Valid().WithUserId(UserId).Build() });
 
             var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
@@ -298,7 +286,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetProposalsAsync(Day, UserId))
                 .ReturnsAsync(new List<ProposalDto>
                 {
-                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Successful = 1 }
+                    ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithSuccessfulFlag(1).Build()
                 });
 
             var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
@@ -314,7 +302,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetProposalsAsync(Day, UserId))
                 .ReturnsAsync(new List<ProposalDto>
                 {
-                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Leaderboard, Successful = 1 }
+                    ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Leaderboard).WithSuccessfulFlag(1).Build()
                 });
 
             var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
@@ -330,8 +318,8 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetProposalsAsync(Day, UserId))
                 .ReturnsAsync(new List<ProposalDto>
                 {
-                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Club, Successful = 0 },
-                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Successful = 0 }
+                    ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Club).WithSuccessfulFlag(0).Build(),
+                    ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithSuccessfulFlag(0).Build()
                 });
 
             var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
@@ -348,7 +336,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetProposalsAsync(Day, UserId))
                 .ReturnsAsync(new List<ProposalDto>
                 {
-                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Clue, Successful = 1 }
+                    ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Clue).WithSuccessfulFlag(1).Build()
                 });
 
             var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);

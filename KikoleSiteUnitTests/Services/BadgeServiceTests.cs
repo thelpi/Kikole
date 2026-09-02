@@ -38,13 +38,7 @@ namespace KikoleSiteUnitTests.Services
             // tous les badges existent et sont anterieurs a la journee testee
             _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
                 .ReturnsAsync(Enum.GetValues(typeof(Badges)).Cast<Badges>()
-                    .Select(b => new BadgeDto
-                    {
-                        Id = (ulong)b,
-                        Name = b.ToString(),
-                        Description = b.ToString(),
-                        CreationDate = Day.AddYears(-1)
-                    }).ToList());
+                    .Select(b => BadgeDtoBuilder.Valid().WithId((ulong)b).WithName(b.ToString()).WithDescription(b.ToString()).WithCreationDate(Day.AddYears(-1)).Build()).ToList());
 
             _badgeRepository.Setup(_ => _.CheckUserHasBadgeAsync(It.IsAny<ulong>(), It.IsAny<ulong>()))
                 .ReturnsAsync(false);
@@ -73,24 +67,13 @@ namespace KikoleSiteUnitTests.Services
 
         private static PlayerDto Player(ushort year = 1990, ulong? badgeId = null)
         {
-            return new PlayerDto
-            {
-                Id = 1,
-                Name = "Zidane",
-                AllowedNames = "zidane",
-                YearOfBirth = year,
-                ProposalDate = Day,
-                CountryId = (ulong)Countries.FR,
-                ContinentId = (ulong)Continents.Europe,
-                PositionId = (ulong)Positions.Midfielder,
-                BadgeId = badgeId
-            };
+            return PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(year).WithProposalDate(Day).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithBadge(badgeId).Build();
         }
 
         private void SetupPlayerFull(PlayerDto player, int clubsCount = 0)
         {
             var clubs = Enumerable.Range(1, clubsCount)
-                .Select(i => new ClubDto { Id = (ulong)i, Name = "Club" + i, AllowedNames = "club" + i })
+                .Select(i => ClubDtoBuilder.Valid().WithId((ulong)i).WithName("Club" + i).WithAllowedNames("club" + i).Build())
                 .ToList();
 
             _playerHandler.Setup(_ => _.GetPlayerFullInfoAsync(It.IsAny<PlayerDto>()))
@@ -107,27 +90,12 @@ namespace KikoleSiteUnitTests.Services
         /// <summary>Trouve le jour meme (IsCurrentDay), avec un score et une heure donnes.</summary>
         private static LeaderDto Leader(ushort points, int minutes, bool sameDay = true)
         {
-            return new LeaderDto
-            {
-                UserId = UserId,
-                Points = points,
-                Time = minutes,
-                ProposalDate = Day,
-                CreationDate = sameDay ? Day.AddMinutes(minutes) : Day.AddDays(3)
-            };
+            return LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.AddMinutes(minutes) : Day.AddDays(3)).Build();
         }
 
         private static ProposalDto Proposal(ProposalTypes type, bool successful)
         {
-            return new ProposalDto
-            {
-                UserId = UserId,
-                ProposalTypeId = (ulong)type,
-                Successful = (byte)(successful ? 1 : 0),
-                Value = "x",
-                ProposalDate = Day,
-                CreationDate = Day.AddMinutes(1)
-            };
+            return ProposalDtoBuilder.Valid().WithUser(UserId).WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithValue("x").WithProposalDate(Day).WithCreationDate(Day.AddMinutes(1)).Build();
         }
 
         private async Task Run(LeaderDto leader, PlayerDto player, params ProposalDto[] proposals)
@@ -328,14 +296,11 @@ namespace KikoleSiteUnitTests.Services
         {
             _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
                 .ReturnsAsync(Enum.GetValues(typeof(Badges)).Cast<Badges>()
-                    .Select(b => new BadgeDto
-                    {
-                        Id = (ulong)b,
+                    .Select(b => new BadgeDto { Id = (ulong)b,
                         Name = b.ToString(),
                         Description = b.ToString(),
                         // cree demain : aucune journee passee ne peut l'obtenir
-                        CreationDate = Day.AddDays(1)
-                    }).ToList());
+                        CreationDate = Day.AddDays(1) }).ToList());
 
             await Run(Leader(1000, 60), Player());
 

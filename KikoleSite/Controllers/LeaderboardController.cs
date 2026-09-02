@@ -321,7 +321,11 @@ namespace KikoleSite.Controllers
                 {
                     Date = date,
                     Sort = sortType,
-                    Hidden = true
+                    Hidden = true,
+                    // le tableau est masque : collections vides plutot que nulles, pour
+                    // qu'un appelant qui oublierait de tester Hidden ne casse pas
+                    Leaders = new List<DayboardLeaderItem>(),
+                    Searchers = new List<DayboardSearcherItem>()
                 };
             }
             else

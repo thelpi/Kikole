@@ -411,12 +411,7 @@ namespace KikoleSite.Services
             User user;
             if (!users.ContainsKey(item.UserId))
             {
-                user = new User(
-                    new UserDto
-                    {
-                        Id = item.UserId,
-                        Login = item.UserName
-                    });
+                user = new User(item.UserId, item.UserName);
                 users.Add(item.UserId, (user, adds.Item1, adds.Item2, adds.Item3));
             }
             else

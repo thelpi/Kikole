@@ -2,7 +2,7 @@
 {
     public class RegistrationGuidDto
     {
-        public string Id { get; set; } = null!;
+        public required string Id { get; set; }
         public ulong? UserId { get; set; }
     }
 }

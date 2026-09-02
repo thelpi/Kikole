@@ -4,10 +4,10 @@ namespace KikoleSite.Models.Dtos
 {
     public class PlayerFullDto
     {
-        public PlayerDto Player { get; set; } = null!;
+        public required PlayerDto Player { get; set; }
 
-        public IReadOnlyList<PlayerClubDto> PlayerClubs { get; set; } = null!;
+        public required IReadOnlyList<PlayerClubDto> PlayerClubs { get; set; }
 
-        public IReadOnlyList<ClubDto> Clubs { get; set; } = null!;
+        public required IReadOnlyList<ClubDto> Clubs { get; set; }
     }
 }

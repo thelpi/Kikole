@@ -2,7 +2,7 @@
 {
     public class PlayersDistributionDto<T>
     {
-        public T Value { get; set; } = default!;
+        public required T Value { get; set; }
 
         public int Count { get; set; }
     }

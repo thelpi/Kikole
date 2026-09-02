@@ -21,12 +21,7 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void Club_SplitsTheAllowedNamesIntoAList()
         {
-            var club = new Club(new ClubDto
-            {
-                Id = 3,
-                Name = "Juventus",
-                AllowedNames = "juve;juventus turin;juventus"
-            });
+            var club = new Club(ClubDtoBuilder.Valid().WithId(3).WithName("Juventus").WithAllowedNames("juve;juventus turin;juventus").Build());
 
             club.Id.Should().Be(3);
             club.Name.Should().Be("Juventus");
@@ -40,8 +35,8 @@ namespace KikoleSiteUnitTests.Models
         {
             var clubs = new List<ClubDto>
             {
-                new ClubDto { Id = 1, Name = "AS Cannes" },
-                new ClubDto { Id = 2, Name = "Real Madrid" }
+                ClubDtoBuilder.Valid().WithId(1).WithName("AS Cannes").Build(),
+                ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build()
             };
 
             var pc = new PlayerClub(
@@ -68,7 +63,7 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void Country_ParsesTheIsoCodeIntoItsEnum()
         {
-            var country = new Country(new CountryDto { Code = "FR", Name = "France" });
+            var country = new Country(CountryDtoBuilder.Valid().WithCode("FR").WithName("France").Build());
 
             country.Code.Should().Be(Countries.FR);
             country.Name.Should().Be("France");
@@ -77,7 +72,7 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void Country_WhenTheCodeIsUnknown_Throws()
         {
-            Action act = () => new Country(new CountryDto { Code = "ZZZ", Name = "Nulle part" });
+            Action act = () => new Country(CountryDtoBuilder.Valid().WithCode("ZZZ").WithName("Nulle part").Build());
 
             act.Should().Throw<ArgumentException>();
         }
@@ -85,11 +80,8 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void Continent_MapsTheIdentifierOntoItsEnum()
         {
-            var continent = new Continent(new ContinentDto
-            {
-                Id = (ulong)Continents.SouthAmerica,
-                Name = "Amérique du Sud"
-            });
+            var continent = new Continent(new ContinentDto { Id = (ulong)Continents.SouthAmerica,
+                Name = "Amérique du Sud" });
 
             continent.Id.Should().Be(Continents.SouthAmerica);
             continent.Name.Should().Be("Amérique du Sud");
@@ -100,13 +92,7 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void User_KeepsOnlyTheIdentityFieldsAndDropsTheCredentials()
         {
-            var user = new User(new UserDto
-            {
-                Id = 7,
-                Login = "joueur",
-                Password = "un-hash-secret",
-                PasswordResetAnswer = "un-autre-hash"
-            });
+            var user = new User(UserDtoBuilder.Valid().WithId(7).WithLogin("joueur").WithPassword("un-hash-secret").WithPasswordResetAnswer("un-autre-hash").Build());
 
             user.Id.Should().Be(7);
             user.Login.Should().Be("joueur");
@@ -121,7 +107,7 @@ namespace KikoleSiteUnitTests.Models
         public void Badge_TreatsAnyNonZeroHiddenFlagAsHidden(byte hidden, bool expected)
         {
             var badge = new Badge(
-                new BadgeDto { Id = 1, Name = "Un badge", Description = "en", Hidden = hidden },
+                BadgeDtoBuilder.Valid().WithId(1).WithName("Un badge").WithDescription("en").WithHiddenFlag(hidden).Build(),
                 12, null);
 
             badge.Hidden.Should().Be(expected);
@@ -131,7 +117,7 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void Badge_UsesTheTranslationWhenThereIsOne()
         {
-            var dto = new BadgeDto { Id = 1, Name = "Un badge", Description = "english description" };
+            var dto = BadgeDtoBuilder.Valid().WithId(1).WithName("Un badge").WithDescription("english description").Build();
 
             new Badge(dto, 1, "description française").Description.Should().Be("description française");
             new Badge(dto, 1, null).Description.Should().Be("english description");
@@ -141,7 +127,7 @@ namespace KikoleSiteUnitTests.Models
         public void UserBadge_ForwardsTheBadgeAndStampsTheDate()
         {
             var badge = new Badge(
-                new BadgeDto { Id = 5, Name = "Wooden spoon", Description = "d", Hidden = 1 }, 3, null);
+                BadgeDtoBuilder.Valid().WithId(5).WithName("Wooden spoon").WithDescription("d").WithHiddenFlag(1).Build(), 3, null);
             var date = new DateTime(2026, 9, 2);
 
             var userBadge = new UserBadge(badge, date);
@@ -159,20 +145,8 @@ namespace KikoleSiteUnitTests.Models
         {
             return new PlayerFullDto
             {
-                Player = new PlayerDto
-                {
-                    Id = 1,
-                    Name = "Zinédine Zidane",
-                    AllowedNames = "zidane;zizou",
-                    YearOfBirth = 1972,
-                    CountryId = (ulong)Countries.FR,
-                    ContinentId = (ulong)Continents.Europe,
-                    PositionId = (ulong)Positions.Midfielder,
-                    CreationUserId = creatorId,
-                    Clue = "un indice",
-                    EasyClue = "un indice facile"
-                },
-                Clubs = new List<ClubDto> { new ClubDto { Id = 2, Name = "Real Madrid" } },
+                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithCreator(creatorId).WithClue("un indice").WithEasyClue("un indice facile").Build(),
+                Clubs = new List<ClubDto> { ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build() },
                 PlayerClubs = new List<PlayerClubDto>
                 {
                     new PlayerClubDto { PlayerId = 1, ClubId = 2, HistoryPosition = 4 }
@@ -183,7 +157,7 @@ namespace KikoleSiteUnitTests.Models
         [Fact]
         public void Player_MapsEveryIdentifierOntoItsEnum()
         {
-            var users = new List<UserDto> { new UserDto { Id = 42, Login = "createur" } };
+            var users = new List<UserDto> { UserDtoBuilder.Valid().WithId(42).WithLogin("createur").Build() };
 
             var player = new Player(Submission(42), users);
 
@@ -200,7 +174,7 @@ namespace KikoleSiteUnitTests.Models
         {
             // ce constructeur sert l'ecran de validation des soumissions : contrairement
             // a PlayerCreator, il ne masque rien
-            var users = new List<UserDto> { new UserDto { Id = 42, Login = "createur" } };
+            var users = new List<UserDto> { UserDtoBuilder.Valid().WithId(42).WithLogin("createur").Build() };
 
             var player = new Player(Submission(42), users);
 

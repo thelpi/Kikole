@@ -9,9 +9,16 @@ namespace KikoleSite.Models
         public string Login { get; }
 
         internal User(UserDto user)
+            : this(user.Id, user.Login)
+        { }
+
+        /// <summary>
+        /// Pour les cas ou seuls l'identifiant et le login sont connus, sans DTO complet.
+        /// </summary>
+        internal User(ulong id, string login)
         {
-            Id = user.Id;
-            Login = user.Login;
+            Id = id;
+            Login = login;
         }
     }
 }

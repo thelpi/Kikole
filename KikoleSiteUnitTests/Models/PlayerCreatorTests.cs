@@ -17,19 +17,12 @@ namespace KikoleSiteUnitTests.Models
 
         private static PlayerDto Player(byte hideCreator = 0)
         {
-            return new PlayerDto
-            {
-                Id = 1,
-                Name = "Zinédine Zidane",
-                AllowedNames = "zidane;zizou",
-                CreationUserId = CreatorId,
-                HideCreator = hideCreator
-            };
+            return PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithCreator(CreatorId).WithHideCreatorFlag(hideCreator).Build();
         }
 
         private static UserDto User(ulong id, UserTypes type)
         {
-            return new UserDto { Id = id, Login = "login" + id, UserTypeId = (ulong)type };
+            return UserDtoBuilder.Valid().WithId(id).WithLogin("login" + id).WithUserTypeId((ulong)type).Build();
         }
 
         // ------------------------------------------------------------- revelation du nom
