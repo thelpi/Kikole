@@ -141,8 +141,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(new List<LeaderDto> { leader });
 
             await _service
-                .PrepareNewLeaderBadgesAsync(leader, player, proposals.ToList(), Languages.en)
-                .ConfigureAwait(false);
+                .PrepareNewLeaderBadgesAsync(leader, player, proposals.ToList(), Languages.en);
         }
 
         private void ShouldHaveGranted(params Badges[] badges)
@@ -162,7 +161,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task FindingThePlayerGrantsTheFirstSuccessBadge()
         {
-            await Run(Leader(1000, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player());
 
             ShouldHaveGranted(Badges.YourFirstSuccess);
         }
@@ -174,7 +173,7 @@ namespace KikoleSiteUnitTests.Services
         [InlineData((ushort)900, true, true)]
         public async Task ScoreThresholdsAreInclusive(ushort points, bool halfway, bool over900)
         {
-            await Run(Leader(points, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(points, 60), Player());
 
             _inserted.Any(_ => _.BadgeId == (ulong)Badges.HalfwayToTheTop).Should().Be(halfway);
             _inserted.Any(_ => _.BadgeId == (ulong)Badges.ItsOver900).Should().Be(over900);
@@ -183,7 +182,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task FindingWithZeroPointsGrantsTheWoodenSpoon()
         {
-            await Run(Leader(0, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(0, 60), Player());
 
             ShouldHaveGranted(Badges.WoodenSpoon);
             ShouldNotHaveGranted(Badges.HalfwayToTheTop);
@@ -199,7 +198,7 @@ namespace KikoleSiteUnitTests.Services
         [InlineData(1400, Badges.SavedByTheBell)]       // 23h20
         public async Task TimeOfDayBadgesUseTheMinutesSinceMidnight(int minutes, Badges expected)
         {
-            await Run(Leader(1000, minutes), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, minutes), Player());
 
             ShouldHaveGranted(expected);
         }
@@ -210,7 +209,7 @@ namespace KikoleSiteUnitTests.Services
         [InlineData(1379)]  // 22h59, juste avant SavedByTheBell
         public async Task TimeOfDayBadgesHaveExclusiveUpperBounds(int minutes)
         {
-            await Run(Leader(1000, minutes), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, minutes), Player());
 
             ShouldNotHaveGranted(
                 Badges.StayUpLate, Badges.CacaCaféClopeKikolé, Badges.SavedByTheBell);
@@ -224,7 +223,7 @@ namespace KikoleSiteUnitTests.Services
         [InlineData((ushort)1970, false, false)]
         public async Task BirthYearBadgesAreCumulative(ushort year, bool archaeology, bool worldWarTwo)
         {
-            await Run(Leader(1000, 60), Player(year)).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player(year));
 
             _inserted.Any(_ => _.BadgeId == (ulong)Badges.Archaeology).Should().Be(archaeology);
             _inserted.Any(_ => _.BadgeId == (ulong)Badges.WorldWarTwo).Should().Be(worldWarTwo);
@@ -233,7 +232,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task APlayerCanCarryASpecialBadge()
         {
-            await Run(Leader(1000, 60), Player(badgeId: (ulong)Badges.LegendTier)).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player(badgeId: (ulong)Badges.LegendTier));
 
             ShouldHaveGranted(Badges.LegendTier);
         }
@@ -243,7 +242,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task FindingWithoutAnyPreviousProposalGrantsImFeelingLucky()
         {
-            await Run(Leader(1000, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player());
 
             ShouldHaveGranted(Badges.ImFeelingLucky);
         }
@@ -251,8 +250,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task AtLeastOneProposalRemovesImFeelingLucky()
         {
-            await Run(Leader(950, 60), Player(), Proposal(ProposalTypes.Club, false))
-                .ConfigureAwait(false);
+            await Run(Leader(950, 60), Player(), Proposal(ProposalTypes.Club, false));
 
             ShouldNotHaveGranted(Badges.ImFeelingLucky);
         }
@@ -262,8 +260,7 @@ namespace KikoleSiteUnitTests.Services
         {
             await Run(Leader(900, 60), Player(),
                     Proposal(ProposalTypes.Club, true),
-                    Proposal(ProposalTypes.Club, false))
-                .ConfigureAwait(false);
+                    Proposal(ProposalTypes.Club, false));
 
             ShouldHaveGranted(Badges.WikipediaScreenshot);
             ShouldNotHaveGranted(Badges.PassportCheck);
@@ -274,8 +271,7 @@ namespace KikoleSiteUnitTests.Services
         {
             await Run(Leader(900, 60), Player(),
                     Proposal(ProposalTypes.Country, true),
-                    Proposal(ProposalTypes.Year, true))
-                .ConfigureAwait(false);
+                    Proposal(ProposalTypes.Year, true));
 
             ShouldHaveGranted(Badges.PassportCheck);
             ShouldNotHaveGranted(Badges.WikipediaScreenshot);
@@ -286,8 +282,7 @@ namespace KikoleSiteUnitTests.Services
         {
             await Run(Leader(500, 60), Player(),
                     Proposal(ProposalTypes.Country, false),
-                    Proposal(ProposalTypes.Year, false))
-                .ConfigureAwait(false);
+                    Proposal(ProposalTypes.Year, false));
 
             ShouldHaveGranted(Badges.EverythingNotLost);
         }
@@ -297,8 +292,7 @@ namespace KikoleSiteUnitTests.Services
         {
             await Run(Leader(500, 60), Player(),
                     Proposal(ProposalTypes.Country, false),
-                    Proposal(ProposalTypes.Year, true))
-                .ConfigureAwait(false);
+                    Proposal(ProposalTypes.Year, true));
 
             ShouldNotHaveGranted(Badges.EverythingNotLost);
         }
@@ -309,7 +303,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task FindingOnALaterDayForfeitsTheSameDayBadges()
         {
             // seuls les badges lies au joueur restent accessibles en rattrapage
-            await Run(Leader(1000, 60, sameDay: false), Player(1939)).ConfigureAwait(false);
+            await Run(Leader(1000, 60, sameDay: false), Player(1939));
 
             ShouldNotHaveGranted(
                 Badges.YourFirstSuccess, Badges.ItsOver900, Badges.ImFeelingLucky);
@@ -323,7 +317,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.CheckUserHasBadgeAsync(UserId, (ulong)Badges.YourFirstSuccess))
                 .ReturnsAsync(true);
 
-            await Run(Leader(1000, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player());
 
             ShouldNotHaveGranted(Badges.YourFirstSuccess);
             ShouldHaveGranted(Badges.ItsOver900);
@@ -343,7 +337,7 @@ namespace KikoleSiteUnitTests.Services
                         CreationDate = Day.AddDays(1)
                     }).ToList());
 
-            await Run(Leader(1000, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player());
 
             _inserted.Should().BeEmpty();
         }
@@ -351,7 +345,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task EveryGrantedBadgeIsStampedWithTheProposalDateAndUser()
         {
-            await Run(Leader(1000, 60), Player()).ConfigureAwait(false);
+            await Run(Leader(1000, 60), Player());
 
             _inserted.Should().NotBeEmpty();
             _inserted.Should().OnlyContain(_ => _.UserId == UserId && _.GetDate == Day);
@@ -370,7 +364,7 @@ namespace KikoleSiteUnitTests.Services
             _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(ProposalChart.HiddenDate, Day))
                 .ReturnsAsync(new List<PlayerDto>());
 
-            await _service.ResetBadgesAsync(Languages.en).ConfigureAwait(false);
+            await _service.ResetBadgesAsync(Languages.en);
 
             foreach (var badge in nonRecomputable)
             {

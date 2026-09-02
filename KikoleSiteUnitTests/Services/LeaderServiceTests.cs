@@ -97,8 +97,7 @@ namespace KikoleSiteUnitTests.Services
             SetupLeaderboard(new List<LeaderDto>(), new List<PlayerDto>());
 
             await _service
-                .GetLeaderboardAsync(Day.AddDays(10), Day, LeaderSorts.TotalPoints)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day.AddDays(10), Day, LeaderSorts.TotalPoints);
 
             _leaderRepository.Verify(
                 _ => _.GetLeadersAsync(Day, Day.AddDays(10), It.IsAny<bool>()), Times.Once);
@@ -115,7 +114,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupLeaderboard(new List<LeaderDto>(), new List<PlayerDto>());
 
-            await _service.GetLeaderboardAsync(Day, Day, sort).ConfigureAwait(false);
+            await _service.GetLeaderboardAsync(Day, Day, sort);
 
             _leaderRepository.Verify(
                 _ => _.GetLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), expectedOnTimeOnly),
@@ -131,8 +130,7 @@ namespace KikoleSiteUnitTests.Services
                 new[] { new PlayerDto { Id = 9, CreationUserId = 1, ProposalDate = Day.AddDays(2) } });
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day.AddDays(2), LeaderSorts.TotalPoints)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day.AddDays(2), LeaderSorts.TotalPoints);
 
             var item = result.Single();
             item.Points.Should().Be(800 + 500 + ProposalChart.SubmissionPoints);
@@ -151,8 +149,7 @@ namespace KikoleSiteUnitTests.Services
                 new[] { new PlayerDto { Id = 9, CreationUserId = 5, ProposalDate = Day } });
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
 
             result.Single().Points.Should().Be(ProposalChart.SubmissionPoints);
             result.Single().KikolesFound.Should().Be(0);
@@ -167,8 +164,7 @@ namespace KikoleSiteUnitTests.Services
                 new[] { new PlayerDto { Id = 9, CreationUserId = 5, ProposalDate = Day } });
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day, LeaderSorts.BestTime)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day, LeaderSorts.BestTime);
 
             result.Single().BestTime.Should().Be(new TimeSpan(23, 59, 59));
         }
@@ -182,8 +178,7 @@ namespace KikoleSiteUnitTests.Services
                 new List<PlayerDto>());
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day.AddDays(1), LeaderSorts.BestTime)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day.AddDays(1), LeaderSorts.BestTime);
 
             result.Single().BestTime.Should().Be(new TimeSpan(2, 0, 0));
         }
@@ -195,8 +190,7 @@ namespace KikoleSiteUnitTests.Services
             SetupLeaderboard(new[] { Leader(1, 300, 60), Leader(2, 900, 90) }, new List<PlayerDto>());
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
 
             result.Single(_ => _.UserName == "gros").Rank.Should().Be(1);
             result.Single(_ => _.UserName == "petit").Rank.Should().Be(2);
@@ -209,8 +203,7 @@ namespace KikoleSiteUnitTests.Services
             SetupLeaderboard(new[] { Leader(1, 300, 30), Leader(2, 900, 600) }, new List<PlayerDto>());
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day, LeaderSorts.BestTime)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day, LeaderSorts.BestTime);
 
             result.Single(_ => _.UserName == "rapide").Rank.Should().Be(1);
             result.Single(_ => _.UserName == "lent").Rank.Should().Be(2);
@@ -224,8 +217,7 @@ namespace KikoleSiteUnitTests.Services
             SetupLeaderboard(new[] { Leader(1, 900, 60) }, new List<PlayerDto>());
 
             var result = await _service
-                .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints)
-                .ConfigureAwait(false);
+                .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
 
             result.Should().BeEmpty();
         }
@@ -284,7 +276,7 @@ namespace KikoleSiteUnitTests.Services
                 Proposal(ProposalTypes.Club, false, 10),     // -50
                 Proposal(ProposalTypes.Name, true, 90));
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l =>
@@ -301,7 +293,7 @@ namespace KikoleSiteUnitTests.Services
                 Proposal(ProposalTypes.Name, true, 30),
                 Proposal(ProposalTypes.Club, false, 60));
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 1000)), Times.Once);
@@ -316,7 +308,7 @@ namespace KikoleSiteUnitTests.Services
                 Proposal(ProposalTypes.Name, false, 7),
                 Proposal(ProposalTypes.Name, true, 8));
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 0)), Times.Once);
@@ -327,7 +319,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupMissingLeader(Proposal(ProposalTypes.Club, false, 5));
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.IsAny<LeaderDto>()), Times.Never);
@@ -344,7 +336,7 @@ namespace KikoleSiteUnitTests.Services
                 CreationDate = Day.AddMinutes(61).AddSeconds(30)
             });
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Time == 62)), Times.Once);
@@ -359,7 +351,7 @@ namespace KikoleSiteUnitTests.Services
                 Proposal(ProposalTypes.Clue, true, 5),        // -50 %
                 Proposal(ProposalTypes.Name, true, 90));
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 500)), Times.Once);
@@ -372,7 +364,7 @@ namespace KikoleSiteUnitTests.Services
                 Proposal(ProposalTypes.Leaderboard, true, 5),  // -25
                 Proposal(ProposalTypes.Name, true, 90));
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 975)), Times.Once);
@@ -415,7 +407,7 @@ namespace KikoleSiteUnitTests.Services
             ProposalService.GetProposalResponsesWithPoints(
                 proposals, playerInfo, out var livePoints, localizer.Object);
 
-            await _service.ComputeMissingLeadersAsync().ConfigureAwait(false);
+            await _service.ComputeMissingLeadersAsync();
 
             _leaderRepository.Verify(
                 _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == livePoints)), Times.Once);
@@ -451,7 +443,7 @@ namespace KikoleSiteUnitTests.Services
             SetupUsers((1, "trouveur"), (5, "createur"));
             SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5);
 
-            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints).ConfigureAwait(false);
+            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
 
             var creator = result.Leaders.Single(_ => _.IsCreator);
             creator.UserName.Should().Be("createur");
@@ -465,7 +457,7 @@ namespace KikoleSiteUnitTests.Services
             SetupUsers((1, "trouveur"), (5, "createur"));
             SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5);
 
-            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints).ConfigureAwait(false);
+            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
 
             result.Leaders.Single(_ => _.IsCreator).Rank.Should().Be(1);
             result.Leaders.Single(_ => !_.IsCreator).Rank.Should().Be(2);
@@ -491,7 +483,7 @@ namespace KikoleSiteUnitTests.Services
                 },
                 creatorId: 5);
 
-            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints).ConfigureAwait(false);
+            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
 
             result.Searchers.Should().ContainSingle();
             result.Searchers.Single().UserName.Should().Be("chercheur");
@@ -519,7 +511,7 @@ namespace KikoleSiteUnitTests.Services
                 },
                 creatorId: 5);
 
-            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints).ConfigureAwait(false);
+            var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
 
             result.Searchers.Should().BeEmpty();
         }
@@ -531,8 +523,7 @@ namespace KikoleSiteUnitTests.Services
             SetupDayboard(new List<LeaderDto>(), new List<ProposalDto>(), creatorId: 5);
 
             var result = await _service
-                .GetDayboardAsync(Day.AddHours(15), DayLeaderSorts.BestTime)
-                .ConfigureAwait(false);
+                .GetDayboardAsync(Day.AddHours(15), DayLeaderSorts.BestTime);
 
             result.Date.Should().Be(Day);
             result.Sort.Should().Be(DayLeaderSorts.BestTime);

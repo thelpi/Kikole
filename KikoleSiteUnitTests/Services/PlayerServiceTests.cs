@@ -74,7 +74,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(FirstDate.AddDays(4));
             _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-            await _service.CreatePlayerAsync(request, 42).ConfigureAwait(false);
+            await _service.CreatePlayerAsync(request, 42);
 
             _playerRepository.Verify(
                 _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.ProposalDate == FirstDate.AddDays(5))),
@@ -89,7 +89,7 @@ namespace KikoleSiteUnitTests.Services
             request.ProposalDate = FirstDate.AddDays(10);
             _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-            await _service.CreatePlayerAsync(request, 42).ConfigureAwait(false);
+            await _service.CreatePlayerAsync(request, 42);
 
             _playerRepository.Verify(_ => _.GetLatestProposalDateAsync(), Times.Never);
             _playerRepository.Verify(
@@ -103,7 +103,7 @@ namespace KikoleSiteUnitTests.Services
             var request = Request();
             _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-            await _service.CreatePlayerAsync(request, 42).ConfigureAwait(false);
+            await _service.CreatePlayerAsync(request, 42);
 
             _playerRepository.Verify(
                 _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.ProposalDate == null)),
@@ -115,7 +115,7 @@ namespace KikoleSiteUnitTests.Services
         {
             _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-            await _service.CreatePlayerAsync(Request(), 42).ConfigureAwait(false);
+            await _service.CreatePlayerAsync(Request(), 42);
 
             _playerRepository.Verify(
                 _ => _.CreatePlayerClubsAsync(It.Is<PlayerClubDto>(c => c.PlayerId == 9)),
@@ -133,7 +133,7 @@ namespace KikoleSiteUnitTests.Services
             };
             _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-            await _service.CreatePlayerAsync(request, 42).ConfigureAwait(false);
+            await _service.CreatePlayerAsync(request, 42);
 
             _playerRepository.Verify(
                 _ => _.InsertPlayerCluesByLanguageAsync(9, 0,
@@ -147,7 +147,7 @@ namespace KikoleSiteUnitTests.Services
         {
             _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-            await _service.CreatePlayerAsync(Request(), 42).ConfigureAwait(false);
+            await _service.CreatePlayerAsync(Request(), 42);
 
             _playerRepository.Verify(
                 _ => _.InsertPlayerCluesByLanguageAsync(
@@ -166,8 +166,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(new PlayerDto { Id = 1, Clue = "the clue", EasyClue = "the easy clue" });
 
             var result = await _service
-                .GetPlayerClueAsync(FirstDate, isEasy, Languages.en)
-                .ConfigureAwait(false);
+                .GetPlayerClueAsync(FirstDate, isEasy, Languages.en);
 
             result.Should().Be(expected);
             _playerRepository.Verify(
@@ -186,8 +185,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync("indice traduit");
 
             var result = await _service
-                .GetPlayerClueAsync(FirstDate, isEasy, Languages.fr)
-                .ConfigureAwait(false);
+                .GetPlayerClueAsync(FirstDate, isEasy, Languages.fr);
 
             result.Should().Be("indice traduit");
         }
@@ -200,8 +198,7 @@ namespace KikoleSiteUnitTests.Services
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1)).ReturnsAsync((PlayerDto)null);
 
             var (error, userId, badges) = await _service
-                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 })
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
 
             error.Should().Be(PlayerSubmissionErrors.PlayerNotFound);
             userId.Should().Be(0);
@@ -215,8 +212,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(new PlayerDto { Id = 1, ProposalDate = FirstDate });
 
             var (error, _, _) = await _service
-                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 })
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
 
             error.Should().Be(PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused);
         }
@@ -228,8 +224,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(new PlayerDto { Id = 1, RejectDate = FirstDate });
 
             var (error, _, _) = await _service
-                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 })
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
 
             error.Should().Be(PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused);
         }
@@ -267,8 +262,7 @@ namespace KikoleSiteUnitTests.Services
             SetupPendingPlayer(1);
 
             var (error, userId, badges) = await _service
-                .ValidatePlayerSubmissionAsync(Acceptance())
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(Acceptance());
 
             error.Should().Be(PlayerSubmissionErrors.NoError);
             userId.Should().Be(42);
@@ -283,8 +277,7 @@ namespace KikoleSiteUnitTests.Services
             SetupPendingPlayer(5);
 
             var (_, _, badges) = await _service
-                .ValidatePlayerSubmissionAsync(Acceptance())
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(Acceptance());
 
             badges.Should().BeEquivalentTo(new[] { Badges.DoItYourself, Badges.WeAreKikole });
         }
@@ -299,8 +292,7 @@ namespace KikoleSiteUnitTests.Services
             SetupPendingPlayer(accepted);
 
             var (_, _, badges) = await _service
-                .ValidatePlayerSubmissionAsync(Acceptance())
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(Acceptance());
 
             badges.Should().NotContain(Badges.WeAreKikole);
         }
@@ -310,7 +302,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupPendingPlayer(1);
 
-            await _service.ValidatePlayerSubmissionAsync(Acceptance()).ConfigureAwait(false);
+            await _service.ValidatePlayerSubmissionAsync(Acceptance());
 
             _playerRepository.Verify(
                 _ => _.UpdatePlayerCluesAsync(1, "current clue", "current easy clue"), Times.Once);
@@ -323,7 +315,7 @@ namespace KikoleSiteUnitTests.Services
             var request = Acceptance();
             request.ClueEditEn = "  nouvel indice  ";
 
-            await _service.ValidatePlayerSubmissionAsync(request).ConfigureAwait(false);
+            await _service.ValidatePlayerSubmissionAsync(request);
 
             _playerRepository.Verify(
                 _ => _.UpdatePlayerCluesAsync(1, "nouvel indice", "current easy clue"), Times.Once);
@@ -343,8 +335,7 @@ namespace KikoleSiteUnitTests.Services
             };
 
             var (error, userId, badges) = await _service
-                .ValidatePlayerSubmissionAsync(request)
-                .ConfigureAwait(false);
+                .ValidatePlayerSubmissionAsync(request);
 
             error.Should().Be(PlayerSubmissionErrors.NoError);
             userId.Should().Be(42);
@@ -363,7 +354,7 @@ namespace KikoleSiteUnitTests.Services
             // pourrait changer le joueur du jour sous les pieds des joueurs
             _clock.Setup(_ => _.IsTomorrowIn(30)).Returns(true);
 
-            await _service.ReassignPlayersOfTheDayAsync().ConfigureAwait(false);
+            await _service.ReassignPlayersOfTheDayAsync();
 
             _playerRepository.Verify(
                 _ => _.ChangePlayerProposalDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
@@ -385,7 +376,7 @@ namespace KikoleSiteUnitTests.Services
                 .Callback<ulong, DateTime>((_, d) => assigned.Add(d))
                 .Returns(Task.CompletedTask);
 
-            await _service.ReassignPlayersOfTheDayAsync().ConfigureAwait(false);
+            await _service.ReassignPlayersOfTheDayAsync();
 
             assigned.Should().BeEquivalentTo(new[]
             {
@@ -415,7 +406,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupHiddenDay(hiddenDayLeaders: 1, allLeaders: 0, createdPlayers: 0, daysSinceFirstDate: 10);
 
-            var result = await _service.CanDisplayHiddenPlayerAsync(7).ConfigureAwait(false);
+            var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
             result.Should().BeTrue();
         }
@@ -426,7 +417,7 @@ namespace KikoleSiteUnitTests.Services
             // 4 jours ecoules depuis FirstDate, donc 5 journees a couvrir
             SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 5, createdPlayers: 0, daysSinceFirstDate: 4);
 
-            var result = await _service.CanDisplayHiddenPlayerAsync(7).ConfigureAwait(false);
+            var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
             result.Should().BeTrue();
         }
@@ -436,7 +427,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 4, createdPlayers: 1, daysSinceFirstDate: 4);
 
-            var result = await _service.CanDisplayHiddenPlayerAsync(7).ConfigureAwait(false);
+            var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
             result.Should().BeTrue();
         }
@@ -446,7 +437,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 4, createdPlayers: 0, daysSinceFirstDate: 4);
 
-            var result = await _service.CanDisplayHiddenPlayerAsync(7).ConfigureAwait(false);
+            var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
             result.Should().BeFalse();
         }
@@ -465,8 +456,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(new UserDto { Id = 7, Login = "joueur", UserTypeId = (ulong)UserTypes.StandardUser });
 
             var result = await _service
-                .GetPlayerOfTheDayFromUserPovAsync(7, FirstDate)
-                .ConfigureAwait(false);
+                .GetPlayerOfTheDayFromUserPovAsync(7, FirstDate);
 
             result.PlayerId.Should().Be(1);
             result.Login.Should().Be("createur");

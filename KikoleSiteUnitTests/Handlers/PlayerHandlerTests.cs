@@ -47,7 +47,7 @@ namespace KikoleSiteUnitTests.Handlers
         {
             SetupCareer((2, "AS Cannes"), (3, "Juventus"), (4, "Real Madrid"));
 
-            var result = await _handler.GetPlayerFullInfoAsync(Player).ConfigureAwait(false);
+            var result = await _handler.GetPlayerFullInfoAsync(Player);
 
             result.Player.Name.Should().Be("Zinédine Zidane");
             result.PlayerClubs.Should().HaveCount(3);
@@ -60,7 +60,7 @@ namespace KikoleSiteUnitTests.Handlers
         {
             SetupCareer();
 
-            var result = await _handler.GetPlayerFullInfoAsync(Player).ConfigureAwait(false);
+            var result = await _handler.GetPlayerFullInfoAsync(Player);
 
             result.PlayerClubs.Should().BeEmpty();
             result.Clubs.Should().BeEmpty();
@@ -82,7 +82,7 @@ namespace KikoleSiteUnitTests.Handlers
             _clubRepository.Setup(_ => _.GetClubAsync(2)).ReturnsAsync(new ClubDto { Id = 2, Name = "Juventus" });
             _clubRepository.Setup(_ => _.GetClubAsync(3)).ReturnsAsync(new ClubDto { Id = 3, Name = "Inter Milan" });
 
-            var result = await _handler.GetPlayerFullInfoAsync(Player).ConfigureAwait(false);
+            var result = await _handler.GetPlayerFullInfoAsync(Player);
 
             result.PlayerClubs.Should().HaveCount(3);
             result.Clubs.Should().HaveCount(2);
@@ -99,7 +99,7 @@ namespace KikoleSiteUnitTests.Handlers
                 .ReturnsAsync(Player);
             SetupCareer((4, "Real Madrid"));
 
-            var result = await _handler.GetPlayerOfTheDayFullInfoAsync(date).ConfigureAwait(false);
+            var result = await _handler.GetPlayerOfTheDayFullInfoAsync(date);
 
             result.Player.Id.Should().Be(1);
             result.Clubs.Should().ContainSingle(c => c.Name == "Real Madrid");

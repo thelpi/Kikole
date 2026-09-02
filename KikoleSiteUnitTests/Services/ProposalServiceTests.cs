@@ -229,7 +229,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task AnAnonymousVisitorGetsNothing()
         {
-            var grant = await _service.GetGrantAccessForDayAsync(0, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(0, Day);
 
             grant.Should().Be(DayGrantTypes.None);
         }
@@ -239,7 +239,7 @@ namespace KikoleSiteUnitTests.Services
         {
             _userRepository.Setup(_ => _.GetUserByIdAsync(UserId)).ReturnsAsync((UserDto)null);
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.None);
         }
@@ -249,7 +249,7 @@ namespace KikoleSiteUnitTests.Services
         {
             SetupUser(UserTypes.Administrator);
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.Admin);
             _playerHandler.Verify(
@@ -269,7 +269,7 @@ namespace KikoleSiteUnitTests.Services
                     PlayerClubs = new List<PlayerClubDto>()
                 });
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.Creator);
         }
@@ -282,7 +282,7 @@ namespace KikoleSiteUnitTests.Services
                 .Setup(_ => _.GetUserLeadersAsync(Day, Day, true, UserId))
                 .ReturnsAsync(new List<LeaderDto> { new LeaderDto { UserId = UserId } });
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.Found);
         }
@@ -299,7 +299,7 @@ namespace KikoleSiteUnitTests.Services
                     new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Successful = 1 }
                 });
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.Found);
         }
@@ -315,7 +315,7 @@ namespace KikoleSiteUnitTests.Services
                     new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Leaderboard, Successful = 1 }
                 });
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.PaidBoard);
         }
@@ -332,7 +332,7 @@ namespace KikoleSiteUnitTests.Services
                     new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Successful = 0 }
                 });
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.None);
         }
@@ -349,7 +349,7 @@ namespace KikoleSiteUnitTests.Services
                     new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Clue, Successful = 1 }
                 });
 
-            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
             grant.Should().Be(DayGrantTypes.None);
         }
