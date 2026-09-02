@@ -217,40 +217,44 @@ namespace KikoleSite.Services
                     .GetMissingUsersAsLeaderAsync(playerOfTheDay.ProposalDate.Value)
                     .ConfigureAwait(false);
 
+                var playerInfo = await _playerHandler
+                    .GetPlayerFullInfoAsync(playerOfTheDay)
+                    .ConfigureAwait(false);
+
                 foreach (var userId in usersId)
                 {
-                    var proposals = await _proposalRepository
+                    var proposals = (await _proposalRepository
                         .GetProposalsAsync(playerOfTheDay.ProposalDate.Value, userId)
+                        .ConfigureAwait(false))
+                        .OrderBy(p => p.CreationDate)
+                        .ToList();
+
+                    var winIndex = proposals.FindIndex(p =>
+                        p.Successful > 0 && (ProposalTypes)p.ProposalTypeId == ProposalTypes.Name);
+
+                    if (winIndex < 0)
+                        continue;
+
+                    // we had for a while a bug of proposals after the player has been found
+                    var untilWin = proposals.Take(winIndex + 1);
+
+                    // meme calcul que le score affiche en direct, pour que le rattrapage
+                    // ne puisse pas diverger du barème réel
+                    ProposalService.GetProposalResponsesWithPoints(
+                        untilWin, playerInfo, out var points, _resources);
+
+                    var winningProposal = proposals[winIndex];
+
+                    await _leaderRepository
+                        .CreateLeaderAsync(new LeaderDto
+                        {
+                            Points = (ushort)points,
+                            ProposalDate = playerOfTheDay.ProposalDate.Value,
+                            Time = (winningProposal.CreationDate - playerOfTheDay.ProposalDate.Value).ToRoundMinutes(),
+                            UserId = userId,
+                            CreationDate = winningProposal.CreationDate
+                        })
                         .ConfigureAwait(false);
-
-                    var points = ProposalChart.BasePoints;
-
-                    foreach (var proposal in proposals.OrderBy(p => p.CreationDate))
-                    {
-                        var (minusPoints, isRate) = ProposalChart.ProposalTypesCost[(ProposalTypes)proposal.ProposalTypeId];
-                        if (proposal.Successful == 0)
-                        {
-                            if (isRate)
-                                minusPoints = (int)Math.Round(points * minusPoints / (decimal)100);
-                            points -= minusPoints;
-                        }
-
-                        if (proposal.Successful > 0 && (ProposalTypes)proposal.ProposalTypeId == ProposalTypes.Name)
-                        {
-                            await _leaderRepository
-                                .CreateLeaderAsync(new LeaderDto
-                                {
-                                    Points = (ushort)(points < 0 ? 0 : points),
-                                    ProposalDate = playerOfTheDay.ProposalDate.Value,
-                                    Time = (proposal.CreationDate - playerOfTheDay.ProposalDate.Value).ToRoundMinutes(),
-                                    UserId = userId,
-                                    CreationDate = proposal.CreationDate
-                                })
-                                .ConfigureAwait(false);
-                            // we had for a while a bug of proposals after the player has been found
-                            break;
-                        }
-                    }
                 }
             }
         }
