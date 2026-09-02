@@ -28,9 +28,9 @@ namespace KikoleSite.Models.Requests
 
         public string EasyClueEn { get; set; } = null!;
 
-        public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; } = null!;
+        public IReadOnlyDictionary<Languages, string?> ClueLanguages { get; set; } = null!;
 
-        public IReadOnlyDictionary<Languages, string> EasyClueLanguages { get; set; } = null!;
+        public IReadOnlyDictionary<Languages, string?> EasyClueLanguages { get; set; } = null!;
 
         internal Positions Position { get; set; }
 

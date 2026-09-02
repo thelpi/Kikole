@@ -12,44 +12,44 @@ namespace KikoleSite.ViewModels
         public ulong PlayerId { get; set; }
         public bool IsAdmin { get; set; }
         public bool CanCreateClub { get; set; }
-        public string Clue { get; set; }
-        public string EasyClue { get; set; }
-        public string Message { get; set; }
-        public string PlayerCreator { get; set; }
+        public string? Clue { get; set; }
+        public string? EasyClue { get; set; }
+        public string? Message { get; set; }
+        public string? PlayerCreator { get; set; }
         public bool LeaderboardAvailable { get; set; }
         public DateTime CurrentDate { get; set; }
 
         public bool DisplayHiddenPageAsHidden { get; set; }
-        public IReadOnlyCollection<UserBadge> Badges { get; set; }
+        public IReadOnlyCollection<UserBadge> Badges { get; set; } = [];
         public int Points { get; set; }
-        public string MessageToDisplay { get; set; }
+        public string? MessageToDisplay { get; set; }
         public bool IsErrorMessage { get; set; }
         public bool IsErrorMessageForced { get; set; }
-        public string BirthYear { get; set; }
-        public string PlayerName { get; set; }
-        public string PlayerAllowedNames { get; set; }
-        public string CountryName { get; set; }
-        public string ContinentName { get; set; }
-        public string Position { get; set; }
-        public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; }
-        public string ClubNameSubmission { get; set; }
-        public string PlayerNameSubmission { get; set; }
-        public string CountryNameSubmission { get; set; }
-        public string ContinentNameSubmission { get; set; }
-        public string BirthYearSubmission { get; set; }
-        public string PositionSubmission { get; set; }
-        public IReadOnlyList<SelectListItem> Positions { get; set; }
-        public string LoggedAs { get; set; }
+        public string? BirthYear { get; set; }
+        public string? PlayerName { get; set; }
+        public string? PlayerAllowedNames { get; set; }
+        public string? CountryName { get; set; }
+        public string? ContinentName { get; set; }
+        public string? Position { get; set; }
+        public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; } = [];
+        public string? ClubNameSubmission { get; set; }
+        public string? PlayerNameSubmission { get; set; }
+        public string? CountryNameSubmission { get; set; }
+        public string? ContinentNameSubmission { get; set; }
+        public string? BirthYearSubmission { get; set; }
+        public string? PositionSubmission { get; set; }
+        public IReadOnlyList<SelectListItem> Positions { get; set; } = [];
+        public string? LoggedAs { get; set; }
         public int CurrentDay { get; set; }
         public bool NoPreviousDay { get; set; }
         public bool IsCreator { get; set; }
 
-        public IReadOnlyList<string> IncorrectClubs { get; set; }
-        public IReadOnlyList<string> IncorrectCountries { get; set; }
-        public IReadOnlyList<string> IncorrectContinents { get; set; }
-        public IReadOnlyList<(string, string)> IncorrectYears { get; set; }
-        public IReadOnlyList<string> IncorrectPositions { get; set; }
-        public IReadOnlyList<string> IncorrectNames { get; set; }
+        public IReadOnlyList<string> IncorrectClubs { get; set; } = [];
+        public IReadOnlyList<string> IncorrectCountries { get; set; } = [];
+        public IReadOnlyList<string> IncorrectContinents { get; set; } = [];
+        public IReadOnlyList<(string, string)> IncorrectYears { get; set; } = [];
+        public IReadOnlyList<string> IncorrectPositions { get; set; } = [];
+        public IReadOnlyList<string> IncorrectNames { get; set; } = [];
 
         public int NextDay => CurrentDay - 1;
         public int PreviousDay => CurrentDay + 1;
@@ -105,11 +105,11 @@ namespace KikoleSite.ViewModels
                     }
                     else
                     {
-                        IncorrectClubs = AddToList(IncorrectClubs, response.Value.ToString());
+                        IncorrectClubs = AddToList(IncorrectClubs, response.Value?.ToString() ?? string.Empty);
                     }
                     break;
                 case ProposalTypes.Country:
-                    var cValue = response.Value.ToString();
+                    var cValue = response.Value?.ToString() ?? string.Empty;
                     if (response.Successful)
                         CountryName = countries[ulong.Parse(cValue)];
                     else
@@ -120,7 +120,7 @@ namespace KikoleSite.ViewModels
                     }
                     break;
                 case ProposalTypes.Continent:
-                    var ccValue = response.Value.ToString();
+                    var ccValue = response.Value?.ToString() ?? string.Empty;
                     if (response.Successful)
                         ContinentName = continents[ulong.Parse(ccValue)];
                     else
@@ -131,7 +131,7 @@ namespace KikoleSite.ViewModels
                     }
                     break;
                 case ProposalTypes.Position:
-                    var pValue = response.Value.ToString();
+                    var pValue = response.Value?.ToString() ?? string.Empty;
                     if (response.Successful)
                         Position = positions[Convert.ToUInt16(pValue)];
                     else
@@ -144,16 +144,16 @@ namespace KikoleSite.ViewModels
                 case ProposalTypes.Name:
                     var nValue = response.Value;
                     if (response.Successful)
-                        PlayerName = nValue.ToString();
+                        PlayerName = nValue?.ToString() ?? string.Empty;
                     else
-                        IncorrectNames = AddToList(IncorrectNames, nValue.ToString());
+                        IncorrectNames = AddToList(IncorrectNames, nValue?.ToString() ?? string.Empty);
                     break;
                 case ProposalTypes.Year:
-                    var yValue = response.Value.ToString();
+                    var yValue = response.Value?.ToString() ?? string.Empty;
                     if (response.Successful)
                         BirthYear = yValue;
                     else
-                        IncorrectYears = AddToList(IncorrectYears, (yValue, response.Tip));
+                        IncorrectYears = AddToList(IncorrectYears, (yValue, response.Tip ?? string.Empty));
                     break;
             }
         }

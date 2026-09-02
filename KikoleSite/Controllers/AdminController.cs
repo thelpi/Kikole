@@ -143,12 +143,12 @@ namespace KikoleSite.Controllers
             {
                 var request = new PlayerSubmissionValidationRequest
                 {
-                    ClueEditLanguages = new Dictionary<Languages, string>
+                    ClueEditLanguages = new Dictionary<Languages, string?>
                     {
                         { Languages.fr, model.ClueOverwriteFr }
                     },
                     ClueEditEn = model.ClueOverwriteEn,
-                    EasyClueEditLanguages = new Dictionary<Languages, string>
+                    EasyClueEditLanguages = new Dictionary<Languages, string?>
                     {
                         { Languages.fr, model.EasyClueOverwriteFr }
                     },
@@ -275,15 +275,20 @@ namespace KikoleSite.Controllers
                 return View(model);
             }
 
-            var names = new List<string>
+            // les dix champs du formulaire sont facultatifs : on filtre les vides
+            // avant de considerer la liste comme non nullable
+            var names = new List<string?>
             {
                 model.AlternativeName0, model.AlternativeName1,
                 model.AlternativeName2, model.AlternativeName3,
                 model.AlternativeName4, model.AlternativeName5,
                 model.AlternativeName6, model.AlternativeName7,
                 model.AlternativeName8, model.AlternativeName9,
-            };
-            names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
+            }
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => n!)
+                .Distinct()
+                .ToList();
 
             var clubsReferential = await GetClubsAsync().ConfigureAwait(false);
 
@@ -321,11 +326,11 @@ namespace KikoleSite.Controllers
                 Clubs = clubs,
                 ClueEn = model.ClueEn,
                 EasyClueEn = model.EasyClueEn,
-                ClueLanguages = new Dictionary<Languages, string>
+                ClueLanguages = new Dictionary<Languages, string?>
                 {
                     { Languages.fr, model.ClueFr }
                 },
-                EasyClueLanguages = new Dictionary<Languages, string>
+                EasyClueLanguages = new Dictionary<Languages, string?>
                 {
                     { Languages.fr, model.EasyClueFr }
                 },
@@ -482,8 +487,8 @@ namespace KikoleSite.Controllers
                     model.PlayerId,
                     model.ClueEn,
                     model.EasyClueEn,
-                    new Dictionary<Languages, string> { { Languages.fr, model.ClueFr } },
-                    new Dictionary<Languages, string> { { Languages.fr, model.EasyClueFr } })
+                    new Dictionary<Languages, string?> { { Languages.fr, model.ClueFr } },
+                    new Dictionary<Languages, string?> { { Languages.fr, model.EasyClueFr } })
                 .ConfigureAwait(false);
 
             model.Success = true;

@@ -37,6 +37,6 @@ namespace KikoleSite.ViewModels
 
         public Dayboard Dayboard { get; set; }
 
-        public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; }
+        public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; } = [];
     }
 }

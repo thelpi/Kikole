@@ -7,9 +7,9 @@ namespace KikoleSite.ViewModels
 {
     public class PalmaresModel
     {
-        public IReadOnlyCollection<(DateTime date, (ulong playerId, string playerName)[] palmares)> MonthlyPalmares { get; set; }
+        public IReadOnlyCollection<(DateTime date, (ulong playerId, string playerName)[] palmares)> MonthlyPalmares { get; set; } = [];
 
-        public IReadOnlyCollection<(string playerName, int firstPlaces, int secondPlaces, int thirdPlaces)> GlobalPalmares { get; set; }
+        public IReadOnlyCollection<(string playerName, int firstPlaces, int secondPlaces, int thirdPlaces)> GlobalPalmares { get; set; } = [];
 
         public PalmaresModel(Palmares data)
         {

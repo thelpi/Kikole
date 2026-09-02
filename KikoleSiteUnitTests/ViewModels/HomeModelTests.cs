@@ -199,7 +199,7 @@ namespace KikoleSiteUnitTests.ViewModels
             Apply(model, ProposalTypes.Club, "Chelsea", sourcePoints: 900);
 
             model.IncorrectClubs.Should().BeEquivalentTo(new[] { "Barcelone", "Chelsea" });
-            model.KnownPlayerClubs.Should().BeNull();
+            model.KnownPlayerClubs.Should().BeEmpty();
         }
 
         // ------------------------------------------------------------- nationalite, continent, poste
@@ -212,7 +212,7 @@ namespace KikoleSiteUnitTests.ViewModels
             Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.FR).ToString());
 
             model.CountryName.Should().Be("France");
-            model.IncorrectCountries.Should().BeNull();
+            model.IncorrectCountries.Should().BeEmpty();
         }
 
         [Fact]
@@ -276,7 +276,7 @@ namespace KikoleSiteUnitTests.ViewModels
             Apply(model, ProposalTypes.Name, "zidane");
 
             model.PlayerName.Should().Be("Zinédine Zidane");
-            model.IncorrectNames.Should().BeNull();
+            model.IncorrectNames.Should().BeEmpty();
         }
 
         [Fact]
@@ -340,9 +340,9 @@ namespace KikoleSiteUnitTests.ViewModels
             model.IncorrectClubs.Should().ContainSingle();
             model.IncorrectNames.Should().ContainSingle();
             model.IncorrectYears.Should().ContainSingle();
-            model.IncorrectCountries.Should().BeNull();
-            model.IncorrectContinents.Should().BeNull();
-            model.IncorrectPositions.Should().BeNull();
+            model.IncorrectCountries.Should().BeEmpty();
+            model.IncorrectContinents.Should().BeEmpty();
+            model.IncorrectPositions.Should().BeEmpty();
         }
     }
 }

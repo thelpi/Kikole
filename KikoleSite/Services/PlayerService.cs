@@ -60,8 +60,8 @@ namespace KikoleSite.Services
         public async Task UpdatePlayerCluesAsync(ulong playerId,
             string clue,
             string easyClue,
-            IReadOnlyDictionary<Languages, string> clueLanguages,
-            IReadOnlyDictionary<Languages, string> easyClueLanguages)
+            IReadOnlyDictionary<Languages, string?> clueLanguages,
+            IReadOnlyDictionary<Languages, string?> easyClueLanguages)
         {
             await UpdateCluesInternalAsync(
                     playerId, clue, easyClue, clueLanguages, easyClueLanguages)
@@ -321,12 +321,12 @@ namespace KikoleSite.Services
             return latestDate.AddDays(1).Date;
         }
 
-        private async Task InsertLanguageCluesAsync(IReadOnlyDictionary<Languages, string> clues,
+        private async Task InsertLanguageCluesAsync(IReadOnlyDictionary<Languages, string?> clues,
             ulong playerId, bool isEasy)
         {
             var languagesClues = clues?
                 .Where(_ => !string.IsNullOrWhiteSpace(_.Value))
-                .ToDictionary(_ => (ulong)_.Key, _ => _.Value.Trim())
+                .ToDictionary(_ => (ulong)_.Key, _ => _.Value!.Trim())
                 ?? new Dictionary<ulong, string>();
 
             if (languagesClues.Count > 0)
@@ -340,8 +340,8 @@ namespace KikoleSite.Services
         private async Task UpdateCluesInternalAsync(ulong playerId,
             string clueEn,
             string easyClueEn,
-            IReadOnlyDictionary<Languages, string> clueLanguages,
-            IReadOnlyDictionary<Languages, string> easyClueLanguages)
+            IReadOnlyDictionary<Languages, string?> clueLanguages,
+            IReadOnlyDictionary<Languages, string?> easyClueLanguages)
         {
             await _playerRepository
                 .UpdatePlayerCluesAsync(playerId, clueEn, easyClueEn)

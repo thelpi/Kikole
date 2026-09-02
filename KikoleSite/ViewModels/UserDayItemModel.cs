@@ -9,7 +9,7 @@ namespace KikoleSite.ViewModels
         public int PointsLost { get; set; }
         public int PointsRemaining { get; set; }
         public ProposalTypes Type { get; set; }
-        public string Value { get; set; }
+        public string? Value { get; set; }
         public bool Success { get; set; }
     }
 }

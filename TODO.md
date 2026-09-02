@@ -238,6 +238,14 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
       exception si un club de la carrière est absent de la liste, `Player` de même si le
       créateur manque. Même motif que le `pDays.First(...)` de `LeaderService` : le code
       casse au lieu de dégrader. Comportements figés par des tests de caractérisation.
+- [ ] **Modernisation syntaxique** — le code date de C# 8, la cible est C# 14. Passe
+      mécanique, à faire d'un bloc pour ne pas polluer les diffs fonctionnels :
+      - `record` plutôt que `class` pour les DTO et les modèles de présentation
+      - `init` plutôt que `set` sur les propriétés qui ne changent pas après construction
+      - namespaces à portée fichier (`namespace KikoleSite.Models;`) : un niveau
+        d'indentation en moins sur tout le projet
+      - expressions de collection `[]` plutôt que `new List<T>()`, `.ToList()` ou
+        `Array.Empty<T>()`
 - [ ] **Retirer les `ConfigureAwait(false)`** — 287 occurrences dans 23 fichiers. Utile dans
       une bibliothèque, inutile ici : ASP.NET Core n'a pas de `SynchronizationContext`.
       C'est du bruit pur. À faire **après** la migration, pour ne pas mélanger les diffs.

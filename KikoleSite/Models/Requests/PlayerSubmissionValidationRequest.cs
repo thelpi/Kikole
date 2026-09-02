@@ -11,9 +11,9 @@ namespace KikoleSite.Models.Requests
 
         public bool IsAccepted { get; set; }
 
-        public IReadOnlyDictionary<Languages, string> ClueEditLanguages { get; set; } = null!;
+        public IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; set; } = null!;
 
-        public IReadOnlyDictionary<Languages, string> EasyClueEditLanguages { get; set; } = null!;
+        public IReadOnlyDictionary<Languages, string?> EasyClueEditLanguages { get; set; } = null!;
 
         public string ClueEditEn { get; set; } = null!;
 
