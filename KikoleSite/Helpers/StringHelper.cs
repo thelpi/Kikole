@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -10,6 +11,16 @@ namespace KikoleSite.Helpers
         private const string Iso8859Code = "ISO-8859-8";
         private const char Separator = ';';
         private const decimal NameToleranceMax = 0.5M;
+
+        // lettres latines sans decomposition Unicode et absentes de la table best-fit
+        // de la page de code : sans cette table elles deviendraient des '?'
+        private static readonly IReadOnlyDictionary<char, string> UnmappedLetters =
+            new Dictionary<char, string>
+            {
+                { 'ß', "ss" }, { 'ẞ', "ss" },
+                { 'Þ', "th" }, { 'þ', "th" },
+                { 'Ð', "d" },  { 'ð', "d" },
+            };
 
         internal static bool ContainsApproximately(this string source, string value)
         {
@@ -49,7 +60,27 @@ namespace KikoleSite.Helpers
 
         internal static string RemoveDiacritics(this string value)
         {
-            var tempBytes = Encoding.GetEncoding(Iso8859Code).GetBytes(value);
+            var mapped = new StringBuilder(value.Length);
+            foreach (var c in value)
+            {
+                if (UnmappedLetters.TryGetValue(c, out var replacement))
+                    mapped.Append(replacement);
+                else
+                    mapped.Append(c);
+            }
+
+            var decomposed = mapped.ToString().Normalize(NormalizationForm.FormD);
+
+            var stripped = new StringBuilder(decomposed.Length);
+            foreach (var c in decomposed)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    stripped.Append(c);
+            }
+
+            // le best-fit de la page de code rabat les lettres latines restantes sur leur
+            // equivalent ASCII (o, l, ae...), y compris celles sans decomposition Unicode
+            var tempBytes = Encoding.GetEncoding(Iso8859Code).GetBytes(stripped.ToString());
             return Encoding.UTF8.GetString(tempBytes);
         }
 
