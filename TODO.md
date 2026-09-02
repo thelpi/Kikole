@@ -68,7 +68,51 @@ réécrire l'auth sur 3.1 puis migrer, c'est le faire deux fois.
 
 ---
 
-## 3. Sécurité et authentification
+## 3. Restauration de la base de production d'époque
+
+La base MySQL de production (mars 2022 → mai 2023) a été retrouvée, mais sous forme de
+**fichiers bruts et non d'un dump `.sql`**. À traiter **juste après la migration**, pour
+comparaison et réalimentation éventuelle de certaines données.
+
+- [ ] **Identifier ce qu'on a exactement.** La restauration dépend entièrement du contenu :
+      - répertoire de données complet (`ibdata1`, `ib_logfile*`, un dossier par base) →
+        cas le plus favorable ;
+      - `.ibd` seuls → nécessite `ALTER TABLE ... IMPORT TABLESPACE` avec un schéma
+        recréé à l'identique au préalable ;
+      - présence ou absence de fichiers `.frm` → c'est l'indice de version : MySQL 8.0 les
+        a supprimés au profit du dictionnaire de données interne. Leur présence signe donc
+        du 5.x.
+- [ ] **Ne pas tenter d'ouvrir ces fichiers avec le MySQL 9.1 de WAMP.** Les formats
+      InnoDB ne sont pas rétrocompatibles sur un tel écart. Il faut monter une instance
+      de la **version d'origine** (Docker `mysql:5.7` par exemple), la pointer sur le
+      répertoire de données, puis produire un `mysqldump` propre — c'est ce dump qui sera
+      ensuite importable dans la base moderne.
+- [ ] **Prévoir la conversion de collation** : la base d'époque était en `utf8` /
+      `utf8_bin`, la nouvelle en `utf8mb4` / `utf8mb4_unicode_ci`. Importer un dump
+      `utf8` sans conversion explicite produit du mojibake sur les noms accentués.
+
+**Le piège principal : les identifiants de badges ont été renumérotés.** Les données
+d'époque référencent l'ancienne numérotation (3, 5, 6, 7… 41) dans `user_badges.badge_id`
+et `players.badge_id`. La nouvelle est contiguë de 1 à 28, dans le même ordre. Une table
+de correspondance est donc nécessaire à l'import :
+
+| ancien | 3 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 30 | 31 | 32 | 33 | 36 | 37 | 38 | 39 | 40 | 41 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **nouveau** | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 |
+
+Les lignes référençant les badges **29** (`DoYouSpeakPatois`) et **34** (`TheEnd`), supprimés,
+sont à écarter. La table `challenges` d'époque est à ignorer, elle n'existe plus.
+
+- [ ] **Les libellés de badges d'époque sont dans ce dump.** C'est l'occasion de remplacer
+      les descriptions que j'ai rédigées par les originales (cf. « Décisions prises »).
+- [ ] **Données personnelles** : ce dump contient des logins, des hachages de mots de passe
+      faibles, des adresses IP et les e-mails de la table `discussions`. À garder en local,
+      et sans intérêt à réimporter tel quel côté comptes puisque le chantier Identity
+      invalidera les hachages de toute façon.
+
+---
+
+## 4. Sécurité et authentification
 
 Quatre défauts identifiés, par gravité décroissante. La cible raisonnable est
 **ASP.NET Core Identity** plutôt que de réparer la cryptographie maison.
@@ -89,7 +133,7 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
 
 ---
 
-## 4. Modèle de données et contenu
+## 5. Modèle de données et contenu
 
 - [ ] **Rendre les clubs canoniques** — aujourd'hui le champ club est un `<input type="text">
       libre : l'autocomplétion suggère mais ne remplit aucun champ caché, contrairement au
@@ -114,7 +158,7 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
 
 ---
 
-## 5. Qualité et performance
+## 6. Qualité et performance
 
 - [ ] **Requêtes N+1** — `PlayerHandler` fait une requête par club d'une carrière,
       `LeaderService.GetUsersFromIdsAsync` une par utilisateur, `BadgeService` une par badge
@@ -150,7 +194,7 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
 
 ---
 
-## 6. Interface
+## 7. Interface
 
 - [ ] Rendre le graphisme plus attrayant.
 
