@@ -103,6 +103,14 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
 - [ ] **Remplir la base des clubs** une bonne fois — prérequis pratique pour jouer.
 - [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
       d'intégrité sont les `IsValid` applicatives.
+- [ ] **`IUserService`** — les 12 appels directs de `AccountController` à `IUserRepository`
+      ne sont pas du CRUD mais de la logique d'authentification : la vérification du mot de
+      passe se fait **dans le contrôleur**, et l'inscription enchaîne cinq étapes sans
+      transaction. Un service serait justifié, mais ce code est destiné à disparaître avec
+      Identity : à traiter **dans** le chantier sécurité, pas avant.
+- [ ] `IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
+      passent en canonique, la résolution nom → identifiant étant alors de la logique métier.
+      `Message` et `Discussion` ne méritent pas de service : ce serait de la délégation vide.
 
 ---
 
@@ -111,6 +119,22 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
 - [ ] **Requêtes N+1** — `PlayerHandler` fait une requête par club d'une carrière,
       `LeaderService.GetUsersFromIdsAsync` une par utilisateur, `BadgeService` une par badge
       et par jour. Sur un classement mensuel, ça se compte en centaines d'aller-retours SQL.
+- [ ] **Extraire un `IInternationalService`** — `KikoleBaseController` porte trois champs
+      `static` (`_countriesCache`, `_continentsCache`, `_clubsCache`), soit de l'état
+      partagé entre toutes les requêtes dans une classe instanciée par requête.
+      `_clubsCache` est une simple référence **sans verrou**, contrairement aux deux autres
+      qui sont des `ConcurrentDictionary` : même famille de bug que le `SHA256` de
+      `Crypter`. Le cache est en plus indexé sur `CultureInfo.CurrentCulture` et invalidé
+      via un paramètre `resetCache` propagé de contrôleur en contrôleur. Un service (ou
+      `IMemoryCache`) sort cet état du contrôleur, le rend testable et thread-safe.
+      *C'est le seul des cinq domaines sans service où le gain est immédiat.*
+- [ ] **Sortir `GetProposalResponsesWithPoints` de `ProposalService`** — la méthode est
+      `internal static` et `LeaderService` l'appelle directement (lignes 243 et 336), seul
+      couplage service → service du projet, invisible à l'analyse des dépendances injectées.
+      Elle ne dépend d'aucun dépôt : c'est une fonction pure sur des DTOs. Sa place est dans
+      un **calculateur de score dédié** que les deux services consommeraient, ce qui
+      supprime l'entorse au lieu de la déplacer. À faire **avant** d'ajouter d'autres
+      appels de ce genre.
 - [ ] **Retirer les `ConfigureAwait(false)`** — 287 occurrences dans 23 fichiers. Utile dans
       une bibliothèque, inutile ici : ASP.NET Core n'a pas de `SynchronizationContext`.
       C'est du bruit pur. À faire **après** la migration, pour ne pas mélanger les diffs.
