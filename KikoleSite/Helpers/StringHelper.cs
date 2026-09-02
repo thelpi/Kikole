@@ -12,6 +12,10 @@ namespace KikoleSite.Helpers
         private const char Separator = ';';
         private const decimal NameToleranceMax = 0.5M;
 
+        // la page de code n'est pas disponible tant que CodePagesEncodingProvider n'est pas
+        // enregistre ; on le fait ici pour que le helper reste utilisable hors du host web
+        private static readonly Encoding BestFitEncoding = ResolveBestFitEncoding();
+
         // lettres latines sans decomposition Unicode et absentes de la table best-fit
         // de la page de code : sans cette table elles deviendraient des '?'
         private static readonly IReadOnlyDictionary<char, string> UnmappedLetters =
@@ -80,8 +84,14 @@ namespace KikoleSite.Helpers
 
             // le best-fit de la page de code rabat les lettres latines restantes sur leur
             // equivalent ASCII (o, l, ae...), y compris celles sans decomposition Unicode
-            var tempBytes = Encoding.GetEncoding(Iso8859Code).GetBytes(stripped.ToString());
+            var tempBytes = BestFitEncoding.GetBytes(stripped.ToString());
             return Encoding.UTF8.GetString(tempBytes);
+        }
+
+        private static Encoding ResolveBestFitEncoding()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            return Encoding.GetEncoding(Iso8859Code);
         }
 
         internal static int GetLevenshteinDistance(this string s, string t)

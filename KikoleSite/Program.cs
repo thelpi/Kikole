@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
 namespace KikoleSite
@@ -8,8 +7,6 @@ namespace KikoleSite
     {
         public static void Main(string[] args)
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
             CreateWebHostBuilder(args).Build().Run();
         }
 
