@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using KikoleSite.Helpers;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Localization;
@@ -48,9 +49,12 @@ namespace KikoleSite.Models.Requests
         internal bool MatchAny(IEnumerable<ProposalDto> proposals)
         {
             // Assume date and user OK
+            // la comparaison est sanitisee comme celle qui decide de la reussite :
+            // sans ca "Zidane", "ZIDANE" et "Zidàne" seraient factures separement
+            var sanitizedValue = Value?.Sanitize();
             return proposals.Any(p =>
                 p.ProposalTypeId == (ulong)ProposalType
-                && p.Value == Value);
+                && p.Value?.Sanitize() == sanitizedValue);
         }
     }
 }
