@@ -42,7 +42,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date)
+        public async Task<PlayerDto?> GetPlayerOfTheDayAsync(DateTime date)
         {
             return await GetDtoAsync<PlayerDto>(
                     "players",
@@ -81,7 +81,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<PlayerDto> GetPlayerByIdAsync(ulong id)
+        public async Task<PlayerDto?> GetPlayerByIdAsync(ulong id)
         {
             return await GetDtoAsync<PlayerDto>(
                     "players",
@@ -150,7 +150,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<string> GetClueAsync(ulong playerId, byte isEasy, ulong languageId)
+        public async Task<string?> GetClueAsync(ulong playerId, byte isEasy, ulong languageId)
         {
             return await ExecuteScalarAsync<string>(
                     "SELECT clue FROM player_clue_translations " +

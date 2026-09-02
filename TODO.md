@@ -179,6 +179,36 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
       un **calculateur de score dédié** que les deux services consommeraient, ce qui
       supprime l'entorse au lieu de la déplacer. À faire **avant** d'ajouter d'autres
       appels de ce genre.
+- [ ] **De la logique métier vit dans les dépôts, hors de portée des tests.** Six règles
+      fonctionnelles sont encodées dans la couche d'accès aux données. Elles sont
+      **invisibles pour les 433 tests unitaires et le resteront** : les tests simulent les
+      dépôts, donc ils vérifient que le service passe les bons paramètres, jamais ce que
+      le SQL en fait. Sur ces points, la suite donne une impression de couverture qu'elle
+      n'a pas.
+
+      Par gravité décroissante :
+      - **`StatisticRepository.UserPlayerLinkSql`** réimplémente en SQL la règle d'accès
+        de `ProposalService.GetGrantAccessForDayAsync` (admin, ou l'a trouvé ce jour-là,
+        ou l'a soumis). **Deux définitions du même droit d'accès, dans deux couches**, qui
+        peuvent diverger en silence. À faire appeler le service plutôt que dupliquer.
+      - **`BaseRepository.SubSqlValidUsers`** définit le « joueur classable » (ni
+        administrateur, ni désactivé). Règle métier injectée dans sept requêtes depuis la
+        classe de base des dépôts, invisible depuis les services — qui référence en plus
+        l'enum de domaine `UserTypes`.
+      - **`proposal_date = DATE(creation_date)`**, la définition de « trouvé le jour même »,
+        dupliquée **cinq fois** (3× `LeaderRepository`, 2× `ProposalRepository`, dont une
+        variante contournable par `OR 1 = @loose`).
+      - `ProposalRepository.GetMissingUsersAsLeaderAsync` encode la définition d'un
+        classement incomplet.
+      - `PlayerRepository.GetPlayersByCreatorAsync` encode l'état d'une soumission via un
+        paramètre `@type` 0/1/2.
+      - `BadgeRepository.GetUsersOfTheDayWithBadgeAsync` charge tous les détenteurs d'un
+        badge puis filtre en C# sur une journée (logique dans le dépôt + N+1).
+
+      Deux chantiers à ne pas mélanger : **(a)** des tests d'intégration sur base jetable
+      — `kikole_mock.sql` étant déjà idempotent, la moitié du travail est faite, et c'est
+      la seule façon de vérifier ces règles telles qu'elles s'exécutent ; **(b)** remonter
+      les règles dans le domaine, une fois (a) en place pour servir de filet.
 - [ ] **Palmarès : le cumul global n'est pas la somme des podiums mensuels.** Dans
       `LeaderService.GetPalmaresAsync`, la fonction interne `GetUserAtPalmaresPosition`
       fait deux choses : elle retourne l'utilisateur à une position donnée **et** lui

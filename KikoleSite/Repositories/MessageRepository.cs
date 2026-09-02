@@ -11,7 +11,7 @@ namespace KikoleSite.Repositories
             : base(configuration, clock)
         { }
 
-        public async Task<MessageDto> GetMessageAsync(DateTime date)
+        public async Task<MessageDto?> GetMessageAsync(DateTime date)
         {
             return await ExecuteScalarAsync<MessageDto>(
                     "SELECT * FROM messages " +

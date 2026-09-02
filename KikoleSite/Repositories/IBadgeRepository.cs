@@ -23,6 +23,6 @@ namespace KikoleSite.Repositories
 
         Task ResetBadgeDatasAsync(ulong badgeId);
 
-        Task<string> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId);
+        Task<string?> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId);
     }
 }

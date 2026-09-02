@@ -44,16 +44,16 @@ namespace KikoleSite.Models
             // player creation NOT included
             Attempts = stats.Count(s => s.Attempt);
             AttemptsDayOne = stats.Count(s => s.AttemptDayOne);
-            AverageTime = stats.Where(s => s.Time.HasValue).Select(s => s.Time.Value).Average();
-            AverageTimeDayOne = stats.Where(s => s.Time.HasValue && s.SuccessDayOne).Select(s => s.Time.Value).Average();
+            AverageTime = stats.Where(s => s.Time.HasValue).Select(s => s.Time!.Value).Average();
+            AverageTimeDayOne = stats.Where(s => s.Time.HasValue && s.SuccessDayOne).Select(s => s.Time!.Value).Average();
             BestTime = stats.Any(s => s.Time.HasValue)
-                ? stats.Where(s => s.Time.HasValue).Min(s => s.Time.Value)
+                ? stats.Where(s => s.Time.HasValue).Min(s => s.Time!.Value)
                 : default(TimeSpan?);
             BestPoints = stats.Any(s => s.Points.HasValue && s.Attempt)
-                ? stats.Where(s => s.Points.HasValue && s.Attempt).Max(s => s.Points.Value)
+                ? stats.Where(s => s.Points.HasValue && s.Attempt).Max(s => s.Points!.Value)
                 : default(int?);
             BestPointsDayOne = stats.Any(s => s.Points.HasValue && s.SuccessDayOne && s.AttemptDayOne)
-                ? stats.Where(s => s.Points.HasValue && s.SuccessDayOne && s.AttemptDayOne).Max(s => s.Points.Value)
+                ? stats.Where(s => s.Points.HasValue && s.SuccessDayOne && s.AttemptDayOne).Max(s => s.Points!.Value)
                 : default(int?);
             Successes = stats.Count(s => s.Points.HasValue && s.Attempt);
             SuccessesDayOne = stats.Count(s => s.Points.HasValue && s.AttemptDayOne);

@@ -9,11 +9,11 @@ namespace KikoleSite.Models
     {
         public ulong PlayerId { get; }
 
-        public string Name { get; }
+        public string? Name { get; }
 
-        public IReadOnlyList<string> AllowedNames { get; }
+        public IReadOnlyList<string>? AllowedNames { get; }
 
-        public string Login { get; }
+        public string? Login { get; }
 
         public bool CanDisplayCreator { get; }
 

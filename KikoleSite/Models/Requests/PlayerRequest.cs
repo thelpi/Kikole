@@ -10,7 +10,7 @@ namespace KikoleSite.Models.Requests
 {
     public class PlayerRequest
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         public ushort YearOfBirth { get; set; }
 
@@ -20,17 +20,17 @@ namespace KikoleSite.Models.Requests
 
         public DateTime? ProposalDate { get; set; }
 
-        public IReadOnlyList<string> AllowedNames { get; set; }
+        public IReadOnlyList<string> AllowedNames { get; set; } = null!;
 
-        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
+        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; } = null!;
 
-        public string ClueEn { get; set; }
+        public string ClueEn { get; set; } = null!;
 
-        public string EasyClueEn { get; set; }
+        public string EasyClueEn { get; set; } = null!;
 
-        public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; }
+        public IReadOnlyDictionary<Languages, string> ClueLanguages { get; set; } = null!;
 
-        public IReadOnlyDictionary<Languages, string> EasyClueLanguages { get; set; }
+        public IReadOnlyDictionary<Languages, string> EasyClueLanguages { get; set; } = null!;
 
         internal Positions Position { get; set; }
 
@@ -38,7 +38,7 @@ namespace KikoleSite.Models.Requests
 
         public bool HideCreator { get; set; }
 
-        internal string IsValid(DateTime today, IStringLocalizer resources)
+        internal string? IsValid(DateTime today, IStringLocalizer resources)
         {
             if (string.IsNullOrWhiteSpace(Name))
                 return resources["InvalidName"];

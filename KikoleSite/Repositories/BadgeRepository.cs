@@ -15,7 +15,7 @@ namespace KikoleSite.Repositories
 
         public async Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync(bool includeHidden)
         {
-            var parameters = new List<(string, object)>();
+            var parameters = new List<(string, object?)>();
             if (!includeHidden)
                 parameters.Add(("hidden", 0));
 
@@ -88,7 +88,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<string> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId)
+        public async Task<string?> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId)
         {
             return await ExecuteScalarAsync<string>(
                     "SELECT description FROM badge_translations " +

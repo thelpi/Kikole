@@ -36,7 +36,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<ClubDto> GetClubAsync(ulong clubId)
+        public async Task<ClubDto?> GetClubAsync(ulong clubId)
         {
             return await GetDtoAsync<ClubDto>(
                     "clubs",

@@ -10,7 +10,7 @@ namespace KikoleSite.Repositories
 
         Task UpdateClubAsync(ClubDto club);
 
-        Task<ClubDto> GetClubAsync(ulong clubId);
+        Task<ClubDto?> GetClubAsync(ulong clubId);
 
         Task<IReadOnlyCollection<ClubDto>> GetClubsAsync();
     }

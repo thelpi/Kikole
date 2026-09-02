@@ -2,8 +2,8 @@
 {
     public class ClubDto : BaseDto
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
-        public string AllowedNames { get; set; }
+        public string AllowedNames { get; set; } = null!;
     }
 }

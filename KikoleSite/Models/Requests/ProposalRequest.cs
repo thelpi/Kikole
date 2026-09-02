@@ -11,8 +11,8 @@ namespace KikoleSite.Models.Requests
     public class ProposalRequest
     {
         public uint DaysBeforeNow { get; set; }
-        public string Value { get; set; }
-        internal string Ip { get; set; }
+        public string Value { get; set; } = null!;
+        internal string? Ip { get; set; }
         internal DateTime ProposalDateTime { get; set; }
         internal ProposalTypes ProposalType { get; set; }
 
@@ -20,11 +20,11 @@ namespace KikoleSite.Models.Requests
 
         internal DateTime PlayerSubmissionDate => ProposalDateTime.AddDays(-DaysBeforeNow).Date;
 
-        internal string GetTip(PlayerDto player, IStringLocalizer resources)
+        internal string? GetTip(PlayerDto player, IStringLocalizer resources)
         {
             return ProposalType switch
             {
-                ProposalTypes.Year => ushort.Parse(Value) > player.YearOfBirth
+                ProposalTypes.Year => ushort.Parse(Value!) > player.YearOfBirth
                     ? resources["TipOlderPlayer"]
                     : resources["TipYoungerPlayer"],
                 ProposalTypes.Leaderboard => resources["LeaderboardAvailable"],

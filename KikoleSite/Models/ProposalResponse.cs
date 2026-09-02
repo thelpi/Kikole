@@ -15,13 +15,13 @@ namespace KikoleSite.Models
 
         public bool Successful { get; }
 
-        public object Value { get; }
+        public object? Value { get; }
 
-        public string RawValue { get; }
+        public string? RawValue { get; }
 
         public DateTime Date { get; }
 
-        public string Tip { get; }
+        public string? Tip { get; }
 
         public (int, bool) LostPoints { get; }
 
@@ -34,7 +34,7 @@ namespace KikoleSite.Models
         internal bool IsWin => ProposalType == ProposalTypes.Name && Successful;
 
         private ProposalResponse(ProposalTypes proposalType,
-            string sourceValue,
+            string? sourceValue,
             bool? success,
             PlayerFullDto player)
         {

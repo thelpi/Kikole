@@ -9,11 +9,11 @@ namespace KikoleSite.Models.Requests
     {
         public ulong Id { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
-        public IReadOnlyList<string> AllowedNames { get; set; }
+        public IReadOnlyList<string> AllowedNames { get; set; } = null!;
 
-        internal string IsValid(IStringLocalizer resources)
+        internal string? IsValid(IStringLocalizer resources)
         {
             if (string.IsNullOrWhiteSpace(Name))
                 return resources["InvalidName"];

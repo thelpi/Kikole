@@ -12,8 +12,8 @@ namespace KikoleSite
         private const string Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private const int GenerateWordSize = 16;
 
-        private readonly string _cookieEncryptionKey;
-        private readonly string _encryptionKey;
+        private readonly string? _cookieEncryptionKey;
+        private readonly string? _encryptionKey;
         private readonly Random _randomizer;
         private readonly SHA256 _sha256;
         private readonly Encoding _encoding;

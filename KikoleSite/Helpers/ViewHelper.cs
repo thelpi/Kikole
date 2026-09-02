@@ -28,7 +28,7 @@ namespace KikoleSite.Helpers
             if (data.GetType() == typeof(bool))
                 return ((bool)data).ToYesNo();
 
-            return data.ToString();
+            return data.ToString() ?? NA;
         }
 
         internal static string ToNaString(this TimeSpan? data)

@@ -25,7 +25,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<UserDto> GetUserByLoginAsync(string login)
+        public async Task<UserDto?> GetUserByLoginAsync(string login)
         {
             return await GetDtoAsync<UserDto>(
                     "users",
@@ -52,7 +52,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<UserDto> GetUserByIdAsync(ulong userId)
+        public async Task<UserDto?> GetUserByIdAsync(ulong userId)
         {
             return await GetDtoAsync<UserDto>("users",
                     ("id", userId),
@@ -75,7 +75,7 @@ namespace KikoleSite.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async Task<RegistrationGuidDto> GetRegistrationGuidAsync(string id)
+        public async Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id)
         {
             return await GetDtoAsync<RegistrationGuidDto>(
                     "registration_guids",

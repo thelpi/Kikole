@@ -4,9 +4,9 @@ namespace KikoleSite.Models.Dtos
 {
     public class PlayerDto : BaseDto
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
-        public string AllowedNames { get; set; }
+        public string AllowedNames { get; set; } = null!;
 
         public ushort YearOfBirth { get; set; }
 
@@ -16,9 +16,9 @@ namespace KikoleSite.Models.Dtos
 
         public DateTime? ProposalDate { get; set; }
 
-        public string Clue { get; set; }
+        public string Clue { get; set; } = null!;
 
-        public string EasyClue { get; set; }
+        public string EasyClue { get; set; } = null!;
 
         public ulong? BadgeId { get; set; }
 

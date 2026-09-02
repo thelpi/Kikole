@@ -6,17 +6,17 @@ namespace KikoleSite.Models.Requests
 {
     public class UserRequest
     {
-        public string Login { get; set; }
+        public string Login { get; set; } = null!;
 
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
 
-        public string PasswordResetQuestion { get; set; }
+        public string PasswordResetQuestion { get; set; } = null!;
 
-        public string PasswordResetAnswer { get; set; }
+        public string PasswordResetAnswer { get; set; } = null!;
 
         public Languages? Language { get; set; }
 
-        public string Ip { get; set; }
+        public string Ip { get; set; } = null!;
 
         internal UserDto ToDto(ICrypter crypter)
         {

@@ -11,11 +11,11 @@ namespace KikoleSite.Repositories
 
         Task CreatePlayerClubsAsync(PlayerClubDto playerClub);
 
-        Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date);
+        Task<PlayerDto?> GetPlayerOfTheDayAsync(DateTime date);
 
         Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(DateTime? minimalDate, DateTime? maximalDate);
 
-        Task<PlayerDto> GetPlayerByIdAsync(ulong id);
+        Task<PlayerDto?> GetPlayerByIdAsync(ulong id);
 
         Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
@@ -33,7 +33,7 @@ namespace KikoleSite.Repositories
 
         Task RefusePlayerProposalAsync(ulong playerId);
 
-        Task<string> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
+        Task<string?> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
 
         Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
     }

@@ -14,7 +14,7 @@ namespace KikoleSite.Models
 
         public bool Hidden { get; }
 
-        internal Badge(BadgeDto dto, int usersCount, string description)
+        internal Badge(BadgeDto dto, int usersCount, string? description)
         {
             Id = dto.Id;
             Name = dto.Name;

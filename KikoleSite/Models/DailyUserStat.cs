@@ -42,7 +42,7 @@ namespace KikoleSite.Models
             bool attemptDayOne,
             bool attempt,
             IEnumerable<LeaderDto> leaders,
-            LeaderDto meLeader)
+            LeaderDto? meLeader)
         {
             Date = currentDate;
             Answer = playerName;

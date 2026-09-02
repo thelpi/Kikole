@@ -8,13 +8,13 @@ namespace KikoleSite.Models.Dtos
 
         public ulong ProposalTypeId { get; set; }
 
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         public byte Successful { get; set; }
 
         public DateTime ProposalDate { get; set; }
 
-        public string Ip { get; set; }
+        public string? Ip { get; set; }
 
         internal bool IsCurrentDay => ProposalDate == CreationDate.Date;
     }

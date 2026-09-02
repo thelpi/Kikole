@@ -6,7 +6,7 @@ namespace KikoleSite.Repositories
 {
     public interface IMessageRepository
     {
-        Task<MessageDto> GetMessageAsync(DateTime date);
+        Task<MessageDto?> GetMessageAsync(DateTime date);
 
         Task InsertMessageAsync(MessageDto message);
     }
