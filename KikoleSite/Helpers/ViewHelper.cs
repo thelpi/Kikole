@@ -14,7 +14,7 @@ namespace KikoleSite.Helpers
         public const string DayPatternFr = "dd/MM";
         public const string Iso8859Code = "ISO-8859-8";
 
-        public static string ToNaString(this object data)
+        public static string ToNaString(this object? data)
         {
             if (data == null)
                 return NA;

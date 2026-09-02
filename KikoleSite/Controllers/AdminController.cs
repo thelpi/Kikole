@@ -523,7 +523,7 @@ namespace KikoleSite.Controllers
                 .ToList();
         }
 
-        private void AddClubIfValid(List<PlayerClubRequest> clubs, string value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
+        private void AddClubIfValid(List<PlayerClubRequest> clubs, string? value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
         {
             var id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
             if (id.HasValue)
