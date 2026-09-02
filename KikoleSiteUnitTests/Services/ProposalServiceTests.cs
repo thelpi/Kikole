@@ -1,4 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using KikoleSite.Handlers;
+using KikoleSite.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
@@ -166,6 +169,189 @@ namespace KikoleSiteUnitTests.Services
             Compute(new[] { Proposal(ProposalTypes.Leaderboard, "", true, 1) }, out var points);
 
             points.Should().Be(975);
+        }
+    }
+
+    /// <summary>
+    /// Hierarchie d'acces a une journee : Admin > Creator > Found > PaidBoard > None.
+    /// C'est ce qui decide si le classement du jour est visible, donc du controle
+    /// d'acces fonctionnel et non du simple confort d'affichage.
+    /// </summary>
+    public class ProposalServiceGrantTests
+    {
+        private static readonly DateTime Day = ProposalChart.FirstDate;
+        private const ulong UserId = 7;
+
+        private readonly Mock<IProposalRepository> _proposalRepository = new Mock<IProposalRepository>();
+        private readonly Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
+        private readonly Mock<IUserRepository> _userRepository = new Mock<IUserRepository>();
+        private readonly Mock<IPlayerHandler> _playerHandler = new Mock<IPlayerHandler>();
+        private readonly ProposalService _service;
+
+        public ProposalServiceGrantTests()
+        {
+            var localizer = new Mock<IStringLocalizer<Translations>>();
+            localizer.Setup(_ => _[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
+
+            _leaderRepository
+                .Setup(_ => _.GetUserLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<ulong>()))
+                .ReturnsAsync(new List<LeaderDto>());
+            _proposalRepository
+                .Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<ulong>()))
+                .ReturnsAsync(new List<ProposalDto>());
+            _playerHandler
+                .Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()))
+                .ReturnsAsync(new PlayerFullDto
+                {
+                    Player = new PlayerDto { Id = 1, CreationUserId = 99 },
+                    Clubs = new List<ClubDto>(),
+                    PlayerClubs = new List<PlayerClubDto>()
+                });
+
+            var clock = new Mock<IClock>();
+            clock.Setup(_ => _.Today).Returns(Day);
+
+            _service = new ProposalService(
+                _proposalRepository.Object,
+                _leaderRepository.Object,
+                _userRepository.Object,
+                _playerHandler.Object,
+                localizer.Object,
+                clock.Object);
+        }
+
+        private void SetupUser(UserTypes type)
+        {
+            _userRepository.Setup(_ => _.GetUserByIdAsync(UserId))
+                .ReturnsAsync(new UserDto { Id = UserId, Login = "joueur", UserTypeId = (ulong)type });
+        }
+
+        [Fact]
+        public async Task AnAnonymousVisitorGetsNothing()
+        {
+            var grant = await _service.GetGrantAccessForDayAsync(0, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.None);
+        }
+
+        [Fact]
+        public async Task AnUnknownUserGetsNothing()
+        {
+            _userRepository.Setup(_ => _.GetUserByIdAsync(UserId)).ReturnsAsync((UserDto)null);
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.None);
+        }
+
+        [Fact]
+        public async Task AnAdministratorIsGrantedWithoutAnyLookup()
+        {
+            SetupUser(UserTypes.Administrator);
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.Admin);
+            _playerHandler.Verify(
+                _ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task TheCreatorOfTheDayOutranksHavingFoundIt()
+        {
+            SetupUser(UserTypes.StandardUser);
+            _playerHandler
+                .Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Day))
+                .ReturnsAsync(new PlayerFullDto
+                {
+                    Player = new PlayerDto { Id = 1, CreationUserId = UserId },
+                    Clubs = new List<ClubDto>(),
+                    PlayerClubs = new List<PlayerClubDto>()
+                });
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.Creator);
+        }
+
+        [Fact]
+        public async Task HavingALeaderRowGrantsFound()
+        {
+            SetupUser(UserTypes.StandardUser);
+            _leaderRepository
+                .Setup(_ => _.GetUserLeadersAsync(Day, Day, true, UserId))
+                .ReturnsAsync(new List<LeaderDto> { new LeaderDto { UserId = UserId } });
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.Found);
+        }
+
+        [Fact]
+        public async Task ASuccessfulNameProposalAlsoGrantsFound()
+        {
+            // filet pour le cas ou la ligne "leaders" manque : la proposition gagnante suffit
+            SetupUser(UserTypes.StandardUser);
+            _proposalRepository
+                .Setup(_ => _.GetProposalsAsync(Day, UserId))
+                .ReturnsAsync(new List<ProposalDto>
+                {
+                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Successful = 1 }
+                });
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.Found);
+        }
+
+        [Fact]
+        public async Task BuyingTheLeaderboardGrantsPaidBoardOnly()
+        {
+            SetupUser(UserTypes.StandardUser);
+            _proposalRepository
+                .Setup(_ => _.GetProposalsAsync(Day, UserId))
+                .ReturnsAsync(new List<ProposalDto>
+                {
+                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Leaderboard, Successful = 1 }
+                });
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.PaidBoard);
+        }
+
+        [Fact]
+        public async Task SearchingWithoutFindingOrBuyingGrantsNothing()
+        {
+            SetupUser(UserTypes.StandardUser);
+            _proposalRepository
+                .Setup(_ => _.GetProposalsAsync(Day, UserId))
+                .ReturnsAsync(new List<ProposalDto>
+                {
+                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Club, Successful = 0 },
+                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Name, Successful = 0 }
+                });
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.None);
+        }
+
+        [Fact]
+        public async Task AskingForAClueIsNotEnoughToSeeTheBoard()
+        {
+            // seul l'achat du classement ouvre l'acces, pas n'importe quel achat
+            SetupUser(UserTypes.StandardUser);
+            _proposalRepository
+                .Setup(_ => _.GetProposalsAsync(Day, UserId))
+                .ReturnsAsync(new List<ProposalDto>
+                {
+                    new ProposalDto { ProposalTypeId = (ulong)ProposalTypes.Clue, Successful = 1 }
+                });
+
+            var grant = await _service.GetGrantAccessForDayAsync(UserId, Day).ConfigureAwait(false);
+
+            grant.Should().Be(DayGrantTypes.None);
         }
     }
 }
