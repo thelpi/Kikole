@@ -17,8 +17,6 @@ namespace KikoleSite.Services
     /// <seealso cref="IBadgeService"/>
     public class BadgeService : IBadgeService
     {
-        private const string SpecialWord = "chouse";
-
         private readonly IPlayerHandler _playerHandler;
         private readonly IBadgeRepository _badgeRepository;
         private readonly ILeaderRepository _leaderRepository;
@@ -57,7 +55,6 @@ namespace KikoleSite.Services
         private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
             = new List<Badges>
             {
-                Badges.DoYouSpeakPatois,
                 Badges.DoItYourself,
                 Badges.WeAreKikole,
                 Badges.Dedicated
@@ -331,14 +328,6 @@ namespace KikoleSite.Services
             var allBadges = await _badgeRepository
                 .GetBadgesAsync(true)
                 .ConfigureAwait(false);
-
-            // We have only a special badge base on the request value for now
-            if (SpecialWord.Equals(request.Value.ToLowerInvariant()))
-            {
-                await InsertBadgeIfNotAlreadyAsync(
-                        request.ProposalDateTime, userId, (ulong)Badges.DoYouSpeakPatois, collectedBadges, allBadges)
-                    .ConfigureAwait(false);
-            }
 
             if (request.IsTodayPlayer)
             {

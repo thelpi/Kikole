@@ -1,48 +1,133 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
-CREATE DATABASE IF NOT EXISTS kikole DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+SET NAMES utf8mb4;
+CREATE DATABASE IF NOT EXISTS kikole DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE kikole;
 
 CREATE TABLE badges (
   id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL,
-  description text COLLATE utf8_bin NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci NOT NULL,
   hidden tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date) VALUES
+(1, 'Your first success', 'Find the player of the day for the first time.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(2, 'Halfway to the top', 'Score at least 500 points on a single day.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(3, 'It\'s over 900!', 'Score at least 900 points on a single day.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(4, 'Archaeology', 'Find a player of the day born before 1970.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(5, 'Three in a row', 'Find the player of the day three days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(6, 'A week in a row', 'Find the player of the day seven days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(7, 'Stay up late', 'Find the player of the day between midnight and 2am.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(8, 'Saved by the bell', 'Find the player of the day between 11pm and midnight.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(9, 'Caca Café Clope Kikolé', 'Find the player of the day between 5am and 8am.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(10, 'Over the top, part 1', 'Be the only player of the day to find the answer faster than everyone else.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(11, 'Over the top, part 2', 'Be the only player of the day to score the highest amount of points.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(12, 'Legend tier', 'Find the player of the day thirty days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(13, 'World War Two', 'Find a player of the day born before 1940.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(14, 'Make it double', 'Score the maximum of 1000 points two days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(15, 'Do it yourself', 'Get one of your own player submissions accepted.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(16, 'Four-four-two', 'Find at least one goalkeeper, four defenders, four midfielders and two forwards.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(17, 'Around the world', 'Find players of the day from at least twenty different countries.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(18, 'Wooden spoon', 'Find the player of the day without scoring a single point.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(19, 'We are Kikolé', 'Get five of your own player submissions accepted.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(20, 'Wikipedia screenshot', 'Find the player of the day using club proposals only.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(21, 'Passport check', 'Find the player of the day without proposing a single club.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(22, 'Everything is not lost', 'Find the player of the day after failing every previous proposal of the day.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(23, 'I\'m feeling lucky', 'Find the player of the day with your very first proposal.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(24, 'Dedicated', 'Take part in the game thirty days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(25, 'Hell of a week', 'Score at least 6666 points over seven consecutive days.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(26, 'The breakfast club', 'Find the player of the day before 9am, seven days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(27, 'Métro, boulot, Kikolé, dodo', 'Find the player of the day after 9pm, seven days in a row.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(28, 'One minute chrono', 'Find a player with at least five clubs in under a minute, with every proposal correct and no clue requested.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41');
 
 CREATE TABLE badge_translations (
   badge_id bigint(20) UNSIGNED NOT NULL,
   language_id bigint(20) UNSIGNED NOT NULL,
-  description text COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  description text COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
-CREATE TABLE challenges (
-  id bigint(20) UNSIGNED NOT NULL,
-  host_user_id bigint(20) UNSIGNED NOT NULL,
-  guest_user_id bigint(20) UNSIGNED NOT NULL,
-  is_accepted tinyint(1) UNSIGNED DEFAULT NULL,
-  challenge_date date DEFAULT NULL,
-  points_rate tinyint(3) UNSIGNED NOT NULL,
-  creation_date datetime NOT NULL,
-  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+INSERT INTO badge_translations (badge_id, language_id, description) VALUES
+(1, 2, 'Trouver le joueur du jour pour la première fois.'),
+(2, 2, 'Marquer au moins 500 points sur une journée.'),
+(3, 2, 'Marquer au moins 900 points sur une journée.'),
+(4, 2, 'Trouver un joueur du jour né avant 1970.'),
+(5, 2, 'Trouver le joueur du jour trois jours d\'affilée.'),
+(6, 2, 'Trouver le joueur du jour sept jours d\'affilée.'),
+(7, 2, 'Trouver le joueur du jour entre minuit et 2h du matin.'),
+(8, 2, 'Trouver le joueur du jour entre 23h et minuit.'),
+(9, 2, 'Trouver le joueur du jour entre 5h et 8h du matin.'),
+(10, 2, 'Être le seul joueur de la journée à trouver plus vite que tout le monde.'),
+(11, 2, 'Être le seul joueur de la journée à marquer le plus grand nombre de points.'),
+(12, 2, 'Trouver le joueur du jour trente jours d\'affilée.'),
+(13, 2, 'Trouver un joueur du jour né avant 1940.'),
+(14, 2, 'Marquer le maximum de 1000 points deux jours d\'affilée.'),
+(15, 2, 'Faire accepter une de vos propres propositions de joueur.'),
+(16, 2, 'Trouver au moins un gardien, quatre défenseurs, quatre milieux et deux attaquants.'),
+(17, 2, 'Trouver des joueurs du jour d\'au moins vingt pays différents.'),
+(18, 2, 'Trouver le joueur du jour sans marquer le moindre point.'),
+(19, 2, 'Faire accepter cinq de vos propres propositions de joueur.'),
+(20, 2, 'Trouver le joueur du jour en ne proposant que des clubs.'),
+(21, 2, 'Trouver le joueur du jour sans proposer un seul club.'),
+(22, 2, 'Trouver le joueur du jour après avoir raté toutes les propositions précédentes de la journée.'),
+(23, 2, 'Trouver le joueur du jour dès la toute première proposition.'),
+(24, 2, 'Participer au jeu trente jours d\'affilée.'),
+(25, 2, 'Marquer au moins 6666 points sur sept jours consécutifs.'),
+(26, 2, 'Trouver le joueur du jour avant 9h, sept jours d\'affilée.'),
+(27, 2, 'Trouver le joueur du jour après 21h, sept jours d\'affilée.'),
+(28, 2, 'Trouver un joueur ayant au moins cinq clubs en moins d\'une minute, avec toutes les propositions correctes et sans demander d\'indice.');
 
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL,
-  allowed_names text COLLATE utf8_bin NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  allowed_names text COLLATE utf8mb4_unicode_ci NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE continents (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO continents (id, `name`, creation_date, update_date) VALUES
+(1, 'Europe', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(2, 'Africa', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(3, 'Asia', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(4, 'North America', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(5, 'South America', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(6, 'Oceania', '2022-03-03 22:17:41', '2022-03-03 21:17:41');
+
+CREATE TABLE continent_translations (
+  continent_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO continent_translations (continent_id, language_id, `name`) VALUES
+(1, 1, 'Europe'),
+(1, 2, 'Europe'),
+(2, 1, 'Africa'),
+(2, 2, 'Afrique'),
+(3, 1, 'Asia'),
+(3, 2, 'Asie'),
+(4, 1, 'North America'),
+(4, 2, 'Amérique du Nord'),
+(5, 1, 'South America'),
+(5, 2, 'Amérique du Sud'),
+(6, 1, 'Oceania'),
+(6, 2, 'Océanie');
 
 CREATE TABLE countries (
   id bigint(20) UNSIGNED NOT NULL,
-  code char(2) COLLATE utf8_bin NOT NULL,
+  code char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 INSERT INTO countries (id, `code`, creation_date, update_date) VALUES
 (1, 'AF', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
@@ -298,8 +383,8 @@ INSERT INTO countries (id, `code`, creation_date, update_date) VALUES
 CREATE TABLE country_translations (
   country_id bigint(20) UNSIGNED NOT NULL,
   language_id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 INSERT INTO country_translations (country_id, language_id, `name`) VALUES
 (1, 1, 'Afghanistan'),
@@ -804,19 +889,19 @@ INSERT INTO country_translations (country_id, language_id, `name`) VALUES
 CREATE TABLE discussions (
   id bigint(20) UNSIGNED NOT NULL,
   user_id bigint(20) UNSIGNED NOT NULL,
-  email varchar(255) COLLATE utf8_bin NOT NULL,
-  message text COLLATE utf8_bin NOT NULL,
+  email varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  message text COLLATE utf8mb4_unicode_ci NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE languages (
   id bigint(20) UNSIGNED NOT NULL,
-  code char(2) COLLATE utf8_bin NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL,
+  code char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 INSERT INTO languages (id, `code`, `name`, creation_date, update_date) VALUES
 (1, 'en', 'English', '2022-03-03 00:00:00', '2022-03-03 21:03:16'),
@@ -830,26 +915,27 @@ CREATE TABLE leaders (
   time int(10) UNSIGNED NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE messages (
   id bigint(20) UNSIGNED NOT NULL,
-  message text COLLATE utf8_bin NOT NULL,
+  message text COLLATE utf8mb4_unicode_ci NOT NULL,
   display_from datetime DEFAULT NULL,
   display_to datetime DEFAULT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE players (
   id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL,
-  allowed_names text COLLATE utf8_bin NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  allowed_names text COLLATE utf8mb4_unicode_ci NOT NULL,
   year_of_birth smallint(5) UNSIGNED NOT NULL,
   country_id bigint(20) UNSIGNED NOT NULL,
+  continent_id bigint(20) UNSIGNED NOT NULL,
   proposal_date date DEFAULT NULL,
-  clue varchar(255) COLLATE utf8_bin NOT NULL,
-  easy_clue varchar(255) COLLATE utf8_bin NOT NULL,
+  clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  easy_clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   position_id bigint(20) UNSIGNED NOT NULL,
   badge_id bigint(20) UNSIGNED DEFAULT NULL,
   creation_user_id bigint(20) UNSIGNED NOT NULL,
@@ -857,26 +943,26 @@ CREATE TABLE players (
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   reject_date datetime DEFAULT NULL,
   hide_creator tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE player_clubs (
   player_id bigint(20) UNSIGNED NOT NULL,
   club_id bigint(20) UNSIGNED NOT NULL,
   history_position tinyint(3) UNSIGNED NOT NULL,
   is_loan tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE player_clue_translations (
   player_id bigint(20) UNSIGNED NOT NULL,
   language_id bigint(20) UNSIGNED NOT NULL,
   is_easy tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
-  clue varchar(255) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE positions (
   id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 INSERT INTO positions (id, `name`) VALUES
 (1, 'Goalkeeper'),
@@ -888,18 +974,19 @@ CREATE TABLE proposals (
   id bigint(20) UNSIGNED NOT NULL,
   user_id bigint(20) UNSIGNED NOT NULL,
   proposal_type_id bigint(20) UNSIGNED NOT NULL,
-  value varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  value varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   successful tinyint(3) UNSIGNED NOT NULL,
+  ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
   proposal_date date NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE proposal_types (
   id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL,
-  description text COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 INSERT INTO proposal_types (id, `name`, description) VALUES
 (1, 'Name', 'The player\'s name has been proposed'),
@@ -907,31 +994,40 @@ INSERT INTO proposal_types (id, `name`, description) VALUES
 (3, 'Year', 'The player\'s year of the birth has been proposed'),
 (4, 'Country', 'The player\'s nationality has been proposed'),
 (5, 'Clue', 'A new clue has been requested'),
-(6, 'Position', 'The player\'s position has been proposed');
+(6, 'Position', 'The player\'s position has been proposed'),
+(7, 'Leaderboard', 'The leaderboard of the day has been requested'),
+(8, 'Continent', 'The player\'s continent has been proposed');
+
+CREATE TABLE registration_guids (
+  id char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  user_id bigint(20) UNSIGNED DEFAULT NULL,
+  creation_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE users (
   id bigint(20) UNSIGNED NOT NULL,
-  login varchar(255) COLLATE utf8_bin NOT NULL,
-  password char(64) COLLATE utf8_bin NOT NULL,
-  password_reset_question varchar(255) COLLATE utf8_bin NOT NULL,
-  password_reset_answer char(64) COLLATE utf8_bin NOT NULL,
+  login varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  password char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  password_reset_question varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  password_reset_answer char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   language_id bigint(20) UNSIGNED NOT NULL,
   user_type_id bigint(20) UNSIGNED NOT NULL,
+  ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
   is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE user_badges (
   user_id bigint(20) UNSIGNED NOT NULL,
   badge_id bigint(20) UNSIGNED NOT NULL,
   get_date date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE user_types (
   id bigint(20) UNSIGNED NOT NULL,
-  name varchar(255) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 INSERT INTO user_types (id, `name`) VALUES
 (1, 'Standard user'),
@@ -944,17 +1040,18 @@ ALTER TABLE badges
 
 ALTER TABLE badge_translations
   ADD PRIMARY KEY (badge_id,language_id),
-  ADD UNIQUE KEY badge_id (badge_id),
   ADD KEY language_id (language_id);
-
-ALTER TABLE challenges
-  ADD PRIMARY KEY (id),
-  ADD KEY host_user_id (host_user_id),
-  ADD KEY guest_user_id (guest_user_id);
 
 ALTER TABLE clubs
   ADD PRIMARY KEY (id),
   ADD UNIQUE KEY name (name);
+
+ALTER TABLE continents
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE continent_translations
+  ADD PRIMARY KEY (continent_id,language_id),
+  ADD KEY language_id (language_id);
 
 ALTER TABLE countries
   ADD PRIMARY KEY (id),
@@ -984,6 +1081,7 @@ ALTER TABLE messages
 ALTER TABLE players
   ADD PRIMARY KEY (id),
   ADD KEY country_id (country_id) USING BTREE,
+  ADD KEY continent_id (continent_id),
   ADD KEY position_id (position_id),
   ADD KEY badge_id (badge_id),
   ADD KEY creation_user_id (creation_user_id),
@@ -1011,6 +1109,10 @@ ALTER TABLE proposals
 ALTER TABLE proposal_types
   ADD PRIMARY KEY (id);
 
+ALTER TABLE registration_guids
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id);
+
 ALTER TABLE users
   ADD PRIMARY KEY (id),
   ADD KEY lang_id (language_id),
@@ -1025,9 +1127,9 @@ ALTER TABLE user_types
 
 ALTER TABLE badges
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-ALTER TABLE challenges
-  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE clubs
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE continents
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE countries
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
