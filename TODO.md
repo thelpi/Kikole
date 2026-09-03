@@ -1,7 +1,6 @@
 # Kikolé — feuille de route « remaster v2 »
 
-Reprise du projet abandonné en mai 2023. Ce fichier est la référence des chantiers à
-mener ; il est rangé par ordre d'attaque recommandé, avec la justification de l'ordre.
+Reprise du projet abandonné en mai 2023. Rangé par ordre d'attaque recommandé.
 
 Branche de travail : `remaster-v2`.
 
@@ -12,110 +11,19 @@ Branche de travail : `remaster-v2`.
 | | état |
 |---|---|
 | Script SQL | reconstruit, `utf8mb4` / `utf8mb4_unicode_ci`, 21 tables |
-| Base locale | MySQL 9.1.0 (WAMP), rejouable via `kikole_mock.sql` |
-| Sites parasites | The Elite et Mets tes tennis supprimés (8 400 lignes) |
-| Tests | 224 tests, projet `KikoleSiteUnitTests` |
-| Application | tourne en local, boucle de jeu fonctionnelle |
-| Code applicatif | ~8 800 lignes C# |
+| Base locale | MySQL 9.1 (WAMP), rejouable à l'infini via `kikole_mock.sql` |
+| Sites parasites | The Elite et Mets tes tennis supprimés |
+| Framework | .NET 10, hébergement minimal |
+| Références nullables | activées, **zéro avertissement** sur les deux projets |
+| Tests | **435**, projet `KikoleSiteUnitTests` |
+| Base de production | extraite en texte (voir `Restauration/`) |
 
 ---
 
-## 1. Finir le filet de tests
+## 1. Sécurité et authentification
 
-**Pourquoi d'abord :** on s'apprête à changer de framework puis à réécrire
-l'authentification, sur une logique métier qu'il a fallu reconstituer par lecture.
-Sans tests, la migration est un acte de foi.
-
-Classé par risque décroissant (bug silencieux ? écrit-il en base ? coût du test ?).
-
-- [ ] **`BadgeService`** (762 l.) — 28 conditions dont des séries multi-jours et des
-      agrégats. Résultats **persistés** dans `user_badges`. `ResetBadgesAsync` efface et
-      recalcule tout l'historique : la fonction la plus destructrice du projet.
-- [ ] **`LeaderService`** (448 l.) — `ComputeMissingLeadersAsync` écrit du score
-      définitif. Contient la boucle jour par jour et le `First()` fragile.
-- [ ] **`PlayerService`** (359 l.) — déplace les dates de parution (irréversible) et
-      décide de l'anonymisation du joueur du jour : un bug ici **spoile**.
-- [ ] **`ProposalService`** (reste) — `GetGrantAccessForDayAsync`, soit le contrôle
-      d'accès au classement du jour.
-- [ ] **`UserStat` / `DailyUserStat`** (151 l.) — agrégats purs, faciles à couvrir.
-- [ ] **`HomeModel.SetPropertiesFromProposal`** — machine à états de l'écran de jeu.
-- [ ] **`ViewHelper`** (189 l.) — faible criticité **mais** dépend de
-      `CultureInfo.CurrentCulture` : à remonter en priorité si on enchaîne sur la
-      migration, c'est typiquement ce qu'une bascule .NET casse (évolutions d'ICU).
-- [ ] Petits modèles (`Player`, `PlayerCreator`, `Badge`, `Club`…) — surtout du mapping.
-- [ ] Contrôleurs (1 974 l.) — coûteux en unitaire, meilleur retour en tests d'intégration.
-- [ ] Dépôts — nécessitent des tests d'intégration sur base jetable.
-
-Hors périmètre : `StatisticService` (outil personnel).
-
----
-
-## 2. Migration .NET 10
-
-**Pourquoi juste après :** `netcoreapp3.1` est en fin de vie depuis décembre 2022, soit
-bientôt quatre ans sans correctif de sécurité, sous une application dont
-l'authentification est déjà faible. Et surtout **tout le reste coûte moins cher après** :
-réécrire l'auth sur 3.1 puis migrer, c'est le faire deux fois.
-
-- [ ] Installer le SDK .NET 10 (seul le 9.0.314 est présent)
-- [ ] `KikoleSite` et `KikoleSiteUnitTests` vers `net10.0`
-- [ ] Remonter les paquets : `xunit` (2.4.x figé par netcoreapp3.1), `Microsoft.NET.Test.Sdk`,
-      `MySql.Data` → `MySqlConnector`, `Moq`
-- [ ] Activer les *nullable reference types* et les analyzers — ils feront une bonne
-      partie de l'audit tout seuls
-- [ ] Vérifier les formatages dépendants de la culture (cf. `ViewHelper`)
-- [ ] Garder `FluentAssertions` en 6.x : la 7.0 bascule sous licence commerciale
-
----
-
-## 3. Restauration de la base de production d'époque
-
-La base MySQL de production (mars 2022 → mai 2023) a été retrouvée, mais sous forme de
-**fichiers bruts et non d'un dump `.sql`**. À traiter **juste après la migration**, pour
-comparaison et réalimentation éventuelle de certaines données.
-
-- [ ] **Identifier ce qu'on a exactement.** La restauration dépend entièrement du contenu :
-      - répertoire de données complet (`ibdata1`, `ib_logfile*`, un dossier par base) →
-        cas le plus favorable ;
-      - `.ibd` seuls → nécessite `ALTER TABLE ... IMPORT TABLESPACE` avec un schéma
-        recréé à l'identique au préalable ;
-      - présence ou absence de fichiers `.frm` → c'est l'indice de version : MySQL 8.0 les
-        a supprimés au profit du dictionnaire de données interne. Leur présence signe donc
-        du 5.x.
-- [ ] **Ne pas tenter d'ouvrir ces fichiers avec le MySQL 9.1 de WAMP.** Les formats
-      InnoDB ne sont pas rétrocompatibles sur un tel écart. Il faut monter une instance
-      de la **version d'origine** (Docker `mysql:5.7` par exemple), la pointer sur le
-      répertoire de données, puis produire un `mysqldump` propre — c'est ce dump qui sera
-      ensuite importable dans la base moderne.
-- [ ] **Prévoir la conversion de collation** : la base d'époque était en `utf8` /
-      `utf8_bin`, la nouvelle en `utf8mb4` / `utf8mb4_unicode_ci`. Importer un dump
-      `utf8` sans conversion explicite produit du mojibake sur les noms accentués.
-
-**Le piège principal : les identifiants de badges ont été renumérotés.** Les données
-d'époque référencent l'ancienne numérotation (3, 5, 6, 7… 41) dans `user_badges.badge_id`
-et `players.badge_id`. La nouvelle est contiguë de 1 à 28, dans le même ordre. Une table
-de correspondance est donc nécessaire à l'import :
-
-| ancien | 3 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 30 | 31 | 32 | 33 | 36 | 37 | 38 | 39 | 40 | 41 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **nouveau** | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 |
-
-Les lignes référençant les badges **29** (`DoYouSpeakPatois`) et **34** (`TheEnd`), supprimés,
-sont à écarter. La table `challenges` d'époque est à ignorer, elle n'existe plus.
-
-- [ ] **Les libellés de badges d'époque sont dans ce dump.** C'est l'occasion de remplacer
-      les descriptions que j'ai rédigées par les originales (cf. « Décisions prises »).
-- [ ] **Données personnelles** : ce dump contient des logins, des hachages de mots de passe
-      faibles, des adresses IP et les e-mails de la table `discussions`. À garder en local,
-      et sans intérêt à réimporter tel quel côté comptes puisque le chantier Identity
-      invalidera les hachages de toute façon.
-
----
-
-## 4. Sécurité et authentification
-
-Quatre défauts identifiés, par gravité décroissante. La cible raisonnable est
-**ASP.NET Core Identity** plutôt que de réparer la cryptographie maison.
+Quatre défauts, par gravité décroissante. La cible raisonnable est **ASP.NET Core
+Identity** plutôt que de réparer la cryptographie maison.
 
 - [ ] **Cookie d'authentification falsifiable** — AES-CBC avec `IV = new byte[16]` (IV nul
       et constant) et **aucun MAC**. Le cookie contient `hashDuMotDePasse§§§login`.
@@ -124,80 +32,64 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
 - [ ] **Mots de passe en SHA256 avec sel global unique** — pas de sel par utilisateur
       (deux comptes avec le même mot de passe ont le même hash) et fonction rapide, donc
       idéale pour du cassage en masse. Cible : un KDF lent.
-- [ ] **`Crypter` échoue en silence et en clair** — les deux `try/catch` renvoient le texte
-      non chiffré si quoi que ce soit tourne mal. Défaillance ouverte.
 - [ ] **`SHA256` en champ d'instance sur un singleton** — `ComputeHash` n'est pas
       thread-safe : deux connexions simultanées peuvent se corrompre. Bug de justesse,
       pas seulement de sécurité, et silencieux.
-- [ ] Ne pas versionner de secrets : passer par *user-secrets* en dev
-
----
-
-## 5. Modèle de données et contenu
-
-- [ ] **Rendre les clubs canoniques** — aujourd'hui le champ club est un `<input type="text">
-      libre : l'autocomplétion suggère mais ne remplit aucun champ caché, contrairement au
-      continent et à la nationalité qui soumettent un identifiant. Passer à un identifiant
-      supprimerait la correspondance par chaîne, permettrait une vraie clé étrangère et
-      rendrait la détection de doublon exacte. À arbitrer : `clubs.allowed_names` ne
-      servirait plus qu'à alimenter l'autocomplétion, plus à décider de la réussite.
-- [ ] **Nationalités doubles et sportives** — `players.country_id` est aujourd'hui unique et
-      `NOT NULL`. C'est un **changement de modèle**, donc à faire avant d'accumuler des
-      données à migrer.
-- [ ] **Remplir la base des clubs** une bonne fois — prérequis pratique pour jouer.
-- [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
-      d'intégrité sont les `IsValid` applicatives.
 - [ ] **`IUserService`** — les 12 appels directs de `AccountController` à `IUserRepository`
       ne sont pas du CRUD mais de la logique d'authentification : la vérification du mot de
       passe se fait **dans le contrôleur**, et l'inscription enchaîne cinq étapes sans
-      transaction. Un service serait justifié, mais ce code est destiné à disparaître avec
-      Identity : à traiter **dans** le chantier sécurité, pas avant.
-- [ ] `IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
-      passent en canonique, la résolution nom → identifiant étant alors de la logique métier.
-      `Message` et `Discussion` ne méritent pas de service : ce serait de la délégation vide.
+      transaction. À traiter **dans** ce chantier, puisque le code disparaîtra avec Identity.
+- [ ] Ne pas versionner de secrets : passer par *user-secrets* en dev.
 
 ---
 
-## 6. Qualité et performance
+## 2. Modèle de données et contenu
+
+- [ ] **Rendre les clubs canoniques** — le champ club est un `<input type="text">` libre :
+      l'autocomplétion suggère mais ne remplit aucun champ caché, contrairement au continent
+      et à la nationalité qui soumettent un identifiant. Un identifiant supprimerait la
+      correspondance par chaîne et permettrait une vraie clé étrangère. À arbitrer :
+      `clubs.allowed_names` ne servirait plus qu'à l'autocomplétion.
+- [ ] **Remplir la base des clubs** — `Restauration/clubs_2023.txt` contient environ
+      1 767 clubs d'époque, dont 738 avec leurs alias. Matière première prête.
+- [ ] **Nationalités doubles et sportives** — `players.country_id` est unique et `NOT NULL`.
+      Changement de modèle, donc à faire avant d'accumuler des données. La table
+      `player_federations` retrouvée en production était une tentative abandonnée.
+- [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
+      d'intégrité sont les `IsValid` applicatives.
+- [ ] `IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
+      passent en canonique. `Message` et `Discussion` ne méritent pas de service.
+
+---
+
+## 3. Qualité et performance
 
 - [ ] **Requêtes N+1** — `PlayerHandler` fait une requête par club d'une carrière,
       `LeaderService.GetUsersFromIdsAsync` une par utilisateur, `BadgeService` une par badge
-      et par jour. Sur un classement mensuel, ça se compte en centaines d'aller-retours SQL.
+      et par jour. Sur un classement mensuel, des centaines d'aller-retours SQL.
 - [ ] **Extraire un `IInternationalService`** — `KikoleBaseController` porte trois champs
       `static` (`_countriesCache`, `_continentsCache`, `_clubsCache`), soit de l'état
       partagé entre toutes les requêtes dans une classe instanciée par requête.
-      `_clubsCache` est une simple référence **sans verrou**, contrairement aux deux autres
-      qui sont des `ConcurrentDictionary` : même famille de bug que le `SHA256` de
-      `Crypter`. Le cache est en plus indexé sur `CultureInfo.CurrentCulture` et invalidé
-      via un paramètre `resetCache` propagé de contrôleur en contrôleur. Un service (ou
-      `IMemoryCache`) sort cet état du contrôleur, le rend testable et thread-safe.
-      *C'est le seul des cinq domaines sans service où le gain est immédiat.*
-- [ ] **Sortir `GetProposalResponsesWithPoints` de `ProposalService`** — la méthode est
-      `internal static` et `LeaderService` l'appelle directement (lignes 243 et 336), seul
-      couplage service → service du projet, invisible à l'analyse des dépendances injectées.
-      Elle ne dépend d'aucun dépôt : c'est une fonction pure sur des DTOs. Sa place est dans
-      un **calculateur de score dédié** que les deux services consommeraient, ce qui
-      supprime l'entorse au lieu de la déplacer. À faire **avant** d'ajouter d'autres
-      appels de ce genre.
+      `_clubsCache` est une référence **sans verrou**, contrairement aux deux autres qui
+      sont des `ConcurrentDictionary` : même famille de bug que le `SHA256` de `Crypter`.
+      *Le seul des cinq domaines sans service où le gain est immédiat.*
+- [ ] **Sortir `GetProposalResponsesWithPoints` de `ProposalService`** — méthode
+      `internal static` que `LeaderService` appelle directement, seul couplage
+      service → service du projet, invisible à l'analyse des dépendances injectées. C'est
+      une fonction pure sur des DTOs : sa place est dans un **calculateur de score dédié**.
 - [ ] **De la logique métier vit dans les dépôts, hors de portée des tests.** Six règles
-      fonctionnelles sont encodées dans la couche d'accès aux données. Elles sont
-      **invisibles pour les 433 tests unitaires et le resteront** : les tests simulent les
-      dépôts, donc ils vérifient que le service passe les bons paramètres, jamais ce que
-      le SQL en fait. Sur ces points, la suite donne une impression de couverture qu'elle
-      n'a pas.
+      fonctionnelles sont encodées dans la couche d'accès aux données, **invisibles pour les
+      435 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
+      passe les bons paramètres, jamais ce que le SQL en fait.
 
       Par gravité décroissante :
-      - **`StatisticRepository.UserPlayerLinkSql`** réimplémente en SQL la règle d'accès
-        de `ProposalService.GetGrantAccessForDayAsync` (admin, ou l'a trouvé ce jour-là,
-        ou l'a soumis). **Deux définitions du même droit d'accès, dans deux couches**, qui
-        peuvent diverger en silence. À faire appeler le service plutôt que dupliquer.
+      - **`StatisticRepository.UserPlayerLinkSql`** réimplémente en SQL la règle d'accès de
+        `ProposalService.GetGrantAccessForDayAsync`. **Deux définitions du même droit
+        d'accès, dans deux couches**, qui peuvent diverger en silence.
       - **`BaseRepository.SubSqlValidUsers`** définit le « joueur classable » (ni
-        administrateur, ni désactivé). Règle métier injectée dans sept requêtes depuis la
-        classe de base des dépôts, invisible depuis les services — qui référence en plus
-        l'enum de domaine `UserTypes`.
+        administrateur, ni désactivé), injecté dans sept requêtes depuis la classe de base.
       - **`proposal_date = DATE(creation_date)`**, la définition de « trouvé le jour même »,
-        dupliquée **cinq fois** (3× `LeaderRepository`, 2× `ProposalRepository`, dont une
-        variante contournable par `OR 1 = @loose`).
+        dupliquée **cinq fois**.
       - `ProposalRepository.GetMissingUsersAsLeaderAsync` encode la définition d'un
         classement incomplet.
       - `PlayerRepository.GetPlayersByCreatorAsync` encode l'état d'une soumission via un
@@ -205,87 +97,101 @@ Quatre défauts identifiés, par gravité décroissante. La cible raisonnable es
       - `BadgeRepository.GetUsersOfTheDayWithBadgeAsync` charge tous les détenteurs d'un
         badge puis filtre en C# sur une journée (logique dans le dépôt + N+1).
 
-      Deux chantiers à ne pas mélanger : **(a)** des tests d'intégration sur base jetable
-      — `kikole_mock.sql` étant déjà idempotent, la moitié du travail est faite, et c'est
-      la seule façon de vérifier ces règles telles qu'elles s'exécutent ; **(b)** remonter
+      Deux chantiers à ne pas mélanger : **(a)** des tests d'intégration sur base jetable —
+      `kikole_mock.sql` étant idempotent, la moitié du travail est faite ; **(b)** remonter
       les règles dans le domaine, une fois (a) en place pour servir de filet.
-- [ ] **Palmarès : le cumul global n'est pas la somme des podiums mensuels.** Dans
-      `LeaderService.GetPalmaresAsync`, la fonction interne `GetUserAtPalmaresPosition`
-      fait deux choses : elle retourne l'utilisateur à une position donnée **et** lui
-      crédite une médaille au passage. Or le garde-fou « les trois places sont pourvues »
-      n'est évalué qu'**après** les trois appels. Sur un mois comptant moins de trois
-      joueurs classés, le mois est écarté de la liste des podiums mais les deux premiers
-      ont déjà encaissé leur or et leur argent au cumul global. Les deux tableaux de la
-      page Palmarès affichent donc des totaux incohérents.
-
-      Ce n'est pas un cas exotique : la relance repart de zéro, et le jeu de données de
-      test ne contient que deux joueurs non-administrateurs. Le bug se déclenche dès la
-      première ouverture de la page en local.
-
-      **Arbitrage non tranché**, à décider avant de corriger :
-      - **A** — un mois sans podium complet ne rapporte aucune médaille. On sépare
-        « regarder qui occupe les trois places » de « distribuer les médailles », et on
-        ne distribue qu'une fois les trois places confirmées. Une quinzaine de lignes
-        dans une seule méthode. *Recommandé.*
-      - **B** — les médailles restent acquises et c'est l'affichage mensuel qui est trop
-        strict : on accepte alors d'afficher un podium incomplet, à deux voire un seul.
-        Plus invasif, touche aussi le modèle `Palmares` et la vue.
-
-      Le comportement actuel est figé par le test
-      `LeaderServicePalmaresTests.TheGlobalTableCountsMedalsFromMonthsThatHaveNoOfficialPodium`,
-      à inverser au moment de la correction.
-- [ ] **`Single()` sans garde-fou sur données incohérentes** — `PlayerClub` lève une
-      exception si un club de la carrière est absent de la liste, `Player` de même si le
-      créateur manque. Même motif que le `pDays.First(...)` de `LeaderService` : le code
-      casse au lieu de dégrader. Comportements figés par des tests de caractérisation.
+- [ ] **`OneMinuteChrono` : le code contredit sa propre description.** Les libellés d'époque
+      annoncent « at least 6 clubs » et « plus de 5 clubs », le commentaire du code dit
+      « More than 5 clubs », mais `BadgeService.cs:143` teste `Clubs.Count < 5` — donc
+      éligible dès 5 clubs. À trancher : corriger le code ou la description.
+- [ ] **`Single()` sans garde-fou sur données incohérentes** — `PlayerClub` lève si un club
+      de la carrière est absent de la liste, `Player` de même si le créateur manque. Même
+      motif que le `pDays.First(...)` de `LeaderService`, qui lèvera sans dire quelle date
+      manque. Comportements figés par des tests de caractérisation.
+- [ ] **`ProposalChart.FirstDate`** — figé en dur à titre provisoire. À sortir en
+      configuration, ou mieux à déduire du `MIN(proposal_date)` en base. Tant qu'il est en
+      dur, `kikole_mock.sql` doit garder la même valeur dans `@first_date`.
 - [ ] **Modernisation syntaxique** — le code date de C# 8, la cible est C# 14. Passe
       mécanique, à faire d'un bloc pour ne pas polluer les diffs fonctionnels :
-      - `record` plutôt que `class` pour les DTO et les modèles de présentation
-      - `init` plutôt que `set` sur les propriétés qui ne changent pas après construction
-      - namespaces à portée fichier (`namespace KikoleSite.Models;`) : un niveau
-        d'indentation en moins sur tout le projet
-      - expressions de collection `[]` plutôt que `new List<T>()`, `.ToList()` ou
-        `Array.Empty<T>()`
+      `record` plutôt que `class` pour les DTO, `init` plutôt que `set`, namespaces à portée
+      fichier, expressions de collection `[]`.
 - [ ] **Retirer les `ConfigureAwait(false)`** — 287 occurrences dans 23 fichiers. Utile dans
       une bibliothèque, inutile ici : ASP.NET Core n'a pas de `SynchronizationContext`.
-      C'est du bruit pur. À faire **après** la migration, pour ne pas mélanger les diffs.
-- [ ] **`ProposalChart.FirstDate`** — figé à la date du jour à titre provisoire. À sortir en
-      configuration, ou mieux à déduire du `MIN(proposal_date)` en base.
-- [ ] **`LeaderService` : `pDays.First(...)`** — lève une exception dès qu'un jour sans
-      joueur apparaît dans l'historique. Masqué tant que `FirstDate` vaut aujourd'hui,
-      ressurgira au premier trou. Un test de caractérisation fige déjà le comportement
-      équivalent dans `PlayerHandler`.
 - [ ] **Durcissement de `RemoveDiacritics`** (optionnel) — il reste 9 caractères non
-      convertis en Latin Extended-A (`Ĳ`, `ŉ`, `ŋ`…) et 11 en Latin Extended Additional,
-      tous archaïques ou typographiques. Sans impact réaliste sur des noms de footballeurs.
+      convertis en Latin Extended-A et 11 en Latin Extended Additional, tous archaïques.
 
 ---
 
-## 7. Interface
+## 4. Interface
 
 - [ ] Rendre le graphisme plus attrayant.
+- [ ] **Les indices peuvent être des images** — un indice d'époque vaut
+      `https://i.imgur.com/YwR1hdd.png`. Le champ est un texte libre rendu tel quel.
 
-**Volontairement en dernier :** c'est le seul poste qui ne bloque rien et ne se déprécie
-pas. Le faire avant la migration, c'est risquer de le refaire.
+**Volontairement en dernier :** le seul poste qui ne bloque rien et ne se déprécie pas.
 
 ---
 
-## Décisions prises, pour mémoire
+## Base de production : ce qui a été fait, ce qui reste possible
 
-- **`utf8mb4_unicode_ci`** plutôt que `utf8mb4_0900_ai_ci` : la seule collation moderne
-  disponible à la fois sur MySQL et MariaDB. La base locale est MySQL 9.1, mais on garde
-  la portabilité.
-- **`ascii_bin`** sur les colonnes de hash, `ascii_general_ci` sur les GUID et les IP :
-  valeurs techniques ASCII, comparaison binaire pour un hash.
-- **`RemoveDiacritics` conserve le passage par ISO-8859-8.** Ce n'était pas un bug : le
-  *best-fit mapping* de la page de code rabat `ø`, `ł`, `Æ` sur leur équivalent ASCII, ce
-  que la normalisation Unicode NFD ne sait pas faire (pas de décomposition canonique). Les
-  deux passes sont désormais combinées.
-- **Barème de soumission à 1 000 points forfaitaires.** L'ancien barème dégressif
-  (`500 + max(0, 1000 − 100×N)`) avait été abandonné en novembre 2022 ; sa branche morte a
-  été supprimée avec les dates de bascule.
-- **Badges 29 (`DoYouSpeakPatois`) et 34 (`TheEnd`) supprimés**, ids réalignés sur 1..28.
-- **Libellés et descriptions des badges réécrits** : les originaux ont été perdus avec la
-  base, ils sont déduits des conditions réelles du code. À relire.
-- **Table `challenges` supprimée** — duels entre joueurs, fonctionnalité abandonnée qui
-  déséquilibrait le scoring.
+Les fichiers bruts se trouvent dans `C:\wamp64_ok\bin\mysql\mysql9.1.0\data\dbs6116785` :
+**40 tablespaces `.ibd` seuls**, sans `.frm`, sans `ibdata1`, au format **MySQL 5.7**
+(vérifié : aucune page SDI). Checksums intacts.
+
+**Fait** — le contenu textuel a été lu directement dans les pages, sans serveur, et déposé
+dans `Restauration/` : libellés et descriptions des badges (EN et FR, désormais repris dans
+`kikole.sql`), liste des clubs, liste des ~390 kikolés avec leurs indices.
+
+**Reste possible** — une restauration *structurée* (identifiants, dates, scores, historique
+des propositions) via `ALTER TABLE ... IMPORT TABLESPACE`. Elle exige :
+
+- une instance **MySQL 5.7** : l'import ne franchit pas la frontière 5.7 → 8.0+, et MariaDB
+  est exclue (elle écrit `FSP_SPACE_FLAGS=0x15` là où MySQL 5.7 écrit `0x21`, pour ses trois
+  formats de ligne — les encodages ont divergé, il n'y a pas de contournement) ;
+- la DDL d'époque, disponible dans l'historique git au commit `59d910d^`
+  (19 tables, `utf8` / `utf8_bin`) — les `ALTER TABLE` d'index doivent être appliqués
+  **avant** le `DISCARD`, puisqu'ils changent la structure du tablespace ;
+- une conversion de collation à l'import, `utf8` → `utf8mb4`, sans quoi les noms accentués
+  produisent du mojibake ;
+- pour `continents`, `continent_translations`, `registration_guids` et `player_federations`,
+  absentes de la DDL d'époque : sans fichier `.cfg`, l'import ne valide pas le schéma, donc
+  une DDL fausse produit des données silencieusement fausses. À vérifier à l'œil.
+
+**Les identifiants de badges ont été renumérotés** : les données d'époque référencent
+l'ancienne numérotation à trous (3, 5, 6… 41), la nouvelle est contiguë de 1 à 28 **dans le
+même ordre**. L'extraction a confirmé cette correspondance. Les lignes référençant les
+badges **29** (`DoYouSpeakPatois`) et **34** (`TheEnd`) sont à écarter, ainsi que la table
+`challenges`.
+
+**Données personnelles** : logins, hachages faibles, adresses IP, e-mails de `discussions`.
+À garder en local ; sans intérêt à réimporter côté comptes, le chantier Identity invalidant
+les hachages de toute façon.
+
+---
+
+## Partis pris
+
+**Schéma**
+- `utf8mb4_unicode_ci` plutôt que `utf8mb4_0900_ai_ci` : seule collation moderne disponible
+  à la fois sur MySQL et MariaDB.
+- `ascii_bin` sur les colonnes de hash, `ascii_general_ci` sur les GUID et les IP.
+- Badges 29 et 34 supprimés, identifiants réalignés sur 1..28. Table `challenges` supprimée.
+- Libellés et descriptions des badges : **ceux d'époque**, récupérés de la base de production.
+
+**Règles de jeu**
+- Barème de soumission à 1 000 points forfaitaires. L'ancien barème dégressif avait été
+  abandonné en novembre 2022 ; sa branche morte a été supprimée.
+- Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est
+  exactement la somme des podiums mensuels, ce qu'un test vérifie désormais.
+- **Un joueur par jour est une invariante**, pas un cas à dégrader : son absence lève une
+  exception qui nomme la date. C'est à l'administration de garantir le calendrier.
+
+**Code**
+- `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`
+  dans le projet.
+- **Les signatures de dépôt restent nullables.** Lever dans le dépôt économiserait 2 gardes
+  sur 10 et en casserait 5 : quatre appelants au moins traitent `null` comme flux de
+  contrôle normal, dont `AuthorizationFilter`, sur le chemin de chaque requête. La couche
+  d'accès dit « il n'y a pas de ligne » ; l'appelant décide si c'est une erreur.
+- `RemoveDiacritics` conserve le passage par ISO-8859-8 : le *best-fit mapping* rabat `ø`,
+  `ł`, `Æ` sur leur équivalent ASCII, ce que la normalisation NFD ne sait pas faire.

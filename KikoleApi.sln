@@ -10,6 +10,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3F1A7C4E-9B2D-4A6E-8C51-D7E0B4A9F132}"
 	ProjectSection(SolutionItems) = preProject
 		TODO.md = TODO.md
+		Restauration\badges_2023.md = Restauration\badges_2023.md
+		Restauration\clubs_2023.txt = Restauration\clubs_2023.txt
+		Restauration\indices_fr_2023.txt = Restauration\indices_fr_2023.txt
+		Restauration\players_2023.txt = Restauration\players_2023.txt
 	EndProjectSection
 EndProject
 Global
