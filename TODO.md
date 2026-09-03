@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **490** unitaires (mockés, rapides) + **1** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **490** unitaires (mockés, rapides) + **2** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -115,8 +115,12 @@ Branche de travail : `remaster-v2`.
       - [x] ~~`BaseRepository.SubSqlValidUsers`~~ — caractérisé par
         `SubSqlValidUsersIntegrationTests`, via `LeaderRepository.GetLeadersAtDateAsync` :
         administrateur et utilisateur désactivé bien exclus.
-      - **`proposal_date = DATE(creation_date)`**, la définition de « trouvé le jour même »,
-        dupliquée **cinq fois**.
+      - [x] ~~`proposal_date = DATE(creation_date)`~~ — la définition de « trouvé le jour
+        même », dupliquée six fois entre `LeaderRepository` et `ProposalRepository` (une
+        occurrence en plus des cinq recensées au départ), centralisée en
+        `BaseRepository.SubSqlOnTime(bool)`, caractérisée par
+        `OnTimeRuleIntegrationTests` (trouvé à temps vs en rattrapage) avant le
+        regroupement, verte après.
       - `ProposalRepository.GetMissingUsersAsLeaderAsync` encode la définition d'un
         classement incomplet.
       - `PlayerRepository.GetPlayersByCreatorAsync` encode l'état d'une soumission via un

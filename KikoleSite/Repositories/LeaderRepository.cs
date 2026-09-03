@@ -28,7 +28,7 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
         return await ExecuteReaderAsync<LeaderDto>(
                 "SELECT * FROM leaders " +
                 "WHERE proposal_date = @date " +
-                $"AND {(onTimeOnly ? $"proposal_date = DATE(creation_date)" : "1 = 1")} " +
+                $"AND {SubSqlOnTime(onTimeOnly)} " +
                 $"AND user_id IN ({SubSqlValidUsers})",
                 new { date.Date });
     }
@@ -39,7 +39,7 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
                 "SELECT * FROM leaders " +
                 "WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
                 "AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
-                $"AND {(onTimeOnly ? $"proposal_date = DATE(creation_date)" : "1 = 1")} " +
+                $"AND {SubSqlOnTime(onTimeOnly)} " +
                 $"AND user_id IN ({SubSqlValidUsers})",
                 new
                 {
@@ -54,7 +54,7 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
                 "SELECT * FROM leaders " +
                 "WHERE (@minimal_date IS NULL OR proposal_date >= @minimal_date) " +
                 "AND proposal_date <= IFNULL(@maximal_date, DATE(NOW())) " +
-                $"AND {(onTimeOnly ? $"proposal_date = DATE(creation_date)" : "1 = 1")} " +
+                $"AND {SubSqlOnTime(onTimeOnly)} " +
                 $"AND user_id = @userId ",
                 new
                 {

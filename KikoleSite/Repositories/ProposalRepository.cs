@@ -74,7 +74,7 @@ public class ProposalRepository : BaseRepository, IProposalRepository
     {
         return await ExecuteReaderAsync<ProposalDto>(
                 "SELECT * FROM proposals " +
-                "WHERE user_id = @userId AND proposal_date = DATE(creation_date)",
+                $"WHERE user_id = @userId AND {SubSqlOnTime(true)}",
                 new { userId });
     }
 
@@ -82,7 +82,7 @@ public class ProposalRepository : BaseRepository, IProposalRepository
     {
         return await ExecuteReaderAsync<ProposalDto>(
                 "SELECT * FROM proposals " +
-                $"WHERE {(exact ? "proposal_date = DATE(creation_date)" : "1 = 1")} " +
+                $"WHERE {SubSqlOnTime(exact)} " +
                 "AND proposal_date = @proposal_date " +
                 $"AND user_id IN ({SubSqlValidUsers})",
                 new
@@ -99,13 +99,12 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 "WHERE user_id = @userId " +
                 "AND proposal_date >= @startDate " +
                 "AND proposal_date <= @endDate " +
-                "AND (proposal_date = DATE(creation_date) OR 1 = @loose)",
+                $"AND ({SubSqlOnTime(exact)})",
                 new
                 {
                     userId,
                     startDate = startDate.Date,
-                    endDate = endDate.Date,
-                    loose = exact ? 0 : 1
+                    endDate = endDate.Date
                 },
                 0);
     }

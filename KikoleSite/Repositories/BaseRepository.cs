@@ -21,6 +21,12 @@ public abstract class BaseRepository
         $"WHERE u.user_type_id != {(ulong)UserTypes.Administrator} " +
         $"AND u.is_disabled = 0";
 
+    /// <summary>Fragment SQL « trouve a temps » : la proposition gagnante est tombee le
+    /// jour meme (<c>proposal_date = DATE(creation_date)</c>), pas en rattrapage plus
+    /// tard. <paramref name="onTimeOnly"/> a <c>false</c> desactive le filtre.</summary>
+    protected static string SubSqlOnTime(bool onTimeOnly) =>
+        onTimeOnly ? "proposal_date = DATE(creation_date)" : "1 = 1";
+
     protected BaseRepository(IConfiguration configuration, IClock clock)
     {
         _connectionString = configuration.GetConnectionString(ConnectionStringName)
