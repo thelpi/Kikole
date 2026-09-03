@@ -25,5 +25,7 @@
         public string? QuestionRecovery { get; set; }
 
         public string? RegistrationId { get; set; }
+
+        public bool RegistrationInviteEnabled { get; set; }
     }
 }

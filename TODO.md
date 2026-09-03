@@ -41,12 +41,10 @@ Branche de travail : `remaster-v2`.
       retiré (voir plus bas), pour ne pas extraire un service autour d'un code qui va
       encore bouger.
 - [ ] Ne pas versionner de secrets : passer par *user-secrets* en dev.
-- [ ] **Retirer le système d'invitation** (`registration_guids`) — demandé par l'utilisateur
-      en même temps que la refonte de l'authent, mais **délibérément découplé** : aucun lien
-      technique avec Identity, et l'inscription libre est prévue pour novembre 2026 (cf.
-      page d'accueil). Impacte `AccountController.create`, `IUserRepository`
-      (`GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`), la table
-      `registration_guids` et sans doute le formulaire de création de compte.
+- [x] ~~Retirer le système d'invitation~~ — **désactivé plutôt que retiré**, derrière
+      `Registration:InviteEnabled` (`false` par défaut, voir « Partis pris »). Le mécanisme
+      (`registration_guids`, `GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`)
+      reste en place pour une réactivation par simple bascule de config.
 - [ ] **Outiller la lutte anti-multi-compte** — associé au point précédent : le système
       d'invitation servait de frein de facto à la fraude, son retrait l'ouvre en grand.
       `ApplicationUser.Ip` capture déjà l'IP à l'inscription, mais c'est insuffisant seul.
@@ -322,6 +320,21 @@ les hachages de toute façon.
   fois dans `WithTotalPoints`. `LeaderboardController.UserDay` recalculait la même chose en
   parcourant une seconde fois la séquence déjà ordonnée par `ScoreCalculator` ; il se
   contente maintenant de lire la valeur.
+- **Invitation désactivée par config, pas retirée.** `Registration:InviteEnabled` (`false`
+  par défaut) est lié via `IOptions<RegistrationOptions>` — le pattern standard, plutôt
+  qu'un `IConfiguration` brut injecté (des clés en chaîne dispersées dans chaque classe) ou
+  qu'un record résolu une fois à la main : les clés attendues sont visibles au typage, et
+  c'est ce que quelqu'un qui connaît déjà ASP.NET Core s'attend à trouver. Premier exemple
+  du genre dans le projet ; les autres lectures de config directes (`EncryptionKey`,
+  `HibpApiBaseUrl`, la chaîne de connexion) pourront suivre le même chemin plus tard, mais
+  ça n'a pas été fait ici — hors périmètre de ce chantier précis.
+
+  À `false`, `AccountController.create` saute entièrement la validation du GUID
+  (`registration_guids`, `GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`) sans
+  qu'aucune de ces méthodes ni la table ne disparaissent : remettre l'invitation est une
+  bascule de config, pas un chantier de code. Les deux messages qui promettaient une date
+  de réouverture fixe (page d'accueil, page « Compte ») ont perdu cette mention : la
+  réactivation dépend maintenant d'un admin, plus d'un calendrier.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

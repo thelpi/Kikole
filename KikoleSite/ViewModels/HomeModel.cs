@@ -18,6 +18,7 @@ public class HomeModel
     public string? PlayerCreator { get; set; }
     public bool LeaderboardAvailable { get; set; }
     public DateTime CurrentDate { get; set; }
+    public bool RegistrationInviteEnabled { get; set; }
 
     public bool DisplayHiddenPageAsHidden { get; set; }
     public IReadOnlyCollection<UserBadge> Badges { get; set; } = [];

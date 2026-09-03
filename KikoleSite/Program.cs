@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using KikoleSite;
+using KikoleSite.Configuration;
 using KikoleSite.Controllers.Filters;
 using KikoleSite.Handlers;
 using KikoleSite.Identity;
@@ -74,6 +75,13 @@ builder.Services
     // seedable dans les tests (new Random(seed)) : PlayerService en a besoin pour un
     // melange deterministe, contrairement a Random.Shared qui n'est pas configurable.
     .AddSingleton(new Random());
+
+// sections de configuration liees via le pattern standard IOptions<T> : les cles attendues
+// sont visibles au typage plutot que dispersees en chaines dans chaque classe qui en a
+// besoin (a la difference d'IConfiguration injecte brut, comme pour EncryptionKey ou
+// HibpApiBaseUrl plus bas — a faire suivre le meme chemin plus tard si l'occasion se
+// presente, pas dans ce chantier).
+builder.Services.Configure<RegistrationOptions>(builder.Configuration.GetSection("Registration"));
 
 // authentification : Identity avec un store Dapper maison (KikoleSite/Identity), pas
 // EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Ni email (aucun canal

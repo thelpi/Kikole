@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Configuration;
 using KikoleSite.Identity;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Controllers;
 
@@ -19,11 +21,13 @@ public class AccountController : KikoleBaseController
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
+    private readonly RegistrationOptions _registrationOptions;
 
     public AccountController(IStringLocalizer<AccountController> localizer,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IPasswordHasher<ApplicationUser> passwordHasher,
+        IOptions<RegistrationOptions> registrationOptions,
         IUserRepository userRepository,
         IInternationalService internationalService,
         IClock clock,
@@ -43,6 +47,7 @@ public class AccountController : KikoleBaseController
         _userManager = userManager;
         _signInManager = signInManager;
         _passwordHasher = passwordHasher;
+        _registrationOptions = registrationOptions.Value;
     }
 
     [HttpGet]
@@ -51,13 +56,16 @@ public class AccountController : KikoleBaseController
         return View(new AccountModel
         {
             IsAuthenticated = UserId > 0,
-            Login = UserLogin
+            Login = UserLogin,
+            RegistrationInviteEnabled = _registrationOptions.InviteEnabled
         });
     }
 
     [HttpPost]
     public async Task<IActionResult> Index(AccountModel model)
     {
+        model.RegistrationInviteEnabled = _registrationOptions.InviteEnabled;
+
         var submitFrom = GetSubmitAction();
 
         if (submitFrom == "logoff")
@@ -170,11 +178,14 @@ public class AccountController : KikoleBaseController
         }
         else if (submitFrom == "create")
         {
+            var inviteRequired = _registrationOptions.InviteEnabled;
+            var registrationId = Guid.Empty;
+
             if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)
                 || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
-                || string.IsNullOrWhiteSpace(model.RegistrationId))
+                || (inviteRequired && string.IsNullOrWhiteSpace(model.RegistrationId)))
                 model.Error = _localizer["InvalidForm"];
-            else if (!Guid.TryParse(model.RegistrationId, out var registrationId))
+            else if (inviteRequired && !Guid.TryParse(model.RegistrationId, out registrationId))
                 model.Error = _localizer["InvalidRegistrationGuidFormat"];
             else if (!string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
                 model.Error = _localizer["NotMatchingPassword"];
@@ -188,12 +199,14 @@ public class AccountController : KikoleBaseController
                     model.Error = _localizer["AlreadyExistsAccount"];
                 else
                 {
-                    var registration = await _userRepository
-                        .GetRegistrationGuidAsync(registrationId.ToString());
+                    // hors invitation, rien a verifier avant de creer le compte
+                    var registration = inviteRequired
+                        ? await _userRepository.GetRegistrationGuidAsync(registrationId.ToString())
+                        : null;
 
-                    if (registration == null)
+                    if (inviteRequired && registration == null)
                         model.Error = _localizer["InvalidRegistrationId"];
-                    else if (registration.UserId.HasValue)
+                    else if (registration?.UserId.HasValue == true)
                         model.Error = _localizer["UsedRegistrationId"];
                     else
                     {
@@ -215,8 +228,9 @@ public class AccountController : KikoleBaseController
                             model.Error = MapPasswordErrorMessage(creation, "UserCreationFailure");
                         else
                         {
-                            await _userRepository
-                                .LinkRegistrationGuidToUserAsync(registrationId.ToString(), user.Id);
+                            if (inviteRequired)
+                                await _userRepository
+                                    .LinkRegistrationGuidToUserAsync(registrationId.ToString(), user.Id);
 
                             return await Index(new AccountModel
                             {

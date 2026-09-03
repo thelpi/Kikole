@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Configuration;
 using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
 using KikoleSite.Identity;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Controllers;
 
@@ -28,6 +30,7 @@ public class HomeController : KikoleBaseController
     private readonly IProposalService _proposalService;
     private readonly IMessageRepository _messageRepository;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RegistrationOptions _registrationOptions;
 
     public HomeController(IStringLocalizer<HomeController> localizer,
         IUserRepository userRepository,
@@ -40,6 +43,7 @@ public class HomeController : KikoleBaseController
         IBadgeService badgeService,
         IDiscussionRepository discussionRepository,
         SignInManager<ApplicationUser> signInManager,
+        IOptions<RegistrationOptions> registrationOptions,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             internationalService,
@@ -54,6 +58,7 @@ public class HomeController : KikoleBaseController
         _proposalService = proposalService;
         _messageRepository = messageRepository;
         _signInManager = signInManager;
+        _registrationOptions = registrationOptions.Value;
     }
 
     [HttpGet]
@@ -149,7 +154,8 @@ public class HomeController : KikoleBaseController
         {
             CurrentDate = _clock.Today,
             Points = ScoreCalculator.BasePoints,
-            Message = msg
+            Message = msg,
+            RegistrationInviteEnabled = _registrationOptions.InviteEnabled
         };
 
         if (day.HasValue

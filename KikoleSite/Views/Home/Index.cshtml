@@ -29,7 +29,7 @@
             <label>@localizer["YouAreNotLogged"]</label>
         </div>
         <div class="mediumTopMargin">
-            @localizer["AccountMandatory"]
+            @(Model.RegistrationInviteEnabled ? localizer["AccountMandatory"] : localizer["AccountMandatoryOpenRegistration"])
         </div>
     }
     else
