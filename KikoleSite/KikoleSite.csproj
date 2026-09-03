@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -6,6 +6,7 @@
     <!-- necessaire pour que le compilateur signale les using inutiles (CS8019) -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <UserSecretsId>bf1925cc-b068-4c0a-b06f-6adb5c196423</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

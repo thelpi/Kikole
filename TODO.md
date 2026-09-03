@@ -40,7 +40,8 @@ Branche de travail : `remaster-v2`.
       contrôleur. Moins urgent qu'avant : à réévaluer une fois le système d'invitation
       retiré (voir plus bas), pour ne pas extraire un service autour d'un code qui va
       encore bouger.
-- [ ] Ne pas versionner de secrets : passer par *user-secrets* en dev.
+- [x] ~~Ne pas versionner de secrets~~ — la chaîne de connexion et `EncryptionKey` sont
+      passées en *user-secrets*, voir « Partis pris ».
 - [x] ~~Retirer le système d'invitation~~ — **désactivé plutôt que retiré**, derrière
       `Registration:InviteEnabled` (`false` par défaut, voir « Partis pris »). Le mécanisme
       (`registration_guids`, `GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`)
@@ -335,6 +336,19 @@ les hachages de toute façon.
   bascule de config, pas un chantier de code. Les deux messages qui promettaient une date
   de réouverture fixe (page d'accueil, page « Compte ») ont perdu cette mention : la
   réactivation dépend maintenant d'un admin, plus d'un calendrier.
+- **Secrets de dev via *user-secrets*, pas dans `appsettings.Development.json`.** La chaîne
+  de connexion et `EncryptionKey` en sont sorties ; le fichier ne porte plus que `Logging`.
+  `appsettings.Development.json` était déjà en `skip-worktree` (jamais remonté par
+  `git status`, donc jamais commité par accident), mais ça ne protège que *ce* dépôt local
+  précis — le fichier reste lisible en clair sur disque, et rien n'empêche une copie de
+  dossier ou un `git add -f` de le faire fuiter. *user-secrets* le sort du dossier du projet
+  entièrement (`%APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\secrets.json`), une
+  protection qui ne dépend plus de l'historique git.
+
+  Mise en place locale, une fois : `dotnet user-secrets set "ConnectionStrings:Kikole" "..."`
+  et `dotnet user-secrets set "EncryptionKey" "..."` depuis `KikoleSite/`. Sans ça,
+  l'application refuse de démarrer : `LegacyCompatiblePasswordHasher` lève dès la première
+  vérification si `EncryptionKey` est absente.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`
