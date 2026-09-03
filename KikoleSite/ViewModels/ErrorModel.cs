@@ -1,9 +1,8 @@
-namespace KikoleSite.ViewModels
-{
-    public class ErrorModel
-    {
-        public string? RequestId { get; set; }
+namespace KikoleSite.ViewModels;
 
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-    }
+public class ErrorModel
+{
+    public string? RequestId { get; set; }
+
+    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace KikoleSite.Models.Dtos
+namespace KikoleSite.Models.Dtos;
+
+public abstract record BaseDto
 {
-    public abstract class BaseDto
-    {
-        public ulong Id { get; set; }
+    public ulong Id { get; init; }
 
-        public DateTime CreationDate { get; set; }
+    public DateTime CreationDate { get; init; }
 
-        public DateTime UpdateDate { get; set; }
-    }
+    public DateTime UpdateDate { get; init; }
 }

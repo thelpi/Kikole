@@ -1,16 +1,15 @@
 ﻿using System;
 using KikoleSite.Models.Enums;
 
-namespace KikoleSite.Controllers.Attributes
-{
-    [AttributeUsage(AttributeTargets.Method)]
-    public class AuthorizationAttribute : Attribute
-    {
-        public UserTypes MinimalUserType { get; }
+namespace KikoleSite.Controllers.Attributes;
 
-        public AuthorizationAttribute(UserTypes minimalUserType = UserTypes.StandardUser)
-        {
-            MinimalUserType = minimalUserType;
-        }
+[AttributeUsage(AttributeTargets.Method)]
+public class AuthorizationAttribute : Attribute
+{
+    public UserTypes MinimalUserType { get; }
+
+    public AuthorizationAttribute(UserTypes minimalUserType = UserTypes.StandardUser)
+    {
+        MinimalUserType = minimalUserType;
     }
 }

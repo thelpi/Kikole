@@ -3,35 +3,34 @@ using KikoleSite.Helpers;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Localization;
 
-namespace KikoleSite.Models.Requests
+namespace KikoleSite.Models.Requests;
+
+public record ClubRequest
 {
-    public class ClubRequest
+    public ulong Id { get; init; }
+
+    public required string Name { get; init; }
+
+    public required IReadOnlyList<string> AllowedNames { get; init; }
+
+    internal string? IsValid(IStringLocalizer resources)
     {
-        public ulong Id { get; set; }
+        if (string.IsNullOrWhiteSpace(Name))
+            return resources["InvalidName"];
 
-        public required string Name { get; set; }
+        if (!AllowedNames.IsValid())
+            return resources["InvalidAllowedNames"];
 
-        public required IReadOnlyList<string> AllowedNames { get; set; }
+        return null;
+    }
 
-        internal string? IsValid(IStringLocalizer resources)
+    internal ClubDto ToDto()
+    {
+        return new ClubDto
         {
-            if (string.IsNullOrWhiteSpace(Name))
-                return resources["InvalidName"];
-
-            if (!AllowedNames.IsValid())
-                return resources["InvalidAllowedNames"];
-
-            return null;
-        }
-
-        internal ClubDto ToDto()
-        {
-            return new ClubDto
-            {
-                AllowedNames = AllowedNames.SanitizeJoin(Name),
-                Name = Name,
-                Id = Id
-            };
-        }
+            AllowedNames = AllowedNames.SanitizeJoin(Name),
+            Name = Name,
+            Id = Id
+        };
     }
 }

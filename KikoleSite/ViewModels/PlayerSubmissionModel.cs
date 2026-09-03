@@ -1,30 +1,29 @@
 ﻿using System.Collections.Generic;
 using KikoleSite.Models;
 
-namespace KikoleSite.ViewModels
+namespace KikoleSite.ViewModels;
+
+public class PlayerSubmissionModel
 {
-    public class PlayerSubmissionModel
-    {
-        public string? Name { get; set; }
+    public string? Name { get; set; }
 
-        public string? Login { get; set; }
+    public string? Login { get; set; }
 
-        public ulong Id { get; set; }
+    public ulong Id { get; set; }
 
-        public IReadOnlyCollection<PlayerClub> Clubs { get; set; } = [];
+    public IReadOnlyCollection<PlayerClub> Clubs { get; set; } = [];
 
-        public string? AllowedNames { get; set; }
+    public string? AllowedNames { get; set; }
 
-        public ushort YearOfBirth { get; set; }
+    public ushort YearOfBirth { get; set; }
 
-        public string? Country { get; set; }
+    public string? Country { get; set; }
 
-        public string? Continent { get; set; }
+    public string? Continent { get; set; }
 
-        public string? Clue { get; set; }
+    public string? Clue { get; set; }
 
-        public string? EasyClue { get; set; }
+    public string? EasyClue { get; set; }
 
-        public string? Position { get; set; }
-    }
+    public string? Position { get; set; }
 }

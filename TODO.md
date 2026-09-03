@@ -15,6 +15,7 @@ Branche de travail : `remaster-v2`.
 | Sites parasites | The Elite et Mets tes tennis supprimés |
 | Framework | .NET 10, hébergement minimal |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
+| Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
 | Tests | **435**, projet `KikoleSiteUnitTests` |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -111,12 +112,12 @@ Identity** plutôt que de réparer la cryptographie maison.
 - [ ] **`ProposalChart.FirstDate`** — figé en dur à titre provisoire. À sortir en
       configuration, ou mieux à déduire du `MIN(proposal_date)` en base. Tant qu'il est en
       dur, `kikole_mock.sql` doit garder la même valeur dans `@first_date`.
-- [ ] **Modernisation syntaxique** — le code date de C# 8, la cible est C# 14. Passe
-      mécanique, à faire d'un bloc pour ne pas polluer les diffs fonctionnels :
-      `record` plutôt que `class` pour les DTO, `init` plutôt que `set`, namespaces à portée
-      fichier, expressions de collection `[]`.
-- [ ] **Retirer les `ConfigureAwait(false)`** — 287 occurrences dans 23 fichiers. Utile dans
-      une bibliothèque, inutile ici : ASP.NET Core n'a pas de `SynchronizationContext`.
+- [ ] **Modernisation syntaxique : le reste.** Les DTO, les requêtes et les namespaces sont
+      faits. Restent les **ViewModels**, qui ne peuvent pas passer en `init` tant que les
+      contrôleurs les remplissent après construction (`model.ErrorMessage = …`) — c'est un
+      motif à revoir, pas une conversion mécanique. Les expressions de collection ne
+      couvrent que ce qui a un type cible : un `var x = new List<T>()` n'en a pas, et
+      `IReadOnlyDictionary` n'est pas constructible avec `[]`.
 - [ ] **Durcissement de `RemoveDiacritics`** (optionnel) — il reste 9 caractères non
       convertis en Latin Extended-A et 11 en Latin Extended Additional, tous archaïques.
 
@@ -189,6 +190,10 @@ les hachages de toute façon.
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`
   dans le projet.
+- **DTO et requêtes sont des `record` à propriétés `init`.** Dapper les remplit sans
+  problème — vérifié contre la vraie base, pas seulement en compilation. Les builders de
+  test remplacent l'instance par une copie (`_dto = _dto with { … }`) au lieu de la muter ;
+  c'est `record` qui rend `init` supportable côté tests.
 - **Les signatures de dépôt restent nullables.** Lever dans le dépôt économiserait 2 gardes
   sur 10 et en casserait 5 : quatre appelants au moins traitent `null` comme flux de
   contrôle normal, dont `AuthorizationFilter`, sur le chemin de chaque requête. La couche

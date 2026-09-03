@@ -1,9 +1,9 @@
 ﻿namespace KikoleSite.Models.Dtos
 {
-    public class CountryDto : BaseDto
+    public record CountryDto : BaseDto
     {
-        public required string Code { get; set; }
+        public required string Code { get; init; }
 
-        public required string Name { get; set; }
+        public required string Name { get; init; }
     }
 }

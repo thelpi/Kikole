@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace KikoleSite.Models.Dtos
+namespace KikoleSite.Models.Dtos;
+
+public record UserBadgeDto
 {
-    public class UserBadgeDto
-    {
-        public ulong UserId { get; set; }
+    public ulong UserId { get; init; }
 
-        public ulong BadgeId { get; set; }
+    public ulong BadgeId { get; init; }
 
-        public DateTime GetDate { get; set; }
-    }
+    public DateTime GetDate { get; init; }
 }

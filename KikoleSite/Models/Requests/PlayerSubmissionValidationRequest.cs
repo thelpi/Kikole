@@ -3,44 +3,43 @@ using System.Linq;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Localization;
 
-namespace KikoleSite.Models.Requests
+namespace KikoleSite.Models.Requests;
+
+public record PlayerSubmissionValidationRequest
 {
-    public class PlayerSubmissionValidationRequest
+    public ulong PlayerId { get; init; }
+
+    public bool IsAccepted { get; init; }
+
+    public required IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; init; }
+
+    public required IReadOnlyDictionary<Languages, string?> EasyClueEditLanguages { get; init; }
+
+    public required string? ClueEditEn { get; init; }
+
+    public required string? EasyClueEditEn { get; init; }
+
+    public required string? RefusalReason { get; init; }
+
+    internal string? IsValid(IStringLocalizer resources)
     {
-        public ulong PlayerId { get; set; }
+        if (PlayerId == 0)
+            return resources["InvalidPlayerId"];
 
-        public bool IsAccepted { get; set; }
+        if (!IsAccepted && string.IsNullOrWhiteSpace(RefusalReason))
+            return resources["RefusalWithoutReason"];
 
-        public required IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; set; }
-
-        public required IReadOnlyDictionary<Languages, string?> EasyClueEditLanguages { get; set; }
-
-        public required string? ClueEditEn { get; set; }
-
-        public required string? EasyClueEditEn { get; set; }
-
-        public required string? RefusalReason { get; set; }
-
-        internal string? IsValid(IStringLocalizer resources)
+        if (IsAccepted)
         {
-            if (PlayerId == 0)
-                return resources["InvalidPlayerId"];
+            if (ClueEditLanguages?.ContainsKey(Languages.fr) != true
+                || ClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
+                return resources["InvalidClue"];
 
-            if (!IsAccepted && string.IsNullOrWhiteSpace(RefusalReason))
-                return resources["RefusalWithoutReason"];
-
-            if (IsAccepted)
-            {
-                if (ClueEditLanguages?.ContainsKey(Languages.fr) != true
-                    || ClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
-                    return resources["InvalidClue"];
-
-                if (EasyClueEditLanguages?.ContainsKey(Languages.fr) != true
-                    || EasyClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
-                    return resources["InvalidClue"];
-            }
-
-            return null;
+            if (EasyClueEditLanguages?.ContainsKey(Languages.fr) != true
+                || EasyClueEditLanguages.Values.Any(cel => string.IsNullOrWhiteSpace(cel)))
+                return resources["InvalidClue"];
         }
+
+        return null;
     }
 }

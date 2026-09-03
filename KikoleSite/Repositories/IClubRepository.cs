@@ -2,16 +2,15 @@
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Repositories
+namespace KikoleSite.Repositories;
+
+public interface IClubRepository
 {
-    public interface IClubRepository
-    {
-        Task<ulong> CreateClubAsync(ClubDto club);
+    Task<ulong> CreateClubAsync(ClubDto club);
 
-        Task UpdateClubAsync(ClubDto club);
+    Task UpdateClubAsync(ClubDto club);
 
-        Task<ClubDto?> GetClubAsync(ulong clubId);
+    Task<ClubDto?> GetClubAsync(ulong clubId);
 
-        Task<IReadOnlyCollection<ClubDto>> GetClubsAsync();
-    }
+    Task<IReadOnlyCollection<ClubDto>> GetClubsAsync();
 }

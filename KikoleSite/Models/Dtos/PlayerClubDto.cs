@@ -1,13 +1,13 @@
 ﻿namespace KikoleSite.Models.Dtos
 {
-    public class PlayerClubDto
+    public record PlayerClubDto
     {
-        public ulong PlayerId { get; set; }
+        public ulong PlayerId { get; init; }
 
-        public ulong ClubId { get; set; }
+        public ulong ClubId { get; init; }
 
-        public byte HistoryPosition { get; set; }
+        public byte HistoryPosition { get; init; }
 
-        public byte IsLoan { get; set; }
+        public byte IsLoan { get; init; }
     }
 }

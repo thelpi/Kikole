@@ -6,93 +6,96 @@ using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Localization;
 
-namespace KikoleSite.Models.Requests
+namespace KikoleSite.Models.Requests;
+
+public record PlayerRequest
 {
-    public class PlayerRequest
+    public required string Name { get; init; }
+
+    public ushort YearOfBirth { get; init; }
+
+    public Countries Country { get; init; }
+
+    public Continents Continent { get; init; }
+
+    public DateTime? ProposalDate { get; init; }
+
+    public required IReadOnlyList<string> AllowedNames { get; init; }
+
+    public required IReadOnlyList<PlayerClubRequest> Clubs { get; init; }
+
+    public required string ClueEn { get; init; }
+
+    public required string EasyClueEn { get; init; }
+
+    public required IReadOnlyDictionary<Languages, string?> ClueLanguages { get; init; }
+
+    public required IReadOnlyDictionary<Languages, string?> EasyClueLanguages { get; init; }
+
+    internal Positions Position { get; init; }
+
+    public bool SetLatestProposalDate { get; init; }
+
+    public bool HideCreator { get; init; }
+
+    internal string? IsValid(DateTime today, IStringLocalizer resources)
     {
-        public required string Name { get; set; }
+        if (string.IsNullOrWhiteSpace(Name))
+            return resources["InvalidName"];
 
-        public ushort YearOfBirth { get; set; }
+        if (YearOfBirth < 1850 || YearOfBirth > 2100)
+            return resources["InvalidBirthYear"];
 
-        public Countries Country { get; set; }
+        if (!AllowedNames.IsValid())
+            return resources["InvalidAllowedNames"];
 
-        public Continents Continent { get; set; }
+        if (Clubs.Count == 0)
+            return resources["EmptyClubsList"];
 
-        public DateTime? ProposalDate { get; set; }
+        if (Clubs.Any(c => c.ClubId == 0))
+            return resources["InvalidClubs"];
 
-        public required IReadOnlyList<string> AllowedNames { get; set; }
+        var historyCheck = Clubs.Select(c => c.HistoryPosition);
+        if (historyCheck.Distinct().Count() != Clubs.Count
+            || historyCheck.Min() != 1
+            || historyCheck.Max() - Clubs.Count != 0)
+            return resources["InvalidClubs"];
 
-        public required IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
+        if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
+            return resources["InvalidClue"];
 
-        public required string ClueEn { get; set; }
+        if (ProposalDate.HasValue && ProposalDate.Value.Date < today)
+            return resources["InvalidProposalDate"];
 
-        public required string EasyClueEn { get; set; }
+        return null;
+    }
 
-        public required IReadOnlyDictionary<Languages, string?> ClueLanguages { get; set; }
-
-        public required IReadOnlyDictionary<Languages, string?> EasyClueLanguages { get; set; }
-
-        internal Positions Position { get; set; }
-
-        public bool SetLatestProposalDate { get; set; }
-
-        public bool HideCreator { get; set; }
-
-        internal string? IsValid(DateTime today, IStringLocalizer resources)
+    /// <summary>
+    /// La date de parution est passee en argument plutot que lue sur la requete :
+    /// elle peut etre calculee par le service quand la requete n'en porte pas.
+    /// </summary>
+    internal PlayerDto ToDto(ulong userId, DateTime? proposalDate)
+    {
+        return new PlayerDto
         {
-            if (string.IsNullOrWhiteSpace(Name))
-                return resources["InvalidName"];
+            ContinentId = (ulong)Continent,
+            CountryId = (ulong)Country,
+            Name = Name,
+            ProposalDate = proposalDate,
+            YearOfBirth = YearOfBirth,
+            AllowedNames = AllowedNames.SanitizeJoin(Name),
+            Clue = ClueEn,
+            EasyClue = EasyClueEn,
+            PositionId = (ulong)Position,
+            CreationUserId = userId,
+            HideCreator = (byte)(HideCreator ? 1 : 0)
+        };
+    }
 
-            if (YearOfBirth < 1850 || YearOfBirth > 2100)
-                return resources["InvalidBirthYear"];
-
-            if (!AllowedNames.IsValid())
-                return resources["InvalidAllowedNames"];
-
-            if (Clubs.Count == 0)
-                return resources["EmptyClubsList"];
-
-            if (Clubs.Any(c => c.ClubId == 0))
-                return resources["InvalidClubs"];
-
-            var historyCheck = Clubs.Select(c => c.HistoryPosition);
-            if (historyCheck.Distinct().Count() != Clubs.Count
-                || historyCheck.Min() != 1
-                || historyCheck.Max() - Clubs.Count != 0)
-                return resources["InvalidClubs"];
-
-            if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
-                return resources["InvalidClue"];
-
-            if (ProposalDate.HasValue && ProposalDate.Value.Date < today)
-                return resources["InvalidProposalDate"];
-
-            return null;
-        }
-
-        internal PlayerDto ToDto(ulong userId)
-        {
-            return new PlayerDto
-            {
-                ContinentId = (ulong)Continent,
-                CountryId = (ulong)Country,
-                Name = Name,
-                ProposalDate = ProposalDate,
-                YearOfBirth = YearOfBirth,
-                AllowedNames = AllowedNames.SanitizeJoin(Name),
-                Clue = ClueEn,
-                EasyClue = EasyClueEn,
-                PositionId = (ulong)Position,
-                CreationUserId = userId,
-                HideCreator = (byte)(HideCreator ? 1 : 0)
-            };
-        }
-
-        internal IReadOnlyList<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
-        {
-            return Clubs
-                .Select(c => c.ToPlayerClubDto(playerId))
-                .ToList();
-        }
+    internal IReadOnlyList<PlayerClubDto> ToPlayerClubDtos(ulong playerId)
+    {
+        return Clubs
+            .Select(c => c.ToPlayerClubDto(playerId))
+            .ToList();
     }
 }

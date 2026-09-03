@@ -24,7 +24,7 @@
                 </fieldset>
             </div>
         }
-        await Html.RenderPartialAsync("Partial/Rules").ConfigureAwait(false);
+        await Html.RenderPartialAsync("Partial/Rules");
         <div style="margin-top: 40px">
             <label>@localizer["YouAreNotLogged"]</label>
         </div>
@@ -74,7 +74,7 @@
                     <label>@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</label>
                 </div>
                 <div>@Html.Raw(string.Format(localizer["FinalScore"].Value, Model.Points))</div>
-                await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
+                await Html.RenderPartialAsync("Partial/Badges", Model.Badges);
             }
             else if (Model.CurrentDay == 0)
             {
@@ -139,7 +139,7 @@
                 </div>
             }
             <div class="smallTopMargin">@Html.Raw(string.Format(localizer["CurrentScore"].Value, Model.Points))</div>
-            await Html.RenderPartialAsync("Partial/Badges", Model.Badges).ConfigureAwait(false);
+            await Html.RenderPartialAsync("Partial/Badges", Model.Badges);
             <div style="margin-top: 30px; font-size: larger">
                 @localizer["DayClue"] <span style="font-style:italic">@Html.Raw(Model.Clue)</span>
             </div>
@@ -384,6 +384,6 @@
             </form>
         }
         <hr />
-        await Html.RenderPartialAsync("Partial/Rules").ConfigureAwait(false);
+        await Html.RenderPartialAsync("Partial/Rules");
     }
 </div>
