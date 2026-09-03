@@ -32,6 +32,7 @@ public class HomeController : KikoleBaseController
         IInternationalService internationalService,
         IMessageRepository messageRepository,
         IClock clock,
+        IGameCalendar gameCalendar,
         IPlayerService playerService,
         IProposalService proposalService,
         IBadgeService badgeService,
@@ -41,6 +42,7 @@ public class HomeController : KikoleBaseController
             crypter,
             internationalService,
             clock,
+            gameCalendar,
             playerService,
             badgeService,
             httpContextAccessor)
@@ -152,12 +154,12 @@ public class HomeController : KikoleBaseController
             && (day.Value >= 0 || IsTypeOfUser(UserTypes.Administrator)))
         {
             model.CurrentDay = day.Value;
-            if (model.DateOfDay < ProposalChart.HiddenDate)
+            if (model.DateOfDay < _gameCalendar.HiddenDate)
             {
                 return RedirectToAction("Index");
             }
 
-            if (model.DateOfDay == ProposalChart.HiddenDate)
+            if (model.DateOfDay == _gameCalendar.HiddenDate)
             {
                 var displayHidden = await _playerService
                     .CanDisplayHiddenPlayerAsync(UserId);
@@ -385,7 +387,7 @@ public class HomeController : KikoleBaseController
                 .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
             .ToList();
         model.Clue = clue;
-        model.NoPreviousDay = _clock.Today.AddDays(-model.CurrentDay) == ProposalChart.FirstDate;
+        model.NoPreviousDay = _clock.Today.AddDays(-model.CurrentDay) == _gameCalendar.FirstDate;
         model.CanCreateClub = isPowerUser;
         model.IsAdmin = isAdminUser;
         model.PlayerId = playerCreator?.PlayerId ?? 0;

@@ -20,6 +20,7 @@ public class AccountController : KikoleBaseController
         ICrypter crypter,
         IInternationalService internationalService,
         IClock clock,
+        IGameCalendar gameCalendar,
         IPlayerService playerService,
         IBadgeService badgeService,
         IHttpContextAccessor httpContextAccessor)
@@ -27,6 +28,7 @@ public class AccountController : KikoleBaseController
             crypter,
             internationalService,
             clock,
+            gameCalendar,
             playerService,
             badgeService,
             httpContextAccessor)

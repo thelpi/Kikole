@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **458**, projet `KikoleSiteUnitTests` |
+| Tests | **464**, projet `KikoleSiteUnitTests` |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
 ---
@@ -59,6 +59,22 @@ Identity** plutôt que de réparer la cryptographie maison.
       `player_federations` retrouvée en production était une tentative abandonnée.
 - [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
       d'intégrité sont les `IsValid` applicatives.
+- [ ] **Renommer `players.proposal_date`.** Le mot *proposal* porte trois sens dans ce
+      code : la tentative d'un participant (table `proposals`, `ProposalTypes`), la
+      soumission d'un joueur par un utilisateur (« proposer un kikolé »), et — ici — le
+      jour où le joueur est le joueur du jour. Les deux premiers sont légitimes, le
+      troisième est un faux ami.
+
+      **`submission_date` serait un piège** : la colonne ne dit pas quand le joueur a été
+      proposé, ça c'est `creation_date` juste à côté. Cible retenue :
+      **`publication_date`** ou `published_date`, qui rejoignent le vocabulaire déjà
+      employé par le code (`GetPlayerOfTheDayAsync`, `GetEarliestPlayerDateAsync`).
+
+      Ce n'est pas un renommage de méthode mais une **migration de schéma**, avec des
+      ricochets : Dapper mappe la colonne sur `PlayerDto.ProposalDate` via
+      `MatchNamesWithUnderscores`, donc la propriété et tous ses usages suivent, plus
+      `kikole_mock.sql` et le script d'import de la base d'époque. À grouper avec les
+      autres changements de schéma (clés étrangères, clubs canoniques, nationalités).
 - [ ] `IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
       passent en canonique. `Message` et `Discussion` ne méritent pas de service.
 
@@ -96,9 +112,6 @@ Identity** plutôt que de réparer la cryptographie maison.
       Deux chantiers à ne pas mélanger : **(a)** des tests d'intégration sur base jetable —
       `kikole_mock.sql` étant idempotent, la moitié du travail est faite ; **(b)** remonter
       les règles dans le domaine, une fois (a) en place pour servir de filet.
-- [ ] **`ProposalChart.FirstDate`** — figé en dur à titre provisoire. À sortir en
-      configuration, ou mieux à déduire du `MIN(proposal_date)` en base. Tant qu'il est en
-      dur, `kikole_mock.sql` doit garder la même valeur dans `@first_date`.
 - [ ] **Modernisation syntaxique : le reste.** Les DTO, les requêtes et les namespaces sont
       faits. Restent les **ViewModels**, qui ne peuvent pas passer en `init` tant que les
       contrôleurs les remplissent après construction (`model.ErrorMessage = …`) — c'est un
@@ -188,6 +201,23 @@ les hachages de toute façon.
   **Toute écriture sur les clubs passe par `CreateOrUpdateClubAsync`**, qui rafraîchit le
   cache lui-même : l'invalidation n'est plus à la charge de l'appelant, donc impossible à
   oublier. Les contrôleurs ne dépendent plus du tout d'`IClubRepository`.
+- **`IGameCalendar` déduit les dates du `MIN(proposal_date)`** : le premier joueur publié
+  est la journée cachée, le jeu commence le lendemain. **Sans joueur en base, l'application
+  refuse de démarrer** plutôt que de servir des dates inventées.
+
+  Il est **scindé en deux** : `GameCalendar` ne porte que trois dates et **ne dépend de
+  rien**, ce qui le range à côté d'`IClock` — un fournisseur transverse, hors des couches,
+  injectable partout. `GameCalendarLoader` porte la seule dépendance à un dépôt et amorce
+  le calendrier au démarrage (`IHostedService`) ; personne ne l'injecte.
+
+  Cette scission n'est pas cosmétique : elle **évite d'avoir à trancher la question des
+  couches**. Un `GameCalendarService` aurait fait dépendre trois services d'un service ;
+  un `GameCalendarHandler` aurait fait court-circuiter la couche service par trois
+  contrôleurs, ce qu'aucun n'avait jamais fait — `IPlayerHandler` n'est injecté que par
+  des services. Avec zéro dépendance à l'appel, il n'y a plus rien à arbitrer.
+
+  Séparé d'`IClock` en revanche : l'horloge ne lit jamais la base, et les fusionner ferait
+  traîner un dépôt derrière chaque `_clock.Today` du projet.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

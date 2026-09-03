@@ -58,6 +58,13 @@ builder.Services
     .AddSingleton<IProposalService, ProposalService>()
     .AddSingleton<IStatisticService, StatisticService>()
     .AddSingleton<IInternationalService, InternationalService>()
+    // le chargeur a besoin du type concret, pour appeler un Initialize que l'interface
+    // n'expose pas : on enregistre donc GameCalendar, et l'interface renvoie la meme
+    // instance. Deux enregistrements independants donneraient deux instances, dont une
+    // seule serait amorcee.
+    .AddSingleton<GameCalendar>()
+    .AddSingleton<IGameCalendar>(sp => sp.GetRequiredService<GameCalendar>())
+    .AddHostedService<GameCalendarLoader>()
     // helpers
     .AddSingleton<ICrypter, Crypter>()
     .AddSingleton<IClock, Clock>()

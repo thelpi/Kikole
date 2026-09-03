@@ -169,7 +169,7 @@ public class ProposalServiceTests
 /// </summary>
 public class ProposalServiceGrantTests
 {
-    private static readonly DateTime Day = ProposalChart.FirstDate;
+    private static readonly DateTime Day = TestCalendar.FirstDate;
     private const ulong UserId = 7;
 
     private readonly Mock<IProposalRepository> _proposalRepository = new();

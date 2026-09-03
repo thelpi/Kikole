@@ -22,6 +22,7 @@ public class PlayerService : IPlayerService
     private readonly IUserRepository _userRepository;
     private readonly ILeaderRepository _leaderRepository;
     private readonly IClock _clock;
+    private readonly IGameCalendar _gameCalendar;
     private readonly Random _randomizer;
 
     /// <summary>
@@ -32,12 +33,14 @@ public class PlayerService : IPlayerService
     /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
     /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
     /// <param name="clock">Clock service.</param>
+    /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
     /// <param name="randomizer">Randomizer.</param>
     public PlayerService(IPlayerHandler playerHandler,
         IPlayerRepository playerRepository,
         IUserRepository userRepository,
         ILeaderRepository leaderRepository,
         IClock clock,
+        IGameCalendar gameCalendar,
         Random randomizer)
     {
         _playerHandler = playerHandler;
@@ -45,6 +48,7 @@ public class PlayerService : IPlayerService
         _userRepository = userRepository;
         _leaderRepository = leaderRepository;
         _clock = clock;
+        _gameCalendar = gameCalendar;
         _randomizer = randomizer;
     }
 
@@ -273,7 +277,7 @@ public class PlayerService : IPlayerService
     public async Task<bool> CanDisplayHiddenPlayerAsync(ulong userId)
     {
         var leaderFound = await _leaderRepository
-            .GetUserLeadersAsync(ProposalChart.HiddenDate, ProposalChart.HiddenDate, false, userId);
+            .GetUserLeadersAsync(_gameCalendar.HiddenDate, _gameCalendar.HiddenDate, false, userId);
 
         if (leaderFound.Count > 0)
         {
@@ -284,9 +288,9 @@ public class PlayerService : IPlayerService
             .GetPlayersByCreatorAsync(userId, true);
 
         var leaders = await _leaderRepository
-            .GetUserLeadersAsync(ProposalChart.FirstDate, null, false, userId);
+            .GetUserLeadersAsync(_gameCalendar.FirstDate, null, false, userId);
 
-        var countToFind = (_clock.Today - ProposalChart.FirstDate).Days + 1;
+        var countToFind = (_clock.Today - _gameCalendar.FirstDate).Days + 1;
 
         var createdCount = createdPlayers.Count(_ => _.ProposalDate <= _clock.Today);
 
@@ -296,7 +300,7 @@ public class PlayerService : IPlayerService
     private async Task<DateTime> GetNextDateAsync()
     {
         var latestDate = await _playerRepository
-            .GetLatestProposalDateAsync();
+            .GetLatestPlayerDateAsync();
 
         return latestDate.AddDays(1).Date;
     }

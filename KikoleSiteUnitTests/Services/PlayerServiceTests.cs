@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite;
 using KikoleSite.Handlers;
-using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
@@ -20,13 +19,14 @@ public class PlayerServiceTests
 {
     // les dates sont exprimees relativement a FirstDate pour que les tests
     // survivent au changement de cette constante
-    private static readonly DateTime FirstDate = ProposalChart.FirstDate;
+    private static readonly DateTime FirstDate = TestCalendar.FirstDate;
 
     private readonly Mock<IPlayerHandler> _playerHandler = new();
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
     private readonly Mock<IClock> _clock = new();
+    private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly PlayerService _service;
 
     public PlayerServiceTests()
@@ -40,6 +40,7 @@ public class PlayerServiceTests
             _userRepository.Object,
             _leaderRepository.Object,
             _clock.Object,
+            _gameCalendar.Object,
             new Random(1));
     }
 
@@ -71,7 +72,7 @@ public class PlayerServiceTests
     public async Task CreatePlayerAsync_WhenAskedForTheNextSlot_TakesTheDayAfterTheLatestOne()
     {
         var request = Request() with { SetLatestProposalDate = true };
-        _playerRepository.Setup(_ => _.GetLatestProposalDateAsync())
+        _playerRepository.Setup(_ => _.GetLatestPlayerDateAsync())
             .ReturnsAsync(FirstDate.AddDays(4));
         _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
@@ -90,7 +91,7 @@ public class PlayerServiceTests
 
         await _service.CreatePlayerAsync(request, 42);
 
-        _playerRepository.Verify(_ => _.GetLatestProposalDateAsync(), Times.Never);
+        _playerRepository.Verify(_ => _.GetLatestPlayerDateAsync(), Times.Never);
         _playerRepository.Verify(
             _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.ProposalDate == FirstDate.AddDays(10))),
             Times.Once);
@@ -261,7 +262,7 @@ public class PlayerServiceTests
     {
         _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
             .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithCreator(42).WithClue("current clue").WithEasyClue("current easy clue").Build());
-        _playerRepository.Setup(_ => _.GetLatestProposalDateAsync()).ReturnsAsync(FirstDate.AddDays(2));
+        _playerRepository.Setup(_ => _.GetLatestPlayerDateAsync()).ReturnsAsync(FirstDate.AddDays(2));
         _playerRepository.Setup(_ => _.GetPlayersByCreatorAsync(42, true))
             .ReturnsAsync(Enumerable.Range(0, acceptedPlayersOfCreator)
                 .Select(_ => PlayerDtoBuilder.Valid().Build()).ToList());
@@ -400,10 +401,10 @@ public class PlayerServiceTests
     {
         _clock.Setup(_ => _.Today).Returns(FirstDate.AddDays(daysSinceFirstDate));
         _leaderRepository
-            .Setup(_ => _.GetUserLeadersAsync(ProposalChart.HiddenDate, ProposalChart.HiddenDate, false, 7))
+            .Setup(_ => _.GetUserLeadersAsync(TestCalendar.HiddenDate, TestCalendar.HiddenDate, false, 7))
             .ReturnsAsync(Enumerable.Range(0, hiddenDayLeaders).Select(_ => LeaderDtoBuilder.Valid().Build()).ToList());
         _leaderRepository
-            .Setup(_ => _.GetUserLeadersAsync(ProposalChart.FirstDate, null, false, 7))
+            .Setup(_ => _.GetUserLeadersAsync(TestCalendar.FirstDate, null, false, 7))
             .ReturnsAsync(Enumerable.Range(0, allLeaders).Select(_ => LeaderDtoBuilder.Valid().Build()).ToList());
         _playerRepository
             .Setup(_ => _.GetPlayersByCreatorAsync(7, true))

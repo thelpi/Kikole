@@ -19,7 +19,9 @@ public interface IPlayerRepository
 
     Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
-    Task<DateTime> GetLatestProposalDateAsync();
+    Task<DateTime> GetLatestPlayerDateAsync();
+
+    Task<DateTime?> GetEarliestPlayerDateAsync();
 
     Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);
 

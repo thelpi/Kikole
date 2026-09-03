@@ -27,6 +27,7 @@ public class LeaderboardController : KikoleBaseController
         ICrypter crypter,
         IInternationalService internationalService,
         IClock clock,
+        IGameCalendar gameCalendar,
         IPlayerService playerService,
         IBadgeService badgeService,
         ILeaderService leaderService,
@@ -37,6 +38,7 @@ public class LeaderboardController : KikoleBaseController
             crypter,
             internationalService,
             clock,
+            gameCalendar,
             playerService,
             badgeService,
             httpContextAccessor)
@@ -172,7 +174,7 @@ public class LeaderboardController : KikoleBaseController
     {
         if (!DateTime.TryParse(date, out var actualDate)
             || actualDate.Date > _clock.Today
-            || actualDate.Date < ProposalChart.HiddenDate)
+            || actualDate.Date < _gameCalendar.HiddenDate)
         {
             return RedirectToAction("ErrorIndex", "Home");
         }
@@ -325,13 +327,13 @@ public class LeaderboardController : KikoleBaseController
             date = _clock.Yesterday;
         }
 
-        if (date.Date <= ProposalChart.HiddenDate)
+        if (date.Date <= _gameCalendar.HiddenDate)
         {
-            date = ProposalChart.HiddenDate;
+            date = _gameCalendar.HiddenDate;
             var displayHidden = await _playerService
                 .CanDisplayHiddenPlayerAsync(UserId);
             if (!displayHidden)
-                date = ProposalChart.FirstDate;
+                date = _gameCalendar.FirstDate;
         }
 
         return date.Date;

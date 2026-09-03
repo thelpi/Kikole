@@ -57,16 +57,4 @@ public class ProposalTypeExtensionsTests
         ProposalChart.ProposalTypesCost.Values.Should().OnlyContain(v => v.points > 0);
     }
 
-    [Fact]
-    public void HiddenDate_IsTheDayBeforeFirstDate()
-    {
-        ProposalChart.HiddenDate.Should().Be(ProposalChart.FirstDate.AddDays(-1));
-    }
-
-    [Fact]
-    public void FirstMonth_IsTheFirstDayOfTheMonthOfFirstDate()
-    {
-        ProposalChart.FirstMonth.Should().Be(
-            new DateTime(ProposalChart.FirstDate.Year, ProposalChart.FirstDate.Month, 1));
-    }
 }

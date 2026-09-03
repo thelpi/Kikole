@@ -30,6 +30,7 @@ public class AdminController : KikoleBaseController
         IInternationalService internationalService,
         IMessageRepository messageRepository,
         IClock clock,
+        IGameCalendar gameCalendar,
         IPlayerService playerService,
         IBadgeService badgeService,
         ILeaderService leaderService,
@@ -39,6 +40,7 @@ public class AdminController : KikoleBaseController
             crypter,
             internationalService,
             clock,
+            gameCalendar,
             playerService,
             badgeService,
             httpContextAccessor)

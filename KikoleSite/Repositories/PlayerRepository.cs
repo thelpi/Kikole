@@ -69,10 +69,16 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 ("player_id", playerId));
     }
 
-    public async Task<DateTime> GetLatestProposalDateAsync()
+    public async Task<DateTime> GetLatestPlayerDateAsync()
     {
         return await ExecuteScalarAsync<DateTime>(
                 "SELECT MAX(proposal_date) FROM players", null);
+    }
+
+    public async Task<DateTime?> GetEarliestPlayerDateAsync()
+    {
+        return await ExecuteScalarAsync<DateTime?>(
+                "SELECT MIN(proposal_date) FROM players", null);
     }
 
     public async Task<PlayerDto?> GetPlayerByIdAsync(ulong id)

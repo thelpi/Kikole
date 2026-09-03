@@ -24,6 +24,7 @@ public class BadgeService : IBadgeService
     private readonly IProposalRepository _proposalRepository;
     private readonly IUserRepository _userRepository;
     private readonly IClock _clock;
+    private readonly IGameCalendar _gameCalendar;
 
     /// <summary>
     /// Ctor.
@@ -35,13 +36,15 @@ public class BadgeService : IBadgeService
     /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
     /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
     /// <param name="clock">Clock service.</param>
+    /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
     public BadgeService(IPlayerHandler playerHandler,
         IBadgeRepository badgeRepository,
         ILeaderRepository leaderRepository,
         IPlayerRepository playerRepository,
         IProposalRepository proposalRepository,
         IUserRepository userRepository,
-        IClock clock)
+        IClock clock,
+        IGameCalendar gameCalendar)
     {
         _playerHandler = playerHandler;
         _badgeRepository = badgeRepository;
@@ -50,6 +53,7 @@ public class BadgeService : IBadgeService
         _proposalRepository = proposalRepository;
         _userRepository = userRepository;
         _clock = clock;
+        _gameCalendar = gameCalendar;
     }
 
     private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
@@ -252,12 +256,12 @@ public class BadgeService : IBadgeService
         var endDate = _clock.Today;
 
         var playersHistoryFull = await _playerRepository
-            .GetPlayersOfTheDayAsync(ProposalChart.HiddenDate, endDate);
+            .GetPlayersOfTheDayAsync(_gameCalendar.HiddenDate, endDate);
 
         var leadersHistoryFull = await GetLeadersHistoryAsync(
-                endDate, ProposalChart.HiddenDate);
+                endDate, _gameCalendar.HiddenDate);
 
-        var date = ProposalChart.HiddenDate;
+        var date = _gameCalendar.HiddenDate;
         while (date <= endDate)
         {
             var leaders = leadersHistoryFull
@@ -302,10 +306,10 @@ public class BadgeService : IBadgeService
             .GetBadgesAsync(true);
 
         var leadersHistory = await GetLeadersHistoryAsync(
-                leader.ProposalDate, ProposalChart.FirstDate);
+                leader.ProposalDate, _gameCalendar.FirstDate);
 
         var playersHistory = await _playerRepository
-            .GetPlayersOfTheDayAsync(ProposalChart.FirstDate, leader.ProposalDate);
+            .GetPlayersOfTheDayAsync(_gameCalendar.FirstDate, leader.ProposalDate);
 
         return await PrepareNewLeaderBadgesInternalAsync(
                 leader, playerOfTheDay, proposalsBeforeWin, allBadges, leadersHistory, playersHistory, language);

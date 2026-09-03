@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Models;
@@ -21,11 +20,4 @@ public static class ProposalChart
             { ProposalTypes.Leaderboard, (25, false) },
             { ProposalTypes.Continent, (100, false) }
         };
-
-    // TODO: provisoire, a sortir en configuration ou a deduire du MIN(proposal_date) en base
-    public static readonly DateTime FirstDate = new DateTime(2026, 09, 02).Date;
-
-    public static readonly DateTime HiddenDate = FirstDate.AddDays(-1);
-
-    public static readonly DateTime FirstMonth = new(FirstDate.Year, FirstDate.Month, 1);
 }

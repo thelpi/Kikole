@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite;
 using KikoleSite.Handlers;
-using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
@@ -17,7 +16,7 @@ namespace KikoleSiteUnitTests.Services;
 
 public class BadgeServiceTests
 {
-    private static readonly DateTime Day = ProposalChart.FirstDate;
+    private static readonly DateTime Day = TestCalendar.FirstDate;
     private const ulong UserId = 7;
 
     private readonly Mock<IPlayerHandler> _playerHandler = new();
@@ -27,6 +26,7 @@ public class BadgeServiceTests
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IClock> _clock = new();
+    private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly BadgeService _service;
 
     private readonly List<UserBadgeDto> _inserted = [];
@@ -62,7 +62,8 @@ public class BadgeServiceTests
             _playerRepository.Object,
             _proposalRepository.Object,
             _userRepository.Object,
-            _clock.Object);
+            _clock.Object,
+            _gameCalendar.Object);
     }
 
     private static PlayerDto Player(ushort year = 1990, ulong? badgeId = null)
@@ -326,7 +327,7 @@ public class BadgeServiceTests
             Badges.DoItYourself, Badges.WeAreKikole, Badges.Dedicated
         };
 
-        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(ProposalChart.HiddenDate, Day))
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
             .ReturnsAsync(new List<PlayerDto>());
 
         await _service.ResetBadgesAsync(Languages.en);

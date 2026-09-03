@@ -18,7 +18,7 @@ namespace KikoleSiteUnitTests.Services;
 
 public class LeaderServiceTests
 {
-    private static readonly DateTime Day = ProposalChart.FirstDate;
+    private static readonly DateTime Day = TestCalendar.FirstDate;
 
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
@@ -26,6 +26,7 @@ public class LeaderServiceTests
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
     private readonly Mock<IClock> _clock = new();
+    private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
 
     public LeaderServiceTests()
@@ -49,6 +50,7 @@ public class LeaderServiceTests
             _userRepository.Object,
             _proposalRepository.Object,
             _clock.Object,
+            _gameCalendar.Object,
             localizer.Object,
             _playerHandler.Object);
     }

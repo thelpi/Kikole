@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite;
 using KikoleSite.Handlers;
-using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
@@ -23,7 +22,7 @@ namespace KikoleSiteUnitTests.Services;
 /// </summary>
 public class LeaderServicePalmaresTests
 {
-    private static readonly DateTime FirstMonth = ProposalChart.FirstMonth;
+    private static readonly DateTime FirstMonth = TestCalendar.FirstMonth;
 
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
@@ -31,6 +30,7 @@ public class LeaderServicePalmaresTests
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
     private readonly Mock<IClock> _clock = new();
+    private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
 
     public LeaderServicePalmaresTests()
@@ -52,6 +52,7 @@ public class LeaderServicePalmaresTests
             _userRepository.Object,
             _proposalRepository.Object,
             _clock.Object,
+            _gameCalendar.Object,
             localizer.Object,
             _playerHandler.Object);
     }

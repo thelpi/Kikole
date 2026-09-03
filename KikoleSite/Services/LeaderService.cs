@@ -25,6 +25,7 @@ public class LeaderService : ILeaderService
     private readonly IUserRepository _userRepository;
     private readonly IProposalRepository _proposalRepository;
     private readonly IClock _clock;
+    private readonly IGameCalendar _gameCalendar;
     private readonly IStringLocalizer<Translations> _resources;
     private readonly IPlayerHandler _playerHandler;
 
@@ -38,11 +39,13 @@ public class LeaderService : ILeaderService
     /// <param name="resources">Instance of <see cref="IStringLocalizer"/>.</param>
     /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
     /// <param name="clock">Clock service.</param>
+    /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
     public LeaderService(IPlayerRepository playerRepository,
         ILeaderRepository leaderRepository,
         IUserRepository userRepository,
         IProposalRepository proposalRepository,
         IClock clock,
+        IGameCalendar gameCalendar,
         IStringLocalizer<Translations> resources,
         IPlayerHandler playerHandler)
     {
@@ -51,6 +54,7 @@ public class LeaderService : ILeaderService
         _userRepository = userRepository;
         _proposalRepository = proposalRepository;
         _clock = clock;
+        _gameCalendar = gameCalendar;
         _resources = resources;
         _playerHandler = playerHandler;
     }
@@ -148,7 +152,7 @@ public class LeaderService : ILeaderService
 
         var stats = new List<DailyUserStat>();
 
-        var currentDate = ProposalChart.FirstDate;
+        var currentDate = _gameCalendar.FirstDate;
 
         var stopDate = requestUserFoundToday
             ? _clock.Today
@@ -343,7 +347,7 @@ public class LeaderService : ILeaderService
 
         var users = new Dictionary<ulong, (User, int, int, int)>();
 
-        var date = ProposalChart.FirstMonth;
+        var date = _gameCalendar.FirstMonth;
 
         var currentMonth = _clock.FirstOfMonth;
         while (date <= currentMonth)

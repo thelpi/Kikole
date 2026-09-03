@@ -70,13 +70,14 @@ INSERT INTO clubs (id, name, allowed_names, creation_date) VALUES
 -- l'environnement local reste valable dans le temps : sans ca, passe minuit il n'y a
 -- plus de joueur du jour et l'application tombe en erreur.
 --
--- @first_date DOIT correspondre a ProposalChart.FirstDate cote code. La journee
--- precedente est la "journee cachee" (ProposalChart.HiddenDate).
+-- @first_date n'a plus a correspondre a quoi que ce soit dans le code : l'application
+-- deduit son calendrier du MIN(proposal_date), qui est la journee cachee inseree
+-- juste en dessous. On part donc d'aujourd'hui moins un mois, pour avoir un historique.
 --
 -- Un pool de 8 joueurs est parcouru en boucle ; l'identifiant vaut l'indice du jour + 2,
 -- ce qui rend les insertions dependantes deterministes (carrieres, traductions).
 
-SET @first_date = '2026-09-02';
+SET @first_date = DATE_SUB(CURDATE(), INTERVAL 1 MONTH);
 SET @last_date = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
 SET @pool_size = 8;
 SET SESSION cte_max_recursion_depth = 10000;
