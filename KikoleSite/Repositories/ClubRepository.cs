@@ -41,6 +41,16 @@ public class ClubRepository : BaseRepository, IClubRepository
                 ("id", clubId));
     }
 
+    public async Task<IReadOnlyCollection<ClubDto>> GetClubsByIdsAsync(IReadOnlyCollection<ulong> clubIds)
+    {
+        if (clubIds.Count == 0)
+            return [];
+
+        return await ExecuteReaderAsync<ClubDto>(
+                "SELECT * FROM clubs WHERE id IN @clubIds",
+                new { clubIds });
+    }
+
     public async Task<IReadOnlyCollection<ClubDto>> GetClubsAsync()
     {
         return await GetDtosAsync<ClubDto>(

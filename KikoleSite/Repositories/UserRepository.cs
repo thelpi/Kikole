@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -90,6 +91,16 @@ public class UserRepository : BaseRepository, IUserRepository
         return await GetDtoAsync<UserDto>("users",
                 ("id", userId),
                 ("is_disabled", 0));
+    }
+
+    public async Task<IReadOnlyCollection<UserDto>> GetUsersByIdsAsync(IReadOnlyCollection<ulong> userIds)
+    {
+        if (userIds.Count == 0)
+            return [];
+
+        return await ExecuteReaderAsync<UserDto>(
+                "SELECT * FROM users WHERE id IN @userIds AND is_disabled = 0",
+                new { userIds });
     }
 
     public async Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id)

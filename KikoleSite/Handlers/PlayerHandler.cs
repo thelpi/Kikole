@@ -44,21 +44,21 @@ public class PlayerHandler : IPlayerHandler
         var playerClubs = await _playerRepository
             .GetPlayerClubsAsync(p.Id);
 
-        var playerClubsDetails = new Dictionary<ulong, ClubDto>(playerClubs.Count);
-        foreach (var pc in playerClubs)
+        List<ulong> distinctClubIds = [.. playerClubs.Select(pc => pc.ClubId).Distinct()];
+
+        var clubs = await _clubRepository
+            .GetClubsByIdsAsync(distinctClubIds);
+
+        if (clubs.Count != distinctClubIds.Count)
         {
-            if (!playerClubsDetails.ContainsKey(pc.ClubId))
-            {
-                var c = await _clubRepository
-                    .GetClubAsync(pc.ClubId)
-                    ?? throw new InvalidOperationException($"Le club {pc.ClubId}, present dans la carriere du joueur {p.Id}, est introuvable.");
-                playerClubsDetails.Add(pc.ClubId, c);
-            }
+            var foundClubIds = clubs.Select(c => c.Id).ToHashSet();
+            var missingClubIds = distinctClubIds.Where(id => !foundClubIds.Contains(id));
+            throw new InvalidOperationException($"Club(s) introuvable(s) dans la carriere du joueur {p.Id} : {string.Join(", ", missingClubIds)}.");
         }
 
         return new PlayerFullDto
         {
-            Clubs = playerClubsDetails.Values.ToList(),
+            Clubs = [.. clubs],
             Player = p,
             PlayerClubs = playerClubs
         };

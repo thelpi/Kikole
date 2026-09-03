@@ -57,11 +57,14 @@ public class LeaderServiceTests
 
     private void SetupUsers(params (ulong id, string login)[] users)
     {
-        foreach (var (id, login) in users)
-        {
-            _userRepository.Setup(_ => _.GetUserByIdAsync(id))
-                .ReturnsAsync(UserDtoBuilder.Valid().WithId(id).WithLogin(login).WithUserTypeId((ulong)UserTypes.StandardUser).Build());
-        }
+        List<UserDto> dtos = [.. users
+            .Select(u => UserDtoBuilder.Valid().WithId(u.id).WithLogin(u.login).WithUserTypeId((ulong)UserTypes.StandardUser).Build())];
+
+        // le depot filtre par id demande : le mock doit faire pareil, sinon un test qui
+        // enregistre 3 utilisateurs mais n'en reclame que 2 en verrait quand meme 3.
+        _userRepository
+            .Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync((IReadOnlyCollection<ulong> ids) => dtos.Where(u => ids.Contains(u.Id)).ToList());
     }
 
     private static LeaderDto Leader(ulong userId, ushort points, int minutes, DateTime? date = null)
@@ -202,8 +205,12 @@ public class LeaderServiceTests
     [Fact]
     public async Task GetLeaderboardAsync_AdministratorsAreExcluded()
     {
-        _userRepository.Setup(_ => _.GetUserByIdAsync(1))
-            .ReturnsAsync(UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithUserTypeId((ulong)UserTypes.Administrator).Build());
+        _userRepository
+            .Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync(new List<UserDto>
+            {
+                UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithUserTypeId((ulong)UserTypes.Administrator).Build()
+            });
         SetupLeaderboard(new[] { Leader(1, 900, 60) }, new List<PlayerDto>());
 
         var result = await _service

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite.Handlers;
@@ -30,12 +31,15 @@ public class PlayerHandlerTests
         var playerClubs = new List<PlayerClubDto>();
         byte position = 1;
         foreach (var (clubId, name) in clubs)
-        {
             playerClubs.Add(new PlayerClubDto { PlayerId = 1, ClubId = clubId, HistoryPosition = position++ });
-            _clubRepository
-                .Setup(_ => _.GetClubAsync(clubId))
-                .ReturnsAsync(ClubDtoBuilder.Valid().WithId(clubId).WithName(name).Build());
-        }
+
+        List<ClubDto> clubDtos = [.. clubs
+            .Select(c => ClubDtoBuilder.Valid().WithId(c.clubId).WithName(c.name).Build())];
+
+        // le depot filtre par id demande, comme en prod : le mock doit faire pareil.
+        _clubRepository
+            .Setup(_ => _.GetClubsByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync((IReadOnlyCollection<ulong> ids) => clubDtos.Where(c => ids.Contains(c.Id)).ToList());
 
         _playerRepository
             .Setup(_ => _.GetPlayerClubsAsync(1))
@@ -69,8 +73,9 @@ public class PlayerHandlerTests
     [Fact]
     public async Task GetPlayerFullInfoAsync_AClubPlayedTwiceIsFetchedOnce()
     {
-        // un joueur peut revenir dans un club (retour de pret, second passage) :
-        // le handler doit dedoublonner avant d'interroger le depot
+        // un joueur peut revenir dans un club (retour de pret, second passage) : le
+        // handler doit dedoublonner avant d'interroger le depot, en un seul appel groupe
+        // (pas une requete par club, tout l'interet du batching)
         _playerRepository
             .Setup(_ => _.GetPlayerClubsAsync(1))
             .ReturnsAsync(new List<PlayerClubDto>
@@ -79,14 +84,21 @@ public class PlayerHandlerTests
                 new() { PlayerId = 1, ClubId = 3, HistoryPosition = 2 },
                 new() { PlayerId = 1, ClubId = 2, HistoryPosition = 3 }
             });
-        _clubRepository.Setup(_ => _.GetClubAsync(2)).ReturnsAsync(ClubDtoBuilder.Valid().WithId(2).WithName("Juventus").Build());
-        _clubRepository.Setup(_ => _.GetClubAsync(3)).ReturnsAsync(ClubDtoBuilder.Valid().WithId(3).WithName("Inter Milan").Build());
+        _clubRepository
+            .Setup(_ => _.GetClubsByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync(new List<ClubDto>
+            {
+                ClubDtoBuilder.Valid().WithId(2).WithName("Juventus").Build(),
+                ClubDtoBuilder.Valid().WithId(3).WithName("Inter Milan").Build()
+            });
 
         var result = await _handler.GetPlayerFullInfoAsync(Player);
 
         result.PlayerClubs.Should().HaveCount(3);
         result.Clubs.Should().HaveCount(2);
-        _clubRepository.Verify(_ => _.GetClubAsync(2), Times.Once);
+        _clubRepository.Verify(
+            _ => _.GetClubsByIdsAsync(It.Is<IReadOnlyCollection<ulong>>(ids => ids.Count == 2)),
+            Times.Once);
     }
 
     [Fact]

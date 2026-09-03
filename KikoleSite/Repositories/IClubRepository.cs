@@ -12,5 +12,7 @@ public interface IClubRepository
 
     Task<ClubDto?> GetClubAsync(ulong clubId);
 
+    Task<IReadOnlyCollection<ClubDto>> GetClubsByIdsAsync(IReadOnlyCollection<ulong> clubIds);
+
     Task<IReadOnlyCollection<ClubDto>> GetClubsAsync();
 }

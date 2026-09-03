@@ -73,11 +73,12 @@ public class LeaderServicePalmaresTests
                 .Select(u => LeaderDtoBuilder.Valid().WithUserId(u.id).WithPoints(u.points).WithTime(u.minutes).WithProposalDate(FirstMonth).WithCreationDate(FirstMonth.AddMinutes(u.minutes)).Build())
                 .ToList());
 
-        foreach (var u in users)
-        {
-            _userRepository.Setup(_ => _.GetUserByIdAsync(u.id))
-                .ReturnsAsync(UserDtoBuilder.Valid().WithId(u.id).WithLogin(u.login).WithUserTypeId((ulong)UserTypes.StandardUser).Build());
-        }
+        List<UserDto> dtos = [.. users
+            .Select(u => UserDtoBuilder.Valid().WithId(u.id).WithLogin(u.login).WithUserTypeId((ulong)UserTypes.StandardUser).Build())];
+
+        _userRepository
+            .Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync((IReadOnlyCollection<ulong> ids) => dtos.Where(u => ids.Contains(u.Id)).ToList());
     }
 
     // ------------------------------------------------------------- podium mensuel

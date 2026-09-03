@@ -422,18 +422,22 @@ public class LeaderService : ILeaderService
 
     private async Task<List<UserDto>> GetUsersFromIdsAsync(IEnumerable<ulong> allUsersId)
     {
-        var users = new List<UserDto>();
-        foreach (var userId in allUsersId)
-        {
-            var user = await _userRepository
-                .GetUserByIdAsync(userId)
-                ?? throw new InvalidOperationException($"L'utilisateur {userId} est introuvable.");
+        IReadOnlyCollection<ulong> ids = allUsersId as IReadOnlyCollection<ulong> ?? [.. allUsersId];
 
-            if (user.UserTypeId != (ulong)UserTypes.Administrator)
-                users.Add(user);
+        if (ids.Count == 0)
+            return [];
+
+        var users = await _userRepository
+            .GetUsersByIdsAsync(ids);
+
+        if (users.Count != ids.Count)
+        {
+            var foundIds = users.Select(u => u.Id).ToHashSet();
+            var missingIds = ids.Where(id => !foundIds.Contains(id));
+            throw new InvalidOperationException($"Utilisateur(s) introuvable(s) : {string.Join(", ", missingIds)}.");
         }
 
-        return users;
+        return [.. users.Where(u => u.UserTypeId != (ulong)UserTypes.Administrator)];
     }
 
 }

@@ -93,9 +93,12 @@ Branche de travail : `remaster-v2`.
 
 ## 3. Qualité et performance
 
-- [ ] **Requêtes N+1** — `PlayerHandler` fait une requête par club d'une carrière,
-      `LeaderService.GetUsersFromIdsAsync` une par utilisateur, `BadgeService` une par badge
-      et par jour. Sur un classement mensuel, des centaines d'aller-retours SQL.
+- [x] ~~Requêtes N+1~~ — `PlayerHandler.GetPlayerFullInfoAsync` faisait une requête par
+      club d'une carrière, `LeaderService.GetUsersFromIdsAsync` une par utilisateur ; les
+      deux batchent maintenant via `GetClubsByIdsAsync`/`GetUsersByIdsAsync`
+      (`WHERE id IN @ids`). `BadgeService.ResetBadgesAsync` a le même défaut (une requête
+      par badge et par jour) mais reste **volontairement non traité** : fonction purement
+      administrative, pas sur un chemin chaud.
 - [ ] **Sortir `GetProposalResponsesWithPoints` de `ProposalService`** — méthode
       `internal static` que `LeaderService` appelle directement, seul couplage
       service → service du projet, invisible à l'analyse des dépendances injectées. C'est
