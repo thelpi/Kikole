@@ -40,7 +40,7 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithClue(string clue) { _dto = _dto with { Clue = clue }; return this; }
     internal PlayerDtoBuilder WithEasyClue(string clue) { _dto = _dto with { EasyClue = clue }; return this; }
     internal PlayerDtoBuilder WithHideCreatorFlag(byte flag) { _dto = _dto with { HideCreator = flag }; return this; }
-    internal PlayerDtoBuilder WithProposalDate(DateTime? date) { _dto = _dto with { ProposalDate = date }; return this; }
+    internal PlayerDtoBuilder WithPublicationDate(DateTime? date) { _dto = _dto with { PublicationDate = date }; return this; }
     internal PlayerDtoBuilder WithRejectDate(DateTime? date) { _dto = _dto with { RejectDate = date }; return this; }
     internal PlayerDtoBuilder WithCreator(ulong userId) { _dto = _dto with { CreationUserId = userId }; return this; }
     internal PlayerDtoBuilder WithBadge(ulong? badgeId) { _dto = _dto with { BadgeId = badgeId }; return this; }

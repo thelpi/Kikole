@@ -164,7 +164,7 @@ public class AdminController : KikoleBaseController
                 if (result == PlayerSubmissionErrors.PlayerNotFound)
                     model.ErrorMessage = _localizer["PlayerDoesNotExist"];
                 else if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
-                    model.ErrorMessage = _localizer["RejectAndProposalDateCombined"];
+                    model.ErrorMessage = _localizer["RejectAndPublicationDateCombined"];
                 else
                 {
                     foreach (var badge in badges)
@@ -312,7 +312,7 @@ public class AdminController : KikoleBaseController
 
         var req = new PlayerRequest
         {
-            SetLatestProposalDate = isAdmin,
+            SetLatestPublicationDate = isAdmin,
             AllowedNames = names,
             Clubs = clubs,
             ClueEn = model.ClueEn,

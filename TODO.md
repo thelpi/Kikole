@@ -59,22 +59,6 @@ Identity** plutôt que de réparer la cryptographie maison.
       `player_federations` retrouvée en production était une tentative abandonnée.
 - [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
       d'intégrité sont les `IsValid` applicatives.
-- [ ] **Renommer `players.proposal_date`.** Le mot *proposal* porte trois sens dans ce
-      code : la tentative d'un participant (table `proposals`, `ProposalTypes`), la
-      soumission d'un joueur par un utilisateur (« proposer un kikolé »), et — ici — le
-      jour où le joueur est le joueur du jour. Les deux premiers sont légitimes, le
-      troisième est un faux ami.
-
-      **`submission_date` serait un piège** : la colonne ne dit pas quand le joueur a été
-      proposé, ça c'est `creation_date` juste à côté. Cible retenue :
-      **`publication_date`** ou `published_date`, qui rejoignent le vocabulaire déjà
-      employé par le code (`GetPlayerOfTheDayAsync`, `GetEarliestPlayerDateAsync`).
-
-      Ce n'est pas un renommage de méthode mais une **migration de schéma**, avec des
-      ricochets : Dapper mappe la colonne sur `PlayerDto.ProposalDate` via
-      `MatchNamesWithUnderscores`, donc la propriété et tous ses usages suivent, plus
-      `kikole_mock.sql` et le script d'import de la base d'époque. À grouper avec les
-      autres changements de schéma (clés étrangères, clubs canoniques, nationalités).
 - [ ] `IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
       passent en canonique. `Message` et `Discussion` ne méritent pas de service.
 
@@ -201,7 +185,7 @@ les hachages de toute façon.
   **Toute écriture sur les clubs passe par `CreateOrUpdateClubAsync`**, qui rafraîchit le
   cache lui-même : l'invalidation n'est plus à la charge de l'appelant, donc impossible à
   oublier. Les contrôleurs ne dépendent plus du tout d'`IClubRepository`.
-- **`IGameCalendar` déduit les dates du `MIN(proposal_date)`** : le premier joueur publié
+- **`IGameCalendar` déduit les dates du `MIN(publication_date)`** : le premier joueur publié
   est la journée cachée, le jeu commence le lendemain. **Sans joueur en base, l'application
   refuse de démarrer** plutôt que de servir des dates inventées.
 
@@ -218,6 +202,23 @@ les hachages de toute façon.
 
   Séparé d'`IClock` en revanche : l'horloge ne lit jamais la base, et les fusionner ferait
   traîner un dépôt derrière chaque `_clock.Today` du projet.
+- **`players.proposal_date` renommée `publication_date`.** Le mot *proposal* portait trois
+  sens dans ce code : la tentative d'un participant (table `proposals`, `ProposalTypes`),
+  la soumission d'un joueur par un utilisateur (« proposer un kikolé »), et — ici — le jour
+  où le joueur est le joueur du jour. Seul ce dernier était un faux ami ; les deux tables
+  `proposals` et `leaders` gardent une vraie colonne `proposal_date` (le jour visé par la
+  tentative), qui n'a pas bougé. `submission_date` aurait été un piège : ça se serait
+  confondu avec `creation_date`, juste à côté. `publication_date` rejoint le vocabulaire
+  déjà en place côté code (`GetPlayerOfTheDayAsync`, la doc de `PlayerRequest.ToDto` parlait
+  déjà de « date de parution »).
+
+  Renommage propagé à `PlayerDto`, `PlayerRequest`, `Player`, `PlayerSorts`, aux méthodes de
+  dépôt (`ChangePlayerPublicationDateAsync`), aux clés de ressources (`InvalidProposalDate`
+  → `InvalidPublicationDate`) et au schéma (`kikole.sql`, `kikole_mock.sql`). Les variables
+  locales qui ne représentent pas ce champ mais un jour de jeu générique, utilisé aussi bien
+  contre `players` que contre `proposals` (`actualDate` dans les contrôleurs, `UserDayModel`)
+  n'ont pas été touchées : les renommer aurait suggéré à tort qu'elles ne portent qu'un seul
+  des deux sens.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

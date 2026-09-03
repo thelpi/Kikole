@@ -14,7 +14,7 @@ public record PlayerDto : BaseDto
 
     public ulong CountryId { get; init; }
 
-    public DateTime? ProposalDate { get; init; }
+    public DateTime? PublicationDate { get; init; }
 
     public required string Clue { get; init; }
 

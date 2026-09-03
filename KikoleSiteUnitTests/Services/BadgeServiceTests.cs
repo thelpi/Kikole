@@ -68,7 +68,7 @@ public class BadgeServiceTests
 
     private static PlayerDto Player(ushort year = 1990, ulong? badgeId = null)
     {
-        return PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(year).WithProposalDate(Day).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithBadge(badgeId).Build();
+        return PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(year).WithPublicationDate(Day).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithBadge(badgeId).Build();
     }
 
     private void SetupPlayerFull(PlayerDto player, int clubsCount = 0)

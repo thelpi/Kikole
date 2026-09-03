@@ -18,7 +18,7 @@ public record PlayerRequest
 
     public Continents Continent { get; init; }
 
-    public DateTime? ProposalDate { get; init; }
+    public DateTime? PublicationDate { get; init; }
 
     public required IReadOnlyList<string> AllowedNames { get; init; }
 
@@ -34,7 +34,7 @@ public record PlayerRequest
 
     internal Positions Position { get; init; }
 
-    public bool SetLatestProposalDate { get; init; }
+    public bool SetLatestPublicationDate { get; init; }
 
     public bool HideCreator { get; init; }
 
@@ -64,8 +64,8 @@ public record PlayerRequest
         if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
             return resources["InvalidClue"];
 
-        if (ProposalDate.HasValue && ProposalDate.Value.Date < today)
-            return resources["InvalidProposalDate"];
+        if (PublicationDate.HasValue && PublicationDate.Value.Date < today)
+            return resources["InvalidPublicationDate"];
 
         return null;
     }
@@ -74,14 +74,14 @@ public record PlayerRequest
     /// La date de parution est passee en argument plutot que lue sur la requete :
     /// elle peut etre calculee par le service quand la requete n'en porte pas.
     /// </summary>
-    internal PlayerDto ToDto(ulong userId, DateTime? proposalDate)
+    internal PlayerDto ToDto(ulong userId, DateTime? publicationDate)
     {
         return new PlayerDto
         {
             ContinentId = (ulong)Continent,
             CountryId = (ulong)Country,
             Name = Name,
-            ProposalDate = proposalDate,
+            PublicationDate = publicationDate,
             YearOfBirth = YearOfBirth,
             AllowedNames = AllowedNames.SanitizeJoin(Name),
             Clue = ClueEn,

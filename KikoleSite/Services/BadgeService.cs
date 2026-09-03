@@ -281,10 +281,10 @@ public class BadgeService : IBadgeService
                     .Where(p => p.Successful == 0 || p.ProposalTypeId != (ulong)ProposalTypes.Name)
                     .ToList();
 
-                var pDay = playersHistoryFull.Single(phl => phl.ProposalDate == date);
+                var pDay = playersHistoryFull.Single(phl => phl.PublicationDate == date);
 
                 var playersHistory = playersHistoryFull
-                    .Where(phl => phl.ProposalDate <= date)
+                    .Where(phl => phl.PublicationDate <= date)
                     .ToList();
 
                 await PrepareNewLeaderBadgesInternalAsync(
@@ -338,7 +338,7 @@ public class BadgeService : IBadgeService
             {
                 date = date.AddDays(-1);
                 if (!proposals.Any(p => p.ProposalDate == date)
-                    && !playersCreated.Any(p => p.ProposalDate == date))
+                    && !playersCreated.Any(p => p.PublicationDate == date))
                     break;
                 i++;
             }
@@ -450,7 +450,7 @@ public class BadgeService : IBadgeService
         var collectedBadges = new List<ulong>();
 
         var myPlayerHistory = playersHistory
-            .Where(p => leadersHistory.Any(h => h.UserId == leader.UserId && h.ProposalDate == p.ProposalDate));
+            .Where(p => leadersHistory.Any(h => h.UserId == leader.UserId && h.ProposalDate == p.PublicationDate));
 
         var myCreatedPlayers = playersHistory
             .Where(p => p.CreationUserId == leader.UserId);
@@ -608,7 +608,7 @@ public class BadgeService : IBadgeService
         var dateToConsider = leader.ProposalDate;
         do
         {
-            var isCreator = myCreatedPlayers.Any(mcp => mcp.ProposalDate == dateToConsider);
+            var isCreator = myCreatedPlayers.Any(mcp => mcp.PublicationDate == dateToConsider);
 
             if (!isCreator)
             {

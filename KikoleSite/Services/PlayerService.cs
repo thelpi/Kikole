@@ -75,12 +75,12 @@ public class PlayerService : IPlayerService
     {
         // la date est resolue ici plutot qu'ecrite dans la requete : un service n'a pas
         // a modifier l'objet qu'on lui passe
-        var proposalDate = request.ProposalDate;
-        if (!proposalDate.HasValue && request.SetLatestProposalDate)
-            proposalDate = await GetNextDateAsync();
+        var publicationDate = request.PublicationDate;
+        if (!publicationDate.HasValue && request.SetLatestPublicationDate)
+            publicationDate = await GetNextDateAsync();
 
         var playerId = await _playerRepository
-            .CreatePlayerAsync(request.ToDto(userId, proposalDate));
+            .CreatePlayerAsync(request.ToDto(userId, publicationDate));
 
         await InsertLanguageCluesAsync(
                 request.ClueLanguages, playerId, false);
@@ -224,7 +224,7 @@ public class PlayerService : IPlayerService
         if (p == null)
             return (PlayerSubmissionErrors.PlayerNotFound, 0, badges);
 
-        if (p.ProposalDate.HasValue || p.RejectDate.HasValue)
+        if (p.PublicationDate.HasValue || p.RejectDate.HasValue)
             return (PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused, 0, badges);
 
         if (request.IsAccepted)
@@ -268,7 +268,7 @@ public class PlayerService : IPlayerService
         foreach (var p in randomizedPlayers)
         {
             await _playerRepository
-                .ChangePlayerProposalDateAsync(p.Id, _clock.Tomorrow.AddDays(i));
+                .ChangePlayerPublicationDateAsync(p.Id, _clock.Tomorrow.AddDays(i));
             i++;
         }
     }
@@ -292,7 +292,7 @@ public class PlayerService : IPlayerService
 
         var countToFind = (_clock.Today - _gameCalendar.FirstDate).Days + 1;
 
-        var createdCount = createdPlayers.Count(_ => _.ProposalDate <= _clock.Today);
+        var createdCount = createdPlayers.Count(_ => _.PublicationDate <= _clock.Today);
 
         return leaders.Count + createdCount == countToFind;
     }

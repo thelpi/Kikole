@@ -21,7 +21,7 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 ("year_of_birth", player.YearOfBirth),
                 ("country_id", player.CountryId),
                 ("continent_id", player.ContinentId),
-                ("proposal_date", player.ProposalDate),
+                ("publication_date", player.PublicationDate),
                 ("creation_date", Clock.Now),
                 ("clue", player.Clue),
                 ("easy_clue", player.EasyClue),
@@ -44,7 +44,7 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         return await GetDtoAsync<PlayerDto>(
                 "players",
-                ("proposal_date", date.Date));
+                ("publication_date", date.Date));
     }
 
     public async Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(
@@ -52,9 +52,9 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         return await ExecuteReaderAsync<PlayerDto>(
                 "SELECT * FROM players " +
-                "WHERE proposal_date IS NOT NULL " +
-                "AND (@min_date IS NULL OR proposal_date >= @min_date) " +
-                "AND (@max_date IS NULL OR proposal_date <= @max_date)",
+                "WHERE publication_date IS NOT NULL " +
+                "AND (@min_date IS NULL OR publication_date >= @min_date) " +
+                "AND (@max_date IS NULL OR publication_date <= @max_date)",
                 new
                 {
                     min_date = minimalDate?.Date,
@@ -72,13 +72,13 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     public async Task<DateTime> GetLatestPlayerDateAsync()
     {
         return await ExecuteScalarAsync<DateTime>(
-                "SELECT MAX(proposal_date) FROM players", null);
+                "SELECT MAX(publication_date) FROM players", null);
     }
 
     public async Task<DateTime?> GetEarliestPlayerDateAsync()
     {
         return await ExecuteScalarAsync<DateTime?>(
-                "SELECT MIN(proposal_date) FROM players", null);
+                "SELECT MIN(publication_date) FROM players", null);
     }
 
     public async Task<PlayerDto?> GetPlayerByIdAsync(ulong id)
@@ -106,7 +106,7 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         await ExecuteNonQueryAsync(
                 "UPDATE players " +
-                "SET proposal_date = @date " +
+                "SET publication_date = @date " +
                 "WHERE id = @playerId",
                 new
                 {
@@ -132,7 +132,7 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         return await ExecuteReaderAsync<PlayerDto>(
                 "SELECT * FROM players " +
-                "WHERE proposal_date IS NULL " +
+                "WHERE publication_date IS NULL " +
                 "AND reject_date IS NULL",
                 new { });
     }
@@ -160,19 +160,19 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 "SELECT * FROM players " +
                 "WHERE creation_user_id = @userId " +
                 "AND (" +
-                "(@type = 1 AND proposal_date IS NOT NULL) " +
+                "(@type = 1 AND publication_date IS NOT NULL) " +
                 "OR (@type = 2 AND reject_date IS NOT NULL) " +
                 "OR @type = 0 " +
                 ")",
                 new { userId, type = (accepted.HasValue ? (accepted.Value ? 1 : 2) : 0) });
     }
 
-    public async Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date)
+    public async Task ChangePlayerPublicationDateAsync(ulong playerId, DateTime date)
     {
         await ExecuteNonQueryAsync(
                 "UPDATE players " +
-                "SET proposal_date = @proposalDate " +
+                "SET publication_date = @publicationDate " +
                 "WHERE id = @playerId",
-                new { playerId, proposalDate = date.Date });
+                new { playerId, publicationDate = date.Date });
     }
 }

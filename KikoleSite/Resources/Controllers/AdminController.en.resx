@@ -198,8 +198,8 @@
   <data name="InvalidPosition1" xml:space="preserve">
     <value>Invalid position</value>
   </data>
-  <data name="InvalidProposalDate" xml:space="preserve">
-    <value>Invalid proposal date</value>
+  <data name="InvalidPublicationDate" xml:space="preserve">
+    <value>Invalid publication date</value>
   </data>
   <data name="InvalidQOrA" xml:space="preserve">
     <value>Invalid question or answer</value>
@@ -252,8 +252,8 @@
   <data name="RefusalWithoutReason" xml:space="preserve">
     <value>Refusal reason not specified</value>
   </data>
-  <data name="RejectAndProposalDateCombined" xml:space="preserve">
-    <value>Unable to set both reject date and proposal date</value>
+  <data name="RejectAndPublicationDateCombined" xml:space="preserve">
+    <value>Unable to set both reject date and publication date</value>
   </data>
   <data name="ResetPasswordError" xml:space="preserve">
     <value>Error while reseting the password</value>

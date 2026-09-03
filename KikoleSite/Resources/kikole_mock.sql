@@ -71,7 +71,7 @@ INSERT INTO clubs (id, name, allowed_names, creation_date) VALUES
 -- plus de joueur du jour et l'application tombe en erreur.
 --
 -- @first_date n'a plus a correspondre a quoi que ce soit dans le code : l'application
--- deduit son calendrier du MIN(proposal_date), qui est la journee cachee inseree
+-- deduit son calendrier du MIN(publication_date), qui est la journee cachee inseree
 -- juste en dessous. On part donc d'aujourd'hui moins un mois, pour avoir un historique.
 --
 -- Un pool de 8 joueurs est parcouru en boucle ; l'identifiant vaut l'indice du jour + 2,
@@ -83,7 +83,7 @@ SET @pool_size = 8;
 SET SESSION cte_max_recursion_depth = 10000;
 
 -- journee cachee (FirstDate - 1)
-INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, continent_id, proposal_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator) VALUES
+INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, continent_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator) VALUES
 (1, 'Andrea Pirlo', 'pirlo;andrea pirlo', 1979, 111, 1, DATE_SUB(@first_date, INTERVAL 1 DAY),
  'A deep-lying playmaker, famous for his free kicks.', 'He won the 2006 World Cup with Italy.',
  3, NULL, 1, '2026-09-01 09:00:00', NULL, 0);
@@ -157,7 +157,7 @@ WITH RECURSIVE seq AS (
 )
 SELECT i, d FROM seq;
 
-INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, continent_id, proposal_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator)
+INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, continent_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator)
 SELECT mock_days.i + 2, mock_pool.name, mock_pool.allowed_names, mock_pool.year_of_birth, mock_pool.country_id, mock_pool.continent_id,
        mock_days.d, mock_pool.clue_en, mock_pool.easy_en, mock_pool.position_id, NULL, 1,
        TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '09:00:00'), NULL, 0

@@ -121,13 +121,13 @@ public class StatisticService : IStatisticService
         var results = players
             .Select(p =>
             {
-                var proposals = allProposals.Where(_ => _.ProposalDate == p.ProposalDate!.Value);
+                var proposals = allProposals.Where(_ => _.ProposalDate == p.PublicationDate!.Value);
 
-                var leaders = allLeaders.Where(_ => _.ProposalDate == p.ProposalDate!.Value);
+                var leaders = allLeaders.Where(_ => _.ProposalDate == p.PublicationDate!.Value);
 
                 return new PlayerStatistics
                 {
-                    Date = p.ProposalDate!.Value,
+                    Date = p.PublicationDate!.Value,
                     Name = leaders.Any(_ => _.UserId == userId) || userId == p.CreationUserId || isAdmin
                         ? p.Name
                         : anonymizedName,
@@ -145,7 +145,7 @@ public class StatisticService : IStatisticService
                     AveragePointsTotal = leaders.Any()
                         ? (int)leaders.Average(_ => _.Points)
                         : 0,
-                    DaysBefore = (int)(_clock.Now - p.ProposalDate!.Value).TotalDays
+                    DaysBefore = (int)(_clock.Now - p.PublicationDate!.Value).TotalDays
                 };
             });
 
@@ -178,7 +178,7 @@ public class StatisticService : IStatisticService
             case PlayerSorts.PointsSameDay:
                 results = results.OrderBy(_ => _.AveragePointsSameDay);
                 break;
-            case PlayerSorts.ProposalDate:
+            case PlayerSorts.PublicationDate:
                 results = results.OrderBy(_ => _.Date);
                 break;
         }

@@ -2,7 +2,7 @@
 {
     public enum PlayerSorts
     {
-        ProposalDate,
+        PublicationDate,
         Name,
         CreatorLogin,
         PointsSameDay,

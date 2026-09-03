@@ -71,7 +71,7 @@ public class PlayerServiceTests
     [Fact]
     public async Task CreatePlayerAsync_WhenAskedForTheNextSlot_TakesTheDayAfterTheLatestOne()
     {
-        var request = Request() with { SetLatestProposalDate = true };
+        var request = Request() with { SetLatestPublicationDate = true };
         _playerRepository.Setup(_ => _.GetLatestPlayerDateAsync())
             .ReturnsAsync(FirstDate.AddDays(4));
         _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
@@ -79,21 +79,21 @@ public class PlayerServiceTests
         await _service.CreatePlayerAsync(request, 42);
 
         _playerRepository.Verify(
-            _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.ProposalDate == FirstDate.AddDays(5))),
+            _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.PublicationDate == FirstDate.AddDays(5))),
             Times.Once);
     }
 
     [Fact]
     public async Task CreatePlayerAsync_AnExplicitDateWins()
     {
-        var request = Request() with { SetLatestProposalDate = true, ProposalDate = FirstDate.AddDays(10) };
+        var request = Request() with { SetLatestPublicationDate = true, PublicationDate = FirstDate.AddDays(10) };
         _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
         await _service.CreatePlayerAsync(request, 42);
 
         _playerRepository.Verify(_ => _.GetLatestPlayerDateAsync(), Times.Never);
         _playerRepository.Verify(
-            _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.ProposalDate == FirstDate.AddDays(10))),
+            _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.PublicationDate == FirstDate.AddDays(10))),
             Times.Once);
     }
 
@@ -106,7 +106,7 @@ public class PlayerServiceTests
         await _service.CreatePlayerAsync(request, 42);
 
         _playerRepository.Verify(
-            _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.ProposalDate == null)),
+            _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.PublicationDate == null)),
             Times.Once);
     }
 
@@ -238,7 +238,7 @@ public class PlayerServiceTests
     public async Task ValidatePlayerSubmissionAsync_WhenAlreadyScheduled_IsRefused()
     {
         _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithProposalDate(FirstDate).Build());
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithPublicationDate(FirstDate).Build());
 
         var (error, _, _) = await _service
             .ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequestBuilder.Valid().Build());
@@ -368,7 +368,7 @@ public class PlayerServiceTests
         await _service.ReassignPlayersOfTheDayAsync();
 
         _playerRepository.Verify(
-            _ => _.ChangePlayerProposalDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
+            _ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
     }
 
     [Fact]
@@ -383,7 +383,7 @@ public class PlayerServiceTests
 
         var assigned = new List<DateTime>();
         _playerRepository
-            .Setup(_ => _.ChangePlayerProposalDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
+            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
             .Callback<ulong, DateTime>((_, d) => assigned.Add(d))
             .Returns(Task.CompletedTask);
 
@@ -409,7 +409,7 @@ public class PlayerServiceTests
         _playerRepository
             .Setup(_ => _.GetPlayersByCreatorAsync(7, true))
             .ReturnsAsync(Enumerable.Range(0, createdPlayers)
-                .Select(_ => PlayerDtoBuilder.Valid().WithProposalDate(FirstDate).Build()).ToList());
+                .Select(_ => PlayerDtoBuilder.Valid().WithPublicationDate(FirstDate).Build()).ToList());
     }
 
     [Fact]

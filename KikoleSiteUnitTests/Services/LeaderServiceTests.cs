@@ -117,7 +117,7 @@ public class LeaderServiceTests
         SetupUsers((1, "joueur"));
         SetupLeaderboard(
             new[] { Leader(1, 800, 60), Leader(1, 500, 30, Day.AddDays(1)) },
-            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(1).WithProposalDate(Day.AddDays(2)).Build() });
+            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(1).WithPublicationDate(Day.AddDays(2)).Build() });
 
         var result = await _service
             .GetLeaderboardAsync(Day, Day.AddDays(2), LeaderSorts.TotalPoints);
@@ -136,7 +136,7 @@ public class LeaderServiceTests
         SetupUsers((5, "createur"));
         SetupLeaderboard(
             new List<LeaderDto>(),
-            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithProposalDate(Day).Build() });
+            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithPublicationDate(Day).Build() });
 
         var result = await _service
             .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
@@ -151,7 +151,7 @@ public class LeaderServiceTests
         SetupUsers((5, "createur"));
         SetupLeaderboard(
             new List<LeaderDto>(),
-            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithProposalDate(Day).Build() });
+            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithPublicationDate(Day).Build() });
 
         var result = await _service
             .GetLeaderboardAsync(Day, Day, LeaderSorts.BestTime);
@@ -221,7 +221,7 @@ public class LeaderServiceTests
 
     private void SetupMissingLeader(params ProposalDto[] proposals)
     {
-        var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithProposalDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build();
+        var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithPublicationDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build();
 
         _playerRepository
             .Setup(_ => _.GetPlayersOfTheDayAsync(null, Day))

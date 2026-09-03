@@ -171,7 +171,7 @@ public class LeaderService : ILeaderService
         {
             // meme invariante qu'ailleurs : il y a un joueur par jour, et le nom de la
             // date manquante vaut mieux que « Sequence contains no matching element »
-            var pDay = pDays.FirstOrDefault(x => x.ProposalDate == currentDate)
+            var pDay = pDays.FirstOrDefault(x => x.PublicationDate == currentDate)
                 ?? throw new InvalidOperationException(
                     $"Aucun joueur n'est programme pour le {currentDate:yyyy-MM-dd}.");
 
@@ -214,7 +214,7 @@ public class LeaderService : ILeaderService
         foreach (var playerOfTheDay in players)
         {
             var usersId = await _proposalRepository
-                .GetMissingUsersAsLeaderAsync(playerOfTheDay.ProposalDate!.Value);
+                .GetMissingUsersAsLeaderAsync(playerOfTheDay.PublicationDate!.Value);
 
             var playerInfo = await _playerHandler
                 .GetPlayerFullInfoAsync(playerOfTheDay);
@@ -222,7 +222,7 @@ public class LeaderService : ILeaderService
             foreach (var userId in usersId)
             {
                 var proposals = (await _proposalRepository
-                    .GetProposalsAsync(playerOfTheDay.ProposalDate.Value, userId))
+                    .GetProposalsAsync(playerOfTheDay.PublicationDate.Value, userId))
                     .OrderBy(p => p.CreationDate)
                     .ToList();
 
@@ -246,8 +246,8 @@ public class LeaderService : ILeaderService
                     .CreateLeaderAsync(new LeaderDto
                     {
                         Points = (ushort)points,
-                        ProposalDate = playerOfTheDay.ProposalDate.Value,
-                        Time = (winningProposal.CreationDate - playerOfTheDay.ProposalDate.Value).ToRoundMinutes(),
+                        ProposalDate = playerOfTheDay.PublicationDate.Value,
+                        Time = (winningProposal.CreationDate - playerOfTheDay.PublicationDate.Value).ToRoundMinutes(),
                         UserId = userId,
                         CreationDate = winningProposal.CreationDate
                     });

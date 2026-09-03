@@ -27,7 +27,7 @@ public interface IPlayerRepository
 
     Task ValidatePlayerProposalAsync(ulong playerId, DateTime date);
 
-    Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date);
+    Task ChangePlayerPublicationDateAsync(ulong playerId, DateTime date);
 
     Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage);
 

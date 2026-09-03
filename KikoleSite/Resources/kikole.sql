@@ -933,7 +933,7 @@ CREATE TABLE players (
   year_of_birth smallint(5) UNSIGNED NOT NULL,
   country_id bigint(20) UNSIGNED NOT NULL,
   continent_id bigint(20) UNSIGNED NOT NULL,
-  proposal_date date DEFAULT NULL,
+  publication_date date DEFAULT NULL,
   clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   easy_clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   position_id bigint(20) UNSIGNED NOT NULL,

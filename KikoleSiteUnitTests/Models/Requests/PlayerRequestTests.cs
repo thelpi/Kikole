@@ -172,37 +172,37 @@ public class PlayerRequestTests
     // ------------------------------------------------------------- date de parution
 
     [Fact]
-    public void IsValid_WhenProposalDateIsInThePast_IsRejected()
+    public void IsValid_WhenPublicationDateIsInThePast_IsRejected()
     {
-        var request = Valid() with { ProposalDate = Today.AddDays(-1) };
+        var request = Valid() with { PublicationDate = Today.AddDays(-1) };
 
-        request.IsValid(Today, _localizer).Should().Be("InvalidProposalDate");
+        request.IsValid(Today, _localizer).Should().Be("InvalidPublicationDate");
     }
 
     [Theory]
     [InlineData(0)]   // aujourd'hui accepte
     [InlineData(1)]
     [InlineData(30)]
-    public void IsValid_WhenProposalDateIsTodayOrLater_IsAccepted(int daysAhead)
+    public void IsValid_WhenPublicationDateIsTodayOrLater_IsAccepted(int daysAhead)
     {
-        var request = Valid() with { ProposalDate = Today.AddDays(daysAhead) };
+        var request = Valid() with { PublicationDate = Today.AddDays(daysAhead) };
 
         request.IsValid(Today, _localizer).Should().BeNull();
     }
 
     [Fact]
-    public void IsValid_WhenProposalDateIsNotSet_IsAccepted()
+    public void IsValid_WhenPublicationDateIsNotSet_IsAccepted()
     {
         // une soumission en attente de validation n'a pas encore de date
-        var request = Valid() with { ProposalDate = null };
+        var request = Valid() with { PublicationDate = null };
 
         request.IsValid(Today, _localizer).Should().BeNull();
     }
 
     [Fact]
-    public void IsValid_IgnoresTheTimeOfDayOnTheProposalDate()
+    public void IsValid_IgnoresTheTimeOfDayOnThePublicationDate()
     {
-        var request = Valid() with { ProposalDate = Today.AddHours(3) };
+        var request = Valid() with { PublicationDate = Today.AddHours(3) };
 
         request.IsValid(Today, _localizer).Should().BeNull();
     }

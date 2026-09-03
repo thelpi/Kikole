@@ -18,7 +18,7 @@ public class StatisticRepository : BaseRepository, IStatisticRepository
         "           AND u.user_type_id = " + (ulong)UserTypes.Administrator +
         "   ) OR EXISTS (" +
         "       SELECT 1 FROM leaders AS ld " +
-        "       WHERE ld.proposal_date = p.proposal_date " +
+        "       WHERE ld.proposal_date = p.publication_date " +
         "           AND ld.user_id = @userId " +
         "   ) OR p.creation_user_id = @userId " +
         ") ";
@@ -33,7 +33,7 @@ public class StatisticRepository : BaseRepository, IStatisticRepository
                 "SELECT l.club_id AS value, COUNT(*) AS count " +
                 "FROM players AS p " +
                 "   JOIN player_clubs AS l ON p.id = l.player_id " +
-                "WHERE p.proposal_date IS NOT NULL " +
+                "WHERE p.publication_date IS NOT NULL " +
                 UserPlayerLinkSql +
                 "GROUP BY l.club_id " +
                 "ORDER BY COUNT(*) DESC",
@@ -45,7 +45,7 @@ public class StatisticRepository : BaseRepository, IStatisticRepository
         return await ExecuteReaderAsync<PlayersDistributionDto<ulong>>(
                 "SELECT country_id AS value, COUNT(*) AS count " +
                 "FROM players AS p " +
-                "WHERE proposal_date IS NOT NULL " +
+                "WHERE publication_date IS NOT NULL " +
                 UserPlayerLinkSql +
                 "GROUP BY country_id " +
                 "ORDER BY COUNT(*) DESC",
@@ -57,7 +57,7 @@ public class StatisticRepository : BaseRepository, IStatisticRepository
         return await ExecuteReaderAsync<PlayersDistributionDto<int>>(
                 "SELECT CONCAT(SUBSTRING(year_of_birth, 1, 3), '0') AS value, COUNT(*) AS count " +
                 "FROM players AS p " +
-                "WHERE proposal_date IS NOT NULL " +
+                "WHERE publication_date IS NOT NULL " +
                 UserPlayerLinkSql +
                 "GROUP BY CONCAT(SUBSTRING(year_of_birth, 1, 3), '0') " +
                 "ORDER BY COUNT(*) DESC",
@@ -69,7 +69,7 @@ public class StatisticRepository : BaseRepository, IStatisticRepository
         return await ExecuteReaderAsync<PlayersDistributionDto<int>>(
                 "SELECT position_id AS value, COUNT(*) AS count " +
                 "FROM players AS p " +
-                "WHERE proposal_date IS NOT NULL " +
+                "WHERE publication_date IS NOT NULL " +
                 UserPlayerLinkSql +
                 "GROUP BY position_id " +
                 "ORDER BY COUNT(*) DESC",

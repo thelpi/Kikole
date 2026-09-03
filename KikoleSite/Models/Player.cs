@@ -18,7 +18,7 @@ public class Player : PlayerCreator
 
     public Countries Country { get; }
 
-    public DateTime? ProposalDate { get; }
+    public DateTime? PublicationDate { get; }
 
     public string Clue { get; }
 
@@ -32,7 +32,7 @@ public class Player : PlayerCreator
         : base(Creator(p, users), p.Player)
     {
         Id = p.Player.Id;
-        ProposalDate = p.Player.ProposalDate;
+        PublicationDate = p.Player.PublicationDate;
         RejectDate = p.Player.RejectDate;
         Clubs = p.PlayerClubs
             .Select(c => new PlayerClub(c, p.Clubs))
