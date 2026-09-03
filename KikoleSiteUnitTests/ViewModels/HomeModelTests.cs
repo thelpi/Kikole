@@ -83,7 +83,7 @@ namespace KikoleSiteUnitTests.ViewModels
             return new ProposalResponse(request, Zidane(), _localizer).WithTotalPoints(points, false);
         }
 
-        private void Apply(HomeModel model, ProposalTypes type, string value, int sourcePoints = 1000, string easyClue = null)
+        private void Apply(HomeModel model, ProposalTypes type, string value, int sourcePoints = 1000, string? easyClue = null)
         {
             model.SetPropertiesFromProposal(
                 Respond(type, value, sourcePoints), Countries, Continents, PositionNames, easyClue);

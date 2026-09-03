@@ -10,7 +10,7 @@ namespace KikoleSiteUnitTests.Helpers
     {
         private class Entry
         {
-            public string Name { get; set; }
+            public required string Name { get; set; }
             public int Points { get; set; }
             public int Position { get; set; }
         }

@@ -41,7 +41,9 @@ namespace KikoleSiteUnitTests.Models.Requests
                     new PlayerClubRequest { ClubId = 3, HistoryPosition = 3 }
                 },
                 ClueEn = "A clue",
-                EasyClueEn = "An easier clue"
+                EasyClueEn = "An easier clue",
+                ClueLanguages = new Dictionary<Languages, string?>(),
+                EasyClueLanguages = new Dictionary<Languages, string?>()
             };
         }
 
@@ -123,15 +125,6 @@ namespace KikoleSiteUnitTests.Models.Requests
         {
             var request = Valid();
             request.Clubs = new List<PlayerClubRequest>();
-
-            request.IsValid(Today, _localizer).Should().Be("EmptyClubsList");
-        }
-
-        [Fact]
-        public void IsValid_WhenCareerIsNull_IsRejected()
-        {
-            var request = Valid();
-            request.Clubs = null;
 
             request.IsValid(Today, _localizer).Should().Be("EmptyClubsList");
         }

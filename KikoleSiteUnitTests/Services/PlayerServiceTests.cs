@@ -58,6 +58,8 @@ namespace KikoleSiteUnitTests.Services
                     new PlayerClubRequest { ClubId = 1, HistoryPosition = 1 },
                     new PlayerClubRequest { ClubId = 2, HistoryPosition = 2 }
                 },
+                ClueLanguages = new Dictionary<Languages, string?>(),
+                EasyClueLanguages = new Dictionary<Languages, string?>(),
                 ClueEn = "clue",
                 EasyClueEn = "easy clue"
             };
@@ -126,7 +128,7 @@ namespace KikoleSiteUnitTests.Services
         public async Task CreatePlayerAsync_SkipsBlankTranslationsAndTrimsTheOthers()
         {
             var request = Request();
-            request.ClueLanguages = new Dictionary<Languages, string>
+            request.ClueLanguages = new Dictionary<Languages, string?>
             {
                 { Languages.fr, "  indice francais  " },
                 { Languages.en, "   " }
@@ -195,10 +197,10 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task ValidatePlayerSubmissionAsync_WhenThePlayerDoesNotExist_ReportsNotFound()
         {
-            _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1)).ReturnsAsync((PlayerDto)null);
+            _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1)).ReturnsAsync((PlayerDto?)null);
 
             var (error, userId, badges) = await _service
-                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
+                .ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequestBuilder.Valid().Build());
 
             error.Should().Be(PlayerSubmissionErrors.PlayerNotFound);
             userId.Should().Be(0);
@@ -212,7 +214,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithProposalDate(FirstDate).Build());
 
             var (error, _, _) = await _service
-                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
+                .ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequestBuilder.Valid().Build());
 
             error.Should().Be(PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused);
         }
@@ -224,7 +226,7 @@ namespace KikoleSiteUnitTests.Services
                 .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithRejectDate(FirstDate).Build());
 
             var (error, _, _) = await _service
-                .ValidatePlayerSubmissionAsync(new PlayerSubmissionValidationRequest { PlayerId = 1 });
+                .ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequestBuilder.Valid().Build());
 
             error.Should().Be(PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused);
         }
@@ -241,13 +243,7 @@ namespace KikoleSiteUnitTests.Services
 
         private static PlayerSubmissionValidationRequest Acceptance()
         {
-            return new PlayerSubmissionValidationRequest
-            {
-                PlayerId = 1,
-                IsAccepted = true,
-                ClueEditLanguages = new Dictionary<Languages, string> { { Languages.fr, "indice" } },
-                EasyClueEditLanguages = new Dictionary<Languages, string> { { Languages.fr, "facile" } }
-            };
+            return PlayerSubmissionValidationRequestBuilder.Valid().Accepted("indice", "facile").Build();
         }
 
         [Fact]
@@ -321,12 +317,7 @@ namespace KikoleSiteUnitTests.Services
             _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
                 .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithCreator(42).Build());
 
-            var request = new PlayerSubmissionValidationRequest
-            {
-                PlayerId = 1,
-                IsAccepted = false,
-                RefusalReason = "doublon"
-            };
+            var request = PlayerSubmissionValidationRequestBuilder.Valid().Refused("doublon").Build();
 
             var (error, userId, badges) = await _service
                 .ValidatePlayerSubmissionAsync(request);
@@ -531,8 +522,8 @@ namespace KikoleSiteUnitTests.Services
                 1,
                 "new clue",
                 "new easy clue",
-                new Dictionary<Languages, string> { { Languages.fr, "  nouvel indice  " } },
-                new Dictionary<Languages, string> { { Languages.fr, "nouvel indice facile" } });
+                new Dictionary<Languages, string?> { { Languages.fr, "  nouvel indice  " } },
+                new Dictionary<Languages, string?> { { Languages.fr, "nouvel indice facile" } });
 
             _playerRepository.Verify(
                 _ => _.UpdatePlayerCluesAsync(1, "new clue", "new easy clue"), Times.Once);

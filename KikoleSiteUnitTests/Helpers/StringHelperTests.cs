@@ -186,7 +186,7 @@ namespace KikoleSiteUnitTests.Helpers
         [Fact]
         public void IsValid_WhenNull_ReturnsFalse()
         {
-            ((IReadOnlyList<string>)null).IsValid().Should().BeFalse();
+            ((IReadOnlyList<string>?)null).IsValid().Should().BeFalse();
         }
 
         [Fact]

@@ -11,15 +11,15 @@ namespace KikoleSite.Models.Requests
 
         public bool IsAccepted { get; set; }
 
-        public IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; set; } = null!;
+        public required IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; set; }
 
-        public IReadOnlyDictionary<Languages, string?> EasyClueEditLanguages { get; set; } = null!;
+        public required IReadOnlyDictionary<Languages, string?> EasyClueEditLanguages { get; set; }
 
-        public string ClueEditEn { get; set; } = null!;
+        public required string? ClueEditEn { get; set; }
 
-        public string EasyClueEditEn { get; set; } = null!;
+        public required string? EasyClueEditEn { get; set; }
 
-        public string RefusalReason { get; set; } = null!;
+        public required string? RefusalReason { get; set; }
 
         internal string? IsValid(IStringLocalizer resources)
         {

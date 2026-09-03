@@ -113,7 +113,7 @@ namespace KikoleSiteUnitTests.Handlers
             // joueur du jour, l'appel casse au lieu de renvoyer null
             _playerRepository
                 .Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateTime>()))
-                .ReturnsAsync((PlayerDto)null);
+                .ReturnsAsync((PlayerDto?)null);
 
             Func<Task> act = () => _handler.GetPlayerOfTheDayFullInfoAsync(new DateTime(2026, 9, 2));
 

@@ -22,7 +22,7 @@ namespace KikoleSiteUnitTests.Models
         }
 
         private static DailyUserStat Stat(
-            IEnumerable<LeaderDto> leaders, LeaderDto mine, bool attempt = true, bool attemptDayOne = true)
+            IEnumerable<LeaderDto> leaders, LeaderDto? mine, bool attempt = true, bool attemptDayOne = true)
         {
             return new DailyUserStat(Me, Day, "Zidane", attemptDayOne, attempt, leaders, mine);
         }

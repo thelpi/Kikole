@@ -9,9 +9,9 @@ namespace KikoleSite.Models.Requests
     {
         public ulong Id { get; set; }
 
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
 
-        public IReadOnlyList<string> AllowedNames { get; set; } = null!;
+        public required IReadOnlyList<string> AllowedNames { get; set; }
 
         internal string? IsValid(IStringLocalizer resources)
         {

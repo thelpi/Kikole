@@ -56,7 +56,7 @@ namespace KikoleSite.Helpers
             return string.Join(Separator, values.Select(Sanitize).Concat(new[] { sourceValue.Sanitize() }).Distinct());
         }
 
-        internal static bool IsValid(this IReadOnlyList<string> values)
+        internal static bool IsValid(this IReadOnlyList<string>? values)
         {
             return values?.Count > 0
                 && values.All(v => !string.IsNullOrWhiteSpace(v));

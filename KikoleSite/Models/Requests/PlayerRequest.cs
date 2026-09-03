@@ -10,7 +10,7 @@ namespace KikoleSite.Models.Requests
 {
     public class PlayerRequest
     {
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
 
         public ushort YearOfBirth { get; set; }
 
@@ -20,17 +20,17 @@ namespace KikoleSite.Models.Requests
 
         public DateTime? ProposalDate { get; set; }
 
-        public IReadOnlyList<string> AllowedNames { get; set; } = null!;
+        public required IReadOnlyList<string> AllowedNames { get; set; }
 
-        public IReadOnlyList<PlayerClubRequest> Clubs { get; set; } = null!;
+        public required IReadOnlyList<PlayerClubRequest> Clubs { get; set; }
 
-        public string ClueEn { get; set; } = null!;
+        public required string ClueEn { get; set; }
 
-        public string EasyClueEn { get; set; } = null!;
+        public required string EasyClueEn { get; set; }
 
-        public IReadOnlyDictionary<Languages, string?> ClueLanguages { get; set; } = null!;
+        public required IReadOnlyDictionary<Languages, string?> ClueLanguages { get; set; }
 
-        public IReadOnlyDictionary<Languages, string?> EasyClueLanguages { get; set; } = null!;
+        public required IReadOnlyDictionary<Languages, string?> EasyClueLanguages { get; set; }
 
         internal Positions Position { get; set; }
 
@@ -49,7 +49,7 @@ namespace KikoleSite.Models.Requests
             if (!AllowedNames.IsValid())
                 return resources["InvalidAllowedNames"];
 
-            if (Clubs == null || Clubs.Count == 0)
+            if (Clubs.Count == 0)
                 return resources["EmptyClubsList"];
 
             if (Clubs.Any(c => c.ClubId == 0))

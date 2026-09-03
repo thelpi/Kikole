@@ -146,7 +146,7 @@ namespace KikoleSiteUnitTests.Helpers
         {
             using (Culture.English())
             {
-                ((object)null).ToNaString().Should().Be(ViewHelper.NA);
+                ((object?)null).ToNaString().Should().Be(ViewHelper.NA);
                 ((object)new DateTime(2026, 9, 2)).ToNaString().Should().Be("2026-09-02");
                 ((object)new TimeSpan(1, 30, 0)).ToNaString().Should().Be("01:30");
                 ((object)true).ToNaString().Should().Be("Yes");

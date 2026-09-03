@@ -180,7 +180,7 @@ namespace KikoleSite.Controllers
                                 Password = model.PasswordCreate1Submission,
                                 PasswordResetQuestion = model.RecoveryQCreate,
                                 PasswordResetAnswer = model.RecoveryACreate?.Trim(),
-                                Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString()
+                                Ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString()
                             };
 
                             var userId = await _userRepository

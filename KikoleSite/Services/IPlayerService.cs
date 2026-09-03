@@ -84,8 +84,8 @@ namespace KikoleSite.Services
         /// <param name="easyClueLanguages">Easy clue, in another languages.</param>
         /// <returns>Nothing.</returns>
         Task UpdatePlayerCluesAsync(ulong playerId, string clue, string easyClue,
-            IReadOnlyDictionary<Languages, string?> clueLanguages,
-            IReadOnlyDictionary<Languages, string?> easyClueLanguages);
+            IReadOnlyDictionary<Languages, string?>? clueLanguages,
+            IReadOnlyDictionary<Languages, string?>? easyClueLanguages);
 
         /// <summary>
         /// Ges both clues in every language specified for of a player.

@@ -11,7 +11,7 @@ namespace KikoleSite.Models.Requests
     public class ProposalRequest
     {
         public uint DaysBeforeNow { get; set; }
-        public string Value { get; set; } = null!;
+        public string? Value { get; set; }
         internal string? Ip { get; set; }
         internal DateTime ProposalDateTime { get; set; }
         internal ProposalTypes ProposalType { get; set; }

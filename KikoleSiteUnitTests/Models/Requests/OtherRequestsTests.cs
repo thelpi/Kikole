@@ -94,13 +94,7 @@ namespace KikoleSiteUnitTests.Models.Requests
 
         private static PlayerSubmissionValidationRequest Accepted()
         {
-            return new PlayerSubmissionValidationRequest
-            {
-                PlayerId = 1,
-                IsAccepted = true,
-                ClueEditLanguages = new Dictionary<Languages, string> { { Languages.fr, "indice" } },
-                EasyClueEditLanguages = new Dictionary<Languages, string> { { Languages.fr, "indice facile" } }
-            };
+            return PlayerSubmissionValidationRequestBuilder.Valid().Accepted().Build();
         }
 
         [Fact]
@@ -121,7 +115,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [Fact]
         public void IsValid_WhenRefusedWithoutReason_IsRejected()
         {
-            var request = new PlayerSubmissionValidationRequest { PlayerId = 1, IsAccepted = false };
+            var request = PlayerSubmissionValidationRequestBuilder.Valid().Build();
 
             request.IsValid(_localizer).Should().Be("RefusalWithoutReason");
         }
@@ -129,12 +123,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [Fact]
         public void IsValid_WhenRefusedWithAReason_CluesAreNotRequired()
         {
-            var request = new PlayerSubmissionValidationRequest
-            {
-                PlayerId = 1,
-                IsAccepted = false,
-                RefusalReason = "joueur deja utilise"
-            };
+            var request = PlayerSubmissionValidationRequestBuilder.Valid().Refused("joueur deja utilise").Build();
 
             request.IsValid(_localizer).Should().BeNull();
         }
@@ -143,7 +132,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         public void IsValid_WhenAcceptedWithoutFrenchClue_IsRejected()
         {
             var request = Accepted();
-            request.ClueEditLanguages = new Dictionary<Languages, string>();
+            request.ClueEditLanguages = new Dictionary<Languages, string?>();
 
             request.IsValid(_localizer).Should().Be("InvalidClue");
         }
@@ -152,7 +141,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         public void IsValid_WhenAcceptedWithABlankClue_IsRejected()
         {
             var request = Accepted();
-            request.ClueEditLanguages = new Dictionary<Languages, string> { { Languages.fr, "   " } };
+            request.ClueEditLanguages = new Dictionary<Languages, string?> { { Languages.fr, "   " } };
 
             request.IsValid(_localizer).Should().Be("InvalidClue");
         }
@@ -161,7 +150,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         public void IsValid_WhenAcceptedWithoutEasyFrenchClue_IsRejected()
         {
             var request = Accepted();
-            request.EasyClueEditLanguages = new Dictionary<Languages, string>();
+            request.EasyClueEditLanguages = new Dictionary<Languages, string?>();
 
             request.IsValid(_localizer).Should().Be("InvalidClue");
         }
@@ -182,7 +171,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         {
             // le login est stocke sanitise, et la recherche l'est aussi : c'est ce qui
             // rend la connexion insensible a la casse et aux accents
-            var dto = new UserRequest { Login = "  Réné  ", Password = "p" }.ToDto(Crypter().Object);
+            var dto = UserRequestBuilder.Valid().WithLogin("  Réné  ").Build().ToDto(Crypter().Object);
 
             dto.Login.Should().Be("rene");
         }
@@ -190,13 +179,11 @@ namespace KikoleSiteUnitTests.Models.Requests
         [Fact]
         public void ToDto_HashesThePasswordAndTheRecoveryAnswer()
         {
-            var dto = new UserRequest
-            {
-                Login = "joueur",
-                Password = "secret",
-                PasswordResetQuestion = "Ma question ?",
-                PasswordResetAnswer = "Ma Réponse"
-            }.ToDto(Crypter().Object);
+            var dto = UserRequestBuilder.Valid()
+                .WithPassword("secret")
+                .WithRecovery("Ma question ?", "Ma Réponse")
+                .Build()
+                .ToDto(Crypter().Object);
 
             dto.Password.Should().Be("hash:secret");
             // la reponse est sanitisee avant hachage, la question ne l'est pas
@@ -209,7 +196,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         {
             var crypter = Crypter();
 
-            var dto = new UserRequest { Login = "joueur", Password = "p" }.ToDto(crypter.Object);
+            var dto = UserRequestBuilder.Valid().Build().ToDto(crypter.Object);
 
             dto.PasswordResetQuestion.Should().Be("GENERATED");
             dto.PasswordResetAnswer.Should().Be("hash:GENERATED");
@@ -219,7 +206,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [Fact]
         public void ToDto_DefaultsToEnglishAndStandardUser()
         {
-            var dto = new UserRequest { Login = "joueur", Password = "p" }.ToDto(Crypter().Object);
+            var dto = UserRequestBuilder.Valid().Build().ToDto(Crypter().Object);
 
             dto.LanguageId.Should().Be((ulong)Languages.en);
             dto.UserTypeId.Should().Be((ulong)UserTypes.StandardUser);
@@ -229,7 +216,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         public void ToDto_NeverGrantsAdministratorRights()
         {
             // garde-fou : la creation de compte ne doit jamais pouvoir produire un admin
-            var dto = new UserRequest { Login = "joueur", Password = "p", Language = Languages.fr }
+            var dto = UserRequestBuilder.Valid().WithLanguage(Languages.fr).Build()
                 .ToDto(Crypter().Object);
 
             dto.UserTypeId.Should().NotBe((ulong)UserTypes.Administrator);
@@ -239,7 +226,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [Fact]
         public void ToDto_CarriesTheIpThrough()
         {
-            var dto = new UserRequest { Login = "joueur", Password = "p", Ip = "::1" }
+            var dto = UserRequestBuilder.Valid().WithIp("::1").Build()
                 .ToDto(Crypter().Object);
 
             dto.Ip.Should().Be("::1");

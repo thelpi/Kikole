@@ -82,7 +82,7 @@ namespace KikoleSite.ViewModels
             IReadOnlyDictionary<ulong, string> countries,
             IReadOnlyDictionary<ulong, string> continents,
             IReadOnlyDictionary<ulong, string> positions,
-            string easyClue)
+            string? easyClue)
         {
             Points = response.TotalPoints;
             switch (response.ProposalType)

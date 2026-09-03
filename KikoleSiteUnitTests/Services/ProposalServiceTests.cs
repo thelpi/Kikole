@@ -227,7 +227,7 @@ namespace KikoleSiteUnitTests.Services
         [Fact]
         public async Task AnUnknownUserGetsNothing()
         {
-            _userRepository.Setup(_ => _.GetUserByIdAsync(UserId)).ReturnsAsync((UserDto)null);
+            _userRepository.Setup(_ => _.GetUserByIdAsync(UserId)).ReturnsAsync((UserDto?)null);
 
             var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
