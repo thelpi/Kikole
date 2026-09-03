@@ -192,6 +192,36 @@ namespace KikoleSiteUnitTests.Services
             result.Should().Be("indice traduit");
         }
 
+        // ------------------------------------------------------------- invariantes
+
+        // Un joueur par jour est une regle du jeu, pas un cas a degrader : ces appels
+        // echouent bruyamment plutot que de casser plus loin sur une reference nulle,
+        // et le message nomme ce qui manque pour que l'administrateur puisse corriger.
+
+        [Fact]
+        public async Task GetPlayerClueAsync_WhenNoPlayerForThatDay_SaysWhichDayIsMissing()
+        {
+            _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateTime>()))
+                .ReturnsAsync((PlayerDto?)null);
+
+            Func<Task> act = () => _service.GetPlayerClueAsync(FirstDate, false, Languages.en);
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage($"*{FirstDate:yyyy-MM-dd}*");
+        }
+
+        [Fact]
+        public async Task GetPlayerCluesAsync_WhenThePlayerDoesNotExist_SaysWhichPlayerIsMissing()
+        {
+            _playerRepository.Setup(_ => _.GetPlayerByIdAsync(It.IsAny<ulong>()))
+                .ReturnsAsync((PlayerDto?)null);
+
+            Func<Task> act = () => _service.GetPlayerCluesAsync(42, new[] { Languages.en });
+
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*42*");
+        }
+
         // ------------------------------------------------------------- validation d'une soumission
 
         [Fact]

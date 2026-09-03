@@ -123,7 +123,8 @@ namespace KikoleSite.Services
             {
                 var creatorUser = await _userRepository
                     .GetUserByIdAsync(creatorUserId)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException($"Le createur {creatorUserId} est introuvable.");
                 usersCache.Add(creatorUserId, creatorUser.Login);
             }
 

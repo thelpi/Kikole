@@ -107,17 +107,18 @@ namespace KikoleSiteUnitTests.Handlers
         }
 
         [Fact]
-        public void GetPlayerOfTheDayFullInfoAsync_WhenNoPlayerForThatDay_Throws()
+        public async Task GetPlayerOfTheDayFullInfoAsync_WhenNoPlayerForThatDay_SaysWhichDayIsMissing()
         {
-            // caracterisation du comportement actuel : aucun garde-fou sur l'absence de
-            // joueur du jour, l'appel casse au lieu de renvoyer null
+            // un joueur par jour est une invariante du jeu : son absence est une faute
+            // d'administration, signalee par une exception qui nomme la date en cause
             _playerRepository
                 .Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync((PlayerDto?)null);
 
             Func<Task> act = () => _handler.GetPlayerOfTheDayFullInfoAsync(new DateTime(2026, 9, 2));
 
-            act.Should().ThrowAsync<NullReferenceException>();
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*2026-09-02*");
         }
     }
 }

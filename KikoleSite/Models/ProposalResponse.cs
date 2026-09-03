@@ -45,18 +45,24 @@ namespace KikoleSite.Models
 
             RawValue = sourceValue;
 
+            // seuls l'achat d'indice et l'achat de classement n'ont pas de valeur : partout
+            // ailleurs elle a ete validee par le controleur avant d'arriver ici, et son
+            // absence signale une ligne de proposition incoherente en base
+            string Guessed() => sourceValue
+                ?? throw new InvalidOperationException($"Une proposition de type {proposalType} doit porter une valeur.");
+
             switch (ProposalType)
             {
                 case ProposalTypes.Name:
                     if (!success.HasValue)
-                        Successful = player.Player.AllowedNames.ContainsApproximately(sourceValue);
+                        Successful = player.Player.AllowedNames.ContainsApproximately(Guessed());
                     Value = Successful
                         ? player.Player.Name
                         : sourceValue;
                     break;
 
                 case ProposalTypes.Club:
-                    var c = player.Clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
+                    var c = player.Clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(Guessed()));
                     if (!success.HasValue)
                         Successful = c != null;
                     if (Successful)
@@ -82,7 +88,7 @@ namespace KikoleSite.Models
 
                 case ProposalTypes.Country:
                     if (!success.HasValue)
-                        Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
+                        Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(Guessed());
                     Value = Successful
                         ? player.Player.CountryId
                         : (object?)sourceValue;
@@ -93,7 +99,7 @@ namespace KikoleSite.Models
 
                 case ProposalTypes.Continent:
                     if (!success.HasValue)
-                        Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(sourceValue);
+                        Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(Guessed());
                     Value = Successful
                         ? player.Player.ContinentId
                         : (object?)sourceValue;
@@ -104,7 +110,7 @@ namespace KikoleSite.Models
 
                 case ProposalTypes.Position:
                     if (!success.HasValue)
-                        Successful = player.Player.PositionId == ulong.Parse(sourceValue);
+                        Successful = player.Player.PositionId == ulong.Parse(Guessed());
                     Value = Successful
                         ? player.Player.PositionId
                         : (object?)sourceValue;
@@ -115,7 +121,7 @@ namespace KikoleSite.Models
 
                 case ProposalTypes.Year:
                     if (!success.HasValue)
-                        Successful = ushort.Parse(sourceValue) == player.Player.YearOfBirth;
+                        Successful = ushort.Parse(Guessed()) == player.Player.YearOfBirth;
                     Value = Successful
                         ? player.Player.YearOfBirth
                         : (object?)sourceValue;

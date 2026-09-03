@@ -437,7 +437,8 @@ namespace KikoleSite.Services
             {
                 var user = await _userRepository
                     .GetUserByIdAsync(userId)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException($"L'utilisateur {userId} est introuvable.");
 
                 if (user.UserTypeId != (ulong)UserTypes.Administrator)
                     users.Add(user);

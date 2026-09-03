@@ -33,7 +33,8 @@ namespace KikoleSite.Handlers
         {
             var p = await _playerRepository
                 .GetPlayerOfTheDayAsync(date)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"Aucun joueur n'est programme pour le {date:yyyy-MM-dd}.");
 
             return await GetPlayerFullInfoAsync(p)
                 .ConfigureAwait(false);
@@ -53,7 +54,8 @@ namespace KikoleSite.Handlers
                 {
                     var c = await _clubRepository
                         .GetClubAsync(pc.ClubId)
-                        .ConfigureAwait(false);
+                        .ConfigureAwait(false)
+                        ?? throw new InvalidOperationException($"Le club {pc.ClubId}, present dans la carriere du joueur {p.Id}, est introuvable.");
                     playerClubsDetails.Add(pc.ClubId, c);
                 }
             }

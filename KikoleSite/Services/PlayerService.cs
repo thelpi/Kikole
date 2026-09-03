@@ -101,7 +101,8 @@ namespace KikoleSite.Services
         {
             var player = await _playerRepository
                 .GetPlayerOfTheDayAsync(proposalDate)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"Aucun joueur n'est programme pour le {proposalDate:yyyy-MM-dd}.");
 
             var clue = isEasy
                 ? player.EasyClue
@@ -126,7 +127,8 @@ namespace KikoleSite.Services
             {
                 var player = await _playerRepository
                     .GetPlayerByIdAsync(playerId)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException($"Le joueur {playerId} est introuvable.");
 
                 clues.Add(Languages.en, (player.Clue, player.EasyClue));
             }
@@ -177,15 +179,18 @@ namespace KikoleSite.Services
         {
             var player = await _playerRepository
                 .GetPlayerOfTheDayAsync(proposalDate.Date)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"Aucun joueur n'est programme pour le {proposalDate:yyyy-MM-dd}.");
 
             var creatorUser = await _userRepository
                 .GetUserByIdAsync(player.CreationUserId)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"Le createur {player.CreationUserId} du joueur du jour est introuvable.");
 
             var requestUser = await _userRepository
                 .GetUserByIdAsync(userId)
-                .ConfigureAwait(false);
+                .ConfigureAwait(false)
+                ?? throw new InvalidOperationException($"L'utilisateur {userId} est introuvable.");
 
             return new PlayerCreator(requestUser, player, creatorUser);
         }
@@ -202,7 +207,8 @@ namespace KikoleSite.Services
             {
                 var user = await _userRepository
                     .GetUserByIdAsync(usrId)
-                    .ConfigureAwait(false);
+                    .ConfigureAwait(false)
+                    ?? throw new InvalidOperationException($"Le createur {usrId} d'une soumission en attente est introuvable.");
                 users.Add(usrId, user);
             }
 
