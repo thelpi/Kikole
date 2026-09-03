@@ -161,12 +161,11 @@ Branche de travail : `remaster-v2`.
       (`LeaderboardModel.IsAdmin`), pour ne pas proposer un lien qui échoue. Vérifié en
       direct dans les trois cas : anonyme et `joueur1` (standard) ne voient plus les liens
       et sont redirigés en accès direct, `admin` voit les liens et accède normalement.
-- [ ] **Modernisation syntaxique : le reste.** Les DTO, les requêtes et les namespaces sont
-      faits. Restent les **ViewModels**, qui ne peuvent pas passer en `init` tant que les
-      contrôleurs les remplissent après construction (`model.ErrorMessage = …`) — c'est un
-      motif à revoir, pas une conversion mécanique. Les expressions de collection ne
-      couvrent que ce qui a un type cible : un `var x = new List<T>()` n'en a pas, et
-      `IReadOnlyDictionary` n'est pas constructible avec `[]`.
+- [x] ~~Modernisation syntaxique : le reste.~~ Les DTO, les requêtes et les namespaces sont
+      faits. **Décision : les ViewModels restent mutables**, voir « Partis pris ». Les
+      expressions de collection ne couvrent de toute façon que ce qui a un type cible : un
+      `var x = new List<T>()` n'en a pas, et `IReadOnlyDictionary` n'est pas constructible
+      avec `[]` — point mineur, sans lien avec la décision ci-dessus, jamais traité.
 - [x] ~~Latin Extended-B dans `Sanitize`~~ — **décision : non traité.** 107 lettres
       d'alphabet phonétique et d'orthographes africaines deviennent `?`, faute d'équivalent
       ASCII évident, mais hors périmètre tant que les noms de joueurs sont saisis dans leur
@@ -453,6 +452,35 @@ les hachages de toute façon.
   problème — vérifié contre la vraie base, pas seulement en compilation. Les builders de
   test remplacent l'instance par une copie (`_dto = _dto with { … }`) au lieu de la muter ;
   c'est `record` qui rend `init` supportable côté tests.
+- **Les ViewModels restent mutables, `init` non poursuivi.** Contrairement aux DTO, ils
+  jouent deux rôles à la fois dans ce projet : accumulateur pendant le calcul (le
+  contrôleur les remplit par bouts au fil de branches conditionnelles) et forme finale pour
+  la vue. `HomeModel` est le cas extrême — plus de 40 propriétés `{ get; set; }`, remplies
+  sur ~260 lignes de `HomeController.Index`, et mutées par ses propres méthodes
+  (`SetPropertiesFromProposal`) appelées une fois par proposition dans une boucle
+  `foreach` : un accumulateur par construction, pas un objet qu'on remplit une fois.
+  `AccountModel` aurait pu passer en `init` isolément (un `if`/`else if` par branche, pas de
+  boucle), mais rendre *certains* ViewModels immuables sans pouvoir le faire pour tous
+  perd l'intérêt : la moitié du bénéfice (cohérence du style, un seul motif à connaître)
+  pour tout le coût de la réflexion au cas par cas. Le vrai correctif serait de séparer le
+  calcul (un service retourne un résultat complet, comme `ScoreCalculator` le fait déjà
+  pour le score) de la projection vers la vue (un seul mapping final, immuable) — un travail
+  de conception par action de contrôleur, pas une conversion syntaxique, hors périmètre pour
+  l'instant.
+
+  **Piste alternative envisagée puis écartée : `init` sur les propriétés input, `set` sur
+  les propriétés output**, propriété par propriété plutôt que modèle par modèle. Vérifiée
+  concrètement sur `AccountModel` et `HomeModel` (POST) en croisant modèle, contrôleur et
+  vue Razor (`@Html.HiddenFor` pour repérer ce qui est réellement lié) : **aucun cas
+  litigieux trouvé** — chaque propriété est déjà proprement soit input jamais réaffectée
+  après le binding, soit output jamais vraiment liée à un `<input>`. Écartée pour deux
+  raisons : (1) elle ne touche pas le vrai problème de `HomeModel`, les propriétés
+  dangereuses (mutées dans la boucle de `SetPropertiesFromProposal`) restant `set`
+  quoi qu'il arrive ; (2) la protection est asymétrique — `init` empêche bien une
+  réaffectation future d'un input, mais rien n'empêche l'inverse (une propriété `set`/output
+  devenant un jour bindable si quelqu'un ajoute un `HiddenFor` dessus, exactement le sens où
+  un bug de confiance apparaîtrait). L'audit croisé modèle/contrôleur/vue reste une méthode
+  utile si un doute resurgit, même sans en faire une conversion de code.
 - **Les signatures de dépôt restent nullables.** Lever dans le dépôt économiserait 2 gardes
   sur 10 et en casserait 5 : quatre appelants au moins traitent `null` comme flux de
   contrôle normal, dont `AuthorizationFilter`, sur le chemin de chaque requête. La couche
