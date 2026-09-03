@@ -47,6 +47,28 @@ Branche de travail : `remaster-v2`.
       page d'accueil). Impacte `AccountController.create`, `IUserRepository`
       (`GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`), la table
       `registration_guids` et sans doute le formulaire de création de compte.
+- [ ] **Outiller la lutte anti-multi-compte** — associé au point précédent : le système
+      d'invitation servait de frein de facto à la fraude, son retrait l'ouvre en grand.
+      `ApplicationUser.Ip` capture déjà l'IP à l'inscription, mais c'est insuffisant seul.
+      Par ordre d'impact :
+      - Historiser les connexions (table `user_id`/`ip`/date à chaque login réussi, pas
+        seulement l'IP d'inscription) — sans ça, aucune corrélation possible dans le temps.
+      - Limiter le nombre de créations de compte par IP (`Microsoft.AspNetCore.RateLimiting`,
+        natif depuis .NET 7, applicable directement sur l'action `create`).
+      - Donner à l'admin un moyen de voir ça — `AdminController` n'a aujourd'hui aucune
+        gestion des utilisateurs ; l'IP capturée est invisible tant qu'il n'y a pas au moins
+        une vue `GROUP BY ip HAVING COUNT(*) > seuil`. Rejoint le besoin `IUserService`
+        déjà noté en §1.
+      - **Vérifier `ForwardedHeadersOptions` en prod avant tout le reste** : en 2023, la
+        récupération d'IP ne fonctionnait pas (toujours la même IP capturée) — signe
+        classique que `KnownProxies`/`KnownNetworks` n'étaient pas configurés, donc que le
+        middleware `UseForwardedHeaders` (déjà présent dans `Program.cs`) ignorait
+        silencieusement `X-Forwarded-For` faute de proxy explicitement approuvé. À
+        diagnostiquer sur l'infra de prod réelle (nginx/Cloudflare/autre) avant de bâtir
+        quoi que ce soit dessus — historiser une IP toujours fausse ne sert à rien.
+      - Poser les attentes honnêtement dès le départ : l'IP est un signal, pas une preuve
+        (CGNAT, VPN) — l'objectif est de relever le coût de la triche occasionnelle, pas de
+        l'éliminer.
 
 ---
 

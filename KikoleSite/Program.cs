@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -106,9 +107,11 @@ builder.Services
 // supporte plusieurs implementations, executees toutes a chaque changement de mot de
 // passe). Timeout court + repli tolerant dans le validateur : l'API tierce ne doit jamais
 // bloquer un joueur.
+var hibpApiBaseUrl = builder.Configuration.GetValue<string>("HibpApiBaseUrl")
+    ?? "https://api.pwnedpasswords.com/";
 builder.Services.AddHttpClient(nameof(HibpPasswordValidator), client =>
 {
-    client.BaseAddress = new Uri("https://api.pwnedpasswords.com/");
+    client.BaseAddress = new Uri(hibpApiBaseUrl);
     client.Timeout = TimeSpan.FromSeconds(3);
 });
 builder.Services.AddScoped<IPasswordValidator<ApplicationUser>, HibpPasswordValidator>();
