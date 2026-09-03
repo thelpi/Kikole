@@ -24,7 +24,6 @@ public class LeaderboardController : KikoleBaseController
     private readonly IProposalService _proposalService;
 
     public LeaderboardController(IUserRepository userRepository,
-        ICrypter crypter,
         IInternationalService internationalService,
         IClock clock,
         IGameCalendar gameCalendar,
@@ -35,7 +34,6 @@ public class LeaderboardController : KikoleBaseController
         IProposalService proposalService,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
-            crypter,
             internationalService,
             clock,
             gameCalendar,

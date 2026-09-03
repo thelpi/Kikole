@@ -1007,13 +1007,19 @@ CREATE TABLE registration_guids (
 CREATE TABLE users (
   id bigint(20) UNSIGNED NOT NULL,
   login varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  password char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  normalized_login varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  password varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   password_reset_question varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  password_reset_answer char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  password_reset_answer varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   language_id bigint(20) UNSIGNED NOT NULL,
   user_type_id bigint(20) UNSIGNED NOT NULL,
   ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
   is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  concurrency_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  security_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  lockout_end datetime DEFAULT NULL,
+  access_failed_count int(10) UNSIGNED NOT NULL DEFAULT '0',
+  lockout_enabled tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
@@ -1115,6 +1121,7 @@ ALTER TABLE registration_guids
 
 ALTER TABLE users
   ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY normalized_login (normalized_login),
   ADD KEY lang_id (language_id),
   ADD KEY is_disabled (is_disabled),
   ADD KEY user_type_id (user_type_id);

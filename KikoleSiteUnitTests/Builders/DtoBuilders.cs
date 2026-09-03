@@ -74,17 +74,21 @@ internal sealed class UserDtoBuilder
     {
         Id = 1,
         Login = "joueur",
+        NormalizedLogin = "JOUEUR",
         Password = "hash",
         PasswordResetQuestion = "une question ?",
         PasswordResetAnswer = "hash-reponse",
         LanguageId = (ulong)Languages.fr,
-        UserTypeId = (ulong)UserTypes.StandardUser
+        UserTypeId = (ulong)UserTypes.StandardUser,
+        ConcurrencyStamp = "concurrency-stamp",
+        SecurityStamp = "security-stamp",
+        LockoutEnabled = true
     };
 
     internal static UserDtoBuilder Valid() => new();
 
     internal UserDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
-    internal UserDtoBuilder WithLogin(string login) { _dto = _dto with { Login = login }; return this; }
+    internal UserDtoBuilder WithLogin(string login) { _dto = _dto with { Login = login, NormalizedLogin = login.ToUpperInvariant() }; return this; }
     internal UserDtoBuilder WithType(UserTypes type) { _dto = _dto with { UserTypeId = (ulong)type }; return this; }
     internal UserDtoBuilder WithUserTypeId(ulong id) { _dto = _dto with { UserTypeId = id }; return this; }
     internal UserDtoBuilder WithLanguageId(ulong id) { _dto = _dto with { LanguageId = id }; return this; }

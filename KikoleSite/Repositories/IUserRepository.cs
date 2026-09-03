@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
 namespace KikoleSite.Repositories;
@@ -7,15 +7,13 @@ public interface IUserRepository
 {
     Task<ulong> CreateUserAsync(UserDto user);
 
-    Task<UserDto?> GetUserByLoginAsync(string login);
+    Task UpdateUserAsync(UserDto user);
 
-    Task<bool> ResetUserKnownPasswordAsync(string login, string oldPassword, string newPassword);
+    Task DeleteUserAsync(ulong userId);
 
-    Task<bool> ResetUserUnknownPasswordAsync(string login, string passwordResetAnswer, string newPassword);
+    Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin);
 
     Task<UserDto?> GetUserByIdAsync(ulong userId);
-
-    Task ResetUserQAndAAsync(ulong userId, string question, string anwser);
 
     Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id);
 

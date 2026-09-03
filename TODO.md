@@ -17,31 +17,36 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **464**, projet `KikoleSiteUnitTests` |
+| Tests | **490**, projet `KikoleSiteUnitTests` |
+| Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
 ---
 
 ## 1. Sécurité et authentification
 
-Quatre défauts, par gravité décroissante. La cible raisonnable est **ASP.NET Core
-Identity** plutôt que de réparer la cryptographie maison.
-
-- [ ] **Cookie d'authentification falsifiable** — AES-CBC avec `IV = new byte[16]` (IV nul
-      et constant) et **aucun MAC**. Le cookie contient `hashDuMotDePasse§§§login`.
-      S'y ajoutent `Secure = false` et `HttpOnly` non renseigné : lisible en JavaScript,
-      donc une XSS suffit à voler le hash.
-- [ ] **Mots de passe en SHA256 avec sel global unique** — pas de sel par utilisateur
-      (deux comptes avec le même mot de passe ont le même hash) et fonction rapide, donc
-      idéale pour du cassage en masse. Cible : un KDF lent.
-- [ ] **`SHA256` en champ d'instance sur un singleton** — `ComputeHash` n'est pas
-      thread-safe : deux connexions simultanées peuvent se corrompre. Bug de justesse,
-      pas seulement de sécurité, et silencieux.
-- [ ] **`IUserService`** — les 12 appels directs de `AccountController` à `IUserRepository`
-      ne sont pas du CRUD mais de la logique d'authentification : la vérification du mot de
-      passe se fait **dans le contrôleur**, et l'inscription enchaîne cinq étapes sans
-      transaction. À traiter **dans** ce chantier, puisque le code disparaîtra avec Identity.
+- [x] ~~Cookie d'authentification falsifiable~~ — remplacé par le cookie Identity, chiffré
+      par la Data Protection API du framework.
+- [x] ~~Mots de passe en SHA256 avec sel global unique~~ — remplacé par PBKDF2 salé par
+      utilisateur (`PasswordHasher<ApplicationUser>`). Les comptes existants sont réécrits
+      automatiquement au premier login réussi, voir « Partis pris ».
+- [x] ~~`SHA256` en champ d'instance sur un singleton~~ — `Crypter`/`ICrypter` ont disparu
+      du projet, plus aucun appelant depuis la refonte Identity ; le seul SHA256 restant
+      (`LegacyCompatiblePasswordHasher`, pour la
+      compatibilité ascendante) utilise `SHA256.HashData` (statique, thread-safe).
+- [ ] **`IUserService`** — `AccountController` orchestre maintenant `UserManager`/
+      `SignInManager` (le standard Identity, pas un défaut), mais la vérification de la
+      réponse de sécurité et le flux d'inscription par GUID restent directement dans le
+      contrôleur. Moins urgent qu'avant : à réévaluer une fois le système d'invitation
+      retiré (voir plus bas), pour ne pas extraire un service autour d'un code qui va
+      encore bouger.
 - [ ] Ne pas versionner de secrets : passer par *user-secrets* en dev.
+- [ ] **Retirer le système d'invitation** (`registration_guids`) — demandé par l'utilisateur
+      en même temps que la refonte de l'authent, mais **délibérément découplé** : aucun lien
+      technique avec Identity, et l'inscription libre est prévue pour novembre 2026 (cf.
+      page d'accueil). Impacte `AccountController.create`, `IUserRepository`
+      (`GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`), la table
+      `registration_guids` et sans doute le formulaire de création de compte.
 
 ---
 
@@ -219,6 +224,64 @@ les hachages de toute façon.
   contre `players` que contre `proposals` (`actualDate` dans les contrôleurs, `UserDayModel`)
   n'ont pas été touchées : les renommer aurait suggéré à tort qu'elles ne portent qu'un seul
   des deux sens.
+- **Authentification : ASP.NET Core Identity, store Dapper maison.** Contrainte produit
+  non négociable : pas d'email, aucun canal de contact avec les joueurs hors formulaire
+  libre. Le principe reste identique — login/mot de passe, question de sécurité pour la
+  récupération, pas de 2FA — mais porté par le standard plutôt que par la crypto maison.
+
+  Le store par défaut d'Identity est en EF Core ; ce projet est Dapper de bout en bout par
+  choix assumé. `DapperUserStore` (`KikoleSite/Identity/`) implémente seulement
+  `IUserStore`/`IUserPasswordStore`/`IUserLockoutStore`/`IUserSecurityStampStore` — rien sur
+  l'email, le téléphone, la 2FA, les rôles ou les claims externes, puisque rien de tout ça
+  n'est utilisé — et délègue à `IUserRepository`, qui reste le seul accès Dapper à la table
+  `users`. `ApplicationUser : IdentityUser<ulong>` conserve la clé `ulong` existante :
+  migrer vers les clés `string`/`Guid` par défaut d'Identity aurait cassé toutes les FK
+  `user_id` du schéma.
+
+  **La question de sécurité n'a pas d'équivalent natif dans Identity** (sa récupération
+  standard suppose un canal externe pour livrer un token). Elle est gérée à la main dans
+  `AccountController`, mais en réutilisant le même `IPasswordHasher<ApplicationUser>` que
+  pour les mots de passe — même algorithme, secret différent, plutôt qu'un SHA256 maison
+  pour la réponse. Une mauvaise réponse passe par le même compteur de verrouillage
+  (`UserManager.AccessFailedAsync`) que les mots de passe : sinon, la réponse — bien plus
+  devinable qu'un mot de passe — serait le maillon faible.
+
+  **Migration des hashes existants sans reset forcé** : `LegacyCompatiblePasswordHasher`
+  reconnaît l'ancien format SHA256+sel (64 caractères hex), le vérifie avec l'ancienne
+  formule, et signale `SuccessRehashNeeded` — Identity réécrit alors le hash en PBKDF2 à la
+  connexion suivante. Le palier utilisateur (`UserTypes`, conservé à trois niveaux) est
+  porté par une claim plutôt que par les rôles Identity (un ensemble plat), pour garder
+  exactement la sémantique « au moins ce palier » de l'existant
+  (`MinimumUserTypeRequirement`) ; `[Authorization(UserTypes.X)]` devient une
+  spécialisation d'`AuthorizeAttribute` qui résout la policy correspondante, donc **aucun
+  site d'appel n'a eu à changer**.
+
+  Effet de bord découvert en testant : MySqlConnector, sans `GuidFormat=None` dans la
+  chaîne de connexion, renvoie les colonnes `CHAR(36)` qui *ressemblent* à un GUID comme
+  `System.Guid` plutôt que `string` — cassait déjà silencieusement `registration_guids.id`
+  (jamais éprouvé jusque-là) en plus des nouvelles colonnes de stamps. Et
+  `BaseRepository.ExecuteNonQueryAndGetInsertedIdAsync` n'ouvrait pas explicitement sa
+  connexion : Dapper la refermait après l'`INSERT` puisqu'il l'avait ouverte lui-même, et sa
+  réutilisation depuis le pool pouvait perdre `LAST_INSERT_ID()` avant le second appel — un
+  bug latent préexistant, débusqué ici par hasard. Les deux sont corrigés.
+
+  `Crypter`/`ICrypter` ont ensuite disparu du projet : leur seul survivant, `Generate()`,
+  ne servait qu'à fabriquer une question/réponse de secours inutilisable quand un compte
+  est créé sans Q&A — remplacé par `Guid.NewGuid().ToString()`, du CSPRNG plutôt que le
+  `System.Random` non cryptographique que `Crypter` utilisait.
+
+  **Politique de mot de passe renforcée pendant qu'il n'y a encore aucun compte réel** :
+  longueur minimale 10, **pas** de règle de composition (chiffre/majuscule/spécial). Ce
+  n'est pas un relâchement : les règles de composition sont aujourd'hui déconseillées
+  (NIST 800-63B, OWASP ASVS) parce que les humains les satisfont de façon prévisible
+  (majuscule en tête, chiffre en fin — un motif que les dictionnaires de cassage
+  connaissent), alors qu'un mot de passe plus long sans contrainte de forme résiste
+  mieux en pratique. S'y ajoute `HibpPasswordValidator`, qui interroge l'API Have I Been
+  Pwned en k-anonymity (seuls 5 caractères du hash SHA1 sortent, jamais le mot de passe)
+  pour rejeter les mots de passe déjà vus dans une fuite connue — repli tolérant si l'API
+  est indisponible, pour qu'un service tiers en panne ne bloque jamais un joueur. Les deux
+  validateurs Identity (longueur + HIBP) s'exécutent tous les deux : `IPasswordValidator`
+  supporte plusieurs implémentations enregistrées côte à côte, pas de remplacement.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

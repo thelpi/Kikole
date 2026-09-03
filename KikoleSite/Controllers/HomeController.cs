@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
+using KikoleSite.Identity;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
@@ -10,6 +11,7 @@ using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -25,10 +27,10 @@ public class HomeController : KikoleBaseController
     private readonly IDiscussionRepository _discussionRepository;
     private readonly IProposalService _proposalService;
     private readonly IMessageRepository _messageRepository;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
     public HomeController(IStringLocalizer<HomeController> localizer,
         IUserRepository userRepository,
-        ICrypter crypter,
         IInternationalService internationalService,
         IMessageRepository messageRepository,
         IClock clock,
@@ -37,9 +39,9 @@ public class HomeController : KikoleBaseController
         IProposalService proposalService,
         IBadgeService badgeService,
         IDiscussionRepository discussionRepository,
+        SignInManager<ApplicationUser> signInManager,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
-            crypter,
             internationalService,
             clock,
             gameCalendar,
@@ -51,6 +53,7 @@ public class HomeController : KikoleBaseController
         _discussionRepository = discussionRepository;
         _proposalService = proposalService;
         _messageRepository = messageRepository;
+        _signInManager = signInManager;
     }
 
     [HttpGet]
@@ -98,9 +101,9 @@ public class HomeController : KikoleBaseController
     }
 
     [HttpGet]
-    public IActionResult Error()
+    public async Task<IActionResult> Error()
     {
-        ResetAuthenticationCookie();
+        await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
 

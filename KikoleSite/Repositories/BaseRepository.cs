@@ -30,7 +30,13 @@ public abstract class BaseRepository
 
     protected async Task<ulong> ExecuteNonQueryAndGetInsertedIdAsync(string sql, object? parameters)
     {
+        // LAST_INSERT_ID() est scope a la session : sans OpenAsync explicite, Dapper ouvre
+        // puis referme la connexion apres l'insertion (lui appartenant), et sa reutilisation
+        // depuis le pool peut perdre cet etat entre les deux appels. Ouvrir nous-memes fait
+        // que Dapper la laisse ouverte, garantissant la meme session pour les deux requetes.
         using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
+
         await connection
             .QueryAsync(
                 sql,

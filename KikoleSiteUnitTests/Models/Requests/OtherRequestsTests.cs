@@ -151,78 +151,69 @@ public class PlayerSubmissionValidationRequestTests
 
 public class UserRequestTests
 {
-    private static Mock<ICrypter> Crypter()
-    {
-        var mock = new Mock<ICrypter>();
-        mock.Setup(_ => _.Encrypt(It.IsAny<string>())).Returns<string>(v => "hash:" + v);
-        mock.Setup(_ => _.Generate()).Returns("GENERATED");
-        return mock;
-    }
-
     [Fact]
-    public void ToDto_SanitizesTheLogin()
+    public void ToApplicationUser_SanitizesTheLogin()
     {
         // le login est stocke sanitise, et la recherche l'est aussi : c'est ce qui
         // rend la connexion insensible a la casse et aux accents
-        var dto = UserRequestBuilder.Valid().WithLogin("  Réné  ").Build().ToDto(Crypter().Object);
+        var (user, _) = UserRequestBuilder.Valid().WithLogin("  Réné  ").Build().ToApplicationUser();
 
-        dto.Login.Should().Be("rene");
+        user.UserName.Should().Be("rene");
     }
 
     [Fact]
-    public void ToDto_HashesThePasswordAndTheRecoveryAnswer()
+    public void ToApplicationUser_SanitizesTheRecoveryAnswerButNotTheQuestion()
     {
-        var dto = UserRequestBuilder.Valid()
-            .WithPassword("secret")
+        // le hachage n'est plus fait ici (il depend d'IPasswordHasher, injecte cote
+        // controleur) : ToApplicationUser ne fait que preparer la reponse en clair.
+        var (user, rawAnswer) = UserRequestBuilder.Valid()
             .WithRecovery("Ma question ?", "Ma Réponse")
             .Build()
-            .ToDto(Crypter().Object);
+            .ToApplicationUser();
 
-        dto.Password.Should().Be("hash:secret");
-        // la reponse est sanitisee avant hachage, la question ne l'est pas
-        dto.PasswordResetAnswer.Should().Be("hash:ma reponse");
-        dto.PasswordResetQuestion.Should().Be("Ma question ?");
+        rawAnswer.Should().Be("ma reponse");
+        user.PasswordResetQuestion.Should().Be("Ma question ?");
     }
 
     [Fact]
-    public void ToDto_WhenRecoveryIsNotProvided_GeneratesUnguessableValues()
+    public void ToApplicationUser_WhenRecoveryIsNotProvided_GeneratesUnguessableValues()
     {
-        var crypter = Crypter();
+        var (user, rawAnswer) = UserRequestBuilder.Valid().Build().ToApplicationUser();
 
-        var dto = UserRequestBuilder.Valid().Build().ToDto(crypter.Object);
-
-        dto.PasswordResetQuestion.Should().Be("GENERATED");
-        dto.PasswordResetAnswer.Should().Be("hash:GENERATED");
-        crypter.Verify(_ => _.Generate(), Times.Exactly(2));
+        // pas de mock a verifier ici (un GUID, pas une dependance injectee) : on verifie
+        // juste que question et reponse sont bien deux valeurs distinctes et non vides.
+        user.PasswordResetQuestion.Should().NotBeNullOrWhiteSpace();
+        rawAnswer.Should().NotBeNullOrWhiteSpace();
+        rawAnswer.Should().NotBe(user.PasswordResetQuestion);
     }
 
     [Fact]
-    public void ToDto_DefaultsToEnglishAndStandardUser()
+    public void ToApplicationUser_DefaultsToEnglishAndStandardUser()
     {
-        var dto = UserRequestBuilder.Valid().Build().ToDto(Crypter().Object);
+        var (user, _) = UserRequestBuilder.Valid().Build().ToApplicationUser();
 
-        dto.LanguageId.Should().Be((ulong)Languages.en);
-        dto.UserTypeId.Should().Be((ulong)UserTypes.StandardUser);
+        user.LanguageId.Should().Be((ulong)Languages.en);
+        user.UserType.Should().Be(UserTypes.StandardUser);
     }
 
     [Fact]
-    public void ToDto_NeverGrantsAdministratorRights()
+    public void ToApplicationUser_NeverGrantsAdministratorRights()
     {
         // garde-fou : la creation de compte ne doit jamais pouvoir produire un admin
-        var dto = UserRequestBuilder.Valid().WithLanguage(Languages.fr).Build()
-            .ToDto(Crypter().Object);
+        var (user, _) = UserRequestBuilder.Valid().WithLanguage(Languages.fr).Build()
+            .ToApplicationUser();
 
-        dto.UserTypeId.Should().NotBe((ulong)UserTypes.Administrator);
-        dto.LanguageId.Should().Be((ulong)Languages.fr);
+        user.UserType.Should().NotBe(UserTypes.Administrator);
+        user.LanguageId.Should().Be((ulong)Languages.fr);
     }
 
     [Fact]
-    public void ToDto_CarriesTheIpThrough()
+    public void ToApplicationUser_CarriesTheIpThrough()
     {
-        var dto = UserRequestBuilder.Valid().WithIp("::1").Build()
-            .ToDto(Crypter().Object);
+        var (user, _) = UserRequestBuilder.Valid().WithIp("::1").Build()
+            .ToApplicationUser();
 
-        dto.Ip.Should().Be("::1");
+        user.Ip.Should().Be("::1");
     }
 }
 

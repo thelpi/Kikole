@@ -4,11 +4,15 @@ using System.Globalization;
 using KikoleSite;
 using KikoleSite.Controllers.Filters;
 using KikoleSite.Handlers;
+using KikoleSite.Identity;
+using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +34,6 @@ builder.Services
     .AddMvc(options =>
     {
         options.Filters.Add<ErrorFilter>();
-        options.Filters.Add<AuthorizationFilter>();
     })
     .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
     .AddDataAnnotationsLocalization();
@@ -66,9 +69,86 @@ builder.Services
     .AddSingleton<IGameCalendar>(sp => sp.GetRequiredService<GameCalendar>())
     .AddHostedService<GameCalendarLoader>()
     // helpers
-    .AddSingleton<ICrypter, Crypter>()
     .AddSingleton<IClock, Clock>()
+    // seedable dans les tests (new Random(seed)) : PlayerService en a besoin pour un
+    // melange deterministe, contrairement a Random.Shared qui n'est pas configurable.
     .AddSingleton(new Random());
+
+// authentification : Identity avec un store Dapper maison (KikoleSite/Identity), pas
+// EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Ni email (aucun canal
+// de contact avec les joueurs hors formulaire libre), ni 2FA : la recuperation reste une
+// question de securite, geree a la main dans AccountController par-dessus IPasswordHasher.
+builder.Services
+    .AddIdentityCore<ApplicationUser>(options =>
+    {
+        // la longueur prime sur la composition (NIST 800-63B, OWASP ASVS) : un mot de
+        // passe long sans regle de melange resiste mieux qu'un court qui les respecte
+        // toutes, parce que les humains satisfont ces regles de facon previsible
+        // (majuscule au debut, chiffre a la fin, "!" pour finir — un motif que les
+        // dictionnaires de cassage connaissent). Pas de comptes existants a ce jour :
+        // aucune raison de ne pas partir sur cette base tout de suite.
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 10;
+
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    })
+    .AddUserStore<DapperUserStore>()
+    .AddClaimsPrincipalFactory<UserTypeClaimsPrincipalFactory>()
+    .AddDefaultTokenProviders()
+    .AddSignInManager();
+
+// verifie les mots de passe contre les fuites connues (Have I Been Pwned, k-anonymity) ;
+// s'ajoute au validateur de longueur d'Identity, ne le remplace pas (IPasswordValidator
+// supporte plusieurs implementations, executees toutes a chaque changement de mot de
+// passe). Timeout court + repli tolerant dans le validateur : l'API tierce ne doit jamais
+// bloquer un joueur.
+builder.Services.AddHttpClient(nameof(HibpPasswordValidator), client =>
+{
+    client.BaseAddress = new Uri("https://api.pwnedpasswords.com/");
+    client.Timeout = TimeSpan.FromSeconds(3);
+});
+builder.Services.AddScoped<IPasswordValidator<ApplicationUser>, HibpPasswordValidator>();
+
+// remplace le normaliseur par defaut (majuscules seules) par celui qui applique la meme
+// regle de deduplication que le reste du projet (StringHelper.Sanitize).
+builder.Services.AddSingleton<ILookupNormalizer, SanitizingLookupNormalizer>();
+
+// pas de builder fluent pour le hasher : enregistrement direct, apres AddIdentityCore
+// pour remplacer le PasswordHasher<TUser> par defaut (TryAddScoped, donc ecrasable).
+builder.Services.AddSingleton<IPasswordHasher<ApplicationUser>, LegacyCompatiblePasswordHasher>();
+
+builder.Services
+    .AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddIdentityCookies();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "KikoleAuth";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+    // les deux menent a la meme page : avant, connecte-mais-pas-assez-privilegie et
+    // pas-connecte-du-tout redirigeaient deja indifferemment vers Home/ErrorIndex.
+    options.LoginPath = "/Home/ErrorIndex";
+    options.AccessDeniedPath = "/Home/ErrorIndex";
+});
+
+builder.Services
+    .AddAuthorizationBuilder()
+    .AddPolicy(
+        MinimumUserTypeRequirement.PolicyName(UserTypes.StandardUser),
+        p => p.AddRequirements(new MinimumUserTypeRequirement(UserTypes.StandardUser)))
+    .AddPolicy(
+        MinimumUserTypeRequirement.PolicyName(UserTypes.PowerUser),
+        p => p.AddRequirements(new MinimumUserTypeRequirement(UserTypes.PowerUser)))
+    .AddPolicy(
+        MinimumUserTypeRequirement.PolicyName(UserTypes.Administrator),
+        p => p.AddRequirements(new MinimumUserTypeRequirement(UserTypes.Administrator)));
+
+builder.Services.AddSingleton<IAuthorizationHandler, MinimumUserTypeHandler>();
 
 var app = builder.Build();
 
@@ -104,6 +184,9 @@ app.UseStaticFiles();
 app.UseCookiePolicy();
 
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

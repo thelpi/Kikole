@@ -26,7 +26,6 @@ public class AdminController : KikoleBaseController
 
     public AdminController(IStringLocalizer<AdminController> localizer,
         IUserRepository userRepository,
-        ICrypter crypter,
         IInternationalService internationalService,
         IMessageRepository messageRepository,
         IClock clock,
@@ -37,7 +36,6 @@ public class AdminController : KikoleBaseController
         IDiscussionRepository discussionRepository,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
-            crypter,
             internationalService,
             clock,
             gameCalendar,

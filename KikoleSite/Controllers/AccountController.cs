@@ -1,11 +1,13 @@
-﻿using System;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
-using KikoleSite.Helpers;
+using KikoleSite.Identity;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -14,10 +16,15 @@ namespace KikoleSite.Controllers;
 public class AccountController : KikoleBaseController
 {
     private readonly IStringLocalizer<AccountController> _localizer;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
 
     public AccountController(IStringLocalizer<AccountController> localizer,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IPasswordHasher<ApplicationUser> passwordHasher,
         IUserRepository userRepository,
-        ICrypter crypter,
         IInternationalService internationalService,
         IClock clock,
         IGameCalendar gameCalendar,
@@ -25,7 +32,6 @@ public class AccountController : KikoleBaseController
         IBadgeService badgeService,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
-            crypter,
             internationalService,
             clock,
             gameCalendar,
@@ -34,6 +40,9 @@ public class AccountController : KikoleBaseController
             httpContextAccessor)
     {
         _localizer = localizer;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _passwordHasher = passwordHasher;
     }
 
     [HttpGet]
@@ -53,7 +62,7 @@ public class AccountController : KikoleBaseController
 
         if (submitFrom == "logoff")
         {
-            ResetAuthenticationCookie();
+            await _signInManager.SignOutAsync();
             model = new AccountModel();
         }
         else if (submitFrom == "login" || model.ForceLoginAction)
@@ -63,22 +72,15 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["InvalidForm"];
             else
             {
-                var existingUser = await _userRepository
-                    .GetUserByLoginAsync(model.LoginSubmission.Sanitize());
+                var result = await _signInManager.PasswordSignInAsync(
+                    model.LoginSubmission, model.PasswordSubmission, isPersistent: true, lockoutOnFailure: true);
 
-                if (existingUser == null)
-                    model.Error = _localizer["UserDoesNotExist"];
-                else if (!_crypter.Encrypt(model.PasswordSubmission).Equals(existingUser.Password))
-                    model.Error = _localizer["PasswordDoesNotMatch"];
+                if (result.IsLockedOut)
+                    model.Error = _localizer["AccountLockedOut"];
+                else if (!result.Succeeded)
+                    model.Error = _localizer["InvalidCredentials"];
                 else
-                {
-                    var value = $"{existingUser.Id}_{existingUser.UserTypeId}";
-
-                    var token = $"{value}_{_crypter.Encrypt(value)}";
-
-                    SetAuthenticationCookie(token, model.LoginSubmission);
                     return RedirectToAction("Index", "Home");
-                }
             }
         }
         else if (submitFrom == "getloginquestion")
@@ -88,8 +90,7 @@ public class AccountController : KikoleBaseController
             else
             {
                 // get question from login
-                var user = await _userRepository
-                    .GetUserByLoginAsync(model.LoginRecoverySubmission);
+                var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
 
                 if (user != null)
                     model.QuestionRecovery = user.PasswordResetQuestion;
@@ -106,16 +107,41 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["InvalidForm"];
             else
             {
-                var response = await _userRepository
-                    .ResetUserUnknownPasswordAsync(
-                        model.LoginRecoverySubmission,
-                        _crypter.Encrypt(model.RecoveryACreate),
-                        _crypter.Encrypt(model.PasswordCreate1Submission));
+                var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
 
-                if (response)
+                if (user == null)
                     model.Error = _localizer["ResetPasswordError"];
+                else if (await _userManager.IsLockedOutAsync(user))
+                    model.Error = _localizer["AccountLockedOut"];
                 else
-                    model.SuccessInfo = _localizer["PasswordReset"];
+                {
+                    // la reponse de securite est un secret bien plus devinable qu'un mot de
+                    // passe : elle passe par le meme compteur de verrouillage que la connexion,
+                    // sinon elle deviendrait le maillon faible.
+                    var verification = _passwordHasher.VerifyHashedPassword(
+                        user, user.PasswordResetAnswerHash, model.RecoveryACreate);
+
+                    if (verification == PasswordVerificationResult.Failed)
+                    {
+                        await _userManager.AccessFailedAsync(user);
+                        model.Error = _localizer["ResetPasswordError"];
+                    }
+                    else
+                    {
+                        await _userManager.ResetAccessFailedCountAsync(user);
+
+                        if (verification == PasswordVerificationResult.SuccessRehashNeeded)
+                            user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, model.RecoveryACreate);
+
+                        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var reset = await _userManager.ResetPasswordAsync(user, token, model.PasswordCreate1Submission);
+
+                        if (!reset.Succeeded)
+                            model.Error = MapPasswordErrorMessage(reset, "ResetPasswordError");
+                        else
+                            model.SuccessInfo = _localizer["PasswordReset"];
+                    }
+                }
             }
         }
         else if (submitFrom == "resetqanda")
@@ -128,8 +154,14 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["InvalidForm"];
             else
             {
-                await _userRepository
-                    .ResetUserQAndAAsync(UserId, model.RecoveryQCreate, _crypter.Encrypt(model.RecoveryACreate));
+                var user = await _userManager.FindByIdAsync(UserId.ToString());
+                if (user == null)
+                    return RedirectToAction("ErrorIndex", "Home");
+
+                user.PasswordResetQuestion = model.RecoveryQCreate;
+                user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, model.RecoveryACreate);
+
+                await _userManager.UpdateAsync(user);
 
                 model.SuccessInfo = _localizer["QandAUpdated"];
                 model.IsAuthenticated = true;
@@ -146,14 +178,11 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["InvalidRegistrationGuidFormat"];
             else if (!string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
                 model.Error = _localizer["NotMatchingPassword"];
-            else if (model.PasswordCreate1Submission.Length < 6)
-                model.Error = _localizer["TooShortPassword"];
             else if (model.LoginCreateSubmission.Length < 3)
                 model.Error = _localizer["TooShortLogin"];
             else
             {
-                var existingUser = await _userRepository
-                    .GetUserByLoginAsync(model.LoginCreateSubmission.Sanitize());
+                var existingUser = await _userManager.FindByNameAsync(model.LoginCreateSubmission);
 
                 if (existingUser != null)
                     model.Error = _localizer["AlreadyExistsAccount"];
@@ -177,15 +206,17 @@ public class AccountController : KikoleBaseController
                             Ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString()
                         };
 
-                        var userId = await _userRepository
-                            .CreateUserAsync(request.ToDto(_crypter));
+                        var (user, rawPasswordResetAnswer) = request.ToApplicationUser();
+                        user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, rawPasswordResetAnswer);
 
-                        if (userId == 0)
-                            model.Error = _localizer["UserCreationFailure"];
+                        var creation = await _userManager.CreateAsync(user, request.Password);
+
+                        if (!creation.Succeeded)
+                            model.Error = MapPasswordErrorMessage(creation, "UserCreationFailure");
                         else
                         {
                             await _userRepository
-                                .LinkRegistrationGuidToUserAsync(registrationId.ToString(), userId);
+                                .LinkRegistrationGuidToUserAsync(registrationId.ToString(), user.Id);
 
                             return await Index(new AccountModel
                             {
@@ -203,8 +234,7 @@ public class AccountController : KikoleBaseController
             if (UserId == 0)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            var user = await _userRepository
-                .GetUserByIdAsync(UserId);
+            var user = await _userManager.FindByIdAsync(UserId.ToString());
 
             if (user == null)
                 return RedirectToAction("ErrorIndex", "Home");
@@ -215,14 +245,11 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["InvalidForm"];
             else
             {
-                var success = await _userRepository
-                    .ResetUserKnownPasswordAsync(
-                        user.Login,
-                        _crypter.Encrypt(model.PasswordSubmission),
-                        _crypter.Encrypt(model.PasswordCreate1Submission));
+                var change = await _userManager.ChangePasswordAsync(
+                        user, model.PasswordSubmission, model.PasswordCreate1Submission);
 
-                if (success)
-                    model.Error = _localizer["ResetPasswordError"];
+                if (!change.Succeeded)
+                    model.Error = MapPasswordErrorMessage(change, "ResetPasswordError");
                 else
                 {
                     model.IsAuthenticated = true;
@@ -233,5 +260,24 @@ public class AccountController : KikoleBaseController
         }
 
         return View(model);
+    }
+
+    /// <summary>
+    /// Traduit les motifs d'echec connus d'Identity (longueur, mot de passe deja
+    /// compromis, ancien mot de passe incorrect) en messages specifiques ; le reste
+    /// retombe sur <paramref name="fallbackResourceKey"/>.
+    /// </summary>
+    private string MapPasswordErrorMessage(IdentityResult result, string fallbackResourceKey)
+    {
+        if (result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.PasswordTooShort)))
+            return _localizer["TooShortPassword"];
+
+        if (result.Errors.Any(e => e.Code == HibpPasswordValidator.PwnedPasswordErrorCode))
+            return _localizer["PasswordCompromised"];
+
+        if (result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.PasswordMismatch)))
+            return _localizer["PasswordDoesNotMatch"];
+
+        return _localizer[fallbackResourceKey];
     }
 }

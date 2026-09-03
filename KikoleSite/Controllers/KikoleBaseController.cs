@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using KikoleSite.Helpers;
+using KikoleSite.Identity;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
@@ -14,12 +16,6 @@ namespace KikoleSite.Controllers;
 
 public abstract class KikoleBaseController : Controller
 {
-    internal const string CryptedAuthenticationCookieName = "AccountFormCrypt";
-    internal const string CookiePartsSeparator = "§§§";
-    internal const string UserIdItemData = "UserId";
-    internal const string UserLoginItemData = "UserLogin";
-    internal const string UserTypeItemData = "UserType";
-
     /// <summary>
     /// Contexte de la requete en cours. Ces membres ne sont lus que depuis une action,
     /// ou le contexte est toujours present : son absence est un defaut de programmation.
@@ -27,22 +23,20 @@ public abstract class KikoleBaseController : Controller
     private HttpContext HttpContextEnsured => _httpContextAccessor.HttpContext
         ?? throw new InvalidOperationException("Aucun contexte HTTP : ce membre n'est utilisable que pendant une requete.");
 
-    protected ulong UserId => HttpContextEnsured.Items.TryGetValue(UserIdItemData, out var userId)
-        ? Convert.ToUInt64(userId)
+    protected ulong UserId => ulong.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)
+        ? userId
         : 0;
 
-    protected string? UserLogin => HttpContextEnsured.Items.TryGetValue(UserLoginItemData, out var userLogin)
-        ? userLogin?.ToString()
-        : null;
+    protected string? UserLogin => User.Identity?.Name;
 
-    // a defaut de type exploitable, on retombe sur le profil le moins privilegie
-    protected UserTypes UserType => HttpContextEnsured.Items.TryGetValue(UserTypeItemData, out var userType)
-            && Enum.TryParse<UserTypes>(userType?.ToString(), out var parsedUserType)
-        ? parsedUserType
+    // a defaut de claim exploitable, on retombe sur le profil le moins privilegie
+    protected UserTypes UserType => User.FindFirstValue(UserTypeClaimsPrincipalFactory.UserTypeClaimType) is string claim
+            && ulong.TryParse(claim, out var userType)
+            && Enum.IsDefined(typeof(UserTypes), (int)userType)
+        ? (UserTypes)userType
         : UserTypes.StandardUser;
 
     protected readonly IUserRepository _userRepository;
-    protected readonly ICrypter _crypter;
     protected readonly IClock _clock;
     protected readonly IPlayerService _playerService;
     protected readonly IBadgeService _badgeService;
@@ -51,7 +45,6 @@ public abstract class KikoleBaseController : Controller
     protected readonly IHttpContextAccessor _httpContextAccessor;
 
     protected KikoleBaseController(IUserRepository userRepository,
-        ICrypter crypter,
         IInternationalService internationalService,
         IClock clock,
         IGameCalendar gameCalendar,
@@ -60,7 +53,6 @@ public abstract class KikoleBaseController : Controller
         IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
-        _crypter = crypter;
         _internationalService = internationalService;
         _clock = clock;
         _gameCalendar = gameCalendar;
@@ -122,11 +114,6 @@ public abstract class KikoleBaseController : Controller
             .ToDictionary(_ => (ulong)_, _ => _.GetLabel());
     }
 
-    protected void ResetAuthenticationCookie()
-    {
-        Response.Cookies.Delete(CryptedAuthenticationCookieName);
-    }
-
     // Raccourcis vers le referentiel : ils resolvent la langue depuis la culture de la
     // requete, ce que le service ne fait pas — c'est ce qui le rend testable.
 
@@ -145,29 +132,8 @@ public abstract class KikoleBaseController : Controller
         return _internationalService.GetContinentsAsync(ViewHelper.GetLanguage());
     }
 
-    protected void SetAuthenticationCookie(string token, string login)
-    {
-        SetCookie(CryptedAuthenticationCookieName,
-            $"{token}{CookiePartsSeparator}{login}",
-            _clock.Now.AddMonths(1));
-    }
-
     protected bool IsTypeOfUser(UserTypes minimalType)
     {
         return (ulong)UserType >= (ulong)minimalType;
-    }
-
-    private void SetCookie(string cookieName, string cookieValue, DateTime expiration)
-    {
-        Response.Cookies.Delete(cookieName);
-        Response.Cookies.Append(
-            cookieName,
-            _crypter.EncryptCookie(cookieValue),
-                new CookieOptions
-                {
-                    Expires = expiration,
-                    IsEssential = true,
-                    Secure = false
-                });
     }
 }

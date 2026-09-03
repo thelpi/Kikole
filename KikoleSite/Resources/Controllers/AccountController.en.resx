@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountLockedOut" xml:space="preserve">
+    <value>Too many attempts: the account is temporarily locked</value>
+  </data>
   <data name="AlreadyExistsAccount" xml:space="preserve">
     <value>A account already exists with this login</value>
   </data>
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Authentication failed: invalid token</value>
+  </data>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Invalid login or password</value>
   </data>
   <data name="InvalidForm" xml:space="preserve">
     <value>Invalid form values</value>
@@ -168,8 +174,11 @@
   <data name="TooShortLogin" xml:space="preserve">
     <value>Login is too short (3 caracters min.)</value>
   </data>
+  <data name="PasswordCompromised" xml:space="preserve">
+    <value>This password has appeared in a known data breach. Please choose another one.</value>
+  </data>
   <data name="TooShortPassword" xml:space="preserve">
-    <value>Password is too short (6 caracters min.)</value>
+    <value>Password is too short (10 caracters min.)</value>
   </data>
   <data name="UsedRegistrationId" xml:space="preserve">
     <value>This registration identifier is already used</value>

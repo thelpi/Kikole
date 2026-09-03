@@ -1,5 +1,6 @@
-﻿using KikoleSite.Helpers;
-using KikoleSite.Models.Dtos;
+using System;
+using KikoleSite.Helpers;
+using KikoleSite.Identity;
 using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Models.Requests;
@@ -18,25 +19,32 @@ public record UserRequest
 
     public required string? Ip { get; init; }
 
-    internal UserDto ToDto(ICrypter crypter)
+    /// <summary>
+    /// La reponse de securite n'est pas hachee ici : ce record n'a pas a connaitre
+    /// l'algorithme de hachage. L'appelant la hache lui-meme avant de creer le compte.
+    /// </summary>
+    internal (ApplicationUser User, string RawPasswordResetAnswer) ToApplicationUser()
     {
-        var realPasswordResetAnswer = string.IsNullOrWhiteSpace(PasswordResetAnswer)
-            ? crypter.Generate()
+        // ni question ni reponse fournies : un GUID sert de valeur inutilisable, pour
+        // qu'un compte cree sans Q&A ne reste pas avec un secret devinable ou vide.
+        var rawPasswordResetAnswer = string.IsNullOrWhiteSpace(PasswordResetAnswer)
+            ? Guid.NewGuid().ToString()
             : PasswordResetAnswer.Sanitize();
 
         var realPasswordResetQuestion = string.IsNullOrWhiteSpace(PasswordResetQuestion)
-            ? crypter.Generate()
+            ? Guid.NewGuid().ToString()
             : PasswordResetQuestion;
 
-        return new UserDto
+        var user = new ApplicationUser
         {
+            UserName = Login.Sanitize(),
             LanguageId = (ulong)(Language ?? Languages.en),
-            Login = Login.Sanitize(),
-            Password = crypter.Encrypt(Password),
-            PasswordResetAnswer = crypter.Encrypt(realPasswordResetAnswer),
+            UserType = UserTypes.StandardUser,
             PasswordResetQuestion = realPasswordResetQuestion,
-            UserTypeId = (ulong)UserTypes.StandardUser,
+            PasswordResetAnswerHash = string.Empty,
             Ip = Ip
         };
+
+        return (user, rawPasswordResetAnswer);
     }
 }
