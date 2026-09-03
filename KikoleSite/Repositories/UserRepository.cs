@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
@@ -10,6 +11,14 @@ public class UserRepository : BaseRepository, IUserRepository
     public UserRepository(IConfiguration configuration, IClock clock)
         : base(configuration, clock)
     { }
+
+    public async Task<int> GetUserCreationCountSinceAsync(string ip, DateTime since)
+    {
+        return await ExecuteScalarAsync(
+                "SELECT COUNT(*) FROM users WHERE ip = @ip AND creation_date >= @since",
+                new { ip, since },
+                0);
+    }
 
     public async Task<ulong> CreateUserAsync(UserDto user)
     {
@@ -121,5 +130,14 @@ public class UserRepository : BaseRepository, IUserRepository
                     id,
                     userId
                 });
+    }
+
+    public async Task CreateLoginHistoryAsync(ulong userId, string? ip)
+    {
+        await ExecuteInsertAsync(
+                "login_history",
+                ("user_id", userId),
+                ("ip", ip),
+                ("creation_date", Clock.Now));
     }
 }

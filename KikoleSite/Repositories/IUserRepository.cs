@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
@@ -7,6 +8,9 @@ namespace KikoleSite.Repositories;
 public interface IUserRepository
 {
     Task<ulong> CreateUserAsync(UserDto user);
+
+    /// <summary>Nombre de comptes créés depuis <paramref name="ip"/> depuis <paramref name="since"/> (lutte anti-multi-compte).</summary>
+    Task<int> GetUserCreationCountSinceAsync(string ip, DateTime since);
 
     Task UpdateUserAsync(UserDto user);
 
@@ -21,4 +25,7 @@ public interface IUserRepository
     Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id);
 
     Task LinkRegistrationGuidToUserAsync(string id, ulong userId);
+
+    /// <summary>Historise une connexion réussie (lutte anti-multi-compte).</summary>
+    Task CreateLoginHistoryAsync(ulong userId, string? ip);
 }

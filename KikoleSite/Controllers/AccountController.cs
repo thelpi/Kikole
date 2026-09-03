@@ -80,15 +80,27 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["InvalidForm"];
             else
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    model.LoginSubmission, model.PasswordSubmission, isPersistent: true, lockoutOnFailure: true);
+                var user = await _userManager.FindByNameAsync(model.LoginSubmission);
 
-                if (result.IsLockedOut)
-                    model.Error = _localizer["AccountLockedOut"];
-                else if (!result.Succeeded)
+                if (user == null)
                     model.Error = _localizer["InvalidCredentials"];
                 else
-                    return RedirectToAction("Index", "Home");
+                {
+                    var result = await _signInManager.PasswordSignInAsync(
+                        user, model.PasswordSubmission, isPersistent: true, lockoutOnFailure: true);
+
+                    if (result.IsLockedOut)
+                        model.Error = _localizer["AccountLockedOut"];
+                    else if (!result.Succeeded)
+                        model.Error = _localizer["InvalidCredentials"];
+                    else
+                    {
+                        await _userRepository.CreateLoginHistoryAsync(
+                                user.Id, Request.HttpContext.Connection.RemoteIpAddress?.ToString());
+
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
             }
         }
         else if (submitFrom == "getloginquestion")
@@ -193,9 +205,19 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["TooShortLogin"];
             else
             {
-                var existingUser = await _userManager.FindByNameAsync(model.LoginCreateSubmission);
+                var clientIp = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
-                if (existingUser != null)
+                var maxCreationsPerIp = _registrationOptions.MaxCreationsPerIpPerDay;
+                var isRateLimited = maxCreationsPerIp.HasValue
+                    && !string.IsNullOrEmpty(clientIp)
+                    && !_registrationOptions.RateLimitWhitelistedIps.Contains(clientIp)
+                    && await _userRepository.GetUserCreationCountSinceAsync(clientIp, _clock.Now.AddDays(-1)) >= maxCreationsPerIp.Value;
+
+                var existingUser = isRateLimited ? null : await _userManager.FindByNameAsync(model.LoginCreateSubmission);
+
+                if (isRateLimited)
+                    model.Error = _localizer["TooManyAccountsFromThisIp"];
+                else if (existingUser != null)
                     model.Error = _localizer["AlreadyExistsAccount"];
                 else
                 {
@@ -216,7 +238,7 @@ public class AccountController : KikoleBaseController
                             Password = model.PasswordCreate1Submission,
                             PasswordResetQuestion = model.RecoveryQCreate,
                             PasswordResetAnswer = model.RecoveryACreate?.Trim(),
-                            Ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString()
+                            Ip = clientIp
                         };
 
                         var (user, rawPasswordResetAnswer) = request.ToApplicationUser();

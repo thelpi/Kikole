@@ -171,6 +171,9 @@
   <data name="ResetPasswordError" xml:space="preserve">
     <value>Error while reseting the password</value>
   </data>
+  <data name="TooManyAccountsFromThisIp" xml:space="preserve">
+    <value>Too many accounts have already been created from this IP address today</value>
+  </data>
   <data name="TooShortLogin" xml:space="preserve">
     <value>Login is too short (3 caracters min.)</value>
   </data>

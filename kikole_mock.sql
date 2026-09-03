@@ -35,6 +35,7 @@ TRUNCATE TABLE clubs;
 TRUNCATE TABLE discussions;
 TRUNCATE TABLE messages;
 TRUNCATE TABLE registration_guids;
+TRUNCATE TABLE login_history;
 TRUNCATE TABLE users;
 
 -- ---------------------------------------------------------------- utilisateurs

@@ -1024,6 +1024,13 @@ CREATE TABLE users (
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
+CREATE TABLE login_history (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  creation_date datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
 CREATE TABLE user_badges (
   user_id bigint(20) UNSIGNED NOT NULL,
   badge_id bigint(20) UNSIGNED NOT NULL,
@@ -1080,6 +1087,10 @@ ALTER TABLE leaders
   ADD PRIMARY KEY (id),
   ADD KEY user_id (user_id),
   ADD KEY proposal_date (proposal_date);
+
+ALTER TABLE login_history
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id);
 
 ALTER TABLE messages
   ADD PRIMARY KEY (id);
@@ -1145,6 +1156,8 @@ ALTER TABLE discussions
 ALTER TABLE languages
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE leaders
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE login_history
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE messages
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;

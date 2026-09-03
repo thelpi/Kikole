@@ -255,6 +255,9 @@
   <data name="TipYoungerPlayerShort" xml:space="preserve">
     <value>plus jeune</value>
   </data>
+  <data name="TooManyAccountsFromThisIp" xml:space="preserve">
+    <value>Trop de comptes ont déjà été créés depuis cette adresse IP aujourd'hui</value>
+  </data>
   <data name="TooShortLogin" xml:space="preserve">
     <value>Le login est trop court (3 caractères minimum)</value>
   </data>

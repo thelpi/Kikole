@@ -10,7 +10,7 @@ Branche de travail : `remaster-v2`.
 
 | | état |
 |---|---|
-| Script SQL | reconstruit, `utf8mb4` / `utf8mb4_unicode_ci`, 21 tables |
+| Script SQL | reconstruit, `utf8mb4` / `utf8mb4_unicode_ci`, 22 tables |
 | Base locale | MySQL 9.1 (WAMP), rejouable à l'infini via `kikole_mock.sql` |
 | Sites parasites | The Elite et Mets tes tennis supprimés |
 | Framework | .NET 10, hébergement minimal |
@@ -46,28 +46,28 @@ Branche de travail : `remaster-v2`.
       `Registration:InviteEnabled` (`false` par défaut, voir « Partis pris »). Le mécanisme
       (`registration_guids`, `GetRegistrationGuidAsync`/`LinkRegistrationGuidToUserAsync`)
       reste en place pour une réactivation par simple bascule de config.
-- [ ] **Outiller la lutte anti-multi-compte** — associé au point précédent : le système
+- [x] ~~Outiller la lutte anti-multi-compte~~ — associé au point précédent : le système
       d'invitation servait de frein de facto à la fraude, son retrait l'ouvre en grand.
-      `ApplicationUser.Ip` capture déjà l'IP à l'inscription, mais c'est insuffisant seul.
-      Par ordre d'impact :
-      - Historiser les connexions (table `user_id`/`ip`/date à chaque login réussi, pas
-        seulement l'IP d'inscription) — sans ça, aucune corrélation possible dans le temps.
-      - Limiter le nombre de créations de compte par IP (`Microsoft.AspNetCore.RateLimiting`,
-        natif depuis .NET 7, applicable directement sur l'action `create`).
-      - Donner à l'admin un moyen de voir ça — `AdminController` n'a aujourd'hui aucune
-        gestion des utilisateurs ; l'IP capturée est invisible tant qu'il n'y a pas au moins
-        une vue `GROUP BY ip HAVING COUNT(*) > seuil`. Rejoint le besoin `IUserService`
-        déjà noté en §1.
-      - **Vérifier `ForwardedHeadersOptions` en prod avant tout le reste** : en 2023, la
-        récupération d'IP ne fonctionnait pas (toujours la même IP capturée) — signe
-        classique que `KnownProxies`/`KnownNetworks` n'étaient pas configurés, donc que le
-        middleware `UseForwardedHeaders` (déjà présent dans `Program.cs`) ignorait
-        silencieusement `X-Forwarded-For` faute de proxy explicitement approuvé. À
-        diagnostiquer sur l'infra de prod réelle (nginx/Cloudflare/autre) avant de bâtir
-        quoi que ce soit dessus — historiser une IP toujours fausse ne sert à rien.
-      - Poser les attentes honnêtement dès le départ : l'IP est un signal, pas une preuve
-        (CGNAT, VPN) — l'objectif est de relever le coût de la triche occasionnelle, pas de
-        l'éliminer.
+      `ApplicationUser.Ip` capture déjà l'IP à l'inscription, mais c'était insuffisant seul.
+      - **Historique des connexions** : table `login_history` (`user_id`/`ip`/
+        `creation_date`), une ligne par login réussi via `IUserRepository
+        .CreateLoginHistoryAsync`, appelée depuis `AccountController` juste après un
+        `PasswordSignInAsync` réussi.
+      - **Rate limiting des créations de compte** — solution maison (pas
+        `Microsoft.AspNetCore.RateLimiting`, voir « Partis pris »), avec liste blanche d'IP
+        configurable (`Registration:RateLimitWhitelistedIps`) pour couvrir l'inscription
+        groupée depuis une même IP de bureau.
+      - **`ForwardedHeadersOptions` préparé, pas activé** : config-driven
+        (`ForwardedProxy:KnownProxies`/`KnownNetworks`, vides par défaut = comportement
+        natif inchangé) faute d'hébergement de prod choisi à ce jour. À renseigner une fois
+        l'infra connue (nginx/Cloudflare/autre) — voir « Partis pris » pour le diagnostic
+        du problème 2023 (même IP toujours capturée).
+      - **Vue admin reportée** — `AdminController` n'a aujourd'hui aucune gestion des
+        utilisateurs ; l'IP capturée reste invisible tant qu'il n'y a pas au moins une vue
+        `GROUP BY ip HAVING COUNT(*) > seuil`. Rejoint le besoin `IUserService` déjà noté
+        en §1. Remis à plus tard, décision explicite.
+      - Rappel posé dès le départ : l'IP est un signal, pas une preuve (CGNAT, VPN) —
+        l'objectif est de relever le coût de la triche occasionnelle, pas de l'éliminer.
 
 ---
 
@@ -349,6 +349,34 @@ les hachages de toute façon.
   et `dotnet user-secrets set "EncryptionKey" "..."` depuis `KikoleSite/`. Sans ça,
   l'application refuse de démarrer : `LegacyCompatiblePasswordHasher` lève dès la première
   vérification si `EncryptionKey` est absente.
+
+- **Lutte anti-multi-compte : rate limiting maison plutôt que
+  `Microsoft.AspNetCore.RateLimiting`.** Un formulaire web s'accommode mieux d'un message
+  d'erreur localisé (`AccountModel.Error`, comme toutes les autres validations de
+  `AccountController`) que d'une 429 générique renvoyée par un middleware ; la liste blanche
+  d'IP (comptes de bureau créés depuis la même IP réseau) est aussi un simple `if` plus
+  lisible qu'un partitioner personnalisé. Concrètement : `IUserRepository
+  .GetUserCreationCountSinceAsync(ip, since)` compte les créations des dernières 24h pour
+  l'IP courante, comparé à `Registration:MaxCreationsPerIpPerDay` (`5` par défaut), sauf si
+  l'IP figure dans `Registration:RateLimitWhitelistedIps`.
+- **`ForwardedHeadersOptions` préparé en config, pas activé.** Pas d'hébergement de
+  production choisi à ce jour, donc rien à configurer de réel — mais le câblage est prêt
+  (`ForwardedProxyOptions`, lu via `IOptions<T>`, listes vides par défaut = comportement
+  natif inchangé, aucun proxy de confiance). Diagnostic du problème 2023 (l'IP capturée
+  était toujours la même) : `ForwardedHeadersOptions.KnownProxies`/`KnownNetworks` vides par
+  défaut, donc `UseForwardedHeaders` ignore silencieusement `X-Forwarded-For` faute de
+  proxy explicitement approuvé — c'est la cause la plus probable, à confirmer sur l'infra
+  réelle une fois choisie, avant de renseigner `ForwardedProxy:KnownProxies`/`KnownNetworks`.
+  `KnownIPNetworks` (`System.Net.IPNetwork`, `.Parse` sur un CIDR) est utilisé plutôt que
+  l'ancien `KnownNetworks` de `Microsoft.AspNetCore.HttpOverrides` — c'est la propriété
+  moderne de `ForwardedHeadersOptions`, l'autre est un vestige d'API antérieure.
+- **Historique des connexions dans une table dédiée (`login_history`), pas une colonne sur
+  `users`.** `ApplicationUser.Ip` ne garde que l'IP d'inscription ; corréler une fraude dans
+  le temps demande une ligne par connexion, pas juste la dernière. En écriture dans
+  `IUserRepository`/`UserRepository`, pas un `ILoginHistoryRepository` séparé : le premier
+  gère déjà deux tables (`users` et `registration_guids`), et sans vue admin pour l'instant
+  (lecture directe en base en attendant), une seule méthode `CreateLoginHistoryAsync` ne
+  justifie pas une interface dédiée.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

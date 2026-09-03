@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using KikoleSite;
 using KikoleSite.Configuration;
 using KikoleSite.Controllers.Filters;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,7 +83,9 @@ builder.Services
 // besoin (a la difference d'IConfiguration injecte brut, comme pour EncryptionKey ou
 // HibpApiBaseUrl plus bas — a faire suivre le meme chemin plus tard si l'occasion se
 // presente, pas dans ce chantier).
-builder.Services.Configure<RegistrationOptions>(builder.Configuration.GetSection("Registration"));
+builder.Services
+    .Configure<RegistrationOptions>(builder.Configuration.GetSection("Registration"))
+    .Configure<ForwardedProxyOptions>(builder.Configuration.GetSection("ForwardedProxy"));
 
 // authentification : Identity avec un store Dapper maison (KikoleSite/Identity), pas
 // EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Ni email (aucun canal
@@ -176,10 +180,21 @@ app.UseRequestLocalization(options =>
     options.SupportedUICultures = cultures;
 });
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+var forwardedProxyOptions = app.Services.GetRequiredService<IOptions<ForwardedProxyOptions>>().Value;
+var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+};
+// vides par defaut : ne change rien au comportement natif (boucle locale seule de
+// confiance) tant que l'hebergement n'est pas choisi. KnownIPNetworks (System.Net) plutot
+// que l'ancien KnownNetworks (Microsoft.AspNetCore.HttpOverrides), qui accepte un CIDR
+// directement via IPNetwork.Parse.
+foreach (var proxy in forwardedProxyOptions.KnownProxies)
+    forwardedHeadersOptions.KnownProxies.Add(IPAddress.Parse(proxy));
+foreach (var network in forwardedProxyOptions.KnownNetworks)
+    forwardedHeadersOptions.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
 
 if (app.Environment.IsDevelopment())
 {
