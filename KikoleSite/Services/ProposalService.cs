@@ -62,7 +62,7 @@ public class ProposalService : IProposalService
             var pInfo = await _playerHandler
                 .GetPlayerOfTheDayFullInfoAsync(proposalDate);
 
-            r = GetProposalResponsesWithPoints(datas, pInfo, out _, _resources);
+            r = ScoreCalculator.GetProposalResponsesWithPoints(datas, pInfo, out _, _resources);
         }
 
         return r;
@@ -80,7 +80,7 @@ public class ProposalService : IProposalService
 
         var proposalMade = request.MatchAny(proposalsAlready);
 
-        GetProposalResponsesWithPoints(proposalsAlready, pInfo, out var sourcePoints, _resources);
+        ScoreCalculator.GetProposalResponsesWithPoints(proposalsAlready, pInfo, out var sourcePoints, _resources);
 
         response = response.WithTotalPoints(sourcePoints, proposalMade);
 
@@ -145,27 +145,5 @@ public class ProposalService : IProposalService
             return DayGrantTypes.PaidBoard;
 
         return DayGrantTypes.None;
-    }
-
-    internal static List<ProposalResponse> GetProposalResponsesWithPoints(
-        IEnumerable<ProposalDto> proposalDtos,
-        PlayerFullDto player,
-        out int points,
-        IStringLocalizer<Translations> resources)
-    {
-        var totalPoints = ProposalChart.BasePoints;
-        var proposals = proposalDtos
-            .OrderBy(pDto => pDto.CreationDate)
-            .Select(pDto =>
-            {
-                var pr = new ProposalResponse(pDto, player, resources)
-                    .WithTotalPoints(totalPoints, false);
-                totalPoints = pr.TotalPoints;
-                return pr;
-            })
-            .ToList();
-
-        points = totalPoints;
-        return proposals;
     }
 }

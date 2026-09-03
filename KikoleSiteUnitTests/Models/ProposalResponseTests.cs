@@ -70,7 +70,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Name, value);
 
         response.Successful.Should().BeTrue();
-        response.LostPoints.Should().Be((0, false));
+        response.Cost.Should().Be((0, false));
         response.Value.Should().Be("Zinédine Zidane");
         response.IsWin.Should().BeTrue();
     }
@@ -81,7 +81,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Name, "Ronaldo");
 
         response.Successful.Should().BeFalse();
-        response.LostPoints.Should().Be((400, false));
+        response.Cost.Should().Be((400, false));
         response.Value.Should().Be("Ronaldo");
         response.IsWin.Should().BeFalse();
     }
@@ -104,7 +104,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Club, value);
 
         response.Successful.Should().BeTrue();
-        response.LostPoints.Should().Be((0, false));
+        response.Cost.Should().Be((0, false));
 
         var clubs = response.Value.Should().BeOfType<List<PlayerClub>>().Subject;
         clubs.Should().HaveCount(1);
@@ -119,7 +119,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Club, "Real Madri");
 
         response.Successful.Should().BeFalse();
-        response.LostPoints.Should().Be((50, false));
+        response.Cost.Should().Be((50, false));
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Country, nameof(Countries.FR));
 
         response.Successful.Should().BeTrue();
-        response.LostPoints.Should().Be((0, false));
+        response.Cost.Should().Be((0, false));
         response.Value.Should().Be((ulong)Countries.FR);
     }
 
@@ -149,7 +149,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Country, nameof(Countries.BR));
 
         response.Successful.Should().BeFalse();
-        response.LostPoints.Should().Be((25, false));
+        response.Cost.Should().Be((25, false));
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Continent, nameof(Continents.Africa));
 
         response.Successful.Should().BeFalse();
-        response.LostPoints.Should().Be((100, false));
+        response.Cost.Should().Be((100, false));
     }
 
     // ------------------------------------------------------------- poste / annee
@@ -188,7 +188,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Position, ((int)Positions.Goalkeeper).ToString());
 
         response.Successful.Should().BeFalse();
-        response.LostPoints.Should().Be((75, false));
+        response.Cost.Should().Be((75, false));
     }
 
     [Fact]
@@ -210,7 +210,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Year, value);
 
         response.Successful.Should().BeFalse();
-        response.LostPoints.Should().Be((25, false));
+        response.Cost.Should().Be((25, false));
         response.Tip.Should().Be(expectedTip);
     }
 
@@ -222,7 +222,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Clue, "GetClue");
 
         response.Successful.Should().BeTrue();
-        response.LostPoints.Should().Be((50, true));  // true = taux
+        response.Cost.Should().Be((50, true));  // true = taux
         response.Value.Should().BeNull();
         response.RawValue.Should().BeEmpty();
     }
@@ -233,7 +233,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Leaderboard, "GetLeaderboard");
 
         response.Successful.Should().BeTrue();
-        response.LostPoints.Should().Be((25, false));
+        response.Cost.Should().Be((25, false));
     }
 
     // ------------------------------------------------------------- WithTotalPoints
@@ -244,6 +244,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Name, "Zidane").WithTotalPoints(1000, false);
 
         response.TotalPoints.Should().Be(1000);
+        response.PointsLost.Should().Be(0);
     }
 
     [Fact]
@@ -252,6 +253,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Name, "Ronaldo").WithTotalPoints(1000, false);
 
         response.TotalPoints.Should().Be(600);
+        response.PointsLost.Should().Be(400);
     }
 
     [Fact]
@@ -261,9 +263,11 @@ public class ProposalResponseTests
         // deux indices coutent 500 puis 250, pas 500 puis 500
         var first = Respond(ProposalTypes.Clue, "x").WithTotalPoints(1000, false);
         first.TotalPoints.Should().Be(500);
+        first.PointsLost.Should().Be(500);
 
         var second = Respond(ProposalTypes.Clue, "x").WithTotalPoints(first.TotalPoints, false);
         second.TotalPoints.Should().Be(250);
+        second.PointsLost.Should().Be(250);
     }
 
     [Fact]
@@ -272,6 +276,9 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Name, "Ronaldo").WithTotalPoints(100, false);
 
         response.TotalPoints.Should().Be(0);
+        // le tarif de la categorie est 400, mais il ne restait que 100 a perdre : PointsLost
+        // reflete la perte reelle (plafonnee), pas le tarif brut de Cost
+        response.PointsLost.Should().Be(100);
     }
 
     [Fact]
@@ -280,6 +287,7 @@ public class ProposalResponseTests
         var response = Respond(ProposalTypes.Name, "Ronaldo").WithTotalPoints(1000, true);
 
         response.TotalPoints.Should().Be(1000);
+        response.PointsLost.Should().Be(0);
     }
 
     // ------------------------------------------------------------- badges

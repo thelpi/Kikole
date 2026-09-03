@@ -201,20 +201,24 @@ public class LeaderboardController : KikoleBaseController
             .GetProposalsAsync(actualDate.Date, userId);
 
         var items = new List<UserDayItemModel>(proposals.Count);
-        var pts = ProposalChart.BasePoints;
         foreach (var proposal in proposals)
         {
             items.Add(new UserDayItemModel
             {
                 Date = proposal.Date,
-                PointsLost = pts - proposal.TotalPoints,
+                PointsLost = proposal.PointsLost,
                 PointsRemaining = proposal.TotalPoints,
                 Success = proposal.Successful,
                 Type = proposal.ProposalType,
                 Value = proposal.RawValue
             });
-            pts = proposal.TotalPoints;
         }
+
+        // le dernier point restant si le classement n'a pas encore de score enregistre
+        // pour ce jour (ex. abandon), sinon BasePoints faute de proposition du tout
+        var lastKnownPoints = proposals.Count > 0
+            ? proposals.Last().TotalPoints
+            : ScoreCalculator.BasePoints;
 
         var model = new UserDayModel
         {
@@ -222,7 +226,7 @@ public class LeaderboardController : KikoleBaseController
             PlayerName = player.Player.Name,
             UserLogin = user.Login,
             ProposalDetails = items,
-            UserScore = db.Leaders.FirstOrDefault(_ => _.UserId == userId)?.Points ?? pts
+            UserScore = db.Leaders.FirstOrDefault(_ => _.UserId == userId)?.Points ?? lastKnownPoints
         };
 
         return View("UserDay", model);

@@ -99,10 +99,10 @@ Branche de travail : `remaster-v2`.
       (`WHERE id IN @ids`). `BadgeService.ResetBadgesAsync` a le même défaut (une requête
       par badge et par jour) mais reste **volontairement non traité** : fonction purement
       administrative, pas sur un chemin chaud.
-- [ ] **Sortir `GetProposalResponsesWithPoints` de `ProposalService`** — méthode
-      `internal static` que `LeaderService` appelle directement, seul couplage
-      service → service du projet, invisible à l'analyse des dépendances injectées. C'est
-      une fonction pure sur des DTOs : sa place est dans un **calculateur de score dédié**.
+- [x] ~~Sortir `GetProposalResponsesWithPoints` de `ProposalService`~~ — fusionné avec
+      `ProposalChart` dans `Models/ScoreCalculator.cs` (voir « Partis pris »). Au passage,
+      `ProposalResponse` expose maintenant `PointsLost` (la perte réelle, plafonnée),
+      supprimant un recalcul redondant qui vivait dans `LeaderboardController.UserDay`.
 - [ ] **De la logique métier vit dans les dépôts, hors de portée des tests.** Six règles
       fonctionnelles sont encodées dans la couche d'accès aux données, **invisibles pour les
       435 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
@@ -307,6 +307,21 @@ les hachages de toute façon.
   est indisponible, pour qu'un service tiers en panne ne bloque jamais un joueur. Les deux
   validateurs Identity (longueur + HIBP) s'exécutent tous les deux : `IPasswordValidator`
   supporte plusieurs implémentations enregistrées côte à côte, pas de remplacement.
+- **`ProposalChart` et `GetProposalResponsesWithPoints` fusionnés en `ScoreCalculator`.**
+  Les deux étaient déjà la même famille de chose — statiques, sans dépendance, sans I/O —
+  juste séparés par accident d'implémentation : le second n'avait atterri dans
+  `ProposalService` que parce qu'il fallait bien l'écrire quelque part, ce qui a permis à
+  `LeaderService` de le contourner en appel statique direct (le seul couplage
+  service → service du projet). Le fusionner avec le barème plutôt qu'en faire un vrai
+  service évite justement de réintroduire ce genre de couplage, et laisse les Views
+  continuer à lire les constantes directement (`ScoreCalculator.ProposalTypesCost`...) —
+  un vrai service injecté aurait interdit cet accès direct depuis les Views.
+
+  Au passage, `ProposalResponse` gagne une propriété `PointsLost` (la perte réelle,
+  plafonnée à ce qu'il restait de points — pas le tarif brut de `Cost`), calculée une
+  fois dans `WithTotalPoints`. `LeaderboardController.UserDay` recalculait la même chose en
+  parcourant une seconde fois la séquence déjà ordonnée par `ScoreCalculator` ; il se
+  contente maintenant de lire la valeur.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

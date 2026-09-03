@@ -23,11 +23,19 @@ public class ProposalResponse
 
     public string? Tip { get; }
 
-    public (int, bool) LostPoints { get; }
+    /// <summary>Le tarif de la catégorie (montant ou taux, cf. <see cref="ScoreCalculator.ProposalTypesCost"/>).</summary>
+    public (int, bool) Cost { get; }
 
     public ProposalTypes ProposalType { get; }
 
     public int TotalPoints { get; private set; }
+
+    /// <summary>
+    /// Ce que cette proposition a réellement coûté, une fois <see cref="TotalPoints"/>
+    /// plafonné à 0 pris en compte — peut être inférieur au tarif de <see cref="Cost"/>
+    /// si le score restant ne suffisait pas à l'absorber.
+    /// </summary>
+    public int PointsLost { get; private set; }
 
     public IReadOnlyCollection<UserBadge> CollectedBadges => _badges;
 
@@ -137,9 +145,9 @@ public class ProposalResponse
         }
 
         if (Successful && ProposalType.CanBeMiss())
-            LostPoints = (0, false);
+            Cost = (0, false);
         else
-            LostPoints = ProposalChart.ProposalTypesCost[ProposalType];
+            Cost = ScoreCalculator.ProposalTypesCost[ProposalType];
     }
 
     internal ProposalResponse(ProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
@@ -167,11 +175,12 @@ public class ProposalResponse
         var lostPoints = 0;
         if (!duplicate)
         {
-            lostPoints = LostPoints.Item2
-                ? (int)Math.Round(sourcePoints * LostPoints.Item1 / (decimal)100)
-                : LostPoints.Item1;
+            lostPoints = Cost.Item2
+                ? (int)Math.Round(sourcePoints * Cost.Item1 / (decimal)100)
+                : Cost.Item1;
         }
         TotalPoints = Math.Max(0, sourcePoints - lostPoints);
+        PointsLost = sourcePoints - TotalPoints;
         return this;
     }
 

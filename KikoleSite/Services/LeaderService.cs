@@ -118,7 +118,7 @@ public class LeaderService : ILeaderService
 
             var points = userLeaders.Sum(_ => _.Points);
             foreach (var userPlayer in userPlayers)
-                points += ProposalChart.SubmissionPoints;
+                points += ScoreCalculator.SubmissionPoints;
 
             items.Add(new LeaderboardItem
             {
@@ -195,7 +195,7 @@ public class LeaderService : ILeaderService
             }
 
             var singleStat = isCreator
-                ? new DailyUserStat(currentDate, pName, ProposalChart.SubmissionPoints)
+                ? new DailyUserStat(currentDate, pName, ScoreCalculator.SubmissionPoints)
                 : new DailyUserStat(userId, currentDate, pName, proposals.Any(_ => _.IsCurrentDay), proposals.Any(), leaders, meLeader);
 
             stats.Add(singleStat);
@@ -237,7 +237,7 @@ public class LeaderService : ILeaderService
 
                 // meme calcul que le score affiche en direct, pour que le rattrapage
                 // ne puisse pas diverger du barème réel
-                ProposalService.GetProposalResponsesWithPoints(
+                ScoreCalculator.GetProposalResponsesWithPoints(
                     untilWin, playerInfo, out var points, _resources);
 
                 var winningProposal = proposals[winIndex];
@@ -296,7 +296,7 @@ public class LeaderService : ILeaderService
             {
                 Date = day,
                 IsCreator = true,
-                Points = ProposalChart.SubmissionPoints,
+                Points = ScoreCalculator.SubmissionPoints,
                 Time = new TimeSpan(23, 59, 59),
                 UserId = player.Player.CreationUserId,
                 UserName = users[player.Player.CreationUserId].Login
@@ -326,7 +326,7 @@ public class LeaderService : ILeaderService
                 UserName = users[propUserGroup.Key].Login
             };
 
-            ProposalService.GetProposalResponsesWithPoints(propUserGroup, player, out var points, _resources);
+            ScoreCalculator.GetProposalResponsesWithPoints(propUserGroup, player, out var points, _resources);
             dsi.Points = points;
 
             searchers.Add(dsi);

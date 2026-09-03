@@ -38,13 +38,13 @@ public class ProposalTypeExtensionsTests
         // un type ajoute a l'enum sans son cout leverait une KeyNotFoundException
         var allTypes = Enum.GetValues(typeof(ProposalTypes)).Cast<ProposalTypes>();
 
-        allTypes.Should().OnlyContain(t => ProposalChart.ProposalTypesCost.ContainsKey(t));
+        allTypes.Should().OnlyContain(t => ScoreCalculator.ProposalTypesCost.ContainsKey(t));
     }
 
     [Fact]
     public void ProposalTypesCost_OnlyTheClueIsExpressedAsARate()
     {
-        var rateBased = ProposalChart.ProposalTypesCost
+        var rateBased = ScoreCalculator.ProposalTypesCost
             .Where(kvp => kvp.Value.isRate)
             .Select(kvp => kvp.Key);
 
@@ -54,7 +54,7 @@ public class ProposalTypeExtensionsTests
     [Fact]
     public void ProposalTypesCost_EveryCostIsPositive()
     {
-        ProposalChart.ProposalTypesCost.Values.Should().OnlyContain(v => v.points > 0);
+        ScoreCalculator.ProposalTypesCost.Values.Should().OnlyContain(v => v.points > 0);
     }
 
 }

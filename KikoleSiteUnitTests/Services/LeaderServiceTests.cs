@@ -126,7 +126,7 @@ public class LeaderServiceTests
             .GetLeaderboardAsync(Day, Day.AddDays(2), LeaderSorts.TotalPoints);
 
         var item = result.Single();
-        item.Points.Should().Be(800 + 500 + ProposalChart.SubmissionPoints);
+        item.Points.Should().Be(800 + 500 + ScoreCalculator.SubmissionPoints);
         item.KikolesFound.Should().Be(2);
         item.KikolesProposed.Should().Be(1);
     }
@@ -144,7 +144,7 @@ public class LeaderServiceTests
         var result = await _service
             .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
 
-        result.Single().Points.Should().Be(ProposalChart.SubmissionPoints);
+        result.Single().Points.Should().Be(ScoreCalculator.SubmissionPoints);
         result.Single().KikolesFound.Should().Be(0);
     }
 
@@ -370,7 +370,7 @@ public class LeaderServiceTests
         var localizer = new Mock<IStringLocalizer<Translations>>();
         localizer.Setup(_ => _[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
 
-        ProposalService.GetProposalResponsesWithPoints(
+        ScoreCalculator.GetProposalResponsesWithPoints(
             proposals, playerInfo, out var livePoints, localizer.Object);
 
         await _service.ComputeMissingLeadersAsync();
@@ -407,7 +407,7 @@ public class LeaderServiceTests
 
         var creator = result.Leaders.Single(_ => _.IsCreator);
         creator.UserName.Should().Be("createur");
-        creator.Points.Should().Be(ProposalChart.SubmissionPoints);
+        creator.Points.Should().Be(ScoreCalculator.SubmissionPoints);
         creator.Time.Should().Be(new TimeSpan(23, 59, 59));
     }
 

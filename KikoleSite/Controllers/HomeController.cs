@@ -148,7 +148,7 @@ public class HomeController : KikoleBaseController
         var model = new HomeModel
         {
             CurrentDate = _clock.Today,
-            Points = ProposalChart.BasePoints,
+            Points = ScoreCalculator.BasePoints,
             Message = msg
         };
 

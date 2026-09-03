@@ -61,7 +61,7 @@ public class ProposalServiceTests
 
     private List<ProposalResponse> Compute(IEnumerable<ProposalDto> proposals, out int points)
     {
-        return ProposalService.GetProposalResponsesWithPoints(
+        return ScoreCalculator.GetProposalResponsesWithPoints(
             proposals, Zidane(), out points, _localizer);
     }
 
@@ -71,7 +71,7 @@ public class ProposalServiceTests
         var result = Compute(new List<ProposalDto>(), out var points);
 
         result.Should().BeEmpty();
-        points.Should().Be(ProposalChart.BasePoints);
+        points.Should().Be(ScoreCalculator.BasePoints);
     }
 
     [Fact]
