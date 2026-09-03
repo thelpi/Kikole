@@ -10,8 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.28" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <!-- Microsoft.AspNetCore.HttpOverrides fait partie du framework partagé : plus de PackageReference -->
-    <PackageReference Include="MySql.Data" Version="9.4.0" />
     <!-- System.Text.Encoding.CodePages fait partie du framework partagé depuis .NET 10 -->
   </ItemGroup>
 

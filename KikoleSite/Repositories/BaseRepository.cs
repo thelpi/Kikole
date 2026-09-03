@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace KikoleSite.Repositories;
 

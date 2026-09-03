@@ -48,14 +48,15 @@ public class MappingModelsTests
     }
 
     [Fact]
-    public void PlayerClub_WhenTheClubIsMissing_Throws()
+    public void PlayerClub_WhenTheClubIsMissing_SaysWhichClubIsMissing()
     {
-        // caracterisation : le Single() n'a aucun garde-fou, une carriere referencant
-        // un club absent casse au lieu de degrader
+        // une carriere referencant un club absent du referentiel est une incoherence
+        // de donnees : elle leve, en nommant le club en cause
         Action act = () => new PlayerClub(
-            new PlayerClubDto { ClubId = 99 }, new List<ClubDto>());
+            new PlayerClubDto { PlayerId = 7, ClubId = 99 }, new List<ClubDto>());
 
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*99*");
     }
 
     // ------------------------------------------------------------- Country / Continent
@@ -184,11 +185,12 @@ public class MappingModelsTests
     }
 
     [Fact]
-    public void Player_WhenTheCreatorIsAbsentFromTheList_Throws()
+    public void Player_WhenTheCreatorIsAbsentFromTheList_SaysWhichCreatorIsMissing()
     {
         Action act = () => new Player(Submission(99), new List<UserDto>());
 
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*99*");
     }
 }
 

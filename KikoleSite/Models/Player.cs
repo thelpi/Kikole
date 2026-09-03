@@ -29,7 +29,7 @@ public class Player : PlayerCreator
     public DateTime? RejectDate { get; }
 
     internal Player(PlayerFullDto p, IEnumerable<UserDto> users)
-        : base(users.Single(u => u.Id == p.Player.CreationUserId), p.Player)
+        : base(Creator(p, users), p.Player)
     {
         Id = p.Player.Id;
         ProposalDate = p.Player.ProposalDate;
@@ -43,5 +43,16 @@ public class Player : PlayerCreator
         Country = (Countries)p.Player.CountryId;
         Position = (Positions)p.Player.PositionId;
         YearOfBirth = p.Player.YearOfBirth;
+    }
+
+    /// <summary>
+    /// Le createur du joueur doit figurer parmi les utilisateurs fournis ; son absence
+    /// est une incoherence de donnees, pas un cas a degrader.
+    /// </summary>
+    private static UserDto Creator(PlayerFullDto p, IEnumerable<UserDto> users)
+    {
+        return users.SingleOrDefault(u => u.Id == p.Player.CreationUserId)
+            ?? throw new InvalidOperationException(
+                $"Le createur {p.Player.CreationUserId} du joueur {p.Player.Id} est absent de la liste fournie.");
     }
 }

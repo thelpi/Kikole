@@ -41,7 +41,7 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (25, 'Hell of a week', 'Scores 6666 points or more in a week (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (26, 'The Breakfast Club', 'Find 7 kikoles in a row before 9AM (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (27, 'Métro, boulot, kikolé, dodo', 'Find 7 kikoles in a row after 9PM (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
-(28, 'OneMinuteChrono', 'Find the kikole and every information, without error and without the easy clue, in less than a minute, counting from the first information found. Kikole must have at least 6 clubs.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41');
+(28, 'OneMinuteChrono', 'Find the kikole and every information, without error and without the easy clue, in less than a minute, counting from the first information found. Kikole must have at least 5 clubs.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41');
 
 CREATE TABLE badge_translations (
   badge_id bigint(20) UNSIGNED NOT NULL,
@@ -77,7 +77,7 @@ INSERT INTO badge_translations (badge_id, language_id, description) VALUES
 (25, 2, 'Faites 6666 points ou plus sur 7 jours (soumissions ignorées)'),
 (26, 2, 'Trouvez 7 kikolés à la suite avant 9 heures (soumissions ignorées)'),
 (27, 2, 'Trouvez 7 kikolés à la suite après 21 heures (soumissions ignorées)'),
-(28, 2, 'Trouvez un kikolé avec toutes ses informations, sans erreur et sans l\'indice facile, en moins d\'une minute. Le compte à rebours commence à partir de la première information trouvée. Le kikolé doit avoir une carrière de plus de 5 clubs.');
+(28, 2, 'Trouvez un kikolé avec toutes ses informations, sans erreur et sans l\'indice facile, en moins d\'une minute. Le compte à rebours commence à partir de la première information trouvée. Le kikolé doit avoir une carrière d\'au moins 5 clubs.');
 
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,

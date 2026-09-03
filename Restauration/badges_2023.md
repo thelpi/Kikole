@@ -86,12 +86,13 @@ Le compte à rebours commence à partir de la première information trouvée.
 Le kikolé doit avoir une carrière de plus de 5 clubs.
 ```
 
-## Un écart entre le code et les descriptions publiées
+## Un écart entre le code et les descriptions publiées, tranché
 
-Le badge **OneMinuteChrono** est décrit en anglais par « Kikole must have at least 6 clubs »
-et en français par « une carrière de plus de 5 clubs ». Le code teste
-`if (p.Clubs.Count < 5) return false;` — donc **éligible dès 5 clubs** — alors que son
-propre commentaire dit « More than 5 clubs ».
+Le badge **OneMinuteChrono** était décrit en anglais par « Kikole must have at least 6 clubs »
+et en français par « une carrière de plus de 5 clubs », alors que le code teste
+`if (p.Clubs.Count < 5) return false;` — donc éligible dès 5 clubs.
 
-Les deux descriptions d'époque concordent entre elles et contredisent l'implémentation.
-L'écart existe toujours dans `BadgeService.cs:143`.
+**La règle est bien de 5 clubs minimum : ce sont les deux descriptions qui étaient
+fausses**, ainsi que le commentaire du code qui disait « More than 5 clubs ». Les trois ont
+été alignés sur l'implémentation. Les libellés du tableau ci-dessus restent ceux extraits de
+la production, tels quels.

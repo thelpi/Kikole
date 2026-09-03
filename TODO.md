@@ -14,9 +14,10 @@ Branche de travail : `remaster-v2`.
 | Base locale | MySQL 9.1 (WAMP), rejouable à l'infini via `kikole_mock.sql` |
 | Sites parasites | The Elite et Mets tes tennis supprimés |
 | Framework | .NET 10, hébergement minimal |
+| Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **435**, projet `KikoleSiteUnitTests` |
+| Tests | **445**, projet `KikoleSiteUnitTests` |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
 ---
@@ -101,14 +102,6 @@ Identity** plutôt que de réparer la cryptographie maison.
       Deux chantiers à ne pas mélanger : **(a)** des tests d'intégration sur base jetable —
       `kikole_mock.sql` étant idempotent, la moitié du travail est faite ; **(b)** remonter
       les règles dans le domaine, une fois (a) en place pour servir de filet.
-- [ ] **`OneMinuteChrono` : le code contredit sa propre description.** Les libellés d'époque
-      annoncent « at least 6 clubs » et « plus de 5 clubs », le commentaire du code dit
-      « More than 5 clubs », mais `BadgeService.cs:143` teste `Clubs.Count < 5` — donc
-      éligible dès 5 clubs. À trancher : corriger le code ou la description.
-- [ ] **`Single()` sans garde-fou sur données incohérentes** — `PlayerClub` lève si un club
-      de la carrière est absent de la liste, `Player` de même si le créateur manque. Même
-      motif que le `pDays.First(...)` de `LeaderService`, qui lèvera sans dire quelle date
-      manque. Comportements figés par des tests de caractérisation.
 - [ ] **`ProposalChart.FirstDate`** — figé en dur à titre provisoire. À sortir en
       configuration, ou mieux à déduire du `MIN(proposal_date)` en base. Tant qu'il est en
       dur, `kikole_mock.sql` doit garder la même valeur dans `@first_date`.
@@ -118,8 +111,10 @@ Identity** plutôt que de réparer la cryptographie maison.
       motif à revoir, pas une conversion mécanique. Les expressions de collection ne
       couvrent que ce qui a un type cible : un `var x = new List<T>()` n'en a pas, et
       `IReadOnlyDictionary` n'est pas constructible avec `[]`.
-- [ ] **Durcissement de `RemoveDiacritics`** (optionnel) — il reste 9 caractères non
-      convertis en Latin Extended-A et 11 en Latin Extended Additional, tous archaïques.
+- [ ] **Latin Extended-B dans `Sanitize`** (optionnel) — 107 lettres d'alphabet phonétique
+      et d'orthographes africaines deviennent `?`, faute d'équivalent ASCII évident. Hors
+      périmètre tant que les noms de joueurs sont saisis dans leur forme médiatique. Un
+      test fige la couverture des plages qui comptent.
 
 ---
 
@@ -185,7 +180,12 @@ les hachages de toute façon.
 - Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est
   exactement la somme des podiums mensuels, ce qu'un test vérifie désormais.
 - **Un joueur par jour est une invariante**, pas un cas à dégrader : son absence lève une
-  exception qui nomme la date. C'est à l'administration de garantir le calendrier.
+  exception qui nomme la date. C'est à l'administration de garantir le calendrier. Même
+  traitement pour les incohérences référentielles — club de carrière ou créateur absent —
+  qui levaient déjà, mais sans dire ce qui manquait.
+- **`OneMinuteChrono` : 5 clubs minimum.** Les deux descriptions d'époque annonçaient 6 et
+  le commentaire du code « more than 5 » : c'est l'implémentation qui avait raison, les
+  trois ont été alignées dessus.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

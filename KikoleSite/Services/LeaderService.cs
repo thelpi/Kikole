@@ -165,7 +165,11 @@ public class LeaderService : ILeaderService
 
         while (currentDate <= stopDate)
         {
-            var pDay = pDays.First(x => x.ProposalDate == currentDate);
+            // meme invariante qu'ailleurs : il y a un joueur par jour, et le nom de la
+            // date manquante vaut mieux que « Sequence contains no matching element »
+            var pDay = pDays.FirstOrDefault(x => x.ProposalDate == currentDate)
+                ?? throw new InvalidOperationException(
+                    $"Aucun joueur n'est programme pour le {currentDate:yyyy-MM-dd}.");
 
             var proposals = allProposals.Where(x => x.ProposalDate == currentDate);
 

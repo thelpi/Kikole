@@ -24,6 +24,15 @@ internal static class StringHelper
             { 'ß', "ss" }, { 'ẞ', "ss" },
             { 'Þ', "th" }, { 'þ', "th" },
             { 'Ð', "d" },  { 'ð', "d" },
+
+            // sans equivalent ni en decomposition NFD ni dans la table de rabattement :
+            // la ligature neerlandaise, le L point-median catalan, et quelques archaismes.
+            // Sans eux le caractere devient '?', que personne ne peut saisir au clavier.
+            { 'Ĳ', "ij" }, { 'ĳ', "ij" },
+            { 'Ŀ', "l" },  { 'ŀ', "l" },
+            { 'Ŋ', "n" },  { 'ŋ', "n" }, { 'ŉ', "n" },
+            { 'ĸ', "k" },
+            { 'ſ', "s" },
         };
 
     internal static bool ContainsApproximately(this string source, string value)

@@ -139,7 +139,7 @@ public class BadgeService : IBadgeService
                 Badges.OneMinuteChrono,
                 (d, p, ph) =>
                 {
-                    // More than 5 clubs in the career to be eligibile
+                    // au moins 5 clubs dans la carriere pour etre eligible
                     if (p.Clubs.Count < 5)
                         return false;
 
