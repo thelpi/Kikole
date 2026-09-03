@@ -38,4 +38,7 @@ public class LeaderboardModel
     public required Dayboard Dayboard { get; set; }
 
     public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; } = [];
+
+    /// <summary>Les liens vers les pages de statistiques ne sont proposes qu'a l'administrateur, seul a y avoir acces.</summary>
+    public bool IsAdmin { get; set; }
 }

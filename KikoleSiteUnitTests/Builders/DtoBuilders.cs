@@ -97,6 +97,7 @@ internal sealed class UserDtoBuilder
     internal UserDtoBuilder WithPassword(string password) { _dto = _dto with { Password = password }; return this; }
     internal UserDtoBuilder WithCreationDate(DateTime date) { _dto = _dto with { CreationDate = date }; return this; }
     internal UserDtoBuilder WithIp(string? ip) { _dto = _dto with { Ip = ip }; return this; }
+    internal UserDtoBuilder WithDisabled(bool disabled = true) { _dto = _dto with { IsDisabled = disabled }; return this; }
 
     internal UserDto Build() => _dto;
 }

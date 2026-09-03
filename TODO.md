@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **490**, projet `KikoleSiteUnitTests` |
+| Tests | **490** unitaires (mockés, rapides) + **1** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -34,12 +34,6 @@ Branche de travail : `remaster-v2`.
       du projet, plus aucun appelant depuis la refonte Identity ; le seul SHA256 restant
       (`LegacyCompatiblePasswordHasher`, pour la
       compatibilité ascendante) utilise `SHA256.HashData` (statique, thread-safe).
-- [ ] **`IUserService`** — `AccountController` orchestre maintenant `UserManager`/
-      `SignInManager` (le standard Identity, pas un défaut), mais la vérification de la
-      réponse de sécurité et le flux d'inscription par GUID restent directement dans le
-      contrôleur. Moins urgent qu'avant : à réévaluer une fois le système d'invitation
-      retiré (voir plus bas), pour ne pas extraire un service autour d'un code qui va
-      encore bouger.
 - [x] ~~Ne pas versionner de secrets~~ — la chaîne de connexion et `EncryptionKey` sont
       passées en *user-secrets*, voir « Partis pris ».
 - [x] ~~Retirer le système d'invitation~~ — **désactivé plutôt que retiré**, derrière
@@ -64,8 +58,7 @@ Branche de travail : `remaster-v2`.
         du problème 2023 (même IP toujours capturée).
       - **Vue admin reportée** — `AdminController` n'a aujourd'hui aucune gestion des
         utilisateurs ; l'IP capturée reste invisible tant qu'il n'y a pas au moins une vue
-        `GROUP BY ip HAVING COUNT(*) > seuil`. Rejoint le besoin `IUserService` déjà noté
-        en §1. Remis à plus tard, décision explicite.
+        `GROUP BY ip HAVING COUNT(*) > seuil`. Remis à plus tard, décision explicite.
       - Rappel posé dès le départ : l'IP est un signal, pas une preuve (CGNAT, VPN) —
         l'objectif est de relever le coût de la triche occasionnelle, pas de l'éliminer.
 
@@ -104,15 +97,24 @@ Branche de travail : `remaster-v2`.
       supprimant un recalcul redondant qui vivait dans `LeaderboardController.UserDay`.
 - [ ] **De la logique métier vit dans les dépôts, hors de portée des tests.** Six règles
       fonctionnelles sont encodées dans la couche d'accès aux données, **invisibles pour les
-      435 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
+      490 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
       passe les bons paramètres, jamais ce que le SQL en fait.
 
+      **(a) Infra de tests d'intégration en place** — `KikoleSiteUnitTests/Integration/`,
+      vraie base MySQL locale, `[Trait("Category","Integration")]` pour rester filtrable
+      (`dotnet test --filter Category!=Integration` pour la suite rapide inchangée ;
+      `dotnet test` seul les inclut désormais si WAMP tourne). Voir « Partis pris ».
+
       Par gravité décroissante :
-      - **`StatisticRepository.UserPlayerLinkSql`** réimplémente en SQL la règle d'accès de
-        `ProposalService.GetGrantAccessForDayAsync`. **Deux définitions du même droit
-        d'accès, dans deux couches**, qui peuvent diverger en silence.
-      - **`BaseRepository.SubSqlValidUsers`** définit le « joueur classable » (ni
-        administrateur, ni désactivé), injecté dans sept requêtes depuis la classe de base.
+      - **`StatisticRepository.UserPlayerLinkSql`** — la question qui la motivait est
+        tombée : les statistiques sont désormais réservées à l'administrateur (point
+        précédent), donc `@userId` y est toujours un administrateur, et sa première branche
+        (`u.user_type_id = Administrator`) rend les deux autres (`leaders`/`creation_user_id`)
+        mortes en pratique. Plus une divergence à résoudre, un nettoyage à faire —
+        simplifier en une vérification unique du palier utilisateur, sans urgence.
+      - [x] ~~`BaseRepository.SubSqlValidUsers`~~ — caractérisé par
+        `SubSqlValidUsersIntegrationTests`, via `LeaderRepository.GetLeadersAtDateAsync` :
+        administrateur et utilisateur désactivé bien exclus.
       - **`proposal_date = DATE(creation_date)`**, la définition de « trouvé le jour même »,
         dupliquée **cinq fois**.
       - `ProposalRepository.GetMissingUsersAsLeaderAsync` encode la définition d'un
@@ -122,19 +124,28 @@ Branche de travail : `remaster-v2`.
       - `BadgeRepository.GetUsersOfTheDayWithBadgeAsync` charge tous les détenteurs d'un
         badge puis filtre en C# sur une journée (logique dans le dépôt + N+1).
 
-      Deux chantiers à ne pas mélanger : **(a)** des tests d'intégration sur base jetable —
-      `kikole_mock.sql` étant idempotent, la moitié du travail est faite ; **(b)** remonter
-      les règles dans le domaine, une fois (a) en place pour servir de filet.
+      **(b)** remonter les règles dans le domaine, une fois chacune caractérisée par (a) pour
+      servir de filet — à faire une règle à la fois, pas en bloc.
+- [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
+      cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
+      `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à
+      `[Authorization(UserTypes.Administrator)]` — deux d'entre elles n'avaient jusqu'ici
+      **aucune** protection (`Stats`, `GetStatisticActiveUsers`). Les deux liens vers ces
+      pages sur `Leaderboard/Index` sont maintenant masqués hors administrateur
+      (`LeaderboardModel.IsAdmin`), pour ne pas proposer un lien qui échoue. Vérifié en
+      direct dans les trois cas : anonyme et `joueur1` (standard) ne voient plus les liens
+      et sont redirigés en accès direct, `admin` voit les liens et accède normalement.
 - [ ] **Modernisation syntaxique : le reste.** Les DTO, les requêtes et les namespaces sont
       faits. Restent les **ViewModels**, qui ne peuvent pas passer en `init` tant que les
       contrôleurs les remplissent après construction (`model.ErrorMessage = …`) — c'est un
       motif à revoir, pas une conversion mécanique. Les expressions de collection ne
       couvrent que ce qui a un type cible : un `var x = new List<T>()` n'en a pas, et
       `IReadOnlyDictionary` n'est pas constructible avec `[]`.
-- [ ] **Latin Extended-B dans `Sanitize`** (optionnel) — 107 lettres d'alphabet phonétique
-      et d'orthographes africaines deviennent `?`, faute d'équivalent ASCII évident. Hors
-      périmètre tant que les noms de joueurs sont saisis dans leur forme médiatique. Un
-      test fige la couverture des plages qui comptent.
+- [x] ~~Latin Extended-B dans `Sanitize`~~ — **décision : non traité.** 107 lettres
+      d'alphabet phonétique et d'orthographes africaines deviennent `?`, faute d'équivalent
+      ASCII évident, mais hors périmètre tant que les noms de joueurs sont saisis dans leur
+      forme médiatique. Un test fige la couverture des plages qui comptent, pour que la
+      décision reste visible si le besoin change.
 
 ---
 
@@ -280,6 +291,13 @@ les hachages de toute façon.
   spécialisation d'`AuthorizeAttribute` qui résout la policy correspondante, donc **aucun
   site d'appel n'a eu à changer**.
 
+  **Pas d'`IUserService` par-dessus.** Envisagé un temps (voir historique), écarté une fois
+  l'invitation désactivée : `UserManager`/`SignInManager` *sont* déjà la couche service pour
+  tout ce qui doit l'être (hashing, lockout, tokens), et le reste (vérif Q&A, liaison GUID,
+  rate limiting) n'est consommé que par `AccountController` lui-même — comme pour
+  `login_history` plus haut, un seul appelant ne justifie pas une abstraction dédiée ; ça
+  ajouterait un pass-through sans rien consolider.
+
   Effet de bord découvert en testant : MySqlConnector, sans `GuidFormat=None` dans la
   chaîne de connexion, renvoie les colonnes `CHAR(36)` qui *ressemblent* à un GUID comme
   `System.Guid` plutôt que `string` — cassait déjà silencieusement `registration_guids.id`
@@ -377,6 +395,30 @@ les hachages de toute façon.
   gère déjà deux tables (`users` et `registration_guids`), et sans vue admin pour l'instant
   (lecture directe en base en attendant), une seule méthode `CreateLoginHistoryAsync` ne
   justifie pas une interface dédiée.
+
+**Tests d'intégration**
+- **Même projet (`KikoleSiteUnitTests/Integration/`), pas un projet dédié.** Filtrable via
+  `[Trait("Category","Integration")]` (`dotnet test --filter Category!=Integration` retrouve
+  les 490 tests rapides et mockés) ; un `.csproj` séparé aurait ajouté du wiring de solution
+  pour une distinction que le trait suffit à faire. Effet de bord assumé : `dotnet test` sans
+  filtre inclut maintenant ces tests, donc échoue si WAMP n'est pas démarré.
+- **`UserSecretsId` propre au projet de tests**, chaîne de connexion re-posée une fois
+  (`dotnet user-secrets set "ConnectionStrings:Kikole" "..." --project KikoleSiteUnitTests`)
+  plutôt que d'emprunter celui de `KikoleSite` : autonome et standard, la petite duplication
+  vaut mieux qu'un lien caché entre deux projets.
+- **`DatabaseFixture` (`IAsyncLifetime`) remet la base à l'état de `kikole_mock.sql`** avant
+  chaque run — même mécanisme que les smoke tests manuels de ce chantier, `kikole_mock.sql`
+  étant déjà idempotent (TRUNCATE puis re-INSERT). Les scénarios spécifiques à un test
+  (utilisateur désactivé, réponse tardive...) s'ajoutent par-dessus dans le test lui-même via
+  les repositories réels, pas dans le fixture partagé — garde `kikole_mock.sql` généraliste,
+  utilisable tel quel pour le dev manuel.
+- **Deux pièges découverts en branchant l'infra**, les deux invisibles dans les 490 tests
+  mockés : `Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true` n'est posé que dans
+  `Program.cs`, jamais exécuté par les tests — sans lui, aucune colonne snake_case ne se
+  mappe (`user_id` → `UserId` silencieusement ignoré, valeurs à zéro) ; et les variables de
+  session (`SET @first_date = ...`) de `kikole_mock.sql` exigent `AllowUserVariables=true`
+  dans la chaîne de connexion, sans quoi MySqlConnector les interprète comme des paramètres
+  de requête liés et rejette `@first_date` comme non défini.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

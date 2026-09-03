@@ -133,13 +133,16 @@
     <a href="/Leaderboard/Palmares">@localizer["PalmaresLink"]</a>
 </h3>
 
-<h3>@localizer["NewPageBuilding"]</h3>
-<h4>
-    <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
-</h4>
-<h4>
-    <a href="/Leaderboard/KikolesStats">@localizer["KikolesStatisticsPageLink"]</a>
-</h4>
+@if (Model.IsAdmin)
+{
+    <h3>@localizer["NewPageBuilding"]</h3>
+    <h4>
+        <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
+    </h4>
+    <h4>
+        <a href="/Leaderboard/KikolesStats">@localizer["KikolesStatisticsPageLink"]</a>
+    </h4>
+}
 
 <script>
     $(function () {

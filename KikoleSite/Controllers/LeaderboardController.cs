@@ -80,13 +80,14 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet]
+    [Authorization(UserTypes.Administrator)]
     public IActionResult Stats()
     {
         return View();
     }
 
     [HttpGet]
-    [Authorization]
+    [Authorization(UserTypes.Administrator)]
     public async Task<JsonResult> GetStatisticPlayersDistribution()
     {
         var datas = await _statisticService
@@ -106,6 +107,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet]
+    [Authorization(UserTypes.Administrator)]
     public async Task<JsonResult> GetStatisticActiveUsers()
     {
         var datas = await _statisticService
@@ -123,7 +125,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet("kikoles-stats")]
-    [Authorization]
+    [Authorization(UserTypes.Administrator)]
     public async Task<JsonResult> GetKikolesStatisticsAsync([FromQuery] PlayerSorts sort, [FromQuery] bool desc)
     {
         var datas = await _statisticService
@@ -160,7 +162,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet]
-    [Authorization]
+    [Authorization(UserTypes.Administrator)]
     public IActionResult KikolesStats()
     {
         return View("KikolesStats");
@@ -251,7 +253,8 @@ public class LeaderboardController : KikoleBaseController
             LeaderboardDay = _clock.Today,
             DaySortType = DayLeaderSorts.BestTime,
             Dayboard = dailyBoard,
-            GlobalLeaderboard = globalLeaderboard
+            GlobalLeaderboard = globalLeaderboard,
+            IsAdmin = IsTypeOfUser(UserTypes.Administrator)
         };
     }
 

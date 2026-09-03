@@ -8,6 +8,9 @@
     <!-- necessaire pour que le compilateur signale les using inutiles (CS8019) -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- distinct de celui de KikoleSite : tests d'integration (dossier Integration/),
+         chaine de connexion propre a ce projet -->
+    <UserSecretsId>697b32b4-fe01-4d1a-a7d5-fa47b3e5f8a3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +27,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!-- tests d'integration uniquement : ConfigurationBuilder + AddUserSecrets -->
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
