@@ -21,7 +21,6 @@ public class AccountController : KikoleBaseController
         IInternationalService internationalService,
         IClock clock,
         IPlayerService playerService,
-        IClubRepository clubRepository,
         IBadgeService badgeService,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
@@ -29,7 +28,6 @@ public class AccountController : KikoleBaseController
             internationalService,
             clock,
             playerService,
-            clubRepository,
             badgeService,
             httpContextAccessor)
     {

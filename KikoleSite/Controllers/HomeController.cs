@@ -33,7 +33,6 @@ public class HomeController : KikoleBaseController
         IMessageRepository messageRepository,
         IClock clock,
         IPlayerService playerService,
-        IClubRepository clubRepository,
         IProposalService proposalService,
         IBadgeService badgeService,
         IDiscussionRepository discussionRepository,
@@ -43,7 +42,6 @@ public class HomeController : KikoleBaseController
             internationalService,
             clock,
             playerService,
-            clubRepository,
             badgeService,
             httpContextAccessor)
     {

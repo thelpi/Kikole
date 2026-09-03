@@ -31,7 +31,6 @@ public class AdminController : KikoleBaseController
         IMessageRepository messageRepository,
         IClock clock,
         IPlayerService playerService,
-        IClubRepository clubRepository,
         IBadgeService badgeService,
         ILeaderService leaderService,
         IDiscussionRepository discussionRepository,
@@ -41,7 +40,6 @@ public class AdminController : KikoleBaseController
             internationalService,
             clock,
             playerService,
-            clubRepository,
             badgeService,
             httpContextAccessor)
     {
@@ -357,13 +355,13 @@ public class AdminController : KikoleBaseController
             if (UserType != UserTypes.Administrator)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            var club = await _clubRepository
+            var club = await _internationalService
                 .GetClubAsync(clubId);
 
             if (club == null)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            var names = club.AllowedNames.Disjoin().ToList();
+            var names = club.AllowedNames.ToList();
             var model = new ClubCreationModel
             {
                 MainName = club.Name,
@@ -414,19 +412,8 @@ public class AdminController : KikoleBaseController
             model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
         else
         {
-            if (model.Id == 0)
-            {
-                await _clubRepository
-                    .CreateClubAsync(request.ToDto());
-            }
-            else
-            {
-                await _clubRepository
-                    .UpdateClubAsync(request.ToDto());
-            }
-
-            // le referentiel vient de changer : l'autocompletion doit le relire
-            _internationalService.InvalidateClubs();
+            await _internationalService
+                .CreateOrUpdateClubAsync(request);
 
             model = new ClubCreationModel
             {

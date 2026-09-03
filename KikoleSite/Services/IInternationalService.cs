@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 
 namespace KikoleSite.Services;
 
@@ -21,6 +22,24 @@ public interface IInternationalService
     Task<IReadOnlyCollection<Club>> GetClubsAsync();
 
     /// <summary>
+    /// Un club par son identifiant.
+    /// </summary>
+    /// <param name="clubId">Identifiant du club.</param>
+    /// <returns>Le club, ou <c>null</c> s'il n'existe pas.</returns>
+    Task<Club?> GetClubAsync(ulong clubId);
+
+    /// <summary>
+    /// Crée le club s'il n'a pas d'identifiant, le met à jour sinon, et rafraîchit le cache.
+    /// </summary>
+    /// <remarks>
+    /// Toute écriture sur le référentiel passe par ici : c'est ce qui garantit que le cache
+    /// ne peut pas devenir obsolète par oubli d'invalidation.
+    /// </remarks>
+    /// <param name="request">Club à enregistrer, préalablement validé.</param>
+    /// <returns>Rien.</returns>
+    Task CreateOrUpdateClubAsync(ClubRequest request);
+
+    /// <summary>
     /// Les nationalités dans la langue demandée, indexées par leur code pays.
     /// </summary>
     /// <param name="language">Langue d'affichage.</param>
@@ -33,9 +52,4 @@ public interface IInternationalService
     /// <param name="language">Langue d'affichage.</param>
     /// <returns>Identifiant de continent vers libellé.</returns>
     Task<IReadOnlyDictionary<ulong, string>> GetContinentsAsync(Languages language);
-
-    /// <summary>
-    /// Oublie les clubs en cache. À appeler après toute écriture sur le référentiel.
-    /// </summary>
-    void InvalidateClubs();
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 
 namespace KikoleSite.Services;
@@ -60,6 +61,28 @@ public class InternationalService : IInternationalService
     }
 
     /// <inheritdoc />
+    public async Task<Club?> GetClubAsync(ulong clubId)
+    {
+        // le referentiel complet est deja en memoire, et invalide a chaque ecriture :
+        // inutile d'aller rechercher une ligne en base
+        var clubs = await GetClubsAsync();
+
+        return clubs.SingleOrDefault(c => c.Id == clubId);
+    }
+
+    /// <inheritdoc />
+    public async Task CreateOrUpdateClubAsync(ClubRequest request)
+    {
+        // un club sans identifiant est un nouveau club
+        if (request.Id == 0)
+            await _clubRepository.CreateClubAsync(request.ToDto());
+        else
+            await _clubRepository.UpdateClubAsync(request.ToDto());
+
+        InvalidateClubs();
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync(Languages language)
     {
         if (_countries.TryGetValue(language, out var cached))
@@ -91,8 +114,7 @@ public class InternationalService : IInternationalService
         return _continents.GetOrAdd(language, loaded);
     }
 
-    /// <inheritdoc />
-    public void InvalidateClubs()
+    private void InvalidateClubs()
     {
         _clubs = null;
     }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using Moq;
@@ -70,18 +71,50 @@ public class InternationalServiceTests
     }
 
     [Fact]
-    public async Task InvalidateClubs_ForcesTheNextCallToReload()
+    public async Task GetClubAsync_FindsTheClubWithoutQueryingAgain()
     {
         await _service.GetClubsAsync();
 
-        _service.InvalidateClubs();
-        await _service.GetClubsAsync();
+        var club = await _service.GetClubAsync(2);
 
-        _clubRepository.Verify(_ => _.GetClubsAsync(), Times.Exactly(2));
+        club!.Name.Should().Be("Real Madrid");
+        _clubRepository.Verify(_ => _.GetClubsAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task InvalidateClubs_ExposesWhatTheRepositoryNowReturns()
+    public async Task GetClubAsync_WhenTheClubDoesNotExist_ReturnsNull()
+    {
+        var club = await _service.GetClubAsync(999);
+
+        club.Should().BeNull();
+    }
+
+    // ------------------------------------------------------------- ecriture
+
+    [Fact]
+    public async Task CreateOrUpdateClubAsync_WithoutIdentifier_Creates()
+    {
+        await _service.CreateOrUpdateClubAsync(Request(0));
+
+        _clubRepository.Verify(_ => _.CreateClubAsync(It.IsAny<ClubDto>()), Times.Once);
+        _clubRepository.Verify(_ => _.UpdateClubAsync(It.IsAny<ClubDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateOrUpdateClubAsync_WithAnIdentifier_Updates()
+    {
+        await _service.CreateOrUpdateClubAsync(Request(7));
+
+        _clubRepository.Verify(_ => _.UpdateClubAsync(It.Is<ClubDto>(c => c.Id == 7)), Times.Once);
+        _clubRepository.Verify(_ => _.CreateClubAsync(It.IsAny<ClubDto>()), Times.Never);
+    }
+
+    /// <summary>
+    /// L'invalidation n'est plus a la charge de l'appelant : toute ecriture rafraichit
+    /// le cache, sans quoi il pourrait devenir obsolete par simple oubli.
+    /// </summary>
+    [Fact]
+    public async Task CreateOrUpdateClubAsync_RefreshesTheCacheItself()
     {
         await _service.GetClubsAsync();
 
@@ -89,11 +122,32 @@ public class InternationalServiceTests
         {
             ClubDtoBuilder.Valid().WithId(3).WithName("Juventus").Build()
         });
-        _service.InvalidateClubs();
+
+        await _service.CreateOrUpdateClubAsync(Request(0));
 
         var clubs = await _service.GetClubsAsync();
-
         clubs.Should().ContainSingle().Which.Name.Should().Be("Juventus");
+    }
+
+    [Fact]
+    public async Task CreateOrUpdateClubAsync_LeavesTheTranslationsAlone()
+    {
+        await _service.GetCountriesAsync(Languages.fr);
+
+        await _service.CreateOrUpdateClubAsync(Request(0));
+        await _service.GetCountriesAsync(Languages.fr);
+
+        _internationalRepository.Verify(_ => _.GetCountriesAsync(It.IsAny<ulong>()), Times.Once);
+    }
+
+    private static ClubRequest Request(ulong id)
+    {
+        return new ClubRequest
+        {
+            Id = id,
+            Name = "Juventus",
+            AllowedNames = new List<string> { "juve" }
+        };
     }
 
     // ------------------------------------------------------------- nationalites
@@ -139,21 +193,6 @@ public class InternationalServiceTests
 
         _internationalRepository.Verify(_ => _.GetContinentsAsync((ulong)Languages.fr), Times.Once);
         _internationalRepository.Verify(_ => _.GetContinentsAsync((ulong)Languages.en), Times.Once);
-    }
-
-    [Fact]
-    public async Task InvalidateClubs_LeavesTheTranslationsAlone()
-    {
-        await _service.GetCountriesAsync(Languages.fr);
-        await _service.GetContinentsAsync(Languages.fr);
-
-        _service.InvalidateClubs();
-
-        await _service.GetCountriesAsync(Languages.fr);
-        await _service.GetContinentsAsync(Languages.fr);
-
-        _internationalRepository.Verify(_ => _.GetCountriesAsync(It.IsAny<ulong>()), Times.Once);
-        _internationalRepository.Verify(_ => _.GetContinentsAsync(It.IsAny<ulong>()), Times.Once);
     }
 
     /// <summary>

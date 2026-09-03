@@ -28,7 +28,6 @@ public class LeaderboardController : KikoleBaseController
         IInternationalService internationalService,
         IClock clock,
         IPlayerService playerService,
-        IClubRepository clubRepository,
         IBadgeService badgeService,
         ILeaderService leaderService,
         IStatisticService statisticService,
@@ -39,7 +38,6 @@ public class LeaderboardController : KikoleBaseController
             internationalService,
             clock,
             playerService,
-            clubRepository,
             badgeService,
             httpContextAccessor)
     {

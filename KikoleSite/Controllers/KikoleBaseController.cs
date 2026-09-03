@@ -45,7 +45,6 @@ public abstract class KikoleBaseController : Controller
     protected readonly ICrypter _crypter;
     protected readonly IClock _clock;
     protected readonly IPlayerService _playerService;
-    protected readonly IClubRepository _clubRepository;
     protected readonly IBadgeService _badgeService;
     protected readonly IInternationalService _internationalService;
     protected readonly IHttpContextAccessor _httpContextAccessor;
@@ -55,7 +54,6 @@ public abstract class KikoleBaseController : Controller
         IInternationalService internationalService,
         IClock clock,
         IPlayerService playerService,
-        IClubRepository clubRepository,
         IBadgeService badgeService,
         IHttpContextAccessor httpContextAccessor)
     {
@@ -64,7 +62,6 @@ public abstract class KikoleBaseController : Controller
         _internationalService = internationalService;
         _clock = clock;
         _playerService = playerService;
-        _clubRepository = clubRepository;
         _badgeService = badgeService;
         _httpContextAccessor = httpContextAccessor;
     }

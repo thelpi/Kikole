@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **455**, projet `KikoleSiteUnitTests` |
+| Tests | **458**, projet `KikoleSiteUnitTests` |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
 ---
@@ -185,6 +185,9 @@ les hachages de toute façon.
   l'expiration ne sert à rien et son éviction non déterministe rendrait les tests fragiles.
   Le service reçoit la langue **en paramètre** et ne lit aucun état ambiant — c'est ce qui
   le rend testable ; ce sont les contrôleurs qui résolvent la culture de la requête.
+  **Toute écriture sur les clubs passe par `CreateOrUpdateClubAsync`**, qui rafraîchit le
+  cache lui-même : l'invalidation n'est plus à la charge de l'appelant, donc impossible à
+  oublier. Les contrôleurs ne dépendent plus du tout d'`IClubRepository`.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`
