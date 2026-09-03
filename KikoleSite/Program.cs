@@ -66,8 +66,8 @@ var app = builder.Build();
 
 var cultures = new List<CultureInfo>
 {
-    new CultureInfo("en"),
-    new CultureInfo("fr")
+    new("en"),
+    new("fr")
 };
 
 app.UseRequestLocalization(options =>

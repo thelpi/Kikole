@@ -23,7 +23,7 @@ public class AuthorizationFilter : IAsyncAuthorizationFilter
     private readonly IClock _clock;
 
     private static readonly ConcurrentDictionary<ulong, (DateTime expirationDate, UserDto userData)> _usersCheckCache
-        = new ConcurrentDictionary<ulong, (DateTime, UserDto)>();
+        = new();
 
     public AuthorizationFilter(
         IUserRepository userRepository,

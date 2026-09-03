@@ -91,7 +91,7 @@ public class ProposalResponse
                     Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(Guessed());
                 Value = Successful
                     ? player.Player.CountryId
-                    : (object?)sourceValue;
+                    : sourceValue;
                 RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
                     ? tmpRawCountry.ToString()
                     : RawValue;
@@ -102,7 +102,7 @@ public class ProposalResponse
                     Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(Guessed());
                 Value = Successful
                     ? player.Player.ContinentId
-                    : (object?)sourceValue;
+                    : sourceValue;
                 RawValue = Enum.TryParse<Continents>(sourceValue, out var tmpRawContinent)
                     ? tmpRawContinent.ToString()
                     : RawValue;
@@ -113,7 +113,7 @@ public class ProposalResponse
                     Successful = player.Player.PositionId == ulong.Parse(Guessed());
                 Value = Successful
                     ? player.Player.PositionId
-                    : (object?)sourceValue;
+                    : sourceValue;
                 RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
                     ? tmpRawPosition.ToString()
                     : RawValue;
@@ -124,7 +124,7 @@ public class ProposalResponse
                     Successful = ushort.Parse(Guessed()) == player.Player.YearOfBirth;
                 Value = Successful
                     ? player.Player.YearOfBirth
-                    : (object?)sourceValue;
+                    : sourceValue;
                 break;
 
             case ProposalTypes.Leaderboard:

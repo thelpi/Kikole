@@ -38,8 +38,8 @@ public class ProposalResponseTests
             },
             PlayerClubs = new List<PlayerClubDto>
             {
-                new PlayerClubDto { PlayerId = 1, ClubId = JuventusId, HistoryPosition = 3 },
-                new PlayerClubDto { PlayerId = 1, ClubId = RealMadridId, HistoryPosition = 4 }
+                new() { PlayerId = 1, ClubId = JuventusId, HistoryPosition = 3 },
+                new() { PlayerId = 1, ClubId = RealMadridId, HistoryPosition = 4 }
             }
         };
     }

@@ -21,7 +21,7 @@ public class Clock : IClock
     public DateTime Yesterday => Today.AddDays(-1);
 
     /// <inheritdoc />
-    public DateTime FirstOfMonth => new DateTime(Now.Year, Now.Month, 1);
+    public DateTime FirstOfMonth => new(Now.Year, Now.Month, 1);
 
     /// <inheritdoc />
     public DateTime TomorrowEnd => Today.AddDays(2).AddSeconds(-1);

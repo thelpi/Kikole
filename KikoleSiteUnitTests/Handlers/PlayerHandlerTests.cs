@@ -75,9 +75,9 @@ public class PlayerHandlerTests
             .Setup(_ => _.GetPlayerClubsAsync(1))
             .ReturnsAsync(new List<PlayerClubDto>
             {
-                new PlayerClubDto { PlayerId = 1, ClubId = 2, HistoryPosition = 1 },
-                new PlayerClubDto { PlayerId = 1, ClubId = 3, HistoryPosition = 2 },
-                new PlayerClubDto { PlayerId = 1, ClubId = 2, HistoryPosition = 3 }
+                new() { PlayerId = 1, ClubId = 2, HistoryPosition = 1 },
+                new() { PlayerId = 1, ClubId = 3, HistoryPosition = 2 },
+                new() { PlayerId = 1, ClubId = 2, HistoryPosition = 3 }
             });
         _clubRepository.Setup(_ => _.GetClubAsync(2)).ReturnsAsync(ClubDtoBuilder.Valid().WithId(2).WithName("Juventus").Build());
         _clubRepository.Setup(_ => _.GetClubAsync(3)).ReturnsAsync(ClubDtoBuilder.Valid().WithId(3).WithName("Inter Milan").Build());

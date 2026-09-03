@@ -25,12 +25,12 @@ public class LeaderServicePalmaresTests
 {
     private static readonly DateTime FirstMonth = ProposalChart.FirstMonth;
 
-    private readonly Mock<IPlayerRepository> _playerRepository = new Mock<IPlayerRepository>();
-    private readonly Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
-    private readonly Mock<IUserRepository> _userRepository = new Mock<IUserRepository>();
-    private readonly Mock<IProposalRepository> _proposalRepository = new Mock<IProposalRepository>();
-    private readonly Mock<IPlayerHandler> _playerHandler = new Mock<IPlayerHandler>();
-    private readonly Mock<IClock> _clock = new Mock<IClock>();
+    private readonly Mock<IPlayerRepository> _playerRepository = new();
+    private readonly Mock<ILeaderRepository> _leaderRepository = new();
+    private readonly Mock<IUserRepository> _userRepository = new();
+    private readonly Mock<IProposalRepository> _proposalRepository = new();
+    private readonly Mock<IPlayerHandler> _playerHandler = new();
+    private readonly Mock<IClock> _clock = new();
     private readonly LeaderService _service;
 
     public LeaderServicePalmaresTests()

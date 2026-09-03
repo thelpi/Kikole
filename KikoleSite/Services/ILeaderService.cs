@@ -23,7 +23,7 @@ public interface ILeaderService
     /// <summary>
     /// Gets the board for a single day.
     /// </summary>
-    /// <param name="date">The day.</param>
+    /// <param name="day">The day.</param>
     /// <param name="sort">Sort for leaders.</param>
     /// <returns>Day board.</returns>
     Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort);

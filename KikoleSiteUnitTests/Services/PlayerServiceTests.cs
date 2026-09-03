@@ -22,11 +22,11 @@ public class PlayerServiceTests
     // survivent au changement de cette constante
     private static readonly DateTime FirstDate = ProposalChart.FirstDate;
 
-    private readonly Mock<IPlayerHandler> _playerHandler = new Mock<IPlayerHandler>();
-    private readonly Mock<IPlayerRepository> _playerRepository = new Mock<IPlayerRepository>();
-    private readonly Mock<IUserRepository> _userRepository = new Mock<IUserRepository>();
-    private readonly Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
-    private readonly Mock<IClock> _clock = new Mock<IClock>();
+    private readonly Mock<IPlayerHandler> _playerHandler = new();
+    private readonly Mock<IPlayerRepository> _playerRepository = new();
+    private readonly Mock<IUserRepository> _userRepository = new();
+    private readonly Mock<ILeaderRepository> _leaderRepository = new();
+    private readonly Mock<IClock> _clock = new();
     private readonly PlayerService _service;
 
     public PlayerServiceTests()
@@ -55,8 +55,8 @@ public class PlayerServiceTests
             AllowedNames = new List<string> { "Zidane" },
             Clubs = new List<PlayerClubRequest>
             {
-                new PlayerClubRequest { ClubId = 1, HistoryPosition = 1 },
-                new PlayerClubRequest { ClubId = 2, HistoryPosition = 2 }
+                new() { ClubId = 1, HistoryPosition = 1 },
+                new() { ClubId = 2, HistoryPosition = 2 }
             },
             ClueLanguages = new Dictionary<Languages, string?>(),
             EasyClueLanguages = new Dictionary<Languages, string?>(),

@@ -27,5 +27,5 @@ public static class ProposalChart
 
     public static readonly DateTime HiddenDate = FirstDate.AddDays(-1);
 
-    public static readonly DateTime FirstMonth = new DateTime(FirstDate.Year, FirstDate.Month, 1);
+    public static readonly DateTime FirstMonth = new(FirstDate.Year, FirstDate.Month, 1);
 }

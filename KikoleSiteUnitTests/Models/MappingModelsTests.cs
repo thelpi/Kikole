@@ -149,7 +149,7 @@ public class MappingModelsTests
             Clubs = new List<ClubDto> { ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build() },
             PlayerClubs = new List<PlayerClubDto>
             {
-                new PlayerClubDto { PlayerId = 1, ClubId = 2, HistoryPosition = 4 }
+                new() { PlayerId = 1, ClubId = 2, HistoryPosition = 4 }
             }
         };
     }

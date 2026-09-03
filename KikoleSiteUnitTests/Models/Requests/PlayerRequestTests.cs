@@ -12,7 +12,7 @@ namespace KikoleSiteUnitTests.Models.Requests;
 
 public class PlayerRequestTests
 {
-    private static readonly DateTime Today = new DateTime(2026, 9, 2);
+    private static readonly DateTime Today = new(2026, 9, 2);
 
     private readonly IStringLocalizer _localizer;
 
@@ -36,9 +36,9 @@ public class PlayerRequestTests
             AllowedNames = new List<string> { "Zidane", "Zizou" },
             Clubs = new List<PlayerClubRequest>
             {
-                new PlayerClubRequest { ClubId = 1, HistoryPosition = 1 },
-                new PlayerClubRequest { ClubId = 2, HistoryPosition = 2 },
-                new PlayerClubRequest { ClubId = 3, HistoryPosition = 3 }
+                new() { ClubId = 1, HistoryPosition = 1 },
+                new() { ClubId = 2, HistoryPosition = 2 },
+                new() { ClubId = 3, HistoryPosition = 3 }
             },
             ClueEn = "A clue",
             EasyClueEn = "An easier clue",
@@ -128,7 +128,7 @@ public class PlayerRequestTests
     {
         var request = Valid() with { Clubs = new List<PlayerClubRequest>
         {
-            new PlayerClubRequest { ClubId = 0, HistoryPosition = 1 }
+            new() { ClubId = 0, HistoryPosition = 1 }
         } };
 
         request.IsValid(Today, _localizer).Should().Be("InvalidClubs");

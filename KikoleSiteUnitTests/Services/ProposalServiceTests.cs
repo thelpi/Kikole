@@ -1,14 +1,14 @@
 using System;
-using System.Threading.Tasks;
-using KikoleSite.Handlers;
-using KikoleSite.Repositories;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite;
+using KikoleSite.Handlers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
+using KikoleSite.Repositories;
 using KikoleSite.Services;
 using Microsoft.Extensions.Localization;
 using Moq;
@@ -45,7 +45,7 @@ public class ProposalServiceTests
             },
             PlayerClubs = new List<PlayerClubDto>
             {
-                new PlayerClubDto { PlayerId = 1, ClubId = RealMadridId, HistoryPosition = 4 }
+                new() { PlayerId = 1, ClubId = RealMadridId, HistoryPosition = 4 }
             }
         };
     }
@@ -172,10 +172,10 @@ public class ProposalServiceGrantTests
     private static readonly DateTime Day = ProposalChart.FirstDate;
     private const ulong UserId = 7;
 
-    private readonly Mock<IProposalRepository> _proposalRepository = new Mock<IProposalRepository>();
-    private readonly Mock<ILeaderRepository> _leaderRepository = new Mock<ILeaderRepository>();
-    private readonly Mock<IUserRepository> _userRepository = new Mock<IUserRepository>();
-    private readonly Mock<IPlayerHandler> _playerHandler = new Mock<IPlayerHandler>();
+    private readonly Mock<IProposalRepository> _proposalRepository = new();
+    private readonly Mock<ILeaderRepository> _leaderRepository = new();
+    private readonly Mock<IUserRepository> _userRepository = new();
+    private readonly Mock<IPlayerHandler> _playerHandler = new();
     private readonly ProposalService _service;
 
     public ProposalServiceGrantTests()

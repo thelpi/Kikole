@@ -5,6 +5,9 @@
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
+    <!-- necessaire pour que le compilateur signale les using inutiles (CS8019) -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -11,7 +11,7 @@ namespace KikoleSiteUnitTests;
 /// </summary>
 internal sealed class PlayerDtoBuilder
 {
-    private PlayerDto _dto = new PlayerDto
+    private PlayerDto _dto = new()
     {
         Id = 1,
         Name = "Zinédine Zidane",
@@ -25,7 +25,7 @@ internal sealed class PlayerDtoBuilder
         CreationUserId = 42
     };
 
-    internal static PlayerDtoBuilder Valid() => new PlayerDtoBuilder();
+    internal static PlayerDtoBuilder Valid() => new();
 
     internal PlayerDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
     internal PlayerDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
@@ -52,14 +52,14 @@ internal sealed class PlayerDtoBuilder
 
 internal sealed class ClubDtoBuilder
 {
-    private ClubDto _dto = new ClubDto
+    private ClubDto _dto = new()
     {
         Id = 1,
         Name = "Real Madrid",
         AllowedNames = "real;real madrid"
     };
 
-    internal static ClubDtoBuilder Valid() => new ClubDtoBuilder();
+    internal static ClubDtoBuilder Valid() => new();
 
     internal ClubDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
     internal ClubDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
@@ -70,7 +70,7 @@ internal sealed class ClubDtoBuilder
 
 internal sealed class UserDtoBuilder
 {
-    private UserDto _dto = new UserDto
+    private UserDto _dto = new()
     {
         Id = 1,
         Login = "joueur",
@@ -81,7 +81,7 @@ internal sealed class UserDtoBuilder
         UserTypeId = (ulong)UserTypes.StandardUser
     };
 
-    internal static UserDtoBuilder Valid() => new UserDtoBuilder();
+    internal static UserDtoBuilder Valid() => new();
 
     internal UserDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
     internal UserDtoBuilder WithLogin(string login) { _dto = _dto with { Login = login }; return this; }
@@ -99,14 +99,14 @@ internal sealed class UserDtoBuilder
 
 internal sealed class LeaderDtoBuilder
 {
-    private LeaderDto _dto = new LeaderDto
+    private LeaderDto _dto = new()
     {
         UserId = 1,
         Points = 1000,
         Time = 60
     };
 
-    internal static LeaderDtoBuilder Valid() => new LeaderDtoBuilder();
+    internal static LeaderDtoBuilder Valid() => new();
 
     internal LeaderDtoBuilder WithUser(ulong userId) { _dto = _dto with { UserId = userId }; return this; }
     internal LeaderDtoBuilder WithUserId(ulong id) { _dto = _dto with { UserId = id }; return this; }
@@ -134,7 +134,7 @@ internal sealed class LeaderDtoBuilder
 
 internal sealed class ProposalDtoBuilder
 {
-    private ProposalDto _dto = new ProposalDto
+    private ProposalDto _dto = new()
     {
         UserId = 1,
         ProposalTypeId = (ulong)ProposalTypes.Name,
@@ -142,7 +142,7 @@ internal sealed class ProposalDtoBuilder
         Successful = 1
     };
 
-    internal static ProposalDtoBuilder Valid() => new ProposalDtoBuilder();
+    internal static ProposalDtoBuilder Valid() => new();
 
     internal ProposalDtoBuilder WithUser(ulong userId) { _dto = _dto with { UserId = userId }; return this; }
     internal ProposalDtoBuilder OfType(ProposalTypes type) { _dto = _dto with { ProposalTypeId = (ulong)type }; return this; }
@@ -159,14 +159,14 @@ internal sealed class ProposalDtoBuilder
 
 internal sealed class BadgeDtoBuilder
 {
-    private BadgeDto _dto = new BadgeDto
+    private BadgeDto _dto = new()
     {
         Id = 1,
         Name = "Un badge",
         Description = "Sa description"
     };
 
-    internal static BadgeDtoBuilder Valid() => new BadgeDtoBuilder();
+    internal static BadgeDtoBuilder Valid() => new();
 
     internal BadgeDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
     internal BadgeDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
@@ -184,7 +184,7 @@ internal sealed class PlayerFullDtoBuilder
     private IReadOnlyList<ClubDto> _clubs = [];
     private IReadOnlyList<PlayerClubDto> _playerClubs = [];
 
-    internal static PlayerFullDtoBuilder Valid() => new PlayerFullDtoBuilder();
+    internal static PlayerFullDtoBuilder Valid() => new();
 
     internal PlayerFullDtoBuilder WithPlayer(PlayerDto player) { _player = player; return this; }
 
@@ -217,7 +217,7 @@ internal sealed class PlayerFullDtoBuilder
     internal PlayerFullDtoBuilder WithClubs(IReadOnlyList<ClubDto> clubs) { _clubs = clubs; return this; }
     internal PlayerFullDtoBuilder WithPlayerClubs(IReadOnlyList<PlayerClubDto> playerClubs) { _playerClubs = playerClubs; return this; }
 
-    internal PlayerFullDto Build() => new PlayerFullDto
+    internal PlayerFullDto Build() => new()
     {
         Player = _player,
         Clubs = _clubs,
@@ -227,9 +227,9 @@ internal sealed class PlayerFullDtoBuilder
 
 internal sealed class CountryDtoBuilder
 {
-    private CountryDto _dto = new CountryDto { Code = "FR", Name = "France" };
+    private CountryDto _dto = new() { Code = "FR", Name = "France" };
 
-    internal static CountryDtoBuilder Valid() => new CountryDtoBuilder();
+    internal static CountryDtoBuilder Valid() => new();
 
     internal CountryDtoBuilder WithCode(string code) { _dto = _dto with { Code = code }; return this; }
     internal CountryDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
@@ -239,9 +239,9 @@ internal sealed class CountryDtoBuilder
 
 internal sealed class ContinentDtoBuilder
 {
-    private ContinentDto _dto = new ContinentDto { Name = "Europe" };
+    private ContinentDto _dto = new() { Name = "Europe" };
 
-    internal static ContinentDtoBuilder Valid() => new ContinentDtoBuilder();
+    internal static ContinentDtoBuilder Valid() => new();
 
     internal ContinentDtoBuilder WithId(Continents continent) { _dto = _dto with { Id = (ulong)continent }; return this; }
     internal ContinentDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
@@ -251,9 +251,9 @@ internal sealed class ContinentDtoBuilder
 
 internal sealed class MessageDtoBuilder
 {
-    private MessageDto _dto = new MessageDto { Message = "un message" };
+    private MessageDto _dto = new() { Message = "un message" };
 
-    internal static MessageDtoBuilder Valid() => new MessageDtoBuilder();
+    internal static MessageDtoBuilder Valid() => new();
 
     internal MessageDtoBuilder WithMessage(string message) { _dto = _dto with { Message = message }; return this; }
     internal MessageDtoBuilder DisplayedFrom(DateTime? from) { _dto = _dto with { DisplayFrom = from }; return this; }

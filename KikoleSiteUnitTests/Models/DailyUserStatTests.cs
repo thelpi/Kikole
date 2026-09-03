@@ -13,7 +13,7 @@ namespace KikoleSiteUnitTests.Models;
 /// </summary>
 public class DailyUserStatTests
 {
-    private static readonly DateTime Day = new DateTime(2026, 9, 2);
+    private static readonly DateTime Day = new(2026, 9, 2);
     private const ulong Me = 7;
 
     private static LeaderDto Leader(ulong userId, ushort points, int minutes, bool sameDay = true)
@@ -132,7 +132,7 @@ public class DailyUserStatTests
 /// <summary>Agregats sur l'ensemble des journees d'un utilisateur.</summary>
 public class UserStatTests
 {
-    private static readonly DateTime Day = new DateTime(2026, 9, 2);
+    private static readonly DateTime Day = new(2026, 9, 2);
     private const ulong Me = 7;
 
     private static DailyUserStat Played(ushort points, int minutes, bool sameDay = true)

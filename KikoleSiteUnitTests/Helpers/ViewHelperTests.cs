@@ -25,8 +25,8 @@ public class ViewHelperTests
             CultureInfo.CurrentCulture = new CultureInfo(name);
         }
 
-        public static Culture French() => new Culture("fr");
-        public static Culture English() => new Culture("en");
+        public static Culture French() => new("fr");
+        public static Culture English() => new("en");
 
         public void Dispose() => CultureInfo.CurrentCulture = _previous;
     }
