@@ -20,7 +20,7 @@ namespace KikoleSite.Services
         /// <param name="userId">User idenfifier.</param>
         /// <param name="pInfo">Information about the player of the request.</param>
         /// <returns>Instance of <see cref="ProposalResponse"/>, proposals already made and leader info in case of win.</returns>
-        Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo);
+        Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo);
 
         /// <summary>
         /// Gets proposals for a specific date and user.

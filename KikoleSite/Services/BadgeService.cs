@@ -226,12 +226,14 @@ namespace KikoleSite.Services
                 }
             };
 
-        private static readonly IReadOnlyDictionary<Badges, (object, int, Func<LeaderDto, object, object>, Func<object, bool>)> LeaderRunAggBasedBadgeCondition
-            = new Dictionary<Badges, (object, int, Func<LeaderDto, object, object>, Func<object, bool>)>
+        // l'accumulateur est un cumul de points : le typer en int evite le boxing et les
+        // castes aveugles de l'ancienne version basee sur object
+        private static readonly IReadOnlyDictionary<Badges, (int, int, Func<LeaderDto, int, int>, Func<int, bool>)> LeaderRunAggBasedBadgeCondition
+            = new Dictionary<Badges, (int, int, Func<LeaderDto, int, int>, Func<int, bool>)>
             {
                 {
                     Badges.HellOfAWeek,
-                    (0, 7, (l, p) => ((int)p) + l.Points, p => (int)p >= 6666)
+                    (0, 7, (l, p) => p + l.Points, p => p >= 6666)
                 }
             };
 
@@ -607,16 +609,16 @@ namespace KikoleSite.Services
             bool creatorIncludeInRun)
         {
             return RespectLeadersRunConditionsInternal(leader, myHistory, myCreatedPlayers, runLength,
-                funcConditionOnLeader, creatorIncludeInRun, null, null, null);
+                funcConditionOnLeader, creatorIncludeInRun, 0, null, null);
         }
 
         private static bool RespectLeadersRunConditions(LeaderDto leader,
             IEnumerable<LeaderDto> myHistory,
             IEnumerable<PlayerDto> myCreatedPlayers,
-            object initialValue,
+            int initialValue,
             int runLength,
-            Func<LeaderDto, object, object> aggFunc,
-            Func<object, bool> checkFunc)
+            Func<LeaderDto, int, int> aggFunc,
+            Func<int, bool> checkFunc)
         {
             return RespectLeadersRunConditionsInternal(leader, myHistory, myCreatedPlayers, runLength,
                 null, false, initialValue, aggFunc, checkFunc);
@@ -626,11 +628,11 @@ namespace KikoleSite.Services
             IEnumerable<LeaderDto> myHistory,
             IEnumerable<PlayerDto> myCreatedPlayers,
             int runLength,
-            Func<LeaderDto, bool> funcConditionOnLeader,
+            Func<LeaderDto, bool>? funcConditionOnLeader,
             bool creatorIncludeInRun,
-            object initialValue,
-            Func<LeaderDto, object, object> aggFunc,
-            Func<object, bool> checkFunc)
+            int initialValue,
+            Func<LeaderDto, int, int>? aggFunc,
+            Func<int, bool>? checkFunc)
         {
             var agg = initialValue;
             var i = 0;
@@ -725,7 +727,7 @@ namespace KikoleSite.Services
             IReadOnlyCollection<BadgeDto> badgesDto,
             Languages language)
         {
-            string description = null;
+            string? description = null;
 
             if (language != Languages.en)
             {

@@ -9,7 +9,7 @@ namespace KikoleSite.ViewModels
 
         public ulong SelectedId { get; set; }
 
-        public PlayerSubmissionModel SelectedPlayer => Players?.SingleOrDefault(p => p.Id == SelectedId);
+        public PlayerSubmissionModel? SelectedPlayer => Players.SingleOrDefault(p => p.Id == SelectedId);
 
         public string? ErrorMessage { get; set; }
 

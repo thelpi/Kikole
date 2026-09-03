@@ -35,7 +35,7 @@ namespace KikoleSite.Services
         /// <param name="isEasy"><c>True</c> to get easy clue; otherwise normal clue.</param>
         /// <param name="language">The language.</param>
         /// <returns>Clue.</returns>
-        Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language);
+        Task<string?> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language);
 
         /// <summary>
         /// Accepts a player submission.
@@ -93,7 +93,7 @@ namespace KikoleSite.Services
         /// <param name="playerId">Player identifier.</param>
         /// <param name="languages">Languages to collect.</param>
         /// <returns>Both clues in every language.</returns>
-        Task<IReadOnlyDictionary<Languages, (string clue, string easyclue)>> GetPlayerCluesAsync(ulong playerId, IReadOnlyCollection<Languages> languages);
+        Task<IReadOnlyDictionary<Languages, (string? clue, string? easyclue)>> GetPlayerCluesAsync(ulong playerId, IReadOnlyCollection<Languages> languages);
 
         /// <summary>
         /// Checks if the special player can be displayed.

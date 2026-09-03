@@ -219,7 +219,7 @@ namespace KikoleSite.Controllers
                 .GetPlayerOfTheDayFullInfoAsync(_clock.Today.AddDays(-daysBefore))
                 .ConfigureAwait(false);
 
-            var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+            var ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
             ProposalResponse response;
             if (isGiveUp)
@@ -321,7 +321,7 @@ namespace KikoleSite.Controllers
                 .ConfigureAwait(false);
         }
 
-        private static bool IsValidInput(ProposalTypes proposalType, string value)
+        private static bool IsValidInput(ProposalTypes proposalType, string? value)
         {
             switch (proposalType)
             {
@@ -342,7 +342,7 @@ namespace KikoleSite.Controllers
         }
 
         private async Task<IActionResult> SetAndGetViewModelAsync(
-            string errorMessageForced,
+            string? errorMessageForced,
             HomeModel model)
         {
             var proposalDate = model.DateOfDay;
@@ -365,7 +365,7 @@ namespace KikoleSite.Controllers
             {
                 if (!string.IsNullOrWhiteSpace(playerCreator?.Name))
                 {
-                    model.SetFinalFormIsUserIsCreator(playerCreator.Name, playerCreator.AllowedNames);
+                    model.SetFinalFormIsUserIsCreator(playerCreator.Name, playerCreator.AllowedNames ?? []);
                 }
                 else
                 {

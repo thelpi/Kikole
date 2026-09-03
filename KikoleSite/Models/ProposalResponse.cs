@@ -85,7 +85,7 @@ namespace KikoleSite.Models
                         Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
                     Value = Successful
                         ? player.Player.CountryId
-                        : (object)sourceValue;
+                        : (object?)sourceValue;
                     RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
                         ? tmpRawCountry.ToString()
                         : RawValue;
@@ -96,7 +96,7 @@ namespace KikoleSite.Models
                         Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(sourceValue);
                     Value = Successful
                         ? player.Player.ContinentId
-                        : (object)sourceValue;
+                        : (object?)sourceValue;
                     RawValue = Enum.TryParse<Continents>(sourceValue, out var tmpRawContinent)
                         ? tmpRawContinent.ToString()
                         : RawValue;
@@ -107,7 +107,7 @@ namespace KikoleSite.Models
                         Successful = player.Player.PositionId == ulong.Parse(sourceValue);
                     Value = Successful
                         ? player.Player.PositionId
-                        : (object)sourceValue;
+                        : (object?)sourceValue;
                     RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
                         ? tmpRawPosition.ToString()
                         : RawValue;
@@ -118,7 +118,7 @@ namespace KikoleSite.Models
                         Successful = ushort.Parse(sourceValue) == player.Player.YearOfBirth;
                     Value = Successful
                         ? player.Player.YearOfBirth
-                        : (object)sourceValue;
+                        : (object?)sourceValue;
                     break;
 
                 case ProposalTypes.Leaderboard:

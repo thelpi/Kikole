@@ -54,7 +54,7 @@ namespace KikoleSite.Controllers
             // /!\ userId is not UserId
             if (userId == 0)
             {
-                var model = await InitializeModelAsync(null).ConfigureAwait(false);
+                var model = await InitializeModelAsync().ConfigureAwait(false);
                 return View(model);
             }
 
@@ -68,7 +68,7 @@ namespace KikoleSite.Controllers
 
             if (stats == null)
             {
-                var model = await InitializeModelAsync(null).ConfigureAwait(false);
+                var model = await InitializeModelAsync().ConfigureAwait(false);
                 return View(model);
             }
 
@@ -245,31 +245,29 @@ namespace KikoleSite.Controllers
             return View("UserDay", model);
         }
 
-        private async Task<LeaderboardModel> InitializeModelAsync(LeaderboardModel model)
+        /// <summary>
+        /// Modele par defaut du classement : le mois courant, trie par points cumules.
+        /// </summary>
+        private async Task<LeaderboardModel> InitializeModelAsync()
         {
-            if (model == null)
-            {
-                model = new LeaderboardModel
-                {
-                    MinimalDate = _clock.FirstOfMonth,
-                    MaximalDate = _clock.Today,
-                    SortType = LeaderSorts.TotalPoints,
-                    LeaderboardDay = _clock.Today,
-                    DaySortType = DayLeaderSorts.BestTime
-                };
-            }
-
             var (dailyBoard, foundToday) = await GetDailyboardAsync(
-                    model.LeaderboardDay, model.DaySortType, null)
+                    _clock.Today, DayLeaderSorts.BestTime, null)
                 .ConfigureAwait(false);
 
-            model.Dayboard = dailyBoard;
-
-            (model.GlobalLeaderboard, _) = await GetLeaderboardAsync(
-                    model.MinimalDate, model.MaximalDate, model.SortType, foundToday)
+            var (globalLeaderboard, _) = await GetLeaderboardAsync(
+                    _clock.FirstOfMonth, _clock.Today, LeaderSorts.TotalPoints, foundToday)
                 .ConfigureAwait(false);
 
-            return model;
+            return new LeaderboardModel
+            {
+                MinimalDate = _clock.FirstOfMonth,
+                MaximalDate = _clock.Today,
+                SortType = LeaderSorts.TotalPoints,
+                LeaderboardDay = _clock.Today,
+                DaySortType = DayLeaderSorts.BestTime,
+                Dayboard = dailyBoard,
+                GlobalLeaderboard = globalLeaderboard
+            };
         }
 
         private async Task<(IReadOnlyCollection<Models.LeaderboardItem>, DayGrantTypes)> GetLeaderboardAsync(

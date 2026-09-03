@@ -137,7 +137,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<UserStat> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName, bool requestUserFoundToday)
+        public async Task<UserStat?> GetUserStatisticsAsync(ulong userId, ulong requestUserId, string anonymizedName, bool requestUserFoundToday)
         {
             var user = await _userRepository
                 .GetUserByIdAsync(userId)
@@ -180,7 +180,7 @@ namespace KikoleSite.Services
 
                 var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
-                var isCreator = (pDay.ProposalDate.Value.Date < stopDate || pDay.HideCreator == 0)
+                var isCreator = (currentDate.Date < stopDate || pDay.HideCreator == 0)
                     && userId == pDay.CreationUserId;
 
                 var pName = pDay.Name;
@@ -214,7 +214,7 @@ namespace KikoleSite.Services
             foreach (var playerOfTheDay in players)
             {
                 var usersId = await _proposalRepository
-                    .GetMissingUsersAsLeaderAsync(playerOfTheDay.ProposalDate.Value)
+                    .GetMissingUsersAsLeaderAsync(playerOfTheDay.ProposalDate!.Value)
                     .ConfigureAwait(false);
 
                 var playerInfo = await _playerHandler
@@ -400,7 +400,7 @@ namespace KikoleSite.Services
             };
         }
 
-        private static User GetUserAtPalmaresPosition(Dictionary<ulong, (User, int, int, int)> users, List<LeaderboardItem> orderedLdItems, int i)
+        private static User? GetUserAtPalmaresPosition(Dictionary<ulong, (User, int, int, int)> users, List<LeaderboardItem> orderedLdItems, int i)
         {
             if (i >= orderedLdItems.Count)
                 return null;

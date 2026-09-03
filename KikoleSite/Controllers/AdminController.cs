@@ -411,12 +411,12 @@ namespace KikoleSite.Controllers
                 model.AlternativeName4
             };
 
-            names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
+            var allowedNames = names.OfType<string>().Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
 
             var request = new ClubRequest
             {
                 Name = model.MainName,
-                AllowedNames = names,
+                AllowedNames = allowedNames,
                 Id = model.Id
             };
 
@@ -508,7 +508,7 @@ namespace KikoleSite.Controllers
             return pls
                 .Select(p => new PlayerSubmissionModel
                 {
-                    AllowedNames = string.Join(';', p.AllowedNames),
+                    AllowedNames = string.Join(';', p.AllowedNames ?? []),
                     Clubs = p.Clubs,
                     Clue = p.Clue,
                     EasyClue = p.EasyClue,

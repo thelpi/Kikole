@@ -55,7 +55,7 @@ namespace KikoleSite.ViewModels
         public int PreviousDay => CurrentDay + 1;
         public DateTime DateOfDay => CurrentDate.AddDays(-CurrentDay);
 
-        internal string GetValueFromProposalType(ProposalTypes proposalType)
+        internal string? GetValueFromProposalType(ProposalTypes proposalType)
         {
             return proposalType switch
             {
@@ -96,11 +96,13 @@ namespace KikoleSite.ViewModels
                 case ProposalTypes.Club:
                     if (response.Successful)
                     {
-                        var clubSubmissions = KnownPlayerClubs?.ToList() ?? new List<PlayerClub>();
-                        var newClubs = response.Value as IReadOnlyCollection<PlayerClub>;
-                        clubSubmissions.AddRange(
-                            newClubs.Where(nc =>
-                                !clubSubmissions.Any(cs => cs.HistoryPosition == nc.HistoryPosition)));
+                        var clubSubmissions = KnownPlayerClubs.ToList();
+                        if (response.Value is IReadOnlyCollection<PlayerClub> newClubs)
+                        {
+                            clubSubmissions.AddRange(
+                                newClubs.Where(nc =>
+                                    !clubSubmissions.Any(cs => cs.HistoryPosition == nc.HistoryPosition)));
+                        }
                         KnownPlayerClubs = clubSubmissions.OrderBy(cs => cs.HistoryPosition).ToList();
                     }
                     else

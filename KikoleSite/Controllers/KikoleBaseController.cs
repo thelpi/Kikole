@@ -22,21 +22,30 @@ namespace KikoleSite.Controllers
         internal const string UserLoginItemData = "UserLogin";
         internal const string UserTypeItemData = "UserType";
 
-        protected ulong UserId => _httpContextAccessor.HttpContext.Items.ContainsKey(UserIdItemData)
-            ? Convert.ToUInt64(_httpContextAccessor.HttpContext.Items[UserIdItemData])
+        /// <summary>
+        /// Contexte de la requete en cours. Ces membres ne sont lus que depuis une action,
+        /// ou le contexte est toujours present : son absence est un defaut de programmation.
+        /// </summary>
+        private HttpContext HttpContextEnsured => _httpContextAccessor.HttpContext
+            ?? throw new InvalidOperationException("Aucun contexte HTTP : ce membre n'est utilisable que pendant une requete.");
+
+        protected ulong UserId => HttpContextEnsured.Items.TryGetValue(UserIdItemData, out var userId)
+            ? Convert.ToUInt64(userId)
             : 0;
 
-        protected string UserLogin => _httpContextAccessor.HttpContext.Items.ContainsKey(UserLoginItemData)
-            ? _httpContextAccessor.HttpContext.Items[UserLoginItemData]?.ToString()
+        protected string? UserLogin => HttpContextEnsured.Items.TryGetValue(UserLoginItemData, out var userLogin)
+            ? userLogin?.ToString()
             : null;
 
-        protected UserTypes UserType => _httpContextAccessor.HttpContext.Items.ContainsKey(UserTypeItemData)
-            ? Enum.Parse<UserTypes>(_httpContextAccessor.HttpContext.Items[UserTypeItemData].ToString())
+        // a defaut de type exploitable, on retombe sur le profil le moins privilegie
+        protected UserTypes UserType => HttpContextEnsured.Items.TryGetValue(UserTypeItemData, out var userType)
+                && Enum.TryParse<UserTypes>(userType?.ToString(), out var parsedUserType)
+            ? parsedUserType
             : UserTypes.StandardUser;
 
-        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _countriesCache;
-        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>> _continentsCache;
-        private static IReadOnlyCollection<Club> _clubsCache;
+        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>? _countriesCache;
+        private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>? _continentsCache;
+        private static IReadOnlyCollection<Club>? _clubsCache;
 
         private readonly IInternationalRepository _internationalRepository;
 
@@ -98,9 +107,9 @@ namespace KikoleSite.Controllers
             return Json(countries);
         }
 
-        protected string GetSubmitAction()
+        protected string? GetSubmitAction()
         {
-            var submitKeys = _httpContextAccessor.HttpContext.Request.Form.Keys.Where(x => x.StartsWith("submit-"));
+            var submitKeys = HttpContextEnsured.Request.Form.Keys.Where(x => x.StartsWith("submit-"));
 
             if (submitKeys.Count() != 1)
                 return null;

@@ -8,7 +8,7 @@ namespace KikoleSite.Controllers.Filters
     public class ErrorFilter : IExceptionFilter
     {
         private readonly IClock _clock;
-        private readonly string _logsFilePathFormat;
+        private readonly string? _logsFilePathFormat;
 
         public ErrorFilter(IConfiguration configuration,
             IClock clock)
@@ -19,7 +19,8 @@ namespace KikoleSite.Controllers.Filters
 
         public void OnException(ExceptionContext context)
         {
-            if (context.Exception != null)
+            // le chemin des logs est optionnel : absent, on se contente d'afficher l'erreur
+            if (_logsFilePathFormat != null)
             {
                 try
                 {
@@ -33,7 +34,6 @@ namespace KikoleSite.Controllers.Filters
                 }
                 catch { }
             }
-            context.Exception = null;
             context.ExceptionHandled = true;
             context.Result = new ViewResult { ViewName = "~/Views/Shared/Error.cshtml" };
         }

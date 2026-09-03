@@ -25,10 +25,10 @@ namespace KikoleSite.Models.Requests
             return ProposalType switch
             {
                 ProposalTypes.Year => ushort.Parse(Value!) > player.YearOfBirth
-                    ? resources["TipOlderPlayer"]
-                    : resources["TipYoungerPlayer"],
-                ProposalTypes.Leaderboard => resources["LeaderboardAvailable"],
-                ProposalTypes.Clue => resources["ClueAvailable"],
+                    ? resources["TipOlderPlayer"].Value
+                    : resources["TipYoungerPlayer"].Value,
+                ProposalTypes.Leaderboard => resources["LeaderboardAvailable"].Value,
+                ProposalTypes.Clue => resources["ClueAvailable"].Value,
                 _ => null,
             };
         }

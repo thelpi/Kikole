@@ -97,7 +97,7 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<string> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language)
+        public async Task<string?> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language)
         {
             var player = await _playerRepository
                 .GetPlayerOfTheDayAsync(proposalDate)
@@ -118,9 +118,9 @@ namespace KikoleSite.Services
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyDictionary<Languages, (string clue, string easyclue)>> GetPlayerCluesAsync(ulong playerId, IReadOnlyCollection<Languages> languages)
+        public async Task<IReadOnlyDictionary<Languages, (string? clue, string? easyclue)>> GetPlayerCluesAsync(ulong playerId, IReadOnlyCollection<Languages> languages)
         {
-            var clues = new Dictionary<Languages, (string clue, string easyclue)>();
+            var clues = new Dictionary<Languages, (string? clue, string? easyclue)>();
 
             if (languages.Contains(Languages.en))
             {

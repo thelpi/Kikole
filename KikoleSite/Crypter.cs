@@ -12,19 +12,31 @@ namespace KikoleSite
         private const string Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private const int GenerateWordSize = 16;
 
-        private readonly string? _cookieEncryptionKey;
-        private readonly string? _encryptionKey;
+        private readonly string _cookieEncryptionKey;
+        private readonly string _encryptionKey;
         private readonly Random _randomizer;
         private readonly SHA256 _sha256;
         private readonly Encoding _encoding;
 
         public Crypter(IConfiguration configuration)
         {
-            _encryptionKey = configuration.GetValue<string>("EncryptionKey");
+            // les deux cles sont obligatoires : sans elles le chiffrement du cookie echoue
+            // silencieusement (le catch renvoie le texte en clair) et les mots de passe sont
+            // haches sans sel. Mieux vaut refuser de demarrer.
+            _encryptionKey = GetRequiredKey(configuration, "EncryptionKey");
+            _cookieEncryptionKey = GetRequiredKey(configuration, "EncryptionCookieKey");
             _randomizer = new Random();
             _sha256 = SHA256.Create();
             _encoding = Encoding.UTF8;
-            _cookieEncryptionKey = configuration.GetValue<string>("EncryptionCookieKey");
+        }
+
+        private static string GetRequiredKey(IConfiguration configuration, string key)
+        {
+            var value = configuration.GetValue<string>(key);
+            if (string.IsNullOrEmpty(value))
+                throw new InvalidOperationException($"La cle '{key}' est absente de la configuration.");
+
+            return value;
         }
 
         public string Encrypt(string data)

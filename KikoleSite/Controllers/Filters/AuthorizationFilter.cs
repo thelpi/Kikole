@@ -43,10 +43,11 @@ namespace KikoleSite.Controllers.Filters
                 ? (UserTypes)_usersCheckCache[userId].userData.UserTypeId
                 : UserTypes.StandardUser;
 
-            if ((context.ActionDescriptor as ControllerActionDescriptor)
-                .MethodInfo
-                .GetCustomAttributes(typeof(AuthorizationAttribute), true)
-                .FirstOrDefault() is AuthorizationAttribute authorizationAttribute)
+            if (context.ActionDescriptor is ControllerActionDescriptor actionDescriptor
+                && actionDescriptor
+                    .MethodInfo
+                    .GetCustomAttributes(typeof(AuthorizationAttribute), true)
+                    .FirstOrDefault() is AuthorizationAttribute authorizationAttribute)
             {
                 if (userId == 0 || !IsTypeOfUser(userId, authorizationAttribute.MinimalUserType))
                 {
@@ -70,7 +71,7 @@ namespace KikoleSite.Controllers.Filters
             return _usersCheckCache[userId].userData.UserTypeId >= (ulong)minimalType;
         }
 
-        private async Task<ulong> ExtractUserIdFromTokenAsync(string token)
+        private async Task<ulong> ExtractUserIdFromTokenAsync(string? token)
         {
             if (string.IsNullOrWhiteSpace(token))
                 return 0;
@@ -100,7 +101,7 @@ namespace KikoleSite.Controllers.Filters
             return userId;
         }
 
-        private (string token, string login) GetAuthenticationCookie(HttpRequest request)
+        private (string? token, string? login) GetAuthenticationCookie(HttpRequest request)
         {
             var cookieValue = request.Cookies.TryGetValue(KikoleBaseController.CryptedAuthenticationCookieName, out var cookieValueTmp)
                 ? _crypter.DecryptCookie(cookieValueTmp)
