@@ -27,7 +27,7 @@ public class AdminController : KikoleBaseController
     public AdminController(IStringLocalizer<AdminController> localizer,
         IUserRepository userRepository,
         ICrypter crypter,
-        IInternationalRepository internationalRepository,
+        IInternationalService internationalService,
         IMessageRepository messageRepository,
         IClock clock,
         IPlayerService playerService,
@@ -38,7 +38,7 @@ public class AdminController : KikoleBaseController
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             crypter,
-            internationalRepository,
+            internationalService,
             clock,
             playerService,
             clubRepository,
@@ -425,7 +425,9 @@ public class AdminController : KikoleBaseController
                     .UpdateClubAsync(request.ToDto());
             }
 
-            await GetClubsAsync(true);
+            // le referentiel vient de changer : l'autocompletion doit le relire
+            _internationalService.InvalidateClubs();
+
             model = new ClubCreationModel
             {
                 InfoMessage = _localizer["ClubOk"]

@@ -57,6 +57,7 @@ builder.Services
     .AddSingleton<ILeaderService, LeaderService>()
     .AddSingleton<IProposalService, ProposalService>()
     .AddSingleton<IStatisticService, StatisticService>()
+    .AddSingleton<IInternationalService, InternationalService>()
     // helpers
     .AddSingleton<ICrypter, Crypter>()
     .AddSingleton<IClock, Clock>()

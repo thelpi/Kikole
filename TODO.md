@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **445**, projet `KikoleSiteUnitTests` |
+| Tests | **455**, projet `KikoleSiteUnitTests` |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
 ---
@@ -69,12 +69,6 @@ Identity** plutôt que de réparer la cryptographie maison.
 - [ ] **Requêtes N+1** — `PlayerHandler` fait une requête par club d'une carrière,
       `LeaderService.GetUsersFromIdsAsync` une par utilisateur, `BadgeService` une par badge
       et par jour. Sur un classement mensuel, des centaines d'aller-retours SQL.
-- [ ] **Extraire un `IInternationalService`** — `KikoleBaseController` porte trois champs
-      `static` (`_countriesCache`, `_continentsCache`, `_clubsCache`), soit de l'état
-      partagé entre toutes les requêtes dans une classe instanciée par requête.
-      `_clubsCache` est une référence **sans verrou**, contrairement aux deux autres qui
-      sont des `ConcurrentDictionary` : même famille de bug que le `SHA256` de `Crypter`.
-      *Le seul des cinq domaines sans service où le gain est immédiat.*
 - [ ] **Sortir `GetProposalResponsesWithPoints` de `ProposalService`** — méthode
       `internal static` que `LeaderService` appelle directement, seul couplage
       service → service du projet, invisible à l'analyse des dépendances injectées. C'est
@@ -186,6 +180,11 @@ les hachages de toute façon.
 - **`OneMinuteChrono` : 5 clubs minimum.** Les deux descriptions d'époque annonçaient 6 et
   le commentaire du code « more than 5 » : c'est l'implémentation qui avait raison, les
   trois ont été alignées dessus.
+- **`IInternationalService` est un singleton à cache explicite**, pas un `IMemoryCache` :
+  les référentiels sont minuscules et ne changent que par action d'administration, donc
+  l'expiration ne sert à rien et son éviction non déterministe rendrait les tests fragiles.
+  Le service reçoit la langue **en paramètre** et ne lit aucun état ambiant — c'est ce qui
+  le rend testable ; ce sont les contrôleurs qui résolvent la culture de la requête.
 
 **Code**
 - `required` plutôt que `null!` sur les DTO et les requêtes. Il n'y a plus aucun `null!`

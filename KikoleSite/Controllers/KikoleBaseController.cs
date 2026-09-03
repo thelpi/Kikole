@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Helpers;
@@ -43,23 +41,18 @@ public abstract class KikoleBaseController : Controller
         ? parsedUserType
         : UserTypes.StandardUser;
 
-    private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>? _countriesCache;
-    private static ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>? _continentsCache;
-    private static IReadOnlyCollection<Club>? _clubsCache;
-
-    private readonly IInternationalRepository _internationalRepository;
-
     protected readonly IUserRepository _userRepository;
     protected readonly ICrypter _crypter;
     protected readonly IClock _clock;
     protected readonly IPlayerService _playerService;
     protected readonly IClubRepository _clubRepository;
     protected readonly IBadgeService _badgeService;
+    protected readonly IInternationalService _internationalService;
     protected readonly IHttpContextAccessor _httpContextAccessor;
 
     protected KikoleBaseController(IUserRepository userRepository,
         ICrypter crypter,
-        IInternationalRepository internationalRepository,
+        IInternationalService internationalService,
         IClock clock,
         IPlayerService playerService,
         IClubRepository clubRepository,
@@ -68,7 +61,7 @@ public abstract class KikoleBaseController : Controller
     {
         _userRepository = userRepository;
         _crypter = crypter;
-        _internationalRepository = internationalRepository;
+        _internationalService = internationalService;
         _clock = clock;
         _playerService = playerService;
         _clubRepository = clubRepository;
@@ -134,63 +127,22 @@ public abstract class KikoleBaseController : Controller
         Response.Cookies.Delete(CryptedAuthenticationCookieName);
     }
 
-    protected async Task<IReadOnlyCollection<Club>> GetClubsAsync(bool resetCache = false)
+    // Raccourcis vers le referentiel : ils resolvent la langue depuis la culture de la
+    // requete, ce que le service ne fait pas — c'est ce qui le rend testable.
+
+    protected Task<IReadOnlyCollection<Club>> GetClubsAsync()
     {
-        if (_clubsCache == null || resetCache)
-        {
-            var clubs = await _clubRepository
-                .GetClubsAsync();
-
-            _clubsCache = clubs.Select(c => new Club(c)).OrderBy(c => c.Name).ToList();
-        }
-
-        return _clubsCache;
+        return _internationalService.GetClubsAsync();
     }
 
-    protected async Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync()
+    protected Task<IReadOnlyDictionary<ulong, string>> GetCountriesAsync()
     {
-        if (_countriesCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
-        {
-            var lng = ViewHelper.GetLanguage();
-
-            var countries = await _internationalRepository
-                .GetCountriesAsync((ulong)lng);
-
-            var apiCountries = countries.Select(c => new Country(c)).OrderBy(c => c.Name).ToList();
-
-            var dict = apiCountries.ToDictionary(ac => (ulong)ac.Code, ac => ac.Name);
-
-            _countriesCache ??= new ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>();
-            _countriesCache.AddOrUpdate(
-                CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                dict,
-                (k, v) => dict);
-        }
-
-        return _countriesCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
+        return _internationalService.GetCountriesAsync(ViewHelper.GetLanguage());
     }
 
-    protected async Task<IReadOnlyDictionary<ulong, string>> GetContinentsAsync()
+    protected Task<IReadOnlyDictionary<ulong, string>> GetContinentsAsync()
     {
-        if (_continentsCache?.ContainsKey(CultureInfo.CurrentCulture.TwoLetterISOLanguageName) != true)
-        {
-            var lng = ViewHelper.GetLanguage();
-
-            var continents = await _internationalRepository
-                .GetContinentsAsync((ulong)lng);
-
-            var apiCountries = continents.Select(c => new Continent(c)).OrderBy(c => c.Name).ToList();
-
-            var dict = apiCountries.ToDictionary(ac => (ulong)ac.Id, ac => ac.Name);
-
-            _continentsCache ??= new ConcurrentDictionary<string, IReadOnlyDictionary<ulong, string>>();
-            _continentsCache.AddOrUpdate(
-                CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                dict,
-                (k, v) => dict);
-        }
-
-        return _continentsCache[CultureInfo.CurrentCulture.TwoLetterISOLanguageName];
+        return _internationalService.GetContinentsAsync(ViewHelper.GetLanguage());
     }
 
     protected void SetAuthenticationCookie(string token, string login)

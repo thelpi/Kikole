@@ -25,7 +25,7 @@ public class LeaderboardController : KikoleBaseController
 
     public LeaderboardController(IUserRepository userRepository,
         ICrypter crypter,
-        IInternationalRepository internationalRepository,
+        IInternationalService internationalService,
         IClock clock,
         IPlayerService playerService,
         IClubRepository clubRepository,
@@ -36,7 +36,7 @@ public class LeaderboardController : KikoleBaseController
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             crypter,
-            internationalRepository,
+            internationalService,
             clock,
             playerService,
             clubRepository,

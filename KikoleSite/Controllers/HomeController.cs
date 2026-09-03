@@ -29,7 +29,7 @@ public class HomeController : KikoleBaseController
     public HomeController(IStringLocalizer<HomeController> localizer,
         IUserRepository userRepository,
         ICrypter crypter,
-        IInternationalRepository internationalRepository,
+        IInternationalService internationalService,
         IMessageRepository messageRepository,
         IClock clock,
         IPlayerService playerService,
@@ -40,7 +40,7 @@ public class HomeController : KikoleBaseController
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             crypter,
-            internationalRepository,
+            internationalService,
             clock,
             playerService,
             clubRepository,

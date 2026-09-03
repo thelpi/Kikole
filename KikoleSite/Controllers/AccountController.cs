@@ -18,7 +18,7 @@ public class AccountController : KikoleBaseController
     public AccountController(IStringLocalizer<AccountController> localizer,
         IUserRepository userRepository,
         ICrypter crypter,
-        IInternationalRepository internationalRepository,
+        IInternationalService internationalService,
         IClock clock,
         IPlayerService playerService,
         IClubRepository clubRepository,
@@ -26,7 +26,7 @@ public class AccountController : KikoleBaseController
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             crypter,
-            internationalRepository,
+            internationalService,
             clock,
             playerService,
             clubRepository,
