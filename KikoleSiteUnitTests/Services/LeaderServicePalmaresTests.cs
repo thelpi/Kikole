@@ -175,21 +175,47 @@ namespace KikoleSiteUnitTests.Services
         }
 
         [Fact]
-        public async Task TheGlobalTableCountsMedalsFromMonthsThatHaveNoOfficialPodium()
+        public async Task AMonthWithoutAFullPodiumAwardsNoMedalAtAll()
         {
-            // INCOHERENCE DOCUMENTEE : GetUserAtPalmaresPosition alimente le cumul global
-            // par effet de bord, avant que le garde-fou "les trois places sont pourvues"
-            // ne decide d'enregistrer le mois. Un mois a un seul participant ne figure donc
-            // pas au palmares mensuel, mais lui rapporte quand meme une premiere place au
-            // cumul global. Autrement dit le global n'est pas la somme des podiums.
+            // le cumul global est la somme des podiums mensuels : un mois ecarte de la
+            // liste des podiums, faute de trois joueurs classes, ne doit rien crediter
             SetupMonths(3);
             SetupContenders((1, "a", 900, 60));
 
             var palmares = await _service.GetPalmaresAsync();
 
             palmares.MonthlyPalmares.Should().BeEmpty();
-            palmares.GlobalPalmares.Should().ContainSingle()
-                .Which.first.Should().Be(3);
+            palmares.GlobalPalmares.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task AMonthWithExactlyTwoContendersAwardsNoMedalEither()
+        {
+            // la borne est bien "trois places pourvues", pas "au moins une"
+            SetupMonths(3);
+            SetupContenders((1, "a", 900, 60), (2, "b", 500, 90));
+
+            var palmares = await _service.GetPalmaresAsync();
+
+            palmares.MonthlyPalmares.Should().BeEmpty();
+            palmares.GlobalPalmares.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task TheGlobalTableIsExactlyTheSumOfTheMonthlyPodiums()
+        {
+            SetupMonths(3);
+            SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
+
+            var palmares = await _service.GetPalmaresAsync();
+
+            var golds = palmares.GlobalPalmares.Sum(g => g.first);
+            var silvers = palmares.GlobalPalmares.Sum(g => g.second);
+            var bronzes = palmares.GlobalPalmares.Sum(g => g.third);
+
+            golds.Should().Be(palmares.MonthlyPalmares.Count);
+            silvers.Should().Be(palmares.MonthlyPalmares.Count);
+            bronzes.Should().Be(palmares.MonthlyPalmares.Count);
         }
 
         [Fact]

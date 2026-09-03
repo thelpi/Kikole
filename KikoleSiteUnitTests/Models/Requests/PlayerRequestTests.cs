@@ -68,7 +68,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
-        public void IsValid_WhenNameIsBlank_IsRejected(string name)
+        public void IsValid_WhenNameIsBlank_IsRejected(string? name)
         {
             var request = Valid();
             request.Name = name;
@@ -170,7 +170,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [InlineData("   ", "easy")]
         [InlineData("clue", null)]
         [InlineData("clue", "   ")]
-        public void IsValid_WhenAnEnglishClueIsMissing_IsRejected(string clue, string easyClue)
+        public void IsValid_WhenAnEnglishClueIsMissing_IsRejected(string? clue, string? easyClue)
         {
             var request = Valid();
             request.ClueEn = clue;

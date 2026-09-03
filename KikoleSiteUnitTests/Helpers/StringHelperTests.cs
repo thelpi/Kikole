@@ -216,7 +216,7 @@ namespace KikoleSiteUnitTests.Helpers
         [InlineData("99", false)]
         [InlineData("Sweeper", false)]
         [InlineData(null, false)]
-        public void IsEnumValue_ValidatesNameOrNumericValue(string value, bool expected)
+        public void IsEnumValue_ValidatesNameOrNumericValue(string? value, bool expected)
         {
             value.IsEnumValue<Positions>().Should().Be(expected);
         }

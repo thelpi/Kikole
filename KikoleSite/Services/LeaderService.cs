@@ -18,6 +18,8 @@ namespace KikoleSite.Services
     /// <seealso cref="ILeaderService"/>
     public class LeaderService : ILeaderService
     {
+        private const int PodiumSize = 3;
+
         private readonly IPlayerRepository _playerRepository;
         private readonly ILeaderRepository _leaderRepository;
         private readonly IUserRepository _userRepository;
@@ -373,16 +375,16 @@ namespace KikoleSite.Services
                     .ThenBy(x => x.BestTime)
                     .ToList();
 
-                var firstUser = GetUserAtPalmaresPosition(users, orderedLdItems, 0);
-                var secondUser = GetUserAtPalmaresPosition(users, orderedLdItems, 1);
-                var thirdUser = GetUserAtPalmaresPosition(users, orderedLdItems, 2);
-
-                if (firstUser != null && secondUser != null && thirdUser != null)
+                // les medailles ne sont distribuees qu'une fois le podium complet : sinon
+                // un mois comptant moins de trois joueurs classes serait ecarte de la liste
+                // des podiums mensuels tout en creditant le cumul global, et les deux
+                // tableaux de la page Palmares afficheraient des totaux incoherents
+                if (orderedLdItems.Count >= PodiumSize)
                 {
                     months.Add((date.Month, date.Year), (
-                        firstUser,
-                        secondUser,
-                        thirdUser));
+                        CreditPalmaresPosition(users, orderedLdItems[0], 0),
+                        CreditPalmaresPosition(users, orderedLdItems[1], 1),
+                        CreditPalmaresPosition(users, orderedLdItems[2], 2)));
                 }
 
                 date = nextMonth;
@@ -400,31 +402,32 @@ namespace KikoleSite.Services
             };
         }
 
-        private static User? GetUserAtPalmaresPosition(Dictionary<ulong, (User, int, int, int)> users, List<LeaderboardItem> orderedLdItems, int i)
+        /// <summary>
+        /// Credite au cumul global la medaille correspondant a la position occupee
+        /// (0 = or, 1 = argent, 2 = bronze), en creant l'utilisateur s'il est inconnu.
+        /// N'est appelee que sur un podium complet.
+        /// </summary>
+        private static User CreditPalmaresPosition(
+            Dictionary<ulong, (User, int, int, int)> users, LeaderboardItem item, int position)
         {
-            if (i >= orderedLdItems.Count)
-                return null;
+            var golds = position == 0 ? 1 : 0;
+            var silvers = position == 1 ? 1 : 0;
+            var bronzes = position == 2 ? 1 : 0;
 
-            var adds = (i == 0 ? 1 : 0, i == 1 ? 1 : 0, i == 2 ? 1 : 0);
-
-            var item = orderedLdItems[i];
-            User user;
-            if (!users.ContainsKey(item.UserId))
+            if (!users.TryGetValue(item.UserId, out var known))
             {
-                user = new User(item.UserId, item.UserName);
-                users.Add(item.UserId, (user, adds.Item1, adds.Item2, adds.Item3));
-            }
-            else
-            {
-                user = users[item.UserId].Item1;
-                users[item.UserId] = (
-                    user,
-                    users[item.UserId].Item2 + adds.Item1,
-                    users[item.UserId].Item3 + adds.Item2,
-                    users[item.UserId].Item4 + adds.Item3);
+                var newUser = new User(item.UserId, item.UserName);
+                users.Add(item.UserId, (newUser, golds, silvers, bronzes));
+                return newUser;
             }
 
-            return user;
+            users[item.UserId] = (
+                known.Item1,
+                known.Item2 + golds,
+                known.Item3 + silvers,
+                known.Item4 + bronzes);
+
+            return known.Item1;
         }
 
         private async Task<List<UserDto>> GetUsersFromIdsAsync(IEnumerable<ulong> allUsersId)

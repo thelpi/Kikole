@@ -34,7 +34,7 @@ namespace KikoleSiteUnitTests.Models.Requests
         [Theory]
         [InlineData(null)]
         [InlineData("  ")]
-        public void IsValid_WhenNameIsBlank_IsRejected(string name)
+        public void IsValid_WhenNameIsBlank_IsRejected(string? name)
         {
             var request = Valid();
             request.Name = name;
