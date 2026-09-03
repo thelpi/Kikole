@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **490** unitaires (mockés, rapides) + **2** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **490** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -95,9 +95,9 @@ Branche de travail : `remaster-v2`.
       `ProposalChart` dans `Models/ScoreCalculator.cs` (voir « Partis pris »). Au passage,
       `ProposalResponse` expose maintenant `PointsLost` (la perte réelle, plafonnée),
       supprimant un recalcul redondant qui vivait dans `LeaderboardController.UserDay`.
-- [ ] **De la logique métier vit dans les dépôts, hors de portée des tests.** Six règles
-      fonctionnelles sont encodées dans la couche d'accès aux données, **invisibles pour les
-      490 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
+- [x] ~~De la logique métier vit dans les dépôts, hors de portée des tests.~~ Six règles
+      fonctionnelles étaient encodées dans la couche d'accès aux données, **invisibles pour
+      les 490 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
       passe les bons paramètres, jamais ce que le SQL en fait.
 
       **(a) Infra de tests d'intégration en place** — `KikoleSiteUnitTests/Integration/`,
@@ -121,15 +121,37 @@ Branche de travail : `remaster-v2`.
         `BaseRepository.SubSqlOnTime(bool)`, caractérisée par
         `OnTimeRuleIntegrationTests` (trouvé à temps vs en rattrapage) avant le
         regroupement, verte après.
-      - `ProposalRepository.GetMissingUsersAsLeaderAsync` encode la définition d'un
-        classement incomplet.
-      - `PlayerRepository.GetPlayersByCreatorAsync` encode l'état d'une soumission via un
-        paramètre `@type` 0/1/2.
-      - `BadgeRepository.GetUsersOfTheDayWithBadgeAsync` charge tous les détenteurs d'un
-        badge puis filtre en C# sur une journée (logique dans le dépôt + N+1).
+      - [x] ~~`ProposalRepository.GetMissingUsersAsLeaderAsync` encode la définition d'un
+        classement incomplet~~ — caractérisée par `MissingLeadersRuleIntegrationTests` (trouvé
+        avec ligne `leaders`, trouvé sans, jamais trouvé). **Pas de (b) ici** : un seul site
+        d'appel (`LeaderService.ComputeMissingLeadersAsync`, réparation admin), rien à
+        dédupliquer — c'est un anti-join, plus à sa place en SQL qu'en C# (comparer deux
+        tables en mémoire coûterait plus cher). Le test sert de filet direct : une règle
+        fausse ferait manquer des réparations en silence, pas seulement un test rouge.
+      - [x] ~~`PlayerRepository.GetPlayersByCreatorAsync` encode l'état d'une soumission via
+        un paramètre `@type` 0/1/2~~ — caractérisée par
+        `PlayersByCreatorRuleIntegrationTests` (en attente / accepté / rejeté, et un autre
+        créateur jamais mélangé). Règle correcte, mais un premier jet du test s'est trompé :
+        `CreatePlayerAsync` n'écrit pas `reject_date` à la création, un rejet passe toujours
+        par `RefusePlayerProposalAsync` après coup — révélé par le test qui échouait, pas
+        deviné. Constat en passant : seul `accepted: true` est appelé en production
+        aujourd'hui (badges, page « mes soumissions ») ; `false`/`null` faisaient partie de
+        l'interface sans filet avant ce test. **Pas de (b)** : un seul site de requête, rien
+        à dédupliquer.
+      - [x] ~~`BadgeRepository.GetUsersOfTheDayWithBadgeAsync` charge tous les détenteurs
+        d'un badge puis filtre en C# sur une journée (logique dans le dépôt + N+1)~~ —
+        caractérisée par `UsersOfTheDayWithBadgeIntegrationTests` (deux détenteurs, deux
+        jours différents, seul celui du jour demandé remonte), verte avant **et** après le
+        passage du filtre `get_date = @date` en SQL. Contrairement à
+        `BadgeService.ResetBadgesAsync` (laissé tel quel, purement administratif), celle-ci
+        est sur le chemin chaud — appelée à chaque soumission gagnante depuis
+        `HomeController` — donc corrigée, pas seulement testée.
 
-      **(b)** remonter les règles dans le domaine, une fois chacune caractérisée par (a) pour
-      servir de filet — à faire une règle à la fois, pas en bloc.
+      Les six règles sont maintenant caractérisées ou n'avaient plus lieu d'être (la
+      première, réglée par la restriction des statistiques à l'administrateur). Trois
+      centralisations effectives (`SubSqlValidUsers`, `SubSqlOnTime`, le filtre `get_date`
+      de cette dernière) ; deux règles laissées en l'état, single-site et déjà en SQL, avec
+      leur filet propre.
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à

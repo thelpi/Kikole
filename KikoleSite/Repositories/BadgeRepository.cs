@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -35,9 +34,12 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
 
     public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateTime date)
     {
-        var userBadges = await GetUsersWithBadgeAsync(badgeId);
-
-        return userBadges.Where(_ => _.GetDate == date.Date).ToList();
+        return await ExecuteReaderAsync<UserBadgeDto>(
+                "SELECT * FROM user_badges " +
+                "WHERE badge_id = @badgeId " +
+                "AND get_date = @date " +
+                $"AND user_id IN ({SubSqlValidUsers})",
+                new { badgeId, date = date.Date });
     }
 
     public async Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId)
