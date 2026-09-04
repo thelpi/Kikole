@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **557** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **577** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -248,7 +248,7 @@ Branche de travail : `remaster-v2`.
       (`AccountController`, le reste d'`AdminController`, `HomeController`,
       `LeaderboardController`) — plus coûteux, demanderait de mocker systématiquement
       `HttpContext`/`ClaimsPrincipal` par action plutôt que sur des méthodes isolées.
-- [ ] **Audit des calculs de badges (`BadgeService`)** — trous identifiés en relisant
+- [x] ~~Audit des calculs de badges (`BadgeService`)~~ — trous identifiés en relisant
       `BadgeService.cs` ligne par ligne : `LeaderBasedBadgeCondition` (badges liés au score/
       horaire du jour) et la plupart des `ProposalsBasedBadgeCondition` étaient déjà couverts,
       mais pas le reste. **Premier lot comblé** (23 nouveaux tests, tous dans
@@ -269,13 +269,26 @@ Branche de travail : `remaster-v2`.
       - `AddBadgeToUserAsync`, `GetAllBadgesAsync` (tri par nombre d'utilisateurs, et la
         branche description traduite/repli jamais exercée jusqu'ici — tous les tests
         existants appelaient le service en `Languages.en`).
-      **Reste volontairement hors de ce lot, plus complexe** : les badges "en série"
-      (`ThreeInARow`, `AWeekInARow`, `LegendTier`, `MakeItDouble`, `TheBreakfastClub`,
-      `MetroBoulotKikoleDodo`, `HellOfAWeek`, tous portés par
-      `RespectLeadersRunConditionsInternal` — boucle multi-jours avec gestion du créateur et
-      agrégation, l'algorithme le plus touffu de la classe) et `OverTheTopPart1`/`Part2`
-      (unicité du meilleur temps/score du jour, y compris la réattribution du badge quand
-      l'unicité est reprise par quelqu'un d'autre).
+      **Second lot comblé** (20 nouveaux tests) :
+      - `OverTheTopPart1`/`Part2` (unicité du meilleur temps/score du jour) — cas solo,
+        égalité (personne ne l'obtient, l'ancien détenteur du jour se le fait retirer),
+        battu par plus rapide (aucun appel de vérification de réattribution, court-circuit),
+        et dépassement strict (réattribution effective, `RemoveUserBadgeAsync` puis
+        `InsertUserBadgeAsync`).
+      - Les 7 badges "en série" (`ThreeInARow`, `AWeekInARow`, `LegendTier`, `MakeItDouble`,
+        `TheBreakfastClub`, `MetroBoulotKikoleDodo`, `HellOfAWeek`), tous portés par
+        `RespectLeadersRunConditionsInternal` — nouvel helper `RunStreak`/`ConsecutiveWins`
+        pour simuler une série de gains consécutifs se terminant par un jour de gain décalé
+        (`WinDay`, +40 jours après `FirstDate`, pour laisser la place à la série de 30 jours
+        de `LegendTier`). Comportement notable capturé par un test dédié
+        (`ADayWhereThePlayerWasCreatedInsteadOfFoundDoesNotBreakTheStreak`) : un jour où
+        l'utilisateur a **créé** le kikolé plutôt que de le trouver est ignoré par
+        l'algorithme (ni requis, ni ne casse la série) — différent d'un jour sans aucune
+        activité, qui l'interrompt net. `HellOfAWeek` a en plus un test où la série n'est
+        pas cassée mais le cumul de points est insuffisant (7 gains consécutifs, total sous
+        le seuil).
+      Couverture de `BadgeService` désormais complète sur les deux lots identifiés à
+      l'audit initial.
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à

@@ -18,6 +18,14 @@ namespace KikoleSiteUnitTests.Services;
 public class BadgeServiceTests
 {
     private static readonly DateTime Day = TestCalendar.FirstDate;
+
+    /// <summary>
+    /// Jour de gain utilise par les badges "en serie" (bases sur une fenetre glissante de
+    /// plusieurs jours consecutifs) : suffisamment apres <see cref="TestCalendar.FirstDate"/>
+    /// pour laisser de la place a une serie de 30 jours (LegendTier, la plus longue).
+    /// </summary>
+    private static readonly DateTime WinDay = TestCalendar.FirstDate.AddDays(40);
+
     private const ulong UserId = 7;
 
     private readonly Mock<IPlayerHandler> _playerHandler = new();
@@ -731,6 +739,273 @@ public class BadgeServiceTests
         var result = await _service.GetAllBadgesAsync(Languages.fr);
 
         result.Should().ContainSingle().Which.Description.Should().Be("English description");
+    }
+
+    // ------------------------------------------------------------- OverTheTopPart1 / Part2 (unicite du jour)
+
+    [Fact]
+    public async Task SoloLeaderOfTheDayGrantsBothOverTheTopBadges()
+    {
+        await Run(Leader(1000, 60), Player());
+
+        ShouldHaveGranted(Badges.OverTheTopPart1, Badges.OverTheTopPart2);
+    }
+
+    [Fact]
+    public async Task TiedFastestTimeGrantsNobodyAndStripsThePreviousHolder()
+    {
+        var leader = Leader(900, 60);
+        var other = LeaderDtoBuilder.Valid().WithUserId(999).WithPoints(800).OnTheDay(Day, 60).Build(); // meme temps
+
+        SetupPlayerFull(Player());
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, It.IsAny<bool>()))
+            .ReturnsAsync(new List<LeaderDto> { leader, other });
+        _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, Day))
+            .ReturnsAsync(new List<UserBadgeDto> { new() { UserId = 999, BadgeId = (ulong)Badges.OverTheTopPart1, GetDate = Day } });
+
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+
+        ShouldNotHaveGranted(Badges.OverTheTopPart1);
+        _badgeRepository.Verify(
+            _ => _.RemoveUserBadgeAsync(It.Is<UserBadgeDto>(b => b.UserId == 999 && b.BadgeId == (ulong)Badges.OverTheTopPart1)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task BeingSlowerThanTheDaysBestNeverTriggersTheReassignmentCheck()
+    {
+        var leader = Leader(900, 120); // plus lent que "other"
+        var other = LeaderDtoBuilder.Valid().WithUserId(999).WithPoints(800).OnTheDay(Day, 60).Build();
+
+        SetupPlayerFull(Player());
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, It.IsAny<bool>()))
+            .ReturnsAsync(new List<LeaderDto> { leader, other });
+
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+
+        ShouldNotHaveGranted(Badges.OverTheTopPart1);
+        _badgeRepository.Verify(
+            _ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, It.IsAny<DateTime>()),
+            Times.Never,
+            "pas la peine de verifier une reattribution si on n'est meme pas parmi les meilleurs");
+    }
+
+    [Fact]
+    public async Task StrictlyBeatingTheDaysBestReassignsTheBadge()
+    {
+        var leader = Leader(1000, 30); // strictement le plus rapide
+        var other = LeaderDtoBuilder.Valid().WithUserId(999).WithPoints(800).OnTheDay(Day, 60).Build();
+
+        SetupPlayerFull(Player());
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, It.IsAny<bool>()))
+            .ReturnsAsync(new List<LeaderDto> { leader, other });
+        _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, Day))
+            .ReturnsAsync(new List<UserBadgeDto> { new() { UserId = 999, BadgeId = (ulong)Badges.OverTheTopPart1, GetDate = Day } });
+
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+
+        ShouldHaveGranted(Badges.OverTheTopPart1);
+        _badgeRepository.Verify(
+            _ => _.RemoveUserBadgeAsync(It.Is<UserBadgeDto>(b => b.UserId == 999)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task HighestPointsGrantsOverTheTopPart2()
+    {
+        var leader = Leader(1000, 60);
+        var other = LeaderDtoBuilder.Valid().WithUserId(999).WithPoints(500).OnTheDay(Day, 90).Build();
+
+        SetupPlayerFull(Player());
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, It.IsAny<bool>()))
+            .ReturnsAsync(new List<LeaderDto> { leader, other });
+
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+
+        ShouldHaveGranted(Badges.OverTheTopPart2);
+    }
+
+    // ------------------------------------------------------------- badges "en serie" (RespectLeadersRunConditionsInternal)
+
+    /// <summary>
+    /// Simule une serie de gains se terminant par le gain du jour (<see cref="WinDay"/>,
+    /// premier element de <paramref name="days"/>). <paramref name="createdInsteadOfWonDays"/>
+    /// simule des jours ou l'utilisateur a plutot cree le joueur du jour au lieu de le
+    /// trouver : ignores par l'algorithme (ni requis, ni casse la serie), contrairement a
+    /// un jour sans aucune activite qui, lui, l'interrompt.
+    /// </summary>
+    private async Task RunStreak(IReadOnlyList<LeaderDto> days, IReadOnlyList<DateTime>? createdInsteadOfWonDays = null)
+    {
+        var todayLeader = days[0];
+        var player = Player() with { PublicationDate = todayLeader.ProposalDate };
+        SetupPlayerFull(player);
+
+        foreach (var l in days)
+        {
+            _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(l.ProposalDate, It.IsAny<bool>()))
+                .ReturnsAsync(new List<LeaderDto> { l });
+        }
+
+        var createdPlayers = (createdInsteadOfWonDays ?? [])
+            .Select(d => Player() with { CreationUserId = UserId, PublicationDate = d })
+            .ToList();
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+            .ReturnsAsync(createdPlayers);
+
+        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en);
+    }
+
+    /// <summary>
+    /// <paramref name="daysAgo"/> jours consecutifs se terminant par <see cref="WinDay"/>
+    /// (0 = aujourd'hui), moins ceux listes dans <paramref name="skip"/> (pour simuler un
+    /// trou dans la serie, ou un jour couvert autrement, ex. par une creation).
+    /// </summary>
+    private static List<LeaderDto> ConsecutiveWins(int daysAgo, int minutes = 60, ushort points = 1000, IReadOnlyList<int>? skip = null)
+    {
+        var skipped = skip ?? [];
+        var days = new List<LeaderDto>();
+        for (var i = 0; i < daysAgo; i++)
+        {
+            if (skipped.Contains(i))
+                continue;
+            days.Add(LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(points).OnTheDay(WinDay.AddDays(-i), minutes).Build());
+        }
+        return days;
+    }
+
+    [Fact]
+    public async Task ThreeConsecutiveWinsGrantThreeInARow()
+    {
+        await RunStreak(ConsecutiveWins(3));
+
+        ShouldHaveGranted(Badges.ThreeInARow);
+    }
+
+    [Fact]
+    public async Task AGapInTheSeriesBreaksThreeInARow()
+    {
+        // jour -1 manquant (ni gain, ni creation) : la serie s'arrete net a i=1
+        await RunStreak(ConsecutiveWins(3, skip: [1]));
+
+        ShouldNotHaveGranted(Badges.ThreeInARow);
+    }
+
+    [Fact]
+    public async Task ADayWhereThePlayerWasCreatedInsteadOfFoundDoesNotBreakTheStreak()
+    {
+        // jour -1 : le joueur a cree le kikole plutot que de le trouver -> ignore, la
+        // serie continue avec les jours -2 et -3 pour atteindre 3
+        var days = ConsecutiveWins(4, skip: [1]);
+
+        await RunStreak(days, createdInsteadOfWonDays: [WinDay.AddDays(-1)]);
+
+        ShouldHaveGranted(Badges.ThreeInARow);
+    }
+
+    [Fact]
+    public async Task SevenConsecutiveWinsGrantAWeekInARow()
+    {
+        await RunStreak(ConsecutiveWins(7));
+
+        ShouldHaveGranted(Badges.AWeekInARow);
+    }
+
+    [Fact]
+    public async Task OnlySixConsecutiveWinsDoesNotGrantAWeekInARow()
+    {
+        await RunStreak(ConsecutiveWins(6));
+
+        ShouldNotHaveGranted(Badges.AWeekInARow);
+    }
+
+    [Fact]
+    public async Task ThirtyConsecutiveWinsGrantLegendTier()
+    {
+        await RunStreak(ConsecutiveWins(30));
+
+        ShouldHaveGranted(Badges.LegendTier);
+    }
+
+    [Fact]
+    public async Task OnlyTwentyNineConsecutiveWinsDoesNotGrantLegendTier()
+    {
+        await RunStreak(ConsecutiveWins(29));
+
+        ShouldNotHaveGranted(Badges.LegendTier);
+    }
+
+    [Fact]
+    public async Task ThousandPointsTwiceInARowGrantsMakeItDouble()
+    {
+        await RunStreak(ConsecutiveWins(2, points: 1000));
+
+        ShouldHaveGranted(Badges.MakeItDouble);
+    }
+
+    [Fact]
+    public async Task LessThanThousandPointsOnTheSecondDayBreaksMakeItDouble()
+    {
+        var days = ConsecutiveWins(2, points: 1000);
+        days[1] = days[1] with { Points = 500 };
+
+        await RunStreak(days);
+
+        ShouldNotHaveGranted(Badges.MakeItDouble);
+    }
+
+    [Fact]
+    public async Task SevenDaysBeforeNineAmGrantsTheBreakfastClub()
+    {
+        await RunStreak(ConsecutiveWins(7, minutes: 100)); // avant 9h (540)
+
+        ShouldHaveGranted(Badges.TheBreakfastClub);
+    }
+
+    [Fact]
+    public async Task OneDayAfterNineAmBreaksTheBreakfastClub()
+    {
+        var days = ConsecutiveWins(7, minutes: 100);
+        days[3] = days[3] with { Time = 600 }; // 10h, casse la serie
+
+        await RunStreak(days);
+
+        ShouldNotHaveGranted(Badges.TheBreakfastClub);
+    }
+
+    [Fact]
+    public async Task SevenDaysAfterNinePmGrantsMetroBoulotKikoleDodo()
+    {
+        await RunStreak(ConsecutiveWins(7, minutes: 1300)); // apres 21h (1260)
+
+        ShouldHaveGranted(Badges.MetroBoulotKikoleDodo);
+    }
+
+    [Fact]
+    public async Task OneDayBeforeNinePmBreaksMetroBoulotKikoleDodo()
+    {
+        var days = ConsecutiveWins(7, minutes: 1300);
+        days[3] = days[3] with { Time = 1000 }; // avant 21h, casse la serie
+
+        await RunStreak(days);
+
+        ShouldNotHaveGranted(Badges.MetroBoulotKikoleDodo);
+    }
+
+    [Fact]
+    public async Task SevenDaysTotalingAtLeast6666PointsGrantsHellOfAWeek()
+    {
+        await RunStreak(ConsecutiveWins(7, points: 1000)); // 7000 au total
+
+        ShouldHaveGranted(Badges.HellOfAWeek);
+    }
+
+    [Fact]
+    public async Task SevenDaysWithATooLowTotalDoesNotGrantHellOfAWeek()
+    {
+        // la serie n'est pas cassee (7 gains consecutifs), mais le cumul est insuffisant
+        await RunStreak(ConsecutiveWins(7, points: 500)); // 3500 au total
+
+        ShouldNotHaveGranted(Badges.HellOfAWeek);
     }
 
     // ------------------------------------------------------------- ResetBadgesAsync
