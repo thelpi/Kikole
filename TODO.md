@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **493** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **528** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -226,6 +226,20 @@ Branche de travail : `remaster-v2`.
       centralisations effectives (`SubSqlValidUsers`, `SubSqlOnTime`, le filtre `get_date`
       de cette dernière) ; deux règles laissées en l'état, single-site et déjà en SQL, avec
       leur filet propre.
+- [x] ~~Audit des zones non couvertes par les tests unitaires~~ — comblé : `StatisticService`
+      (seul service du projet sans test, anonymisation/tri/moyennes),
+      `KikoleBaseController` (`UserId`/`UserType`/`GetSubmitAction`, premier contrôleur
+      testé du projet, via une sous-classe de test minimale), et les deux helpers privés
+      d'`AdminController` (`SplitAlternativeNames`, `AddClubIfValid`, passés en `internal`
+      pour les exposer, même motif que `ProposalRequest.GetTip`). **Correction en cours de
+      route** : `ScoreCalculator.GetProposalResponsesWithPoints`, initialement identifié
+      comme un trou, s'est révélé déjà entièrement couvert (`ProposalServiceTests.cs`, dont
+      le commentaire de classe le précise) — juste rangé sous un nom de fichier trompeur.
+      Reste volontairement hors périmètre (repos délibéré, pas repris ici) : les
+      dépôts (décision déjà actée plus haut) et le reste des contrôleurs
+      (`AccountController`, le reste d'`AdminController`, `HomeController`,
+      `LeaderboardController`) — plus coûteux, demanderait de mocker systématiquement
+      `HttpContext`/`ClaimsPrincipal` par action plutôt que sur des méthodes isolées.
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à
