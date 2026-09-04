@@ -157,7 +157,7 @@
     <value>Vous êtes connecté en tant que</value>
   </data>
   <data name="NationalityTitle" xml:space="preserve">
-    <value>Nationalité :</value>
+    <value>Nationalité sportive :</value>
   </data>
   <data name="NextDay" xml:space="preserve">
     <value>Jour suivant</value>
@@ -185,6 +185,9 @@
   </data>
   <data name="TipAboutNationality" xml:space="preserve">
     <value>voir les &lt;a href="#country-rules"&gt;règles&lt;/a&gt;</value>
+  </data>
+  <data name="TipAboutPosition" xml:space="preserve">
+    <value>le joueur peut avoir deux positions, une seule est requise</value>
   </data>
   <data name="TypePlayerName" xml:space="preserve">
     <value>Saisissez le nom du joueur ici :</value>
@@ -238,7 +241,7 @@
     <value>Clubs :</value>
   </data>
   <data name="FinalNationality" xml:space="preserve">
-    <value>Nationalité :</value>
+    <value>Nationalité sportive :</value>
   </data>
   <data name="FinalPosition" xml:space="preserve">
     <value>Position :</value>

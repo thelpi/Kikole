@@ -121,17 +121,12 @@ public class ProposalResponse
                 break;
 
             case ProposalTypes.Country:
-                if (!success.HasValue)
-                {
-                    var guessedCountryId = (ulong)Enum.Parse<Countries>(Guessed());
-                    Successful = player.Player.CountryId == guessedCountryId
-                        || player.Player.AlternativeCountryId == guessedCountryId;
-                }
+                ulong? guessedCountryId = success.HasValue ? null : (ulong)Enum.Parse<Countries>(Guessed());
+                (Successful, AlternativeCountryId) = ResolveMainOrAlternative(
+                    player.Player.CountryId, player.Player.AlternativeCountryId, success, guessedCountryId);
                 Value = Successful
                     ? player.Player.CountryId
                     : sourceValue;
-                if (Successful)
-                    AlternativeCountryId = player.Player.AlternativeCountryId;
                 RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
                     ? tmpRawCountry.ToString()
                     : RawValue;
@@ -159,17 +154,12 @@ public class ProposalResponse
                 break;
 
             case ProposalTypes.Position:
-                if (!success.HasValue)
-                {
-                    var guessedPositionId = ulong.Parse(Guessed());
-                    Successful = player.Player.PositionId == guessedPositionId
-                        || player.Player.AlternativePositionId == guessedPositionId;
-                }
+                ulong? guessedPositionId = success.HasValue ? null : ulong.Parse(Guessed());
+                (Successful, AlternativePositionId) = ResolveMainOrAlternative(
+                    player.Player.PositionId, player.Player.AlternativePositionId, success, guessedPositionId);
                 Value = Successful
                     ? player.Player.PositionId
                     : sourceValue;
-                if (Successful)
-                    AlternativePositionId = player.Player.AlternativePositionId;
                 RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
                     ? tmpRawPosition.ToString()
                     : RawValue;
@@ -218,6 +208,20 @@ public class ProposalResponse
                 : resources["TipYoungerPlayerShort"];
         }
         Date = dto.CreationDate;
+    }
+
+    /// <summary>
+    /// Logique commune aux propositions <see cref="ProposalTypes.Country"/> et
+    /// <see cref="ProposalTypes.Position"/> : reussie si la valeur devinee correspond au
+    /// principal ou a l'alternatif, auquel cas l'alternatif est expose pour l'affichage.
+    /// <paramref name="guessedId"/> est nul quand <paramref name="successOverride"/> est
+    /// deja connu (rejeu d'une proposition persistee), auquel cas il n'est pas utilise.
+    /// </summary>
+    private static (bool successful, ulong? exposedAlternativeId) ResolveMainOrAlternative(
+        ulong mainId, ulong? alternativeId, bool? successOverride, ulong? guessedId)
+    {
+        var successful = successOverride ?? (mainId == guessedId || alternativeId == guessedId);
+        return (successful, successful ? alternativeId : null);
     }
 
     internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)

@@ -453,6 +453,20 @@ les hachages de toute façon.
   diffère du poste principal, et le badge `FourFourtwo` (`BadgeService`) continue de ne
   compter que `PositionId` — même précédent que le badge `AroundTheWorld`, qui ne compte
   que `CountryId` sans l'alternative.
+
+  **Après coup** : les cas `Country` et `Position` du `switch` de `ProposalResponse`
+  étant devenus rigoureusement identiques dans leur forme (deviner, comparer au principal
+  ou à l'alternatif, exposer l'alternatif si trouvé), factorisés dans une méthode privée
+  partagée `ResolveMainOrAlternative`. `Continent` n'y participe pas : sa valeur est
+  dérivée du pays (pas stockée) et porte en plus une déduplication quand principal et
+  alternatif tombent sur le même continent — assez différent pour que le forcer dans la
+  même abstraction nuise plus qu'il n'aide.
+
+  Deux libellés ajustés à la marge dans la foulée : "Nationalité :" devient "Nationalité
+  sportive :" (`NationalityTitle`/`FinalNationality`, cohérent avec le vocabulaire déjà
+  posé par `AboutCountryDetails`), et une mention "(le joueur peut avoir deux positions,
+  une seule est requise)" apparaît sous le menu déroulant Position en jeu
+  (`TipAboutPosition`, même motif que `TipAboutNationality`).
 - Barème de soumission à 1 000 points forfaitaires. L'ancien barème dégressif avait été
   abandonné en novembre 2022 ; sa branche morte a été supprimée.
 - Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est

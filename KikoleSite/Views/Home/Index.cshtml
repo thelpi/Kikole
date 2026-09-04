@@ -341,6 +341,7 @@
                             <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
                             <span>(-<span class="redtext">@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Position].points</span> @localizer["PointsIfIncorrect"])</span>
                         </div>
+                        <div style="font-size: small">(@localizer["TipAboutPosition"])</div>
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
                             <div class="mediumTopMargin">
