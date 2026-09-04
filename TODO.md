@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **534** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **557** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -248,6 +248,34 @@ Branche de travail : `remaster-v2`.
       (`AccountController`, le reste d'`AdminController`, `HomeController`,
       `LeaderboardController`) — plus coûteux, demanderait de mocker systématiquement
       `HttpContext`/`ClaimsPrincipal` par action plutôt que sur des méthodes isolées.
+- [ ] **Audit des calculs de badges (`BadgeService`)** — trous identifiés en relisant
+      `BadgeService.cs` ligne par ligne : `LeaderBasedBadgeCondition` (badges liés au score/
+      horaire du jour) et la plupart des `ProposalsBasedBadgeCondition` étaient déjà couverts,
+      mais pas le reste. **Premier lot comblé** (23 nouveaux tests, tous dans
+      `BadgeServiceTests.cs`) :
+      - `PlayersHistoryBasedBadgeCondition` (`FourFourtwo`, `AroundTheWorld`) — nécessitait un
+        nouvel helper `RunWithPastFinds` pour simuler un historique multi-jours (le jour du
+        gain doit être décalé après `FirstDate` pour laisser de la place à un passé, sinon la
+        fenêtre `[FirstDate, gain]` ne contient que le jour même).
+      - `OneMinuteChrono` (la condition la plus longue du fichier) — 5 tests couvrant le cas
+        nominal et les rejets (trop lent, catégorie manquante, indice demandé, moins de clubs
+        proposés que la carrière n'en compte).
+      - `PrepareNonLeaderBadgesAsync` (badge `Dedicated`, streak de 30 jours) — y compris le
+        cas où un jour de la série est couvert par la création d'un joueur publié plutôt
+        qu'une proposition.
+      - `GetUserBadgesAsync` — la règle de visibilité des badges cachés obtenus le jour même
+        (soi-même ou administrateur voient, un autre utilisateur standard non) et le filtre
+        `foundToday`.
+      - `AddBadgeToUserAsync`, `GetAllBadgesAsync` (tri par nombre d'utilisateurs, et la
+        branche description traduite/repli jamais exercée jusqu'ici — tous les tests
+        existants appelaient le service en `Languages.en`).
+      **Reste volontairement hors de ce lot, plus complexe** : les badges "en série"
+      (`ThreeInARow`, `AWeekInARow`, `LegendTier`, `MakeItDouble`, `TheBreakfastClub`,
+      `MetroBoulotKikoleDodo`, `HellOfAWeek`, tous portés par
+      `RespectLeadersRunConditionsInternal` — boucle multi-jours avec gestion du créateur et
+      agrégation, l'algorithme le plus touffu de la classe) et `OverTheTopPart1`/`Part2`
+      (unicité du meilleur temps/score du jour, y compris la réattribution du badge quand
+      l'unicité est reprise par quelqu'un d'autre).
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à
