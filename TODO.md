@@ -66,16 +66,67 @@ Branche de travail : `remaster-v2`.
 
 ## 2. Modèle de données et contenu
 
-- [ ] **Rendre les clubs canoniques** — le champ club est un `<input type="text">` libre :
-      l'autocomplétion suggère mais ne remplit aucun champ caché, contrairement au continent
-      et à la nationalité qui soumettent un identifiant. Un identifiant supprimerait la
-      correspondance par chaîne et permettrait une vraie clé étrangère. À arbitrer :
-      `clubs.allowed_names` ne servirait plus qu'à l'autocomplétion.
-- [ ] **Remplir la base des clubs** — `Restauration/clubs_2023.txt` contient environ
-      1 767 clubs d'époque, dont 738 avec leurs alias. Matière première prête.
+- [x] ~~Rendre les clubs canoniques~~ — le champ club était un `<input type="text">` libre ;
+      contrairement au continent et à la nationalité, l'autocomplétion ne remplissait aucun
+      champ caché. Refait : `clubs` + nouvelle table `club_translations` (nom canonique et
+      alias par langue, cf. « Partis pris »), `country_id` sur `clubs`, autocomplétion par
+      ID des deux côtés (proposition quotidienne et création de joueur). Au passage, bug
+      préexistant corrigé : `site.js` lisait `item.Value`/`item.Key` (casse Pascal) alors
+      que `Json()` renvoie `value`/`key` — le menu déroulant pays/continent affichait des
+      lignes vides depuis toujours.
+- [ ] **Remplir la base des clubs** — **en cours**, sourcée pays par pays depuis Wikipedia
+      (pas la base empirique de 2023, `Restauration/clubs_2023.txt`, gardée en dernier
+      recours). Le Royaume-Uni est **volontairement repoussé** : ses clubs se répartissent
+      entre nations FIFA distinctes (Angleterre/Écosse/Galles/Irlande du Nord), qui
+      n'existent pas encore dans le modèle ONU actuel (`Countries`) — à traiter après la
+      bascule au sens FIFA ci-dessous, pour ne pas sourcer deux fois.
+      - [x] **France : 47 clubs** dans `kikole.sql` (Ligue 1 + Ligue 2 saison 2025-26, plus
+        7 historiques majeurs sans lien fusion/scission ambigu : Bordeaux, Sochaux, Nîmes,
+        AC Ajaccio, Châteauroux, Sedan, Valenciennes ; puis 4 résolus après recherche —
+        GFC Ajaccio, Évian Thonon Gaillard FC — période Ligue 1 2009-2016 uniquement, les
+        clubs amateurs pré-fusion sont trop obscurs pour ce jeu —, US Créteil-Lusitanos,
+        Istres FC). Import vérifié (schéma + `dotnet test`).
+      - **Enjeu de conception découvert en cours de route, pas juste du contenu manquant** :
+        à l'époque où le jeu était en ligne, des joueurs se servaient des trous de
+        l'autocomplétion (un club obscur présent ou absent) comme signal méta pour
+        déduire le joueur du jour parmi plusieurs candidats. Une base de clubs incomplète
+        n'est donc pas neutre — elle fuite de l'information. À garder en tête pour la suite
+        du sourcing (viser l'exhaustivité des clubs *plausibles* pour les joueurs déjà en
+        base, pas juste les clubs les plus connus).
+      - [x] **Racing Club de France** — résolu par l'utilisateur (connaissance précise du
+        club) : une seule entrée malgré les nombreux changements de nom entre 1896 et 2018
+        (Racing Club de Paris, Matra Racing, Racing 92...), tous en alias de recherche,
+        sans les années. 48 clubs au total.
+      - Pas ajouté, décision (pas un report) : Stade Français — activité professionnelle
+        trop brève et non continue (1942-1968, 1981-1985) pour ce jeu.
+      - Ensuite : quelques autres pays non ambigus (le plan initial), puis reprise du
+        Royaume-Uni une fois la bascule FIFA faite.
+- [ ] **Pays/continent au sens FIFA plutôt qu'ONU** — `Countries`/`Continents` (et les
+      tables `countries`/`continents`) suivent aujourd'hui le découpage ONU : un seul
+      Royaume-Uni, pas d'Angleterre/Écosse/Galles/Irlande du Nord séparées, alors que ce
+      sont des nations FIFA distinctes (sélections, clubs, confédérations). Rejoint
+      « Nationalités doubles et sportives » ci-dessous, dont c'est en partie la même
+      question — `player_federations`, retrouvée en production, était déjà une tentative
+      abandonnée dans ce sens. Impact clubs : faible tant que le sourcing reste sur la
+      France, à surveiller dès le Royaume-Uni (voir point précédent).
 - [ ] **Nationalités doubles et sportives** — `players.country_id` est unique et `NOT NULL`.
-      Changement de modèle, donc à faire avant d'accumuler des données. La table
-      `player_federations` retrouvée en production était une tentative abandonnée.
+      Changement de modèle, donc à faire avant d'accumuler des données. Probablement à
+      fusionner avec le point FIFA ci-dessus plutôt que traité séparément.
+- [ ] **Lier `country_id`/`continent_id`** — aujourd'hui totalement indépendants (ni en
+      base ni en code), on peut trouver le pays puis proposer un continent incohérent.
+      **À faire après la bascule FIFA ci-dessus**, pour ne pas lier le mauvais modèle.
+      Plan retenu :
+      - `countries` gagne `continent_id` (miroir de `clubs.country_id`).
+      - Dès que le pays est trouvé, le continent est **révélé automatiquement** (déductible
+        sans effort) et son champ de proposition disparaît du formulaire. S'il est deviné
+        *avant* le pays, comportement inchangé (proposition indépendante, coût normal).
+      - Badge #28 (`BadgeService`, exige aujourd'hui une proposition Continent **et**
+        Country dans l'historique) : la condition continent est satisfaite dès que le pays
+        est trouvé, sans exiger de proposition Continent séparée.
+      - Création de joueur (admin) : le champ Continent disparaît, déduit du pays choisi
+        côté serveur — plus de validation croisée à faire, il n'y a plus qu'une saisie.
+      - Autocomplétion pays : inchangée (pas de suffixe continent, à la différence des
+        clubs qui affichent leur pays).
 - [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
       d'intégrité sont les `IsValid` applicatives.
 - [x] ~~`IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
@@ -254,6 +305,23 @@ les hachages de toute façon.
   **Toute écriture sur les clubs passe par `CreateOrUpdateClubAsync`**, qui rafraîchit le
   cache lui-même : l'invalidation n'est plus à la charge de l'appelant, donc impossible à
   oublier. Les contrôleurs ne dépendent plus du tout d'`IClubRepository`.
+- **Clubs traduits par langue (`club_translations`), pas un `allowed_names` texte libre.**
+  Même motif que `continent_translations`/`country_translations`/`player_clue_translations`
+  (PK composite avec `language_id`) plutôt qu'un blob `;`-séparé sans notion de langue —
+  découvert en creusant le formulaire admin existant (labels `MainNameEn`/`MainNameFr`,
+  déjà pensé « titre de page Wikipédia EN/FR », jamais représenté correctement en base).
+  `priority = 0` est le nom canonique par langue (obligatoire pour FR et EN), les priorités
+  suivantes sont des alias de recherche pour cette langue uniquement — l'autocomplétion
+  cherche et affiche dans la langue courante de l'utilisateur, pas dans un mélange des deux.
+  `clubs.name` survit comme simple miroir du nom canonique FR, pour explorer la base sans
+  jointure ; `clubs.allowed_names` a disparu, entièrement remplacée. Contrainte
+  d'unicité sur `(name, country_id)`, pas `name` seul : deux clubs de pays différents
+  peuvent légitimement partager un nom.
+- **Proposition de club par ID, pas par correspondance de texte.** Même motif que
+  pays/continent (champ visible + champ caché rempli par l'autocomplétion). Éliminait au
+  passage un bug latent côté admin : `AddClubIfValid` cherchait un club par égalité de
+  texte **exacte** contre le référentiel, et ignorait silencieusement un club mal
+  orthographié sans le signaler.
 - **`IGameCalendar` déduit les dates du `MIN(publication_date)`** : le premier joueur publié
   est la journée cachée, le jeu commence le lendemain. **Sans joueur en base, l'application
   refuse de démarrer** plutôt que de servir des dates inventées.
