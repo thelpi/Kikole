@@ -23,8 +23,11 @@ USE kikole;
 -- ---------------------------------------------------------------- remise a zero
 -- TRUNCATE plutot que DELETE : remet aussi les compteurs AUTO_INCREMENT a 1,
 -- pour que deux executations successives produisent exactement la meme base.
--- Ordre sans importance ici, le schema ne declare aucune cle etrangere.
+-- Ordre toujours sans importance (FOREIGN_KEY_CHECKS desactive le temps du bloc) : les
+-- cles etrangeres ajoutees a la fin de kikole.sql interdisent sinon purement et
+-- simplement TRUNCATE sur une table referencee (players, clubs, users), meme vide.
 
+SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE proposals;
 TRUNCATE TABLE leaders;
 TRUNCATE TABLE user_badges;
@@ -38,6 +41,7 @@ TRUNCATE TABLE messages;
 TRUNCATE TABLE registration_guids;
 TRUNCATE TABLE login_history;
 TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ---------------------------------------------------------------- utilisateurs
 

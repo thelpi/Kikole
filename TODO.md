@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **490** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **491** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -139,8 +139,8 @@ Branche de travail : `remaster-v2`.
       page (Mendy, Darcheville, Simons) étaient de toute façon déjà tranchés par logique
       sportive malgré le chapeau "administratif" — la règle affichée était déjà bancale
       avant ce chantier. Réécriture actée avec l'utilisateur, pas encore faite.
-- [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
-      d'intégrité sont les `IsValid` applicatives.
+- [x] ~~Ajouter les clés étrangères~~ — 29 relations `_id`, contrainte `RESTRICT` par défaut
+      (aucun `ON DELETE`/`ON UPDATE` explicite), voir « Partis pris ».
 - [x] ~~`IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
       passent en canonique.~~ **Décision : pas nécessaire.** Passage en canonique fait
       (traductions par langue, `country_id`, autocomplétion par ID), tout absorbé par
@@ -323,6 +323,24 @@ les hachages de toute façon.
   ligne dédiée. Une dizaine de cas limites (Inde britannique, CEI, Antilles néerlandaises,
   Yémen du Nord/Sud...) volontairement laissés de côté : aucune culture footballistique
   a priori dans ces cas, à ajouter au cas par cas si un joueur concerné se présente.
+
+- **29 clés étrangères ajoutées, en fin de fichier après tous les `INSERT`** (l'ordre des
+  `ALTER TABLE` n'a donc pas d'importance). Couvrent chaque colonne `_id` du schéma :
+  toutes les tables de traduction vers leur table mère et vers `languages`, `clubs`/
+  `players` vers `countries`, `players.alternative_country_id` vers `countries` (même
+  table que `country_id`), `countries.continent_id` vers `continents`, et toutes les
+  références à `users`. **Pas de `ON DELETE`/`ON UPDATE` explicite** (donc `RESTRICT` par
+  défaut MySQL dans les deux sens) : décision délibérée, l'application ne supprime jamais
+  rien dans son domaine (utilisateurs désactivés, jamais supprimés ; joueurs/clubs créés
+  ou modifiés, jamais supprimés) — `RESTRICT` fait juste échouer bruyamment une suppression
+  qui n'a de toute façon aucun chemin de code aujourd'hui, sans inventer une politique de
+  cascade spéculative. Deux index manquants découverts et ajoutés au passage
+  (`countries.continent_id`, `user_badges.badge_id` — la PK composite de cette dernière ne
+  couvre pas `badge_id` en préfixe gauche), les FK MySQL l'exigeant sur la colonne
+  référençante. Vérifié avant application : zéro ligne orpheline sur les 29 relations.
+  `kikole_mock.sql` : `players`/`clubs`/`users` étant désormais des tables référencées,
+  MySQL refuse un `TRUNCATE TABLE` dessus même sans ligne fille — le bloc de reset est
+  maintenant encadré par `SET FOREIGN_KEY_CHECKS = 0;`/`= 1;`.
 
 **Règles de jeu**
 - **`players.alternative_country_id` (nullable) plutôt qu'une vraie liste de

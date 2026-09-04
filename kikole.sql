@@ -1371,7 +1371,8 @@ ALTER TABLE continent_translations
 
 ALTER TABLE countries
   ADD PRIMARY KEY (id),
-  ADD UNIQUE KEY code (code);
+  ADD UNIQUE KEY code (code),
+  ADD KEY continent_id (continent_id);
 
 ALTER TABLE country_translations
   ADD PRIMARY KEY (country_id,language_id),
@@ -1441,7 +1442,8 @@ ALTER TABLE users
   ADD KEY user_type_id (user_type_id);
 
 ALTER TABLE user_badges
-  ADD PRIMARY KEY (user_id,badge_id);
+  ADD PRIMARY KEY (user_id,badge_id),
+  ADD KEY badge_id (badge_id);
 
 ALTER TABLE user_types
   ADD PRIMARY KEY (id);
@@ -1476,3 +1478,70 @@ ALTER TABLE users
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE user_types
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+-- Cles etrangeres : aucun ON DELETE/ON UPDATE explicite (defaut RESTRICT des deux cotes)
+-- puisque rien dans l'application ne supprime jamais une ligne - leur seul role est
+-- d'empecher une insertion incoherente (id inexistant), pas de gerer une suppression en
+-- cascade qui n'existe nulle part. Ajoutees en tout dernier, apres tous les INSERT : leur
+-- ordre d'apparition dans ce fichier n'a donc aucune importance vis-a-vis de l'ordre des
+-- INSERT plus haut.
+ALTER TABLE badge_translations
+  ADD CONSTRAINT fk_badge_translations_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id),
+  ADD CONSTRAINT fk_badge_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE clubs
+  ADD CONSTRAINT fk_clubs_country_id FOREIGN KEY (country_id) REFERENCES countries (id);
+
+ALTER TABLE club_translations
+  ADD CONSTRAINT fk_club_translations_club_id FOREIGN KEY (club_id) REFERENCES clubs (id),
+  ADD CONSTRAINT fk_club_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE continent_translations
+  ADD CONSTRAINT fk_continent_translations_continent_id FOREIGN KEY (continent_id) REFERENCES continents (id),
+  ADD CONSTRAINT fk_continent_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE countries
+  ADD CONSTRAINT fk_countries_continent_id FOREIGN KEY (continent_id) REFERENCES continents (id);
+
+ALTER TABLE country_translations
+  ADD CONSTRAINT fk_country_translations_country_id FOREIGN KEY (country_id) REFERENCES countries (id),
+  ADD CONSTRAINT fk_country_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE discussions
+  ADD CONSTRAINT fk_discussions_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE leaders
+  ADD CONSTRAINT fk_leaders_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE login_history
+  ADD CONSTRAINT fk_login_history_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE players
+  ADD CONSTRAINT fk_players_country_id FOREIGN KEY (country_id) REFERENCES countries (id),
+  ADD CONSTRAINT fk_players_alternative_country_id FOREIGN KEY (alternative_country_id) REFERENCES countries (id),
+  ADD CONSTRAINT fk_players_position_id FOREIGN KEY (position_id) REFERENCES positions (id),
+  ADD CONSTRAINT fk_players_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id),
+  ADD CONSTRAINT fk_players_creation_user_id FOREIGN KEY (creation_user_id) REFERENCES users (id);
+
+ALTER TABLE player_clubs
+  ADD CONSTRAINT fk_player_clubs_player_id FOREIGN KEY (player_id) REFERENCES players (id),
+  ADD CONSTRAINT fk_player_clubs_club_id FOREIGN KEY (club_id) REFERENCES clubs (id);
+
+ALTER TABLE player_clue_translations
+  ADD CONSTRAINT fk_player_clue_translations_player_id FOREIGN KEY (player_id) REFERENCES players (id),
+  ADD CONSTRAINT fk_player_clue_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE proposals
+  ADD CONSTRAINT fk_proposals_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+  ADD CONSTRAINT fk_proposals_proposal_type_id FOREIGN KEY (proposal_type_id) REFERENCES proposal_types (id);
+
+ALTER TABLE registration_guids
+  ADD CONSTRAINT fk_registration_guids_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE users
+  ADD CONSTRAINT fk_users_language_id FOREIGN KEY (language_id) REFERENCES languages (id),
+  ADD CONSTRAINT fk_users_user_type_id FOREIGN KEY (user_type_id) REFERENCES user_types (id);
+
+ALTER TABLE user_badges
+  ADD CONSTRAINT fk_user_badges_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+  ADD CONSTRAINT fk_user_badges_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id);
