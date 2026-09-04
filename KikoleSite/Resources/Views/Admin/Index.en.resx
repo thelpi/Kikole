@@ -162,6 +162,9 @@
   <data name="AlternativeNationality" xml:space="preserve">
     <value>Alternative nationality</value>
   </data>
+  <data name="AlternativePosition" xml:space="preserve">
+    <value>Alternative position</value>
+  </data>
   <data name="Position" xml:space="preserve">
     <value>Position</value>
   </data>
@@ -182,6 +185,9 @@
   </data>
   <data name="TipAboutAlternativeNationality" xml:space="preserve">
     <value>optional: only if the player represented a defunct sporting nation in addition to their current country (e.g. East Germany then Germany)</value>
+  </data>
+  <data name="TipAboutAlternativePosition" xml:space="preserve">
+    <value>optional: only if the player plausibly fits two different positions (e.g. attacking midfielder / forward)</value>
   </data>
   <data name="WikiPlayerName" xml:space="preserve">
     <value>use english Wikipedia page title</value>

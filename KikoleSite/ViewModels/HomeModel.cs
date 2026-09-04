@@ -163,7 +163,13 @@ public class HomeModel
             case ProposalTypes.Position:
                 var pValue = response.Value?.ToString() ?? string.Empty;
                 if (response.Successful)
-                    Position = positions[Convert.ToUInt16(pValue)];
+                {
+                    var mainPositionId = Convert.ToUInt16(pValue);
+                    Position = positions[mainPositionId];
+                    if (response.AlternativePositionId.HasValue
+                        && positions.TryGetValue(response.AlternativePositionId.Value, out var altPositionName))
+                        Position += $" / {altPositionName}";
+                }
                 else
                 {
                     if (ulong.TryParse(pValue, out var pId) && positions.ContainsKey(pId))

@@ -65,6 +65,17 @@ public class ProposalResponseTests
         };
     }
 
+    /// <summary>Joueur fictif occupant plausiblement deux postes (type Eden Hazard, milieu/attaquant).</summary>
+    private static PlayerFullDto DualPositionPlayer()
+    {
+        return new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().WithId(4).WithName("Joueur Double Poste").WithAllowedNames("double poste").WithYearOfBirth(1991).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).WithAlternativePositionId((ulong)Positions.Forward).Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+    }
+
     private ProposalResponse Respond(ProposalTypes type, string value, PlayerFullDto? player = null)
     {
         var request = new ProposalRequest
@@ -274,6 +285,34 @@ public class ProposalResponseTests
 
         response.Successful.Should().BeFalse();
         response.Cost.Should().Be((75, false));
+    }
+
+    [Fact]
+    public void Position_WhenMatchingTheMainOne_IsSuccessfulAndExposesTheAlternative()
+    {
+        var response = Respond(ProposalTypes.Position, ((int)Positions.Midfielder).ToString(), DualPositionPlayer());
+
+        response.Successful.Should().BeTrue();
+        response.Value.Should().Be((ulong)Positions.Midfielder);
+        response.AlternativePositionId.Should().Be((ulong)Positions.Forward);
+    }
+
+    [Fact]
+    public void Position_WhenMatchingTheAlternativeOne_IsAlsoSuccessful()
+    {
+        var response = Respond(ProposalTypes.Position, ((int)Positions.Forward).ToString(), DualPositionPlayer());
+
+        response.Successful.Should().BeTrue();
+        response.AlternativePositionId.Should().Be((ulong)Positions.Forward);
+    }
+
+    [Fact]
+    public void Position_WithAnAlternativeOnThePlayer_ButNeitherIsGuessed_IsUnsuccessful()
+    {
+        var response = Respond(ProposalTypes.Position, ((int)Positions.Goalkeeper).ToString(), DualPositionPlayer());
+
+        response.Successful.Should().BeFalse();
+        response.AlternativePositionId.Should().BeNull();
     }
 
     [Fact]

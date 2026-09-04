@@ -123,6 +123,12 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     </div>
 
     <div class="largeTopMargin">
+        <div><label>@localizer["AlternativePosition"]</label></div>
+        @Html.DropDownListFor(m => m.AlternativePosition, Model.Positions, new { @style = "width: 150px" })
+        <div style="font-size: small">(@localizer["TipAboutAlternativePosition"])</div>
+    </div>
+
+    <div class="largeTopMargin">
         <div>
             <label>@localizer["ClubsCareer"]</label>
         </div>

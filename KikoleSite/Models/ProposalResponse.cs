@@ -34,6 +34,14 @@ public class ProposalResponse
     /// </summary>
     public ulong? AlternativeContinentId { get; }
 
+    /// <summary>
+    /// Renseigne uniquement pour une proposition <see cref="ProposalTypes.Position"/>
+    /// reussie sur un joueur occupant plausiblement deux postes differents
+    /// (<see cref="PlayerDto.AlternativePositionId"/>) - les deux sont alors affiches au
+    /// reveal, peu importe lequel a ete devine.
+    /// </summary>
+    public ulong? AlternativePositionId { get; }
+
     public DateTime Date { get; }
 
     public string? Tip { get; }
@@ -152,10 +160,16 @@ public class ProposalResponse
 
             case ProposalTypes.Position:
                 if (!success.HasValue)
-                    Successful = player.Player.PositionId == ulong.Parse(Guessed());
+                {
+                    var guessedPositionId = ulong.Parse(Guessed());
+                    Successful = player.Player.PositionId == guessedPositionId
+                        || player.Player.AlternativePositionId == guessedPositionId;
+                }
                 Value = Successful
                     ? player.Player.PositionId
                     : sourceValue;
+                if (Successful)
+                    AlternativePositionId = player.Player.AlternativePositionId;
                 RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
                     ? tmpRawPosition.ToString()
                     : RawValue;

@@ -30,6 +30,8 @@ public class Player : PlayerCreator
 
     public Positions Position { get; }
 
+    public Positions? AlternativePosition { get; }
+
     public DateTime? RejectDate { get; }
 
     /// <summary>
@@ -57,6 +59,9 @@ public class Player : PlayerCreator
             ? (Continents)countryContinents[p.Player.AlternativeCountryId.Value]
             : null;
         Position = (Positions)p.Player.PositionId;
+        AlternativePosition = p.Player.AlternativePositionId.HasValue
+            ? (Positions)p.Player.AlternativePositionId.Value
+            : null;
         YearOfBirth = p.Player.YearOfBirth;
     }
 

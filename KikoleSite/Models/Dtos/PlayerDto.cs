@@ -29,6 +29,13 @@ public record PlayerDto : BaseDto
 
     public ulong PositionId { get; init; }
 
+    /// <summary>
+    /// Second poste que le joueur occupe plausiblement (ex. milieu offensif / attaquant) -
+    /// <see cref="PositionId"/> reste la reponse principale, celle-ci est acceptee en plus.
+    /// Non renseignee dans l'immense majorite des cas.
+    /// </summary>
+    public ulong? AlternativePositionId { get; init; }
+
     public ulong CreationUserId { get; init; }
 
     public DateTime? RejectDate { get; init; }

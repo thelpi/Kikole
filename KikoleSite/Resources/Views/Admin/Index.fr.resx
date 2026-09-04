@@ -162,6 +162,9 @@
   <data name="AlternativeNationality" xml:space="preserve">
     <value>Nationalité alternative</value>
   </data>
+  <data name="AlternativePosition" xml:space="preserve">
+    <value>Poste alternatif</value>
+  </data>
   <data name="Position" xml:space="preserve">
     <value>Position</value>
   </data>
@@ -182,6 +185,9 @@
   </data>
   <data name="TipAboutAlternativeNationality" xml:space="preserve">
     <value>facultatif : uniquement si le joueur a représenté une nation sportive disparue en plus de son pays actuel (ex. RDA puis Allemagne)</value>
+  </data>
+  <data name="TipAboutAlternativePosition" xml:space="preserve">
+    <value>facultatif : uniquement si le joueur occupe plausiblement deux postes différents (ex. milieu offensif / attaquant)</value>
   </data>
   <data name="WikiPlayerName" xml:space="preserve">
     <value>utilisez le titre de la page Wikipédia en anglais</value>

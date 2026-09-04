@@ -438,6 +438,8 @@ public class HomeController : KikoleBaseController
                     model.ContinentName += $" / {altContinentName}";
             }
             model.Position = ((Positions)pp.Player.PositionId).GetLabel();
+            if (pp.Player.AlternativePositionId.HasValue)
+                model.Position += $" / {((Positions)pp.Player.AlternativePositionId.Value).GetLabel()}";
             model.KnownPlayerClubs = pp.PlayerClubs.Select(pc => new PlayerClub(pc, pp.Clubs)).ToList();
             model.BirthYear = pp.Player.YearOfBirth.ToNaString();
         }

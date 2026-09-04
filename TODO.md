@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **528** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **534** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -146,6 +146,14 @@ Branche de travail : `remaster-v2`.
       continents différents). Les anciens cas d'arbitrage (Mendy, Darcheville, Simons)
       disparaissent : ils n'étaient des "cas complexes" que sous l'ancien système
       administratif, la logique sportive ne laisse plus d'ambiguïté à leur sujet.
+- [x] ~~Postes multiples (plainte v1, ex. Eden Hazard milieu/attaquant)~~ — calqué à
+      l'identique sur `alternative_country_id` : `players.alternative_position_id`
+      (nullable, un seul poste secondaire), deviner l'un ou l'autre valide la proposition
+      Position, les deux s'affichent au reveal (`"Milieu de terrain / Attaquant"`). Les 4
+      catégories existantes (Gardien/Défenseur/Milieu/Attaquant) restent inchangées, aucun
+      affinage. Voir « Partis pris ». Vérifié en base (colonne + FK) et en direct (joueur
+      test créé en admin, poste alternatif deviné et affiché, reveal complet aussi
+      vérifié) avant remise à zéro de `kikole_mock.sql`.
 - [x] ~~Ajouter les clés étrangères~~ — 29 relations `_id`, contrainte `RESTRICT` par défaut
       (aucun `ON DELETE`/`ON UPDATE` explicite), voir « Partis pris ».
 - [x] ~~`IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
@@ -427,6 +435,24 @@ les hachages de toute façon.
   principe « chargé une fois, passé en paramètre » de ce chantier. Corrigé :
   `SetAndGetViewModelAsync` reçoit désormais `countryContinents` en paramètre, calculé une
   seule fois par chacun de ses deux appelants (`Index` GET et POST).
+- **`players.alternative_position_id` (nullable) plutôt qu'une vraie liste de postes,
+  calqué à l'identique sur `alternative_country_id`.** Plainte récurrente depuis la v1 :
+  un joueur n'a qu'un seul poste alors que beaucoup en occupent plausiblement deux (ex.
+  Eden Hazard, milieu offensif/attaquant). Deviner l'un ou l'autre valide la proposition
+  Position, les deux s'affichent au reveal (`ProposalResponse.AlternativePositionId`,
+  combiné dans `HomeModel.Position` en `"Milieu de terrain / Attaquant"`, même code que
+  `HomeController` pour le reveal complet). Les 4 catégories existantes restent
+  inchangées — décision explicite de ne pas les affiner (pas de "latéral", "meneur de
+  jeu"...). Plus simple que le pays : pas de table de traduction en base, les libellés
+  viennent de `Positions.GetLabel()` (`ViewHelper.cs`), donc uniquement le second FK sur
+  `players` et sa propagation (DTO, requête, contrôleur admin, vue, domaine, score,
+  affichage). Champ admin `<select>` (pas d'autocomplétion JS, contrairement au pays) :
+  `PlayerCreationModel.Positions` (liste avec option vide déjà construite par
+  `SetPositionsOnModel`) réutilisée telle quelle pour les deux champs. Comme pour le
+  pays, ni `PlayerRequest.IsValid` ni `AdminController` ne vérifient que l'alternative
+  diffère du poste principal, et le badge `FourFourtwo` (`BadgeService`) continue de ne
+  compter que `PositionId` — même précédent que le badge `AroundTheWorld`, qui ne compte
+  que `CountryId` sans l'alternative.
 - Barème de soumission à 1 000 points forfaitaires. L'ancien barème dégressif avait été
   abandonné en novembre 2022 ; sa branche morte a été supprimée.
 - Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est

@@ -26,6 +26,7 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 ("clue", player.Clue),
                 ("easy_clue", player.EasyClue),
                 ("position_id", player.PositionId),
+                ("alternative_position_id", player.AlternativePositionId),
                 ("creation_user_id", player.CreationUserId),
                 ("hide_creator", player.HideCreator));
     }

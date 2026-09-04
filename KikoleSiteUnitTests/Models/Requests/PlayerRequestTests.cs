@@ -227,6 +227,22 @@ public class PlayerRequestTests
         dto.CreationUserId.Should().Be(42);
     }
 
+    [Fact]
+    public void ToDto_LeavesAlternativePositionIdNullWhenNotSet()
+    {
+        var dto = Valid().ToDto(42, null);
+
+        dto.AlternativePositionId.Should().BeNull();
+    }
+
+    [Fact]
+    public void ToDto_MapsAlternativePositionWhenPresent()
+    {
+        var request = Valid() with { AlternativePosition = Positions.Forward };
+
+        request.ToDto(42, null).AlternativePositionId.Should().Be((ulong)Positions.Forward);
+    }
+
     [Theory]
     [InlineData(true, (byte)1)]
     [InlineData(false, (byte)0)]

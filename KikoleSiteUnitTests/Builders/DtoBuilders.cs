@@ -35,6 +35,7 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithCountryId(ulong id) { _dto = _dto with { CountryId = id }; return this; }
     internal PlayerDtoBuilder WithAlternativeCountryId(ulong? id) { _dto = _dto with { AlternativeCountryId = id }; return this; }
     internal PlayerDtoBuilder WithPositionId(ulong id) { _dto = _dto with { PositionId = id }; return this; }
+    internal PlayerDtoBuilder WithAlternativePositionId(ulong? id) { _dto = _dto with { AlternativePositionId = id }; return this; }
     internal PlayerDtoBuilder WithClue(string clue) { _dto = _dto with { Clue = clue }; return this; }
     internal PlayerDtoBuilder WithEasyClue(string clue) { _dto = _dto with { EasyClue = clue }; return this; }
     internal PlayerDtoBuilder WithHideCreatorFlag(byte flag) { _dto = _dto with { HideCreator = flag }; return this; }

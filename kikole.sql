@@ -1233,6 +1233,7 @@ CREATE TABLE players (
   clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   easy_clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   position_id bigint(20) UNSIGNED NOT NULL,
+  alternative_position_id bigint(20) UNSIGNED DEFAULT NULL,
   badge_id bigint(20) UNSIGNED DEFAULT NULL,
   creation_user_id bigint(20) UNSIGNED NOT NULL,
   creation_date datetime NOT NULL,
@@ -1404,6 +1405,7 @@ ALTER TABLE players
   ADD KEY country_id (country_id) USING BTREE,
   ADD KEY alternative_country_id (alternative_country_id) USING BTREE,
   ADD KEY position_id (position_id),
+  ADD KEY alternative_position_id (alternative_position_id),
   ADD KEY badge_id (badge_id),
   ADD KEY creation_user_id (creation_user_id),
   ADD KEY reject_date (reject_date);
@@ -1520,6 +1522,7 @@ ALTER TABLE players
   ADD CONSTRAINT fk_players_country_id FOREIGN KEY (country_id) REFERENCES countries (id),
   ADD CONSTRAINT fk_players_alternative_country_id FOREIGN KEY (alternative_country_id) REFERENCES countries (id),
   ADD CONSTRAINT fk_players_position_id FOREIGN KEY (position_id) REFERENCES positions (id),
+  ADD CONSTRAINT fk_players_alternative_position_id FOREIGN KEY (alternative_position_id) REFERENCES positions (id),
   ADD CONSTRAINT fk_players_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id),
   ADD CONSTRAINT fk_players_creation_user_id FOREIGN KEY (creation_user_id) REFERENCES users (id);
 

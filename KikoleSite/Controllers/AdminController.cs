@@ -268,6 +268,21 @@ public class AdminController : KikoleBaseController
             return View(model);
         }
 
+        // facultatif : uniquement si le joueur occupe plausiblement deux postes differents
+        // (ex. milieu offensif / attaquant) ; "0" est la valeur de l'option vide du select
+        ulong? alternativePositionId = null;
+        if (!string.IsNullOrWhiteSpace(model.AlternativePosition) && model.AlternativePosition != "0")
+        {
+            if (!ulong.TryParse(model.AlternativePosition, out var parsedAlternativePositionId)
+                || !GetPositions().Any(p => p.Key == parsedAlternativePositionId))
+            {
+                model.ErrorMessage = _localizer["InvalidPosition"];
+                SetPositionsOnModel(model);
+                return View(model);
+            }
+            alternativePositionId = parsedAlternativePositionId;
+        }
+
         // les dix champs du formulaire sont facultatifs : on filtre les vides
         // avant de considerer la liste comme non nullable
         var names = new List<string?>
@@ -331,6 +346,7 @@ public class AdminController : KikoleBaseController
             AlternativeCountry = alternativeCountryId.HasValue ? (Countries)alternativeCountryId.Value : null,
             Name = model.Name,
             Position = (Positions)positionId,
+            AlternativePosition = alternativePositionId.HasValue ? (Positions)alternativePositionId.Value : null,
             YearOfBirth = yearValue,
             HideCreator = model.HideCreator
         };

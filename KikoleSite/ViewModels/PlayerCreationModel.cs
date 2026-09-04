@@ -99,6 +99,8 @@ public class PlayerCreationModel
 
     public string? Position { get; set; }
 
+    public string? AlternativePosition { get; set; }
+
     public IReadOnlyList<SelectListItem> Positions { get; set; } = [];
 
     public string? ClueFr { get; set; }

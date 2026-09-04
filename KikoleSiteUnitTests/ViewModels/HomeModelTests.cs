@@ -43,7 +43,8 @@ public class HomeModelTests
         new Dictionary<ulong, string>
         {
             { (ulong)Positions.Goalkeeper, "Gardien de but" },
-            { (ulong)Positions.Midfielder, "Milieu de terrain" }
+            { (ulong)Positions.Midfielder, "Milieu de terrain" },
+            { (ulong)Positions.Forward, "Attaquant" }
         };
 
     private static readonly IReadOnlyDictionary<ulong, string> Clubs =
@@ -338,6 +339,32 @@ public class HomeModelTests
         Apply(model, ProposalTypes.Position, ((int)Positions.Goalkeeper).ToString(), sourcePoints: 925);
 
         model.IncorrectPositions.Should().ContainSingle().Which.Should().Be("Gardien de but");
+    }
+
+    [Fact]
+    public void APlayerWithAnAlternativePositionDisplaysBothNamesOnceFound()
+    {
+        var hazardLike = new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().WithId(4).WithName("Joueur Double Poste").WithAllowedNames("double poste")
+                .WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FRA)
+                .WithPositionId((ulong)Positions.Midfielder)
+                .WithAlternativePositionId((ulong)Positions.Forward).Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+        var request = new ProposalRequest
+        {
+            Value = ((int)Positions.Midfielder).ToString(),
+            ProposalType = ProposalTypes.Position,
+            ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
+        };
+        var response = new ProposalResponse(request, hazardLike, _localizer, TestCountryContinents.Map).WithTotalPoints(1000, false);
+        var model = new HomeModel();
+
+        model.SetPropertiesFromProposal(response, Countries, Continents, TestCountryContinents.Map, PositionNames, Clubs, null);
+
+        model.Position.Should().Be("Milieu de terrain / Attaquant");
     }
 
     // ------------------------------------------------------------- nom et annee

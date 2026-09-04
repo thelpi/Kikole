@@ -35,6 +35,9 @@ public record PlayerRequest
 
     internal Positions Position { get; init; }
 
+    /// <summary>Second poste facultatif, voir <see cref="PlayerDto.AlternativePositionId"/>.</summary>
+    internal Positions? AlternativePosition { get; init; }
+
     public bool SetLatestPublicationDate { get; init; }
 
     public bool HideCreator { get; init; }
@@ -88,6 +91,7 @@ public record PlayerRequest
             Clue = ClueEn,
             EasyClue = EasyClueEn,
             PositionId = (ulong)Position,
+            AlternativePositionId = AlternativePosition.HasValue ? (ulong)AlternativePosition.Value : null,
             CreationUserId = userId,
             HideCreator = (byte)(HideCreator ? 1 : 0)
         };
