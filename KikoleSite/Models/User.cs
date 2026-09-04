@@ -1,17 +1,23 @@
 ﻿using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Models;
+
+public class User
 {
-    public class User
+    public ulong Id { get; }
+
+    public string Login { get; }
+
+    internal User(UserDto user)
+        : this(user.Id, user.Login)
+    { }
+
+    /// <summary>
+    /// Pour les cas ou seuls l'identifiant et le login sont connus, sans DTO complet.
+    /// </summary>
+    internal User(ulong id, string login)
     {
-        public ulong Id { get; }
-
-        public string Login { get; }
-
-        internal User(UserDto user)
-        {
-            Id = user.Id;
-            Login = user.Login;
-        }
+        Id = id;
+        Login = login;
     }
 }

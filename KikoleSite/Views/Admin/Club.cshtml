@@ -38,32 +38,36 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         <div>
             <label>@localizer["MainNameEn"]</label>
         </div>
-        @Html.TextBoxFor(x => x.MainName, null, new { @style = "width: 250px" })
+        @Html.TextBoxFor(x => x.MainNameEn, null, new { @style = "width: 250px" })
+    </div>
+    <div class="smallTopMargin">
+        <label>@localizer["AlternativeNames"]</label>
+        <div>
+            @Html.TextAreaFor(x => x.AlternativeNamesEn, 4, 30, null)
+        </div>
     </div>
     <div class="largeTopMargin">
         <div>
             <label>@localizer["MainNameFr"]</label>
         </div>
-        @Html.TextBoxFor(x => x.AlternativeName0, null, new { @style = "width: 250px" })
+        @Html.TextBoxFor(x => x.MainNameFr, null, new { @style = "width: 250px" })
     </div>
-
-    <div class="largeTopMargin">
+    <div class="smallTopMargin">
         <label>@localizer["AlternativeNames"]</label>
-    </div>
-    <div class="smallTopMargin">
-        @Html.TextBoxFor(x => x.AlternativeName1, null, new { @style = "width: 250px" })
-    </div>
-    <div class="smallTopMargin">
-        @Html.TextBoxFor(x => x.AlternativeName2, null, new { @style = "width: 250px" })
-    </div>
-    <div class="smallTopMargin">
-        @Html.TextBoxFor(x => x.AlternativeName3, null, new { @style = "width: 250px" })
-    </div>
-    <div class="smallTopMargin">
-        @Html.TextBoxFor(x => x.AlternativeName4, null, new { @style = "width: 250px" })
+        <div>
+            @Html.TextAreaFor(x => x.AlternativeNamesFr, 4, 30, null)
+        </div>
     </div>
     <div style="font-size: small">(@localizer["AlternativeTip"])</div>
     <div style="font-size: small">(@localizer["DontMindDiacritics"])</div>
+
+    <div class="largeTopMargin">
+        <div>
+            <label>@localizer["Country"]</label>
+        </div>
+        <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 250px" />
+        <input type="hidden" id="countryId" name="Country" value="@Model.Country" />
+    </div>
 
     <div class="largeTopMargin">
         @Html.HiddenFor(x => x.Id)

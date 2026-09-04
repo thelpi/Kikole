@@ -2,12 +2,11 @@
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Repositories
-{
-    public interface IDiscussionRepository
-    {
-        Task<ulong> CreateDiscussionAsync(DiscussionDto discussion);
+namespace KikoleSite.Repositories;
 
-        Task<IReadOnlyCollection<DiscussionDto>> GetDiscussionsAsync();
-    }
+public interface IDiscussionRepository
+{
+    Task<ulong> CreateDiscussionAsync(DiscussionDto discussion);
+
+    Task<IReadOnlyCollection<DiscussionDto>> GetDiscussionsAsync();
 }

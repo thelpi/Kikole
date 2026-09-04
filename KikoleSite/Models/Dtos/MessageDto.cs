@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace KikoleSite.Models.Dtos
+namespace KikoleSite.Models.Dtos;
+
+public record MessageDto : BaseDto
 {
-    public class MessageDto : BaseDto
-    {
-        public string Message { get; set; }
+    public required string Message { get; init; }
 
-        public DateTime? DisplayFrom { get; set; }
+    public DateTime? DisplayFrom { get; init; }
 
-        public DateTime? DisplayTo { get; set; }
-    }
+    public DateTime? DisplayTo { get; init; }
 }

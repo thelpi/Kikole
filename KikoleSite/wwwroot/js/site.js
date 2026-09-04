@@ -340,8 +340,8 @@ $(function () {
 });
 
 /* countries autocompletion */
-$(function () {
-    $("#countryName").autocomplete({
+var autocompleteCountries = function (nameFieldId, idFieldId, submit) {
+    $(nameFieldId).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url: '/Home/AutoCompleteCountries/',
@@ -352,23 +352,29 @@ $(function () {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.Value,
-                            value: item.Key
+                            label: item.value,
+                            value: item.key
                         };
                     }))
                 }
             });
         },
         select: function (e, i) {
-            $("#countryId").val(i.item.value);
-            $("#countryName").val(i.item.label);
-            if ($("#submitCountry").length > 0) {
+            $(idFieldId).val(i.item.value);
+            $(nameFieldId).val(i.item.label);
+            if (submit && $("#submitCountry").length > 0) {
                 $("#submitCountry").click();
             }
             return false;
         },
         minLength: 1
     });
+};
+$(function () {
+    autocompleteCountries("#countryName", "#countryId", true);
+    if ($("#alternativeCountryName").length > 0) {
+        autocompleteCountries("#alternativeCountryName", "#alternativeCountryId", false);
+    }
 });
 
 /* continents autocompletion */
@@ -384,8 +390,8 @@ $(function () {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.Value,
-                            value: item.Key
+                            label: item.value,
+                            value: item.key
                         };
                     }))
                 }
@@ -404,8 +410,8 @@ $(function () {
 });
 
 /* clubs autocompletion */
-var autocompleteClubs = function (clubIdName, submit) {
-    $(clubIdName).autocomplete({
+var autocompleteClubs = function (nameFieldId, idFieldId, submit) {
+    $(nameFieldId).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url: '/Home/AutoCompleteClubs/',
@@ -415,13 +421,17 @@ var autocompleteClubs = function (clubIdName, submit) {
                 type: "POST",
                 success: function (data) {
                     response($.map(data, function (item) {
-                        return item;
+                        return {
+                            label: item.value,
+                            value: item.key
+                        };
                     }))
                 }
             });
         },
         select: function (e, i) {
-            $(clubIdName).val(i.item.value);
+            $(idFieldId).val(i.item.value);
+            $(nameFieldId).val(i.item.label);
             if (submit && $("#submitClub").length > 0) {
                 $("#submitClub").click();
             }
@@ -431,9 +441,9 @@ var autocompleteClubs = function (clubIdName, submit) {
     });
 };
 $(function() {
-    autocompleteClubs("#clubName", true);
+    autocompleteClubs("#clubName", "#clubId", true);
     for (let i = 0; i < 15; i++) {
-        autocompleteClubs("#Club" + i, false);
+        autocompleteClubs("#Club" + i, "#Club" + i + "Id", false);
     }
 });
 

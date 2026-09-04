@@ -5,65 +5,62 @@ using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Repositories;
 
-namespace KikoleSite.Handlers
+namespace KikoleSite.Handlers;
+
+/// <summary>
+/// Player handler implementation.
+/// </summary>
+/// <seealso cref="IPlayerHandler"/>
+public class PlayerHandler : IPlayerHandler
 {
+    private readonly IPlayerRepository _playerRepository;
+    private readonly IClubRepository _clubRepository;
+
     /// <summary>
-    /// Player handler implementation.
+    /// Ctor.
     /// </summary>
-    /// <seealso cref="IPlayerHandler"/>
-    public class PlayerHandler : IPlayerHandler
+    /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
+    /// <param name="clubRepository">Instance of <see cref="IClubRepository"/>.</param>
+    public PlayerHandler(IPlayerRepository playerRepository,
+        IClubRepository clubRepository)
     {
-        private readonly IPlayerRepository _playerRepository;
-        private readonly IClubRepository _clubRepository;
+        _playerRepository = playerRepository;
+        _clubRepository = clubRepository;
+    }
 
-        /// <summary>
-        /// Ctor.
-        /// </summary>
-        /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
-        /// <param name="clubRepository">Instance of <see cref="IClubRepository"/>.</param>
-        public PlayerHandler(IPlayerRepository playerRepository,
-            IClubRepository clubRepository)
+    /// <inheritdoc />
+    public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date)
+    {
+        var p = await _playerRepository
+            .GetPlayerOfTheDayAsync(date)
+            ?? throw new InvalidOperationException($"Aucun joueur n'est programme pour le {date:yyyy-MM-dd}.");
+
+        return await GetPlayerFullInfoAsync(p);
+    }
+
+    /// <inheritdoc />
+    public async Task<PlayerFullDto> GetPlayerFullInfoAsync(PlayerDto p)
+    {
+        var playerClubs = await _playerRepository
+            .GetPlayerClubsAsync(p.Id);
+
+        List<ulong> distinctClubIds = [.. playerClubs.Select(pc => pc.ClubId).Distinct()];
+
+        var clubs = await _clubRepository
+            .GetClubsByIdsAsync(distinctClubIds);
+
+        if (clubs.Count != distinctClubIds.Count)
         {
-            _playerRepository = playerRepository;
-            _clubRepository = clubRepository;
+            var foundClubIds = clubs.Select(c => c.Id).ToHashSet();
+            var missingClubIds = distinctClubIds.Where(id => !foundClubIds.Contains(id));
+            throw new InvalidOperationException($"Club(s) introuvable(s) dans la carriere du joueur {p.Id} : {string.Join(", ", missingClubIds)}.");
         }
 
-        /// <inheritdoc />
-        public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date)
+        return new PlayerFullDto
         {
-            var p = await _playerRepository
-                .GetPlayerOfTheDayAsync(date)
-                .ConfigureAwait(false);
-
-            return await GetPlayerFullInfoAsync(p)
-                .ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public async Task<PlayerFullDto> GetPlayerFullInfoAsync(PlayerDto p)
-        {
-            var playerClubs = await _playerRepository
-                .GetPlayerClubsAsync(p.Id)
-                .ConfigureAwait(false);
-
-            var playerClubsDetails = new Dictionary<ulong, ClubDto>(playerClubs.Count);
-            foreach (var pc in playerClubs)
-            {
-                if (!playerClubsDetails.ContainsKey(pc.ClubId))
-                {
-                    var c = await _clubRepository
-                        .GetClubAsync(pc.ClubId)
-                        .ConfigureAwait(false);
-                    playerClubsDetails.Add(pc.ClubId, c);
-                }
-            }
-
-            return new PlayerFullDto
-            {
-                Clubs = playerClubsDetails.Values.ToList(),
-                Player = p,
-                PlayerClubs = playerClubs
-            };
-        }
+            Clubs = [.. clubs],
+            Player = p,
+            PlayerClubs = playerClubs
+        };
     }
 }

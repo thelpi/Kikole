@@ -1,19 +1,35 @@
-﻿namespace KikoleSite.Models.Dtos
+using System;
+
+namespace KikoleSite.Models.Dtos
 {
-    public class UserDto : BaseDto
+    public record UserDto : BaseDto
     {
-        public string Login { get; set; }
+        public required string Login { get; init; }
 
-        public string Password { get; set; }
+        public required string NormalizedLogin { get; init; }
 
-        public string PasswordResetQuestion { get; set; }
+        public required string Password { get; init; }
 
-        public string PasswordResetAnswer { get; set; }
+        public required string PasswordResetQuestion { get; init; }
 
-        public ulong LanguageId { get; set; }
+        public required string PasswordResetAnswer { get; init; }
 
-        public ulong UserTypeId { get; set; }
+        public ulong LanguageId { get; init; }
 
-        public string Ip { get; set; }
+        public ulong UserTypeId { get; init; }
+
+        public string? Ip { get; init; }
+
+        public bool IsDisabled { get; init; }
+
+        public required string ConcurrencyStamp { get; init; }
+
+        public required string SecurityStamp { get; init; }
+
+        public DateTime? LockoutEnd { get; init; }
+
+        public int AccessFailedCount { get; init; }
+
+        public bool LockoutEnabled { get; init; }
     }
 }

@@ -1,11 +1,11 @@
 ﻿namespace KikoleSite.Models.Dtos
 {
-    public class DiscussionDto : BaseDto
+    public record DiscussionDto : BaseDto
     {
-        public ulong UserId { get; set; }
+        public ulong UserId { get; init; }
 
-        public string Email { get; set; }
+        public required string Email { get; init; }
 
-        public string Message { get; set; }
+        public required string Message { get; init; }
     }
 }

@@ -1,24 +1,31 @@
-﻿using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Repositories
+namespace KikoleSite.Repositories;
+
+public interface IUserRepository
 {
-    public interface IUserRepository
-    {
-        Task<ulong> CreateUserAsync(UserDto user);
+    Task<ulong> CreateUserAsync(UserDto user);
 
-        Task<UserDto> GetUserByLoginAsync(string login);
+    /// <summary>Nombre de comptes créés depuis <paramref name="ip"/> depuis <paramref name="since"/> (lutte anti-multi-compte).</summary>
+    Task<int> GetUserCreationCountSinceAsync(string ip, DateTime since);
 
-        Task<bool> ResetUserKnownPasswordAsync(string login, string oldPassword, string newPassword);
+    Task UpdateUserAsync(UserDto user);
 
-        Task<bool> ResetUserUnknownPasswordAsync(string login, string passwordResetAnswer, string newPassword);
+    Task DeleteUserAsync(ulong userId);
 
-        Task<UserDto> GetUserByIdAsync(ulong userId);
+    Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin);
 
-        Task ResetUserQAndAAsync(ulong userId, string question, string anwser);
+    Task<UserDto?> GetUserByIdAsync(ulong userId);
 
-        Task<RegistrationGuidDto> GetRegistrationGuidAsync(string id);
+    Task<IReadOnlyCollection<UserDto>> GetUsersByIdsAsync(IReadOnlyCollection<ulong> userIds);
 
-        Task LinkRegistrationGuidToUserAsync(string id, ulong userId);
-    }
+    Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id);
+
+    Task LinkRegistrationGuidToUserAsync(string id, ulong userId);
+
+    /// <summary>Historise une connexion réussie (lutte anti-multi-compte).</summary>
+    Task CreateLoginHistoryAsync(ulong userId, string? ip);
 }

@@ -1,21 +1,20 @@
 ﻿using System;
 
-namespace KikoleSite.Models.Dtos
+namespace KikoleSite.Models.Dtos;
+
+public record ProposalDto : BaseDto
 {
-    public class ProposalDto : BaseDto
-    {
-        public ulong UserId { get; set; }
+    public ulong UserId { get; init; }
 
-        public ulong ProposalTypeId { get; set; }
+    public ulong ProposalTypeId { get; init; }
 
-        public string Value { get; set; }
+    public string? Value { get; init; }
 
-        public byte Successful { get; set; }
+    public byte Successful { get; init; }
 
-        public DateTime ProposalDate { get; set; }
+    public DateTime ProposalDate { get; init; }
 
-        public string Ip { get; set; }
+    public string? Ip { get; init; }
 
-        internal bool IsCurrentDay => ProposalDate == CreationDate.Date;
-    }
+    internal bool IsCurrentDay => ProposalDate == CreationDate.Date;
 }

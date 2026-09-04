@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountMandatory" xml:space="preserve">
-    <value>Un compte est nécessaire pour jouer. Jusqu'au mois de novembre, il vous faut une invitation pour s'inscrire. L'inscription redeviendra libre à cette date.</value>
+    <value>Un compte est nécessaire pour jouer. Il vous faut une invitation pour s'inscrire.</value>
+  </data>
+  <data name="AccountMandatoryOpenRegistration" xml:space="preserve">
+    <value>Un compte est nécessaire pour jouer.</value>
   </data>
   <data name="BirthYearTitle" xml:space="preserve">
     <value>Année de naissance :</value>
   </data>
   <data name="CareerClubSoFar" xml:space="preserve">
     <value>Carrière en club :</value>
-  </data>
-  <data name="ChallengeOngoing" xml:space="preserve">
-    <value>Vous avez un challenge contre &lt;span class="redtext"&gt;{0}&lt;/span&gt; aujourd'hui, pour &lt;span class="redtext"&gt;{1}&lt;/span&gt;% de vos points !</value>
   </data>
   <data name="ClubsTitle" xml:space="preserve">
     <value>Clubs :</value>
@@ -165,9 +165,6 @@
   <data name="OneClubAtATime" xml:space="preserve">
     <value>un club à la fois</value>
   </data>
-  <data name="PendingChallenges" xml:space="preserve">
-    <value>Vous avez des challenges en attente d'une &lt;a href="/Challenge"&gt;réponse&lt;/a&gt;.</value>
-  </data>
   <data name="PlayerFoundCongrats" xml:space="preserve">
     <value>Félicitations ! Le joueur était &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt;.</value>
   </data>
@@ -184,7 +181,7 @@
     <value>Jour précédent</value>
   </data>
   <data name="SubmittedBy" xml:space="preserve">
-    <value>Le joueur du jour a été proposé par  &lt;span class="redtext"&gt;{0}&lt;/span&gt; !</value>
+    <value>Le joueur du jour a été proposé par &lt;span class="redtext"&gt;{0}&lt;/span&gt; !</value>
   </data>
   <data name="TipAboutNationality" xml:space="preserve">
     <value>voir les &lt;a href="#country-rules"&gt;règles&lt;/a&gt;</value>

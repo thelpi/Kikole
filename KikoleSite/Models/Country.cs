@@ -2,18 +2,17 @@
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Models;
+
+public class Country
 {
-    public class Country
+    public Countries Code { get; }
+
+    public string Name { get; }
+
+    internal Country(CountryDto dto)
     {
-        public Countries Code { get; }
-
-        public string Name { get; }
-
-        internal Country(CountryDto dto)
-        {
-            Code = Enum.Parse<Countries>(dto.Code);
-            Name = dto.Name;
-        }
+        Code = Enum.Parse<Countries>(dto.Code);
+        Name = dto.Name;
     }
 }

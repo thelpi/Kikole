@@ -1,0 +1,1547 @@
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+SET NAMES utf8mb4;
+CREATE DATABASE IF NOT EXISTS kikole DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE kikole;
+
+CREATE TABLE badges (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci NOT NULL,
+  hidden tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date) VALUES
+(1, 'Your first success', 'Find your first kikolé', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(2, 'Halfway to the top', 'Find the kikolé while getting 500 points or more', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(3, 'IT\'S OVER 900', 'Find the kikolé while getting 900 points or more', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(4, 'Archaeology', 'Find a kikolé born before 1970', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(5, 'Three in a row', 'Find three kikolés in a row (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(6, 'A week in a row', 'Find seven kikolés in a row (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(7, 'Stay up late', 'Find a kikolé before 2 AM', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(8, 'Saved by the bell', 'Find a kikolé between 11 PM and midnight', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(9, 'Caca, Café, Clope, Kikolé', 'Find a kikolé between 5AM and 8AM', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(10, 'Over the top, part 1', 'Find the kikolé before everyone else', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(11, 'Over the top, part 2', 'Find the kikolé with more points than everyone else', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(12, 'Legend tier', 'Find 30 kikolés in a row (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(13, 'World war II', 'Find a kikolé born before 1940', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(14, 'Make it double', 'Score 1000 points twice in a row (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(15, 'Do it yourself', 'Submit a kikolé', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(16, 'Four Four two', 'Find enough kikolés to create a 442 formation + goalkeeper', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(17, 'Around the world', 'Find kikolés from 20 countries', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(18, 'Wooden spoon', 'Find a kikolé without scoring points', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(19, 'We are kikolé', 'Submit 5 kikolés', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(20, 'Wikipedia screenshot', 'Find a kikolé solely with club submissions prior (at least one)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(21, 'Passport check', 'Find a kikolé without any club submission prior', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(22, 'Everything not lost', 'Find a kikolé without any correct submission prior (at least one incorrect)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(23, 'I\'m feeling lucky', 'Find the kikolé just by submitting his name', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(24, 'Dedicated', 'Search 30 kikolés in a row (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(25, 'Hell of a week', 'Score 6666 points or more in a week (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(26, 'The Breakfast Club', 'Find 7 kikolés in a row before 9AM (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(27, 'Métro, boulot, kikolé, dodo', 'Find 7 kikolés in a row after 9PM (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(28, 'OneMinuteChrono', 'Find the kikolé and every piece of information, without error and without the easy clue, in less than a minute, counting from the first information found. The kikolé must have at least 5 clubs.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41');
+
+CREATE TABLE badge_translations (
+  badge_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO badge_translations (badge_id, language_id, description) VALUES
+(1, 2, 'Trouvez votre premier Kikolé'),
+(2, 2, 'Trouvez votre premier kikolé en 500 points ou plus'),
+(3, 2, 'Trouvez votre premier kikolé en 900 points ou plus'),
+(4, 2, 'Trouvez un kikolé né avant 1970'),
+(5, 2, 'Trouvez 3 kikolés à la suite (soumissions ignorées)'),
+(6, 2, 'Trouvez 7 kikolés à la suite (soumissions ignorées)'),
+(7, 2, 'Trouvez un kikolé avant 2 heures du matin'),
+(8, 2, 'Trouvez un kikolé après 23 heures'),
+(9, 2, 'Trouvez un kikolé entre 5 et 8 heures du matin'),
+(10, 2, 'Trouvez le kikolé le premier'),
+(11, 2, 'Trouvez le kikolé avec plus de points que vos adversaires'),
+(12, 2, 'Trouvez 30 kikolés à la suite (soumissions ignorées)'),
+(13, 2, 'Trouvez un kikolé né avant 1940'),
+(14, 2, 'Obtenez 1000 points deux fois d\'affilée (soumissions ignorées)'),
+(15, 2, 'Proposez un kikolé'),
+(16, 2, 'Trouvez suffisamment de kikolés pour former une composition 442 + gardien de but'),
+(17, 2, 'Trouvez des kikolés de 20 pays différents'),
+(18, 2, 'Trouvez un kikolé sans marquer de points'),
+(19, 2, 'Proposez 5 kikolés'),
+(20, 2, 'Trouvez un kikolé en ne soumettant que des clubs au préalable (au moins un)'),
+(21, 2, 'Trouvez un kikolé sans soumettre de clubs au préalable'),
+(22, 2, 'Trouvez un kikolé en ne soumettant que des propositions incorrectes au préalable (au moins une)'),
+(23, 2, 'Trouvez le kikolé juste en soumettant son nom'),
+(24, 2, 'Cherchez 30 kikolés à la suite (soumissions ignorées)'),
+(25, 2, 'Faites 6666 points ou plus sur 7 jours (soumissions ignorées)'),
+(26, 2, 'Trouvez 7 kikolés à la suite avant 9 heures (soumissions ignorées)'),
+(27, 2, 'Trouvez 7 kikolés à la suite après 21 heures (soumissions ignorées)'),
+(28, 2, 'Trouvez un kikolé avec toutes ses informations, sans erreur et sans l\'indice facile, en moins d\'une minute. Le compte à rebours commence à partir de la première information trouvée. Le kikolé doit avoir une carrière d\'au moins 5 clubs.');
+
+CREATE TABLE clubs (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  country_id bigint(20) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+-- Ligue 1 + Ligue 2 (saison 2025-26), source Wikipedia. country_id 77 = France (enum
+-- Countries) pour les 36 ; AS Monaco (id 10) y est inclus malgre sa souverainete propre,
+-- car affilie a la FFF et engage en Ligue 1 - voir TODO.md pour la nuance FIFA/ONU a
+-- revisiter plus tard.
+INSERT INTO clubs (id, `name`, country_id, creation_date) VALUES
+(1,  'Angers SCO', 77, '2026-09-04 00:00:00'),
+(2,  'AJ Auxerre', 77, '2026-09-04 00:00:00'),
+(3,  'Stade Brestois 29', 77, '2026-09-04 00:00:00'),
+(4,  'Le Havre AC', 77, '2026-09-04 00:00:00'),
+(5,  'RC Lens', 77, '2026-09-04 00:00:00'),
+(6,  'Lille OSC', 77, '2026-09-04 00:00:00'),
+(7,  'FC Lorient', 77, '2026-09-04 00:00:00'),
+(8,  'Olympique Lyonnais', 77, '2026-09-04 00:00:00'),
+(9,  'Olympique de Marseille', 77, '2026-09-04 00:00:00'),
+(10, 'AS Monaco', 77, '2026-09-04 00:00:00'),
+(11, 'FC Nantes', 77, '2026-09-04 00:00:00'),
+(12, 'OGC Nice', 77, '2026-09-04 00:00:00'),
+(13, 'Paris Saint-Germain', 77, '2026-09-04 00:00:00'),
+(14, 'Stade Rennais', 77, '2026-09-04 00:00:00'),
+(15, 'RC Strasbourg Alsace', 77, '2026-09-04 00:00:00'),
+(16, 'Toulouse FC', 77, '2026-09-04 00:00:00'),
+(17, 'FC Metz', 77, '2026-09-04 00:00:00'),
+(18, 'Paris FC', 77, '2026-09-04 00:00:00'),
+(19, 'Amiens SC', 77, '2026-09-04 00:00:00'),
+(20, 'FC Annecy', 77, '2026-09-04 00:00:00'),
+(21, 'SC Bastia', 77, '2026-09-04 00:00:00'),
+(22, 'US Boulogne', 77, '2026-09-04 00:00:00'),
+(23, 'Clermont Foot', 77, '2026-09-04 00:00:00'),
+(24, 'USL Dunkerque', 77, '2026-09-04 00:00:00'),
+(25, 'Grenoble Foot 38', 77, '2026-09-04 00:00:00'),
+(26, 'En Avant Guingamp', 77, '2026-09-04 00:00:00'),
+(27, 'Stade Lavallois', 77, '2026-09-04 00:00:00'),
+(28, 'Le Mans FC', 77, '2026-09-04 00:00:00'),
+(29, 'Montpellier HSC', 77, '2026-09-04 00:00:00'),
+(30, 'AS Nancy Lorraine', 77, '2026-09-04 00:00:00'),
+(31, 'Pau FC', 77, '2026-09-04 00:00:00'),
+(32, 'Red Star FC', 77, '2026-09-04 00:00:00'),
+(33, 'Stade de Reims', 77, '2026-09-04 00:00:00'),
+(34, 'Rodez AF', 77, '2026-09-04 00:00:00'),
+(35, 'AS Saint-Étienne', 77, '2026-09-04 00:00:00'),
+(36, 'ES Troyes AC', 77, '2026-09-04 00:00:00'),
+(37, 'Girondins de Bordeaux', 77, '2026-09-04 00:00:00'),
+(38, 'FC Sochaux-Montbéliard', 77, '2026-09-04 00:00:00'),
+(39, 'Nîmes Olympique', 77, '2026-09-04 00:00:00'),
+(40, 'AC Ajaccio', 77, '2026-09-04 00:00:00'),
+(41, 'LB Châteauroux', 77, '2026-09-04 00:00:00'),
+(42, 'CS Sedan Ardennes', 77, '2026-09-04 00:00:00'),
+(43, 'Valenciennes FC', 77, '2026-09-04 00:00:00'),
+(44, 'GFC Ajaccio', 77, '2026-09-04 00:00:00'),
+(45, 'Évian Thonon Gaillard FC', 77, '2026-09-04 00:00:00'),
+(46, 'US Créteil-Lusitanos', 77, '2026-09-04 00:00:00'),
+(47, 'Istres Football Club', 77, '2026-09-04 00:00:00'),
+(48, 'Racing Club de France', 77, '2026-09-04 00:00:00'),
+(49, 'Stade Malherbe Caen', 77, '2026-09-04 00:00:00'),
+(50, 'FC Gueugnon', 77, '2026-09-04 00:00:00'),
+(51, 'Dijon FCO', 77, '2026-09-04 00:00:00'),
+(52, 'US Orléans', 77, '2026-09-04 00:00:00'),
+(53, 'FC Sète 34', 77, '2026-09-04 00:00:00'),
+(54, 'FC Martigues', 77, '2026-09-04 00:00:00'),
+(55, 'FC Rouen', 77, '2026-09-04 00:00:00'),
+(56, 'Excelsior AC', 77, '2026-09-04 00:00:00'),
+(57, 'FC Antibes', 77, '2026-09-04 00:00:00'),
+(58, 'Olympique d''Alès en Cévennes', 77, '2026-09-04 00:00:00'),
+(59, 'FC Mulhouse', 77, '2026-09-04 00:00:00'),
+(60, 'Limoges Football', 77, '2026-09-04 00:00:00'),
+(61, 'Angoulême Charente FC', 77, '2026-09-04 00:00:00'),
+(62, 'SR Colmar', 77, '2026-09-04 00:00:00'),
+(63, 'CA Paris-Charenton', 77, '2026-09-04 00:00:00'),
+(64, 'AC Avignonnais', 77, '2026-09-04 00:00:00'),
+(65, 'AS Aix-en-Provence', 77, '2026-09-04 00:00:00'),
+(66, 'Hyères FC', 77, '2026-09-04 00:00:00'),
+(67, 'Stade Français', 77, '2026-09-04 00:00:00'),
+(68, 'Athletic Club Arlésien', 77, '2026-09-04 00:00:00'),
+(69, 'Chamois Niortais FC', 77, '2026-09-04 00:00:00'),
+(70, 'AS Cannes', 77, '2026-09-04 00:00:00'),
+(71, 'AS Béziers', 77, '2026-09-04 00:00:00'),
+(72, 'SC Toulon', 77, '2026-09-04 00:00:00'),
+(73, 'Tours FC', 77, '2026-09-04 00:00:00'),
+(74, 'Racing Besançon', 77, '2026-09-04 00:00:00'),
+(75, 'AS Beauvais Oise', 77, '2026-09-04 00:00:00'),
+(76, 'Louhans-Cuiseaux FC', 77, '2026-09-04 00:00:00'),
+(77, 'Quimper Kerfeunteun FC', 77, '2026-09-04 00:00:00'),
+(78, 'Chaumont FC', 77, '2026-09-04 00:00:00'),
+(79, 'Olympique de Valence', 77, '2026-09-04 00:00:00'),
+(80, 'Bourges 18', 77, '2026-09-04 00:00:00'),
+(81, 'Montluçon Football', 77, '2026-09-04 00:00:00'),
+(82, 'SAS Épinal', 77, '2026-09-04 00:00:00'),
+(83, 'SC Abbeville', 77, '2026-09-04 00:00:00'),
+(84, 'RC Fontainebleau', 77, '2026-09-04 00:00:00'),
+-- Italie (Serie A + Serie B saison 2001-02, source Championship Manager 01/02 club.dat,
+-- noms canoniques EN tels quels ; noms/alias FR issus de eng.lng/fra.lng du meme jeu
+-- quand une traduction existe reellement, sinon identiques a l'EN).
+(85,  'Milan AC', 111, '2026-09-04 00:00:00'),
+(86,  'AS Rome', 111, '2026-09-04 00:00:00'),
+(87,  'Atalanta Bergame', 111, '2026-09-04 00:00:00'),
+(88,  'Bologne', 111, '2026-09-04 00:00:00'),
+(89,  'Brescia', 111, '2026-09-04 00:00:00'),
+(90,  'Chievo Verona', 111, '2026-09-04 00:00:00'),
+(91,  'Fiorentina', 111, '2026-09-04 00:00:00'),
+(92,  'Hellas Vérone', 111, '2026-09-04 00:00:00'),
+(93,  'Inter de Milan', 111, '2026-09-04 00:00:00'),
+(94,  'Juventus de Turin', 111, '2026-09-04 00:00:00'),
+(95,  'Lazio Rome', 111, '2026-09-04 00:00:00'),
+(96,  'Lecce', 111, '2026-09-04 00:00:00'),
+(97,  'Parme AC', 111, '2026-09-04 00:00:00'),
+(98,  'Pérouse', 111, '2026-09-04 00:00:00'),
+(99,  'Piacenza', 111, '2026-09-04 00:00:00'),
+(100, 'Turin', 111, '2026-09-04 00:00:00'),
+(101, 'Udinese', 111, '2026-09-04 00:00:00'),
+(102, 'Venise', 111, '2026-09-04 00:00:00'),
+(103, 'Ancône', 111, '2026-09-04 00:00:00'),
+(104, 'Bari', 111, '2026-09-04 00:00:00'),
+(105, 'Cagliari', 111, '2026-09-04 00:00:00'),
+(106, 'Palerme', 111, '2026-09-04 00:00:00'),
+(107, 'Cittadella Padova', 111, '2026-09-04 00:00:00'),
+(108, 'Côme', 111, '2026-09-04 00:00:00'),
+(109, 'Cosenza', 111, '2026-09-04 00:00:00'),
+(110, 'Crotone', 111, '2026-09-04 00:00:00'),
+(111, 'Empoli', 111, '2026-09-04 00:00:00'),
+(112, 'Genoa', 111, '2026-09-04 00:00:00'),
+(113, 'Messine', 111, '2026-09-04 00:00:00'),
+(114, 'Modène', 111, '2026-09-04 00:00:00'),
+(115, 'Naples', 111, '2026-09-04 00:00:00'),
+(116, 'Pistoiese', 111, '2026-09-04 00:00:00'),
+(117, 'Reggina', 111, '2026-09-04 00:00:00'),
+(118, 'Salernitana', 111, '2026-09-04 00:00:00'),
+(119, 'Sampdoria de Gênes', 111, '2026-09-04 00:00:00'),
+(120, 'Sienne', 111, '2026-09-04 00:00:00'),
+(121, 'Ternana', 111, '2026-09-04 00:00:00'),
+(122, 'Vicence', 111, '2026-09-04 00:00:00'),
+-- Italie, complement : clubs en Serie C (groupes C1/C2) en 2001-02 mais ayant un vrai
+-- passe (avant ou apres cette saison, jusqu'a 2026) en Serie A ou B. Selection non
+-- exhaustive, au cas par cas selon notoriete plutot que tous les clubs C1/C2 (~90).
+(123, 'Cesena', 111, '2026-09-04 00:00:00'),
+(124, 'Livourne', 111, '2026-09-04 00:00:00'),
+(125, 'Monza', 111, '2026-09-04 00:00:00'),
+(126, 'Padoue', 111, '2026-09-04 00:00:00'),
+(127, 'Pise', 111, '2026-09-04 00:00:00'),
+(128, 'Reggiana', 111, '2026-09-04 00:00:00'),
+(129, 'Triestina', 111, '2026-09-04 00:00:00'),
+(130, 'Trévise', 111, '2026-09-04 00:00:00'),
+(131, 'S.P.A.L.', 111, '2026-09-04 00:00:00'),
+(132, 'Varese', 111, '2026-09-04 00:00:00'),
+(133, 'Lucchese-Libertas', 111, '2026-09-04 00:00:00'),
+(134, 'Spezia 1906', 111, '2026-09-04 00:00:00'),
+(135, 'Avellino', 111, '2026-09-04 00:00:00'),
+(136, 'Catane', 111, '2026-09-04 00:00:00'),
+(137, 'Pescara', 111, '2026-09-04 00:00:00'),
+(138, 'Ascoli', 111, '2026-09-04 00:00:00'),
+(139, 'Benevento Sporting', 111, '2026-09-04 00:00:00'),
+(140, 'Cremonese', 111, '2026-09-04 00:00:00'),
+(141, 'Pro Vercelli', 111, '2026-09-04 00:00:00'),
+(142, 'Alexandrie', 111, '2026-09-04 00:00:00'),
+(143, 'Novara', 111, '2026-09-04 00:00:00'),
+(144, 'Sassuolo', 111, '2026-09-04 00:00:00'),
+(145, 'Mantova 1994', 111, '2026-09-04 00:00:00'),
+(146, 'Foggia', 111, '2026-09-04 00:00:00'),
+(147, 'Catanzaro', 111, '2026-09-04 00:00:00'),
+(148, 'Frosinone', 111, '2026-09-04 00:00:00'),
+-- Grece (Super League/Division A + Division B, saison 2001-02, meme source et methode
+-- que l'Italie). Traductions FR limitees a ce que fra.lng atteste reellement (surtout
+-- les villes : Athenes, Le Piree, Salonique) ; le reste garde son nom transliterated
+-- inchange, coherent avec l'usage des medias francophones pour le football grec.
+-- Club 153 "Ethnikos Asteras" (division A) : identite incertaine, distinct de
+-- "Ethnikos Piraeus" (division inferieure, non retenu ici) - a verifier.
+(149, 'AEK Athènes', 87, '2026-09-04 00:00:00'),
+(150, 'Aigaleo City', 87, '2026-09-04 00:00:00'),
+(151, 'Akratitos', 87, '2026-09-04 00:00:00'),
+(152, 'Aris Salonique', 87, '2026-09-04 00:00:00'),
+(153, 'Ethnikos Asteras', 87, '2026-09-04 00:00:00'),
+(154, 'Ionikos Nikeas', 87, '2026-09-04 00:00:00'),
+(155, 'Iraklis Salonique', 87, '2026-09-04 00:00:00'),
+(156, 'OFI Crete', 87, '2026-09-04 00:00:00'),
+(157, 'Olympiakos Le Pirée', 87, '2026-09-04 00:00:00'),
+(158, 'Panachaiki', 87, '2026-09-04 00:00:00'),
+(159, 'Panathinaikos', 87, '2026-09-04 00:00:00'),
+(160, 'Panionios', 87, '2026-09-04 00:00:00'),
+(161, 'PAOK Salonique', 87, '2026-09-04 00:00:00'),
+(162, 'Skoda Xanthi', 87, '2026-09-04 00:00:00'),
+(163, 'Agios Nikolaos', 87, '2026-09-04 00:00:00'),
+(164, 'Apollon Athens', 87, '2026-09-04 00:00:00'),
+(165, 'Apollon Kalamarias', 87, '2026-09-04 00:00:00'),
+(166, 'Athinaikos', 87, '2026-09-04 00:00:00'),
+(167, 'Chalkidona', 87, '2026-09-04 00:00:00'),
+(168, 'I.S. Paniliakos', 87, '2026-09-04 00:00:00'),
+(169, 'Kalamata', 87, '2026-09-04 00:00:00'),
+(170, 'Kallithea', 87, '2026-09-04 00:00:00'),
+(171, 'Olympiakos Volou', 87, '2026-09-04 00:00:00'),
+(172, 'Panaigialeios', 87, '2026-09-04 00:00:00'),
+(173, 'Panseraikos', 87, '2026-09-04 00:00:00'),
+(174, 'Pas Giannena', 87, '2026-09-04 00:00:00'),
+(175, 'Patraikos', 87, '2026-09-04 00:00:00'),
+(176, 'Proodeftiki', 87, '2026-09-04 00:00:00');
+
+CREATE TABLE club_translations (
+  club_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  priority tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+-- language_id : 1 EN, 2 FR (enum Languages). priority 0 = nom canonique (identique EN/FR
+-- pour la quasi-totalite de ces clubs francais, les noms ne se traduisent pas), priority
+-- > 0 = alias de recherche pour cette langue.
+INSERT INTO club_translations (club_id, language_id, priority, `name`) VALUES
+(1, 2, 0, 'Angers SCO'), (1, 2, 1, 'Angers'), (1, 1, 0, 'Angers SCO'), (1, 1, 1, 'Angers'),
+(2, 2, 0, 'AJ Auxerre'), (2, 2, 1, 'Auxerre'), (2, 1, 0, 'AJ Auxerre'), (2, 1, 1, 'Auxerre'),
+(3, 2, 0, 'Stade Brestois 29'), (3, 2, 1, 'Brest'), (3, 2, 2, 'Stade Brestois'), (3, 1, 0, 'Stade Brestois 29'), (3, 1, 1, 'Brest'), (3, 1, 2, 'Stade Brestois'),
+(4, 2, 0, 'Le Havre AC'), (4, 2, 1, 'Le Havre'), (4, 2, 2, 'HAC'), (4, 1, 0, 'Le Havre AC'), (4, 1, 1, 'Le Havre'), (4, 1, 2, 'HAC'),
+(5, 2, 0, 'RC Lens'), (5, 2, 1, 'Lens'), (5, 2, 2, 'Racing Club de Lens'), (5, 1, 0, 'RC Lens'), (5, 1, 1, 'Lens'),
+(6, 2, 0, 'Lille OSC'), (6, 2, 1, 'Lille'), (6, 2, 2, 'LOSC'), (6, 1, 0, 'Lille OSC'), (6, 1, 1, 'Lille'), (6, 1, 2, 'LOSC'),
+(7, 2, 0, 'FC Lorient'), (7, 2, 1, 'Lorient'), (7, 1, 0, 'FC Lorient'), (7, 1, 1, 'Lorient'),
+(8, 2, 0, 'Olympique Lyonnais'), (8, 2, 1, 'Lyon'), (8, 2, 2, 'OL'), (8, 1, 0, 'Olympique Lyonnais'), (8, 1, 1, 'Lyon'), (8, 1, 2, 'OL'),
+(9, 2, 0, 'Olympique de Marseille'), (9, 2, 1, 'Marseille'), (9, 2, 2, 'OM'), (9, 1, 0, 'Olympique de Marseille'), (9, 1, 1, 'Marseille'), (9, 1, 2, 'OM'),
+(10, 2, 0, 'AS Monaco'), (10, 2, 1, 'Monaco'), (10, 2, 2, 'ASM'), (10, 1, 0, 'AS Monaco'), (10, 1, 1, 'AS Monaco FC'), (10, 1, 2, 'Monaco'),
+(11, 2, 0, 'FC Nantes'), (11, 2, 1, 'Nantes'), (11, 1, 0, 'FC Nantes'), (11, 1, 1, 'Nantes'),
+(12, 2, 0, 'OGC Nice'), (12, 2, 1, 'Nice'), (12, 1, 0, 'OGC Nice'), (12, 1, 1, 'Nice'),
+(13, 2, 0, 'Paris Saint-Germain'), (13, 2, 1, 'PSG'), (13, 2, 2, 'Paris SG'), (13, 1, 0, 'Paris Saint-Germain'), (13, 1, 1, 'PSG'), (13, 1, 2, 'Paris SG'),
+(14, 2, 0, 'Stade Rennais'), (14, 2, 1, 'Rennes'), (14, 1, 0, 'Stade Rennais'), (14, 1, 1, 'Rennes'),
+(15, 2, 0, 'RC Strasbourg Alsace'), (15, 2, 1, 'Strasbourg'), (15, 2, 2, 'RCSA'), (15, 1, 0, 'RC Strasbourg Alsace'), (15, 1, 1, 'Strasbourg'), (15, 1, 2, 'RCSA'),
+(16, 2, 0, 'Toulouse FC'), (16, 2, 1, 'Toulouse'), (16, 2, 2, 'TFC'), (16, 1, 0, 'Toulouse FC'), (16, 1, 1, 'Toulouse'), (16, 1, 2, 'TFC'),
+(17, 2, 0, 'FC Metz'), (17, 2, 1, 'Metz'), (17, 1, 0, 'FC Metz'), (17, 1, 1, 'Metz'),
+(18, 2, 0, 'Paris FC'), (18, 1, 0, 'Paris FC'),
+(19, 2, 0, 'Amiens SC'), (19, 2, 1, 'Amiens'), (19, 1, 0, 'Amiens SC'), (19, 1, 1, 'Amiens'),
+(20, 2, 0, 'FC Annecy'), (20, 2, 1, 'Annecy'), (20, 1, 0, 'FC Annecy'), (20, 1, 1, 'Annecy'),
+(21, 2, 0, 'SC Bastia'), (21, 2, 1, 'Bastia'), (21, 1, 0, 'SC Bastia'), (21, 1, 1, 'Bastia'),
+(22, 2, 0, 'US Boulogne'), (22, 2, 1, 'Boulogne'), (22, 1, 0, 'US Boulogne'), (22, 1, 1, 'Boulogne'),
+(23, 2, 0, 'Clermont Foot'), (23, 2, 1, 'Clermont'), (23, 2, 2, 'Clermont Foot 63'), (23, 1, 0, 'Clermont Foot'), (23, 1, 1, 'Clermont'), (23, 1, 2, 'Clermont Foot 63'),
+(24, 2, 0, 'USL Dunkerque'), (24, 2, 1, 'Dunkerque'), (24, 1, 0, 'USL Dunkerque'), (24, 1, 1, 'Dunkerque'),
+(25, 2, 0, 'Grenoble Foot 38'), (25, 2, 1, 'Grenoble'), (25, 2, 2, 'GF38'), (25, 1, 0, 'Grenoble Foot 38'), (25, 1, 1, 'Grenoble'), (25, 1, 2, 'GF38'),
+(26, 2, 0, 'En Avant Guingamp'), (26, 2, 1, 'Guingamp'), (26, 2, 2, 'EAG'), (26, 1, 0, 'En Avant Guingamp'), (26, 1, 1, 'Guingamp'), (26, 1, 2, 'EAG'),
+(27, 2, 0, 'Stade Lavallois'), (27, 2, 1, 'Laval'), (27, 1, 0, 'Stade Lavallois'), (27, 1, 1, 'Laval'),
+(28, 2, 0, 'Le Mans FC'), (28, 2, 1, 'Le Mans'), (28, 1, 0, 'Le Mans FC'), (28, 1, 1, 'Le Mans'),
+(29, 2, 0, 'Montpellier HSC'), (29, 2, 1, 'Montpellier'), (29, 2, 2, 'MHSC'), (29, 1, 0, 'Montpellier HSC'), (29, 1, 1, 'Montpellier'), (29, 1, 2, 'MHSC'),
+(30, 2, 0, 'AS Nancy Lorraine'), (30, 2, 1, 'Nancy'), (30, 2, 2, 'ASNL'), (30, 1, 0, 'AS Nancy Lorraine'), (30, 1, 1, 'Nancy'), (30, 1, 2, 'ASNL'),
+(31, 2, 0, 'Pau FC'), (31, 2, 1, 'Pau'), (31, 1, 0, 'Pau FC'), (31, 1, 1, 'Pau'),
+(32, 2, 0, 'Red Star FC'), (32, 2, 1, 'Red Star'), (32, 1, 0, 'Red Star FC'), (32, 1, 1, 'Red Star'),
+(33, 2, 0, 'Stade de Reims'), (33, 2, 1, 'Reims'), (33, 1, 0, 'Stade de Reims'), (33, 1, 1, 'Reims'),
+(34, 2, 0, 'Rodez AF'), (34, 2, 1, 'Rodez'), (34, 1, 0, 'Rodez AF'), (34, 1, 1, 'Rodez'),
+(35, 2, 0, 'AS Saint-Étienne'), (35, 2, 1, 'Saint-Étienne'), (35, 2, 2, 'ASSE'), (35, 1, 0, 'AS Saint-Étienne'), (35, 1, 1, 'Saint-Étienne'), (35, 1, 2, 'ASSE'),
+(36, 2, 0, 'ES Troyes AC'), (36, 2, 1, 'Troyes'), (36, 2, 2, 'ESTAC'), (36, 1, 0, 'ES Troyes AC'), (36, 1, 1, 'Troyes'), (36, 1, 2, 'ESTAC'),
+(37, 2, 0, 'Girondins de Bordeaux'), (37, 2, 1, 'Bordeaux'), (37, 2, 2, 'FCGB'), (37, 1, 0, 'Girondins de Bordeaux'), (37, 1, 1, 'Bordeaux'), (37, 1, 2, 'FCGB'),
+(38, 2, 0, 'FC Sochaux-Montbéliard'), (38, 2, 1, 'Sochaux'), (38, 2, 2, 'FCSM'), (38, 1, 0, 'FC Sochaux-Montbéliard'), (38, 1, 1, 'Sochaux'), (38, 1, 2, 'FCSM'),
+(39, 2, 0, 'Nîmes Olympique'), (39, 2, 1, 'Nîmes'), (39, 1, 0, 'Nîmes Olympique'), (39, 1, 1, 'Nîmes'),
+(40, 2, 0, 'AC Ajaccio'), (40, 2, 1, 'Ajaccio'), (40, 2, 2, 'ACA'), (40, 1, 0, 'AC Ajaccio'), (40, 1, 1, 'Ajaccio'), (40, 1, 2, 'ACA'),
+(41, 2, 0, 'LB Châteauroux'), (41, 2, 1, 'Châteauroux'), (41, 1, 0, 'LB Châteauroux'), (41, 1, 1, 'Châteauroux'),
+(42, 2, 0, 'CS Sedan Ardennes'), (42, 2, 1, 'Sedan'), (42, 1, 0, 'CS Sedan Ardennes'), (42, 1, 1, 'Sedan'),
+(43, 2, 0, 'Valenciennes FC'), (43, 2, 1, 'Valenciennes'), (43, 2, 2, 'VAFC'), (43, 1, 0, 'Valenciennes FC'), (43, 1, 1, 'Valenciennes'), (43, 1, 2, 'VAFC'),
+(44, 2, 0, 'GFC Ajaccio'), (44, 2, 1, 'Gazélec Ajaccio'), (44, 1, 0, 'GFC Ajaccio'), (44, 1, 1, 'Gazélec Ajaccio'),
+(45, 2, 0, 'Évian Thonon Gaillard FC'), (45, 2, 1, 'ETG'), (45, 2, 2, 'Evian TG'), (45, 1, 0, 'Évian Thonon Gaillard FC'), (45, 1, 1, 'ETG'), (45, 1, 2, 'Evian TG'),
+(46, 2, 0, 'US Créteil-Lusitanos'), (46, 2, 1, 'US Créteil'), (46, 2, 2, 'Créteil'), (46, 1, 0, 'US Créteil-Lusitanos'), (46, 1, 1, 'US Créteil'), (46, 1, 2, 'Créteil'),
+(47, 2, 0, 'Istres Football Club'), (47, 2, 1, 'FC Istres Ouest Provence'), (47, 2, 2, 'Istres'), (47, 1, 0, 'Istres Football Club'), (47, 1, 1, 'FC Istres Ouest Provence'), (47, 1, 2, 'Istres'),
+-- Racing Club de France : une seule entree malgre les nombreux changements de nom
+-- (1896-2018), tous en alias de recherche, sans les annees (non pertinentes pour
+-- l'autocompletion). Fourni par l'utilisateur, base connaissance precise du club.
+(48, 2, 0, 'Racing Club de France'), (48, 2, 1, 'Racing Club de Paris'), (48, 2, 2, 'Matra Racing'), (48, 2, 3, 'Racing Paris 1'), (48, 2, 4, 'Racing 92'), (48, 2, 5, 'RC France 92'), (48, 2, 6, 'RC France football 92'), (48, 2, 7, 'RC France football-Levallois 92'), (48, 2, 8, 'RC France football Colombes 92'),
+(48, 1, 0, 'Racing Club de France'), (48, 1, 1, 'Racing Club de Paris'), (48, 1, 2, 'Matra Racing'), (48, 1, 3, 'Racing Paris 1'), (48, 1, 4, 'Racing 92'), (48, 1, 5, 'RC France 92'), (48, 1, 6, 'RC France football 92'), (48, 1, 7, 'RC France football-Levallois 92'), (48, 1, 8, 'RC France football Colombes 92'),
+(49, 2, 0, 'Stade Malherbe Caen'), (49, 2, 1, 'Caen'), (49, 2, 2, 'SM Caen'), (49, 1, 0, 'Stade Malherbe Caen'), (49, 1, 1, 'Caen'), (49, 1, 2, 'SM Caen'),
+(50, 2, 0, 'FC Gueugnon'), (50, 2, 1, 'Gueugnon'), (50, 1, 0, 'FC Gueugnon'), (50, 1, 1, 'Gueugnon'),
+(51, 2, 0, 'Dijon FCO'), (51, 2, 1, 'Dijon'), (51, 1, 0, 'Dijon FCO'), (51, 1, 1, 'Dijon'),
+(52, 2, 0, 'US Orléans'), (52, 2, 1, 'Orléans'), (52, 1, 0, 'US Orléans'), (52, 1, 1, 'Orléans'),
+(53, 2, 0, 'FC Sète 34'), (53, 2, 1, 'Sète'), (53, 2, 2, 'Sporting Club Sétois'), (53, 1, 0, 'FC Sète 34'), (53, 1, 1, 'Sète'), (53, 1, 2, 'Sporting Club Sétois'),
+(54, 2, 0, 'FC Martigues'), (54, 2, 1, 'Martigues'), (54, 1, 0, 'FC Martigues'), (54, 1, 1, 'Martigues'),
+(55, 2, 0, 'FC Rouen'), (55, 2, 1, 'Rouen'), (55, 1, 0, 'FC Rouen'), (55, 1, 1, 'Rouen'),
+(56, 2, 0, 'Excelsior AC'), (56, 2, 1, 'Excelsior Roubaix'), (56, 1, 0, 'Excelsior AC'), (56, 1, 1, 'Excelsior Roubaix'),
+(57, 2, 0, 'FC Antibes'), (57, 2, 1, 'Antibes'), (57, 1, 0, 'FC Antibes'), (57, 1, 1, 'Antibes'),
+(58, 2, 0, 'Olympique d''Alès en Cévennes'), (58, 2, 1, 'Alès'), (58, 2, 2, 'Olympique Alès'), (58, 1, 0, 'Olympique d''Alès en Cévennes'), (58, 1, 1, 'Alès'), (58, 1, 2, 'Olympique Alès'),
+(59, 2, 0, 'FC Mulhouse'), (59, 2, 1, 'Mulhouse'), (59, 1, 0, 'FC Mulhouse'), (59, 1, 1, 'Mulhouse'),
+(60, 2, 0, 'Limoges Football'), (60, 2, 1, 'Limoges'), (60, 1, 0, 'Limoges Football'), (60, 1, 1, 'Limoges'),
+(61, 2, 0, 'Angoulême Charente FC'), (61, 2, 1, 'Angoulême'), (61, 1, 0, 'Angoulême Charente FC'), (61, 1, 1, 'Angoulême'),
+(62, 2, 0, 'SR Colmar'), (62, 2, 1, 'Colmar'), (62, 1, 0, 'SR Colmar'), (62, 1, 1, 'Colmar'),
+(63, 2, 0, 'CA Paris-Charenton'), (63, 2, 1, 'Paris-Charenton'), (63, 1, 0, 'CA Paris-Charenton'), (63, 1, 1, 'Paris-Charenton'),
+(64, 2, 0, 'AC Avignonnais'), (64, 2, 1, 'Avignon'), (64, 1, 0, 'AC Avignonnais'), (64, 1, 1, 'Avignon'),
+(65, 2, 0, 'AS Aix-en-Provence'), (65, 2, 1, 'Aix-en-Provence'), (65, 1, 0, 'AS Aix-en-Provence'), (65, 1, 1, 'Aix-en-Provence'),
+(66, 2, 0, 'Hyères FC'), (66, 2, 1, 'Hyères'), (66, 1, 0, 'Hyères FC'), (66, 1, 1, 'Hyères'),
+(67, 2, 0, 'Stade Français'), (67, 2, 1, 'Stade Français Paris'), (67, 1, 0, 'Stade Français'), (67, 1, 1, 'Stade Français Paris'),
+(68, 2, 0, 'Athletic Club Arlésien'), (68, 2, 1, 'AC Arles'), (68, 2, 2, 'AC Arles-Avignon'), (68, 1, 0, 'Athletic Club Arlésien'), (68, 1, 1, 'AC Arles'), (68, 1, 2, 'AC Arles-Avignon'),
+(69, 2, 0, 'Chamois Niortais FC'), (69, 2, 1, 'Chamois Niortais'), (69, 2, 2, 'Niort'), (69, 1, 0, 'Chamois Niortais FC'), (69, 1, 1, 'Chamois Niortais'), (69, 1, 2, 'Niort'),
+(70, 2, 0, 'AS Cannes'), (70, 2, 1, 'Cannes'), (70, 1, 0, 'AS Cannes'), (70, 1, 1, 'Cannes'),
+(71, 2, 0, 'AS Béziers'), (71, 2, 1, 'Béziers'), (71, 1, 0, 'AS Béziers'), (71, 1, 1, 'Béziers'),
+(72, 2, 0, 'SC Toulon'), (72, 2, 1, 'Toulon'), (72, 2, 2, 'Sporting Toulon Var'), (72, 1, 0, 'SC Toulon'), (72, 1, 1, 'Toulon'), (72, 1, 2, 'Sporting Toulon Var'),
+(73, 2, 0, 'Tours FC'), (73, 2, 1, 'Tours'), (73, 1, 0, 'Tours FC'), (73, 1, 1, 'Tours'),
+(74, 2, 0, 'Racing Besançon'), (74, 2, 1, 'Besançon'), (74, 1, 0, 'Racing Besançon'), (74, 1, 1, 'Besançon'),
+(75, 2, 0, 'AS Beauvais Oise'), (75, 2, 1, 'Beauvais'), (75, 1, 0, 'AS Beauvais Oise'), (75, 1, 1, 'Beauvais'),
+(76, 2, 0, 'Louhans-Cuiseaux FC'), (76, 2, 1, 'Louhans-Cuiseaux'), (76, 1, 0, 'Louhans-Cuiseaux FC'), (76, 1, 1, 'Louhans-Cuiseaux'),
+(77, 2, 0, 'Quimper Kerfeunteun FC'), (77, 2, 1, 'Quimper'), (77, 1, 0, 'Quimper Kerfeunteun FC'), (77, 1, 1, 'Quimper'),
+(78, 2, 0, 'Chaumont FC'), (78, 2, 1, 'Chaumont'), (78, 1, 0, 'Chaumont FC'), (78, 1, 1, 'Chaumont'),
+(79, 2, 0, 'Olympique de Valence'), (79, 2, 1, 'Valence'), (79, 1, 0, 'Olympique de Valence'), (79, 1, 1, 'Valence'),
+(80, 2, 0, 'Bourges 18'), (80, 2, 1, 'Bourges'), (80, 1, 0, 'Bourges 18'), (80, 1, 1, 'Bourges'),
+(81, 2, 0, 'Montluçon Football'), (81, 2, 1, 'Montluçon'), (81, 1, 0, 'Montluçon Football'), (81, 1, 1, 'Montluçon'),
+(82, 2, 0, 'SAS Épinal'), (82, 2, 1, 'Épinal'), (82, 1, 0, 'SAS Épinal'), (82, 1, 1, 'Épinal'),
+(83, 2, 0, 'SC Abbeville'), (83, 2, 1, 'Abbeville'), (83, 1, 0, 'SC Abbeville'), (83, 1, 1, 'Abbeville'),
+(84, 2, 0, 'RC Fontainebleau'), (84, 2, 1, 'Fontainebleau'), (84, 1, 0, 'RC Fontainebleau'), (84, 1, 1, 'Fontainebleau'),
+(85, 2, 0, 'Milan AC'), (85, 2, 1, 'Milan'), (85, 2, 2, 'AC Milan'), (85, 1, 0, 'AC Milan'), (85, 1, 1, 'Milan'),
+(86, 2, 0, 'AS Rome'), (86, 2, 1, 'Roma'), (86, 1, 0, 'AS Roma'), (86, 1, 1, 'Roma'),
+(87, 2, 0, 'Atalanta Bergame'), (87, 2, 1, 'Atalanta'), (87, 1, 0, 'Atalanta'), (87, 1, 1, 'Atalanta Bergamo'),
+(88, 2, 0, 'Bologne'), (88, 2, 1, 'Bologna'), (88, 1, 0, 'Bologna 1909'), (88, 1, 1, 'Bologna'),
+(89, 2, 0, 'Brescia'), (89, 1, 0, 'Brescia'),
+(90, 2, 0, 'Chievo Verona'), (90, 2, 1, 'Chievo'), (90, 1, 0, 'Chievo Verona'), (90, 1, 1, 'Chievo'),
+(91, 2, 0, 'Fiorentina'), (91, 1, 0, 'Fiorentina'),
+(92, 2, 0, 'Hellas Vérone'), (92, 2, 1, 'Vérone'), (92, 2, 2, 'Hellas Verona'), (92, 1, 0, 'Hellas Verona'), (92, 1, 1, 'Verona'),
+(93, 2, 0, 'Inter de Milan'), (93, 2, 1, 'Inter Milan'), (93, 2, 2, 'Inter'), (93, 1, 0, 'Internazionale'), (93, 1, 1, 'Inter'), (93, 1, 2, 'Inter Milan'),
+(94, 2, 0, 'Juventus de Turin'), (94, 2, 1, 'Juventus'), (94, 1, 0, 'Juventus'), (94, 1, 1, 'Juventus Turin'),
+(95, 2, 0, 'Lazio Rome'), (95, 2, 1, 'Lazio'), (95, 1, 0, 'Lazio'), (95, 1, 1, 'Lazio Rome'),
+(96, 2, 0, 'Lecce'), (96, 1, 0, 'Lecce'),
+(97, 2, 0, 'Parme AC'), (97, 2, 1, 'Parme'), (97, 2, 2, 'Parma'), (97, 1, 0, 'Parma'), (97, 1, 1, 'Parma AC'),
+(98, 2, 0, 'Pérouse'), (98, 2, 1, 'Perugia'), (98, 1, 0, 'Perugia'), (98, 1, 1, 'Perugia Calcio'),
+(99, 2, 0, 'Piacenza'), (99, 1, 0, 'Piacenza'),
+(100, 2, 0, 'Turin'), (100, 2, 1, 'Torino'), (100, 1, 0, 'Torino'), (100, 1, 1, 'Turin'),
+(101, 2, 0, 'Udinese'), (101, 1, 0, 'Udinese'),
+(102, 2, 0, 'Venise'), (102, 2, 1, 'Venezia'), (102, 1, 0, 'Venezia'), (102, 1, 1, 'Venice'),
+(103, 2, 0, 'Ancône'), (103, 2, 1, 'Ancona'), (103, 1, 0, 'Ancona'), (103, 1, 1, 'Ancona'),
+(104, 2, 0, 'Bari'), (104, 1, 0, 'Bari'),
+(105, 2, 0, 'Cagliari'), (105, 1, 0, 'Cagliari'),
+(106, 2, 0, 'Palerme'), (106, 2, 1, 'Palermo'), (106, 1, 0, 'Città di Palermo'), (106, 1, 1, 'Palermo'),
+-- Cittadella Padova : nom officiel reel du club entre 2000 et 2004 (AS Cittadella
+-- Padova, "Padova" referant a la ville de Padoue voisine, pas au club distinct
+-- Calcio Padova) - confirme par l'utilisateur via Wikipedia, pas une bizarrerie
+-- de la source club.dat.
+(107, 2, 0, 'Cittadella Padova'), (107, 2, 1, 'Cittadella'), (107, 1, 0, 'Cittadella Padova'), (107, 1, 1, 'Cittadella'),
+(108, 2, 0, 'Côme'), (108, 2, 1, 'Como'), (108, 1, 0, 'Como'), (108, 1, 1, 'Como'),
+(109, 2, 0, 'Cosenza'), (109, 1, 0, 'Cosenza'),
+(110, 2, 0, 'Crotone'), (110, 1, 0, 'Crotone'),
+(111, 2, 0, 'Empoli'), (111, 1, 0, 'Empoli'),
+(112, 2, 0, 'Genoa'), (112, 1, 0, 'Genoa'),
+(113, 2, 0, 'Messine'), (113, 2, 1, 'Messina'), (113, 1, 0, 'Messina'), (113, 1, 1, 'Messina'),
+(114, 2, 0, 'Modène'), (114, 2, 1, 'Modena'), (114, 1, 0, 'Modena'), (114, 1, 1, 'Modena'),
+(115, 2, 0, 'Naples'), (115, 2, 1, 'Napoli'), (115, 1, 0, 'Napoli'), (115, 1, 1, 'Napoli'),
+(116, 2, 0, 'Pistoiese'), (116, 1, 0, 'Pistoiese'),
+(117, 2, 0, 'Reggina'), (117, 1, 0, 'Reggina'),
+(118, 2, 0, 'Salernitana'), (118, 1, 0, 'Salernitana'),
+(119, 2, 0, 'Sampdoria de Gênes'), (119, 2, 1, 'Sampdoria'), (119, 1, 0, 'Sampdoria'), (119, 1, 1, 'Sampdoria Genoa'),
+(120, 2, 0, 'Sienne'), (120, 2, 1, 'Siena'), (120, 1, 0, 'Siena'), (120, 1, 1, 'Siena'),
+(121, 2, 0, 'Ternana'), (121, 1, 0, 'Ternana'),
+(122, 2, 0, 'Vicence'), (122, 2, 1, 'Vicenza'), (122, 1, 0, 'Vicenza'), (122, 1, 1, 'Vicenza'),
+(123, 2, 0, 'Cesena'), (123, 1, 0, 'Cesena'),
+(124, 2, 0, 'Livourne'), (124, 2, 1, 'Livorno'), (124, 1, 0, 'Livorno'),
+(125, 2, 0, 'Monza'), (125, 1, 0, 'Monza'),
+(126, 2, 0, 'Padoue'), (126, 2, 1, 'Padova'), (126, 1, 0, 'Padova'),
+(127, 2, 0, 'Pise'), (127, 2, 1, 'Pisa'), (127, 1, 0, 'Pisa'),
+(128, 2, 0, 'Reggiana'), (128, 1, 0, 'Reggiana'),
+(129, 2, 0, 'Triestina'), (129, 1, 0, 'Triestina'),
+(130, 2, 0, 'Trévise'), (130, 2, 1, 'Treviso'), (130, 1, 0, 'Treviso'),
+(131, 2, 0, 'S.P.A.L.'), (131, 2, 1, 'Spal'), (131, 1, 0, 'S.P.A.L.'), (131, 1, 1, 'Spal'),
+(132, 2, 0, 'Varese'), (132, 1, 0, 'Varese'),
+(133, 2, 0, 'Lucchese-Libertas'), (133, 2, 1, 'Lucchese'), (133, 1, 0, 'Lucchese-Libertas'), (133, 1, 1, 'Lucchese'),
+(134, 2, 0, 'Spezia 1906'), (134, 2, 1, 'Spezia'), (134, 1, 0, 'Spezia 1906'), (134, 1, 1, 'Spezia'),
+(135, 2, 0, 'Avellino'), (135, 1, 0, 'Avellino'),
+(136, 2, 0, 'Catane'), (136, 2, 1, 'Catania'), (136, 1, 0, 'Catania'),
+(137, 2, 0, 'Pescara'), (137, 1, 0, 'Pescara'),
+(138, 2, 0, 'Ascoli'), (138, 1, 0, 'Ascoli'),
+(139, 2, 0, 'Benevento Sporting'), (139, 2, 1, 'Benevento'), (139, 1, 0, 'Benevento Sporting'), (139, 1, 1, 'Benevento'),
+(140, 2, 0, 'Cremonese'), (140, 1, 0, 'Cremonese'),
+(141, 2, 0, 'Pro Vercelli'), (141, 1, 0, 'Pro Vercelli'),
+(142, 2, 0, 'Alexandrie'), (142, 2, 1, 'Alessandria'), (142, 1, 0, 'Alessandria'),
+(143, 2, 0, 'Novara'), (143, 1, 0, 'Novara'),
+(144, 2, 0, 'Sassuolo'), (144, 1, 0, 'Sassuolo'),
+(145, 2, 0, 'Mantova 1994'), (145, 2, 1, 'Mantova'), (145, 1, 0, 'Mantova 1994'), (145, 1, 1, 'Mantova'),
+(146, 2, 0, 'Foggia'), (146, 1, 0, 'Foggia'),
+(147, 2, 0, 'Catanzaro'), (147, 1, 0, 'Catanzaro'),
+(148, 2, 0, 'Frosinone'), (148, 1, 0, 'Frosinone'),
+(149, 2, 0, 'AEK Athènes'), (149, 2, 1, 'AEK'), (149, 1, 0, 'AEK Athens'), (149, 1, 1, 'AEK'),
+(150, 2, 0, 'Aigaleo City'), (150, 2, 1, 'Aigaleo'), (150, 1, 0, 'Aigaleo City'), (150, 1, 1, 'Aigaleo'),
+(151, 2, 0, 'Akratitos'), (151, 1, 0, 'Akratitos'),
+(152, 2, 0, 'Aris Salonique'), (152, 2, 1, 'Aris'), (152, 1, 0, 'Aris Salonika'), (152, 1, 1, 'Aris'),
+(153, 2, 0, 'Ethnikos Asteras'), (153, 2, 1, 'Eth. Asteras'), (153, 1, 0, 'Ethnikos Asteras'), (153, 1, 1, 'Eth. Asteras'),
+(154, 2, 0, 'Ionikos Nikeas'), (154, 2, 1, 'Ionikos'), (154, 1, 0, 'Ionikos Nikeas'), (154, 1, 1, 'Ionikos'),
+(155, 2, 0, 'Iraklis Salonique'), (155, 2, 1, 'Iraklis'), (155, 1, 0, 'Iraklis Salonika'), (155, 1, 1, 'Iraklis'),
+(156, 2, 0, 'OFI Crete'), (156, 2, 1, 'OFI'), (156, 1, 0, 'OFI Crete'), (156, 1, 1, 'OFI'),
+(157, 2, 0, 'Olympiakos Le Pirée'), (157, 2, 1, 'Olympiakos'), (157, 1, 0, 'Olympiakos Piraeus'), (157, 1, 1, 'Olympiakos'),
+(158, 2, 0, 'Panachaiki'), (158, 1, 0, 'Panachaiki'),
+(159, 2, 0, 'Panathinaikos'), (159, 2, 1, 'PAO'), (159, 1, 0, 'Panathinaikos'), (159, 1, 1, 'PAO'),
+(160, 2, 0, 'Panionios'), (160, 1, 0, 'Panionios'),
+(161, 2, 0, 'PAOK Salonique'), (161, 2, 1, 'PAOK'), (161, 1, 0, 'PAOK Salonika'), (161, 1, 1, 'PAOK'),
+(162, 2, 0, 'Skoda Xanthi'), (162, 2, 1, 'Xanthi'), (162, 1, 0, 'Skoda Xanthi'), (162, 1, 1, 'Xanthi'),
+(163, 2, 0, 'Agios Nikolaos'), (163, 2, 1, 'AOAN'), (163, 1, 0, 'Agios Nikolaos'), (163, 1, 1, 'AOAN'),
+(164, 2, 0, 'Apollon Athens'), (164, 2, 1, 'Apollon'), (164, 1, 0, 'Apollon Athens'), (164, 1, 1, 'Apollon'),
+(165, 2, 0, 'Apollon Kalamarias'), (165, 2, 1, 'Kalamaria'), (165, 1, 0, 'Apollon Kalamarias'), (165, 1, 1, 'Kalamaria'),
+(166, 2, 0, 'Athinaikos'), (166, 1, 0, 'Athinaikos'),
+(167, 2, 0, 'Chalkidona'), (167, 1, 0, 'Chalkidona'),
+(168, 2, 0, 'I.S. Paniliakos'), (168, 2, 1, 'Paniliakos'), (168, 1, 0, 'I.S. Paniliakos'), (168, 1, 1, 'Paniliakos'),
+(169, 2, 0, 'Kalamata'), (169, 1, 0, 'Kalamata'),
+(170, 2, 0, 'Kallithea'), (170, 1, 0, 'Kallithea'),
+(171, 2, 0, 'Olympiakos Volou'), (171, 2, 1, 'Olympiakos Volos'), (171, 1, 0, 'Olympiakos Volou'), (171, 1, 1, 'Olympiakos Volos'),
+(172, 2, 0, 'Panaigialeios'), (172, 2, 1, 'Aigio'), (172, 1, 0, 'Panaigialeios'), (172, 1, 1, 'Aigio'),
+(173, 2, 0, 'Panseraikos'), (173, 2, 1, 'Serres'), (173, 1, 0, 'Panseraikos'), (173, 1, 1, 'Serres'),
+(174, 2, 0, 'Pas Giannena'), (174, 2, 1, 'Giannena'), (174, 2, 2, 'PAS Giannina'), (174, 1, 0, 'Pas Giannena'), (174, 1, 1, 'Giannena'), (174, 1, 2, 'PAS Giannina'),
+(175, 2, 0, 'Patraikos'), (175, 1, 0, 'Patraikos'),
+(176, 2, 0, 'Proodeftiki'), (176, 1, 0, 'Proodeftiki');
+
+CREATE TABLE continents (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO continents (id, `name`, creation_date, update_date) VALUES
+(1, 'Europe', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(2, 'Africa', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(3, 'Asia', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(4, 'North America', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(5, 'South America', '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(6, 'Oceania', '2022-03-03 22:17:41', '2022-03-03 21:17:41');
+
+CREATE TABLE continent_translations (
+  continent_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO continent_translations (continent_id, language_id, `name`) VALUES
+(1, 1, 'Europe'),
+(1, 2, 'Europe'),
+(2, 1, 'Africa'),
+(2, 2, 'Afrique'),
+(3, 1, 'Asia'),
+(3, 2, 'Asie'),
+(4, 1, 'North America'),
+(4, 2, 'Amérique du Nord'),
+(5, 1, 'South America'),
+(5, 2, 'Amérique du Sud'),
+(6, 1, 'Oceania'),
+(6, 2, 'Océanie');
+
+CREATE TABLE countries (
+  id bigint(20) UNSIGNED NOT NULL,
+  code char(3) COLLATE utf8mb4_unicode_ci NOT NULL,
+  continent_id bigint(20) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO countries (id, `code`, continent_id, creation_date, update_date) VALUES
+(1, 'AFG', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(3, 'ALB', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(4, 'ALG', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(5, 'ASA', 6, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(6, 'AND', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(7, 'ANG', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(8, 'AIA', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(10, 'ATG', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(11, 'ARG', 5, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(12, 'ARM', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(13, 'ARU', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(14, 'AUS', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(15, 'AUT', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(16, 'AZE', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(17, 'BAH', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(18, 'BHR', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(19, 'BAN', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(20, 'BRB', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(21, 'BLR', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(22, 'BEL', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(23, 'BLZ', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(24, 'BEN', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(25, 'BER', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(26, 'BHU', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(27, 'BOL', 5, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(29, 'BIH', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(30, 'BOT', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(32, 'BRA', 5, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(34, 'BRU', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(35, 'BUL', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(36, 'BFA', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(37, 'BDI', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(38, 'CPV', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(39, 'CAM', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(40, 'CMR', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(41, 'CAN', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(42, 'CAY', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(43, 'CTA', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(44, 'CHA', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(45, 'CHI', 5, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(46, 'CHN', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(49, 'COL', 5, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(50, 'COM', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(51, 'CGO', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(52, 'COD', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(53, 'COK', 6, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(54, 'CRC', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(55, 'CIV', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(56, 'CRO', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(57, 'CUB', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(58, 'CUW', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(59, 'CYP', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(60, 'CZE', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(61, 'DEN', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(62, 'DJI', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(63, 'DMA', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(64, 'DOM', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(65, 'ECU', 5, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(66, 'EGY', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(67, 'SLV', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(68, 'EQG', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(69, 'ERI', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(70, 'EST', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(71, 'SWZ', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(72, 'ETH', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(74, 'FRO', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(75, 'FIJ', 6, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(76, 'FIN', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(77, 'FRA', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(79, 'TAH', 6, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(81, 'GAB', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(82, 'GAM', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(83, 'GEO', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(84, 'GER', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(85, 'GHA', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(86, 'GIB', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(87, 'GRE', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(89, 'GRN', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(91, 'GUM', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(92, 'GUA', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(94, 'GUI', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(95, 'GNB', 2, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(96, 'GUY', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(97, 'HAI', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(100, 'HON', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(101, 'HKG', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(102, 'HUN', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(103, 'ISL', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(104, 'IND', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(105, 'IDN', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(106, 'IRN', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(107, 'IRQ', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(108, 'IRL', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(110, 'ISR', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(111, 'ITA', 1, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(112, 'JAM', 4, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(113, 'JPN', 3, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(115, 'JOR', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(116, 'KAZ', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(117, 'KEN', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(119, 'PRK', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(120, 'KOR', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(121, 'KUW', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(122, 'KGZ', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(123, 'LAO', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(124, 'LVA', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(125, 'LBN', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(126, 'LES', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(127, 'LBR', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(128, 'LBY', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(129, 'LIE', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(130, 'LTU', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(131, 'LUX', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(132, 'MAC', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(133, 'MAD', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(134, 'MWI', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(135, 'MAS', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(136, 'MDV', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(137, 'MLI', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(138, 'MLT', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(141, 'MTN', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(142, 'MRI', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(144, 'MEX', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(146, 'MDA', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(148, 'MNG', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(149, 'MNE', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(150, 'MSR', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(151, 'MAR', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(152, 'MOZ', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(153, 'MYA', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(154, 'NAM', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(156, 'NEP', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(157, 'NED', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(158, 'NCL', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(159, 'NZL', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(160, 'NCA', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(161, 'NIG', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(162, 'NGA', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(165, 'MKD', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(167, 'NOR', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(168, 'OMA', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(169, 'PAK', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(171, 'PLE', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(172, 'PAN', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(173, 'PNG', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(174, 'PAR', 5, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(175, 'PER', 5, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(176, 'PHI', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(178, 'POL', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(179, 'POR', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(180, 'PUR', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(181, 'QAT', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(183, 'ROU', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(184, 'RUS', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(185, 'RWA', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(188, 'SKN', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(189, 'LCA', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(192, 'VIN', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(193, 'SAM', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(194, 'SMR', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(195, 'STP', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(196, 'KSA', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(197, 'SEN', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(198, 'SRB', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(199, 'SEY', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(200, 'SLE', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(201, 'SGP', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(203, 'SVK', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(204, 'SVN', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(205, 'SOL', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(206, 'SOM', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(207, 'RSA', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(209, 'SSD', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(210, 'ESP', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(211, 'SRI', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(212, 'SDN', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(213, 'SUR', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(215, 'SWE', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(216, 'SUI', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(217, 'SYR', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(218, 'TPE', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(219, 'TJK', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(220, 'TAN', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(221, 'THA', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(222, 'TLS', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(223, 'TOG', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(225, 'TGA', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(226, 'TRI', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(227, 'TUN', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(228, 'TUR', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(229, 'TKM', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(230, 'TCA', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(232, 'UGA', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(233, 'UKR', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(234, 'UAE', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(236, 'USA', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(238, 'URU', 5, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(239, 'UZB', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(240, 'VAN', 6, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(241, 'VEN', 5, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(242, 'VIE', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(243, 'VGB', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(244, 'VIR', 4, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(247, 'YEM', 3, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(248, 'ZAM', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(249, 'ZIM', 2, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(235, 'ENG', 1, '2022-03-03 22:17:42', '2022-03-03 21:17:42'),
+(250, 'SCO', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(251, 'WAL', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(252, 'NIR', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(253, 'KOS', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+-- Nations sportives disparues (URSS, RDA, Yougoslavie, Tchecoslovaquie) : conservees en
+-- tant que pays a part entiere, avec la confederation qu'elles avaient a l'epoque (UEFA
+-- pour les 4). Voir players.alternative_country_id : un joueur ayant represente une de
+-- ces nations puis son ou ses successeurs actuels porte les deux, l'une ou l'autre
+-- proposition est acceptee. Cas de simple renommage (ex. RFA -> Allemagne, Serbie-et-
+-- Montenegro -> Serbie) non ajoutes ici : ce sont deja les pays actuels, pas de ligne
+-- dediee necessaire.
+(254, 'TCH', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(255, 'GDR', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(256, 'URS', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(257, 'YUG', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00');
+
+CREATE TABLE country_translations (
+  country_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO country_translations (country_id, language_id, `name`) VALUES
+(1, 1, 'Afghanistan'),
+(1, 2, 'Afghanistan'),
+(3, 1, 'Albania'),
+(3, 2, 'Albanie'),
+(4, 1, 'Algeria'),
+(4, 2, 'Algérie'),
+(5, 1, 'American Samoa'),
+(5, 2, 'Samoa américaines'),
+(6, 1, 'Andorra'),
+(6, 2, 'Andorre'),
+(7, 1, 'Angola'),
+(7, 2, 'Angola'),
+(8, 1, 'Anguilla'),
+(8, 2, 'Anguilla'),
+(10, 1, 'Antigua and Barbuda'),
+(10, 2, 'Antigua-et-Barbuda'),
+(11, 1, 'Argentina'),
+(11, 2, 'Argentine'),
+(12, 1, 'Armenia'),
+(12, 2, 'Arménie'),
+(13, 1, 'Aruba'),
+(13, 2, 'Aruba'),
+(14, 1, 'Australia'),
+(14, 2, 'Australie'),
+(15, 1, 'Austria'),
+(15, 2, 'Autriche'),
+(16, 1, 'Azerbaijan'),
+(16, 2, 'Azerbaïdjan'),
+(17, 1, 'Bahamas'),
+(17, 2, 'Bahamas'),
+(18, 1, 'Bahrain'),
+(18, 2, 'Bahreïn'),
+(19, 1, 'Bangladesh'),
+(19, 2, 'Bangladesh'),
+(20, 1, 'Barbados'),
+(20, 2, 'Barbade'),
+(21, 1, 'Belarus'),
+(21, 2, 'Biélorussie'),
+(22, 1, 'Belgium'),
+(22, 2, 'Belgique'),
+(23, 1, 'Belize'),
+(23, 2, 'Belize'),
+(24, 1, 'Benin'),
+(24, 2, 'Bénin'),
+(25, 1, 'Bermuda'),
+(25, 2, 'Bermudes'),
+(26, 1, 'Bhutan'),
+(26, 2, 'Bhoutan'),
+(27, 1, 'Bolivia (Plurinational State of)'),
+(27, 2, 'Bolivie'),
+(29, 1, 'Bosnia and Herzegovina'),
+(29, 2, 'Bosnie-Herzégovine'),
+(30, 1, 'Botswana'),
+(30, 2, 'Botswana'),
+(32, 1, 'Brazil'),
+(32, 2, 'Brésil'),
+(34, 1, 'Brunei Darussalam'),
+(34, 2, 'Brunei'),
+(35, 1, 'Bulgaria'),
+(35, 2, 'Bulgarie'),
+(36, 1, 'Burkina Faso'),
+(36, 2, 'Burkina Faso'),
+(37, 1, 'Burundi'),
+(37, 2, 'Burundi'),
+(38, 1, 'Cabo Verde'),
+(38, 2, 'Cap-Vert'),
+(39, 1, 'Cambodia'),
+(39, 2, 'Cambodge'),
+(40, 1, 'Cameroon'),
+(40, 2, 'Cameroun'),
+(41, 1, 'Canada'),
+(41, 2, 'Canada'),
+(42, 1, 'Cayman Islands'),
+(42, 2, 'Îles Caïmans'),
+(43, 1, 'Central African Republic'),
+(43, 2, 'République centrafricaine'),
+(44, 1, 'Chad'),
+(44, 2, 'Tchad'),
+(45, 1, 'Chile'),
+(45, 2, 'Chili'),
+(46, 1, 'China'),
+(46, 2, 'Chine'),
+(49, 1, 'Colombia'),
+(49, 2, 'Colombie'),
+(50, 1, 'Comoros'),
+(50, 2, 'Comores'),
+(51, 1, 'Congo'),
+(51, 2, 'République du Congo'),
+(52, 1, 'Congo, Democratic Republic of the'),
+(52, 2, 'République démocratique du Congo'),
+(53, 1, 'Cook Islands'),
+(53, 2, 'Îles Cook'),
+(54, 1, 'Costa Rica'),
+(54, 2, 'Costa Rica'),
+(55, 1, 'Côte d\'Ivoire'),
+(55, 2, 'Côte d\'Ivoire'),
+(56, 1, 'Croatia'),
+(56, 2, 'Croatie'),
+(57, 1, 'Cuba'),
+(57, 2, 'Cuba'),
+(58, 1, 'Curaçao'),
+(58, 2, 'Curaçao'),
+(59, 1, 'Cyprus'),
+(59, 2, 'Chypre'),
+(60, 1, 'Czechia'),
+(60, 2, 'Tchéquie'),
+(61, 1, 'Denmark'),
+(61, 2, 'Danemark'),
+(62, 1, 'Djibouti'),
+(62, 2, 'Djibouti'),
+(63, 1, 'Dominica'),
+(63, 2, 'Dominique'),
+(64, 1, 'Dominican Republic'),
+(64, 2, 'République dominicaine'),
+(65, 1, 'Ecuador'),
+(65, 2, 'Équateur'),
+(66, 1, 'Egypt'),
+(66, 2, 'Égypte'),
+(67, 1, 'El Salvador'),
+(67, 2, 'Salvador'),
+(68, 1, 'Equatorial Guinea'),
+(68, 2, 'Guinée équatoriale'),
+(69, 1, 'Eritrea'),
+(69, 2, 'Érythrée'),
+(70, 1, 'Estonia'),
+(70, 2, 'Estonie'),
+(71, 1, 'Eswatini'),
+(71, 2, 'Eswatini'),
+(72, 1, 'Ethiopia'),
+(72, 2, 'Éthiopie'),
+(74, 1, 'Faroe Islands'),
+(74, 2, 'Îles Féroé'),
+(75, 1, 'Fiji'),
+(75, 2, 'Fidji'),
+(76, 1, 'Finland'),
+(76, 2, 'Finlande'),
+(77, 1, 'France'),
+(77, 2, 'France'),
+(79, 1, 'French Polynesia'),
+(79, 2, 'Polynésie française'),
+(81, 1, 'Gabon'),
+(81, 2, 'Gabon'),
+(82, 1, 'Gambia'),
+(82, 2, 'Gambie'),
+(83, 1, 'Georgia'),
+(83, 2, 'Géorgie'),
+(84, 1, 'Germany'),
+(84, 2, 'Allemagne'),
+(85, 1, 'Ghana'),
+(85, 2, 'Ghana'),
+(86, 1, 'Gibraltar'),
+(86, 2, 'Gibraltar'),
+(87, 1, 'Greece'),
+(87, 2, 'Grèce'),
+(89, 1, 'Grenada'),
+(89, 2, 'Grenade'),
+(91, 1, 'Guam'),
+(91, 2, 'Guam'),
+(92, 1, 'Guatemala'),
+(92, 2, 'Guatemala'),
+(94, 1, 'Guinea'),
+(94, 2, 'Guinée'),
+(95, 1, 'Guinea-Bissau'),
+(95, 2, 'Guinée-Bissau'),
+(96, 1, 'Guyana'),
+(96, 2, 'Guyana'),
+(97, 1, 'Haiti'),
+(97, 2, 'Haïti'),
+(100, 1, 'Honduras'),
+(100, 2, 'Honduras'),
+(101, 1, 'Hong Kong'),
+(101, 2, 'Hong Kong'),
+(102, 1, 'Hungary'),
+(102, 2, 'Hongrie'),
+(103, 1, 'Iceland'),
+(103, 2, 'Islande'),
+(104, 1, 'India'),
+(104, 2, 'Inde'),
+(105, 1, 'Indonesia'),
+(105, 2, 'Indonésie'),
+(106, 1, 'Iran (Islamic Republic of)'),
+(106, 2, 'Iran'),
+(107, 1, 'Iraq'),
+(107, 2, 'Irak'),
+(108, 1, 'Ireland'),
+(108, 2, 'Irlande'),
+(110, 1, 'Israel'),
+(110, 2, 'Israël'),
+(111, 1, 'Italy'),
+(111, 2, 'Italie'),
+(112, 1, 'Jamaica'),
+(112, 2, 'Jamaïque'),
+(113, 1, 'Japan'),
+(113, 2, 'Japon'),
+(115, 1, 'Jordan'),
+(115, 2, 'Jordanie'),
+(116, 1, 'Kazakhstan'),
+(116, 2, 'Kazakhstan'),
+(117, 1, 'Kenya'),
+(117, 2, 'Kenya'),
+(119, 1, 'Korea (Democratic People\'s Republic of)'),
+(119, 2, 'Corée du Nord'),
+(120, 1, 'Korea, Republic of'),
+(120, 2, 'Corée du Sud'),
+(121, 1, 'Kuwait'),
+(121, 2, 'Koweït'),
+(122, 1, 'Kyrgyzstan'),
+(122, 2, 'Kirghizistan'),
+(123, 1, 'Lao People\'s Democratic Republic'),
+(123, 2, 'Laos'),
+(124, 1, 'Latvia'),
+(124, 2, 'Lettonie'),
+(125, 1, 'Lebanon'),
+(125, 2, 'Liban'),
+(126, 1, 'Lesotho'),
+(126, 2, 'Lesotho'),
+(127, 1, 'Liberia'),
+(127, 2, 'Liberia'),
+(128, 1, 'Libya'),
+(128, 2, 'Libye'),
+(129, 1, 'Liechtenstein'),
+(129, 2, 'Liechtenstein'),
+(130, 1, 'Lithuania'),
+(130, 2, 'Lituanie'),
+(131, 1, 'Luxembourg'),
+(131, 2, 'Luxembourg'),
+(132, 1, 'Macao'),
+(132, 2, 'Macao'),
+(133, 1, 'Madagascar'),
+(133, 2, 'Madagascar'),
+(134, 1, 'Malawi'),
+(134, 2, 'Malawi'),
+(135, 1, 'Malaysia'),
+(135, 2, 'Malaisie'),
+(136, 1, 'Maldives'),
+(136, 2, 'Maldives'),
+(137, 1, 'Mali'),
+(137, 2, 'Mali'),
+(138, 1, 'Malta'),
+(138, 2, 'Malte'),
+(141, 1, 'Mauritania'),
+(141, 2, 'Mauritanie'),
+(142, 1, 'Mauritius'),
+(142, 2, 'Maurice'),
+(144, 1, 'Mexico'),
+(144, 2, 'Mexique'),
+(146, 1, 'Moldova, Republic of'),
+(146, 2, 'Moldavie'),
+(148, 1, 'Mongolia'),
+(148, 2, 'Mongolie'),
+(149, 1, 'Montenegro'),
+(149, 2, 'Monténégro'),
+(150, 1, 'Montserrat'),
+(150, 2, 'Montserrat'),
+(151, 1, 'Morocco'),
+(151, 2, 'Maroc'),
+(152, 1, 'Mozambique'),
+(152, 2, 'Mozambique'),
+(153, 1, 'Myanmar'),
+(153, 2, 'Birmanie'),
+(154, 1, 'Namibia'),
+(154, 2, 'Namibie'),
+(156, 1, 'Nepal'),
+(156, 2, 'Népal'),
+(157, 1, 'Netherlands'),
+(157, 2, 'Pays-Bas'),
+(158, 1, 'New Caledonia'),
+(158, 2, 'Nouvelle-Calédonie'),
+(159, 1, 'New Zealand'),
+(159, 2, 'Nouvelle-Zélande'),
+(160, 1, 'Nicaragua'),
+(160, 2, 'Nicaragua'),
+(161, 1, 'Niger'),
+(161, 2, 'Niger'),
+(162, 1, 'Nigeria'),
+(162, 2, 'Nigeria'),
+(165, 1, 'North Macedonia'),
+(165, 2, 'Macédoine du Nord'),
+(167, 1, 'Norway'),
+(167, 2, 'Norvège'),
+(168, 1, 'Oman'),
+(168, 2, 'Oman'),
+(169, 1, 'Pakistan'),
+(169, 2, 'Pakistan'),
+(171, 1, 'Palestine, State of'),
+(171, 2, 'Palestine'),
+(172, 1, 'Panama'),
+(172, 2, 'Panama'),
+(173, 1, 'Papua New Guinea'),
+(173, 2, 'Papouasie-Nouvelle-Guinée'),
+(174, 1, 'Paraguay'),
+(174, 2, 'Paraguay'),
+(175, 1, 'Peru'),
+(175, 2, 'Pérou'),
+(176, 1, 'Philippines'),
+(176, 2, 'Philippines'),
+(178, 1, 'Poland'),
+(178, 2, 'Pologne'),
+(179, 1, 'Portugal'),
+(179, 2, 'Portugal'),
+(180, 1, 'Puerto Rico'),
+(180, 2, 'Porto Rico'),
+(181, 1, 'Qatar'),
+(181, 2, 'Qatar'),
+(183, 1, 'Romania'),
+(183, 2, 'Roumanie'),
+(184, 1, 'Russian Federation'),
+(184, 2, 'Russie'),
+(185, 1, 'Rwanda'),
+(185, 2, 'Rwanda'),
+(188, 1, 'Saint Kitts and Nevis'),
+(188, 2, 'Saint-Christophe-et-Niévès'),
+(189, 1, 'Saint Lucia'),
+(189, 2, 'Sainte-Lucie'),
+(192, 1, 'Saint Vincent and the Grenadines'),
+(192, 2, 'Saint-Vincent-et-les-Grenadines'),
+(193, 1, 'Samoa'),
+(193, 2, 'Samoa'),
+(194, 1, 'San Marino'),
+(194, 2, 'Saint-Marin'),
+(195, 1, 'Sao Tome and Principe'),
+(195, 2, 'Sao Tomé-et-Principe'),
+(196, 1, 'Saudi Arabia'),
+(196, 2, 'Arabie saoudite'),
+(197, 1, 'Senegal'),
+(197, 2, 'Sénégal'),
+(198, 1, 'Serbia'),
+(198, 2, 'Serbie'),
+(199, 1, 'Seychelles'),
+(199, 2, 'Seychelles'),
+(200, 1, 'Sierra Leone'),
+(200, 2, 'Sierra Leone'),
+(201, 1, 'Singapore'),
+(201, 2, 'Singapour'),
+(203, 1, 'Slovakia'),
+(203, 2, 'Slovaquie'),
+(204, 1, 'Slovenia'),
+(204, 2, 'Slovénie'),
+(205, 1, 'Solomon Islands'),
+(205, 2, 'Îles Salomon'),
+(206, 1, 'Somalia'),
+(206, 2, 'Somalie'),
+(207, 1, 'South Africa'),
+(207, 2, 'Afrique du Sud'),
+(209, 1, 'South Sudan'),
+(209, 2, 'Soudan du Sud'),
+(210, 1, 'Spain'),
+(210, 2, 'Espagne'),
+(211, 1, 'Sri Lanka'),
+(211, 2, 'Sri Lanka'),
+(212, 1, 'Sudan'),
+(212, 2, 'Soudan'),
+(213, 1, 'Suriname'),
+(213, 2, 'Suriname'),
+(215, 1, 'Sweden'),
+(215, 2, 'Suède'),
+(216, 1, 'Switzerland'),
+(216, 2, 'Suisse'),
+(217, 1, 'Syrian Arab Republic'),
+(217, 2, 'Syrie'),
+(218, 1, 'Taiwan, Province of China'),
+(218, 2, 'Taïwan / (République de Chine (Taïwan))'),
+(219, 1, 'Tajikistan'),
+(219, 2, 'Tadjikistan'),
+(220, 1, 'Tanzania, United Republic of'),
+(220, 2, 'Tanzanie'),
+(221, 1, 'Thailand'),
+(221, 2, 'Thaïlande'),
+(222, 1, 'Timor-Leste'),
+(222, 2, 'Timor oriental'),
+(223, 1, 'Togo'),
+(223, 2, 'Togo'),
+(225, 1, 'Tonga'),
+(225, 2, 'Tonga'),
+(226, 1, 'Trinidad and Tobago'),
+(226, 2, 'Trinité-et-Tobago'),
+(227, 1, 'Tunisia'),
+(227, 2, 'Tunisie'),
+(228, 1, 'Turkey'),
+(228, 2, 'Turquie'),
+(229, 1, 'Turkmenistan'),
+(229, 2, 'Turkménistan'),
+(230, 1, 'Turks and Caicos Islands'),
+(230, 2, 'Îles Turques-et-Caïques'),
+(232, 1, 'Uganda'),
+(232, 2, 'Ouganda'),
+(233, 1, 'Ukraine'),
+(233, 2, 'Ukraine'),
+(234, 1, 'United Arab Emirates'),
+(234, 2, 'Émirats arabes unis'),
+(236, 1, 'United States of America'),
+(236, 2, 'États-Unis'),
+(238, 1, 'Uruguay'),
+(238, 2, 'Uruguay'),
+(239, 1, 'Uzbekistan'),
+(239, 2, 'Ouzbékistan'),
+(240, 1, 'Vanuatu'),
+(240, 2, 'Vanuatu'),
+(241, 1, 'Venezuela (Bolivarian Republic of)'),
+(241, 2, 'Venezuela'),
+(242, 1, 'Viet Nam'),
+(242, 2, 'Viêt Nam'),
+(243, 1, 'Virgin Islands (British)'),
+(243, 2, 'Îles Vierges britanniques'),
+(244, 1, 'Virgin Islands (U.S.)'),
+(244, 2, 'Îles Vierges des États-Unis'),
+(247, 1, 'Yemen'),
+(247, 2, 'Yémen'),
+(248, 1, 'Zambia'),
+(248, 2, 'Zambie'),
+(249, 1, 'Zimbabwe'),
+(249, 2, 'Zimbabwe'),
+(235, 1, 'England'),
+(235, 2, 'Angleterre'),
+(250, 1, 'Scotland'),
+(250, 2, 'Écosse'),
+(251, 1, 'Wales'),
+(251, 2, 'Pays de Galles'),
+(252, 1, 'Northern Ireland'),
+(252, 2, 'Irlande du Nord'),
+(253, 1, 'Kosovo'),
+(253, 2, 'Kosovo'),
+(254, 1, 'Czechoslovakia'),
+(254, 2, 'Tchécoslovaquie'),
+(255, 1, 'East Germany'),
+(255, 2, 'Allemagne de l\'Est'),
+(256, 1, 'Soviet Union'),
+(256, 2, 'Union soviétique'),
+(257, 1, 'Yugoslavia'),
+(257, 2, 'Yougoslavie');
+
+CREATE TABLE discussions (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  email varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  message text COLLATE utf8mb4_unicode_ci NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE languages (
+  id bigint(20) UNSIGNED NOT NULL,
+  code char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO languages (id, `code`, `name`, creation_date, update_date) VALUES
+(1, 'en', 'English', '2022-03-03 00:00:00', '2022-03-03 21:03:16'),
+(2, 'fr', 'Français', '2022-03-03 00:00:00', '2022-03-03 21:03:16');
+
+CREATE TABLE leaders (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  proposal_date date NOT NULL,
+  points smallint(5) UNSIGNED NOT NULL,
+  time int(10) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE messages (
+  id bigint(20) UNSIGNED NOT NULL,
+  message text COLLATE utf8mb4_unicode_ci NOT NULL,
+  display_from datetime DEFAULT NULL,
+  display_to datetime DEFAULT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE players (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  allowed_names text COLLATE utf8mb4_unicode_ci NOT NULL,
+  year_of_birth smallint(5) UNSIGNED NOT NULL,
+  country_id bigint(20) UNSIGNED NOT NULL,
+  alternative_country_id bigint(20) UNSIGNED DEFAULT NULL,
+  publication_date date DEFAULT NULL,
+  clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  easy_clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  position_id bigint(20) UNSIGNED NOT NULL,
+  badge_id bigint(20) UNSIGNED DEFAULT NULL,
+  creation_user_id bigint(20) UNSIGNED NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  reject_date datetime DEFAULT NULL,
+  hide_creator tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE player_clubs (
+  player_id bigint(20) UNSIGNED NOT NULL,
+  club_id bigint(20) UNSIGNED NOT NULL,
+  history_position tinyint(3) UNSIGNED NOT NULL,
+  is_loan tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE player_clue_translations (
+  player_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  is_easy tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE positions (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO positions (id, `name`) VALUES
+(1, 'Goalkeeper'),
+(2, 'Defender'),
+(3, 'Midfielder'),
+(4, 'Forward');
+
+CREATE TABLE proposals (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  proposal_type_id bigint(20) UNSIGNED NOT NULL,
+  value varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  successful tinyint(3) UNSIGNED NOT NULL,
+  ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  proposal_date date NOT NULL,
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE proposal_types (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  description text COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO proposal_types (id, `name`, description) VALUES
+(1, 'Name', 'The player\'s name has been proposed'),
+(2, 'Club', 'A club in the player\'s career has been proposed'),
+(3, 'Year', 'The player\'s year of the birth has been proposed'),
+(4, 'Country', 'The player\'s nationality has been proposed'),
+(5, 'Clue', 'A new clue has been requested'),
+(6, 'Position', 'The player\'s position has been proposed'),
+(7, 'Leaderboard', 'The leaderboard of the day has been requested'),
+(8, 'Continent', 'The player\'s continent has been proposed');
+
+CREATE TABLE registration_guids (
+  id char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  user_id bigint(20) UNSIGNED DEFAULT NULL,
+  creation_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE users (
+  id bigint(20) UNSIGNED NOT NULL,
+  login varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  normalized_login varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  password varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  password_reset_question varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  password_reset_answer varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  user_type_id bigint(20) UNSIGNED NOT NULL,
+  ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  concurrency_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  security_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+  lockout_end datetime DEFAULT NULL,
+  access_failed_count int(10) UNSIGNED NOT NULL DEFAULT '0',
+  lockout_enabled tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
+  creation_date datetime NOT NULL,
+  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE login_history (
+  id bigint(20) UNSIGNED NOT NULL,
+  user_id bigint(20) UNSIGNED NOT NULL,
+  ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  creation_date datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE user_badges (
+  user_id bigint(20) UNSIGNED NOT NULL,
+  badge_id bigint(20) UNSIGNED NOT NULL,
+  get_date date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE user_types (
+  id bigint(20) UNSIGNED NOT NULL,
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+INSERT INTO user_types (id, `name`) VALUES
+(1, 'Standard user'),
+(2, 'Power user'),
+(3, 'Administrator');
+
+
+ALTER TABLE badges
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE badge_translations
+  ADD PRIMARY KEY (badge_id,language_id),
+  ADD KEY language_id (language_id);
+
+ALTER TABLE clubs
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY name_country (name, country_id),
+  ADD KEY country_id (country_id) USING BTREE;
+
+ALTER TABLE club_translations
+  ADD PRIMARY KEY (club_id,language_id,priority),
+  ADD KEY language_id (language_id),
+  ADD KEY priority (priority),
+  ADD KEY club_id (club_id) USING BTREE;
+
+ALTER TABLE continents
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE continent_translations
+  ADD PRIMARY KEY (continent_id,language_id),
+  ADD KEY language_id (language_id);
+
+ALTER TABLE countries
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY code (code),
+  ADD KEY continent_id (continent_id);
+
+ALTER TABLE country_translations
+  ADD PRIMARY KEY (country_id,language_id),
+  ADD KEY country_id (country_id),
+  ADD KEY language_id (language_id);
+
+ALTER TABLE discussions
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id);
+
+ALTER TABLE languages
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY code (code);
+
+ALTER TABLE leaders
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id),
+  ADD KEY proposal_date (proposal_date);
+
+ALTER TABLE login_history
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id);
+
+ALTER TABLE messages
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE players
+  ADD PRIMARY KEY (id),
+  ADD KEY country_id (country_id) USING BTREE,
+  ADD KEY alternative_country_id (alternative_country_id) USING BTREE,
+  ADD KEY position_id (position_id),
+  ADD KEY badge_id (badge_id),
+  ADD KEY creation_user_id (creation_user_id),
+  ADD KEY reject_date (reject_date);
+
+ALTER TABLE player_clubs
+  ADD PRIMARY KEY (player_id,history_position),
+  ADD KEY player_id (player_id),
+  ADD KEY club_id (club_id);
+
+ALTER TABLE player_clue_translations
+  ADD PRIMARY KEY (player_id,language_id,is_easy),
+  ADD KEY language_id (language_id),
+  ADD KEY is_easy (is_easy),
+  ADD KEY player_id (player_id) USING BTREE;
+
+ALTER TABLE positions
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE proposals
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id),
+  ADD KEY proposal_type_id (proposal_type_id);
+
+ALTER TABLE proposal_types
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE registration_guids
+  ADD PRIMARY KEY (id),
+  ADD KEY user_id (user_id);
+
+ALTER TABLE users
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY normalized_login (normalized_login),
+  ADD KEY lang_id (language_id),
+  ADD KEY is_disabled (is_disabled),
+  ADD KEY user_type_id (user_type_id);
+
+ALTER TABLE user_badges
+  ADD PRIMARY KEY (user_id,badge_id),
+  ADD KEY badge_id (badge_id);
+
+ALTER TABLE user_types
+  ADD PRIMARY KEY (id);
+
+ALTER TABLE badges
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE clubs
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE continents
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE countries
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE discussions
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE languages
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE leaders
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE login_history
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE messages
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE players
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE positions
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE proposals
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE proposal_types
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE users
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE user_types
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+-- Cles etrangeres : aucun ON DELETE/ON UPDATE explicite (defaut RESTRICT des deux cotes)
+-- puisque rien dans l'application ne supprime jamais une ligne - leur seul role est
+-- d'empecher une insertion incoherente (id inexistant), pas de gerer une suppression en
+-- cascade qui n'existe nulle part. Ajoutees en tout dernier, apres tous les INSERT : leur
+-- ordre d'apparition dans ce fichier n'a donc aucune importance vis-a-vis de l'ordre des
+-- INSERT plus haut.
+ALTER TABLE badge_translations
+  ADD CONSTRAINT fk_badge_translations_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id),
+  ADD CONSTRAINT fk_badge_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE clubs
+  ADD CONSTRAINT fk_clubs_country_id FOREIGN KEY (country_id) REFERENCES countries (id);
+
+ALTER TABLE club_translations
+  ADD CONSTRAINT fk_club_translations_club_id FOREIGN KEY (club_id) REFERENCES clubs (id),
+  ADD CONSTRAINT fk_club_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE continent_translations
+  ADD CONSTRAINT fk_continent_translations_continent_id FOREIGN KEY (continent_id) REFERENCES continents (id),
+  ADD CONSTRAINT fk_continent_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE countries
+  ADD CONSTRAINT fk_countries_continent_id FOREIGN KEY (continent_id) REFERENCES continents (id);
+
+ALTER TABLE country_translations
+  ADD CONSTRAINT fk_country_translations_country_id FOREIGN KEY (country_id) REFERENCES countries (id),
+  ADD CONSTRAINT fk_country_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE discussions
+  ADD CONSTRAINT fk_discussions_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE leaders
+  ADD CONSTRAINT fk_leaders_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE login_history
+  ADD CONSTRAINT fk_login_history_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE players
+  ADD CONSTRAINT fk_players_country_id FOREIGN KEY (country_id) REFERENCES countries (id),
+  ADD CONSTRAINT fk_players_alternative_country_id FOREIGN KEY (alternative_country_id) REFERENCES countries (id),
+  ADD CONSTRAINT fk_players_position_id FOREIGN KEY (position_id) REFERENCES positions (id),
+  ADD CONSTRAINT fk_players_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id),
+  ADD CONSTRAINT fk_players_creation_user_id FOREIGN KEY (creation_user_id) REFERENCES users (id);
+
+ALTER TABLE player_clubs
+  ADD CONSTRAINT fk_player_clubs_player_id FOREIGN KEY (player_id) REFERENCES players (id),
+  ADD CONSTRAINT fk_player_clubs_club_id FOREIGN KEY (club_id) REFERENCES clubs (id);
+
+ALTER TABLE player_clue_translations
+  ADD CONSTRAINT fk_player_clue_translations_player_id FOREIGN KEY (player_id) REFERENCES players (id),
+  ADD CONSTRAINT fk_player_clue_translations_language_id FOREIGN KEY (language_id) REFERENCES languages (id);
+
+ALTER TABLE proposals
+  ADD CONSTRAINT fk_proposals_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+  ADD CONSTRAINT fk_proposals_proposal_type_id FOREIGN KEY (proposal_type_id) REFERENCES proposal_types (id);
+
+ALTER TABLE registration_guids
+  ADD CONSTRAINT fk_registration_guids_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE users
+  ADD CONSTRAINT fk_users_language_id FOREIGN KEY (language_id) REFERENCES languages (id),
+  ADD CONSTRAINT fk_users_user_type_id FOREIGN KEY (user_type_id) REFERENCES user_types (id);
+
+ALTER TABLE user_badges
+  ADD CONSTRAINT fk_user_badges_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+  ADD CONSTRAINT fk_user_badges_badge_id FOREIGN KEY (badge_id) REFERENCES badges (id);

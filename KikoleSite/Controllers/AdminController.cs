@@ -15,526 +15,520 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 
-namespace KikoleSite.Controllers
+namespace KikoleSite.Controllers;
+
+public class AdminController : KikoleBaseController
 {
-    public class AdminController : KikoleBaseController
+    private readonly IStringLocalizer<AdminController> _localizer;
+    private readonly IDiscussionRepository _discussionRepository;
+    private readonly ILeaderService _leaderService;
+    private readonly IMessageRepository _messageRepository;
+
+    public AdminController(IStringLocalizer<AdminController> localizer,
+        IUserRepository userRepository,
+        IInternationalService internationalService,
+        IMessageRepository messageRepository,
+        IClock clock,
+        IGameCalendar gameCalendar,
+        IPlayerService playerService,
+        IBadgeService badgeService,
+        ILeaderService leaderService,
+        IDiscussionRepository discussionRepository,
+        IHttpContextAccessor httpContextAccessor)
+        : base(userRepository,
+            internationalService,
+            clock,
+            gameCalendar,
+            playerService,
+            badgeService,
+            httpContextAccessor)
     {
-        private readonly IStringLocalizer<AdminController> _localizer;
-        private readonly IDiscussionRepository _discussionRepository;
-        private readonly ILeaderService _leaderService;
-        private readonly IMessageRepository _messageRepository;
+        _localizer = localizer;
+        _discussionRepository = discussionRepository;
+        _leaderService = leaderService;
+        _messageRepository = messageRepository;
+    }
 
-        public AdminController(IStringLocalizer<AdminController> localizer,
-            IUserRepository userRepository,
-            ICrypter crypter,
-            IInternationalRepository internationalRepository,
-            IMessageRepository messageRepository,
-            IClock clock,
-            IPlayerService playerService,
-            IClubRepository clubRepository,
-            IBadgeService badgeService,
-            ILeaderService leaderService,
-            IDiscussionRepository discussionRepository,
-            IHttpContextAccessor httpContextAccessor)
-            : base(userRepository,
-                crypter,
-                internationalRepository,
-                clock,
-                playerService,
-                clubRepository,
-                badgeService,
-                httpContextAccessor)
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Actions()
+    {
+        // default : from now without ms to tomorrow 23:59:59
+        return View(new AdminModel
         {
-            _localizer = localizer;
-            _discussionRepository = discussionRepository;
-            _leaderService = leaderService;
-            _messageRepository = messageRepository;
+            MessageDateStart = _clock.NowSeconds,
+            MessageDateEnd = _clock.TomorrowEnd,
+            Discussions = await _discussionRepository
+                .GetDiscussionsAsync()
+        });
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Actions(AdminModel model)
+    {
+        var action = GetSubmitAction();
+
+        switch (action)
+        {
+            case "recomputebadges":
+                await _badgeService
+                    .ResetBadgesAsync(ViewHelper.GetLanguage());
+                break;
+            case "recomputeleaders":
+                await _leaderService
+                    .ComputeMissingLeadersAsync(await _internationalService.GetCountryContinentsAsync());
+                break;
+            case "reassignplayers":
+                await _playerService
+                    .ReassignPlayersOfTheDayAsync();
+                break;
+            case "insertmessage":
+                if (model == null)
+                    return RedirectToAction("ErrorIndex", "Home");
+
+                await _messageRepository
+                    .InsertMessageAsync(new Models.Dtos.MessageDto
+                    {
+                        DisplayTo = model.MessageDateEnd,
+                        DisplayFrom = model.MessageDateStart,
+                        CreationDate = _clock.Now,
+                        Message = model.Message ?? string.Empty
+                    });
+
+                model.Message = null;
+                model.ActionFeedback = "Annonce créée";
+                break;
         }
 
-        [HttpGet]
-        [Authorization(UserTypes.Administrator)]
-        public async Task<IActionResult> Actions()
+        return View(model);
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> PlayerSubmission()
+    {
+        var players = await GetPlayerSubmissionsList();
+
+        var model = new PlayerSubmissionsModel
         {
-            // default : from now without ms to tomorrow 23:59:59
-            return View(new AdminModel
-            {
-                MessageDateStart = _clock.NowSeconds,
-                MessageDateEnd = _clock.TomorrowEnd,
-                Discussions = await _discussionRepository
-                    .GetDiscussionsAsync()
-                    .ConfigureAwait(false)
-            });
-        }
+            Players = players
+        };
 
-        [HttpPost]
-        [Authorization(UserTypes.Administrator)]
-        public async Task<IActionResult> Actions(AdminModel model)
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
+    {
+        if (model == null)
+            return RedirectToAction("PlayerSubmission", "Admin");
+
+        model.Players = await GetPlayerSubmissionsList();
+
+        if (model.Players.Count == 0)
+            return RedirectToAction("PlayerSubmission", "Admin");
+
+        var action = GetSubmitAction();
+
+        if (action == "accepted" || action == "refusal")
         {
-            var action = GetSubmitAction();
-
-            switch (action)
+            var request = new PlayerSubmissionValidationRequest
             {
-                case "recomputebadges":
-                    await _badgeService
-                        .ResetBadgesAsync(ViewHelper.GetLanguage())
-                        .ConfigureAwait(false);
-                    break;
-                case "recomputeleaders":
-                    await _leaderService
-                        .ComputeMissingLeadersAsync()
-                        .ConfigureAwait(false);
-                    break;
-                case "reassignplayers":
-                    await _playerService
-                        .ReassignPlayersOfTheDayAsync()
-                        .ConfigureAwait(false);
-                    break;
-                case "insertmessage":
-                    if (model == null)
-                        return RedirectToAction("ErrorIndex", "Home");
-
-                    await _messageRepository
-                        .InsertMessageAsync(new Models.Dtos.MessageDto
-                        {
-                            DisplayTo = model.MessageDateEnd,
-                            DisplayFrom = model.MessageDateStart,
-                            CreationDate = _clock.Now,
-                            Message = model.Message ?? string.Empty
-                        })
-                        .ConfigureAwait(false);
-
-                    model.Message = null;
-                    model.ActionFeedback = "Annonce créée";
-                    break;
-            }
-
-            return View(model);
-        }
-
-        [HttpGet]
-        [Authorization(UserTypes.Administrator)]
-        public async Task<IActionResult> PlayerSubmission()
-        {
-            var players = await GetPlayerSubmissionsList().ConfigureAwait(false);
-
-            var model = new PlayerSubmissionsModel
-            {
-                Players = players
+                ClueEditLanguages = new Dictionary<Languages, string?>
+                {
+                    { Languages.fr, model.ClueOverwriteFr }
+                },
+                ClueEditEn = model.ClueOverwriteEn,
+                EasyClueEditLanguages = new Dictionary<Languages, string?>
+                {
+                    { Languages.fr, model.EasyClueOverwriteFr }
+                },
+                EasyClueEditEn = model.EasyClueOverwriteEn,
+                IsAccepted = action == "accepted",
+                PlayerId = model.SelectedId,
+                RefusalReason = model.RefusalReason
             };
 
-            return View(model);
-        }
-
-        [HttpPost]
-        [Authorization(UserTypes.Administrator)]
-        public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
-        {
-            if (model == null)
-                return RedirectToAction("PlayerSubmission", "Admin");
-
-            model.Players = await GetPlayerSubmissionsList().ConfigureAwait(false);
-
-            if (model.Players.Count == 0)
-                return RedirectToAction("PlayerSubmission", "Admin");
-
-            var action = GetSubmitAction();
-
-            if (action == "accepted" || action == "refusal")
+            var validityCheck = request.IsValid(_localizer);
+            if (!string.IsNullOrWhiteSpace(validityCheck))
+                model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityCheck);
+            else
             {
-                var request = new PlayerSubmissionValidationRequest
-                {
-                    ClueEditLanguages = new Dictionary<Languages, string>
-                    {
-                        { Languages.fr, model.ClueOverwriteFr }
-                    },
-                    ClueEditEn = model.ClueOverwriteEn,
-                    EasyClueEditLanguages = new Dictionary<Languages, string>
-                    {
-                        { Languages.fr, model.EasyClueOverwriteFr }
-                    },
-                    EasyClueEditEn = model.EasyClueOverwriteEn,
-                    IsAccepted = action == "accepted",
-                    PlayerId = model.SelectedId,
-                    RefusalReason = model.RefusalReason
-                };
+                var (result, userId, badges) = await _playerService
+                    .ValidatePlayerSubmissionAsync(request);
 
-                var validityCheck = request.IsValid(_localizer);
-                if (!string.IsNullOrWhiteSpace(validityCheck))
-                    model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityCheck);
+                if (result == PlayerSubmissionErrors.PlayerNotFound)
+                    model.ErrorMessage = _localizer["PlayerDoesNotExist"];
+                else if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
+                    model.ErrorMessage = _localizer["RejectAndPublicationDateCombined"];
                 else
                 {
-                    var (result, userId, badges) = await _playerService
-                        .ValidatePlayerSubmissionAsync(request)
-                        .ConfigureAwait(false);
-
-                    if (result == PlayerSubmissionErrors.PlayerNotFound)
-                        model.ErrorMessage = _localizer["PlayerDoesNotExist"];
-                    else if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
-                        model.ErrorMessage = _localizer["RejectAndProposalDateCombined"];
-                    else
+                    foreach (var badge in badges)
                     {
-                        foreach (var badge in badges)
-                        {
-                            await _badgeService
-                                .AddBadgeToUserAsync(badge, userId)
-                                .ConfigureAwait(false);
-                        }
-
-                        return RedirectToAction("PlayerSubmission", "Admin");
+                        await _badgeService
+                            .AddBadgeToUserAsync(badge, userId);
                     }
-                }
-            }
-            else if (action == "pchoice")
-            {
-                if (model.SelectedPlayer == null)
-                {
-                    model.ErrorMessage = _localizer["InvalidSelectedPlayer"];
-                    model.SelectedId = 0;
-                }
-            }
-            else
-                return RedirectToAction("PlayerSubmission", "Admin");
 
-            return View(model);
+                    return RedirectToAction("PlayerSubmission", "Admin");
+                }
+            }
         }
-
-        [HttpGet]
-        [Authorization(UserTypes.PowerUser)]
-        public IActionResult Index(bool withOkMessage)
+        else if (action == "pchoice")
         {
-            var model = new PlayerCreationModel();
-            if (withOkMessage)
-                model.InfoMessage = _localizer["PlayerOk"];
+            if (model.SelectedPlayer == null)
+            {
+                model.ErrorMessage = _localizer["InvalidSelectedPlayer"];
+                model.SelectedId = 0;
+            }
+        }
+        else
+            return RedirectToAction("PlayerSubmission", "Admin");
+
+        return View(model);
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.PowerUser)]
+    public IActionResult Index(bool withOkMessage)
+    {
+        var model = new PlayerCreationModel();
+        if (withOkMessage)
+            model.InfoMessage = _localizer["PlayerOk"];
+        SetPositionsOnModel(model);
+        model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.PowerUser)]
+    public async Task<IActionResult> Index(PlayerCreationModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.Name))
+        {
+            model.ErrorMessage = _localizer["MandatName"];
             SetPositionsOnModel(model);
-            model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
-            model.IsSubmissionNewChart = _clock.Today >= ProposalChart.SubmissionNewChartStart;
             return View(model);
         }
 
-        [HttpPost]
-        [Authorization(UserTypes.PowerUser)]
-        public async Task<IActionResult> Index(PlayerCreationModel model)
+        if (model.YearOfBirth == null || !ushort.TryParse(model.YearOfBirth, out var yearValue))
         {
-            if (string.IsNullOrWhiteSpace(model.Name))
-            {
-                model.ErrorMessage = _localizer["MandatName"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
+            model.ErrorMessage = _localizer["InvalidYear"];
+            SetPositionsOnModel(model);
+            return View(model);
+        }
 
-            if (model.YearOfBirth == null || !ushort.TryParse(model.YearOfBirth, out var yearValue))
-            {
-                model.ErrorMessage = _localizer["InvalidYear"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
+        if (string.IsNullOrWhiteSpace(model.ClueEn))
+        {
+            model.ErrorMessage = _localizer["MandatClue"];
+            SetPositionsOnModel(model);
+            return View(model);
+        }
 
-            if (string.IsNullOrWhiteSpace(model.ClueEn))
-            {
-                model.ErrorMessage = _localizer["MandatClue"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
+        if (string.IsNullOrWhiteSpace(model.EasyClueEn))
+        {
+            model.ErrorMessage = _localizer["MandatClue"];
+            SetPositionsOnModel(model);
+            return View(model);
+        }
 
-            if (string.IsNullOrWhiteSpace(model.EasyClueEn))
-            {
-                model.ErrorMessage = _localizer["MandatClue"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
+        var countries = await GetCountriesAsync();
 
-            var continents = await GetContinentsAsync()
-                .ConfigureAwait(false);
+        if (model.Country == null
+            || !ulong.TryParse(model.Country, out var countryId)
+            || !countries.Any(c => countryId == c.Key))
+        {
+            model.ErrorMessage = _localizer["InvalidCountry"];
+            SetPositionsOnModel(model);
+            return View(model);
+        }
 
-            if (model.Continent == null
-                || !ulong.TryParse(model.Continent, out var continentId)
-                || !continents.Any(c => continentId == c.Key))
-            {
-                model.ErrorMessage = _localizer["InvalidContinent"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
-
-            var countries = await GetCountriesAsync()
-                .ConfigureAwait(false);
-
-            if (model.Country == null
-                || !ulong.TryParse(model.Country, out var countryId)
-                || !countries.Any(c => countryId == c.Key))
+        // facultatif : uniquement pour un joueur ayant represente une nation sportive
+        // disparue en plus de son pays actuel (ex. RDA puis Allemagne)
+        ulong? alternativeCountryId = null;
+        if (!string.IsNullOrWhiteSpace(model.AlternativeCountry))
+        {
+            if (!ulong.TryParse(model.AlternativeCountry, out var parsedAlternativeCountryId)
+                || !countries.Any(c => parsedAlternativeCountryId == c.Key))
             {
                 model.ErrorMessage = _localizer["InvalidCountry"];
                 SetPositionsOnModel(model);
                 return View(model);
             }
-
-            if (model.Position == null
-                || !ulong.TryParse(model.Position, out var positionId)
-                || !GetPositions().Any(p => p.Key == positionId))
-            {
-                model.ErrorMessage = _localizer["InvalidPosition"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
-
-            var names = new List<string>
-            {
-                model.AlternativeName0, model.AlternativeName1,
-                model.AlternativeName2, model.AlternativeName3,
-                model.AlternativeName4, model.AlternativeName5,
-                model.AlternativeName6, model.AlternativeName7,
-                model.AlternativeName8, model.AlternativeName9,
-            };
-            names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList();
-
-            var clubsReferential = await GetClubsAsync().ConfigureAwait(false);
-
-            byte iPos = 1;
-            var clubs = new List<PlayerClubRequest>();
-            AddClubIfValid(clubs, model.Club0, clubsReferential, ref iPos, model.IsLoan0);
-            AddClubIfValid(clubs, model.Club1, clubsReferential, ref iPos, model.IsLoan1);
-            AddClubIfValid(clubs, model.Club2, clubsReferential, ref iPos, model.IsLoan2);
-            AddClubIfValid(clubs, model.Club3, clubsReferential, ref iPos, model.IsLoan3);
-            AddClubIfValid(clubs, model.Club4, clubsReferential, ref iPos, model.IsLoan4);
-            AddClubIfValid(clubs, model.Club5, clubsReferential, ref iPos, model.IsLoan5);
-            AddClubIfValid(clubs, model.Club6, clubsReferential, ref iPos, model.IsLoan6);
-            AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7);
-            AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8);
-            AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9);
-            AddClubIfValid(clubs, model.Club10, clubsReferential, ref iPos, model.IsLoan10);
-            AddClubIfValid(clubs, model.Club11, clubsReferential, ref iPos, model.IsLoan11);
-            AddClubIfValid(clubs, model.Club12, clubsReferential, ref iPos, model.IsLoan12);
-            AddClubIfValid(clubs, model.Club13, clubsReferential, ref iPos, model.IsLoan13);
-            AddClubIfValid(clubs, model.Club14, clubsReferential, ref iPos, model.IsLoan14);
-
-            if (clubs.Count == 0)
-            {
-                model.ErrorMessage = _localizer["OneClubMin"];
-                SetPositionsOnModel(model);
-                return View(model);
-            }
-
-            var isAdmin = IsTypeOfUser(UserTypes.Administrator);
-
-            var req = new PlayerRequest
-            {
-                SetLatestProposalDate = isAdmin,
-                AllowedNames = names,
-                Clubs = clubs,
-                ClueEn = model.ClueEn,
-                EasyClueEn = model.EasyClueEn,
-                ClueLanguages = new Dictionary<Languages, string>
-                {
-                    { Languages.fr, model.ClueFr }
-                },
-                EasyClueLanguages = new Dictionary<Languages, string>
-                {
-                    { Languages.fr, model.EasyClueFr }
-                },
-                Country = (Countries)countryId,
-                Continent = (Continents)continentId,
-                Name = model.Name,
-                Position = (Positions)positionId,
-                YearOfBirth = yearValue,
-                HideCreator = model.HideCreator
-            };
-
-            var validityRequest = req.IsValid(_clock.Today, _localizer);
-            if (!string.IsNullOrWhiteSpace(validityRequest))
-            {
-                model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
-                SetPositionsOnModel(model);
-                return View(model);
-            }
-            else
-            {
-                await _playerService
-                    .CreatePlayerAsync(req, UserId)
-                    .ConfigureAwait(false);
-                return RedirectToAction("Index", "Admin", new { withOkMessage = true });
-            }
+            alternativeCountryId = parsedAlternativeCountryId;
         }
 
-        [HttpGet]
-        [Authorization(UserTypes.PowerUser)]
-        public async Task<IActionResult> Club([FromQuery] ulong clubId)
+        if (model.Position == null
+            || !ulong.TryParse(model.Position, out var positionId)
+            || !GetPositions().Any(p => p.Key == positionId))
         {
-            if (clubId > 0)
-            {
-                if (UserType != UserTypes.Administrator)
-                    return RedirectToAction("ErrorIndex", "Home");
-
-                var club = await _clubRepository
-                    .GetClubAsync(clubId)
-                    .ConfigureAwait(false);
-
-                if (club == null)
-                    return RedirectToAction("ErrorIndex", "Home");
-
-                var names = club.AllowedNames.Disjoin().ToList();
-                var model = new ClubCreationModel
-                {
-                    MainName = club.Name,
-                    AlternativeName0 = names.Count > 0 ? names[0] : null,
-                    AlternativeName1 = names.Count > 1 ? names[1] : null,
-                    AlternativeName2 = names.Count > 2 ? names[2] : null,
-                    AlternativeName3 = names.Count > 3 ? names[3] : null,
-                    AlternativeName4 = names.Count > 4 ? names[4] : null,
-                    Id = clubId
-                };
-
-                return View("Club", model);
-            }
-
-            return View("Club", new ClubCreationModel());
+            model.ErrorMessage = _localizer["InvalidPosition"];
+            SetPositionsOnModel(model);
+            return View(model);
         }
 
-        [HttpPost]
-        [Authorization(UserTypes.PowerUser)]
-        public async Task<IActionResult> Club(ClubCreationModel model)
+        // les dix champs du formulaire sont facultatifs : on filtre les vides
+        // avant de considerer la liste comme non nullable
+        var names = new List<string?>
         {
-            if (string.IsNullOrWhiteSpace(model.MainName))
-            {
-                model.ErrorMessage = _localizer["ClubNameMiss"];
-                return View("Club", model);
-            }
+            model.AlternativeName0, model.AlternativeName1,
+            model.AlternativeName2, model.AlternativeName3,
+            model.AlternativeName4, model.AlternativeName5,
+            model.AlternativeName6, model.AlternativeName7,
+            model.AlternativeName8, model.AlternativeName9,
+        }
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Select(n => n!)
+            .Distinct()
+            .ToList();
 
-            var names = new[]
+        var clubsReferential = await GetClubsAsync();
+
+        byte iPos = 1;
+        var clubs = new List<PlayerClubRequest>();
+        AddClubIfValid(clubs, model.Club0Id, clubsReferential, ref iPos, model.IsLoan0);
+        AddClubIfValid(clubs, model.Club1Id, clubsReferential, ref iPos, model.IsLoan1);
+        AddClubIfValid(clubs, model.Club2Id, clubsReferential, ref iPos, model.IsLoan2);
+        AddClubIfValid(clubs, model.Club3Id, clubsReferential, ref iPos, model.IsLoan3);
+        AddClubIfValid(clubs, model.Club4Id, clubsReferential, ref iPos, model.IsLoan4);
+        AddClubIfValid(clubs, model.Club5Id, clubsReferential, ref iPos, model.IsLoan5);
+        AddClubIfValid(clubs, model.Club6Id, clubsReferential, ref iPos, model.IsLoan6);
+        AddClubIfValid(clubs, model.Club7Id, clubsReferential, ref iPos, model.IsLoan7);
+        AddClubIfValid(clubs, model.Club8Id, clubsReferential, ref iPos, model.IsLoan8);
+        AddClubIfValid(clubs, model.Club9Id, clubsReferential, ref iPos, model.IsLoan9);
+        AddClubIfValid(clubs, model.Club10Id, clubsReferential, ref iPos, model.IsLoan10);
+        AddClubIfValid(clubs, model.Club11Id, clubsReferential, ref iPos, model.IsLoan11);
+        AddClubIfValid(clubs, model.Club12Id, clubsReferential, ref iPos, model.IsLoan12);
+        AddClubIfValid(clubs, model.Club13Id, clubsReferential, ref iPos, model.IsLoan13);
+        AddClubIfValid(clubs, model.Club14Id, clubsReferential, ref iPos, model.IsLoan14);
+
+        if (clubs.Count == 0)
+        {
+            model.ErrorMessage = _localizer["OneClubMin"];
+            SetPositionsOnModel(model);
+            return View(model);
+        }
+
+        var isAdmin = IsTypeOfUser(UserTypes.Administrator);
+
+        var req = new PlayerRequest
+        {
+            SetLatestPublicationDate = isAdmin,
+            AllowedNames = names,
+            Clubs = clubs,
+            ClueEn = model.ClueEn,
+            EasyClueEn = model.EasyClueEn,
+            ClueLanguages = new Dictionary<Languages, string?>
             {
-                model.AlternativeName0,
-                model.AlternativeName1,
-                model.AlternativeName2,
-                model.AlternativeName3,
-                model.AlternativeName4
+                { Languages.fr, model.ClueFr }
+            },
+            EasyClueLanguages = new Dictionary<Languages, string?>
+            {
+                { Languages.fr, model.EasyClueFr }
+            },
+            Country = (Countries)countryId,
+            AlternativeCountry = alternativeCountryId.HasValue ? (Countries)alternativeCountryId.Value : null,
+            Name = model.Name,
+            Position = (Positions)positionId,
+            YearOfBirth = yearValue,
+            HideCreator = model.HideCreator
+        };
+
+        var validityRequest = req.IsValid(_clock.Today, _localizer);
+        if (!string.IsNullOrWhiteSpace(validityRequest))
+        {
+            model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
+            SetPositionsOnModel(model);
+            return View(model);
+        }
+        else
+        {
+            await _playerService
+                .CreatePlayerAsync(req, UserId);
+            return RedirectToAction("Index", "Admin", new { withOkMessage = true });
+        }
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.PowerUser)]
+    public async Task<IActionResult> Club([FromQuery] ulong clubId)
+    {
+        if (clubId > 0)
+        {
+            if (UserType != UserTypes.Administrator)
+                return RedirectToAction("ErrorIndex", "Home");
+
+            var club = await _internationalService
+                .GetClubAsync(clubId);
+
+            if (club == null)
+                return RedirectToAction("ErrorIndex", "Home");
+
+            var namesEn = club.NamesByLanguage[Languages.en];
+            var namesFr = club.NamesByLanguage[Languages.fr];
+            var model = new ClubCreationModel
+            {
+                MainNameEn = namesEn[0],
+                MainNameFr = namesFr[0],
+                AlternativeNamesEn = string.Join('\n', namesEn.Skip(1)),
+                AlternativeNamesFr = string.Join('\n', namesFr.Skip(1)),
+                Country = club.CountryId.ToString(),
+                Id = clubId
             };
-
-            names = names.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
-
-            var request = new ClubRequest
-            {
-                Name = model.MainName,
-                AllowedNames = names,
-                Id = model.Id
-            };
-
-            var validityRequest = request.IsValid(_localizer);
-            if (!string.IsNullOrWhiteSpace(validityRequest))
-                model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
-            else
-            {
-                if (model.Id == 0)
-                {
-                    await _clubRepository
-                        .CreateClubAsync(request.ToDto())
-                        .ConfigureAwait(false);
-                }
-                else
-                {
-                    await _clubRepository
-                        .UpdateClubAsync(request.ToDto())
-                        .ConfigureAwait(false);
-                }
-
-                await GetClubsAsync(true).ConfigureAwait(false);
-                model = new ClubCreationModel
-                {
-                    InfoMessage = _localizer["ClubOk"]
-                };
-            }
 
             return View("Club", model);
         }
 
-        [HttpGet]
-        [Authorization(UserTypes.Administrator)]
-        public async Task<IActionResult> PlayerEdit(ulong playerId)
-        {
-            var clues = await _playerService
-                .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr })
-                .ConfigureAwait(false);
+        return View("Club", new ClubCreationModel());
+    }
 
-            var model = new PlayerEditModel
+    [HttpPost]
+    [Authorization(UserTypes.PowerUser)]
+    public async Task<IActionResult> Club(ClubCreationModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.MainNameEn) || string.IsNullOrWhiteSpace(model.MainNameFr))
+        {
+            model.ErrorMessage = _localizer["ClubNameMiss"];
+            return View("Club", model);
+        }
+
+        var countries = await GetCountriesAsync();
+
+        if (model.Country == null
+            || !ulong.TryParse(model.Country, out var countryId)
+            || !countries.Any(c => countryId == c.Key))
+        {
+            model.ErrorMessage = _localizer["InvalidCountry"];
+            return View("Club", model);
+        }
+
+        var request = new ClubRequest
+        {
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
             {
-                PlayerId = playerId,
-                ClueEn = clues[Languages.en].clue,
-                ClueFr = clues[Languages.fr].clue,
-                EasyClueEn = clues[Languages.en].easyclue,
-                EasyClueFr = clues[Languages.fr].easyclue
+                { Languages.en, SplitAlternativeNames(model.MainNameEn, model.AlternativeNamesEn) },
+                { Languages.fr, SplitAlternativeNames(model.MainNameFr, model.AlternativeNamesFr) }
+            },
+            CountryId = countryId,
+            Id = model.Id
+        };
+
+        var validityRequest = request.IsValid(_localizer);
+        if (!string.IsNullOrWhiteSpace(validityRequest))
+            model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
+        else
+        {
+            await _internationalService
+                .CreateOrUpdateClubAsync(request);
+
+            model = new ClubCreationModel
+            {
+                InfoMessage = _localizer["ClubOk"]
             };
+        }
 
+        return View("Club", model);
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> PlayerEdit(ulong playerId)
+    {
+        var clues = await _playerService
+            .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr });
+
+        var model = new PlayerEditModel
+        {
+            PlayerId = playerId,
+            ClueEn = clues[Languages.en].clue,
+            ClueFr = clues[Languages.fr].clue,
+            EasyClueEn = clues[Languages.en].easyclue,
+            EasyClueFr = clues[Languages.fr].easyclue
+        };
+
+        return View("PlayerEdit", model);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> PlayerEdit(PlayerEditModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.ClueEn)
+            || string.IsNullOrWhiteSpace(model.ClueFr)
+            || string.IsNullOrWhiteSpace(model.EasyClueEn)
+            || string.IsNullOrWhiteSpace(model.EasyClueFr)
+            || model.PlayerId == 0)
+        {
+            model.Message = "Données de formulaire invalides";
             return View("PlayerEdit", model);
         }
 
-        [HttpPost]
-        [Authorization(UserTypes.Administrator)]
-        public async Task<IActionResult> PlayerEdit(PlayerEditModel model)
-        {
-            if (string.IsNullOrWhiteSpace(model.ClueEn)
-                || string.IsNullOrWhiteSpace(model.ClueFr)
-                || string.IsNullOrWhiteSpace(model.EasyClueEn)
-                || string.IsNullOrWhiteSpace(model.EasyClueFr)
-                || model.PlayerId == 0)
+        await _playerService
+            .UpdatePlayerCluesAsync(
+                model.PlayerId,
+                model.ClueEn,
+                model.EasyClueEn,
+                new Dictionary<Languages, string?> { { Languages.fr, model.ClueFr } },
+                new Dictionary<Languages, string?> { { Languages.fr, model.EasyClueFr } });
+
+        model.Success = true;
+        model.Message = null;
+
+        return View("PlayerEdit", model);
+    }
+
+    private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
+    {
+        var pls = await _playerService.GetPlayerSubmissionsAsync(await _internationalService.GetCountryContinentsAsync());
+
+        var countries = await GetCountriesAsync();
+
+        var continents = await GetContinentsAsync();
+
+        return pls
+            .Select(p => new PlayerSubmissionModel
             {
-                model.Message = "Données de formulaire invalides";
-                return View("PlayerEdit", model);
-            }
+                AllowedNames = string.Join(';', p.AllowedNames ?? []),
+                Clubs = p.Clubs,
+                Clue = p.Clue,
+                EasyClue = p.EasyClue,
+                Country = countries[(ulong)p.Country],
+                Continent = continents[(ulong)p.Continent],
+                Id = p.Id,
+                Login = p.Login,
+                Name = p.Name,
+                Position = Enum.GetValues(typeof(Positions)).Cast<Positions>().First(pp => pp == p.Position).ToString(),
+                YearOfBirth = p.YearOfBirth
+            })
+            .ToList();
+    }
 
-            await _playerService
-                .UpdatePlayerCluesAsync(
-                    model.PlayerId,
-                    model.ClueEn,
-                    model.EasyClueEn,
-                    new Dictionary<Languages, string> { { Languages.fr, model.ClueFr } },
-                    new Dictionary<Languages, string> { { Languages.fr, model.EasyClueFr } })
-                .ConfigureAwait(false);
+    /// <summary>Nom canonique (priorite 0) suivi des alias saisis un par ligne, sans doublon ni ligne vide.</summary>
+    internal static IReadOnlyList<string> SplitAlternativeNames(string canonicalName, string? alternativeNames)
+    {
+        var aliases = (alternativeNames ?? string.Empty)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(n => !string.Equals(n, canonicalName, StringComparison.OrdinalIgnoreCase))
+            .Distinct();
 
-            model.Success = true;
-            model.Message = null;
+        return new[] { canonicalName }.Concat(aliases).ToList();
+    }
 
-            return View("PlayerEdit", model);
-        }
-
-        private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
+    internal static void AddClubIfValid(List<PlayerClubRequest> clubs, string? clubIdValue, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
+    {
+        if (ulong.TryParse(clubIdValue, out var clubId) && clubsReferential.Any(c => c.Id == clubId))
         {
-            var pls = await _playerService.GetPlayerSubmissionsAsync().ConfigureAwait(false);
-
-            var countries = await GetCountriesAsync().ConfigureAwait(false);
-
-            var continents = await GetContinentsAsync().ConfigureAwait(false);
-
-            return pls
-                .Select(p => new PlayerSubmissionModel
-                {
-                    AllowedNames = string.Join(';', p.AllowedNames),
-                    Clubs = p.Clubs,
-                    Clue = p.Clue,
-                    EasyClue = p.EasyClue,
-                    Country = countries[(ulong)p.Country],
-                    Continent = continents[(ulong)p.Continent],
-                    Id = p.Id,
-                    Login = p.Login,
-                    Name = p.Name,
-                    Position = Enum.GetValues(typeof(Positions)).Cast<Positions>().First(pp => pp == p.Position).ToString(),
-                    YearOfBirth = p.YearOfBirth
-                })
-                .ToList();
+            clubs.Add(new PlayerClubRequest { ClubId = clubId, HistoryPosition = i, IsLoan = isLoan });
+            i++;
         }
+    }
 
-        private void AddClubIfValid(List<PlayerClubRequest> clubs, string value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
-        {
-            var id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
-            if (id.HasValue)
-            {
-                clubs.Add(new PlayerClubRequest { ClubId = id.Value, HistoryPosition = i, IsLoan = isLoan });
-                i++;
-            }
-        }
-
-        private void SetPositionsOnModel(PlayerCreationModel model)
-        {
-            model.Positions = new[] { new SelectListItem("", "0") }
-                .Concat(GetPositions()
-                    .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
-                .ToList();
-        }
+    private void SetPositionsOnModel(PlayerCreationModel model)
+    {
+        model.Positions = new[] { new SelectListItem("", "0") }
+            .Concat(GetPositions()
+                .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
+            .ToList();
     }
 }

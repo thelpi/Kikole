@@ -1,43 +1,50 @@
-﻿using KikoleSite.Helpers;
-using KikoleSite.Models.Dtos;
+using System;
+using KikoleSite.Helpers;
+using KikoleSite.Identity;
 using KikoleSite.Models.Enums;
 
-namespace KikoleSite.Models.Requests
+namespace KikoleSite.Models.Requests;
+
+public record UserRequest
 {
-    public class UserRequest
+    public required string Login { get; init; }
+
+    public required string Password { get; init; }
+
+    public required string? PasswordResetQuestion { get; init; }
+
+    public required string? PasswordResetAnswer { get; init; }
+
+    public Languages? Language { get; init; }
+
+    public required string? Ip { get; init; }
+
+    /// <summary>
+    /// La reponse de securite n'est pas hachee ici : ce record n'a pas a connaitre
+    /// l'algorithme de hachage. L'appelant la hache lui-meme avant de creer le compte.
+    /// </summary>
+    internal (ApplicationUser User, string RawPasswordResetAnswer) ToApplicationUser()
     {
-        public string Login { get; set; }
+        // ni question ni reponse fournies : un GUID sert de valeur inutilisable, pour
+        // qu'un compte cree sans Q&A ne reste pas avec un secret devinable ou vide.
+        var rawPasswordResetAnswer = string.IsNullOrWhiteSpace(PasswordResetAnswer)
+            ? Guid.NewGuid().ToString()
+            : PasswordResetAnswer.Sanitize();
 
-        public string Password { get; set; }
+        var realPasswordResetQuestion = string.IsNullOrWhiteSpace(PasswordResetQuestion)
+            ? Guid.NewGuid().ToString()
+            : PasswordResetQuestion;
 
-        public string PasswordResetQuestion { get; set; }
-
-        public string PasswordResetAnswer { get; set; }
-
-        public Languages? Language { get; set; }
-
-        public string Ip { get; set; }
-
-        internal UserDto ToDto(ICrypter crypter)
+        var user = new ApplicationUser
         {
-            var realPasswordResetAnswer = string.IsNullOrWhiteSpace(PasswordResetAnswer)
-                ? crypter.Generate()
-                : PasswordResetAnswer.Sanitize();
+            UserName = Login.Sanitize(),
+            LanguageId = (ulong)(Language ?? Languages.en),
+            UserType = UserTypes.StandardUser,
+            PasswordResetQuestion = realPasswordResetQuestion,
+            PasswordResetAnswerHash = string.Empty,
+            Ip = Ip
+        };
 
-            var realPasswordResetQuestion = string.IsNullOrWhiteSpace(PasswordResetQuestion)
-                ? crypter.Generate()
-                : PasswordResetQuestion;
-
-            return new UserDto
-            {
-                LanguageId = (ulong)(Language ?? Languages.en),
-                Login = Login.Sanitize(),
-                Password = crypter.Encrypt(Password),
-                PasswordResetAnswer = crypter.Encrypt(realPasswordResetAnswer),
-                PasswordResetQuestion = realPasswordResetQuestion,
-                UserTypeId = (ulong)UserTypes.StandardUser,
-                Ip = Ip
-            };
-        }
+        return (user, rawPasswordResetAnswer);
     }
 }

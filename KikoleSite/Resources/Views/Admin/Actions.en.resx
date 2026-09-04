@@ -127,7 +127,7 @@
     <value>Administrative actions</value>
   </data>
   <data name="ReassignPlayers" xml:space="preserve">
-    <value>Reassign player' dates</value>
+    <value>Reassign players' dates</value>
   </data>
   <data name="RecomputeBadges" xml:space="preserve">
     <value>Recompute badges</value>

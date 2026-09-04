@@ -123,6 +123,9 @@
   <data name="AlternativeTip" xml:space="preserve">
     <value>si très différent du nom EN ou FR</value>
   </data>
+  <data name="Country" xml:space="preserve">
+    <value>Pays</value>
+  </data>
   <data name="CreateClubTitle" xml:space="preserve">
     <value>Créer un club</value>
   </data>
@@ -136,7 +139,7 @@
     <value>Nom principal (titre page wiki anglais)</value>
   </data>
   <data name="MainNameFr" xml:space="preserve">
-    <value>Nom alternatif (titre page wiki français</value>
+    <value>Nom principal (titre page wiki français)</value>
   </data>
   <data name="SearchAlreadyExists" xml:space="preserve">
     <value>Chercher si le club n'existe pas déjà :</value>

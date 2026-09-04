@@ -121,9 +121,9 @@
     <value>Back to home</value>
   </data>
   <data name="ErrorMessage" xml:space="preserve">
-    <value>An error has occured.</value>
+    <value>An error has occurred.</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
-    <value>An error has occured</value>
+    <value>An error has occurred</value>
   </data>
 </root>

@@ -1,0 +1,26 @@
+root = true
+
+[*.cs]
+
+# ----------------------------------------------------------------- directives using
+# System en tete, pas de ligne vide entre les groupes, et les using inutiles signales
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+dotnet_diagnostic.IDE0005.severity = warning
+
+# ----------------------------------------------------------------- inference de type
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true
+dotnet_diagnostic.IDE0007.severity = suggestion
+
+# ----------------------------------------------------------------- construction
+# new() plutot que de repeter le type quand il est deja ecrit a gauche
+csharp_style_implicit_object_creation_when_type_is_apparent = true
+dotnet_diagnostic.IDE0090.severity = suggestion
+
+# ----------------------------------------------------------------- casts
+dotnet_diagnostic.IDE0004.severity = suggestion
+
+# using inutiles : le compilateur les signale en "hidden" par defaut
+dotnet_diagnostic.CS8019.severity = warning

@@ -120,14 +120,11 @@
   <data name="Account" xml:space="preserve">
     <value>Account</value>
   </data>
-  <data name="ChallengeSomeone" xml:space="preserve">
-    <value>Challenge someone!</value>
-  </data>
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact</value>
   </data>
   <data name="FriendlyWebsite" xml:space="preserve">
-    <value>You like bike?</value>
+    <value>Do you like cycling?</value>
   </data>
   <data name="Leaderboard" xml:space="preserve">
     <value>Leaderboard</value>
@@ -136,9 +133,9 @@
     <value>NEW!</value>
   </data>
   <data name="SiteName" xml:space="preserve">
-    <value>Kikole?</value>
+    <value>Kikolé?</value>
   </data>
   <data name="SubmitKikole" xml:space="preserve">
-    <value>Submit a kikole!</value>
+    <value>Submit a kikolé!</value>
   </data>
 </root>

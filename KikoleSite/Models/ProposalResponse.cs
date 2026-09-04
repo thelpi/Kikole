@@ -7,171 +7,221 @@ using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 using Microsoft.Extensions.Localization;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Models;
+
+public class ProposalResponse
 {
-    public class ProposalResponse
+    private readonly List<UserBadge> _badges = [];
+
+    public bool Successful { get; }
+
+    public object? Value { get; }
+
+    public string? RawValue { get; }
+
+    /// <summary>
+    /// Renseigne uniquement pour une proposition <see cref="ProposalTypes.Country"/>
+    /// reussie sur un joueur ayant une nation sportive disparue en plus de la
+    /// principale (<see cref="PlayerDto.AlternativeCountryId"/>) - les deux sont
+    /// alors affichees au reveal, peu importe laquelle a ete devinee.
+    /// </summary>
+    public ulong? AlternativeCountryId { get; }
+
+    /// <summary>
+    /// Meme principe que <see cref="AlternativeCountryId"/>, pour une proposition
+    /// <see cref="ProposalTypes.Continent"/> reussie quand le pays alternatif est sur un
+    /// continent different du principal (ex. Algerie/France).
+    /// </summary>
+    public ulong? AlternativeContinentId { get; }
+
+    public DateTime Date { get; }
+
+    public string? Tip { get; }
+
+    /// <summary>Le tarif de la catégorie (montant ou taux, cf. <see cref="ScoreCalculator.ProposalTypesCost"/>).</summary>
+    public (int, bool) Cost { get; }
+
+    public ProposalTypes ProposalType { get; }
+
+    public int TotalPoints { get; private set; }
+
+    /// <summary>
+    /// Ce que cette proposition a réellement coûté, une fois <see cref="TotalPoints"/>
+    /// plafonné à 0 pris en compte — peut être inférieur au tarif de <see cref="Cost"/>
+    /// si le score restant ne suffisait pas à l'absorber.
+    /// </summary>
+    public int PointsLost { get; private set; }
+
+    public IReadOnlyCollection<UserBadge> CollectedBadges => _badges;
+
+    internal bool IsWin => ProposalType == ProposalTypes.Name && Successful;
+
+    private ProposalResponse(ProposalTypes proposalType,
+        string? sourceValue,
+        bool? success,
+        PlayerFullDto player,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
-        private readonly List<UserBadge> _badges = new List<UserBadge>();
+        ProposalType = proposalType;
 
-        public bool Successful { get; }
+        if (success.HasValue)
+            Successful = success.Value;
 
-        public object Value { get; }
+        RawValue = sourceValue;
 
-        public string RawValue { get; }
+        // seuls l'achat d'indice et l'achat de classement n'ont pas de valeur : partout
+        // ailleurs elle a ete validee par le controleur avant d'arriver ici, et son
+        // absence signale une ligne de proposition incoherente en base
+        string Guessed() => sourceValue
+            ?? throw new InvalidOperationException($"Une proposition de type {proposalType} doit porter une valeur.");
 
-        public DateTime Date { get; }
-
-        public string Tip { get; }
-
-        public (int, bool) LostPoints { get; }
-
-        public ProposalTypes ProposalType { get; }
-
-        public int TotalPoints { get; private set; }
-
-        public IReadOnlyCollection<UserBadge> CollectedBadges => _badges;
-
-        internal bool IsWin => ProposalType == ProposalTypes.Name && Successful;
-
-        private ProposalResponse(ProposalTypes proposalType,
-            string sourceValue,
-            bool? success,
-            PlayerFullDto player)
+        switch (ProposalType)
         {
-            ProposalType = proposalType;
+            case ProposalTypes.Name:
+                if (!success.HasValue)
+                    Successful = player.Player.AllowedNames.ContainsApproximately(Guessed());
+                Value = Successful
+                    ? player.Player.Name
+                    : sourceValue;
+                break;
 
-            if (success.HasValue)
-                Successful = success.Value;
-
-            RawValue = sourceValue;
-
-            switch (ProposalType)
-            {
-                case ProposalTypes.Name:
-                    if (!success.HasValue)
-                        Successful = player.Player.AllowedNames.ContainsApproximately(sourceValue);
-                    Value = Successful
-                        ? player.Player.Name
-                        : sourceValue;
-                    break;
-
-                case ProposalTypes.Club:
-                    var c = player.Clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(sourceValue));
-                    if (!success.HasValue)
-                        Successful = c != null;
-                    if (Successful)
+            case ProposalTypes.Club:
+                var c = ulong.TryParse(Guessed(), out var clubId)
+                    ? player.Clubs.FirstOrDefault(_ => _.Id == clubId)
+                    : null;
+                if (!success.HasValue)
+                    Successful = c != null;
+                if (Successful)
+                {
+                    if (c == null)
                     {
-                        if (c == null)
-                        {
-                            // weird case from the beginning when there was no autocompletion on clubs
-                            // the value is not really used in that case anyway
-                            // it just need to be not null
-                            Value = new List<PlayerClub>();
-                        }
-                        else
-                        {
-                            Value = player.PlayerClubs
-                                .Where(_ => _.ClubId == c.Id)
-                                .Select(_ => new PlayerClub(_, player.Clubs))
-                                .ToList();
-                        }
+                        // weird case from the beginning when there was no autocompletion on clubs
+                        // the value is not really used in that case anyway
+                        // it just need to be not null
+                        Value = new List<PlayerClub>();
                     }
                     else
-                        Value = sourceValue;
-                    break;
+                    {
+                        Value = player.PlayerClubs
+                            .Where(_ => _.ClubId == c.Id)
+                            .Select(_ => new PlayerClub(_, player.Clubs))
+                            .ToList();
+                    }
+                }
+                else
+                    Value = sourceValue;
+                break;
 
-                case ProposalTypes.Country:
-                    if (!success.HasValue)
-                        Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(sourceValue);
-                    Value = Successful
-                        ? player.Player.CountryId
-                        : (object)sourceValue;
-                    RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
-                        ? tmpRawCountry.ToString()
-                        : RawValue;
-                    break;
+            case ProposalTypes.Country:
+                if (!success.HasValue)
+                {
+                    var guessedCountryId = (ulong)Enum.Parse<Countries>(Guessed());
+                    Successful = player.Player.CountryId == guessedCountryId
+                        || player.Player.AlternativeCountryId == guessedCountryId;
+                }
+                Value = Successful
+                    ? player.Player.CountryId
+                    : sourceValue;
+                if (Successful)
+                    AlternativeCountryId = player.Player.AlternativeCountryId;
+                RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
+                    ? tmpRawCountry.ToString()
+                    : RawValue;
+                break;
 
-                case ProposalTypes.Continent:
-                    if (!success.HasValue)
-                        Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(sourceValue);
-                    Value = Successful
-                        ? player.Player.ContinentId
-                        : (object)sourceValue;
-                    RawValue = Enum.TryParse<Continents>(sourceValue, out var tmpRawContinent)
-                        ? tmpRawContinent.ToString()
-                        : RawValue;
-                    break;
+            case ProposalTypes.Continent:
+                var mainContinentId = countryContinents[player.Player.CountryId];
+                var altContinentId = player.Player.AlternativeCountryId.HasValue
+                    ? countryContinents[player.Player.AlternativeCountryId.Value]
+                    : (ulong?)null;
+                if (!success.HasValue)
+                {
+                    var guessedContinentId = (ulong)Enum.Parse<Continents>(Guessed());
+                    Successful = mainContinentId == guessedContinentId
+                        || altContinentId == guessedContinentId;
+                }
+                Value = Successful
+                    ? mainContinentId
+                    : sourceValue;
+                if (Successful && altContinentId.HasValue && altContinentId != mainContinentId)
+                    AlternativeContinentId = altContinentId;
+                RawValue = Enum.TryParse<Continents>(sourceValue, out var tmpRawContinent)
+                    ? tmpRawContinent.ToString()
+                    : RawValue;
+                break;
 
-                case ProposalTypes.Position:
-                    if (!success.HasValue)
-                        Successful = player.Player.PositionId == ulong.Parse(sourceValue);
-                    Value = Successful
-                        ? player.Player.PositionId
-                        : (object)sourceValue;
-                    RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
-                        ? tmpRawPosition.ToString()
-                        : RawValue;
-                    break;
+            case ProposalTypes.Position:
+                if (!success.HasValue)
+                    Successful = player.Player.PositionId == ulong.Parse(Guessed());
+                Value = Successful
+                    ? player.Player.PositionId
+                    : sourceValue;
+                RawValue = Enum.TryParse<Positions>(sourceValue, out var tmpRawPosition)
+                    ? tmpRawPosition.ToString()
+                    : RawValue;
+                break;
 
-                case ProposalTypes.Year:
-                    if (!success.HasValue)
-                        Successful = ushort.Parse(sourceValue) == player.Player.YearOfBirth;
-                    Value = Successful
-                        ? player.Player.YearOfBirth
-                        : (object)sourceValue;
-                    break;
+            case ProposalTypes.Year:
+                if (!success.HasValue)
+                    Successful = ushort.Parse(Guessed()) == player.Player.YearOfBirth;
+                Value = Successful
+                    ? player.Player.YearOfBirth
+                    : sourceValue;
+                break;
 
-                case ProposalTypes.Leaderboard:
-                case ProposalTypes.Clue:
-                    if (!success.HasValue)
-                        Successful = true;
-                    Value = null;
-                    RawValue = string.Empty;
-                    break;
-            }
-
-            if (Successful && ProposalType.CanBeMiss())
-                LostPoints = (0, false);
-            else
-                LostPoints = ProposalChart.ProposalTypesCost[ProposalType];
+            case ProposalTypes.Leaderboard:
+            case ProposalTypes.Clue:
+                if (!success.HasValue)
+                    Successful = true;
+                Value = null;
+                RawValue = string.Empty;
+                break;
         }
 
-        internal ProposalResponse(ProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
-            : this(request.ProposalType, request.Value, null, player)
+        if (Successful && ProposalType.CanBeMiss())
+            Cost = (0, false);
+        else
+            Cost = ScoreCalculator.ProposalTypesCost[ProposalType];
+    }
+
+    internal ProposalResponse(ProposalRequest request, PlayerFullDto player, IStringLocalizer resources,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
+        : this(request.ProposalType, request.Value, null, player, countryContinents)
+    {
+        Date = request.ProposalDateTime;
+        Tip = request.GetTip(player.Player, resources);
+    }
+
+    internal ProposalResponse(ProposalDto dto, PlayerFullDto player, IStringLocalizer resources,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
+        : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, countryContinents)
+    {
+        // a bit ugly, ngl
+        if ((ProposalTypes)dto.ProposalTypeId == ProposalTypes.Year)
         {
-            Date = request.ProposalDateTime;
-            Tip = request.GetTip(player.Player, resources);
+            Tip = Convert.ToUInt16(Value) > player.Player.YearOfBirth
+                ? resources["TipOlderPlayerShort"]
+                : resources["TipYoungerPlayerShort"];
         }
+        Date = dto.CreationDate;
+    }
 
-        internal ProposalResponse(ProposalDto dto, PlayerFullDto player, IStringLocalizer resources)
-            : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player)
+    internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)
+    {
+        var lostPoints = 0;
+        if (!duplicate)
         {
-            // a bit ugly, ngl
-            if ((ProposalTypes)dto.ProposalTypeId == ProposalTypes.Year)
-            {
-                Tip = Convert.ToUInt16(Value) > player.Player.YearOfBirth
-                    ? resources["TipOlderPlayerShort"]
-                    : resources["TipYoungerPlayerShort"];
-            }
-            Date = dto.CreationDate;
+            lostPoints = Cost.Item2
+                ? (int)Math.Round(sourcePoints * Cost.Item1 / (decimal)100)
+                : Cost.Item1;
         }
+        TotalPoints = Math.Max(0, sourcePoints - lostPoints);
+        PointsLost = sourcePoints - TotalPoints;
+        return this;
+    }
 
-        internal ProposalResponse WithTotalPoints(int sourcePoints, bool duplicate)
-        {
-            var lostPoints = 0;
-            if (!duplicate)
-            {
-                lostPoints = LostPoints.Item2
-                    ? (int)Math.Round(sourcePoints * LostPoints.Item1 / (decimal)100)
-                    : LostPoints.Item1;
-            }
-            TotalPoints = Math.Max(0, sourcePoints - lostPoints);
-            return this;
-        }
-
-        internal void AddBadge(UserBadge badge)
-        {
-            _badges.Add(badge);
-        }
+    internal void AddBadge(UserBadge badge)
+    {
+        _badges.Add(badge);
     }
 }

@@ -3,38 +3,39 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Repositories
+namespace KikoleSite.Repositories;
+
+public interface IPlayerRepository
 {
-    public interface IPlayerRepository
-    {
-        Task<ulong> CreatePlayerAsync(PlayerDto player);
+    Task<ulong> CreatePlayerAsync(PlayerDto player);
 
-        Task CreatePlayerClubsAsync(PlayerClubDto playerClub);
+    Task CreatePlayerClubsAsync(PlayerClubDto playerClub);
 
-        Task<PlayerDto> GetPlayerOfTheDayAsync(DateTime date);
+    Task<PlayerDto?> GetPlayerOfTheDayAsync(DateTime date);
 
-        Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(DateTime? minimalDate, DateTime? maximalDate);
+    Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(DateTime? minimalDate, DateTime? maximalDate);
 
-        Task<PlayerDto> GetPlayerByIdAsync(ulong id);
+    Task<PlayerDto?> GetPlayerByIdAsync(ulong id);
 
-        Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
+    Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
-        Task<DateTime> GetLatestProposalDateAsync();
+    Task<DateTime> GetLatestPlayerDateAsync();
 
-        Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);
+    Task<DateTime?> GetEarliestPlayerDateAsync();
 
-        Task ValidatePlayerProposalAsync(ulong playerId, DateTime date);
+    Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);
 
-        Task ChangePlayerProposalDateAsync(ulong playerId, DateTime date);
+    Task ValidatePlayerProposalAsync(ulong playerId, DateTime date);
 
-        Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage);
+    Task ChangePlayerPublicationDateAsync(ulong playerId, DateTime date);
 
-        Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync();
+    Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage);
 
-        Task RefusePlayerProposalAsync(ulong playerId);
+    Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync();
 
-        Task<string> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
+    Task RefusePlayerProposalAsync(ulong playerId);
 
-        Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
-    }
+    Task<string?> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
+
+    Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Models;
+
+public abstract class DayboardItem
 {
-    public abstract class DayboardItem
-    {
-        public DateTime Date { get; set; }
-        public ulong UserId { get; set; }
-        public string UserName { get; set; }
-        public int Points { get; set; }
-    }
+    public DateTime Date { get; set; }
+    public ulong UserId { get; set; }
+    public required string UserName { get; set; }
+    public int Points { get; set; }
 }

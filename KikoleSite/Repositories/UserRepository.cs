@@ -1,124 +1,143 @@
-﻿using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
-namespace KikoleSite.Repositories
+namespace KikoleSite.Repositories;
+
+public class UserRepository : BaseRepository, IUserRepository
 {
-    public class UserRepository : BaseRepository, IUserRepository
+    public UserRepository(IConfiguration configuration, IClock clock)
+        : base(configuration, clock)
+    { }
+
+    public async Task<int> GetUserCreationCountSinceAsync(string ip, DateTime since)
     {
-        public UserRepository(IConfiguration configuration, IClock clock)
-            : base(configuration, clock)
-        { }
+        return await ExecuteScalarAsync(
+                "SELECT COUNT(*) FROM users WHERE ip = @ip AND creation_date >= @since",
+                new { ip, since },
+                0);
+    }
 
-        public async Task<ulong> CreateUserAsync(UserDto user)
-        {
-            return await ExecuteInsertAsync(
-                    "users",
-                    ("login", user.Login),
-                    ("password", user.Password),
-                    ("password_reset_question", user.PasswordResetQuestion),
-                    ("password_reset_answer", user.PasswordResetAnswer),
-                    ("language_id", user.LanguageId),
-                    ("user_type_id", user.UserTypeId),
-                    ("ip", user.Ip),
-                    ("creation_date", Clock.Now))
-                .ConfigureAwait(false);
-        }
+    public async Task<ulong> CreateUserAsync(UserDto user)
+    {
+        return await ExecuteInsertAsync(
+                "users",
+                ("login", user.Login),
+                ("normalized_login", user.NormalizedLogin),
+                ("password", user.Password),
+                ("password_reset_question", user.PasswordResetQuestion),
+                ("password_reset_answer", user.PasswordResetAnswer),
+                ("language_id", user.LanguageId),
+                ("user_type_id", user.UserTypeId),
+                ("ip", user.Ip),
+                ("is_disabled", user.IsDisabled ? 1 : 0),
+                ("concurrency_stamp", user.ConcurrencyStamp),
+                ("security_stamp", user.SecurityStamp),
+                ("lockout_end", user.LockoutEnd),
+                ("access_failed_count", user.AccessFailedCount),
+                ("lockout_enabled", user.LockoutEnabled ? 1 : 0),
+                ("creation_date", Clock.Now));
+    }
 
-        public async Task<UserDto> GetUserByLoginAsync(string login)
-        {
-            return await GetDtoAsync<UserDto>(
-                    "users",
-                    ("login", login),
-                    ("is_disabled", 0))
-                .ConfigureAwait(false);
-        }
+    public async Task UpdateUserAsync(UserDto user)
+    {
+        await ExecuteNonQueryAsync(
+                "UPDATE users " +
+                "SET login = @login, " +
+                "    normalized_login = @normalizedLogin, " +
+                "    password = @password, " +
+                "    password_reset_question = @passwordResetQuestion, " +
+                "    password_reset_answer = @passwordResetAnswer, " +
+                "    language_id = @languageId, " +
+                "    user_type_id = @userTypeId, " +
+                "    ip = @ip, " +
+                "    is_disabled = @isDisabled, " +
+                "    concurrency_stamp = @concurrencyStamp, " +
+                "    security_stamp = @securityStamp, " +
+                "    lockout_end = @lockoutEnd, " +
+                "    access_failed_count = @accessFailedCount, " +
+                "    lockout_enabled = @lockoutEnabled " +
+                "WHERE id = @id",
+                new
+                {
+                    id = user.Id,
+                    login = user.Login,
+                    normalizedLogin = user.NormalizedLogin,
+                    password = user.Password,
+                    passwordResetQuestion = user.PasswordResetQuestion,
+                    passwordResetAnswer = user.PasswordResetAnswer,
+                    languageId = user.LanguageId,
+                    userTypeId = user.UserTypeId,
+                    ip = user.Ip,
+                    isDisabled = user.IsDisabled ? 1 : 0,
+                    concurrencyStamp = user.ConcurrencyStamp,
+                    securityStamp = user.SecurityStamp,
+                    lockoutEnd = user.LockoutEnd,
+                    accessFailedCount = user.AccessFailedCount,
+                    lockoutEnabled = user.LockoutEnabled ? 1 : 0
+                });
+    }
 
-        public async Task<bool> ResetUserKnownPasswordAsync(string login, string oldPassword, string newPassword)
-        {
-            return await ResetUserPasswordAsync(
-                    login,
-                    ("password", oldPassword),
-                    newPassword)
-                .ConfigureAwait(false);
-        }
+    public async Task DeleteUserAsync(ulong userId)
+    {
+        await ExecuteNonQueryAsync(
+                "DELETE FROM users WHERE id = @userId",
+                new { userId });
+    }
 
-        public async Task<bool> ResetUserUnknownPasswordAsync(string login, string passwordResetAnswer, string newPassword)
-        {
-            return await ResetUserPasswordAsync(
-                    login,
-                    ("password_reset_answer", passwordResetAnswer),
-                    newPassword)
-                .ConfigureAwait(false);
-        }
+    public async Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin)
+    {
+        return await GetDtoAsync<UserDto>(
+                "users",
+                ("normalized_login", normalizedLogin),
+                ("is_disabled", 0));
+    }
 
-        public async Task<UserDto> GetUserByIdAsync(ulong userId)
-        {
-            return await GetDtoAsync<UserDto>("users",
-                    ("id", userId),
-                    ("is_disabled", 0))
-                .ConfigureAwait(false);
-        }
+    public async Task<UserDto?> GetUserByIdAsync(ulong userId)
+    {
+        return await GetDtoAsync<UserDto>("users",
+                ("id", userId),
+                ("is_disabled", 0));
+    }
 
-        public async Task ResetUserQAndAAsync(ulong userId, string question, string anwser)
-        {
-            await ExecuteNonQueryAsync(
-                    "UPDATE users " +
-                    "SET password_reset_question = @question, password_reset_answer = @anwser " +
-                    "WHERE id = @userId",
-                    new
-                    {
-                        userId,
-                        question,
-                        anwser
-                    })
-                .ConfigureAwait(false);
-        }
+    public async Task<IReadOnlyCollection<UserDto>> GetUsersByIdsAsync(IReadOnlyCollection<ulong> userIds)
+    {
+        if (userIds.Count == 0)
+            return [];
 
-        public async Task<RegistrationGuidDto> GetRegistrationGuidAsync(string id)
-        {
-            return await GetDtoAsync<RegistrationGuidDto>(
-                    "registration_guids",
-                    ("id", id))
-                .ConfigureAwait(false);
-        }
+        return await ExecuteReaderAsync<UserDto>(
+                "SELECT * FROM users WHERE id IN @userIds AND is_disabled = 0",
+                new { userIds });
+    }
 
-        public async Task LinkRegistrationGuidToUserAsync(string id, ulong userId)
-        {
-            await ExecuteNonQueryAsync(
-                    "UPDATE registration_guids " +
-                    "SET user_id = @userId " +
-                    "WHERE id = @id",
-                    new
-                    {
-                        id,
-                        userId
-                    })
-                .ConfigureAwait(false);
-        }
+    public async Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id)
+    {
+        return await GetDtoAsync<RegistrationGuidDto>(
+                "registration_guids",
+                ("id", id));
+    }
 
-        private async Task<bool> ResetUserPasswordAsync(string login, (string, string) fieldInfo, string newPassword)
-        {
-            var user = await GetDtoAsync<UserDto>(
-                    "users",
-                    ("login", login),
-                    ("is_disabled", 0),
-                    (fieldInfo.Item1, fieldInfo.Item2))
-                .ConfigureAwait(false);
+    public async Task LinkRegistrationGuidToUserAsync(string id, ulong userId)
+    {
+        await ExecuteNonQueryAsync(
+                "UPDATE registration_guids " +
+                "SET user_id = @userId " +
+                "WHERE id = @id",
+                new
+                {
+                    id,
+                    userId
+                });
+    }
 
-            if (user == null)
-                return false;
-
-            await ExecuteNonQueryAsync(
-                    "UPDATE users SET password = @password WHERE id = @id",
-                    new
-                    {
-                        id = user.Id,
-                        password = newPassword
-                    })
-                .ConfigureAwait(false);
-
-            return true;
-        }
+    public async Task CreateLoginHistoryAsync(ulong userId, string? ip)
+    {
+        await ExecuteInsertAsync(
+                "login_history",
+                ("user_id", userId),
+                ("ip", ip),
+                ("creation_date", Clock.Now));
     }
 }

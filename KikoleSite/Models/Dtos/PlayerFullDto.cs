@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace KikoleSite.Models.Dtos
+namespace KikoleSite.Models.Dtos;
+
+public record PlayerFullDto
 {
-    public class PlayerFullDto
-    {
-        public PlayerDto Player { get; set; }
+    public required PlayerDto Player { get; init; }
 
-        public IReadOnlyList<PlayerClubDto> PlayerClubs { get; set; }
+    public required IReadOnlyList<PlayerClubDto> PlayerClubs { get; init; }
 
-        public IReadOnlyList<ClubDto> Clubs { get; set; }
-    }
+    public required IReadOnlyList<ClubDto> Clubs { get; init; }
 }

@@ -211,7 +211,7 @@
     <value>users have this badge</value>
   </data>
   <data name="EveryEveryBadge" xml:space="preserve">
-    <value>You haven't miss a single unique badge!</value>
+    <value>You haven't missed a single unique badge!</value>
   </data>
   <data name="ImpossibleBadge" xml:space="preserve">
     <value>Impossible to own</value>
@@ -235,7 +235,7 @@
     <value>Average points</value>
   </data>
   <data name="BoldFirstDay" xml:space="preserve">
-    <value>* in bold, kikoles tried / found the first day.</value>
+    <value>* in bold, kikolés tried / found the first day.</value>
   </data>
   <data name="CurrentDay" xml:space="preserve">
     <value>The first day</value>

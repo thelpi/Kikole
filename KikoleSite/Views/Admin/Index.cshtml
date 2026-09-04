@@ -45,16 +45,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
 
     <div class="largeTopMargin">
         <div>
-            <label>@localizer["Continent"]</label>
-        </div>
-        <div>
-            <input type="text" id="continentName" name="ContinentNameSubmissionValue" style="width: 300px" />
-            <input type="hidden" id="continentId" name="Continent" />
-        </div>
-    </div>
-
-    <div class="largeTopMargin">
-        <div>
             <label>@localizer["Nationality"]</label>
         </div>
         <div>
@@ -62,6 +52,17 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
             <input type="hidden" id="countryId" name="Country" />
         </div>
         <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
+    </div>
+
+    <div class="largeTopMargin">
+        <div>
+            <label>@localizer["AlternativeNationality"]</label>
+        </div>
+        <div>
+            <input type="text" id="alternativeCountryName" name="AlternativeCountryNameSubmissionValue" style="width: 300px" />
+            <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" />
+        </div>
+        <div style="font-size: small">(@localizer["TipAboutAlternativeNationality"])</div>
     </div>
 
     @if (Model.DisplayPlayerSubmissionLink)
@@ -132,9 +133,11 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         @for (var i = 0; i < 15; i++)
         {
             var name = $"Club{i}";
+            var idName = $"Club{i}Id";
             var loanChk = $"IsLoan{i}";
             <div class="smallTopMargin">
-                <input type="text" id="@name" name="@name" style="width: 250px" />
+                <input type="text" id="@name" name="@(name)Value" style="width: 250px" />
+                <input type="hidden" id="@idName" name="@idName" />
                 <span>@localizer["IsLoan"]</span>
                 @Html.CheckBox(loanChk)
             </div>
@@ -153,13 +156,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     </div>
 
     <div class="largeTopMargin">
-        @if (Model.IsSubmissionNewChart)
-        {
-            @Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ProposalChart.SubmissionPoints))
-        }
-        else
-        {
-            @Html.Raw(string.Format(localizer["ChartLaius"].Value, KikoleSite.Models.ProposalChart.SubmissionMaxPoints, KikoleSite.Models.ProposalChart.SubmissionLosePointsByLeader, KikoleSite.Models.ProposalChart.SubmissionThresholdlosePoints, KikoleSite.Models.ProposalChart.SubmissionBasePoints))
-        }
+        @Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ScoreCalculator.SubmissionPoints))
     </div>
 </form>

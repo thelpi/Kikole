@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Models;
+
+public class DayboardSearcherItem : DayboardItem
 {
-    public class DayboardSearcherItem : DayboardItem
-    {
-        public DateTime LastActivity { get; set; }
-    }
+    public DateTime LastActivity { get; set; }
 }

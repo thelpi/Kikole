@@ -1,22 +1,22 @@
-﻿namespace KikoleSite.ViewModels
+namespace KikoleSite.ViewModels
 {
     public class ClubCreationModel
     {
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
 
-        public string InfoMessage { get; set; }
+        public string? InfoMessage { get; set; }
 
-        public string MainName { get; set; }
+        public string? MainNameEn { get; set; }
 
-        public string AlternativeName0 { get; set; }
+        public string? MainNameFr { get; set; }
 
-        public string AlternativeName1 { get; set; }
+        /// <summary>Un alias EN par ligne.</summary>
+        public string? AlternativeNamesEn { get; set; }
 
-        public string AlternativeName2 { get; set; }
+        /// <summary>Un alias FR par ligne.</summary>
+        public string? AlternativeNamesFr { get; set; }
 
-        public string AlternativeName3 { get; set; }
-
-        public string AlternativeName4 { get; set; }
+        public string? Country { get; set; }
 
         public ulong Id { get; set; }
     }

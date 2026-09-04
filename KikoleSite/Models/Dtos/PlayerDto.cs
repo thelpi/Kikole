@@ -1,33 +1,37 @@
 ﻿using System;
 
-namespace KikoleSite.Models.Dtos
+namespace KikoleSite.Models.Dtos;
+
+public record PlayerDto : BaseDto
 {
-    public class PlayerDto : BaseDto
-    {
-        public string Name { get; set; }
+    public required string Name { get; init; }
 
-        public string AllowedNames { get; set; }
+    public required string AllowedNames { get; init; }
 
-        public ushort YearOfBirth { get; set; }
+    public ushort YearOfBirth { get; init; }
 
-        public ulong ContinentId { get; set; }
+    public ulong CountryId { get; init; }
 
-        public ulong CountryId { get; set; }
+    /// <summary>
+    /// Nation sportive disparue que le joueur a aussi representee (ex. RDA puis
+    /// Allemagne) - <see cref="CountryId"/> reste la reponse principale, celle-ci est
+    /// acceptee en plus. Non renseignee dans l'immense majorite des cas.
+    /// </summary>
+    public ulong? AlternativeCountryId { get; init; }
 
-        public DateTime? ProposalDate { get; set; }
+    public DateTime? PublicationDate { get; init; }
 
-        public string Clue { get; set; }
+    public required string Clue { get; init; }
 
-        public string EasyClue { get; set; }
+    public required string EasyClue { get; init; }
 
-        public ulong? BadgeId { get; set; }
+    public ulong? BadgeId { get; init; }
 
-        public ulong PositionId { get; set; }
+    public ulong PositionId { get; init; }
 
-        public ulong CreationUserId { get; set; }
+    public ulong CreationUserId { get; init; }
 
-        public DateTime? RejectDate { get; set; }
+    public DateTime? RejectDate { get; init; }
 
-        public byte HideCreator { get; set; }
-    }
+    public byte HideCreator { get; init; }
 }

@@ -1,7 +1,7 @@
 ﻿namespace KikoleSite.Models.Dtos
 {
-    public class ContinentDto : BaseDto
+    public record ContinentDto : BaseDto
     {
-        public string Name { get; set; }
+        public required string Name { get; init; }
     }
 }

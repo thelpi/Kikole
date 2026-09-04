@@ -1,22 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Models.Dtos;
 
-namespace KikoleSite.Models
+namespace KikoleSite.Models;
+
+public class PlayerClub
 {
-    public class PlayerClub
+    public byte HistoryPosition { get; }
+
+    public string Name { get; }
+
+    public bool IsLoan { get; }
+
+    internal PlayerClub(PlayerClubDto playerClub, IEnumerable<ClubDto> clubs)
     {
-        public byte HistoryPosition { get; }
+        // le club de la carriere doit figurer dans le referentiel fourni ; son absence
+        // est une incoherence de donnees, pas un cas a degrader
+        var club = clubs.SingleOrDefault(c => c.Id == playerClub.ClubId)
+            ?? throw new InvalidOperationException(
+                $"Le club {playerClub.ClubId} de la carriere du joueur {playerClub.PlayerId} est absent du referentiel.");
 
-        public string Name { get; }
-
-        public bool IsLoan { get; }
-
-        internal PlayerClub(PlayerClubDto playerClub, IEnumerable<ClubDto> clubs)
-        {
-            Name = clubs.Single(c => c.Id == playerClub.ClubId).Name;
-            HistoryPosition = playerClub.HistoryPosition;
-            IsLoan = playerClub.IsLoan > 0;
-        }
+        Name = club.Name;
+        HistoryPosition = playerClub.HistoryPosition;
+        IsLoan = playerClub.IsLoan > 0;
     }
 }

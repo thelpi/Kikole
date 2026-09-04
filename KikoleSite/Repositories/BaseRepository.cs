@@ -1,143 +1,147 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
-namespace KikoleSite.Repositories
+namespace KikoleSite.Repositories;
+
+public abstract class BaseRepository
 {
-    public abstract class BaseRepository
+    protected readonly IClock Clock;
+
+    private readonly string _connectionString;
+    private const string ConnectionStringName = "Kikole";
+
+    protected string SubSqlValidUsers => $"SELECT u.id FROM users AS u " +
+        $"WHERE u.user_type_id != {(ulong)UserTypes.Administrator} " +
+        $"AND u.is_disabled = 0";
+
+    /// <summary>Fragment SQL « trouve a temps » : la proposition gagnante est tombee le
+    /// jour meme (<c>proposal_date = DATE(creation_date)</c>), pas en rattrapage plus
+    /// tard. <paramref name="onTimeOnly"/> a <c>false</c> desactive le filtre.</summary>
+    protected static string SubSqlOnTime(bool onTimeOnly) =>
+        onTimeOnly ? "proposal_date = DATE(creation_date)" : "1 = 1";
+
+    protected BaseRepository(IConfiguration configuration, IClock clock)
     {
-        protected readonly IClock Clock;
+        _connectionString = configuration.GetConnectionString(ConnectionStringName)
+            ?? throw new InvalidOperationException($"La chaine de connexion '{ConnectionStringName}' est absente de la configuration.");
+        Clock = clock;
+    }
 
-        private readonly string _connectionString;
-        private const string ConnectionStringName = "Kikole";
+    protected async Task<ulong> ExecuteNonQueryAndGetInsertedIdAsync(string sql, object? parameters)
+    {
+        // LAST_INSERT_ID() est scope a la session : sans OpenAsync explicite, Dapper ouvre
+        // puis referme la connexion apres l'insertion (lui appartenant), et sa reutilisation
+        // depuis le pool peut perdre cet etat entre les deux appels. Ouvrir nous-memes fait
+        // que Dapper la laisse ouverte, garantissant la meme session pour les deux requetes.
+        using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
 
-        protected string SubSqlValidUsers => $"SELECT u.id FROM users AS u " +
-            $"WHERE u.user_type_id != {(ulong)UserTypes.Administrator} " +
-            $"AND u.is_disabled = 0";
+        await connection
+            .QueryAsync(
+                sql,
+                parameters,
+                commandType: CommandType.Text);
 
-        protected BaseRepository(IConfiguration configuration, IClock clock)
+        var results = await connection
+            .QueryAsync<ulong>(
+                "SELECT LAST_INSERT_ID()",
+                commandType: CommandType.Text);
+
+        return results.FirstOrDefault();
+    }
+
+    protected async Task ExecuteNonQueryAsync(string sql, object? parameters)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        await connection
+            .QueryAsync(
+                sql,
+                parameters,
+                commandType: CommandType.Text);
+    }
+
+    protected async Task<T?> ExecuteScalarAsync<T>(string sql, object? parameters, T? defaultValue = default)
+    {
+        var result = defaultValue;
+
+        using (var connection = new MySqlConnection(_connectionString))
         {
-            _connectionString = configuration.GetConnectionString(ConnectionStringName);
-            Clock = clock;
-        }
-
-        protected async Task<ulong> ExecuteNonQueryAndGetInsertedIdAsync(string sql, object parameters)
-        {
-            using var connection = new MySqlConnection(_connectionString);
-            await connection
-                .QueryAsync(
-                    sql,
-                    parameters,
-                    commandType: CommandType.Text)
-                .ConfigureAwait(false);
-
             var results = await connection
-                .QueryAsync<ulong>(
-                    "SELECT LAST_INSERT_ID()",
-                    commandType: CommandType.Text)
-                .ConfigureAwait(false);
-
-            return results.FirstOrDefault();
-        }
-
-        protected async Task ExecuteNonQueryAsync(string sql, object parameters)
-        {
-            using var connection = new MySqlConnection(_connectionString);
-            await connection
-                .QueryAsync(
-                    sql,
-                    parameters,
-                    commandType: CommandType.Text)
-                .ConfigureAwait(false);
-        }
-
-        protected async Task<T> ExecuteScalarAsync<T>(string sql, object parameters, T defaultValue = default)
-        {
-            var result = defaultValue;
-
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                var results = await connection
-                    .QueryAsync<T>(
-                        sql,
-                        parameters,
-                        commandType: CommandType.Text)
-                    .ConfigureAwait(false);
-
-                if (results.Any())
-                    result = results.First();
-            }
-
-            return result;
-        }
-
-        protected async Task<IReadOnlyList<T>> ExecuteReaderAsync<T>(string sql, object parameters)
-        {
-            using var connection = new MySqlConnection(_connectionString);
-            return (await connection
                 .QueryAsync<T>(
                     sql,
                     parameters,
-                    commandType: CommandType.Text)
-                .ConfigureAwait(false)).ToList();
+                    commandType: CommandType.Text);
+
+            if (results.Any())
+                result = results.First();
         }
 
-        protected async Task<ulong> ExecuteInsertAsync(string table, params (string column, object value)[] columns)
-        {
-            return await ExecuteNonQueryAndGetInsertedIdAsync(
-                    GetBasicInsertSql(table, columns),
-                    GetDynamicParameters(columns))
-                .ConfigureAwait(false);
-        }
+        return result;
+    }
 
-        protected async Task<ulong> ExecuteReplaceAsync(string table, params (string column, object value)[] columns)
-        {
-            return await ExecuteNonQueryAndGetInsertedIdAsync(
-                    GetBasicInsertSql(table, columns, true),
-                    GetDynamicParameters(columns))
-                .ConfigureAwait(false);
-        }
+    protected async Task<IReadOnlyList<T>> ExecuteReaderAsync<T>(string sql, object? parameters)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        return (await connection
+            .QueryAsync<T>(
+                sql,
+                parameters,
+                commandType: CommandType.Text)).ToList();
+    }
 
-        protected async Task<T> GetDtoAsync<T>(string table, params (string column, object value)[] conditions)
-        {
-            return await ExecuteScalarAsync<T>(
-                    GetBasicSelectSql(table, conditions),
-                    GetDynamicParameters(conditions))
-                .ConfigureAwait(false);
-        }
+    protected async Task<ulong> ExecuteInsertAsync(string table, params (string column, object? value)[] columns)
+    {
+        return await ExecuteNonQueryAndGetInsertedIdAsync(
+                GetBasicInsertSql(table, columns),
+                GetDynamicParameters(columns));
+    }
 
-        protected async Task<IReadOnlyList<T>> GetDtosAsync<T>(string table, params (string column, object value)[] conditions)
-        {
-            return await ExecuteReaderAsync<T>(
-                    GetBasicSelectSql(table, conditions),
-                    GetDynamicParameters(conditions))
-                .ConfigureAwait(false);
-        }
+    protected async Task<ulong> ExecuteReplaceAsync(string table, params (string column, object? value)[] columns)
+    {
+        return await ExecuteNonQueryAndGetInsertedIdAsync(
+                GetBasicInsertSql(table, columns, true),
+                GetDynamicParameters(columns));
+    }
 
-        private static string GetBasicSelectSql(string table, (string column, object value)[] conditions)
-        {
-            return $"SELECT * FROM {table} WHERE {(conditions?.Length > 0 ? string.Join(" AND ", conditions.Select(c => $"{c.column} = @{c.column}")) : "1=1")}";
-        }
+    protected async Task<T?> GetDtoAsync<T>(string table, params (string column, object? value)[] conditions)
+    {
+        return await ExecuteScalarAsync<T>(
+                GetBasicSelectSql(table, conditions),
+                GetDynamicParameters(conditions));
+    }
 
-        private static string GetBasicInsertSql(string table, (string column, object value)[] columns, bool replace = false)
-        {
-            return $"{(replace ? "REPLACE" : "INSERT")} INTO {table} ({string.Join(", ", columns.Select(c => c.column))}) VALUES ({string.Join(", ", columns.Select(c => $"@{c.column}"))})";
-        }
+    protected async Task<IReadOnlyList<T>> GetDtosAsync<T>(string table, params (string column, object? value)[] conditions)
+    {
+        return await ExecuteReaderAsync<T>(
+                GetBasicSelectSql(table, conditions),
+                GetDynamicParameters(conditions));
+    }
 
-        private static DynamicParameters GetDynamicParameters((string column, object value)[] conditions)
-        {
-            if (!(conditions?.Length > 0))
-                return null;
+    private static string GetBasicSelectSql(string table, (string column, object? value)[] conditions)
+    {
+        return $"SELECT * FROM {table} WHERE {(conditions?.Length > 0 ? string.Join(" AND ", conditions.Select(c => $"{c.column} = @{c.column}")) : "1=1")}";
+    }
 
-            var parameters = new DynamicParameters();
-            for (var i = 0; i < conditions.Length; i++)
-                parameters.Add(conditions[i].column, conditions[i].value);
-            return parameters;
-        }
+    private static string GetBasicInsertSql(string table, (string column, object? value)[] columns, bool replace = false)
+    {
+        return $"{(replace ? "REPLACE" : "INSERT")} INTO {table} ({string.Join(", ", columns.Select(c => c.column))}) VALUES ({string.Join(", ", columns.Select(c => $"@{c.column}"))})";
+    }
+
+    private static DynamicParameters? GetDynamicParameters((string column, object? value)[] conditions)
+    {
+        if (!(conditions?.Length > 0))
+            return null;
+
+        var parameters = new DynamicParameters();
+        for (var i = 0; i < conditions.Length; i++)
+            parameters.Add(conditions[i].column, conditions[i].value);
+        return parameters;
     }
 }
