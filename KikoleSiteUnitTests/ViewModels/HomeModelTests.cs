@@ -25,8 +25,8 @@ public class HomeModelTests
     private static readonly IReadOnlyDictionary<ulong, string> Countries =
         new Dictionary<ulong, string>
         {
-            { (ulong)KikoleSite.Models.Enums.Countries.FR, "France" },
-            { (ulong)KikoleSite.Models.Enums.Countries.BR, "Brésil" }
+            { (ulong)KikoleSite.Models.Enums.Countries.FRA, "France" },
+            { (ulong)KikoleSite.Models.Enums.Countries.BRA, "Brésil" }
         };
 
     private static readonly IReadOnlyDictionary<ulong, string> Continents =
@@ -64,7 +64,7 @@ public class HomeModelTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FR).WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FRA).WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
                 ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").Build(),
@@ -216,7 +216,7 @@ public class HomeModelTests
     {
         var model = new HomeModel();
 
-        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.FR).ToString());
+        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.FRA).ToString());
 
         model.CountryName.Should().Be("France");
         model.IncorrectCountries.Should().BeEmpty();
@@ -227,7 +227,7 @@ public class HomeModelTests
     {
         var model = new HomeModel();
 
-        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.BR).ToString(), sourcePoints: 975);
+        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.BRA).ToString(), sourcePoints: 975);
 
         model.CountryName.Should().BeNull();
         model.IncorrectCountries.Should().ContainSingle().Which.Should().Be("Brésil");
@@ -327,7 +327,7 @@ public class HomeModelTests
         var model = new HomeModel();
 
         // nationalite ratee : 1000 - 25
-        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.BR).ToString());
+        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.BRA).ToString());
         model.Points.Should().Be(975);
 
         // poste rate, applique au score courant : 975 - 75

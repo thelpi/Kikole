@@ -228,7 +228,7 @@ public class LeaderServiceTests
 
     private void SetupMissingLeader(params ProposalDto[] proposals)
     {
-        var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithPublicationDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build();
+        var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithPublicationDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build();
 
         _playerRepository
             .Setup(_ => _.GetPlayersOfTheDayAsync(null, Day))
@@ -362,7 +362,7 @@ public class LeaderServiceTests
 
         var playerInfo = new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = [],
             PlayerClubs = []
         };

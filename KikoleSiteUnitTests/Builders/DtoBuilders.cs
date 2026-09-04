@@ -17,7 +17,7 @@ internal sealed class PlayerDtoBuilder
         Name = "Zinédine Zidane",
         AllowedNames = "zidane;zizou;zinedine zidane",
         YearOfBirth = 1972,
-        CountryId = (ulong)Countries.FR,
+        CountryId = (ulong)Countries.FRA,
         ContinentId = (ulong)Continents.Europe,
         PositionId = (ulong)Positions.Midfielder,
         Clue = "un indice",
@@ -56,7 +56,7 @@ internal sealed class ClubDtoBuilder
     {
         Id = 1,
         Name = "Real Madrid",
-        CountryId = (ulong)Countries.ES
+        CountryId = (ulong)Countries.ESP
     };
 
     internal static ClubDtoBuilder Valid() => new();
@@ -252,7 +252,7 @@ internal sealed class PlayerFullDtoBuilder
 
 internal sealed class CountryDtoBuilder
 {
-    private CountryDto _dto = new() { Code = "FR", Name = "France" };
+    private CountryDto _dto = new() { Code = "FRA", Name = "France" };
 
     internal static CountryDtoBuilder Valid() => new();
 

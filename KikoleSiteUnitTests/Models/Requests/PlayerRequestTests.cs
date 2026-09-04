@@ -30,7 +30,7 @@ public class PlayerRequestTests
         {
             Name = "Zinédine Zidane",
             YearOfBirth = 1972,
-            Country = Countries.FR,
+            Country = Countries.FRA,
             Continent = Continents.Europe,
             Position = Positions.Midfielder,
             AllowedNames = new List<string> { "Zidane", "Zizou" },
@@ -223,7 +223,7 @@ public class PlayerRequestTests
     {
         var dto = Valid().ToDto(42, null);
 
-        dto.CountryId.Should().Be((ulong)Countries.FR);
+        dto.CountryId.Should().Be((ulong)Countries.FRA);
         dto.ContinentId.Should().Be((ulong)Continents.Europe);
         dto.PositionId.Should().Be((ulong)Positions.Midfielder);
         dto.CreationUserId.Should().Be(42);

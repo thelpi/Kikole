@@ -30,7 +30,7 @@ public class ProposalResponseTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
                 ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").Build(),
@@ -143,17 +143,17 @@ public class ProposalResponseTests
     [Fact]
     public void Country_WhenMatching_IsSuccessful()
     {
-        var response = Respond(ProposalTypes.Country, nameof(Countries.FR));
+        var response = Respond(ProposalTypes.Country, nameof(Countries.FRA));
 
         response.Successful.Should().BeTrue();
         response.Cost.Should().Be((0, false));
-        response.Value.Should().Be((ulong)Countries.FR);
+        response.Value.Should().Be((ulong)Countries.FRA);
     }
 
     [Fact]
     public void Country_WhenWrong_CostsThePenalty()
     {
-        var response = Respond(ProposalTypes.Country, nameof(Countries.BR));
+        var response = Respond(ProposalTypes.Country, nameof(Countries.BRA));
 
         response.Successful.Should().BeFalse();
         response.Cost.Should().Be((25, false));

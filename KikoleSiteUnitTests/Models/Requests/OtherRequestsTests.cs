@@ -20,7 +20,7 @@ public class ClubRequestTests
         return new ClubRequest
         {
             Id = 3,
-            CountryId = (ulong)Countries.DE,
+            CountryId = (ulong)Countries.GER,
             NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
             {
                 { Languages.fr, new List<string> { "Bayern Munich", "Bayern" } },
@@ -72,7 +72,7 @@ public class ClubRequestTests
         var dto = Valid().ToDto();
 
         dto.Name.Should().Be("Bayern Munich");
-        dto.CountryId.Should().Be((ulong)Countries.DE);
+        dto.CountryId.Should().Be((ulong)Countries.GER);
         dto.Id.Should().Be(3);
     }
 

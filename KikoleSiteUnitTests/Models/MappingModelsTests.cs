@@ -73,9 +73,9 @@ public class MappingModelsTests
     [Fact]
     public void Country_ParsesTheIsoCodeIntoItsEnum()
     {
-        var country = new Country(CountryDtoBuilder.Valid().WithCode("FR").WithName("France").Build());
+        var country = new Country(CountryDtoBuilder.Valid().WithCode("FRA").WithName("France").Build());
 
-        country.Code.Should().Be(Countries.FR);
+        country.Code.Should().Be(Countries.FRA);
         country.Name.Should().Be("France");
     }
 
@@ -155,7 +155,7 @@ public class MappingModelsTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithCreator(creatorId).WithClue("un indice").WithEasyClue("un indice facile").Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithCreator(creatorId).WithClue("un indice").WithEasyClue("un indice facile").Build(),
             Clubs = new List<ClubDto> { ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build() },
             PlayerClubs = new List<PlayerClubDto>
             {
@@ -172,7 +172,7 @@ public class MappingModelsTests
         var player = new Player(Submission(42), users);
 
         player.Id.Should().Be(1);
-        player.Country.Should().Be(Countries.FR);
+        player.Country.Should().Be(Countries.FRA);
         player.Continent.Should().Be(Continents.Europe);
         player.Position.Should().Be(Positions.Midfielder);
         player.YearOfBirth.Should().Be(1972);

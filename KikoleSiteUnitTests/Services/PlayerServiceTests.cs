@@ -50,7 +50,7 @@ public class PlayerServiceTests
         {
             Name = "Zinédine Zidane",
             YearOfBirth = 1972,
-            Country = Countries.FR,
+            Country = Countries.FRA,
             Continent = Continents.Europe,
             Position = Positions.Midfielder,
             AllowedNames = new List<string> { "Zidane" },
@@ -579,7 +579,7 @@ public class PlayerServiceTests
     private void SetupPendingSubmissions(params (ulong playerId, ulong creatorId)[] submissions)
     {
         var dtos = submissions
-            .Select(s => PlayerDtoBuilder.Valid().WithId(s.playerId).WithName("Joueur" + s.playerId).WithAllowedNames("joueur" + s.playerId).WithCreator(s.creatorId).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build())
+            .Select(s => PlayerDtoBuilder.Valid().WithId(s.playerId).WithName("Joueur" + s.playerId).WithAllowedNames("joueur" + s.playerId).WithCreator(s.creatorId).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build())
             .ToList();
 
         _playerRepository.Setup(_ => _.GetPendingValidationPlayersAsync()).ReturnsAsync(dtos);

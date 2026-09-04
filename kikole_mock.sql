@@ -54,7 +54,8 @@ INSERT INTO registration_guids (id, user_id, creation_date) VALUES
 -- clubs.name est le miroir du nom canonique FR (club_translations, language_id=2,
 -- priority=0) : simple etiquette de confort pour explorer la base sans jointure.
 -- country_id : valeurs de l'enum Countries (77 France, 84 Allemagne, 111 Italie,
--- 210 Espagne, 235 Royaume-Uni, 236 Etats-Unis)
+-- 210 Espagne, 235 Angleterre, 236 Etats-Unis) - codes FIFA depuis la bascule pays,
+-- Royaume-Uni n'existe plus en tant que tel (eclate en 4 nations)
 INSERT INTO clubs (id, name, country_id, creation_date) VALUES
 (1,  'AS Cannes',              77,  '2026-09-01 09:00:00'),
 (2,  'Girondins de Bordeaux',  77,  '2026-09-01 09:00:00'),

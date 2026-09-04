@@ -37,8 +37,8 @@ public class InternationalServiceTests
             .Setup(_ => _.GetCountriesAsync(It.IsAny<ulong>()))
             .ReturnsAsync(new List<CountryDto>
             {
-                CountryDtoBuilder.Valid().WithCode("FR").WithName("Zzz").Build(),
-                CountryDtoBuilder.Valid().WithCode("BR").WithName("Aaa").Build()
+                CountryDtoBuilder.Valid().WithCode("FRA").WithName("Zzz").Build(),
+                CountryDtoBuilder.Valid().WithCode("BRA").WithName("Aaa").Build()
             });
 
         _internationalRepository
@@ -147,7 +147,7 @@ public class InternationalServiceTests
         return new ClubRequest
         {
             Id = id,
-            CountryId = (ulong)Countries.IT,
+            CountryId = (ulong)Countries.ITA,
             NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
             {
                 { Languages.fr, new List<string> { "Juventus", "Juve" } },
@@ -163,7 +163,7 @@ public class InternationalServiceTests
     {
         var countries = await _service.GetCountriesAsync(Languages.fr);
 
-        countries[(ulong)Countries.FR].Should().Be("Zzz");
+        countries[(ulong)Countries.FRA].Should().Be("Zzz");
         countries.Values.Should().ContainInOrder("Aaa", "Zzz");
     }
 
