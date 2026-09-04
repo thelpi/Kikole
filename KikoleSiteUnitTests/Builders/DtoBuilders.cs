@@ -18,7 +18,6 @@ internal sealed class PlayerDtoBuilder
         AllowedNames = "zidane;zizou;zinedine zidane",
         YearOfBirth = 1972,
         CountryId = (ulong)Countries.FRA,
-        ContinentId = (ulong)Continents.Europe,
         PositionId = (ulong)Positions.Midfielder,
         Clue = "un indice",
         EasyClue = "un indice facile",
@@ -32,11 +31,9 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithAllowedNames(string names) { _dto = _dto with { AllowedNames = names }; return this; }
     internal PlayerDtoBuilder WithYearOfBirth(ushort year) { _dto = _dto with { YearOfBirth = year }; return this; }
     internal PlayerDtoBuilder WithCountry(Countries country) { _dto = _dto with { CountryId = (ulong)country }; return this; }
-    internal PlayerDtoBuilder WithContinent(Continents continent) { _dto = _dto with { ContinentId = (ulong)continent }; return this; }
     internal PlayerDtoBuilder WithPosition(Positions position) { _dto = _dto with { PositionId = (ulong)position }; return this; }
     internal PlayerDtoBuilder WithCountryId(ulong id) { _dto = _dto with { CountryId = id }; return this; }
     internal PlayerDtoBuilder WithAlternativeCountryId(ulong? id) { _dto = _dto with { AlternativeCountryId = id }; return this; }
-    internal PlayerDtoBuilder WithContinentId(ulong id) { _dto = _dto with { ContinentId = id }; return this; }
     internal PlayerDtoBuilder WithPositionId(ulong id) { _dto = _dto with { PositionId = id }; return this; }
     internal PlayerDtoBuilder WithClue(string clue) { _dto = _dto with { Clue = clue }; return this; }
     internal PlayerDtoBuilder WithEasyClue(string clue) { _dto = _dto with { EasyClue = clue }; return this; }
@@ -257,10 +254,30 @@ internal sealed class CountryDtoBuilder
 
     internal static CountryDtoBuilder Valid() => new();
 
+    internal CountryDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
     internal CountryDtoBuilder WithCode(string code) { _dto = _dto with { Code = code }; return this; }
     internal CountryDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
+    internal CountryDtoBuilder WithContinentId(ulong id) { _dto = _dto with { ContinentId = id }; return this; }
 
     internal CountryDto Build() => _dto;
+}
+
+/// <summary>
+/// Correspondance pays-&gt;continent partagee par les tests qui construisent
+/// ProposalResponse/Player directement (le continent n'est plus stocke sur le joueur,
+/// il est deduit de cette table).
+/// </summary>
+internal static class TestCountryContinents
+{
+    internal static readonly IReadOnlyDictionary<ulong, ulong> Map = new Dictionary<ulong, ulong>
+    {
+        { (ulong)Countries.FRA, (ulong)Continents.Europe },
+        { (ulong)Countries.BRA, (ulong)Continents.SouthAmerica },
+        { (ulong)Countries.GDR, (ulong)Continents.Europe },
+        { (ulong)Countries.GER, (ulong)Continents.Europe },
+        { (ulong)Countries.ITA, (ulong)Continents.Europe },
+        { (ulong)Countries.ESP, (ulong)Continents.Europe },
+    };
 }
 
 internal sealed class ContinentDtoBuilder

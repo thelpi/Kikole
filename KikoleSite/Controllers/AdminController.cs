@@ -233,17 +233,6 @@ public class AdminController : KikoleBaseController
             return View(model);
         }
 
-        var continents = await GetContinentsAsync();
-
-        if (model.Continent == null
-            || !ulong.TryParse(model.Continent, out var continentId)
-            || !continents.Any(c => continentId == c.Key))
-        {
-            model.ErrorMessage = _localizer["InvalidContinent"];
-            SetPositionsOnModel(model);
-            return View(model);
-        }
-
         var countries = await GetCountriesAsync();
 
         if (model.Country == null
@@ -340,7 +329,6 @@ public class AdminController : KikoleBaseController
             },
             Country = (Countries)countryId,
             AlternativeCountry = alternativeCountryId.HasValue ? (Countries)alternativeCountryId.Value : null,
-            Continent = (Continents)continentId,
             Name = model.Name,
             Position = (Positions)positionId,
             YearOfBirth = yearValue,

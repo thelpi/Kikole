@@ -25,6 +25,7 @@ public class PlayerServiceTests
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
+    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly PlayerService _service;
@@ -33,12 +34,14 @@ public class PlayerServiceTests
     {
         _clock.Setup(_ => _.Today).Returns(FirstDate);
         _clock.Setup(_ => _.Tomorrow).Returns(FirstDate.AddDays(1));
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
 
         _service = new PlayerService(
             _playerHandler.Object,
             _playerRepository.Object,
             _userRepository.Object,
             _leaderRepository.Object,
+            _internationalService.Object,
             _clock.Object,
             _gameCalendar.Object,
             new Random(1));
@@ -51,7 +54,6 @@ public class PlayerServiceTests
             Name = "Zinédine Zidane",
             YearOfBirth = 1972,
             Country = Countries.FRA,
-            Continent = Continents.Europe,
             Position = Positions.Midfielder,
             AllowedNames = new List<string> { "Zidane" },
             Clubs = new List<PlayerClubRequest>
@@ -579,7 +581,7 @@ public class PlayerServiceTests
     private void SetupPendingSubmissions(params (ulong playerId, ulong creatorId)[] submissions)
     {
         var dtos = submissions
-            .Select(s => PlayerDtoBuilder.Valid().WithId(s.playerId).WithName("Joueur" + s.playerId).WithAllowedNames("joueur" + s.playerId).WithCreator(s.creatorId).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build())
+            .Select(s => PlayerDtoBuilder.Valid().WithId(s.playerId).WithName("Joueur" + s.playerId).WithAllowedNames("joueur" + s.playerId).WithCreator(s.creatorId).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).Build())
             .ToList();
 
         _playerRepository.Setup(_ => _.GetPendingValidationPlayersAsync()).ReturnsAsync(dtos);

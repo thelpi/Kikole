@@ -21,7 +21,6 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 ("year_of_birth", player.YearOfBirth),
                 ("country_id", player.CountryId),
                 ("alternative_country_id", player.AlternativeCountryId),
-                ("continent_id", player.ContinentId),
                 ("publication_date", player.PublicationDate),
                 ("creation_date", Clock.Now),
                 ("clue", player.Clue),

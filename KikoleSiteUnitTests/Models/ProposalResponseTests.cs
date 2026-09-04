@@ -30,7 +30,7 @@ public class ProposalResponseTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
                 ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").Build(),
@@ -48,7 +48,18 @@ public class ProposalResponseTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(2).WithName("Matthias Sammer").WithAllowedNames("sammer;matthias sammer").WithYearOfBirth(1967).WithCountryId((ulong)Countries.GDR).WithAlternativeCountryId((ulong)Countries.GER).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Defender).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(2).WithName("Matthias Sammer").WithAllowedNames("sammer;matthias sammer").WithYearOfBirth(1967).WithCountryId((ulong)Countries.GDR).WithAlternativeCountryId((ulong)Countries.GER).WithPositionId((ulong)Positions.Defender).Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+    }
+
+    /// <summary>Joueur fictif au parcours international double sur deux continents (type Algerie/France).</summary>
+    private static PlayerFullDto DualContinentPlayer()
+    {
+        return new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().WithId(3).WithName("Joueur Double Continent").WithAllowedNames("double").WithYearOfBirth(1990).WithCountryId((ulong)Countries.BRA).WithAlternativeCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Forward).Build(),
             Clubs = [],
             PlayerClubs = []
         };
@@ -63,7 +74,7 @@ public class ProposalResponseTests
             ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
         };
 
-        return new ProposalResponse(request, player ?? Zidane(), _localizer);
+        return new ProposalResponse(request, player ?? Zidane(), _localizer, TestCountryContinents.Map);
     }
 
     // ------------------------------------------------------------- nom du joueur
@@ -213,6 +224,35 @@ public class ProposalResponseTests
 
         response.Successful.Should().BeFalse();
         response.Cost.Should().Be((100, false));
+    }
+
+    [Fact]
+    public void Continent_IsDeducedFromTheCountry_NotStoredIndependently()
+    {
+        // Zidane est France -> Europe : deviner Europe reussit sans continent stocke sur le joueur
+        var response = Respond(ProposalTypes.Continent, nameof(Continents.Europe));
+
+        response.Successful.Should().BeTrue();
+        response.Value.Should().Be((ulong)Continents.Europe);
+    }
+
+    [Fact]
+    public void Continent_WithCountryAndAlternativeOnDifferentContinents_EitherIsAccepted()
+    {
+        // pays principal Bresil (Amerique du Sud), alternatif France (Europe)
+        var southAmerica = Respond(ProposalTypes.Continent, nameof(Continents.SouthAmerica), DualContinentPlayer());
+        var europe = Respond(ProposalTypes.Continent, nameof(Continents.Europe), DualContinentPlayer());
+
+        southAmerica.Successful.Should().BeTrue();
+        europe.Successful.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Continent_WithCountryAndAlternativeOnDifferentContinents_ExposesBothOnSuccess()
+    {
+        var response = Respond(ProposalTypes.Continent, nameof(Continents.SouthAmerica), DualContinentPlayer());
+
+        response.AlternativeContinentId.Should().Be((ulong)Continents.Europe);
     }
 
     // ------------------------------------------------------------- poste / annee

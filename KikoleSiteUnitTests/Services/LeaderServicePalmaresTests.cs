@@ -29,6 +29,7 @@ public class LeaderServicePalmaresTests
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
+    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
@@ -45,6 +46,7 @@ public class LeaderServicePalmaresTests
         _playerRepository
             .Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
             .ReturnsAsync(new List<PlayerDto>());
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
 
         _service = new LeaderService(
             _playerRepository.Object,
@@ -54,7 +56,8 @@ public class LeaderServicePalmaresTests
             _clock.Object,
             _gameCalendar.Object,
             localizer.Object,
-            _playerHandler.Object);
+            _playerHandler.Object,
+            _internationalService.Object);
     }
 
     /// <param name="monthsSpan">Nombre de mois couverts (1 = uniquement FirstMonth).</param>

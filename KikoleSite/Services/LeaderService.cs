@@ -28,6 +28,7 @@ public class LeaderService : ILeaderService
     private readonly IGameCalendar _gameCalendar;
     private readonly IStringLocalizer<Translations> _resources;
     private readonly IPlayerHandler _playerHandler;
+    private readonly IInternationalService _internationalService;
 
     /// <summary>
     /// Ctor.
@@ -38,6 +39,7 @@ public class LeaderService : ILeaderService
     /// <param name="proposalRepository">Instance of <see cref="IProposalRepository"/>.</param>
     /// <param name="resources">Instance of <see cref="IStringLocalizer"/>.</param>
     /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
+    /// <param name="internationalService">Instance of <see cref="IInternationalService"/>.</param>
     /// <param name="clock">Clock service.</param>
     /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
     public LeaderService(IPlayerRepository playerRepository,
@@ -47,7 +49,8 @@ public class LeaderService : ILeaderService
         IClock clock,
         IGameCalendar gameCalendar,
         IStringLocalizer<Translations> resources,
-        IPlayerHandler playerHandler)
+        IPlayerHandler playerHandler,
+        IInternationalService internationalService)
     {
         _playerRepository = playerRepository;
         _leaderRepository = leaderRepository;
@@ -57,6 +60,7 @@ public class LeaderService : ILeaderService
         _gameCalendar = gameCalendar;
         _resources = resources;
         _playerHandler = playerHandler;
+        _internationalService = internationalService;
     }
 
     /// <inheritdoc />
@@ -211,6 +215,8 @@ public class LeaderService : ILeaderService
         var players = await _playerRepository
             .GetPlayersOfTheDayAsync(null, _clock.Today);
 
+        var countryContinents = await _internationalService.GetCountryContinentsAsync();
+
         foreach (var playerOfTheDay in players)
         {
             var usersId = await _proposalRepository
@@ -238,7 +244,7 @@ public class LeaderService : ILeaderService
                 // meme calcul que le score affiche en direct, pour que le rattrapage
                 // ne puisse pas diverger du barème réel
                 ScoreCalculator.GetProposalResponsesWithPoints(
-                    untilWin, playerInfo, out var points, _resources);
+                    untilWin, playerInfo, out var points, _resources, countryContinents);
 
                 var winningProposal = proposals[winIndex];
 
@@ -268,6 +274,8 @@ public class LeaderService : ILeaderService
 
         var player = await _playerHandler
             .GetPlayerOfTheDayFullInfoAsync(day);
+
+        var countryContinents = await _internationalService.GetCountryContinentsAsync();
 
         var leaderUsers = leaders.Select(_ => _.UserId);
 
@@ -326,7 +334,7 @@ public class LeaderService : ILeaderService
                 UserName = users[propUserGroup.Key].Login
             };
 
-            ScoreCalculator.GetProposalResponsesWithPoints(propUserGroup, player, out var points, _resources);
+            ScoreCalculator.GetProposalResponsesWithPoints(propUserGroup, player, out var points, _resources, countryContinents);
             dsi.Points = points;
 
             searchers.Add(dsi);

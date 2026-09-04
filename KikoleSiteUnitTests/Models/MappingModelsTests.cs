@@ -155,7 +155,7 @@ public class MappingModelsTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).WithCreator(creatorId).WithClue("un indice").WithEasyClue("un indice facile").Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).WithCreator(creatorId).WithClue("un indice").WithEasyClue("un indice facile").Build(),
             Clubs = new List<ClubDto> { ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build() },
             PlayerClubs = new List<PlayerClubDto>
             {
@@ -169,7 +169,7 @@ public class MappingModelsTests
     {
         var users = new List<UserDto> { UserDtoBuilder.Valid().WithId(42).WithLogin("createur").Build() };
 
-        var player = new Player(Submission(42), users);
+        var player = new Player(Submission(42), users, TestCountryContinents.Map);
 
         player.Id.Should().Be(1);
         player.Country.Should().Be(Countries.FRA);
@@ -186,7 +186,7 @@ public class MappingModelsTests
         // a PlayerCreator, il ne masque rien
         var users = new List<UserDto> { UserDtoBuilder.Valid().WithId(42).WithLogin("createur").Build() };
 
-        var player = new Player(Submission(42), users);
+        var player = new Player(Submission(42), users, TestCountryContinents.Map);
 
         player.Name.Should().Be("Zinédine Zidane");
         player.AllowedNames.Should().BeEquivalentTo(new[] { "zidane", "zizou" });
@@ -196,7 +196,7 @@ public class MappingModelsTests
     [Fact]
     public void Player_WhenTheCreatorIsAbsentFromTheList_SaysWhichCreatorIsMissing()
     {
-        Action act = () => new Player(Submission(99), new List<UserDto>());
+        Action act = () => new Player(Submission(99), new List<UserDto>(), TestCountryContinents.Map);
 
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*99*");

@@ -52,4 +52,11 @@ public interface IInternationalService
     /// <param name="language">Langue d'affichage.</param>
     /// <returns>Identifiant de continent vers libellé.</returns>
     Task<IReadOnlyDictionary<ulong, string>> GetContinentsAsync(Languages language);
+
+    /// <summary>
+    /// La confédération (continent) de chaque pays, indépendante de la langue. Sert à
+    /// déduire le continent d'un joueur depuis son pays plutôt que de le stocker.
+    /// </summary>
+    /// <returns>Identifiant de pays vers identifiant de continent.</returns>
+    Task<IReadOnlyDictionary<ulong, ulong>> GetCountryContinentsAsync();
 }

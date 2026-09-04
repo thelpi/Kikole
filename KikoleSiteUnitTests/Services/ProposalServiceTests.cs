@@ -38,7 +38,7 @@ public class ProposalServiceTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
                 ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").Build()
@@ -62,7 +62,7 @@ public class ProposalServiceTests
     private List<ProposalResponse> Compute(IEnumerable<ProposalDto> proposals, out int points)
     {
         return ScoreCalculator.GetProposalResponsesWithPoints(
-            proposals, Zidane(), out points, _localizer);
+            proposals, Zidane(), out points, _localizer, TestCountryContinents.Map);
     }
 
     [Fact]
@@ -176,6 +176,7 @@ public class ProposalServiceGrantTests
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
+    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly ProposalService _service;
 
     public ProposalServiceGrantTests()
@@ -201,11 +202,14 @@ public class ProposalServiceGrantTests
         var clock = new Mock<IClock>();
         clock.Setup(_ => _.Today).Returns(Day);
 
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+
         _service = new ProposalService(
             _proposalRepository.Object,
             _leaderRepository.Object,
             _userRepository.Object,
             _playerHandler.Object,
+            _internationalService.Object,
             localizer.Object,
             clock.Object);
     }

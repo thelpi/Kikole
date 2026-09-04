@@ -134,7 +134,12 @@ public class HomeModel
             case ProposalTypes.Continent:
                 var ccValue = response.Value?.ToString() ?? string.Empty;
                 if (response.Successful)
+                {
                     ContinentName = continents[ulong.Parse(ccValue)];
+                    if (response.AlternativeContinentId.HasValue
+                        && continents.TryGetValue(response.AlternativeContinentId.Value, out var altContinentName))
+                        ContinentName += $" / {altContinentName}";
+                }
                 else
                 {
                     if (ulong.TryParse(ccValue, out var cId) && continents.ContainsKey(cId))

@@ -16,6 +16,8 @@ public class Player : PlayerCreator
 
     public Continents Continent { get; }
 
+    public Continents? AlternativeContinent { get; }
+
     public Countries Country { get; }
 
     public Countries? AlternativeCountry { get; }
@@ -30,7 +32,12 @@ public class Player : PlayerCreator
 
     public DateTime? RejectDate { get; }
 
-    internal Player(PlayerFullDto p, IEnumerable<UserDto> users)
+    /// <summary>
+    /// Le continent n'est plus stocke : il est deduit du pays (et du pays alternatif s'il
+    /// existe) via <paramref name="countryContinents"/>, fourni par l'appelant plutot
+    /// qu'interroge ici puisque cette classe n'a aucune dependance d'acces aux donnees.
+    /// </summary>
+    internal Player(PlayerFullDto p, IEnumerable<UserDto> users, IReadOnlyDictionary<ulong, ulong> countryContinents)
         : base(Creator(p, users), p.Player)
     {
         Id = p.Player.Id;
@@ -41,10 +48,13 @@ public class Player : PlayerCreator
             .ToList();
         Clue = p.Player.Clue;
         EasyClue = p.Player.EasyClue;
-        Continent = (Continents)p.Player.ContinentId;
         Country = (Countries)p.Player.CountryId;
         AlternativeCountry = p.Player.AlternativeCountryId.HasValue
             ? (Countries)p.Player.AlternativeCountryId.Value
+            : null;
+        Continent = (Continents)countryContinents[p.Player.CountryId];
+        AlternativeContinent = p.Player.AlternativeCountryId.HasValue
+            ? (Continents)countryContinents[p.Player.AlternativeCountryId.Value]
             : null;
         Position = (Positions)p.Player.PositionId;
         YearOfBirth = p.Player.YearOfBirth;

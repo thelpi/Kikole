@@ -10,8 +10,6 @@ public record PlayerDto : BaseDto
 
     public ushort YearOfBirth { get; init; }
 
-    public ulong ContinentId { get; init; }
-
     public ulong CountryId { get; init; }
 
     /// <summary>

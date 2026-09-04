@@ -29,6 +29,10 @@ public class InternationalService : IInternationalService
     // possibles, sans consequence : ils produisent la meme liste.
     private volatile IReadOnlyCollection<Club>? _clubs;
 
+    // Independant de la langue (ce ne sont que des identifiants), donc pas de dictionnaire
+    // par langue comme _countries/_continents.
+    private volatile IReadOnlyDictionary<ulong, ulong>? _countryContinents;
+
     /// <summary>
     /// Ctor.
     /// </summary>
@@ -117,6 +121,21 @@ public class InternationalService : IInternationalService
             .ToDictionary(c => (ulong)c.Id, c => c.Name);
 
         return _continents.GetOrAdd(language, loaded);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<ulong, ulong>> GetCountryContinentsAsync()
+    {
+        var cached = _countryContinents;
+        if (cached != null)
+            return cached;
+
+        var countries = await _internationalRepository.GetCountriesAsync((ulong)Languages.en);
+
+        var loaded = countries.ToDictionary(c => c.Id, c => c.ContinentId);
+
+        _countryContinents = loaded;
+        return loaded;
     }
 
     private void InvalidateClubs()

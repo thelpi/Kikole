@@ -36,14 +36,15 @@ public static class ScoreCalculator
         IEnumerable<ProposalDto> proposalDtos,
         PlayerFullDto player,
         out int points,
-        IStringLocalizer<Translations> resources)
+        IStringLocalizer<Translations> resources,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var totalPoints = BasePoints;
         var proposals = proposalDtos
             .OrderBy(pDto => pDto.CreationDate)
             .Select(pDto =>
             {
-                var pr = new ProposalResponse(pDto, player, resources)
+                var pr = new ProposalResponse(pDto, player, resources, countryContinents)
                     .WithTotalPoints(totalPoints, false);
                 totalPoints = pr.TotalPoints;
                 return pr;

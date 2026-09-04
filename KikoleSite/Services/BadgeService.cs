@@ -148,7 +148,8 @@ public class BadgeService : IBadgeService
                         return false;
 
                     // Every proposal is correct
-                    // Year, nationality and position are filled
+                    // Year, nationality and position are filled (le continent est deduit
+                    // du pays desormais, pas besoin d'une proposition Continent separee)
                     // Easy clue is not requested
                     // Leaderboard is not requested
                     // Same count of club proposals than career clubs
@@ -156,7 +157,6 @@ public class BadgeService : IBadgeService
                         || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Year)
                         || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Position)
                         || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Country)
-                        || !ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Continent)
                         || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Clue)
                         || ph.Any(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Leaderboard)
                         || ph.Count(_ => (ProposalTypes)_.ProposalTypeId == ProposalTypes.Club) != p.Clubs.Count)

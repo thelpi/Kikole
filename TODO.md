@@ -110,25 +110,27 @@ Branche de travail : `remaster-v2`.
       réel identifié (nation sportive disparue → successeur), voir « Partis pris ». Le cas
       général (double sélection, ex. Algérie puis France) reste à traiter séparément le
       jour où il se présente.
-- [ ] **Lier `country_id`/`continent_id`** — le prérequis (`countries.continent_id`,
-      confédération réelle) est fait ci-dessus. **La logique de jeu elle-même
-      (révélation automatique du continent une fois le pays trouvé) reste à câbler** :
-      - Dès que le pays est trouvé, le continent est **révélé automatiquement** (déductible
-        sans effort) et son champ de proposition disparaît du formulaire. S'il est deviné
-        *avant* le pays, comportement inchangé (proposition indépendante, coût normal).
-      - Badge #28 (`BadgeService`, exige aujourd'hui une proposition Continent **et**
-        Country dans l'historique) : la condition continent est satisfaite dès que le pays
-        est trouvé, sans exiger de proposition Continent séparée.
-      - Création de joueur (admin) : le champ Continent disparaît, déduit du pays choisi
-        côté serveur — plus de validation croisée à faire, il n'y a plus qu'une saisie.
-      - Autocomplétion pays : inchangée (pas de suffixe continent, à la différence des
-        clubs qui affichent leur pays).
-      - Cas amusant identifié mais non résolu : un joueur avec double sélection
-        internationale (ex. Algérie puis France) — la révélation auto du continent depuis
-        le pays trouvé devient ambiguë si `alternative_country_id` est aussi utilisé pour
-        ce genre de cas un jour. Pas un problème aujourd'hui (le seul usage actuel
-        d'`alternative_country_id` est les nations disparues, toutes UEFA comme leur
-        pays actuel), mais à garder en tête.
+- [x] ~~Lier `country_id`/`continent_id`~~ — `players.continent_id` **supprimé** : le
+      continent n'est plus stocké du tout, il est déduit à la volée de `country_id` (et
+      `alternative_country_id`) via `countries.continent_id`, jamais persisté sur le
+      joueur. Voir « Partis pris » pour l'architecture (le calcul vit dans
+      `ProposalResponse`/`ScoreCalculator`, classes pures sans accès aux données ; la
+      correspondance pays→continent est chargée une fois et **passée en paramètre**,
+      comme les dictionnaires déjà utilisés par `HomeModel`).
+      - [x] Badge `OneMinuteChrono` (`BadgeService`) : la condition n'exige plus de
+        proposition Continent séparée dans l'historique, le pays suffit.
+      - [x] Création de joueur (admin) : le champ Continent a disparu du formulaire,
+        entièrement déduit du pays choisi côté serveur.
+      - [x] Cas Algérie/France resolu **via `alternative_country_id`**, pas via une
+        révélation auto du pays vers le continent : deviner le continent du pays **ou**
+        du pays alternatif valide la proposition (même principe que pour le pays), les
+        deux s'affichent au reveal quand ils diffèrent (`"Amérique du Sud / Europe"`).
+      - [ ] **Reste à faire, non couvert par ce chantier** : la révélation automatique du
+        continent une fois le pays trouvé, et la disparition du champ de proposition
+        Continent correspondant sur la page de jeu (`Views/Home/Index.cshtml`) — le
+        joueur peut aujourd'hui encore deviner le continent indépendamment même après
+        avoir trouvé le pays, ce qui n'est plus qu'un point de confort/cohérence UI, pas
+        un bug de correction (la logique de validation, elle, est bien déduite).
 - [ ] **Réécrire la page de règles (nationalité administrative vs sportive)** — la page
       d'accueil affirme aujourd'hui explicitement "le jeu ne gère pas la nationalité
       sportive" (exemple Ryan Giggs = "Royaume-Uni", pas "Pays de Galles"), un principe
@@ -333,6 +335,29 @@ les hachages de toute façon.
   volontairement (cas jugé assez rare pour être accepté tel quel). Saisie admin
   uniquement (`AdminController.Index`), pas de nouvel écran d'édition : le seul point
   d'entrée pour la nationalité d'un joueur est déjà sa création.
+- **`players.continent_id` supprimé : le continent n'est plus une donnée, c'est un
+  calcul.** Gardé indépendant, il était devenu contre-productif — rien n'empêchait un
+  continent incohérent avec le pays, et il ne pouvait pas représenter un joueur au
+  parcours international double (ex. Algérie puis France, deux pays donc potentiellement
+  deux continents valides). Décidé une fois `countries.continent_id` en place (bascule
+  FIFA) et `alternative_country_id` ajouté : le continent se déduit désormais de
+  `country_id` (+ `alternative_country_id`) à chaque calcul, jamais stocké.
+
+  `ProposalResponse` et `ScoreCalculator` sont des classes pures, sans dépendance ni I/O
+  (voir plus bas) : elles ne peuvent pas interroger la base elles-mêmes. Comme
+  `HomeModel.SetPropertiesFromProposal` recevait déjà ses dictionnaires de référentiel en
+  paramètre, la correspondance `country_id → continent_id`
+  (`InternationalService.GetCountryContinentsAsync`, cache dédié car indépendant de la
+  langue contrairement à `GetCountriesAsync`/`GetContinentsAsync`) suit le même principe :
+  chargée une fois puis **passée en paramètre**, plutôt qu'injectée comme dépendance dans
+  des classes qui n'en ont pas aujourd'hui. `PlayerService`/`ProposalService`/
+  `LeaderService` (les 3 seuls points de construction de `Player`/`ProposalResponse` dans
+  tout le projet) l'injectent et la transmettent.
+
+  Deviner le continent du pays **ou** du pays alternatif valide la proposition — même
+  principe que `alternative_country_id` pour le pays — et les deux s'affichent au reveal
+  quand ils diffèrent. Non fait : la révélation automatique du continent (et la
+  disparition du champ de proposition correspondant) une fois le pays trouvé — voir §2.
 - Barème de soumission à 1 000 points forfaitaires. L'ancien barème dégressif avait été
   abandonné en novembre 2022 ; sa branche morte a été supprimée.
 - Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est

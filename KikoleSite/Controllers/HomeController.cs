@@ -416,8 +416,21 @@ public class HomeController : KikoleBaseController
 
             var continents = await GetContinentsAsync();
 
+            var countryContinents = await _internationalService.GetCountryContinentsAsync();
+
             model.CountryName = countries.FirstOrDefault(c => c.Key == pp.Player.CountryId).Value;
-            model.ContinentName = continents.FirstOrDefault(c => c.Key == pp.Player.ContinentId).Value;
+            if (pp.Player.AlternativeCountryId.HasValue
+                && countries.TryGetValue(pp.Player.AlternativeCountryId.Value, out var altCountryName))
+                model.CountryName += $" / {altCountryName}";
+
+            var mainContinentId = countryContinents[pp.Player.CountryId];
+            model.ContinentName = continents.FirstOrDefault(c => c.Key == mainContinentId).Value;
+            if (pp.Player.AlternativeCountryId.HasValue)
+            {
+                var altContinentId = countryContinents[pp.Player.AlternativeCountryId.Value];
+                if (altContinentId != mainContinentId && continents.TryGetValue(altContinentId, out var altContinentName))
+                    model.ContinentName += $" / {altContinentName}";
+            }
             model.Position = ((Positions)pp.Player.PositionId).GetLabel();
             model.KnownPlayerClubs = pp.PlayerClubs.Select(pc => new PlayerClub(pc, pp.Clubs)).ToList();
             model.BirthYear = pp.Player.YearOfBirth.ToNaString();

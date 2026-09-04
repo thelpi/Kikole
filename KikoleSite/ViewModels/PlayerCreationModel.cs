@@ -37,8 +37,6 @@ public class PlayerCreationModel
 
     public string? AlternativeCountry { get; set; }
 
-    public string? Continent { get; set; }
-
     public string? Club0Id { get; set; }
 
     public string? Club1Id { get; set; }

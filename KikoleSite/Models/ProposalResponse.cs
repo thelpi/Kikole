@@ -27,6 +27,13 @@ public class ProposalResponse
     /// </summary>
     public ulong? AlternativeCountryId { get; }
 
+    /// <summary>
+    /// Meme principe que <see cref="AlternativeCountryId"/>, pour une proposition
+    /// <see cref="ProposalTypes.Continent"/> reussie quand le pays alternatif est sur un
+    /// continent different du principal (ex. Algerie/France).
+    /// </summary>
+    public ulong? AlternativeContinentId { get; }
+
     public DateTime Date { get; }
 
     public string? Tip { get; }
@@ -52,7 +59,8 @@ public class ProposalResponse
     private ProposalResponse(ProposalTypes proposalType,
         string? sourceValue,
         bool? success,
-        PlayerFullDto player)
+        PlayerFullDto player,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         ProposalType = proposalType;
 
@@ -122,11 +130,21 @@ public class ProposalResponse
                 break;
 
             case ProposalTypes.Continent:
+                var mainContinentId = countryContinents[player.Player.CountryId];
+                var altContinentId = player.Player.AlternativeCountryId.HasValue
+                    ? countryContinents[player.Player.AlternativeCountryId.Value]
+                    : (ulong?)null;
                 if (!success.HasValue)
-                    Successful = player.Player.ContinentId == (ulong)Enum.Parse<Continents>(Guessed());
+                {
+                    var guessedContinentId = (ulong)Enum.Parse<Continents>(Guessed());
+                    Successful = mainContinentId == guessedContinentId
+                        || altContinentId == guessedContinentId;
+                }
                 Value = Successful
-                    ? player.Player.ContinentId
+                    ? mainContinentId
                     : sourceValue;
+                if (Successful && altContinentId.HasValue && altContinentId != mainContinentId)
+                    AlternativeContinentId = altContinentId;
                 RawValue = Enum.TryParse<Continents>(sourceValue, out var tmpRawContinent)
                     ? tmpRawContinent.ToString()
                     : RawValue;
@@ -166,15 +184,17 @@ public class ProposalResponse
             Cost = ScoreCalculator.ProposalTypesCost[ProposalType];
     }
 
-    internal ProposalResponse(ProposalRequest request, PlayerFullDto player, IStringLocalizer resources)
-        : this(request.ProposalType, request.Value, null, player)
+    internal ProposalResponse(ProposalRequest request, PlayerFullDto player, IStringLocalizer resources,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
+        : this(request.ProposalType, request.Value, null, player, countryContinents)
     {
         Date = request.ProposalDateTime;
         Tip = request.GetTip(player.Player, resources);
     }
 
-    internal ProposalResponse(ProposalDto dto, PlayerFullDto player, IStringLocalizer resources)
-        : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player)
+    internal ProposalResponse(ProposalDto dto, PlayerFullDto player, IStringLocalizer resources,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
+        : this((ProposalTypes)dto.ProposalTypeId, dto.Value, dto.Successful > 0, player, countryContinents)
     {
         // a bit ugly, ngl
         if ((ProposalTypes)dto.ProposalTypeId == ProposalTypes.Year)

@@ -14,7 +14,7 @@ public class InternationalRepository : BaseRepository, IInternationalRepository
     public async Task<IReadOnlyCollection<CountryDto>> GetCountriesAsync(ulong languageId)
     {
         return await ExecuteReaderAsync<CountryDto>(
-                "SELECT code, name " +
+                "SELECT id, code, continent_id, name " +
                 "FROM countries " +
                 "JOIN country_translations ON id = country_id " +
                 "WHERE language_id = @language_id",

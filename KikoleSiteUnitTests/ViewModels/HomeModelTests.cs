@@ -66,7 +66,7 @@ public class HomeModelTests
     {
         return new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FRA).WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FRA).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
                 ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").Build(),
@@ -89,7 +89,7 @@ public class HomeModelTests
             ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
         };
 
-        return new ProposalResponse(request, Zidane(), _localizer).WithTotalPoints(points, false);
+        return new ProposalResponse(request, Zidane(), _localizer, TestCountryContinents.Map).WithTotalPoints(points, false);
     }
 
     private void Apply(HomeModel model, ProposalTypes type, string value, int sourcePoints = 1000, string? easyClue = null)
@@ -243,7 +243,6 @@ public class HomeModelTests
             Player = PlayerDtoBuilder.Valid().WithId(2).WithName("Matthias Sammer").WithAllowedNames("sammer")
                 .WithCountryId((ulong)KikoleSite.Models.Enums.Countries.GDR)
                 .WithAlternativeCountryId((ulong)KikoleSite.Models.Enums.Countries.GER)
-                .WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe)
                 .WithPositionId((ulong)Positions.Defender).Build(),
             Clubs = [],
             PlayerClubs = []
@@ -254,7 +253,7 @@ public class HomeModelTests
             ProposalType = ProposalTypes.Country,
             ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
         };
-        var response = new ProposalResponse(request, sammer, _localizer).WithTotalPoints(1000, false);
+        var response = new ProposalResponse(request, sammer, _localizer, TestCountryContinents.Map).WithTotalPoints(1000, false);
         var model = new HomeModel();
 
         model.SetPropertiesFromProposal(response, Countries, Continents, PositionNames, Clubs, null);

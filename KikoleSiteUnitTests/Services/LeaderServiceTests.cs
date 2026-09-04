@@ -25,6 +25,7 @@ public class LeaderServiceTests
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
+    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
@@ -34,6 +35,7 @@ public class LeaderServiceTests
         _clock.Setup(_ => _.Today).Returns(Day);
         _clock.Setup(_ => _.Yesterday).Returns(Day.AddDays(-1));
         _clock.Setup(_ => _.FirstOfMonth).Returns(new DateTime(Day.Year, Day.Month, 1));
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
 
         var localizer = new Mock<IStringLocalizer<Translations>>();
         localizer.Setup(_ => _[It.IsAny<string>()])
@@ -52,7 +54,8 @@ public class LeaderServiceTests
             _clock.Object,
             _gameCalendar.Object,
             localizer.Object,
-            _playerHandler.Object);
+            _playerHandler.Object,
+            _internationalService.Object);
     }
 
     private void SetupUsers(params (ulong id, string login)[] users)
@@ -228,7 +231,7 @@ public class LeaderServiceTests
 
     private void SetupMissingLeader(params ProposalDto[] proposals)
     {
-        var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithPublicationDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build();
+        var player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithPublicationDate(Day).WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).Build();
 
         _playerRepository
             .Setup(_ => _.GetPlayersOfTheDayAsync(null, Day))
@@ -362,7 +365,7 @@ public class LeaderServiceTests
 
         var playerInfo = new PlayerFullDto
         {
-            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
+            Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FRA).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = [],
             PlayerClubs = []
         };
@@ -371,7 +374,7 @@ public class LeaderServiceTests
         localizer.Setup(_ => _[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
 
         ScoreCalculator.GetProposalResponsesWithPoints(
-            proposals, playerInfo, out var livePoints, localizer.Object);
+            proposals, playerInfo, out var livePoints, localizer.Object, TestCountryContinents.Map);
 
         await _service.ComputeMissingLeadersAsync();
 
