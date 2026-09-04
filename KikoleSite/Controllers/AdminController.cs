@@ -505,7 +505,7 @@ public class AdminController : KikoleBaseController
     }
 
     /// <summary>Nom canonique (priorite 0) suivi des alias saisis un par ligne, sans doublon ni ligne vide.</summary>
-    private static IReadOnlyList<string> SplitAlternativeNames(string canonicalName, string? alternativeNames)
+    internal static IReadOnlyList<string> SplitAlternativeNames(string canonicalName, string? alternativeNames)
     {
         var aliases = (alternativeNames ?? string.Empty)
             .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -515,7 +515,7 @@ public class AdminController : KikoleBaseController
         return new[] { canonicalName }.Concat(aliases).ToList();
     }
 
-    private static void AddClubIfValid(List<PlayerClubRequest> clubs, string? clubIdValue, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
+    internal static void AddClubIfValid(List<PlayerClubRequest> clubs, string? clubIdValue, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
     {
         if (ulong.TryParse(clubIdValue, out var clubId) && clubsReferential.Any(c => c.Id == clubId))
         {
