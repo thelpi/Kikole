@@ -132,9 +132,11 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         @for (var i = 0; i < 15; i++)
         {
             var name = $"Club{i}";
+            var idName = $"Club{i}Id";
             var loanChk = $"IsLoan{i}";
             <div class="smallTopMargin">
-                <input type="text" id="@name" name="@name" style="width: 250px" />
+                <input type="text" id="@name" name="@(name)Value" style="width: 250px" />
+                <input type="hidden" id="@idName" name="@idName" />
                 <span>@localizer["IsLoan"]</span>
                 @Html.CheckBox(loanChk)
             </div>

@@ -33,7 +33,7 @@ public class HomeModel
     public string? ContinentName { get; set; }
     public string? Position { get; set; }
     public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; } = [];
-    public string? ClubNameSubmission { get; set; }
+    public string? ClubIdSubmission { get; set; }
     public string? PlayerNameSubmission { get; set; }
     public string? CountryNameSubmission { get; set; }
     public string? ContinentNameSubmission { get; set; }
@@ -60,7 +60,7 @@ public class HomeModel
     {
         return proposalType switch
         {
-            ProposalTypes.Club => ClubNameSubmission,
+            ProposalTypes.Club => ClubIdSubmission,
             ProposalTypes.Country => CountryNameSubmission,
             ProposalTypes.Continent => ContinentNameSubmission,
             ProposalTypes.Name => PlayerNameSubmission,
@@ -83,6 +83,7 @@ public class HomeModel
         IReadOnlyDictionary<ulong, string> countries,
         IReadOnlyDictionary<ulong, string> continents,
         IReadOnlyDictionary<ulong, string> positions,
+        IReadOnlyDictionary<ulong, string> clubs,
         string? easyClue)
     {
         Points = response.TotalPoints;
@@ -108,7 +109,10 @@ public class HomeModel
                 }
                 else
                 {
-                    IncorrectClubs = AddToList(IncorrectClubs, response.Value?.ToString() ?? string.Empty);
+                    var clValue = response.Value?.ToString() ?? string.Empty;
+                    if (ulong.TryParse(clValue, out var clId) && clubs.ContainsKey(clId))
+                        clValue = clubs[clId];
+                    IncorrectClubs = AddToList(IncorrectClubs, clValue);
                 }
                 break;
             case ProposalTypes.Country:

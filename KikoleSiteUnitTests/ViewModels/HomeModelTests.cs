@@ -43,6 +43,13 @@ public class HomeModelTests
             { (ulong)Positions.Midfielder, "Milieu de terrain" }
         };
 
+    private static readonly IReadOnlyDictionary<ulong, string> Clubs =
+        new Dictionary<ulong, string>
+        {
+            { RealMadridId, "Real Madrid" },
+            { JuventusId, "Juventus" }
+        };
+
     private readonly IStringLocalizer _localizer;
 
     public HomeModelTests()
@@ -86,7 +93,7 @@ public class HomeModelTests
     private void Apply(HomeModel model, ProposalTypes type, string value, int sourcePoints = 1000, string? easyClue = null)
     {
         model.SetPropertiesFromProposal(
-            Respond(type, value, sourcePoints), Countries, Continents, PositionNames, easyClue);
+            Respond(type, value, sourcePoints), Countries, Continents, PositionNames, Clubs, easyClue);
     }
 
     // ------------------------------------------------------------- navigation

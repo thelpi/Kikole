@@ -37,35 +37,35 @@ public class PlayerCreationModel
 
     public string? Continent { get; set; }
 
-    public string? Club0 { get; set; }
+    public string? Club0Id { get; set; }
 
-    public string? Club1 { get; set; }
+    public string? Club1Id { get; set; }
 
-    public string? Club2 { get; set; }
+    public string? Club2Id { get; set; }
 
-    public string? Club3 { get; set; }
+    public string? Club3Id { get; set; }
 
-    public string? Club4 { get; set; }
+    public string? Club4Id { get; set; }
 
-    public string? Club5 { get; set; }
+    public string? Club5Id { get; set; }
 
-    public string? Club6 { get; set; }
+    public string? Club6Id { get; set; }
 
-    public string? Club7 { get; set; }
+    public string? Club7Id { get; set; }
 
-    public string? Club8 { get; set; }
+    public string? Club8Id { get; set; }
 
-    public string? Club9 { get; set; }
+    public string? Club9Id { get; set; }
 
-    public string? Club10 { get; set; }
+    public string? Club10Id { get; set; }
 
-    public string? Club11 { get; set; }
+    public string? Club11Id { get; set; }
 
-    public string? Club12 { get; set; }
+    public string? Club12Id { get; set; }
 
-    public string? Club13 { get; set; }
+    public string? Club13Id { get; set; }
 
-    public string? Club14 { get; set; }
+    public string? Club14Id { get; set; }
 
     public bool IsLoan0 { get; set; }
 

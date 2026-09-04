@@ -190,7 +190,8 @@
                             <label>@localizer["ClubsTitle"]</label>
                         </div>
                         <div>
-                            <input type="text" name="ClubNameSubmission" id="clubName" style="width: 300px" />
+                            <input type="text" name="ClubNameSubmissionValue" id="clubName" style="width: 300px" />
+                            <input type="hidden" name="ClubIdSubmission" id="clubId" />
                             <input type="submit" value="Ok" name="submit-Club" id="submitClub" style="visibility:hidden; width: 0px" />
                             <span>(-<span class="redtext">@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Club].points</span> @localizer["PointsIfIncorrect"])</span>
                         </div>

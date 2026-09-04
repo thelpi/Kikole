@@ -352,8 +352,8 @@ $(function () {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.Value,
-                            value: item.Key
+                            label: item.value,
+                            value: item.key
                         };
                     }))
                 }
@@ -384,8 +384,8 @@ $(function () {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.Value,
-                            value: item.Key
+                            label: item.value,
+                            value: item.key
                         };
                     }))
                 }
@@ -404,8 +404,8 @@ $(function () {
 });
 
 /* clubs autocompletion */
-var autocompleteClubs = function (clubIdName, submit) {
-    $(clubIdName).autocomplete({
+var autocompleteClubs = function (nameFieldId, idFieldId, submit) {
+    $(nameFieldId).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url: '/Home/AutoCompleteClubs/',
@@ -415,13 +415,17 @@ var autocompleteClubs = function (clubIdName, submit) {
                 type: "POST",
                 success: function (data) {
                     response($.map(data, function (item) {
-                        return item;
+                        return {
+                            label: item.value,
+                            value: item.key
+                        };
                     }))
                 }
             });
         },
         select: function (e, i) {
-            $(clubIdName).val(i.item.value);
+            $(idFieldId).val(i.item.value);
+            $(nameFieldId).val(i.item.label);
             if (submit && $("#submitClub").length > 0) {
                 $("#submitClub").click();
             }
@@ -431,9 +435,9 @@ var autocompleteClubs = function (clubIdName, submit) {
     });
 };
 $(function() {
-    autocompleteClubs("#clubName", true);
+    autocompleteClubs("#clubName", "#clubId", true);
     for (let i = 0; i < 15; i++) {
-        autocompleteClubs("#Club" + i, false);
+        autocompleteClubs("#Club" + i, "#Club" + i + "Id", false);
     }
 });
 

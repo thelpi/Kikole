@@ -330,6 +330,8 @@ public class HomeController : KikoleBaseController
             case ProposalTypes.Country:
                 return value.IsEnumValue<Countries>();
             case ProposalTypes.Club:
+                // l'identifiant vient d'une selection d'autocompletion, jamais saisi a la main
+                return !string.IsNullOrWhiteSpace(value) && ulong.TryParse(value, out _);
             case ProposalTypes.Name:
                 return !string.IsNullOrWhiteSpace(value) && !int.TryParse(value, out _);
             default:
@@ -371,8 +373,12 @@ public class HomeController : KikoleBaseController
 
                 var positions = GetPositions();
 
+                var language = ViewHelper.GetLanguage();
+                var clubs = (await _internationalService.GetClubsAsync())
+                    .ToDictionary(c => c.Id, c => c.GetCanonicalName(language));
+
                 foreach (var p in proposals)
-                    model.SetPropertiesFromProposal(p, countries, continents, positions, easyClue);
+                    model.SetPropertiesFromProposal(p, countries, continents, positions, clubs, easyClue);
             }
         }
 

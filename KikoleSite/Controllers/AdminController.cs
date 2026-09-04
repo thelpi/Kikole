@@ -283,21 +283,21 @@ public class AdminController : KikoleBaseController
 
         byte iPos = 1;
         var clubs = new List<PlayerClubRequest>();
-        AddClubIfValid(clubs, model.Club0, clubsReferential, ref iPos, model.IsLoan0);
-        AddClubIfValid(clubs, model.Club1, clubsReferential, ref iPos, model.IsLoan1);
-        AddClubIfValid(clubs, model.Club2, clubsReferential, ref iPos, model.IsLoan2);
-        AddClubIfValid(clubs, model.Club3, clubsReferential, ref iPos, model.IsLoan3);
-        AddClubIfValid(clubs, model.Club4, clubsReferential, ref iPos, model.IsLoan4);
-        AddClubIfValid(clubs, model.Club5, clubsReferential, ref iPos, model.IsLoan5);
-        AddClubIfValid(clubs, model.Club6, clubsReferential, ref iPos, model.IsLoan6);
-        AddClubIfValid(clubs, model.Club7, clubsReferential, ref iPos, model.IsLoan7);
-        AddClubIfValid(clubs, model.Club8, clubsReferential, ref iPos, model.IsLoan8);
-        AddClubIfValid(clubs, model.Club9, clubsReferential, ref iPos, model.IsLoan9);
-        AddClubIfValid(clubs, model.Club10, clubsReferential, ref iPos, model.IsLoan10);
-        AddClubIfValid(clubs, model.Club11, clubsReferential, ref iPos, model.IsLoan11);
-        AddClubIfValid(clubs, model.Club12, clubsReferential, ref iPos, model.IsLoan12);
-        AddClubIfValid(clubs, model.Club13, clubsReferential, ref iPos, model.IsLoan13);
-        AddClubIfValid(clubs, model.Club14, clubsReferential, ref iPos, model.IsLoan14);
+        AddClubIfValid(clubs, model.Club0Id, clubsReferential, ref iPos, model.IsLoan0);
+        AddClubIfValid(clubs, model.Club1Id, clubsReferential, ref iPos, model.IsLoan1);
+        AddClubIfValid(clubs, model.Club2Id, clubsReferential, ref iPos, model.IsLoan2);
+        AddClubIfValid(clubs, model.Club3Id, clubsReferential, ref iPos, model.IsLoan3);
+        AddClubIfValid(clubs, model.Club4Id, clubsReferential, ref iPos, model.IsLoan4);
+        AddClubIfValid(clubs, model.Club5Id, clubsReferential, ref iPos, model.IsLoan5);
+        AddClubIfValid(clubs, model.Club6Id, clubsReferential, ref iPos, model.IsLoan6);
+        AddClubIfValid(clubs, model.Club7Id, clubsReferential, ref iPos, model.IsLoan7);
+        AddClubIfValid(clubs, model.Club8Id, clubsReferential, ref iPos, model.IsLoan8);
+        AddClubIfValid(clubs, model.Club9Id, clubsReferential, ref iPos, model.IsLoan9);
+        AddClubIfValid(clubs, model.Club10Id, clubsReferential, ref iPos, model.IsLoan10);
+        AddClubIfValid(clubs, model.Club11Id, clubsReferential, ref iPos, model.IsLoan11);
+        AddClubIfValid(clubs, model.Club12Id, clubsReferential, ref iPos, model.IsLoan12);
+        AddClubIfValid(clubs, model.Club13Id, clubsReferential, ref iPos, model.IsLoan13);
+        AddClubIfValid(clubs, model.Club14Id, clubsReferential, ref iPos, model.IsLoan14);
 
         if (clubs.Count == 0)
         {
@@ -511,12 +511,11 @@ public class AdminController : KikoleBaseController
         return new[] { canonicalName }.Concat(aliases).ToList();
     }
 
-    private void AddClubIfValid(List<PlayerClubRequest> clubs, string? value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
+    private static void AddClubIfValid(List<PlayerClubRequest> clubs, string? clubIdValue, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)
     {
-        var id = clubsReferential.FirstOrDefault(c => value == c.Name)?.Id;
-        if (id.HasValue)
+        if (ulong.TryParse(clubIdValue, out var clubId) && clubsReferential.Any(c => c.Id == clubId))
         {
-            clubs.Add(new PlayerClubRequest { ClubId = id.Value, HistoryPosition = i, IsLoan = isLoan });
+            clubs.Add(new PlayerClubRequest { ClubId = clubId, HistoryPosition = i, IsLoan = isLoan });
             i++;
         }
     }
