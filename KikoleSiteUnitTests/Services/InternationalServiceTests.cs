@@ -31,6 +31,8 @@ public class InternationalServiceTests
             ClubDtoBuilder.Valid().WithId(1).WithName("AS Cannes").Build()
         });
 
+        _clubRepository.Setup(_ => _.GetClubTranslationsAsync()).ReturnsAsync(new List<ClubTranslationDto>());
+
         _internationalRepository
             .Setup(_ => _.GetCountriesAsync(It.IsAny<ulong>()))
             .ReturnsAsync(new List<CountryDto>
@@ -145,8 +147,12 @@ public class InternationalServiceTests
         return new ClubRequest
         {
             Id = id,
-            Name = "Juventus",
-            AllowedNames = new List<string> { "juve" }
+            CountryId = (ulong)Countries.IT,
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
+            {
+                { Languages.fr, new List<string> { "Juventus", "Juve" } },
+                { Languages.en, new List<string> { "Juventus" } }
+            }
         };
     }
 

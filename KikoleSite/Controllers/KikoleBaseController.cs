@@ -64,12 +64,17 @@ public abstract class KikoleBaseController : Controller
     [HttpPost]
     public async Task<JsonResult> AutoCompleteClubs(string prefix)
     {
-        var clubs = (await GetClubsAsync())
-            .Where(c =>
-                c.Name.Sanitize().Contains(prefix.Sanitize())
-                || c.AllowedNames?.Any(_ => _.Sanitize().Contains(prefix.Sanitize())) == true);
+        var language = ViewHelper.GetLanguage();
+        var sanitizedPrefix = prefix.Sanitize();
 
-        return Json(clubs.Select(x => x.Name));
+        var clubs = (await GetClubsAsync())
+            .Where(c => c.MatchesSearch(language, sanitizedPrefix));
+
+        // le code pays leve l'ambiguite entre deux clubs homonymes de pays differents
+        // (l'unicite en base est sur (name, country_id), pas name seul) ; le code ISO a
+        // 2 lettres est deja le nom de l'enum, pas besoin d'aller chercher son libelle
+        return Json(clubs.Select(c => new KeyValuePair<ulong, string>(
+            c.Id, $"{c.GetCanonicalName(language)} - {(Countries)c.CountryId}")));
     }
 
     [HttpPost]

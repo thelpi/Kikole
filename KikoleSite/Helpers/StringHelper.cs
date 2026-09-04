@@ -45,11 +45,6 @@ internal static class StringHelper
         });
     }
 
-    internal static bool ContainsSanitized(this string source, string value)
-    {
-        return source.Disjoin().Contains(value.Sanitize());
-    }
-
     internal static IReadOnlyList<string> Disjoin(this string value)
     {
         return value.Split(Separator).ToList();

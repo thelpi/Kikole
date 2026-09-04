@@ -78,8 +78,12 @@ Branche de travail : `remaster-v2`.
       `player_federations` retrouvée en production était une tentative abandonnée.
 - [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
       d'intégrité sont les `IsValid` applicatives.
-- [ ] `IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
-      passent en canonique. `Message` et `Discussion` ne méritent pas de service.
+- [x] ~~`IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
+      passent en canonique.~~ **Décision : pas nécessaire.** Passage en canonique fait
+      (traductions par langue, `country_id`, autocomplétion par ID), tout absorbé par
+      `InternationalService` existant (déjà le point d'entrée pour pays/continents) sans
+      ajouter de couche — même précédent que `Message`/`Discussion`, qui ne méritent pas
+      de service dédié.
 
 ---
 

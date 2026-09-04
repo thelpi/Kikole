@@ -123,19 +123,6 @@ public class StringHelperTests
         result.Should().Be("zidane");
     }
 
-    // ------------------------------------------------------------- ContainsSanitized
-
-    [Theory]
-    [InlineData("real;real madrid", "Real Madrid", true)]
-    [InlineData("real;real madrid", "  REAL  ", true)]
-    [InlineData("real;real madrid", "Réal Madrid", true)]     // accent parasite absorbe
-    [InlineData("real;real madrid", "Real Madri", false)]     // correspondance exacte : pas de tolerance
-    [InlineData("real;real madrid", "Barcelone", false)]
-    public void ContainsSanitized_RequiresExactMatchAfterSanitization(string source, string value, bool expected)
-    {
-        source.ContainsSanitized(value).Should().Be(expected);
-    }
-
     // ------------------------------------------------------------- ContainsApproximately
 
     [Theory]

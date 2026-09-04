@@ -20,8 +20,12 @@ public class ClubRequestTests
         return new ClubRequest
         {
             Id = 3,
-            Name = "Bayern München",
-            AllowedNames = new List<string> { "Bayern", "Bayern Munich" }
+            CountryId = (ulong)Countries.DE,
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
+            {
+                { Languages.fr, new List<string> { "Bayern Munich", "Bayern" } },
+                { Languages.en, new List<string> { "Bayern Munich", "Bayern" } }
+            }
         };
     }
 
@@ -34,37 +38,54 @@ public class ClubRequestTests
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void IsValid_WhenNameIsBlank_IsRejected(string name)
+    public void IsValid_WhenFrenchCanonicalNameIsBlank_IsRejected(string name)
     {
-        var request = Valid() with { Name = name };
+        var request = Valid() with
+        {
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
+            {
+                { Languages.fr, new List<string> { name } },
+                { Languages.en, new List<string> { "Bayern Munich" } }
+            }
+        };
 
         request.IsValid(_localizer).Should().Be("InvalidName");
     }
 
     [Fact]
-    public void IsValid_WhenAllowedNamesIsEmpty_IsRejected()
+    public void IsValid_WhenEnglishCanonicalNameIsMissing_IsRejected()
     {
-        var request = Valid() with { AllowedNames = [] };
+        var request = Valid() with
+        {
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
+            {
+                { Languages.fr, new List<string> { "Bayern Munich" } }
+            }
+        };
 
-        request.IsValid(_localizer).Should().Be("InvalidAllowedNames");
+        request.IsValid(_localizer).Should().Be("InvalidName");
     }
 
     [Fact]
-    public void ToDto_SanitizesAliasesAndAppendsTheDisplayName()
+    public void ToDto_UsesTheFrenchCanonicalNameAsTheDisplayName()
     {
         var dto = Valid().ToDto();
 
-        dto.AllowedNames.Should().Be("bayern;bayern munich;bayern munchen");
-        dto.Name.Should().Be("Bayern München");
+        dto.Name.Should().Be("Bayern Munich");
+        dto.CountryId.Should().Be((ulong)Countries.DE);
         dto.Id.Should().Be(3);
     }
 
     [Fact]
-    public void ToDto_WhenAnAliasEqualsTheNameOnceSanitized_ItIsNotDuplicated()
+    public void ToTranslationDtos_ProducesOneRowPerNamePerLanguageWithIncreasingPriority()
     {
-        var request = Valid() with { AllowedNames = new List<string> { "Bayern Munchen" } };
+        var translations = Valid().ToTranslationDtos(3);
 
-        request.ToDto().AllowedNames.Should().Be("bayern munchen");
+        translations.Should().HaveCount(4);
+        translations.Should().ContainSingle(t => t.LanguageId == (ulong)Languages.fr && t.Priority == 0 && t.Name == "Bayern Munich");
+        translations.Should().ContainSingle(t => t.LanguageId == (ulong)Languages.fr && t.Priority == 1 && t.Name == "Bayern");
+        translations.Should().ContainSingle(t => t.LanguageId == (ulong)Languages.en && t.Priority == 0 && t.Name == "Bayern Munich");
+        translations.Should().ContainSingle(t => t.LanguageId == (ulong)Languages.en && t.Priority == 1 && t.Name == "Bayern");
     }
 }
 

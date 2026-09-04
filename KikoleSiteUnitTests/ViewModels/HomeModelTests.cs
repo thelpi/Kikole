@@ -60,8 +60,8 @@ public class HomeModelTests
             Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithYearOfBirth(1972).WithCountryId((ulong)KikoleSite.Models.Enums.Countries.FR).WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
-                ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").WithAllowedNames("juve;juventus").Build(),
-                ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").WithAllowedNames("real;real madrid").Build()
+                ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").Build(),
+                ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").Build()
             },
             PlayerClubs = new List<PlayerClubDto>
             {
@@ -161,7 +161,7 @@ public class HomeModelTests
     {
         var model = new HomeModel();
 
-        Apply(model, ProposalTypes.Club, "Real Madrid");
+        Apply(model, ProposalTypes.Club, RealMadridId.ToString());
 
         model.KnownPlayerClubs.Should().ContainSingle();
         model.KnownPlayerClubs[0].Name.Should().Be("Real Madrid");
@@ -173,8 +173,8 @@ public class HomeModelTests
     {
         var model = new HomeModel();
 
-        Apply(model, ProposalTypes.Club, "Real Madrid");   // position 4
-        Apply(model, ProposalTypes.Club, "Juventus");      // position 3
+        Apply(model, ProposalTypes.Club, RealMadridId.ToString());   // position 4
+        Apply(model, ProposalTypes.Club, JuventusId.ToString());     // position 3
 
         model.KnownPlayerClubs.Select(c => c.HistoryPosition).Should().ContainInOrder(3, 4);
     }
@@ -184,8 +184,8 @@ public class HomeModelTests
     {
         var model = new HomeModel();
 
-        Apply(model, ProposalTypes.Club, "Real Madrid");
-        Apply(model, ProposalTypes.Club, "real");
+        Apply(model, ProposalTypes.Club, RealMadridId.ToString());
+        Apply(model, ProposalTypes.Club, RealMadridId.ToString());
 
         model.KnownPlayerClubs.Should().ContainSingle();
     }

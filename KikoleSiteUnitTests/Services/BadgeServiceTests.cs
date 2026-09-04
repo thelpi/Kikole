@@ -74,7 +74,7 @@ public class BadgeServiceTests
     private void SetupPlayerFull(PlayerDto player, int clubsCount = 0)
     {
         var clubs = Enumerable.Range(1, clubsCount)
-            .Select(i => ClubDtoBuilder.Valid().WithId((ulong)i).WithName("Club" + i).WithAllowedNames("club" + i).Build())
+            .Select(i => ClubDtoBuilder.Valid().WithId((ulong)i).WithName("Club" + i).Build())
             .ToList();
 
         _playerHandler.Setup(_ => _.GetPlayerFullInfoAsync(It.IsAny<PlayerDto>()))

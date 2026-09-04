@@ -33,8 +33,8 @@ public class ProposalResponseTests
             Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou;zinedine zidane").WithYearOfBirth(1972).WithCountryId((ulong)Countries.FR).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Midfielder).Build(),
             Clubs = new List<ClubDto>
             {
-                ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").WithAllowedNames("real;real madrid").Build(),
-                ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").WithAllowedNames("juve;juventus").Build()
+                ClubDtoBuilder.Valid().WithId(RealMadridId).WithName("Real Madrid").Build(),
+                ClubDtoBuilder.Valid().WithId(JuventusId).WithName("Juventus").Build()
             },
             PlayerClubs = new List<PlayerClubDto>
             {
@@ -90,18 +90,17 @@ public class ProposalResponseTests
     public void IsWin_IsOnlyTrueForASuccessfulNameProposal()
     {
         // un club correct ne gagne pas la partie
-        Respond(ProposalTypes.Club, "Real Madrid").IsWin.Should().BeFalse();
+        Respond(ProposalTypes.Club, RealMadridId.ToString()).IsWin.Should().BeFalse();
     }
 
     // ------------------------------------------------------------- clubs
+    // la proposition porte desormais l'identifiant du club (choisi via l'autocompletion),
+    // plus un texte libre a sanitiser/tolerer : le match est exact par construction.
 
-    [Theory]
-    [InlineData("Real Madrid")]
-    [InlineData("real")]
-    [InlineData("Réal Madrid")]  // accent parasite absorbe par la sanitisation
-    public void Club_WhenMatching_IsSuccessfulAndReturnsTheCareerEntries(string value)
+    [Fact]
+    public void Club_WhenMatchingTheClubId_IsSuccessfulAndReturnsTheCareerEntries()
     {
-        var response = Respond(ProposalTypes.Club, value);
+        var response = Respond(ProposalTypes.Club, RealMadridId.ToString());
 
         response.Successful.Should().BeTrue();
         response.Cost.Should().Be((0, false));
@@ -113,10 +112,10 @@ public class ProposalResponseTests
     }
 
     [Fact]
-    public void Club_MatchingIsExact_ATypoIsRejected()
+    public void Club_WhenTheIdIsNotInTheCareer_IsRejected()
     {
-        // contrairement au nom du joueur, les clubs n'ont aucune tolerance
-        var response = Respond(ProposalTypes.Club, "Real Madri");
+        // un identifiant de club valide, mais absent de la carriere du joueur
+        var response = Respond(ProposalTypes.Club, "999");
 
         response.Successful.Should().BeFalse();
         response.Cost.Should().Be((50, false));
@@ -125,10 +124,18 @@ public class ProposalResponseTests
     [Fact]
     public void Club_WhenWrong_CostsThePenaltyAndEchoesTheInput()
     {
-        var response = Respond(ProposalTypes.Club, "Barcelone");
+        var response = Respond(ProposalTypes.Club, "999");
 
         response.Successful.Should().BeFalse();
-        response.Value.Should().Be("Barcelone");
+        response.Value.Should().Be("999");
+    }
+
+    [Fact]
+    public void Club_WhenTheValueIsNotANumericId_IsRejectedWithoutThrowing()
+    {
+        var response = Respond(ProposalTypes.Club, "Real Madrid");
+
+        response.Successful.Should().BeFalse();
     }
 
     // ------------------------------------------------------------- nationalite / continent

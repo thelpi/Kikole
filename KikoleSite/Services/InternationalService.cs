@@ -50,9 +50,11 @@ public class InternationalService : IInternationalService
             return cached;
 
         var clubs = await _clubRepository.GetClubsAsync();
+        var translations = await _clubRepository.GetClubTranslationsAsync();
+        var translationsByClub = translations.ToLookup(t => t.ClubId);
 
         var loaded = clubs
-            .Select(c => new Club(c))
+            .Select(c => new Club(c, translationsByClub[c.Id]))
             .OrderBy(c => c.Name)
             .ToList();
 
@@ -74,10 +76,13 @@ public class InternationalService : IInternationalService
     public async Task CreateOrUpdateClubAsync(ClubRequest request)
     {
         // un club sans identifiant est un nouveau club
-        if (request.Id == 0)
-            await _clubRepository.CreateClubAsync(request.ToDto());
+        var clubId = request.Id;
+        if (clubId == 0)
+            clubId = await _clubRepository.CreateClubAsync(request.ToDto());
         else
             await _clubRepository.UpdateClubAsync(request.ToDto());
+
+        await _clubRepository.ReplaceClubTranslationsAsync(clubId, request.ToTranslationDtos(clubId));
 
         InvalidateClubs();
     }

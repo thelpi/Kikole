@@ -56,16 +56,37 @@ internal sealed class ClubDtoBuilder
     {
         Id = 1,
         Name = "Real Madrid",
-        AllowedNames = "real;real madrid"
+        CountryId = (ulong)Countries.ES
     };
 
     internal static ClubDtoBuilder Valid() => new();
 
     internal ClubDtoBuilder WithId(ulong id) { _dto = _dto with { Id = id }; return this; }
     internal ClubDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
-    internal ClubDtoBuilder WithAllowedNames(string names) { _dto = _dto with { AllowedNames = names }; return this; }
+    internal ClubDtoBuilder WithCountryId(ulong countryId) { _dto = _dto with { CountryId = countryId }; return this; }
 
     internal ClubDto Build() => _dto;
+}
+
+internal sealed class ClubTranslationDtoBuilder
+{
+    private ClubTranslationDto _dto = new()
+    {
+        ClubId = 1,
+        LanguageId = (ulong)Languages.fr,
+        Priority = 0,
+        Name = "Real Madrid"
+    };
+
+    internal static ClubTranslationDtoBuilder Valid() => new();
+
+    internal ClubTranslationDtoBuilder WithClubId(ulong clubId) { _dto = _dto with { ClubId = clubId }; return this; }
+    internal ClubTranslationDtoBuilder WithLanguage(Languages language) { _dto = _dto with { LanguageId = (ulong)language }; return this; }
+    internal ClubTranslationDtoBuilder WithLanguageId(ulong languageId) { _dto = _dto with { LanguageId = languageId }; return this; }
+    internal ClubTranslationDtoBuilder WithPriority(byte priority) { _dto = _dto with { Priority = priority }; return this; }
+    internal ClubTranslationDtoBuilder WithName(string name) { _dto = _dto with { Name = name }; return this; }
+
+    internal ClubTranslationDto Build() => _dto;
 }
 
 internal sealed class UserDtoBuilder
@@ -204,7 +225,6 @@ internal sealed class PlayerFullDtoBuilder
                 clubs.Add(ClubDtoBuilder.Valid()
                     .WithId(clubId)
                     .WithName(name)
-                    .WithAllowedNames(name.ToLowerInvariant())
                     .Build());
             }
             playerClubs.Add(new PlayerClubDto

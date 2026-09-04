@@ -31,6 +31,7 @@ TRUNCATE TABLE user_badges;
 TRUNCATE TABLE player_clue_translations;
 TRUNCATE TABLE player_clubs;
 TRUNCATE TABLE players;
+TRUNCATE TABLE club_translations;
 TRUNCATE TABLE clubs;
 TRUNCATE TABLE discussions;
 TRUNCATE TABLE messages;
@@ -50,23 +51,51 @@ INSERT INTO registration_guids (id, user_id, creation_date) VALUES
 ('11111111-2222-3333-4444-555555555555', NULL, '2026-09-01 09:00:00');
 
 -- ---------------------------------------------------------------- clubs
--- allowed_names suit le format produit par SanitizeJoin : alias sanitises puis nom sanitise, separes par ';'
-
+-- clubs.name est le miroir du nom canonique FR (club_translations, language_id=2,
+-- priority=0) : simple etiquette de confort pour explorer la base sans jointure.
 -- country_id : valeurs de l'enum Countries (77 France, 84 Allemagne, 111 Italie,
 -- 210 Espagne, 235 Royaume-Uni, 236 Etats-Unis)
-INSERT INTO clubs (id, name, allowed_names, country_id, creation_date) VALUES
-(1,  'AS Cannes',           'cannes;as cannes',                        77,  '2026-09-01 09:00:00'),
-(2,  'Girondins de Bordeaux', 'bordeaux;girondins de bordeaux',        77,  '2026-09-01 09:00:00'),
-(3,  'Juventus',            'juve;juventus turin;juventus',            111, '2026-09-01 09:00:00'),
-(4,  'Real Madrid',         'real;real madrid',                        210, '2026-09-01 09:00:00'),
-(5,  'Brescia',             'brescia calcio;brescia',                  111, '2026-09-01 09:00:00'),
-(6,  'Inter Milan',         'inter;internazionale;inter milan',        111, '2026-09-01 09:00:00'),
-(7,  'AC Milan',            'milan;ac milan',                          111, '2026-09-01 09:00:00'),
-(8,  'New York City FC',    'nycfc;new york city fc',                  236, '2026-09-01 09:00:00'),
-(9,  'FC Barcelone',        'barca;barcelone;fc barcelone',            210, '2026-09-01 09:00:00'),
-(10, 'Paris Saint-Germain', 'psg;paris sg;paris saint-germain',        77,  '2026-09-01 09:00:00'),
-(11, 'Manchester United',   'man utd;manchester united',               235, '2026-09-01 09:00:00'),
-(12, 'Bayern Munich',       'bayern;bayern munich',                    84,  '2026-09-01 09:00:00');
+INSERT INTO clubs (id, name, country_id, creation_date) VALUES
+(1,  'AS Cannes',              77,  '2026-09-01 09:00:00'),
+(2,  'Girondins de Bordeaux',  77,  '2026-09-01 09:00:00'),
+(3,  'Juventus Turin',         111, '2026-09-01 09:00:00'),
+(4,  'Real Madrid',            210, '2026-09-01 09:00:00'),
+(5,  'Brescia Calcio',         111, '2026-09-01 09:00:00'),
+(6,  'Inter Milan',            111, '2026-09-01 09:00:00'),
+(7,  'Milan AC',                111, '2026-09-01 09:00:00'),
+(8,  'New York City FC',       236, '2026-09-01 09:00:00'),
+(9,  'FC Barcelone',           210, '2026-09-01 09:00:00'),
+(10, 'Paris Saint-Germain',    77,  '2026-09-01 09:00:00'),
+(11, 'Manchester United',      235, '2026-09-01 09:00:00'),
+(12, 'Bayern Munich',          84,  '2026-09-01 09:00:00');
+
+-- language_id : 1 EN, 2 FR (enum Languages). priority 0 = nom canonique (obligatoire
+-- dans les 2 langues), priority > 0 = alias de recherche pour cette langue.
+INSERT INTO club_translations (club_id, language_id, priority, name) VALUES
+(1,  2, 0, 'AS Cannes'),              (1,  2, 1, 'Cannes'),
+(1,  1, 0, 'AS Cannes'),              (1,  1, 1, 'Cannes'),
+(2,  2, 0, 'Girondins de Bordeaux'),  (2,  2, 1, 'Bordeaux'),
+(2,  1, 0, 'Girondins de Bordeaux'),  (2,  1, 1, 'Bordeaux'),
+(3,  2, 0, 'Juventus Turin'),         (3,  2, 1, 'Juve'), (3, 2, 2, 'Juventus'),
+(3,  1, 0, 'Juventus FC'),            (3,  1, 1, 'Juve'), (3, 1, 2, 'Juventus'),
+(4,  2, 0, 'Real Madrid'),            (4,  2, 1, 'Real'),
+(4,  1, 0, 'Real Madrid'),            (4,  1, 1, 'Real'),
+(5,  2, 0, 'Brescia Calcio'),         (5,  2, 1, 'Brescia'),
+(5,  1, 0, 'Brescia Calcio'),         (5,  1, 1, 'Brescia'),
+(6,  2, 0, 'Inter Milan'),            (6,  2, 1, 'Inter'), (6, 2, 2, 'Internazionale'),
+(6,  1, 0, 'Inter Milan'),            (6,  1, 1, 'Inter'), (6, 1, 2, 'Internazionale'),
+(7,  2, 0, 'Milan AC'),               (7,  2, 1, 'AC Milan'), (7, 2, 2, 'Milan'),
+(7,  1, 0, 'AC Milan'),               (7,  1, 1, 'Milan'),
+(8,  2, 0, 'New York City FC'),       (8,  2, 1, 'NYCFC'),
+(8,  1, 0, 'New York City FC'),       (8,  1, 1, 'NYCFC'),
+(9,  2, 0, 'FC Barcelone'),           (9,  2, 1, 'Barça'), (9, 2, 2, 'Barcelone'),
+(9,  1, 0, 'FC Barcelona'),           (9,  1, 1, 'Barça'), (9, 1, 2, 'Barcelona'),
+(10, 2, 0, 'Paris Saint-Germain'),    (10, 2, 1, 'PSG'), (10, 2, 2, 'Paris SG'),
+(10, 1, 0, 'Paris Saint-Germain'),    (10, 1, 1, 'PSG'),
+(11, 2, 0, 'Manchester United'),      (11, 2, 1, 'Man Utd'),
+(11, 1, 0, 'Manchester United'),      (11, 1, 1, 'Man Utd'),
+(12, 2, 0, 'Bayern Munich'),          (12, 2, 1, 'Bayern'),
+(12, 1, 0, 'Bayern Munich'),          (12, 1, 1, 'Bayern');
 
 
 -- ---------------------------------------------------------------- joueurs du jour

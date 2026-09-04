@@ -19,13 +19,22 @@ public class MappingModelsTests
     // ------------------------------------------------------------- Club
 
     [Fact]
-    public void Club_SplitsTheAllowedNamesIntoAList()
+    public void Club_GroupsTranslationsByLanguageOrderedByPriority()
     {
-        var club = new Club(ClubDtoBuilder.Valid().WithId(3).WithName("Juventus").WithAllowedNames("juve;juventus turin;juventus").Build());
+        var translations = new[]
+        {
+            ClubTranslationDtoBuilder.Valid().WithClubId(3).WithLanguage(Languages.fr).WithPriority(0).WithName("Juventus Turin").Build(),
+            ClubTranslationDtoBuilder.Valid().WithClubId(3).WithLanguage(Languages.fr).WithPriority(1).WithName("Juve").Build(),
+            ClubTranslationDtoBuilder.Valid().WithClubId(3).WithLanguage(Languages.en).WithPriority(0).WithName("Juventus FC").Build()
+        };
+
+        var club = new Club(ClubDtoBuilder.Valid().WithId(3).WithName("Juventus Turin").Build(), translations);
 
         club.Id.Should().Be(3);
-        club.Name.Should().Be("Juventus");
-        club.AllowedNames.Should().BeEquivalentTo(new[] { "juve", "juventus turin", "juventus" });
+        club.Name.Should().Be("Juventus Turin");
+        club.GetCanonicalName(Languages.fr).Should().Be("Juventus Turin");
+        club.GetCanonicalName(Languages.en).Should().Be("Juventus FC");
+        club.NamesByLanguage[Languages.fr].Should().BeEquivalentTo(new[] { "Juventus Turin", "Juve" }, o => o.WithStrictOrdering());
     }
 
     // ------------------------------------------------------------- PlayerClub

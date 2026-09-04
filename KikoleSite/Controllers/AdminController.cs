@@ -361,15 +361,14 @@ public class AdminController : KikoleBaseController
             if (club == null)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            var names = club.AllowedNames.ToList();
+            var namesEn = club.NamesByLanguage[Languages.en];
+            var namesFr = club.NamesByLanguage[Languages.fr];
             var model = new ClubCreationModel
             {
-                MainName = club.Name,
-                AlternativeName0 = names.Count > 0 ? names[0] : null,
-                AlternativeName1 = names.Count > 1 ? names[1] : null,
-                AlternativeName2 = names.Count > 2 ? names[2] : null,
-                AlternativeName3 = names.Count > 3 ? names[3] : null,
-                AlternativeName4 = names.Count > 4 ? names[4] : null,
+                MainNameEn = namesEn[0],
+                MainNameFr = namesFr[0],
+                AlternativeNamesEn = string.Join('\n', namesEn.Skip(1)),
+                AlternativeNamesFr = string.Join('\n', namesFr.Skip(1)),
                 Country = club.CountryId.ToString(),
                 Id = clubId
             };
@@ -384,22 +383,11 @@ public class AdminController : KikoleBaseController
     [Authorization(UserTypes.PowerUser)]
     public async Task<IActionResult> Club(ClubCreationModel model)
     {
-        if (string.IsNullOrWhiteSpace(model.MainName))
+        if (string.IsNullOrWhiteSpace(model.MainNameEn) || string.IsNullOrWhiteSpace(model.MainNameFr))
         {
             model.ErrorMessage = _localizer["ClubNameMiss"];
             return View("Club", model);
         }
-
-        var names = new[]
-        {
-            model.AlternativeName0,
-            model.AlternativeName1,
-            model.AlternativeName2,
-            model.AlternativeName3,
-            model.AlternativeName4
-        };
-
-        var allowedNames = names.OfType<string>().Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
 
         var countries = await GetCountriesAsync();
 
@@ -413,8 +401,11 @@ public class AdminController : KikoleBaseController
 
         var request = new ClubRequest
         {
-            Name = model.MainName,
-            AllowedNames = allowedNames,
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
+            {
+                { Languages.en, SplitAlternativeNames(model.MainNameEn, model.AlternativeNamesEn) },
+                { Languages.fr, SplitAlternativeNames(model.MainNameFr, model.AlternativeNamesFr) }
+            },
             CountryId = countryId,
             Id = model.Id
         };
@@ -507,6 +498,17 @@ public class AdminController : KikoleBaseController
                 YearOfBirth = p.YearOfBirth
             })
             .ToList();
+    }
+
+    /// <summary>Nom canonique (priorite 0) suivi des alias saisis un par ligne, sans doublon ni ligne vide.</summary>
+    private static IReadOnlyList<string> SplitAlternativeNames(string canonicalName, string? alternativeNames)
+    {
+        var aliases = (alternativeNames ?? string.Empty)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(n => !string.Equals(n, canonicalName, StringComparison.OrdinalIgnoreCase))
+            .Distinct();
+
+        return new[] { canonicalName }.Concat(aliases).ToList();
     }
 
     private void AddClubIfValid(List<PlayerClubRequest> clubs, string? value, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)

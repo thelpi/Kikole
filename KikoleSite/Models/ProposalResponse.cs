@@ -70,7 +70,9 @@ public class ProposalResponse
                 break;
 
             case ProposalTypes.Club:
-                var c = player.Clubs.FirstOrDefault(_ => _.AllowedNames.ContainsSanitized(Guessed()));
+                var c = ulong.TryParse(Guessed(), out var clubId)
+                    ? player.Clubs.FirstOrDefault(_ => _.Id == clubId)
+                    : null;
                 if (!success.HasValue)
                     Successful = c != null;
                 if (Successful)

@@ -15,4 +15,9 @@ public interface IClubRepository
     Task<IReadOnlyCollection<ClubDto>> GetClubsByIdsAsync(IReadOnlyCollection<ulong> clubIds);
 
     Task<IReadOnlyCollection<ClubDto>> GetClubsAsync();
+
+    Task<IReadOnlyCollection<ClubTranslationDto>> GetClubTranslationsAsync();
+
+    /// <summary>Remplace toutes les traductions d'un club par la liste fournie (le nombre d'alias est variable d'une modification à l'autre : un upsert par clé laisserait des lignes obsolètes).</summary>
+    Task ReplaceClubTranslationsAsync(ulong clubId, IReadOnlyCollection<ClubTranslationDto> translations);
 }

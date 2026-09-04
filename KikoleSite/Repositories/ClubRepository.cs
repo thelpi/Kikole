@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +16,6 @@ public class ClubRepository : BaseRepository, IClubRepository
         return await ExecuteInsertAsync(
                 "clubs",
                 ("name", club.Name),
-                ("allowed_names", club.AllowedNames),
                 ("country_id", club.CountryId),
                 ("creation_date", Clock.Now));
     }
@@ -25,12 +24,11 @@ public class ClubRepository : BaseRepository, IClubRepository
     {
         await ExecuteNonQueryAsync(
                 "UPDATE clubs " +
-                "SET name = @name, allowed_names = @allowed_names, country_id = @country_id " +
+                "SET name = @name, country_id = @country_id " +
                 "WHERE id = @id",
                 new
                 {
                     name = club.Name,
-                    allowed_names = club.AllowedNames,
                     country_id = club.CountryId,
                     id = club.Id
                 });
@@ -57,5 +55,28 @@ public class ClubRepository : BaseRepository, IClubRepository
     {
         return await GetDtosAsync<ClubDto>(
                 "clubs");
+    }
+
+    public async Task<IReadOnlyCollection<ClubTranslationDto>> GetClubTranslationsAsync()
+    {
+        return await GetDtosAsync<ClubTranslationDto>(
+                "club_translations");
+    }
+
+    public async Task ReplaceClubTranslationsAsync(ulong clubId, IReadOnlyCollection<ClubTranslationDto> translations)
+    {
+        await ExecuteNonQueryAsync(
+                "DELETE FROM club_translations WHERE club_id = @clubId",
+                new { clubId });
+
+        foreach (var translation in translations)
+        {
+            await ExecuteInsertAsync(
+                    "club_translations",
+                    ("club_id", clubId),
+                    ("language_id", translation.LanguageId),
+                    ("priority", translation.Priority),
+                    ("name", translation.Name));
+        }
     }
 }
