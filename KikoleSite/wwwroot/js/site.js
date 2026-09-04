@@ -570,9 +570,43 @@ function daysBetween(startDate, endDate) {
     }
 }
 
-function navigateDaysHandler(e) {
-    window.location.href = "/?day=" + daysBetween(e.target.value, Date.now());
-}
+/* day navigation datepicker */
+$(function () {
+    var regionalByLang = {
+        fr: {
+            closeText: "Fermer",
+            prevText: "Préc.",
+            nextText: "Suiv.",
+            currentText: "Aujourd'hui",
+            monthNames: ["janvier", "février", "mars", "avril", "mai", "juin",
+                "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+            monthNamesShort: ["janv.", "févr.", "mars", "avr.", "mai", "juin",
+                "juil.", "août", "sept.", "oct.", "nov.", "déc."],
+            dayNamesMin: ["D", "L", "M", "M", "J", "V", "S"],
+            weekHeader: "Sem.",
+            dateFormat: "dd/mm/yy",
+            firstDay: 1
+        },
+        en: {
+            dateFormat: "mm/dd/yy",
+            firstDay: 0
+        }
+    };
+    var lang = document.body.getAttribute("data-lang") === "en" ? "en" : "fr";
+    $("#dayDatepicker").datepicker($.extend({
+        changeMonth: true,
+        changeYear: true,
+        onSelect: function () {
+            var picked = $(this).datepicker("getDate");
+            window.location.href = "/?day=" + daysBetween(picked, Date.now());
+        }
+    }, regionalByLang[lang]));
+    var initialDate = $("#dayDatepicker").data("date");
+    if (initialDate) {
+        var parts = initialDate.split("-");
+        $("#dayDatepicker").datepicker("setDate", new Date(parts[0], parts[1] - 1, parts[2]));
+    }
+});
 
 Date.prototype.yyyymmdd = function () {
     var mm = this.getMonth() + 1; // getMonth() is zero-based

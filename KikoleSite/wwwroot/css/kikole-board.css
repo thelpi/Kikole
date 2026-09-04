@@ -1,7 +1,8 @@
 /* Habillage "dossier de scout" de la page de jeu (Views/Home/Index.cshtml).
    Scope : tout sous .kikole-board, sauf les tokens (:root, globaux et sans risque)
-   et .ui-autocomplete (widget jQuery UI attache en enfant direct de <body>, impossible
-   a scoper autrement). Voir C:\Users\LPI\.claude\plans\linear-pondering-wind.md. */
+   et .ui-autocomplete / .ui-datepicker (widgets jQuery UI attaches en enfant direct
+   de <body>, impossible a scoper autrement). Voir
+   C:\Users\LPI\.claude\plans\linear-pondering-wind.md. */
 
 :root {
   --paper: #efe9d8;
@@ -58,7 +59,7 @@
 
 .kikole-board .day-nav a:hover { text-decoration: underline; }
 
-.kikole-board .day-nav input[type="date"] {
+.kikole-board .day-nav .date-field {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
   font-weight: 600;
@@ -68,16 +69,13 @@
   padding: 2px 2px 3px;
   background: transparent;
   color: var(--pitch-strong);
+  width: 78px;
+  cursor: pointer;
 }
 
-.kikole-board .day-nav input[type="date"]:focus-visible {
+.kikole-board .day-nav .date-field:focus-visible {
   outline: none;
   border-bottom: 1px solid var(--pitch);
-}
-
-.kikole-board .day-nav input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.45;
-  filter: sepia(60%) saturate(300%) hue-rotate(90deg);
 }
 
 .kikole-board .logged-as {
@@ -493,4 +491,110 @@
   color: var(--paper-raised);
   border: none;
   margin: 0;
+}
+
+/* ------------------------------------------------------------ datepicker jQuery UI
+   Meme contrainte que .ui-autocomplete ci-dessus : #ui-datepicker-div s'attache en
+   enfant direct de <body>. */
+
+.ui-datepicker {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  box-shadow: 0 10px 24px var(--shadow);
+  padding: 8px;
+  width: 240px;
+}
+
+.ui-datepicker .ui-datepicker-header {
+  background: var(--pitch);
+  color: var(--paper-raised);
+  border: none;
+  border-radius: 3px;
+  padding: 4px 0;
+}
+
+.ui-datepicker .ui-datepicker-title {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+  top: 4px;
+  cursor: pointer;
+}
+
+.ui-datepicker .ui-datepicker-prev .ui-icon,
+.ui-datepicker .ui-datepicker-next .ui-icon {
+  filter: invert(1);
+}
+
+.ui-datepicker .ui-datepicker-prev:hover,
+.ui-datepicker .ui-datepicker-next:hover {
+  background: transparent;
+  border: none;
+  top: 4px;
+}
+
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  background: var(--paper-raised);
+  color: var(--pitch-strong);
+  border: 1px solid color-mix(in srgb, var(--paper-raised) 60%, transparent);
+  border-radius: 2px;
+}
+
+.ui-datepicker table {
+  margin: 6px 0 0;
+}
+
+.ui-datepicker th {
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.ui-datepicker td {
+  padding: 1px;
+}
+
+.ui-datepicker td a,
+.ui-datepicker td span {
+  text-align: center;
+  border-radius: 3px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  padding: 4px 0;
+}
+
+.ui-datepicker td a:hover {
+  background: var(--pitch-soft);
+  border: none;
+}
+
+.ui-datepicker td .ui-state-active {
+  background: var(--pitch);
+  color: var(--paper-raised);
+}
+
+.ui-datepicker td.ui-datepicker-today a {
+  border: 1px solid var(--gold);
+}
+
+.ui-datepicker .ui-datepicker-buttonpane {
+  border-top: 1px solid var(--paper-line);
+}
+
+.ui-datepicker .ui-datepicker-buttonpane button {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--pitch-strong);
+  background: transparent;
+  border: none;
 }

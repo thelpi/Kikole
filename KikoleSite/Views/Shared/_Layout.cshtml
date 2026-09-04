@@ -4,7 +4,8 @@
         Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
         out var currentLng);
 
-    var flagPath = currentLng == "c=en|uic=en"
+    var isEnglish = currentLng == "c=en|uic=en";
+    var flagPath = isEnglish
         ? "/images/FR-France-Flag-icon.png"
         : "/images/GB-United-Kingdom-Flag-icon.png";
 
@@ -37,7 +38,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
-<body>
+<body data-lang="@(isEnglish ? "en" : "fr")">
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
