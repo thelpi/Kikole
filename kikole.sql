@@ -245,7 +245,41 @@ INSERT INTO clubs (id, `name`, country_id, creation_date) VALUES
 (145, 'Mantova 1994', 111, '2026-09-04 00:00:00'),
 (146, 'Foggia', 111, '2026-09-04 00:00:00'),
 (147, 'Catanzaro', 111, '2026-09-04 00:00:00'),
-(148, 'Frosinone', 111, '2026-09-04 00:00:00');
+(148, 'Frosinone', 111, '2026-09-04 00:00:00'),
+-- Grece (Super League/Division A + Division B, saison 2001-02, meme source et methode
+-- que l'Italie). Traductions FR limitees a ce que fra.lng atteste reellement (surtout
+-- les villes : Athenes, Le Piree, Salonique) ; le reste garde son nom transliterated
+-- inchange, coherent avec l'usage des medias francophones pour le football grec.
+-- Club 153 "Ethnikos Asteras" (division A) : identite incertaine, distinct de
+-- "Ethnikos Piraeus" (division inferieure, non retenu ici) - a verifier.
+(149, 'AEK Athènes', 87, '2026-09-04 00:00:00'),
+(150, 'Aigaleo City', 87, '2026-09-04 00:00:00'),
+(151, 'Akratitos', 87, '2026-09-04 00:00:00'),
+(152, 'Aris Salonique', 87, '2026-09-04 00:00:00'),
+(153, 'Ethnikos Asteras', 87, '2026-09-04 00:00:00'),
+(154, 'Ionikos Nikeas', 87, '2026-09-04 00:00:00'),
+(155, 'Iraklis Salonique', 87, '2026-09-04 00:00:00'),
+(156, 'OFI Crete', 87, '2026-09-04 00:00:00'),
+(157, 'Olympiakos Le Pirée', 87, '2026-09-04 00:00:00'),
+(158, 'Panachaiki', 87, '2026-09-04 00:00:00'),
+(159, 'Panathinaikos', 87, '2026-09-04 00:00:00'),
+(160, 'Panionios', 87, '2026-09-04 00:00:00'),
+(161, 'PAOK Salonique', 87, '2026-09-04 00:00:00'),
+(162, 'Skoda Xanthi', 87, '2026-09-04 00:00:00'),
+(163, 'Agios Nikolaos', 87, '2026-09-04 00:00:00'),
+(164, 'Apollon Athens', 87, '2026-09-04 00:00:00'),
+(165, 'Apollon Kalamarias', 87, '2026-09-04 00:00:00'),
+(166, 'Athinaikos', 87, '2026-09-04 00:00:00'),
+(167, 'Chalkidona', 87, '2026-09-04 00:00:00'),
+(168, 'I.S. Paniliakos', 87, '2026-09-04 00:00:00'),
+(169, 'Kalamata', 87, '2026-09-04 00:00:00'),
+(170, 'Kallithea', 87, '2026-09-04 00:00:00'),
+(171, 'Olympiakos Volou', 87, '2026-09-04 00:00:00'),
+(172, 'Panaigialeios', 87, '2026-09-04 00:00:00'),
+(173, 'Panseraikos', 87, '2026-09-04 00:00:00'),
+(174, 'Pas Giannena', 87, '2026-09-04 00:00:00'),
+(175, 'Patraikos', 87, '2026-09-04 00:00:00'),
+(176, 'Proodeftiki', 87, '2026-09-04 00:00:00');
 
 CREATE TABLE club_translations (
   club_id bigint(20) UNSIGNED NOT NULL,
@@ -413,7 +447,35 @@ INSERT INTO club_translations (club_id, language_id, priority, `name`) VALUES
 (145, 2, 0, 'Mantova 1994'), (145, 2, 1, 'Mantova'), (145, 1, 0, 'Mantova 1994'), (145, 1, 1, 'Mantova'),
 (146, 2, 0, 'Foggia'), (146, 1, 0, 'Foggia'),
 (147, 2, 0, 'Catanzaro'), (147, 1, 0, 'Catanzaro'),
-(148, 2, 0, 'Frosinone'), (148, 1, 0, 'Frosinone');
+(148, 2, 0, 'Frosinone'), (148, 1, 0, 'Frosinone'),
+(149, 2, 0, 'AEK Athènes'), (149, 2, 1, 'AEK'), (149, 1, 0, 'AEK Athens'), (149, 1, 1, 'AEK'),
+(150, 2, 0, 'Aigaleo City'), (150, 2, 1, 'Aigaleo'), (150, 1, 0, 'Aigaleo City'), (150, 1, 1, 'Aigaleo'),
+(151, 2, 0, 'Akratitos'), (151, 1, 0, 'Akratitos'),
+(152, 2, 0, 'Aris Salonique'), (152, 2, 1, 'Aris'), (152, 1, 0, 'Aris Salonika'), (152, 1, 1, 'Aris'),
+(153, 2, 0, 'Ethnikos Asteras'), (153, 2, 1, 'Eth. Asteras'), (153, 1, 0, 'Ethnikos Asteras'), (153, 1, 1, 'Eth. Asteras'),
+(154, 2, 0, 'Ionikos Nikeas'), (154, 2, 1, 'Ionikos'), (154, 1, 0, 'Ionikos Nikeas'), (154, 1, 1, 'Ionikos'),
+(155, 2, 0, 'Iraklis Salonique'), (155, 2, 1, 'Iraklis'), (155, 1, 0, 'Iraklis Salonika'), (155, 1, 1, 'Iraklis'),
+(156, 2, 0, 'OFI Crete'), (156, 2, 1, 'OFI'), (156, 1, 0, 'OFI Crete'), (156, 1, 1, 'OFI'),
+(157, 2, 0, 'Olympiakos Le Pirée'), (157, 2, 1, 'Olympiakos'), (157, 1, 0, 'Olympiakos Piraeus'), (157, 1, 1, 'Olympiakos'),
+(158, 2, 0, 'Panachaiki'), (158, 1, 0, 'Panachaiki'),
+(159, 2, 0, 'Panathinaikos'), (159, 2, 1, 'PAO'), (159, 1, 0, 'Panathinaikos'), (159, 1, 1, 'PAO'),
+(160, 2, 0, 'Panionios'), (160, 1, 0, 'Panionios'),
+(161, 2, 0, 'PAOK Salonique'), (161, 2, 1, 'PAOK'), (161, 1, 0, 'PAOK Salonika'), (161, 1, 1, 'PAOK'),
+(162, 2, 0, 'Skoda Xanthi'), (162, 2, 1, 'Xanthi'), (162, 1, 0, 'Skoda Xanthi'), (162, 1, 1, 'Xanthi'),
+(163, 2, 0, 'Agios Nikolaos'), (163, 2, 1, 'AOAN'), (163, 1, 0, 'Agios Nikolaos'), (163, 1, 1, 'AOAN'),
+(164, 2, 0, 'Apollon Athens'), (164, 2, 1, 'Apollon'), (164, 1, 0, 'Apollon Athens'), (164, 1, 1, 'Apollon'),
+(165, 2, 0, 'Apollon Kalamarias'), (165, 2, 1, 'Kalamaria'), (165, 1, 0, 'Apollon Kalamarias'), (165, 1, 1, 'Kalamaria'),
+(166, 2, 0, 'Athinaikos'), (166, 1, 0, 'Athinaikos'),
+(167, 2, 0, 'Chalkidona'), (167, 1, 0, 'Chalkidona'),
+(168, 2, 0, 'I.S. Paniliakos'), (168, 2, 1, 'Paniliakos'), (168, 1, 0, 'I.S. Paniliakos'), (168, 1, 1, 'Paniliakos'),
+(169, 2, 0, 'Kalamata'), (169, 1, 0, 'Kalamata'),
+(170, 2, 0, 'Kallithea'), (170, 1, 0, 'Kallithea'),
+(171, 2, 0, 'Olympiakos Volou'), (171, 2, 1, 'Olympiakos Volos'), (171, 1, 0, 'Olympiakos Volou'), (171, 1, 1, 'Olympiakos Volos'),
+(172, 2, 0, 'Panaigialeios'), (172, 2, 1, 'Aigio'), (172, 1, 0, 'Panaigialeios'), (172, 1, 1, 'Aigio'),
+(173, 2, 0, 'Panseraikos'), (173, 2, 1, 'Serres'), (173, 1, 0, 'Panseraikos'), (173, 1, 1, 'Serres'),
+(174, 2, 0, 'Pas Giannena'), (174, 2, 1, 'Giannena'), (174, 2, 2, 'PAS Giannina'), (174, 1, 0, 'Pas Giannena'), (174, 1, 1, 'Giannena'), (174, 1, 2, 'PAS Giannina'),
+(175, 2, 0, 'Patraikos'), (175, 1, 0, 'Patraikos'),
+(176, 2, 0, 'Proodeftiki'), (176, 1, 0, 'Proodeftiki');
 
 CREATE TABLE continents (
   id bigint(20) UNSIGNED NOT NULL,
