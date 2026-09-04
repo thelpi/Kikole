@@ -319,15 +319,6 @@ Branche de travail : `remaster-v2`.
       pré-connexion, classement, admin) réutilisant les mêmes tokens une fois la page de
       jeu stabilisée, et les badges (actuellement non retouchés, cf. `Partial/Badges.cshtml`)
       — prévu en même temps que la page classement.
-      - [ ] **Clubs : faire disparaître le barème une fois la carrière complète.**
-        Contrairement à Continent/Nationalité/Année/Position (catégories à valeur unique,
-        qui basculent en "résolu" dès que la bonne réponse est trouvée), Clubs est une
-        liste ouverte : rien dans `HomeModel`/`HomeController` ne sait aujourd'hui détecter
-        "tous les clubs de la carrière ont été trouvés" — le champ de saisie et son coût
-        restent donc actifs indéfiniment, même une fois le dernier club deviné. Idée à
-        creuser : comparer `Model.KnownPlayerClubs.Count` au nombre réel de clubs du
-        joueur (déjà connu côté serveur via `PlayerFullDto.PlayerClubs`, pas encore exposé
-        au modèle de vue) pour basculer la ligne Clubs en "résolu" comme les autres.
 - [ ] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`. Le champ est un texte libre rendu tel quel.
 
