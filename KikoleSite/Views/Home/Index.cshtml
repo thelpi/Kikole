@@ -1,40 +1,29 @@
 ﻿@using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model HomeModel
-<div>
+<div class="kikole-board">
     @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && Model.IsErrorMessageForced)
     {
-        <div class="largeTopMargin">
-            <label class="redtext">@Model.MessageToDisplay</label>
-        </div>
+        <div class="banner error">@Model.MessageToDisplay</div>
     }
     @if (Model.DisplayHiddenPageAsHidden)
     {
-        <div class="redtext largeTopMargin" style="font-size: large">
-            @localizer["AlmostThere"]
-        </div>
+        <div class="banner error">@localizer["AlmostThere"]</div>
     }
     else if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {
-            <div class="redtext largeTopMargin" style="font-size: large">
-                <fieldset style="padding: 15px; border-color: red; border-width: 1px; border-style: solid ">
-                    @Html.Raw(Model.Message)
-                </fieldset>
-            </div>
+            <div class="banner error">@Html.Raw(Model.Message)</div>
         }
         await Html.RenderPartialAsync("Partial/Rules");
-        <div style="margin-top: 40px">
-            <label>@localizer["YouAreNotLogged"]</label>
-        </div>
-        <div class="mediumTopMargin">
-            @(Model.RegistrationInviteEnabled ? localizer["AccountMandatory"] : localizer["AccountMandatoryOpenRegistration"])
+        <div class="auth-notice">
+            <p>@localizer["YouAreNotLogged"]</p>
+            <p>@(Model.RegistrationInviteEnabled ? localizer["AccountMandatory"] : localizer["AccountMandatoryOpenRegistration"])</p>
         </div>
     }
     else
     {
-        <div class="kikole-board">
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {
             <div class="banner error">@Html.Raw(Model.Message)</div>
@@ -389,7 +378,6 @@
                 <p class="caption">-<strong>@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points @localizer["PointsIfIncorrect"]</strong></p>
             </div>
         }
-        </div>
         </div>
         <hr />
         await Html.RenderPartialAsync("Partial/Rules");
