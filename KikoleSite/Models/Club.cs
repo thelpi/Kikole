@@ -12,10 +12,13 @@ public class Club
 
     public IReadOnlyList<string> AllowedNames { get; }
 
+    public ulong CountryId { get; }
+
     internal Club(ClubDto dto)
     {
         Name = dto.Name;
         AllowedNames = dto.AllowedNames.Disjoin();
         Id = dto.Id;
+        CountryId = dto.CountryId;
     }
 }

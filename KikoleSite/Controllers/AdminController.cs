@@ -370,6 +370,7 @@ public class AdminController : KikoleBaseController
                 AlternativeName2 = names.Count > 2 ? names[2] : null,
                 AlternativeName3 = names.Count > 3 ? names[3] : null,
                 AlternativeName4 = names.Count > 4 ? names[4] : null,
+                Country = club.CountryId.ToString(),
                 Id = clubId
             };
 
@@ -400,10 +401,21 @@ public class AdminController : KikoleBaseController
 
         var allowedNames = names.OfType<string>().Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToArray();
 
+        var countries = await GetCountriesAsync();
+
+        if (model.Country == null
+            || !ulong.TryParse(model.Country, out var countryId)
+            || !countries.Any(c => countryId == c.Key))
+        {
+            model.ErrorMessage = _localizer["InvalidCountry"];
+            return View("Club", model);
+        }
+
         var request = new ClubRequest
         {
             Name = model.MainName,
             AllowedNames = allowedNames,
+            CountryId = countryId,
             Id = model.Id
         };
 

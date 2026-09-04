@@ -82,9 +82,16 @@ INSERT INTO badge_translations (badge_id, language_id, description) VALUES
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,
   name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  allowed_names text COLLATE utf8mb4_unicode_ci NOT NULL,
+  country_id bigint(20) UNSIGNED NOT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE club_translations (
+  club_id bigint(20) UNSIGNED NOT NULL,
+  language_id bigint(20) UNSIGNED NOT NULL,
+  priority tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE continents (
@@ -1057,7 +1064,14 @@ ALTER TABLE badge_translations
 
 ALTER TABLE clubs
   ADD PRIMARY KEY (id),
-  ADD UNIQUE KEY name (name);
+  ADD UNIQUE KEY name_country (name, country_id),
+  ADD KEY country_id (country_id) USING BTREE;
+
+ALTER TABLE club_translations
+  ADD PRIMARY KEY (club_id,language_id,priority),
+  ADD KEY language_id (language_id),
+  ADD KEY priority (priority),
+  ADD KEY club_id (club_id) USING BTREE;
 
 ALTER TABLE continents
   ADD PRIMARY KEY (id);

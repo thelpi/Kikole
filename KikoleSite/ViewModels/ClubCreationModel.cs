@@ -18,6 +18,8 @@
 
         public string? AlternativeName4 { get; set; }
 
+        public string? Country { get; set; }
+
         public ulong Id { get; set; }
     }
 }

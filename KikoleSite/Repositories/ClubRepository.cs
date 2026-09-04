@@ -17,6 +17,7 @@ public class ClubRepository : BaseRepository, IClubRepository
                 "clubs",
                 ("name", club.Name),
                 ("allowed_names", club.AllowedNames),
+                ("country_id", club.CountryId),
                 ("creation_date", Clock.Now));
     }
 
@@ -24,12 +25,13 @@ public class ClubRepository : BaseRepository, IClubRepository
     {
         await ExecuteNonQueryAsync(
                 "UPDATE clubs " +
-                "SET name = @name, allowed_names = @allowed_names " +
+                "SET name = @name, allowed_names = @allowed_names, country_id = @country_id " +
                 "WHERE id = @id",
                 new
                 {
                     name = club.Name,
                     allowed_names = club.AllowedNames,
+                    country_id = club.CountryId,
                     id = club.Id
                 });
     }

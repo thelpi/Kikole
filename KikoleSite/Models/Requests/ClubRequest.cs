@@ -13,6 +13,8 @@ public record ClubRequest
 
     public required IReadOnlyList<string> AllowedNames { get; init; }
 
+    public ulong CountryId { get; init; }
+
     internal string? IsValid(IStringLocalizer resources)
     {
         if (string.IsNullOrWhiteSpace(Name))
@@ -30,7 +32,8 @@ public record ClubRequest
         {
             AllowedNames = AllowedNames.SanitizeJoin(Name),
             Name = Name,
-            Id = Id
+            Id = Id,
+            CountryId = CountryId
         };
     }
 }

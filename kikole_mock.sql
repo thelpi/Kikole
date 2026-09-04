@@ -52,19 +52,21 @@ INSERT INTO registration_guids (id, user_id, creation_date) VALUES
 -- ---------------------------------------------------------------- clubs
 -- allowed_names suit le format produit par SanitizeJoin : alias sanitises puis nom sanitise, separes par ';'
 
-INSERT INTO clubs (id, name, allowed_names, creation_date) VALUES
-(1,  'AS Cannes',           'cannes;as cannes',                        '2026-09-01 09:00:00'),
-(2,  'Girondins de Bordeaux', 'bordeaux;girondins de bordeaux',        '2026-09-01 09:00:00'),
-(3,  'Juventus',            'juve;juventus turin;juventus',            '2026-09-01 09:00:00'),
-(4,  'Real Madrid',         'real;real madrid',                        '2026-09-01 09:00:00'),
-(5,  'Brescia',             'brescia calcio;brescia',                  '2026-09-01 09:00:00'),
-(6,  'Inter Milan',         'inter;internazionale;inter milan',        '2026-09-01 09:00:00'),
-(7,  'AC Milan',            'milan;ac milan',                          '2026-09-01 09:00:00'),
-(8,  'New York City FC',    'nycfc;new york city fc',                  '2026-09-01 09:00:00'),
-(9,  'FC Barcelone',        'barca;barcelone;fc barcelone',            '2026-09-01 09:00:00'),
-(10, 'Paris Saint-Germain', 'psg;paris sg;paris saint-germain',        '2026-09-01 09:00:00'),
-(11, 'Manchester United',   'man utd;manchester united',               '2026-09-01 09:00:00'),
-(12, 'Bayern Munich',       'bayern;bayern munich',                    '2026-09-01 09:00:00');
+-- country_id : valeurs de l'enum Countries (77 France, 84 Allemagne, 111 Italie,
+-- 210 Espagne, 235 Royaume-Uni, 236 Etats-Unis)
+INSERT INTO clubs (id, name, allowed_names, country_id, creation_date) VALUES
+(1,  'AS Cannes',           'cannes;as cannes',                        77,  '2026-09-01 09:00:00'),
+(2,  'Girondins de Bordeaux', 'bordeaux;girondins de bordeaux',        77,  '2026-09-01 09:00:00'),
+(3,  'Juventus',            'juve;juventus turin;juventus',            111, '2026-09-01 09:00:00'),
+(4,  'Real Madrid',         'real;real madrid',                        210, '2026-09-01 09:00:00'),
+(5,  'Brescia',             'brescia calcio;brescia',                  111, '2026-09-01 09:00:00'),
+(6,  'Inter Milan',         'inter;internazionale;inter milan',        111, '2026-09-01 09:00:00'),
+(7,  'AC Milan',            'milan;ac milan',                          111, '2026-09-01 09:00:00'),
+(8,  'New York City FC',    'nycfc;new york city fc',                  236, '2026-09-01 09:00:00'),
+(9,  'FC Barcelone',        'barca;barcelone;fc barcelone',            210, '2026-09-01 09:00:00'),
+(10, 'Paris Saint-Germain', 'psg;paris sg;paris saint-germain',        77,  '2026-09-01 09:00:00'),
+(11, 'Manchester United',   'man utd;manchester united',               235, '2026-09-01 09:00:00'),
+(12, 'Bayern Munich',       'bayern;bayern munich',                    84,  '2026-09-01 09:00:00');
 
 
 -- ---------------------------------------------------------------- joueurs du jour
