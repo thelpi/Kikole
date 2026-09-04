@@ -12,6 +12,12 @@
     var redirectUrl = System.Web.HttpUtility.UrlEncode(Context.Request.Path.Value);
     if (Context.Request.QueryString.HasValue)
         redirectUrl = $"{redirectUrl}{System.Web.HttpUtility.UrlEncode(Context.Request.QueryString.Value)}";
+
+    // meme logique que KikoleBaseController.UserId/UserLogin : la vue n'herite pas de ce
+    // controleur de base, donc on relit directement le ClaimsPrincipal ambiant.
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isLoggedIn = ulong.TryParse(userIdClaim, out var currentUserId) && currentUserId > 0;
+    var currentUserLogin = User.Identity?.Name;
 }
 <!DOCTYPE html>
 <html>
@@ -39,18 +45,110 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 <body data-lang="@(isEnglish ? "en" : "fr")">
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <a style="padding: 15px 13px" asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">@localizer["SiteName"]</a>
-                <a style="padding: 15px 13px" asp-area="" asp-controller="Account" asp-action="Index" class="navbar-brand">@localizer["Account"]</a>
-                <a style="padding: 15px 13px" asp-area="" asp-controller="Leaderboard" asp-action="Index" class="navbar-brand">@localizer["Leaderboard"]</a>
-                <a style="padding: 15px 12px" href="/Home/SwitchLang?redirect=@redirectUrl" class="navbar-brand">
-                    <img style="width: 25px; height: 25px" src="@flagPath" />
+    <header class="site-nav">
+        <div class="site-nav-inner">
+            <a class="site-nav-brand" asp-area="" asp-controller="Home" asp-action="Index">@localizer["SiteName"]</a>
+
+            <div class="site-nav-links">
+                <a class="site-nav-icon" asp-area="" asp-controller="Leaderboard" asp-action="Index"
+                   title="@localizer["Leaderboard"]" aria-label="@localizer["Leaderboard"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" /><path d="M7 5H4a3 3 0 0 0 3 4" /><path d="M17 5h3a3 3 0 0 1-3 4" /><path d="M12 12v3" /><path d="M9 19h6" /><path d="M12 15v4" />
+                    </svg>
+                </a>
+                @if (isLoggedIn)
+                {
+                    <a class="site-nav-icon" asp-area="" asp-controller="Account" asp-action="Index"
+                       title="@localizer["Account"]" aria-label="@localizer["Account"]">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="3.4" /><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" />
+                        </svg>
+                    </a>
+                }
+            </div>
+
+            <div class="site-nav-right">
+                @if (isLoggedIn)
+                {
+                    <span class="site-nav-user">@currentUserLogin</span>
+                    <form method="post" action="/Account" class="site-nav-logout-form">
+                        <button type="submit" name="submit-logoff" class="site-nav-icon-btn site-nav-logout"
+                                title="@localizer["LogOut"]" aria-label="@localizer["LogOut"]">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 4h4v16h-4" /><path d="M4 12h11" /><path d="M11.5 8.5 15 12l-3.5 3.5" />
+                            </svg>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a class="site-nav-login" asp-area="" asp-controller="Account" asp-action="Index">@localizer["LogIn"]</a>
+                }
+                <a class="site-nav-icon-btn site-nav-flag" href="/Home/SwitchLang?redirect=@redirectUrl"
+                   title="@(isEnglish ? "Passer en français" : "Switch to English")">
+                    <img src="@flagPath" alt="" />
                 </a>
             </div>
+
+            <button type="button" class="site-nav-burger" id="siteNavBurger" aria-label="Menu" aria-expanded="false" aria-controls="siteNavDrawer">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-    </nav>
+
+        <div class="site-nav-drawer" id="siteNavDrawer">
+            <div class="site-nav-drawer-inner">
+                <a class="site-nav-drawer-row" asp-area="" asp-controller="Home" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 11.5 12 5l8 6.5" /><path d="M6 10v9h12v-9" /><path d="M10 19v-5h4v5" />
+                    </svg>
+                    @localizer["Home"]
+                </a>
+                <a class="site-nav-drawer-row" asp-area="" asp-controller="Leaderboard" asp-action="Index">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" /><path d="M7 5H4a3 3 0 0 0 3 4" /><path d="M17 5h3a3 3 0 0 1-3 4" /><path d="M12 12v3" /><path d="M9 19h6" /><path d="M12 15v4" />
+                    </svg>
+                    @localizer["Leaderboard"]
+                </a>
+                @if (isLoggedIn)
+                {
+                    <a class="site-nav-drawer-row" asp-area="" asp-controller="Account" asp-action="Index">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="3.4" /><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" />
+                        </svg>
+                        @localizer["Account"]
+                    </a>
+                }
+                <div class="site-nav-drawer-foot">
+                    @if (isLoggedIn)
+                    {
+                        <span class="site-nav-user">@currentUserLogin</span>
+                        <div class="site-nav-drawer-foot-actions">
+                            <a class="site-nav-icon-btn site-nav-flag" href="/Home/SwitchLang?redirect=@redirectUrl"
+                               title="@(isEnglish ? "Passer en français" : "Switch to English")">
+                                <img src="@flagPath" alt="" />
+                            </a>
+                            <form method="post" action="/Account">
+                                <button type="submit" name="submit-logoff" class="site-nav-icon-btn site-nav-logout"
+                                        title="@localizer["LogOut"]" aria-label="@localizer["LogOut"]">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 4h4v16h-4" /><path d="M4 12h11" /><path d="M11.5 8.5 15 12l-3.5 3.5" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="site-nav-login" asp-area="" asp-controller="Account" asp-action="Index">@localizer["LogIn"]</a>
+                        <a class="site-nav-icon-btn site-nav-flag" href="/Home/SwitchLang?redirect=@redirectUrl"
+                           title="@(isEnglish ? "Passer en français" : "Switch to English")">
+                            <img src="@flagPath" alt="" />
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </header>
 
     <div class="container body-content">
         @RenderBody()

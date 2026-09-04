@@ -71,6 +71,11 @@ public class AccountController : KikoleBaseController
         if (submitFrom == "logoff")
         {
             await _signInManager.SignOutAsync();
+            // SignOutAsync ne rafraichit pas HttpContext.User pour la reponse en cours
+            // (seul le cookie change, pris en compte a la prochaine requete) : sans ca,
+            // le menu de _Layout afficherait encore l'utilisateur comme connecte sur
+            // cette meme page.
+            HttpContext.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
             model = new AccountModel();
         }
         else if (submitFrom == "login" || model.ForceLoginAction)

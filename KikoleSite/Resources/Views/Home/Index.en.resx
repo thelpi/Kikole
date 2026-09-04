@@ -153,9 +153,6 @@
   <data name="FinalScore" xml:space="preserve">
     <value>Your final score: &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt; points.</value>
   </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>You are logged as</value>
-  </data>
   <data name="NationalityTitle" xml:space="preserve">
     <value>Sporting nationality:</value>
   </data>

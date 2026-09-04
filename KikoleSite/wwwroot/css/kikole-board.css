@@ -1,6 +1,7 @@
 /* Habillage "dossier de scout" de la page de jeu (Views/Home/Index.cshtml).
-   Scope : tout sous .kikole-board, sauf les tokens (:root, globaux et sans risque)
-   et .ui-autocomplete / .ui-datepicker (widgets jQuery UI attaches en enfant direct
+   Scope : tout sous .kikole-board, sauf les tokens (:root, globaux et sans risque),
+   .site-nav (chrome globale de _Layout.cshtml, presente sur toutes les pages) et
+   .ui-autocomplete / .ui-datepicker (widgets jQuery UI attaches en enfant direct
    de <body>, impossible a scoper autrement). Voir
    C:\Users\LPI\.claude\plans\linear-pondering-wind.md. */
 
@@ -24,6 +25,199 @@
   --board-accent: #dfb04c;
 }
 
+/* ---------------------------------------------------------- navigation globale
+   Chrome de _Layout.cshtml, presente sur toutes les pages (pas seulement sous
+   .kikole-board) : remplace l'ancienne navbar Bootstrap fixe. */
+
+body { padding-top: 0; }
+
+.site-nav {
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  background: var(--board-bg);
+  color: var(--board-fg);
+  box-sizing: border-box;
+}
+
+.site-nav * { box-sizing: border-box; }
+
+.site-nav-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 18px;
+  height: 52px;
+}
+
+.site-nav-brand {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--board-fg);
+  text-decoration: none;
+  flex: none;
+}
+
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--board-fg) 20%, transparent);
+}
+
+.site-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav-icon,
+.site-nav-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--board-fg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.site-nav-icon svg,
+.site-nav-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.site-nav-icon:hover,
+.site-nav-icon-btn:hover {
+  background: color-mix(in srgb, var(--board-fg) 12%, transparent);
+}
+
+.site-nav-logout-form { display: contents; }
+
+.site-nav-logout:hover {
+  background: color-mix(in srgb, var(--stamp) 55%, transparent);
+}
+
+.site-nav-flag img {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+}
+
+.site-nav-user {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--board-fg) 80%, transparent);
+}
+
+.site-nav-login {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--board-accent);
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--board-accent) 55%, transparent);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.site-nav-login:hover {
+  background: color-mix(in srgb, var(--board-accent) 15%, transparent);
+}
+
+.site-nav-burger {
+  display: none;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.site-nav-burger:hover { background: color-mix(in srgb, var(--board-fg) 12%, transparent); }
+
+.site-nav-burger span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  background: var(--board-fg);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.site-nav-burger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.site-nav-burger.open span:nth-child(2) { opacity: 0; }
+.site-nav-burger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.site-nav-drawer {
+  display: none;
+  max-height: 0;
+  overflow: hidden;
+  background: var(--paper-raised);
+  transition: max-height 0.25s ease;
+}
+
+.site-nav-drawer.open { max-height: 320px; }
+
+.site-nav-drawer-inner { padding: 8px 18px 14px; }
+
+.site-nav-drawer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-nav-drawer-row:hover { color: var(--pitch-strong); }
+
+.site-nav-drawer-row svg {
+  width: 17px;
+  height: 17px;
+  color: var(--pitch);
+  flex: none;
+}
+
+.site-nav-drawer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+
+.site-nav-drawer-foot .site-nav-user { color: var(--ink-soft); }
+.site-nav-drawer-foot .site-nav-icon-btn { color: var(--pitch-strong); }
+.site-nav-drawer-foot .site-nav-icon-btn:hover { background: var(--pitch-soft); }
+.site-nav-drawer-foot .site-nav-logout:hover { background: var(--stamp-soft); color: var(--stamp); }
+.site-nav-drawer-foot-actions { display: flex; align-items: center; gap: 4px; }
+
+@media (max-width: 680px) {
+  .site-nav-links,
+  .site-nav-right { display: none; }
+  .site-nav-burger { display: inline-flex; }
+  .site-nav-drawer { display: block; }
+}
+
 .kikole-board {
   font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
   color: var(--ink);
@@ -41,7 +235,7 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 22px;
 }
 
 .kikole-board .day-nav {
@@ -77,14 +271,6 @@
   outline: none;
   border-bottom: 1px solid var(--pitch);
 }
-
-.kikole-board .logged-as {
-  font-size: 11px;
-  color: var(--ink-soft);
-  margin: 2px 0 20px;
-}
-
-.kikole-board .logged-as strong { color: var(--pitch-strong); }
 
 .kikole-board .scoreboard {
   background: var(--board-bg);
@@ -137,7 +323,7 @@
 .kikole-board .creator-line {
   font-size: 12px;
   color: var(--ink-soft);
-  margin: -6px 0 14px;
+  margin: -8px 0 14px;
 }
 
 /* ---------------------------------------------------------- dossier card */

@@ -6,6 +6,14 @@
     }
 });
 
+/* burger menu (nav globale, toutes les pages) */
+$(function () {
+    $("#siteNavBurger").on("click", function () {
+        var open = $("#siteNavDrawer").toggleClass("open").hasClass("open");
+        $(this).toggleClass("open", open).attr("aria-expanded", open ? "true" : "false");
+    });
+});
+
 var loadKikolesStats = function (sort, desc) {
     $.ajax({
         url: '/kikoles-stats?sort=' + sort + '&desc=' + desc,

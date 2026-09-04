@@ -61,7 +61,6 @@
                 <div class="value">@Model.Points</div>
             </div>
         </div>
-        <div class="logged-as">@localizer["LoggedAs"] <strong>@Model.LoggedAs</strong></div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))
         {
             <div class="creator-line">@Html.Raw(string.Format(localizer["SubmittedBy"].Value, Model.PlayerCreator))</div>
