@@ -77,7 +77,7 @@ public class AdminController : KikoleBaseController
                 break;
             case "recomputeleaders":
                 await _leaderService
-                    .ComputeMissingLeadersAsync();
+                    .ComputeMissingLeadersAsync(await _internationalService.GetCountryContinentsAsync());
                 break;
             case "reassignplayers":
                 await _playerService
@@ -480,7 +480,7 @@ public class AdminController : KikoleBaseController
 
     private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
     {
-        var pls = await _playerService.GetPlayerSubmissionsAsync();
+        var pls = await _playerService.GetPlayerSubmissionsAsync(await _internationalService.GetCountryContinentsAsync());
 
         var countries = await GetCountriesAsync();
 

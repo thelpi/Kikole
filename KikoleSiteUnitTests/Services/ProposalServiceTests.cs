@@ -176,7 +176,6 @@ public class ProposalServiceGrantTests
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
-    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly ProposalService _service;
 
     public ProposalServiceGrantTests()
@@ -202,14 +201,11 @@ public class ProposalServiceGrantTests
         var clock = new Mock<IClock>();
         clock.Setup(_ => _.Today).Returns(Day);
 
-        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
-
         _service = new ProposalService(
             _proposalRepository.Object,
             _leaderRepository.Object,
             _userRepository.Object,
             _playerHandler.Object,
-            _internationalService.Object,
             localizer.Object,
             clock.Object);
     }

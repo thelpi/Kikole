@@ -21,7 +21,6 @@ public class PlayerService : IPlayerService
     private readonly IPlayerRepository _playerRepository;
     private readonly IUserRepository _userRepository;
     private readonly ILeaderRepository _leaderRepository;
-    private readonly IInternationalService _internationalService;
     private readonly IClock _clock;
     private readonly IGameCalendar _gameCalendar;
     private readonly Random _randomizer;
@@ -33,7 +32,6 @@ public class PlayerService : IPlayerService
     /// <param name="playerRepository">Instance of <see cref="IPlayerRepository"/>.</param>
     /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
     /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
-    /// <param name="internationalService">Instance of <see cref="IInternationalService"/>.</param>
     /// <param name="clock">Clock service.</param>
     /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
     /// <param name="randomizer">Randomizer.</param>
@@ -41,7 +39,6 @@ public class PlayerService : IPlayerService
         IPlayerRepository playerRepository,
         IUserRepository userRepository,
         ILeaderRepository leaderRepository,
-        IInternationalService internationalService,
         IClock clock,
         IGameCalendar gameCalendar,
         Random randomizer)
@@ -50,7 +47,6 @@ public class PlayerService : IPlayerService
         _playerRepository = playerRepository;
         _userRepository = userRepository;
         _leaderRepository = leaderRepository;
-        _internationalService = internationalService;
         _clock = clock;
         _gameCalendar = gameCalendar;
         _randomizer = randomizer;
@@ -191,7 +187,7 @@ public class PlayerService : IPlayerService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync()
+    public async Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var dtos = await _playerRepository
             .GetPendingValidationPlayersAsync();
@@ -204,8 +200,6 @@ public class PlayerService : IPlayerService
                 ?? throw new InvalidOperationException($"Le createur {usrId} d'une soumission en attente est introuvable.");
             users.Add(usrId, user);
         }
-
-        var countryContinents = await _internationalService.GetCountryContinentsAsync();
 
         var players = new List<Player>(dtos.Count);
         foreach (var p in dtos)

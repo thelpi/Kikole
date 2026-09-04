@@ -222,6 +222,8 @@ public class HomeController : KikoleBaseController
         var pInfo = await _playerService
             .GetPlayerOfTheDayFullInfoAsync(_clock.Today.AddDays(-daysBefore));
 
+        var countryContinents = await _internationalService.GetCountryContinentsAsync();
+
         var ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
         ProposalResponse response;
@@ -242,7 +244,8 @@ public class HomeController : KikoleBaseController
                     .ManageProposalResponseAsync(
                         innerPr,
                         UserId,
-                        pInfo);
+                        pInfo,
+                        countryContinents);
 
                 response = responseTmp;
             }
@@ -261,7 +264,8 @@ public class HomeController : KikoleBaseController
                 .ManageProposalResponseAsync(
                     pr,
                     UserId,
-                    pInfo);
+                    pInfo,
+                    countryContinents);
 
             // no badges management in case of giveup
         }
@@ -277,7 +281,7 @@ public class HomeController : KikoleBaseController
             };
 
             var (responseTmp, proposalsAlready, leader) = await _proposalService
-                .ManageProposalResponseAsync(request, UserId, pInfo);
+                .ManageProposalResponseAsync(request, UserId, pInfo, countryContinents);
 
             response = responseTmp;
 
@@ -365,7 +369,7 @@ public class HomeController : KikoleBaseController
             else
             {
                 var proposals = await _proposalService
-                    .GetProposalsAsync(proposalDate, UserId);
+                    .GetProposalsAsync(proposalDate, UserId, await _internationalService.GetCountryContinentsAsync());
 
                 var countries = await GetCountriesAsync();
 

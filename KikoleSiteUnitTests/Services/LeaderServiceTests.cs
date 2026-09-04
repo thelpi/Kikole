@@ -25,7 +25,6 @@ public class LeaderServiceTests
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
-    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
@@ -35,7 +34,6 @@ public class LeaderServiceTests
         _clock.Setup(_ => _.Today).Returns(Day);
         _clock.Setup(_ => _.Yesterday).Returns(Day.AddDays(-1));
         _clock.Setup(_ => _.FirstOfMonth).Returns(new DateTime(Day.Year, Day.Month, 1));
-        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
 
         var localizer = new Mock<IStringLocalizer<Translations>>();
         localizer.Setup(_ => _[It.IsAny<string>()])
@@ -54,8 +52,7 @@ public class LeaderServiceTests
             _clock.Object,
             _gameCalendar.Object,
             localizer.Object,
-            _playerHandler.Object,
-            _internationalService.Object);
+            _playerHandler.Object);
     }
 
     private void SetupUsers(params (ulong id, string login)[] users)
@@ -260,7 +257,7 @@ public class LeaderServiceTests
             Proposal(ProposalTypes.Club, false, 10),     // -50
             Proposal(ProposalTypes.Name, true, 90));
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l =>
@@ -277,7 +274,7 @@ public class LeaderServiceTests
             Proposal(ProposalTypes.Name, true, 30),
             Proposal(ProposalTypes.Club, false, 60));
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 1000)), Times.Once);
@@ -292,7 +289,7 @@ public class LeaderServiceTests
             Proposal(ProposalTypes.Name, false, 7),
             Proposal(ProposalTypes.Name, true, 8));
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 0)), Times.Once);
@@ -303,7 +300,7 @@ public class LeaderServiceTests
     {
         SetupMissingLeader(Proposal(ProposalTypes.Club, false, 5));
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.IsAny<LeaderDto>()), Times.Never);
@@ -314,7 +311,7 @@ public class LeaderServiceTests
     {
         SetupMissingLeader(ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(61).AddSeconds(30)).Build());
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Time == 62)), Times.Once);
@@ -329,7 +326,7 @@ public class LeaderServiceTests
             Proposal(ProposalTypes.Clue, true, 5),        // -50 %
             Proposal(ProposalTypes.Name, true, 90));
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 500)), Times.Once);
@@ -342,7 +339,7 @@ public class LeaderServiceTests
             Proposal(ProposalTypes.Leaderboard, true, 5),  // -25
             Proposal(ProposalTypes.Name, true, 90));
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == 975)), Times.Once);
@@ -376,7 +373,7 @@ public class LeaderServiceTests
         ScoreCalculator.GetProposalResponsesWithPoints(
             proposals, playerInfo, out var livePoints, localizer.Object, TestCountryContinents.Map);
 
-        await _service.ComputeMissingLeadersAsync();
+        await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
         _leaderRepository.Verify(
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == livePoints)), Times.Once);
@@ -406,7 +403,7 @@ public class LeaderServiceTests
         SetupUsers((1, "trouveur"), (5, "createur"));
         SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5);
 
-        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
 
         var creator = result.Leaders.Single(_ => _.IsCreator);
         creator.UserName.Should().Be("createur");
@@ -420,7 +417,7 @@ public class LeaderServiceTests
         SetupUsers((1, "trouveur"), (5, "createur"));
         SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5);
 
-        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
 
         result.Leaders.Single(_ => _.IsCreator).Rank.Should().Be(1);
         result.Leaders.Single(_ => !_.IsCreator).Rank.Should().Be(2);
@@ -438,7 +435,7 @@ public class LeaderServiceTests
             },
             creatorId: 5);
 
-        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
 
         result.Searchers.Should().ContainSingle();
         result.Searchers.Single().UserName.Should().Be("chercheur");
@@ -458,7 +455,7 @@ public class LeaderServiceTests
             },
             creatorId: 5);
 
-        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints);
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
 
         result.Searchers.Should().BeEmpty();
     }
@@ -470,7 +467,7 @@ public class LeaderServiceTests
         SetupDayboard(new List<LeaderDto>(), new List<ProposalDto>(), creatorId: 5);
 
         var result = await _service
-            .GetDayboardAsync(Day.AddHours(15), DayLeaderSorts.BestTime);
+            .GetDayboardAsync(Day.AddHours(15), DayLeaderSorts.BestTime, TestCountryContinents.Map);
 
         result.Date.Should().Be(Day);
         result.Sort.Should().Be(DayLeaderSorts.BestTime);

@@ -57,8 +57,9 @@ public interface IPlayerService
     /// <summary>
     /// Gets pending player submissions.
     /// </summary>
+    /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent de chaque joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Collection of <see cref="Player"/>.</returns>
-    Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync();
+    Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Valides a player submission.

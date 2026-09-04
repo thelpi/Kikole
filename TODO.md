@@ -349,10 +349,21 @@ les hachages de toute façon.
   paramètre, la correspondance `country_id → continent_id`
   (`InternationalService.GetCountryContinentsAsync`, cache dédié car indépendant de la
   langue contrairement à `GetCountriesAsync`/`GetContinentsAsync`) suit le même principe :
-  chargée une fois puis **passée en paramètre**, plutôt qu'injectée comme dépendance dans
-  des classes qui n'en ont pas aujourd'hui. `PlayerService`/`ProposalService`/
-  `LeaderService` (les 3 seuls points de construction de `Player`/`ProposalResponse` dans
-  tout le projet) l'injectent et la transmettent.
+  chargée une fois puis **passée en paramètre**.
+
+  **Premier jet erroné, corrigé en repassant derrière** : `IInternationalService` avait
+  été injecté directement dans `PlayerService`/`ProposalService`/`LeaderService` pour
+  aller chercher cette correspondance elles-mêmes — un couplage service → service que le
+  projet avait justement pris soin d'éviter jusqu'ici (voir la fusion
+  `ScoreCalculator`/`ProposalChart` plus bas, motivée par le même principe : le seul
+  couplage service → service du projet passait par un contournement en appel statique,
+  précisément parce qu'un service ne doit pas dépendre d'un autre). Corrigé : les 3
+  services ne connaissent plus `IInternationalService` du tout ; `GetPlayerSubmissionsAsync`,
+  `GetProposalsAsync`, `ManageProposalResponseAsync`, `ComputeMissingLeadersAsync` et
+  `GetDayboardAsync` reçoivent désormais `countryContinents` en paramètre, résolu par
+  l'appelant — toujours un contrôleur, qui a déjà `IInternationalService` via
+  `KikoleBaseController`. Seuls des contrôleurs consomment `IInternationalService`, comme
+  avant ce chantier.
 
   Deviner le continent du pays **ou** du pays alternatif valide la proposition — même
   principe que `alternative_country_id` pour le pays — et les deux s'affichent au reveal

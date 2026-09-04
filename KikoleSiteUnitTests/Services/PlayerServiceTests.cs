@@ -25,7 +25,6 @@ public class PlayerServiceTests
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
-    private readonly Mock<IInternationalService> _internationalService = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly PlayerService _service;
@@ -34,14 +33,12 @@ public class PlayerServiceTests
     {
         _clock.Setup(_ => _.Today).Returns(FirstDate);
         _clock.Setup(_ => _.Tomorrow).Returns(FirstDate.AddDays(1));
-        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
 
         _service = new PlayerService(
             _playerHandler.Object,
             _playerRepository.Object,
             _userRepository.Object,
             _leaderRepository.Object,
-            _internationalService.Object,
             _clock.Object,
             _gameCalendar.Object,
             new Random(1));
@@ -607,7 +604,7 @@ public class PlayerServiceTests
     {
         SetupPendingSubmissions();
 
-        (await _service.GetPlayerSubmissionsAsync()).Should().BeEmpty();
+        (await _service.GetPlayerSubmissionsAsync(TestCountryContinents.Map)).Should().BeEmpty();
     }
 
     [Fact]
@@ -615,7 +612,7 @@ public class PlayerServiceTests
     {
         SetupPendingSubmissions((1, 42), (2, 43));
 
-        var result = await _service.GetPlayerSubmissionsAsync();
+        var result = await _service.GetPlayerSubmissionsAsync(TestCountryContinents.Map);
 
         result.Should().HaveCount(2);
         result.Select(p => p.Id).Should().BeEquivalentTo(new ulong[] { 1, 2 });
@@ -629,7 +626,7 @@ public class PlayerServiceTests
         // en revanche une requete par joueur pour la carriere (cf. N+1 dans le TODO)
         SetupPendingSubmissions((1, 42), (2, 42), (3, 42));
 
-        var result = await _service.GetPlayerSubmissionsAsync();
+        var result = await _service.GetPlayerSubmissionsAsync(TestCountryContinents.Map);
 
         result.Should().HaveCount(3);
         _userRepository.Verify(_ => _.GetUserByIdAsync(42), Times.Once);

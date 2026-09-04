@@ -23,7 +23,6 @@ public class ProposalService : IProposalService
     private readonly ILeaderRepository _leaderRepository;
     private readonly IUserRepository _userRepository;
     private readonly IPlayerHandler _playerHandler;
-    private readonly IInternationalService _internationalService;
     private readonly IStringLocalizer<Translations> _resources;
     private readonly IClock _clock;
 
@@ -34,14 +33,12 @@ public class ProposalService : IProposalService
     /// <param name="leaderRepository">Instance of <see cref="ILeaderRepository"/>.</param>
     /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
     /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
-    /// <param name="internationalService">Instance of <see cref="IInternationalService"/>.</param>
     /// <param name="resources">Translation resources.</param>
     /// <param name="clock">Clock service.</param>
     public ProposalService(IProposalRepository proposalRepository,
         ILeaderRepository leaderRepository,
         IUserRepository userRepository,
         IPlayerHandler playerHandler,
-        IInternationalService internationalService,
         IStringLocalizer<Translations> resources,
         IClock clock)
     {
@@ -49,13 +46,13 @@ public class ProposalService : IProposalService
         _leaderRepository = leaderRepository;
         _userRepository = userRepository;
         _playerHandler = playerHandler;
-        _internationalService = internationalService;
         _resources = resources;
         _clock = clock;
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId)
+    public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var datas = await _proposalRepository
             .GetProposalsAsync(proposalDate, userId);
@@ -66,8 +63,6 @@ public class ProposalService : IProposalService
             var pInfo = await _playerHandler
                 .GetPlayerOfTheDayFullInfoAsync(proposalDate);
 
-            var countryContinents = await _internationalService.GetCountryContinentsAsync();
-
             r = ScoreCalculator.GetProposalResponsesWithPoints(datas, pInfo, out _, _resources, countryContinents);
         }
 
@@ -75,11 +70,10 @@ public class ProposalService : IProposalService
     }
 
     /// <inheritdoc />
-    public async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo)
+    public async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         LeaderDto? leader = null;
-
-        var countryContinents = await _internationalService.GetCountryContinentsAsync();
 
         var response = new ProposalResponse(request, pInfo, _resources, countryContinents);
 

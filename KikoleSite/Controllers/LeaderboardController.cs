@@ -196,11 +196,13 @@ public class LeaderboardController : KikoleBaseController
         if (player.Player.CreationUserId == userId)
             return RedirectToAction("ErrorIndex", "Home");
 
+        var countryContinents = await _internationalService.GetCountryContinentsAsync();
+
         var db = await _leaderService
-            .GetDayboardAsync(actualDate.Date, DayLeaderSorts.BestTime);
+            .GetDayboardAsync(actualDate.Date, DayLeaderSorts.BestTime, countryContinents);
 
         var proposals = await _proposalService
-            .GetProposalsAsync(actualDate.Date, userId);
+            .GetProposalsAsync(actualDate.Date, userId, countryContinents);
 
         var items = new List<UserDayItemModel>(proposals.Count);
         foreach (var proposal in proposals)
@@ -314,7 +316,7 @@ public class LeaderboardController : KikoleBaseController
         else
         {
             dayboard = await _leaderService
-                .GetDayboardAsync(date, sortType);
+                .GetDayboardAsync(date, sortType, await _internationalService.GetCountryContinentsAsync());
         }
 
         return (dayboard, todayGrantEnsured);

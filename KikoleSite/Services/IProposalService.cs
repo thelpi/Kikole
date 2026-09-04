@@ -19,16 +19,20 @@ public interface IProposalService
     /// <param name="request">Proposal request.</param>
     /// <param name="userId">User idenfifier.</param>
     /// <param name="pInfo">Information about the player of the request.</param>
+    /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent du joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Instance of <see cref="ProposalResponse"/>, proposals already made and leader info in case of win.</returns>
-    Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo);
+    Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo,
+        IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Gets proposals for a specific date and user.
     /// </summary>
     /// <param name="proposalDate">Proposal date.</param>
     /// <param name="userId">User identifier.</param>
+    /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent du joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Collection of proposals.</returns>
-    Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId);
+    Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId,
+        IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Checks grant access of a user for the specified day.

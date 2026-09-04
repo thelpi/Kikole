@@ -25,8 +25,9 @@ public interface ILeaderService
     /// </summary>
     /// <param name="day">The day.</param>
     /// <param name="sort">Sort for leaders.</param>
+    /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent du joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Day board.</returns>
-    Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort);
+    Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort, IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Get user statistics.
@@ -41,8 +42,9 @@ public interface ILeaderService
     /// <summary>
     /// Computes missing leaders (administration tool).
     /// </summary>
+    /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent du joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Nothing.</returns>
-    Task ComputeMissingLeadersAsync();
+    Task ComputeMissingLeadersAsync(IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Gets palmares.
