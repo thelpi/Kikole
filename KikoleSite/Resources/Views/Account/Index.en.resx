@@ -172,10 +172,10 @@
     <value>Registration id:</value>
   </data>
   <data name="TipRecovery" xml:space="preserve">
-    <value>Fields below are optionnal, but if you lose your password, the answer to this question might save you!</value>
+    <value>Fields below are optional, but if you lose your password, the answer to this question might save you!</value>
   </data>
   <data name="TipRegistrationId" xml:space="preserve">
-    <value>You can't register without this id (formated as XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)</value>
+    <value>You can't register without this id (formatted as XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)</value>
   </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>

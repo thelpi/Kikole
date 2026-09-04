@@ -159,16 +159,16 @@
     <value>Asking for a second clue costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
   </data>
   <data name="GetLeaderboard" xml:space="preserve">
-    <value>Asking for a view no the daily leaderboard costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>Asking for a view of the daily leaderboard costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="GoodGuess" xml:space="preserve">
     <value>A good guess on any category costs &lt;span class="greentext" style="font-size: large"&gt;no points&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
-    <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikole?"&lt;/span&gt; is a game where you have to guess a new football player &lt;span class="redtext"&gt;every day&lt;/span&gt;.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikolé?"&lt;/span&gt; is a game where you have to guess a new football player &lt;span class="redtext"&gt;every day&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;Your opponents have the same player to guess, so be the best and you'll appear on our &lt;a href="/Leaderboard"&gt;leaderboard&lt;/a&gt;!&lt;/p&gt;
 &lt;p&gt;To find the player of the day, you can suggest his position, nationality, clubs or birth year. A starter clue is also given.&lt;/p&gt;
-&lt;p&gt;Notice that the player can be active or retired, moreover feminine players are possible but quite rare.&lt;/p&gt;
+&lt;p&gt;Notice that the player can be active or retired, moreover female players are possible but quite rare.&lt;/p&gt;
 &lt;p&gt;Fictional players (movies and such) are disallowed.&lt;/p&gt;
 &lt;p&gt;In case of technical issue, complaint or to suggest a player (another way to gain points), please &lt;a href="/Home/Contact"&gt;contact me&lt;/a&gt; (authentication required).&lt;/p&gt;</value>
   </data>
@@ -179,6 +179,6 @@
     <value>You start with &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="SubmissionPoints" xml:space="preserve">
-    <value>If one of your kikole submission is accepted, you'll win &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points that day.</value>
+    <value>If one of your kikolé submissions is accepted, you'll win &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points that day.</value>
   </data>
 </root>

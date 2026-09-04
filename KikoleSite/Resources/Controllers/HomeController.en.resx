@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AuthenticationRequired" xml:space="preserve">
-    <value>You must be authenticated and having the required permissions to do this action.</value>
+    <value>You must be authenticated and have the required permissions to do this action.</value>
   </data>
   <data name="InvalidEmail" xml:space="preserve">
     <value>The email is empty.</value>

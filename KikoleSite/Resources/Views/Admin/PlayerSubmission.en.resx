@@ -169,7 +169,7 @@
     <value>Position</value>
   </data>
   <data name="RefusePlayer" xml:space="preserve">
-    <value>Refuse the player (reason of reject)</value>
+    <value>Refuse the player (rejection reason)</value>
   </data>
   <data name="SelectPlayer" xml:space="preserve">
     <value>Select a player</value>

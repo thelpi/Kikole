@@ -136,7 +136,7 @@
     <value>ne pas se soucier des accents, ils seront ignorés</value>
   </data>
   <data name="AvoidAmbiguousPos" xml:space="preserve">
-    <value>d'une manière générale, évitez les joueurs avec un positionnement trop ambigüe</value>
+    <value>d'une manière générale, évitez les joueurs avec un positionnement trop ambigu</value>
   </data>
   <data name="CheckSubmittedPlayers" xml:space="preserve">
     <value>Vérifier les joueurs proposés</value>
@@ -169,7 +169,7 @@
     <value>Rester anonyme :</value>
   </data>
   <data name="RemainsAnonymousTip" xml:space="preserve">
-    <value>le jour où le kikolé est joué, votre nom d'utilisateur n'apparaïtra pas</value>
+    <value>le jour où le kikolé est joué, votre nom d'utilisateur n'apparaîtra pas</value>
   </data>
   <data name="SubmitPlayerGo" xml:space="preserve">
     <value>Proposer le joueur</value>

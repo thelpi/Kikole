@@ -136,7 +136,7 @@
     <value>ordered from older to newer</value>
   </data>
   <data name="ClubTipTwo" xml:space="preserve">
-    <value>no duplicate in case the player comes back to a club he already played</value>
+    <value>no duplicate in case the player comes back to a club he already played for</value>
   </data>
   <data name="ComeBackTomorrow" xml:space="preserve">
     <value>Come back tomorrow for a new player!</value>
@@ -190,7 +190,7 @@
     <value>Type the player's name here:</value>
   </data>
   <data name="UseWikiTitle" xml:space="preserve">
-    <value>tip: type the title of the player's english Wiki page</value>
+    <value>tip: type the title of the player's English Wiki page</value>
   </data>
   <data name="YouAreNotLogged" xml:space="preserve">
     <value>You are &lt;a href="/Account"&gt;&lt;span class="redtext"&gt;not logged&lt;/span&gt;&lt;/a&gt;</value>
@@ -199,7 +199,7 @@
     <value>The player of {1} was &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt;.</value>
   </data>
   <data name="AlmostThere" xml:space="preserve">
-    <value>So close ! You're missing something to be at 100%....</value>
+    <value>So close! You're missing something to be at 100%...</value>
   </data>
   <data name="EasyDayClue" xml:space="preserve">
     <value>Easy clue of the day:</value>
@@ -211,7 +211,7 @@
     <value>I need another clue</value>
   </data>
   <data name="CreateClubIsGood" xml:space="preserve">
-    <value>If the lack of a club eliminate some potential players, add it to make the game harder for your opponents !</value>
+    <value>If the lack of a club eliminates some potential players, adding it can make the game harder for your opponents!</value>
   </data>
   <data name="HelpToCreateClub" xml:space="preserve">
     <value>Add a new club to the database</value>

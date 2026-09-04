@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActiveUsers" xml:space="preserve">
-    <value>Users who tried: {0} ({1}% of success)</value>
+    <value>Users who tried: {0} ({1}% success rate)</value>
   </data>
   <data name="ActiveUsersToday" xml:space="preserve">
-    <value>The first day : {0} ({1}% of success)</value>
+    <value>Of which, same day: {0} ({1}% success rate)</value>
   </data>
   <data name="AttemptedHeader" xml:space="preserve">
     <value>Attempted</value>
   </data>
   <data name="BestPlayersMonthCount" xml:space="preserve">
-    <value>Best players of the month by kikoles found</value>
+    <value>Best players of the month by kikolés found</value>
   </data>
   <data name="BestPlayersMonthPoints" xml:space="preserve">
     <value>Best players of the month by points</value>
@@ -148,7 +148,7 @@
     <value>Date:</value>
   </data>
   <data name="EasyKikoleMonth" xml:space="preserve">
-    <value>Easiest kikoles of the month</value>
+    <value>Easiest kikolés of the month</value>
   </data>
   <data name="FoundHeader" xml:space="preserve">
     <value>Found</value>
@@ -163,16 +163,16 @@
     <value>Get ranking</value>
   </data>
   <data name="HardKikoleMonth" xml:space="preserve">
-    <value>Hardest kikoles of the month</value>
+    <value>Hardest kikolés of the month</value>
   </data>
   <data name="HiddenDayboard" xml:space="preserve">
     <value>Today results are hidden!</value>
   </data>
   <data name="KFoundHeader" xml:space="preserve">
-    <value>Kikoles found (created)</value>
+    <value>Kikolés found (created)</value>
   </data>
   <data name="KikolesStatisticsPageLink" xml:space="preserve">
-    <value>Stats about kikoles</value>
+    <value>Stats about kikolés</value>
   </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>

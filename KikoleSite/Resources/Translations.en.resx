@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AlreadyExistsAccount" xml:space="preserve">
-    <value>A account already exists with this login</value>
+    <value>An account already exists with this login</value>
   </data>
   <data name="ClubCreationFailure" xml:space="preserve">
     <value>Club creation failure</value>
@@ -217,7 +217,7 @@
     <value>Unable to set both reject date and publication date</value>
   </data>
   <data name="ResetPasswordError" xml:space="preserve">
-    <value>Error while reseting the password</value>
+    <value>Error while resetting the password</value>
   </data>
   <data name="TipOlderPlayer" xml:space="preserve">
     <value>The player is older</value>

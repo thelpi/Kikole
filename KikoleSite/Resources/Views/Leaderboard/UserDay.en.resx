@@ -133,13 +133,13 @@
     <value>Lost pts</value>
   </data>
   <data name="PlayerOf" xml:space="preserve">
-    <value>Kikole of</value>
+    <value>Kikolé of</value>
   </data>
   <data name="PlayerToFind" xml:space="preserve">
     <value>Player to find</value>
   </data>
   <data name="RemainingPoints" xml:space="preserve">
-    <value>Remain pts</value>
+    <value>Remaining pts</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Type</value>

@@ -139,7 +139,7 @@
     <value>Nom principal (titre page wiki anglais)</value>
   </data>
   <data name="MainNameFr" xml:space="preserve">
-    <value>Nom alternatif (titre page wiki français</value>
+    <value>Nom principal (titre page wiki français)</value>
   </data>
   <data name="SearchAlreadyExists" xml:space="preserve">
     <value>Chercher si le club n'existe pas déjà :</value>

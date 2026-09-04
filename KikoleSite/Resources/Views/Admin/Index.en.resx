@@ -124,13 +124,13 @@
     <value>Add club (open a new tab)</value>
   </data>
   <data name="AdminOverrideClue" xml:space="preserve">
-    <value>might be override by the administrator</value>
+    <value>might be overridden by the administrator</value>
   </data>
   <data name="AlternativeNames" xml:space="preserve">
     <value>Alternative names</value>
   </data>
   <data name="AltNameTip1" xml:space="preserve">
-    <value>at least the last name without the first name, and few alternatives of your choice</value>
+    <value>at least the last name without the first name, and a few alternatives of your choice</value>
   </data>
   <data name="AltNameTip2" xml:space="preserve">
     <value>don't mind diacritics, it will be considered equal</value>
@@ -148,7 +148,7 @@
     <value>in chronological order, senior career only, without B teams</value>
   </data>
   <data name="ClubsTip2" xml:space="preserve">
-    <value>if more than 15 clubs, set the first 15th and the administrator will complete; please create all the club</value>
+    <value>if more than 15 clubs, set the first 15 and the administrator will complete the rest; please create the clubs</value>
   </data>
   <data name="Clue" xml:space="preserve">
     <value>Clue</value>
@@ -169,7 +169,7 @@
     <value>Remains anonymous:</value>
   </data>
   <data name="RemainsAnonymousTip" xml:space="preserve">
-    <value>the day the kikole is played, your username will not appear</value>
+    <value>the day the kikolé is played, your username will not appear</value>
   </data>
   <data name="SubmitPlayerGo" xml:space="preserve">
     <value>Submit the player</value>
@@ -211,7 +211,7 @@
     <value>Continent</value>
   </data>
   <data name="NewChartLaius" xml:space="preserve">
-    <value>&lt;p&gt;If your kikole is accepted by the moderator, he'll be scheduled for the next available day.&lt;/p&gt;
+    <value>&lt;p&gt;If your kikolé is accepted by the moderator, it'll be scheduled for the next available day.&lt;/p&gt;
 &lt;p&gt;On this day, you won't be able to play but you'll win {0} points.&lt;/p&gt;</value>
   </data>
 </root>
