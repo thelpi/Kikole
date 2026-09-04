@@ -130,17 +130,12 @@
     <value>A propos de la nationalité</value>
   </data>
   <data name="AboutCountryDetails" xml:space="preserve">
-    <value>&lt;p&gt;Le jeu ne gère pas la nationalité sportive. Les nationalités proposées sont celles administratives, basées sur &lt;a target="_blank" href="https://fr.wikipedia.org/wiki/ISO_3166-1"&gt;cette norme&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Exemple : la nationalité de Ryan Giggs est "Royaume-Uni" et non pas "Pays de Galles".&lt;/p&gt;
-&lt;p&gt;Il n'y a qu'une seule nationalité possible par joueur. Quand la nationalité sportive correspond avec une des nationalités administratives, elle est utilisée.&lt;/p&gt;
-&lt;p&gt;Il est POSSIBLE, bien que très rare, que le choix soit arbitraire par l'administrateur. Voici quelques cas complexes :&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Edouard Mendy est Sénégalais puis qu'il a choisi cette fédération pour être sélectionné ; ce cas n'est pas litigieux en appliquant la règle ci-dessus.&lt;/li&gt;
-&lt;li&gt;Jean-Claude Darcheville est Français : on peut dire que c'est un choix de l'administrateur, lié au fait que la fédération de Guyane ne soit pas reconnue par la FIFA.&lt;/li&gt;
-&lt;li&gt;Xavi Simons est hollandais : choix de l'administrateur à date, il est encore possible pour lui de faire une sélection A avec l'Espagne.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Enfin, les nationalités n'existant plus sont substituées par les nationalités s'en rapprochant le plus (ce qui peut là encore être arbitraire).&lt;/p&gt;
-&lt;p&gt;Exemple : Lev Yachine est considéré Russe, puisque "Union Soviétique" n'est pas disponible.&lt;/p&gt;</value>
+    <value>&lt;p&gt;La nationalité est celle &lt;strong&gt;sportive&lt;/strong&gt;, pas administrative.&lt;/p&gt;
+&lt;p&gt;Elle correspond donc, dans le cas le plus courant, à la sélection pour laquelle le joueur a joué (exemple : Angleterre pour David Beckham). La liste des pays est &lt;a target="_blank" href="https://fr.wikipedia.org/wiki/Liste_des_codes_pays_de_la_FIFA#Listes_des_codes_pays_actuels_affili%C3%A9s_%C3%A0_la_FIFA"&gt;celle de la FIFA&lt;/a&gt; ; les pays mentionnés comme "non reconnus par la FIFA" sont exclus.&lt;/p&gt;
+&lt;p&gt;Les principales sélections disparues sont également présentes : URSS, ex-Yougoslavie, RDA, Tchécoslovaquie. Cela permet par exemple à Lev Yachine d'avoir sa véritable sélection, même si, dans un tel cas, la nationalité actuelle la plus proche (ici la Russie) reste également autorisée.&lt;/p&gt;
+&lt;p&gt;Note : la RFA n'existe pas en tant que telle (fusionnée avec l'Allemagne), de même que la Serbie-et-Monténégro (fusionnée avec la Serbie).&lt;/p&gt;
+&lt;p&gt;Par ailleurs, si un joueur a représenté deux sélections A différentes — typiquement une disparue, puis son successeur —, les deux sont acceptées. Exemple : Robert Prosinečki, avec l'ex-Yougoslavie et la Croatie.&lt;/p&gt;
+&lt;p&gt;Enfin, cas particulier du précédent : si les deux sélections sont sur des continents différents (exemple : Algérie puis France, ou l'inverse), les deux continents sont également acceptés.&lt;/p&gt;</value>
   </data>
   <data name="BadGuessClub" xml:space="preserve">
     <value>Une proposition incorrecte pour un des clubs coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>

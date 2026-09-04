@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **491** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **493** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -125,20 +125,27 @@ Branche de travail : `remaster-v2`.
         révélation auto du pays vers le continent : deviner le continent du pays **ou**
         du pays alternatif valide la proposition (même principe que pour le pays), les
         deux s'affichent au reveal quand ils diffèrent (`"Amérique du Sud / Europe"`).
-      - [ ] **Reste à faire, non couvert par ce chantier** : la révélation automatique du
-        continent une fois le pays trouvé, et la disparition du champ de proposition
-        Continent correspondant sur la page de jeu (`Views/Home/Index.cshtml`) — le
-        joueur peut aujourd'hui encore deviner le continent indépendamment même après
-        avoir trouvé le pays, ce qui n'est plus qu'un point de confort/cohérence UI, pas
-        un bug de correction (la logique de validation, elle, est bien déduite).
-- [ ] **Réécrire la page de règles (nationalité administrative vs sportive)** — la page
-      d'accueil affirme aujourd'hui explicitement "le jeu ne gère pas la nationalité
-      sportive" (exemple Ryan Giggs = "Royaume-Uni", pas "Pays de Galles"), un principe
-      contredit par la bascule FIFA ci-dessus (Écosse/Galles/Irlande du Nord n'existent
-      qu'au sens sportif, pas administratif). Les cas complexes déjà documentés dans cette
-      page (Mendy, Darcheville, Simons) étaient de toute façon déjà tranchés par logique
-      sportive malgré le chapeau "administratif" — la règle affichée était déjà bancale
-      avant ce chantier. Réécriture actée avec l'utilisateur, pas encore faite.
+      - [x] **Révélation automatique du continent une fois le pays trouvé** — quand une
+        proposition Country réussit, `HomeModel.SetPropertiesFromProposal` déduit
+        directement `ContinentName` (pays + pays alternatif) au lieu d'attendre une
+        proposition Continent séparée. Le champ de saisie sur `Views/Home/Index.cshtml`
+        disparaît par le même `@if (string.IsNullOrWhiteSpace(Model.ContinentName))` que
+        celui déjà utilisé pour le pays — aucun changement de vue nécessaire, seul le
+        modèle change d'état plus tôt. Même code que le chemin « reveal complet »
+        (`HomeController.SetAndGetViewModelAsync`, déjà écrit ainsi).
+- [x] ~~Réécrire la page de règles (nationalité administrative vs sportive)~~ — l'ancien
+      texte affirmait "le jeu ne gère pas la nationalité sportive" (exemple Ryan Giggs =
+      "Royaume-Uni", pas "Pays de Galles"), un principe contredit par la bascule FIFA
+      ci-dessus (Écosse/Galles/Irlande du Nord n'existent qu'au sens sportif, pas
+      administratif). Réécrit entièrement (`AboutCountryDetails`, FR et EN,
+      `Resources/Views/Home/Partial/Rules.*.resx`) : la nationalité affichée est
+      désormais présentée comme sportive dès la première phrase, avec un lien direct vers
+      la liste FIFA, la mention des 4 sélections disparues conservées (URSS, ex-Yougoslavie,
+      RDA, Tchécoslovaquie) et de leurs cas de fusion (RFA, Serbie-et-Monténégro), et les
+      deux cas de double sélection (`alternative_country_id` seul, puis le cas à deux
+      continents différents). Les anciens cas d'arbitrage (Mendy, Darcheville, Simons)
+      disparaissent : ils n'étaient des "cas complexes" que sous l'ancien système
+      administratif, la logique sportive ne laisse plus d'ambiguïté à leur sujet.
 - [x] ~~Ajouter les clés étrangères~~ — 29 relations `_id`, contrainte `RESTRICT` par défaut
       (aucun `ON DELETE`/`ON UPDATE` explicite), voir « Partis pris ».
 - [x] ~~`IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
@@ -385,8 +392,27 @@ les hachages de toute façon.
 
   Deviner le continent du pays **ou** du pays alternatif valide la proposition — même
   principe que `alternative_country_id` pour le pays — et les deux s'affichent au reveal
-  quand ils diffèrent. Non fait : la révélation automatique du continent (et la
-  disparition du champ de proposition correspondant) une fois le pays trouvé — voir §2.
+  quand ils diffèrent.
+
+  **Révélation automatique une fois le pays trouvé.** Trouver le pays révèle aussitôt le
+  continent, sans qu'une proposition Continent séparée soit nécessaire — `HomeModel`
+  reçoit `countryContinents` en plus de `countries`/`continents` (même mécanisme de
+  paramètre que le reste de ce chantier) et le calcule directement dans le cas
+  `ProposalTypes.Country` réussi, avant même qu'un `ProposalTypes.Continent` n'ait été
+  soumis. La vue n'a rien à changer : elle cachait déjà le champ de saisie dès que
+  `ContinentName` est renseigné (`@if (string.IsNullOrWhiteSpace(Model.ContinentName))`,
+  le même motif que pour le pays) — c'est l'état du modèle qui change plus tôt, pas la
+  vue elle-même.
+
+  **Un double (voire triple) appel à `GetCountryContinentsAsync` s'était glissé dans
+  `HomeController`**, repéré après coup : `Index` (POST) le chargeait une fois pour les
+  `ManageProposalResponseAsync`, puis appelait `SetAndGetViewModelAsync`, qui le
+  rechargeait lui-même pour la boucle `SetPropertiesFromProposal`, et une troisième fois
+  si le joueur venait d'être trouvé (bloc reveal complet). Sans conséquence mesurable —
+  `InternationalService` le met en cache après le premier appel — mais contraire au
+  principe « chargé une fois, passé en paramètre » de ce chantier. Corrigé :
+  `SetAndGetViewModelAsync` reçoit désormais `countryContinents` en paramètre, calculé une
+  seule fois par chacun de ses deux appelants (`Index` GET et POST).
 - Barème de soumission à 1 000 points forfaitaires. L'ancien barème dégressif avait été
   abandonné en novembre 2022 ; sa branche morte a été supprimée.
 - Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est

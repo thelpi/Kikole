@@ -35,7 +35,8 @@ public class HomeModelTests
         new Dictionary<ulong, string>
         {
             { (ulong)KikoleSite.Models.Enums.Continents.Europe, "Europe" },
-            { (ulong)KikoleSite.Models.Enums.Continents.Africa, "Afrique" }
+            { (ulong)KikoleSite.Models.Enums.Continents.Africa, "Afrique" },
+            { (ulong)KikoleSite.Models.Enums.Continents.SouthAmerica, "Amérique du Sud" }
         };
 
     private static readonly IReadOnlyDictionary<ulong, string> PositionNames =
@@ -95,7 +96,7 @@ public class HomeModelTests
     private void Apply(HomeModel model, ProposalTypes type, string value, int sourcePoints = 1000, string? easyClue = null)
     {
         model.SetPropertiesFromProposal(
-            Respond(type, value, sourcePoints), Countries, Continents, PositionNames, Clubs, easyClue);
+            Respond(type, value, sourcePoints), Countries, Continents, TestCountryContinents.Map, PositionNames, Clubs, easyClue);
     }
 
     // ------------------------------------------------------------- navigation
@@ -256,9 +257,47 @@ public class HomeModelTests
         var response = new ProposalResponse(request, sammer, _localizer, TestCountryContinents.Map).WithTotalPoints(1000, false);
         var model = new HomeModel();
 
-        model.SetPropertiesFromProposal(response, Countries, Continents, PositionNames, Clubs, null);
+        model.SetPropertiesFromProposal(response, Countries, Continents, TestCountryContinents.Map, PositionNames, Clubs, null);
 
         model.CountryName.Should().Be("Allemagne de l'Est / Allemagne");
+        model.ContinentName.Should().Be("Europe");
+    }
+
+    [Fact]
+    public void FindingTheCountryAutoRevealsItsContinentWithoutASeparateGuess()
+    {
+        var model = new HomeModel();
+
+        Apply(model, ProposalTypes.Country, ((int)KikoleSite.Models.Enums.Countries.FRA).ToString());
+
+        model.ContinentName.Should().Be("Europe");
+        model.IncorrectContinents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void FindingACountryOnTwoContinentsRevealsBothContinents()
+    {
+        var player = new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().WithId(3).WithName("Karim Exemple").WithAllowedNames("karim")
+                .WithCountryId((ulong)KikoleSite.Models.Enums.Countries.BRA)
+                .WithAlternativeCountryId((ulong)KikoleSite.Models.Enums.Countries.FRA)
+                .WithPositionId((ulong)Positions.Midfielder).Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+        var request = new ProposalRequest
+        {
+            Value = ((int)KikoleSite.Models.Enums.Countries.BRA).ToString(),
+            ProposalType = ProposalTypes.Country,
+            ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
+        };
+        var response = new ProposalResponse(request, player, _localizer, TestCountryContinents.Map).WithTotalPoints(1000, false);
+        var model = new HomeModel();
+
+        model.SetPropertiesFromProposal(response, Countries, Continents, TestCountryContinents.Map, PositionNames, Clubs, null);
+
+        model.ContinentName.Should().Be("Amérique du Sud / Europe");
     }
 
     [Fact]

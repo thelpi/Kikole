@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Configuration;
@@ -182,7 +183,8 @@ public class HomeController : KikoleBaseController
 
         return await SetAndGetViewModelAsync(
                 errorMessageForced,
-                model
+                model,
+                await _internationalService.GetCountryContinentsAsync()
             );
     }
 
@@ -318,7 +320,8 @@ public class HomeController : KikoleBaseController
 
         return await SetAndGetViewModelAsync(
                 null,
-                model);
+                model,
+                countryContinents);
     }
 
     private static bool IsValidInput(ProposalTypes proposalType, string? value)
@@ -345,7 +348,8 @@ public class HomeController : KikoleBaseController
 
     private async Task<IActionResult> SetAndGetViewModelAsync(
         string? errorMessageForced,
-        HomeModel model)
+        HomeModel model,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var proposalDate = model.DateOfDay;
 
@@ -369,7 +373,7 @@ public class HomeController : KikoleBaseController
             else
             {
                 var proposals = await _proposalService
-                    .GetProposalsAsync(proposalDate, UserId, await _internationalService.GetCountryContinentsAsync());
+                    .GetProposalsAsync(proposalDate, UserId, countryContinents);
 
                 var countries = await GetCountriesAsync();
 
@@ -382,7 +386,7 @@ public class HomeController : KikoleBaseController
                     .ToDictionary(c => c.Id, c => c.GetCanonicalName(language));
 
                 foreach (var p in proposals)
-                    model.SetPropertiesFromProposal(p, countries, continents, positions, clubs, easyClue);
+                    model.SetPropertiesFromProposal(p, countries, continents, countryContinents, positions, clubs, easyClue);
             }
         }
 
@@ -419,8 +423,6 @@ public class HomeController : KikoleBaseController
             var countries = await GetCountriesAsync();
 
             var continents = await GetContinentsAsync();
-
-            var countryContinents = await _internationalService.GetCountryContinentsAsync();
 
             model.CountryName = countries.FirstOrDefault(c => c.Key == pp.Player.CountryId).Value;
             if (pp.Player.AlternativeCountryId.HasValue

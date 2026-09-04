@@ -82,6 +82,7 @@ public class HomeModel
     internal void SetPropertiesFromProposal(ProposalResponse response,
         IReadOnlyDictionary<ulong, string> countries,
         IReadOnlyDictionary<ulong, string> continents,
+        IReadOnlyDictionary<ulong, ulong> countryContinents,
         IReadOnlyDictionary<ulong, string> positions,
         IReadOnlyDictionary<ulong, string> clubs,
         string? easyClue)
@@ -119,10 +120,22 @@ public class HomeModel
                 var cValue = response.Value?.ToString() ?? string.Empty;
                 if (response.Successful)
                 {
-                    CountryName = countries[ulong.Parse(cValue)];
+                    var mainCountryId = ulong.Parse(cValue);
+                    CountryName = countries[mainCountryId];
                     if (response.AlternativeCountryId.HasValue
                         && countries.TryGetValue(response.AlternativeCountryId.Value, out var altCountryName))
                         CountryName += $" / {altCountryName}";
+
+                    // le pays etant trouve, le continent en decoule directement : plus besoin
+                    // d'une proposition Continent separee pour le reveler
+                    var mainContinentId = countryContinents[mainCountryId];
+                    ContinentName = continents[mainContinentId];
+                    if (response.AlternativeCountryId.HasValue)
+                    {
+                        var altContinentId = countryContinents[response.AlternativeCountryId.Value];
+                        if (altContinentId != mainContinentId && continents.TryGetValue(altContinentId, out var altContinentName))
+                            ContinentName += $" / {altContinentName}";
+                    }
                 }
                 else
                 {

@@ -130,17 +130,12 @@
     <value>About the nationality</value>
   </data>
   <data name="AboutCountryDetails" xml:space="preserve">
-    <value>&lt;p&gt;The game does not manage sportive nationality. Only administratives nationalities are considered, based on &lt;a target="_blank" href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes"&gt;this norm&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Exemple : Ryan Giggs's nationality is "United Kingdom" and not "Wales".&lt;/p&gt;
-&lt;p&gt;There's only one nationality per player. When the sportive nationality matches the administrative nationalité, it's the one chosen.&lt;/p&gt;
-&lt;p&gt;It's possible, although very rare, that the choice is arbitrary by the administrator. Here's several complex cases:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Edouard Mendy is Senegalese, as he has chosen this federation; this case is legit as it respects the rule above.&lt;/li&gt;
-&lt;li&gt;Jean-Claude Darcheville is French: choice made by the administrator, due to the fact that the Guyane's federation is not recognized by the FIFA.&lt;/li&gt;
-&lt;li&gt;Xavi Simons is Dutch: choice made by the administrator at the current date, it might still possible for him to pick the Spanish selection.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Finally, nationalities from the past are substitued by closest current nationalities (which might be arbitrary once again).&lt;/p&gt;
-&lt;p&gt;Exemple : Lev Yachine is Russian, because "Soviet Union" is not available.&lt;/p&gt;</value>
+    <value>&lt;p&gt;The nationality shown is the &lt;strong&gt;sporting&lt;/strong&gt; one, not the administrative one.&lt;/p&gt;
+&lt;p&gt;In the most common case, it matches the national team the player actually played for (exemple : England for David Beckham). The list of countries is &lt;a target="_blank" href="https://en.wikipedia.org/wiki/List_of_FIFA_country_codes"&gt;the FIFA one&lt;/a&gt;; countries listed as "not recognized by FIFA" are excluded.&lt;/p&gt;
+&lt;p&gt;The main defunct national teams are also included: USSR, former Yugoslavia, East Germany, Czechoslovakia. This lets, for exemple, Lev Yachine keep his real national team, even though in such a case the closest current nationality (Russia, here) is also accepted.&lt;/p&gt;
+&lt;p&gt;Note: West Germany doesn't exist as such (merged with Germany), neither does Serbia and Montenegro (merged with Serbia).&lt;/p&gt;
+&lt;p&gt;Also, if a player represented two different senior national teams — typically a defunct one, then its successor —, both are accepted. Exemple : Robert Prosinečki, with former Yugoslavia and Croatia.&lt;/p&gt;
+&lt;p&gt;Finally, a special case of the previous one: if the two national teams are on different continents (exemple : Algeria then France, or the other way around), both continents are accepted as well.&lt;/p&gt;</value>
   </data>
   <data name="BadGuessClub" xml:space="preserve">
     <value>An incorrect club proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
