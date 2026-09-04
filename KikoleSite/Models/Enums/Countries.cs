@@ -217,6 +217,14 @@ namespace KikoleSite.Models.Enums
         SCO = 250,
         WAL = 251,
         NIR = 252,
-        KOS = 253
+        KOS = 253,
+
+        // Nations sportives disparues (voir players.alternative_country_id) : conservees
+        // avec la confederation qu'elles avaient a l'epoque, pas de ligne pour les simples
+        // renommages (RFA -> GER, Serbie-et-Montenegro -> SRB...).
+        TCH = 254,
+        GDR = 255,
+        URS = 256,
+        YUG = 257
     }
 }

@@ -14,6 +14,13 @@ public record PlayerDto : BaseDto
 
     public ulong CountryId { get; init; }
 
+    /// <summary>
+    /// Nation sportive disparue que le joueur a aussi representee (ex. RDA puis
+    /// Allemagne) - <see cref="CountryId"/> reste la reponse principale, celle-ci est
+    /// acceptee en plus. Non renseignee dans l'immense majorite des cas.
+    /// </summary>
+    public ulong? AlternativeCountryId { get; init; }
+
     public DateTime? PublicationDate { get; init; }
 
     public required string Clue { get; init; }

@@ -16,6 +16,9 @@ public record PlayerRequest
 
     public Countries Country { get; init; }
 
+    /// <summary>Nation sportive disparue supplementaire, voir <see cref="PlayerDto.AlternativeCountryId"/>.</summary>
+    public Countries? AlternativeCountry { get; init; }
+
     public Continents Continent { get; init; }
 
     public DateTime? PublicationDate { get; init; }
@@ -80,6 +83,7 @@ public record PlayerRequest
         {
             ContinentId = (ulong)Continent,
             CountryId = (ulong)Country,
+            AlternativeCountryId = AlternativeCountry.HasValue ? (ulong)AlternativeCountry.Value : null,
             Name = Name,
             PublicationDate = publicationDate,
             YearOfBirth = YearOfBirth,

@@ -74,18 +74,20 @@ Branche de travail : `remaster-v2`.
       préexistant corrigé : `site.js` lisait `item.Value`/`item.Key` (casse Pascal) alors
       que `Json()` renvoie `value`/`key` — le menu déroulant pays/continent affichait des
       lignes vides depuis toujours.
-- [ ] **Remplir la base des clubs** — **en cours**, sourcée pays par pays depuis Wikipedia
-      (pas la base empirique de 2023, `Restauration/clubs_2023.txt`, gardée en dernier
-      recours). Le Royaume-Uni est **volontairement repoussé** : ses clubs se répartissent
-      entre nations FIFA distinctes (Angleterre/Écosse/Galles/Irlande du Nord), qui
-      n'existent pas encore dans le modèle ONU actuel (`Countries`) — à traiter après la
-      bascule au sens FIFA ci-dessous, pour ne pas sourcer deux fois.
-      - [x] **France : 47 clubs** dans `kikole.sql` (Ligue 1 + Ligue 2 saison 2025-26, plus
-        7 historiques majeurs sans lien fusion/scission ambigu : Bordeaux, Sochaux, Nîmes,
-        AC Ajaccio, Châteauroux, Sedan, Valenciennes ; puis 4 résolus après recherche —
-        GFC Ajaccio, Évian Thonon Gaillard FC — période Ligue 1 2009-2016 uniquement, les
-        clubs amateurs pré-fusion sont trop obscurs pour ce jeu —, US Créteil-Lusitanos,
-        Istres FC). Import vérifié (schéma + `dotnet test`).
+- [ ] **Remplir la base des clubs** — **en cours**, sourcée pays par pays. Méthode ayant
+      évolué au fil du sourcing : Wikipedia (clubs actuels + historiques majeurs) pour la
+      France, puis pivot vers `Championship Manager 01/02` (fichiers `.dat`/`.lng` du jeu,
+      offset `Nation` reverse-engineered dans `club.dat`, traductions FR authentiques via
+      `fra.lng`/`eng.lng`) pour l'Italie et la Grèce — bien plus complet et fiable que
+      Wikipedia pour les divisions inférieures. Base empirique de 2023
+      (`Restauration/clubs_2023.txt`) gardée en tout dernier recours.
+      - [x] **France : 84 clubs** (Ligue 1/2 2025-26 + historiques majeurs + Racing Club de
+        France résolu par l'utilisateur, tous les changements de nom en alias sans les
+        années). Stade Français volontairement exclu (activité trop brève/discontinue).
+      - [x] **Italie : 64 clubs** — Serie A + B 2001-02 (38), puis 26 clubs de Serie C
+        (2001-02) ayant un vrai passé Serie A/B avant ou après, sélectionnés au cas par cas
+        plutôt que les ~90 clubs C1/C2 en bloc.
+      - [x] **Grèce : 28 clubs** — Division A + B 2001-02.
       - **Enjeu de conception découvert en cours de route, pas juste du contenu manquant** :
         à l'époque où le jeu était en ligne, des joueurs se servaient des trous de
         l'autocomplétion (un club obscur présent ou absent) comme signal méta pour
@@ -93,30 +95,24 @@ Branche de travail : `remaster-v2`.
         n'est donc pas neutre — elle fuite de l'information. À garder en tête pour la suite
         du sourcing (viser l'exhaustivité des clubs *plausibles* pour les joueurs déjà en
         base, pas juste les clubs les plus connus).
-      - [x] **Racing Club de France** — résolu par l'utilisateur (connaissance précise du
-        club) : une seule entrée malgré les nombreux changements de nom entre 1896 et 2018
-        (Racing Club de Paris, Matra Racing, Racing 92...), tous en alias de recherche,
-        sans les années. 48 clubs au total.
-      - Pas ajouté, décision (pas un report) : Stade Français — activité professionnelle
-        trop brève et non continue (1942-1968, 1981-1985) pour ce jeu.
-      - Ensuite : quelques autres pays non ambigus (le plan initial), puis reprise du
-        Royaume-Uni une fois la bascule FIFA faite.
-- [ ] **Pays/continent au sens FIFA plutôt qu'ONU** — `Countries`/`Continents` (et les
-      tables `countries`/`continents`) suivent aujourd'hui le découpage ONU : un seul
-      Royaume-Uni, pas d'Angleterre/Écosse/Galles/Irlande du Nord séparées, alors que ce
-      sont des nations FIFA distinctes (sélections, clubs, confédérations). Rejoint
-      « Nationalités doubles et sportives » ci-dessous, dont c'est en partie la même
-      question — `player_federations`, retrouvée en production, était déjà une tentative
-      abandonnée dans ce sens. Impact clubs : faible tant que le sourcing reste sur la
-      France, à surveiller dès le Royaume-Uni (voir point précédent).
-- [ ] **Nationalités doubles et sportives** — `players.country_id` est unique et `NOT NULL`.
-      Changement de modèle, donc à faire avant d'accumuler des données. Probablement à
-      fusionner avec le point FIFA ci-dessus plutôt que traité séparément.
-- [ ] **Lier `country_id`/`continent_id`** — aujourd'hui totalement indépendants (ni en
-      base ni en code), on peut trouver le pays puis proposer un continent incohérent.
-      **À faire après la bascule FIFA ci-dessus**, pour ne pas lier le mauvais modèle.
-      Plan retenu :
-      - `countries` gagne `continent_id` (miroir de `clubs.country_id`).
+      - Ensuite : encore quelques pays si besoin, puis le Royaume-Uni (clubs déjà possible
+        maintenant que la bascule FIFA ci-dessous est faite — Angleterre/Écosse/Galles/
+        Irlande du Nord existent).
+- [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
+      211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
+      lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
+      géographie — Israël/Chypre/Kazakhstan en UEFA, Australie en AFC, Guyana/Suriname en
+      CONCACAF). Royaume-Uni éclaté en 4 (Angleterre/Écosse/Galles/Irlande du Nord), les
+      ~42 territoires ISO sans fédération FIFA (Åland, Monaco, Vatican...) supprimés plutôt
+      que gardés avec un continent nul. Voir « Partis pris » pour le détail du recodage.
+- [x] ~~Nationalités doubles et sportives~~ — **pas un système multi-nationalités
+      générique** : `players.alternative_country_id` (nullable, un seul) couvre le cas
+      réel identifié (nation sportive disparue → successeur), voir « Partis pris ». Le cas
+      général (double sélection, ex. Algérie puis France) reste à traiter séparément le
+      jour où il se présente.
+- [ ] **Lier `country_id`/`continent_id`** — le prérequis (`countries.continent_id`,
+      confédération réelle) est fait ci-dessus. **La logique de jeu elle-même
+      (révélation automatique du continent une fois le pays trouvé) reste à câbler** :
       - Dès que le pays est trouvé, le continent est **révélé automatiquement** (déductible
         sans effort) et son champ de proposition disparaît du formulaire. S'il est deviné
         *avant* le pays, comportement inchangé (proposition indépendante, coût normal).
@@ -127,6 +123,20 @@ Branche de travail : `remaster-v2`.
         côté serveur — plus de validation croisée à faire, il n'y a plus qu'une saisie.
       - Autocomplétion pays : inchangée (pas de suffixe continent, à la différence des
         clubs qui affichent leur pays).
+      - Cas amusant identifié mais non résolu : un joueur avec double sélection
+        internationale (ex. Algérie puis France) — la révélation auto du continent depuis
+        le pays trouvé devient ambiguë si `alternative_country_id` est aussi utilisé pour
+        ce genre de cas un jour. Pas un problème aujourd'hui (le seul usage actuel
+        d'`alternative_country_id` est les nations disparues, toutes UEFA comme leur
+        pays actuel), mais à garder en tête.
+- [ ] **Réécrire la page de règles (nationalité administrative vs sportive)** — la page
+      d'accueil affirme aujourd'hui explicitement "le jeu ne gère pas la nationalité
+      sportive" (exemple Ryan Giggs = "Royaume-Uni", pas "Pays de Galles"), un principe
+      contredit par la bascule FIFA ci-dessus (Écosse/Galles/Irlande du Nord n'existent
+      qu'au sens sportif, pas administratif). Les cas complexes déjà documentés dans cette
+      page (Mendy, Darcheville, Simons) étaient de toute façon déjà tranchés par logique
+      sportive malgré le chapeau "administratif" — la règle affichée était déjà bancale
+      avant ce chantier. Réécriture actée avec l'utilisateur, pas encore faite.
 - [ ] Ajouter les clés étrangères : le schéma n'en déclare **aucune**, les seules garanties
       d'intégrité sont les `IsValid` applicatives.
 - [x] ~~`IClubService` — non justifié aujourd'hui (CRUD nu) ; le deviendra si les clubs
@@ -284,8 +294,45 @@ les hachages de toute façon.
 - `ascii_bin` sur les colonnes de hash, `ascii_general_ci` sur les GUID et les IP.
 - Badges 29 et 34 supprimés, identifiants réalignés sur 1..28. Table `challenges` supprimée.
 - Libellés et descriptions des badges : **ceux d'époque**, récupérés de la base de production.
+- **`countries` recodé intégralement en codes FIFA à 3 lettres, `id` numérique stable.**
+  Source unique : le premier tableau de
+  [Liste des codes pays de la FIFA](https://fr.wikipedia.org/wiki/Liste_des_codes_pays_de_la_FIFA)
+  (211 fédérations), pas l'ISO 3166 utilisé jusque-là. `Countries.cs` n'avait qu'un seul
+  membre explicite (`AF = 1`, le reste implicite) — supprimer des membres au milieu du
+  fichier aurait décalé silencieusement tous les suivants, donc les 211 membres restants
+  ont **tous** une valeur explicite désormais. Les 206 pays qui correspondent 1-pour-1 à un
+  pays ISO déjà présent gardent leur `id` (donc `clubs.country_id`/`players.country_id`
+  existants restent valides sans migration) et changent juste de `code` (ex. `DE`→`GER`,
+  `IT`→`ITA`). `GB` (id 235, "Royaume-Uni") ne correspond à aucun membre FIFA (pas de
+  sélection unifiée) : recyclé en Angleterre plutôt que supprimé puis recréé, pour que les
+  2 données mock qui le référençaient (Manchester United, Beckham) restent valides sans y
+  toucher. Écosse/Galles/Irlande du Nord + Kosovo (fédération FIFA sans code ISO) ajoutés à
+  la fin (ids 250-253). Les ~42 territoires ISO sans fédération FIFA (Åland, Antarctique,
+  Monaco, Vatican, Guadeloupe, Kiribati...) sont **supprimés**, pas gardés avec un
+  `continent_id` nul — décision explicite : `countries` est la liste des nationalités
+  sportives, pas un sur-ensemble administratif. `continents`/`Continents.cs` ne bougent
+  pas : déjà 6 entrées, 1-pour-1 avec les 6 confédérations FIFA, pas de renommage
+  nécessaire sur les noms.
+- **4 nations sportives disparues ajoutées comme pays à part entière** (Tchécoslovaquie,
+  RDA, URSS, Yougoslavie — ids 254-257, confédération UEFA qu'elles avaient à l'époque).
+  Tri effectué sur une liste de ~44 codes FIFA obsolètes : la plupart sont de simples
+  renommages d'un pays qui existe toujours (Ceylan→Sri Lanka, Haute-Volta→Burkina Faso,
+  RFA→Allemagne, Serbie-et-Monténégro→Serbie...), remappés vers l'entrée actuelle sans
+  ligne dédiée. Une dizaine de cas limites (Inde britannique, CEI, Antilles néerlandaises,
+  Yémen du Nord/Sud...) volontairement laissés de côté : aucune culture footballistique
+  a priori dans ces cas, à ajouter au cas par cas si un joueur concerné se présente.
 
 **Règles de jeu**
+- **`players.alternative_country_id` (nullable) plutôt qu'une vraie liste de
+  nationalités.** Deviner l'un ou l'autre valide la proposition Country, les deux
+  s'affichent au reveal (`ProposalResponse.AlternativeCountryId`, combiné dans
+  `HomeModel.CountryName` en `"RDA / Allemagne"`). Couvre le cas identifié (nation
+  disparue → successeur, ex. Matthias Sammer RDA puis Allemagne), pas un système
+  multi-nationalités générique — un joueur ayant représenté 3 entités successives
+  (ex. ex-Yougoslavie → Serbie-et-Monténégro → Monténégro) n'est pas couvert,
+  volontairement (cas jugé assez rare pour être accepté tel quel). Saisie admin
+  uniquement (`AdminController.Index`), pas de nouvel écran d'édition : le seul point
+  d'entrée pour la nationalité d'un joueur est déjà sa création.
 - Barème de soumission à 1 000 points forfaitaires. L'ancien barème dégressif avait été
   abandonné en novembre 2022 ; sa branche morte a été supprimée.
 - Palmarès : un mois sans podium complet ne rapporte **aucune** médaille. Le cumul global est

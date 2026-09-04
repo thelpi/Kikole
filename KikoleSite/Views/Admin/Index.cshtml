@@ -64,6 +64,17 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
         <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
     </div>
 
+    <div class="largeTopMargin">
+        <div>
+            <label>@localizer["AlternativeNationality"]</label>
+        </div>
+        <div>
+            <input type="text" id="alternativeCountryName" name="AlternativeCountryNameSubmissionValue" style="width: 300px" />
+            <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" />
+        </div>
+        <div style="font-size: small">(@localizer["TipAboutAlternativeNationality"])</div>
+    </div>
+
     @if (Model.DisplayPlayerSubmissionLink)
     {
         <div class="largeTopMargin">

@@ -731,7 +731,18 @@ INSERT INTO countries (id, `code`, continent_id, creation_date, update_date) VAL
 (250, 'SCO', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
 (251, 'WAL', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
 (252, 'NIR', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
-(253, 'KOS', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00');
+(253, 'KOS', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+-- Nations sportives disparues (URSS, RDA, Yougoslavie, Tchecoslovaquie) : conservees en
+-- tant que pays a part entiere, avec la confederation qu'elles avaient a l'epoque (UEFA
+-- pour les 4). Voir players.alternative_country_id : un joueur ayant represente une de
+-- ces nations puis son ou ses successeurs actuels porte les deux, l'une ou l'autre
+-- proposition est acceptee. Cas de simple renommage (ex. RFA -> Allemagne, Serbie-et-
+-- Montenegro -> Serbie) non ajoutes ici : ce sont deja les pays actuels, pas de ligne
+-- dediee necessaire.
+(254, 'TCH', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(255, 'GDR', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(256, 'URS', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00'),
+(257, 'YUG', 1, '2026-09-04 00:00:00', '2026-09-04 00:00:00');
 
 CREATE TABLE country_translations (
   country_id bigint(20) UNSIGNED NOT NULL,
@@ -1161,7 +1172,15 @@ INSERT INTO country_translations (country_id, language_id, `name`) VALUES
 (252, 1, 'Northern Ireland'),
 (252, 2, 'Irlande du Nord'),
 (253, 1, 'Kosovo'),
-(253, 2, 'Kosovo');
+(253, 2, 'Kosovo'),
+(254, 1, 'Czechoslovakia'),
+(254, 2, 'Tchécoslovaquie'),
+(255, 1, 'East Germany'),
+(255, 2, 'Allemagne de l\'Est'),
+(256, 1, 'Soviet Union'),
+(256, 2, 'Union soviétique'),
+(257, 1, 'Yugoslavia'),
+(257, 2, 'Yougoslavie');
 
 CREATE TABLE discussions (
   id bigint(20) UNSIGNED NOT NULL,
@@ -1209,6 +1228,7 @@ CREATE TABLE players (
   allowed_names text COLLATE utf8mb4_unicode_ci NOT NULL,
   year_of_birth smallint(5) UNSIGNED NOT NULL,
   country_id bigint(20) UNSIGNED NOT NULL,
+  alternative_country_id bigint(20) UNSIGNED DEFAULT NULL,
   continent_id bigint(20) UNSIGNED NOT NULL,
   publication_date date DEFAULT NULL,
   clue varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -1382,6 +1402,7 @@ ALTER TABLE messages
 ALTER TABLE players
   ADD PRIMARY KEY (id),
   ADD KEY country_id (country_id) USING BTREE,
+  ADD KEY alternative_country_id (alternative_country_id) USING BTREE,
   ADD KEY continent_id (continent_id),
   ADD KEY position_id (position_id),
   ADD KEY badge_id (badge_id),

@@ -19,6 +19,14 @@ public class ProposalResponse
 
     public string? RawValue { get; }
 
+    /// <summary>
+    /// Renseigne uniquement pour une proposition <see cref="ProposalTypes.Country"/>
+    /// reussie sur un joueur ayant une nation sportive disparue en plus de la
+    /// principale (<see cref="PlayerDto.AlternativeCountryId"/>) - les deux sont
+    /// alors affichees au reveal, peu importe laquelle a ete devinee.
+    /// </summary>
+    public ulong? AlternativeCountryId { get; }
+
     public DateTime Date { get; }
 
     public string? Tip { get; }
@@ -98,10 +106,16 @@ public class ProposalResponse
 
             case ProposalTypes.Country:
                 if (!success.HasValue)
-                    Successful = player.Player.CountryId == (ulong)Enum.Parse<Countries>(Guessed());
+                {
+                    var guessedCountryId = (ulong)Enum.Parse<Countries>(Guessed());
+                    Successful = player.Player.CountryId == guessedCountryId
+                        || player.Player.AlternativeCountryId == guessedCountryId;
+                }
                 Value = Successful
                     ? player.Player.CountryId
                     : sourceValue;
+                if (Successful)
+                    AlternativeCountryId = player.Player.AlternativeCountryId;
                 RawValue = Enum.TryParse<Countries>(sourceValue, out var tmpRawCountry)
                     ? tmpRawCountry.ToString()
                     : RawValue;

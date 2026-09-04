@@ -255,6 +255,21 @@ public class AdminController : KikoleBaseController
             return View(model);
         }
 
+        // facultatif : uniquement pour un joueur ayant represente une nation sportive
+        // disparue en plus de son pays actuel (ex. RDA puis Allemagne)
+        ulong? alternativeCountryId = null;
+        if (!string.IsNullOrWhiteSpace(model.AlternativeCountry))
+        {
+            if (!ulong.TryParse(model.AlternativeCountry, out var parsedAlternativeCountryId)
+                || !countries.Any(c => parsedAlternativeCountryId == c.Key))
+            {
+                model.ErrorMessage = _localizer["InvalidCountry"];
+                SetPositionsOnModel(model);
+                return View(model);
+            }
+            alternativeCountryId = parsedAlternativeCountryId;
+        }
+
         if (model.Position == null
             || !ulong.TryParse(model.Position, out var positionId)
             || !GetPositions().Any(p => p.Key == positionId))
@@ -324,6 +339,7 @@ public class AdminController : KikoleBaseController
                 { Languages.fr, model.EasyClueFr }
             },
             Country = (Countries)countryId,
+            AlternativeCountry = alternativeCountryId.HasValue ? (Countries)alternativeCountryId.Value : null,
             Continent = (Continents)continentId,
             Name = model.Name,
             Position = (Positions)positionId,

@@ -340,8 +340,8 @@ $(function () {
 });
 
 /* countries autocompletion */
-$(function () {
-    $("#countryName").autocomplete({
+var autocompleteCountries = function (nameFieldId, idFieldId, submit) {
+    $(nameFieldId).autocomplete({
         source: function (request, response) {
             $.ajax({
                 url: '/Home/AutoCompleteCountries/',
@@ -360,15 +360,21 @@ $(function () {
             });
         },
         select: function (e, i) {
-            $("#countryId").val(i.item.value);
-            $("#countryName").val(i.item.label);
-            if ($("#submitCountry").length > 0) {
+            $(idFieldId).val(i.item.value);
+            $(nameFieldId).val(i.item.label);
+            if (submit && $("#submitCountry").length > 0) {
                 $("#submitCountry").click();
             }
             return false;
         },
         minLength: 1
     });
+};
+$(function () {
+    autocompleteCountries("#countryName", "#countryId", true);
+    if ($("#alternativeCountryName").length > 0) {
+        autocompleteCountries("#alternativeCountryName", "#alternativeCountryId", false);
+    }
 });
 
 /* continents autocompletion */

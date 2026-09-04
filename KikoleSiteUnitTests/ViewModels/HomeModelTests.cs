@@ -26,7 +26,9 @@ public class HomeModelTests
         new Dictionary<ulong, string>
         {
             { (ulong)KikoleSite.Models.Enums.Countries.FRA, "France" },
-            { (ulong)KikoleSite.Models.Enums.Countries.BRA, "Brésil" }
+            { (ulong)KikoleSite.Models.Enums.Countries.BRA, "Brésil" },
+            { (ulong)KikoleSite.Models.Enums.Countries.GDR, "Allemagne de l'Est" },
+            { (ulong)KikoleSite.Models.Enums.Countries.GER, "Allemagne" }
         };
 
     private static readonly IReadOnlyDictionary<ulong, string> Continents =
@@ -231,6 +233,33 @@ public class HomeModelTests
 
         model.CountryName.Should().BeNull();
         model.IncorrectCountries.Should().ContainSingle().Which.Should().Be("Brésil");
+    }
+
+    [Fact]
+    public void ACountryWithAnAlternativeDisplaysBothNamesOnceFound()
+    {
+        var sammer = new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().WithId(2).WithName("Matthias Sammer").WithAllowedNames("sammer")
+                .WithCountryId((ulong)KikoleSite.Models.Enums.Countries.GDR)
+                .WithAlternativeCountryId((ulong)KikoleSite.Models.Enums.Countries.GER)
+                .WithContinentId((ulong)KikoleSite.Models.Enums.Continents.Europe)
+                .WithPositionId((ulong)Positions.Defender).Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+        var request = new ProposalRequest
+        {
+            Value = ((int)KikoleSite.Models.Enums.Countries.GDR).ToString(),
+            ProposalType = ProposalTypes.Country,
+            ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
+        };
+        var response = new ProposalResponse(request, sammer, _localizer).WithTotalPoints(1000, false);
+        var model = new HomeModel();
+
+        model.SetPropertiesFromProposal(response, Countries, Continents, PositionNames, Clubs, null);
+
+        model.CountryName.Should().Be("Allemagne de l'Est / Allemagne");
     }
 
     [Fact]

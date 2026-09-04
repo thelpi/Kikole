@@ -35,6 +35,7 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithContinent(Continents continent) { _dto = _dto with { ContinentId = (ulong)continent }; return this; }
     internal PlayerDtoBuilder WithPosition(Positions position) { _dto = _dto with { PositionId = (ulong)position }; return this; }
     internal PlayerDtoBuilder WithCountryId(ulong id) { _dto = _dto with { CountryId = id }; return this; }
+    internal PlayerDtoBuilder WithAlternativeCountryId(ulong? id) { _dto = _dto with { AlternativeCountryId = id }; return this; }
     internal PlayerDtoBuilder WithContinentId(ulong id) { _dto = _dto with { ContinentId = id }; return this; }
     internal PlayerDtoBuilder WithPositionId(ulong id) { _dto = _dto with { PositionId = id }; return this; }
     internal PlayerDtoBuilder WithClue(string clue) { _dto = _dto with { Clue = clue }; return this; }

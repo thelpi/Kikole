@@ -44,7 +44,17 @@ public class ProposalResponseTests
         };
     }
 
-    private ProposalResponse Respond(ProposalTypes type, string value)
+    private static PlayerFullDto Sammer()
+    {
+        return new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().WithId(2).WithName("Matthias Sammer").WithAllowedNames("sammer;matthias sammer").WithYearOfBirth(1967).WithCountryId((ulong)Countries.GDR).WithAlternativeCountryId((ulong)Countries.GER).WithContinentId((ulong)Continents.Europe).WithPositionId((ulong)Positions.Defender).Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+    }
+
+    private ProposalResponse Respond(ProposalTypes type, string value, PlayerFullDto? player = null)
     {
         var request = new ProposalRequest
         {
@@ -53,7 +63,7 @@ public class ProposalResponseTests
             ProposalDateTime = new DateTime(2026, 9, 2, 18, 0, 0)
         };
 
-        return new ProposalResponse(request, Zidane(), _localizer);
+        return new ProposalResponse(request, player ?? Zidane(), _localizer);
     }
 
     // ------------------------------------------------------------- nom du joueur
@@ -157,6 +167,34 @@ public class ProposalResponseTests
 
         response.Successful.Should().BeFalse();
         response.Cost.Should().Be((25, false));
+    }
+
+    [Fact]
+    public void Country_WhenMatchingTheMainOne_IsSuccessfulAndExposesTheAlternative()
+    {
+        var response = Respond(ProposalTypes.Country, nameof(Countries.GDR), Sammer());
+
+        response.Successful.Should().BeTrue();
+        response.Value.Should().Be((ulong)Countries.GDR);
+        response.AlternativeCountryId.Should().Be((ulong)Countries.GER);
+    }
+
+    [Fact]
+    public void Country_WhenMatchingTheAlternativeOne_IsAlsoSuccessful()
+    {
+        var response = Respond(ProposalTypes.Country, nameof(Countries.GER), Sammer());
+
+        response.Successful.Should().BeTrue();
+        response.AlternativeCountryId.Should().Be((ulong)Countries.GER);
+    }
+
+    [Fact]
+    public void Country_WithAnAlternativeOnThePlayer_ButNeitherIsGuessed_IsUnsuccessful()
+    {
+        var response = Respond(ProposalTypes.Country, nameof(Countries.FRA), Sammer());
+
+        response.Successful.Should().BeFalse();
+        response.AlternativeCountryId.Should().BeNull();
     }
 
     [Fact]

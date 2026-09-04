@@ -118,7 +118,12 @@ public class HomeModel
             case ProposalTypes.Country:
                 var cValue = response.Value?.ToString() ?? string.Empty;
                 if (response.Successful)
+                {
                     CountryName = countries[ulong.Parse(cValue)];
+                    if (response.AlternativeCountryId.HasValue
+                        && countries.TryGetValue(response.AlternativeCountryId.Value, out var altCountryName))
+                        CountryName += $" / {altCountryName}";
+                }
                 else
                 {
                     if (ulong.TryParse(cValue, out var cId) && countries.ContainsKey(cId))

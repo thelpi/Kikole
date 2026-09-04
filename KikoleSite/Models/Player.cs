@@ -18,6 +18,8 @@ public class Player : PlayerCreator
 
     public Countries Country { get; }
 
+    public Countries? AlternativeCountry { get; }
+
     public DateTime? PublicationDate { get; }
 
     public string Clue { get; }
@@ -41,6 +43,9 @@ public class Player : PlayerCreator
         EasyClue = p.Player.EasyClue;
         Continent = (Continents)p.Player.ContinentId;
         Country = (Countries)p.Player.CountryId;
+        AlternativeCountry = p.Player.AlternativeCountryId.HasValue
+            ? (Countries)p.Player.AlternativeCountryId.Value
+            : null;
         Position = (Positions)p.Player.PositionId;
         YearOfBirth = p.Player.YearOfBirth;
     }
