@@ -1,0 +1,496 @@
+/* Habillage "dossier de scout" de la page de jeu (Views/Home/Index.cshtml).
+   Scope : tout sous .kikole-board, sauf les tokens (:root, globaux et sans risque)
+   et .ui-autocomplete (widget jQuery UI attache en enfant direct de <body>, impossible
+   a scoper autrement). Voir C:\Users\LPI\.claude\plans\linear-pondering-wind.md. */
+
+:root {
+  --paper: #efe9d8;
+  --paper-raised: #faf6e9;
+  --paper-line: #e2dac2;
+  --ink: #1c2b22;
+  --ink-soft: #4a5a4f;
+  --pitch: #1f5e3e;
+  --pitch-strong: #17462f;
+  --pitch-soft: #dbe6da;
+  --stamp: #a6332b;
+  --stamp-soft: #f3e0dc;
+  --gold: #ad8a3e;
+  --shadow: rgba(28, 43, 34, 0.16);
+
+  /* tableau d'affichage : toujours sombre, comme un vrai ecran de stade */
+  --board-bg: #12201a;
+  --board-fg: #f4eeda;
+  --board-accent: #dfb04c;
+}
+
+.kikole-board {
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  color: var(--ink);
+  max-width: 640px;
+  margin: 20px auto 0;
+}
+
+.kikole-board * { box-sizing: border-box; }
+
+/* ---------------------------------------------------------- masthead */
+
+.kikole-board .masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.kikole-board .day-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.kikole-board .day-nav a {
+  color: var(--pitch-strong);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.kikole-board .day-nav a:hover { text-decoration: underline; }
+
+.kikole-board .day-nav input[type="date"] {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-bottom: 1px dashed var(--paper-line);
+  border-radius: 0;
+  padding: 2px 2px 3px;
+  background: transparent;
+  color: var(--pitch-strong);
+}
+
+.kikole-board .day-nav input[type="date"]:focus-visible {
+  outline: none;
+  border-bottom: 1px solid var(--pitch);
+}
+
+.kikole-board .day-nav input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.45;
+  filter: sepia(60%) saturate(300%) hue-rotate(90deg);
+}
+
+.kikole-board .logged-as {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 2px 0 20px;
+}
+
+.kikole-board .logged-as strong { color: var(--pitch-strong); }
+
+.kikole-board .scoreboard {
+  background: var(--board-bg);
+  color: var(--board-fg);
+  border: 1px solid color-mix(in srgb, var(--board-fg) 15%, transparent);
+  border-radius: 6px;
+  padding: 8px 16px 6px;
+  text-align: right;
+  box-shadow: 0 6px 14px var(--shadow);
+  flex: none;
+}
+
+.kikole-board .scoreboard .label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.kikole-board .scoreboard .value {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 30px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--board-accent);
+}
+
+/* ---------------------------------------------------------- bandeaux */
+
+.kikole-board .banner {
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  border: 1px solid transparent;
+}
+
+.kikole-board .banner.success {
+  background: var(--pitch-soft);
+  border-color: color-mix(in srgb, var(--pitch) 35%, transparent);
+  color: var(--pitch-strong);
+}
+
+.kikole-board .banner.error {
+  background: var(--stamp-soft);
+  border-color: color-mix(in srgb, var(--stamp) 35%, transparent);
+  color: var(--stamp);
+}
+
+.kikole-board .creator-line {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: -6px 0 14px;
+}
+
+/* ---------------------------------------------------------- dossier card */
+
+.kikole-board .dossier {
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  box-shadow: 0 18px 40px var(--shadow);
+}
+
+.kikole-board .dossier-head {
+  padding: 22px 26px 18px;
+  border-bottom: 1px dashed var(--paper-line);
+}
+
+.kikole-board .clue {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.kikole-board .clue + .clue { margin-top: 8px; }
+
+.kikole-board .clue .tag {
+  flex: none;
+  width: 158px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pitch);
+  border: 1px solid var(--pitch);
+  border-radius: 3px;
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.kikole-board .clue p { margin: 0; font-style: italic; }
+
+/* ---------------------------------------------------------- rows */
+
+.kikole-board .rows { padding: 6px 26px 4px; }
+
+.kikole-board .dossier-row {
+  display: grid;
+  grid-template-columns: 128px 1fr auto;
+  align-items: start;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--paper-line);
+  margin: 0;
+}
+
+.kikole-board .dossier-row:last-child { border-bottom: none; }
+
+.kikole-board .dossier-row .field {
+  padding-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kikole-board .dossier-row .cost { padding-top: 3px; }
+
+.kikole-board .dossier-row .field .hint {
+  display: block;
+  margin-top: 5px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.kikole-board .dossier-row .field .hint a { color: var(--pitch-strong); }
+
+/* essais rates : visible qu'une categorie soit encore ouverte ou deja trouvee */
+
+.kikole-board .attempts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 7px;
+}
+
+.kikole-board .dossier-row.solved .attempts { margin: 0 0 7px; }
+
+.kikole-board .attempt {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.kikole-board .attempt .tag {
+  margin-left: 6px;
+  font-style: italic;
+}
+
+/* etat trouve */
+
+.kikole-board .dossier-row.solved .value {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.kikole-board .dossier-row.solved .value svg { flex: none; color: var(--pitch); margin-top: 3px; }
+
+.kikole-board .dossier-row.solved .cost {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--ink-soft) 60%, transparent);
+}
+
+/* champ a completer */
+
+.kikole-board .blank-wrap {
+  position: relative;
+  max-width: 260px;
+}
+
+.kikole-board .blank {
+  width: 100%;
+  border: none;
+  border-bottom: 2px dashed var(--paper-line);
+  background: transparent;
+  padding: 4px 2px 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.kikole-board .blank::placeholder { color: var(--ink-soft); font-style: italic; }
+
+.kikole-board .blank:focus-visible {
+  outline: none;
+  border-bottom: 2px solid var(--pitch);
+}
+
+.kikole-board select.blank {
+  border: 1px solid var(--paper-line);
+  border-radius: 3px;
+  padding: 5px 8px;
+  max-width: 190px;
+  background: var(--paper);
+}
+
+.kikole-board .dossier-row.locked .cost {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--stamp);
+  background: var(--stamp-soft);
+  border: 1px solid color-mix(in srgb, var(--stamp) 45%, transparent);
+  border-radius: 999px;
+  padding: 3px 10px;
+  width: 76px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.kikole-board .small-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.kikole-board .small-link a { color: var(--pitch-strong); }
+
+/* clubs deja trouves */
+
+.kikole-board .club-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.kikole-board .club {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.kikole-board .club svg { flex: none; color: var(--pitch); margin-top: 3px; }
+
+.kikole-board .club .loan {
+  flex: none;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+/* ---------------------------------------------------------- final answer */
+
+.kikole-board .final {
+  margin: 4px 26px 24px;
+  padding-top: 18px;
+  border-top: 2px solid var(--pitch);
+}
+
+.kikole-board .final .field {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pitch-strong);
+  margin-bottom: 8px;
+}
+
+.kikole-board .final-input {
+  display: flex;
+  border: 1.5px solid var(--pitch);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--paper);
+  max-width: 420px;
+}
+
+.kikole-board .final-input input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.kikole-board .final-input input::placeholder { color: var(--ink-soft); }
+
+.kikole-board .final-input input:focus-visible {
+  outline: 2px solid var(--pitch);
+  outline-offset: -2px;
+}
+
+.kikole-board .final-input button {
+  flex: none;
+  border: none;
+  background: var(--pitch);
+  color: var(--paper-raised);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 20px;
+  cursor: pointer;
+}
+
+.kikole-board .final-input button:hover { background: var(--pitch-strong); }
+.kikole-board .final-input button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.kikole-board .final .attempts { margin-top: 9px; }
+
+.kikole-board .final .caption {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.kikole-board .final .caption strong { color: var(--stamp); font-weight: 600; }
+
+/* ---------------------------------------------------------- actions */
+
+.kikole-board .actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.kikole-board .actions button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.kikole-board .actions button .cost { color: var(--stamp); margin-left: 6px; }
+
+.kikole-board .actions button:hover { transform: translateY(-1px); }
+.kikole-board .actions button:focus-visible { outline: 2px solid var(--pitch); outline-offset: 2px; }
+
+.kikole-board .actions button:disabled {
+  cursor: default;
+  opacity: 0.5;
+  transform: none;
+}
+
+.kikole-board .actions button:disabled .cost { color: var(--ink-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kikole-board .actions button { transition: none; }
+}
+
+@media (max-width: 480px) {
+  .kikole-board .dossier-row { grid-template-columns: 96px 1fr; }
+  .kikole-board .dossier-row .cost { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+}
+
+/* ---------------------------------------------------------- autocompletion jQuery UI
+   Le widget s'attache en enfant direct de <body>, hors de .kikole-board : override
+   global necessaire, sans risque puisque c'est le meme composant partout sur le site. */
+
+.ui-autocomplete {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  box-shadow: 0 10px 24px var(--shadow);
+  padding: 4px;
+}
+
+.ui-autocomplete .ui-menu-item-wrapper {
+  padding: 6px 10px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+.ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
+  background: var(--pitch);
+  color: var(--paper-raised);
+  border: none;
+  margin: 0;
+}

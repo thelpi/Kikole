@@ -54,7 +54,12 @@ public class HomeModel
 
     public int NextDay => CurrentDay - 1;
     public int PreviousDay => CurrentDay + 1;
-    public DateTime DateOfDay => CurrentDate.AddDays(-CurrentDay);
+    // CurrentDate n'est jamais posté par le client (uniquement renseigné par le
+    // controleur) : la validation automatique du modele lit cette propriete des le
+    // model binding d'un POST, avant que le controleur n'ait eu la main - a ce
+    // moment CurrentDate vaut encore default(DateTime), et lui soustraire des jours
+    // deborde des que CurrentDay != 0. Se degrader plutot que planter.
+    public DateTime DateOfDay => CurrentDate == default ? default : CurrentDate.AddDays(-CurrentDay);
 
     internal string? GetValueFromProposalType(ProposalTypes proposalType)
     {

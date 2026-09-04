@@ -199,7 +199,7 @@
     <value>Valeur incorrecte</value>
   </data>
   <data name="LeaderboardAvailable" xml:space="preserve">
-    <value>Le classement quotidien est disponible</value>
+    <value>Le classement du jour est désormais disponible</value>
   </data>
   <data name="PasswordDoesNotMatch" xml:space="preserve">
     <value>Le mot de passe ne correspond pas</value>

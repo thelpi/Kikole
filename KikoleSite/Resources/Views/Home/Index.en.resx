@@ -187,7 +187,7 @@
     <value>see &lt;a href="#country-rules"&gt;rules&lt;/a&gt;</value>
   </data>
   <data name="TipAboutPosition" xml:space="preserve">
-    <value>the player may have two positions, only one is required</value>
+    <value>two positions possible</value>
   </data>
   <data name="TypePlayerName" xml:space="preserve">
     <value>Type the player's name here:</value>
