@@ -316,10 +316,29 @@ Branche de travail : `remaster-v2`.
 - [ ] **Rendre le graphisme plus attrayant** — **en cours**. Direction validée : la page
       de jeu comme un dossier de scout (`kikole-board.css`, `Views/Home/Index.cshtml`),
       cf. le plan `linear-pondering-wind.md`. Fait depuis : menu de navigation global
-      (`_Layout.cshtml`), datepicker jQuery UI, page Compte (`Views/Account/Index.cshtml`)
-      et présentation/règles (`Partial/Rules.cshtml`) réutilisant les mêmes tokens. Reste à
-      faire : classement et admin, et les badges (actuellement non retouchés, cf.
-      `Partial/Badges.cshtml`) — prévu en même temps que la page classement.
+      (`_Layout.cshtml`), datepicker jQuery UI, page Compte (`Views/Account/Index.cshtml`),
+      présentation/règles (`Partial/Rules.cshtml`), fiches badge (`Partial/Badges.cshtml`),
+      classement (`Leaderboard/Index.cshtml`), palmarès (`Leaderboard/Palmares.cshtml`) et
+      détail des statistiques d'un utilisateur (`Leaderboard/User.cshtml`,
+      `Leaderboard/UserDay.cshtml`) — tableaux de données réhabillés avec les classes
+      historiques de `site.css` conservées telles quelles (certaines sont régénérées par
+      `site.js` en AJAX, cf. `initializeLeaderboards`). Volontairement laissées de côté :
+      les pages statistiques réservées aux administrateurs (`Leaderboard/Stats.cshtml`,
+      `Leaderboard/KikolesStats.cshtml`).
+  - [ ] **`Leaderboard/Palmares.cshtml` n'est pas localisée** (pas de resx, tout le texte
+        est en français en dur, y compris un reliquat anglais "No data to display" corrigé
+        au passage). Contrairement à toutes les autres pages du site, un utilisateur en
+        anglais verrait donc du français ici. Pas corrigé maintenant (pur travail de style
+        cette fois-ci) — prévoir l'ajout d'un `Palmares.fr.resx`/`Palmares.en.resx` le jour
+        où on y touche pour autre chose que du visuel.
+  - [ ] **Certains badges peuvent-ils donner un indice gratuit par le seul fait d'être
+        obtenus ?** Tout le monde peut voir les badges de tout le monde. À date, les noms
+        de badges (`Models/Enums/Badges.cs`) semblent plutôt liés au comportement du joueur
+        qui les obtient (régularité, rapidité, absence d'indice...) qu'à une caractéristique
+        du footballeur du jour — donc a priori pas de fuite directe. À vérifier badge par
+        badge dans `BadgeService.cs` pour être sûr qu'aucun n'est conditionné par un trait
+        du joueur cherché (ex. son poste, sa nationalité), ce qui serait un indice gratuit
+        dès qu'on voit quelqu'un l'obtenir en cours de journée.
   - [ ] **Bug graphique : superposition des blocs beige au moment de la victoire.**
         Une fois le joueur trouvé, quand la page s'affiche avec les badges puis le bloc
         présentation/règles en dessous, un rendu bizarre apparaît (les blocs beige se

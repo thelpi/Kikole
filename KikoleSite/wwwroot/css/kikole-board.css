@@ -907,6 +907,114 @@ body { padding-top: 0; }
   .kikole-board .dossier-row .cost { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
 }
 
+/* ---------------------------------------------------------- tableaux de donnees
+   (classement, palmares, statistiques utilisateur) : classes historiques de site.css
+   (tabData, tabDataHead, even/odd/creator, fillN...) reprises telles quelles - certaines
+   sont regenerees par site.js (tableaux du classement, cf. loadGlobalLeaderboard /
+   loadDailyLeaderboard) donc ni les noms de classe ni les id ne peuvent changer. */
+
+.kikole-board .table-wrap { overflow-x: auto; }
+
+.kikole-board table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.kikole-board thead th {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 2px solid var(--pitch);
+  padding: 8px 10px;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.kikole-board tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.kikole-board tbody tr:last-child td { border-bottom: none; }
+
+.kikole-board .even td { background: var(--paper-raised); }
+.kikole-board .odd td { background: var(--paper); }
+
+.kikole-board .creator td {
+  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+  font-weight: 600;
+}
+
+.kikole-board .tabDataBold { font-weight: 700; color: var(--pitch-strong); }
+.kikole-board .tabDataHeadBg { background: transparent; }
+
+.kikole-board .fillCorrect { background: var(--pitch-soft); }
+.kikole-board .fillIncorrect { background: var(--stamp-soft); }
+
+.kikole-board .fill1 { background: color-mix(in srgb, var(--pitch) 18%, var(--paper)); }
+.kikole-board .fill2 { background: color-mix(in srgb, var(--gold) 22%, var(--paper)); }
+.kikole-board .fill3 { background: color-mix(in srgb, var(--stamp) 14%, var(--paper)); }
+.kikole-board .fill4 { background: color-mix(in srgb, var(--pitch-strong) 16%, var(--paper)); }
+.kikole-board .fill5 { background: color-mix(in srgb, #4a6fa5 22%, var(--paper)); }
+.kikole-board .fill6 { background: color-mix(in srgb, #8a6fb0 20%, var(--paper)); }
+.kikole-board .fill7 { background: color-mix(in srgb, #b0784a 20%, var(--paper)); }
+.kikole-board .fill8 { background: color-mix(in srgb, var(--ink-soft) 16%, var(--paper)); }
+
+.kikole-board .table-caption {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: -4px 0 12px;
+}
+
+.kikole-board input[type="date"] {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-bottom: 1px dashed var(--paper-line);
+  border-radius: 0;
+  padding: 3px 2px;
+  background: transparent;
+  color: var(--pitch-strong);
+}
+
+.kikole-board input[type="date"]:focus-visible {
+  outline: none;
+  border-bottom: 1px solid var(--pitch);
+}
+
+@media (max-width: 480px) {
+  .kikole-board table { font-size: 11.5px; }
+  .kikole-board thead th,
+  .kikole-board tbody td { padding: 6px 7px; }
+}
+
+.kikole-board .medal-gold { color: var(--gold); font-weight: 700; }
+.kikole-board .medal-silver { color: #8a8f92; font-weight: 700; }
+.kikole-board .medal-bronze { color: #a8703f; font-weight: 700; }
+
+.kikole-board .profile-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: normal;
+  font-size: 24px;
+  letter-spacing: 0.02em;
+  color: var(--stamp);
+  margin: 0 0 14px;
+}
+
+.kikole-board .badge-card.missing {
+  background: transparent;
+  border-style: dashed;
+}
+
+.kikole-board .badge-card.missing .badge-icon { color: var(--ink-soft); opacity: 0.5; }
+.kikole-board .badge-card.missing .badge-name { color: var(--ink-soft); }
+
 /* ---------------------------------------------------------- autocompletion jQuery UI
    Le widget s'attache en enfant direct de <body>, hors de .kikole-board : override
    global necessaire, sans risque puisque c'est le meme composant partout sur le site. */
