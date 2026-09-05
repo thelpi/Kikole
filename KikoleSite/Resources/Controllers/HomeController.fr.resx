@@ -129,6 +129,9 @@
   <data name="InvalidRequest" xml:space="preserve">
     <value>Requête invalide</value>
   </data>
+  <data name="RequestPowerUserMessage" xml:space="preserve">
+    <value>Bonjour, je souhaite pouvoir proposer un joueur, pouvez-vous m'octroyer les droits svp ?</value>
+  </data>
   <data name="ValidGuess" xml:space="preserve">
     <value>Proposition {0} correcte.</value>
   </data>

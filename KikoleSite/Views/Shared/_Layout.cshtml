@@ -96,12 +96,12 @@
                         }
                     </a>
                 }
-                @if (isPowerUser)
+                @if (isLoggedIn)
                 {
-                    <a class="site-nav-icon" asp-area="" asp-controller="Admin" asp-action="Index"
+                    <a class="site-nav-icon" href="@(isPowerUser ? Url.Action("Index", "Admin") : Url.Action("Contact", "Home", new { requestAccess = true }))"
                        title="@localizer["SubmitKikole"]" aria-label="@localizer["SubmitKikole"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="9" cy="8" r="3.2" /><path d="M3.5 19c1-3.4 3.4-5.2 5.5-5.2s4.5 1.8 5.5 5.2" /><path d="M18 8v5" /><path d="M15.5 10.5h5" />
+                            <path d="M6 5v14" /><path d="M6 12.5 13.5 5.5" /><path d="M6 12.5 14 19" /><path d="M18 8v5" /><path d="M15.5 10.5h5" />
                         </svg>
                     </a>
                 }
@@ -190,11 +190,11 @@
                         }
                     </a>
                 }
-                @if (isPowerUser)
+                @if (isLoggedIn)
                 {
-                    <a class="site-nav-drawer-row" asp-area="" asp-controller="Admin" asp-action="Index">
+                    <a class="site-nav-drawer-row" href="@(isPowerUser ? Url.Action("Index", "Admin") : Url.Action("Contact", "Home", new { requestAccess = true }))">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="9" cy="8" r="3.2" /><path d="M3.5 19c1-3.4 3.4-5.2 5.5-5.2s4.5 1.8 5.5 5.2" /><path d="M18 8v5" /><path d="M15.5 10.5h5" />
+                            <path d="M6 5v14" /><path d="M6 12.5 13.5 5.5" /><path d="M6 12.5 14 19" /><path d="M18 8v5" /><path d="M15.5 10.5h5" />
                         </svg>
                         @localizer["SubmitKikole"]
                     </a>

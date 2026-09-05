@@ -922,6 +922,33 @@ Branche de travail : `remaster-v2`.
         meilleure formulation est trouvée.
       Build (0 avertissement) + 596 tests verts, vérifications navigateur (DOM/mesures
       pour l'alignement checkbox, lecture directe pour le reste).
+- [x] **"Archivé" (lot précédent validé) + 3 nouveautés pour finir la journée : icône
+      dédiée + accès facilité à la création d'un kikolé, mention de délai sur la page
+      Contact.**
+      - **Icône "Créer un kikolé" redessinée** — partageait jusqu'ici le même
+        pictogramme que "Compte" (silhouette), seulement distingué par un petit "+".
+        Remplacée par un "K" (deux diagonales + une barre verticale, même style de
+        trait que les autres icônes du site) suivi du même "+" ; l'icône "Compte" n'a
+        pas bougé. Appliqué aux deux endroits où l'icône existe (`_Layout.cshtml`,
+        barre desktop et tiroir mobile).
+      - **Icône "Créer un kikolé" désormais toujours visible pour un utilisateur
+        connecté** (avant : seulement `PowerUser`+) — mais sa destination dépend
+        toujours du palier : `PowerUser`/administrateur → `/Admin` (le vrai
+        formulaire, comportement inchangé) ; utilisateur standard → `/Home/Contact
+        ?requestAccess=true`, un nouveau paramètre optionnel sur l'action `Contact`
+        (GET) qui préremplit `ContactModel.NewMessage` avec un texte de demande de
+        droits standard (nouvelle clé resx `RequestPowerUserMessage`,
+        `Resources/Controllers/HomeController.*.resx`, FR/EN). Objectif : un
+        utilisateur standard qui clique dessus n'atterrit pas sur un formulaire de
+        contact vide sans savoir quoi écrire — le message est prérempli, modifiable
+        avant envoi. Vérifié en direct dans les deux rôles et les deux langues.
+      - **Page Contact : mention de délai de réponse ajoutée** en bas de carte, sous
+        le bouton d'envoi (nouvelle clé resx `ResponseTimeNote`, FR/EN,
+        `Resources/Views/Home/Contact.*.resx`) — avec la classe `.spaced` déjà
+        introduite plus haut (le hint suit un bouton, pas un champ texte, le
+        `margin-top: -6px` par défaut l'aurait collé au bouton).
+      Build (0 avertissement) + 596 tests verts, vérifié en direct (admin, utilisateur
+      standard, FR et EN).
 - [x] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
       extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une

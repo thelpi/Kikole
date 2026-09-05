@@ -135,4 +135,7 @@
   <data name="NoMessagesYet" xml:space="preserve">
     <value>You haven't written yet. Ask your question below.</value>
   </data>
+  <data name="ResponseTimeNote" xml:space="preserve">
+    <value>The administrator usually replies within 24 hours.</value>
+  </data>
 </root>

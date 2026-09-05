@@ -65,7 +65,7 @@ public class HomeController : KikoleBaseController
 
     [HttpGet]
     [Authorization]
-    public async Task<IActionResult> Contact()
+    public async Task<IActionResult> Contact([FromQuery] bool requestAccess = false)
     {
         // l'admin ne discute jamais avec lui-meme : cf. _Layout.cshtml, l'icone Contact
         // ne lui est de toute facon pas presentee, ce redirect est la garde ceinture-bretelles
@@ -73,7 +73,14 @@ public class HomeController : KikoleBaseController
             return RedirectToAction("Discussions", "Admin");
 
         var messages = await _discussionService.GetOwnThreadAsync(UserId);
-        return View(new ContactModel { Messages = messages });
+        return View(new ContactModel
+        {
+            Messages = messages,
+            // icone "Créer un kikolé" du menu pour un utilisateur pas encore PowerUser
+            // (cf. _Layout.cshtml) : preremplit la demande plutot que de le laisser
+            // face a une page vide sans savoir quoi ecrire
+            NewMessage = requestAccess ? _localizer["RequestPowerUserMessage"].Value : null
+        });
     }
 
     [HttpPost]
