@@ -120,11 +120,11 @@
   <data name="Account" xml:space="preserve">
     <value>Compte</value>
   </data>
+  <data name="AdminActions" xml:space="preserve">
+    <value>Actions admin</value>
+  </data>
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact</value>
-  </data>
-  <data name="FriendlyWebsite" xml:space="preserve">
-    <value>Vous aimez le vélo ?</value>
   </data>
   <data name="Home" xml:space="preserve">
     <value>Accueil</value>
@@ -143,6 +143,9 @@
   </data>
   <data name="SiteName" xml:space="preserve">
     <value>Kikolé ?</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statistiques</value>
   </data>
   <data name="SubmitKikole" xml:space="preserve">
     <value>Proposer un kikolé !</value>

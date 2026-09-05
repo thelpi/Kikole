@@ -120,9 +120,6 @@
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contacter l'administrateur</value>
   </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>Vous êtes connecté en tant que</value>
-  </data>
   <data name="ToSend" xml:space="preserve">
     <value>Envoyer</value>
   </data>

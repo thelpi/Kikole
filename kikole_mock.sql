@@ -4,15 +4,15 @@
 -- (badges, pays, continents, langues, positions, types de proposition, types d'utilisateur).
 --
 -- Les mots de passe sont hashes en SHA256(motdepasse + EncryptionKey), ou EncryptionKey
--- est la valeur de appsettings.Development.json ("KikoleDevSalt2026") : c'est l'ancien
--- format, delibere. Ca sert de fixture pour verifier le rehash automatique vers PBKDF2
--- a la premiere connexion (LegacyCompatiblePasswordHasher). Changer cette cle invalide
--- les comptes ci-dessous.
+-- est la valeur des user-secrets ("KikoleDevSalt2026") : c'est l'ancien format, delibere.
+-- Ca sert de fixture pour verifier le rehash automatique vers PBKDF2 a la premiere
+-- connexion (LegacyCompatiblePasswordHasher). Changer cette cle invalide les comptes
+-- ci-dessous.
 --
 -- Comptes :
---   admin   / admin123   (administrateur)
---   joueur1 / test123    (utilisateur standard)
---   joueur2 / test123    (utilisateur standard)
+--   admin   / admin12345      (administrateur)
+--   joueur1 / NouveauMdp1234  (utilisateur standard)
+--   joueur2 / test123         (utilisateur standard)
 --   question de recuperation : reponse "kikole" pour les trois
 --
 -- Joueurs du jour : generes de FirstDate a aujourd'hui + 7 jours (voir plus bas).
@@ -46,8 +46,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ---------------------------------------------------------------- utilisateurs
 
 INSERT INTO users (id, login, normalized_login, password, password_reset_question, password_reset_answer, language_id, user_type_id, is_disabled, concurrency_stamp, security_stamp, ip, creation_date) VALUES
-(1, 'admin',   'ADMIN',   '4df227a5023483d53ebea1653c76a8aad6c2a0aa1b07a6b55c6e66842fd8bf25', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 3, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:00:00'),
-(2, 'joueur1', 'JOUEUR1', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:05:00'),
+(1, 'admin',   'ADMIN',   '0834071d6bb6ffc7e16b4d6f620c181b4d5b654294eeb94931220c8679e009a1', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 3, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:00:00'),
+(2, 'joueur1', 'JOUEUR1', 'd855fce1f2803c3a3406f05d2bad9db4df589a5fdf047dcedc7bc8bc29e898ba', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:05:00'),
 (3, 'joueur2', 'JOUEUR2', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 1, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:10:00');
 
 -- un GUID libre pour tester le parcours d'inscription

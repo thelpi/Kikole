@@ -126,6 +126,9 @@
   <data name="AdminActions" xml:space="preserve">
     <value>Actions d'administration</value>
   </data>
+  <data name="CheckSubmittedPlayers" xml:space="preserve">
+    <value>Vérifier les joueurs proposés</value>
+  </data>
   <data name="ReassignPlayers" xml:space="preserve">
     <value>Réassigner la date des joueurs</value>
   </data>

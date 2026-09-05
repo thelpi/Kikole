@@ -120,6 +120,9 @@
   <data name="ActiveUsersTitle" xml:space="preserve">
     <value>Nombre d'utilisateurs actifs</value>
   </data>
+  <data name="KikolesStatsLink" xml:space="preserve">
+    <value>Voir les statistiques des kikolés</value>
+  </data>
   <data name="PlayersDistributionTitle" xml:space="preserve">
     <value>Répartition des joueurs par critère</value>
   </data>

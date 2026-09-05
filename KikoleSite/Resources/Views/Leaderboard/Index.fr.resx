@@ -171,14 +171,8 @@
   <data name="KFoundHeader" xml:space="preserve">
     <value>Kikolés trouvés / créés</value>
   </data>
-  <data name="KikolesStatisticsPageLink" xml:space="preserve">
-    <value>Stats sur les kikolés</value>
-  </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>trié par {0}, depuis {1} jusqu'au {2}</value>
-  </data>
-  <data name="NewPageBuilding" xml:space="preserve">
-    <value>Statistiques</value>
   </data>
   <data name="NotYetPoints" xml:space="preserve">
     <value>N/A</value>
@@ -206,9 +200,6 @@
   </data>
   <data name="SortType" xml:space="preserve">
     <value>Type de tri :</value>
-  </data>
-  <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Stats sur le site</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Temps</value>

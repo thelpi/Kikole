@@ -463,6 +463,34 @@ Branche de travail : `remaster-v2`.
         substitution requis) — compte reremis à son palier d'origine une fois le test
         terminé. Ça laisse deux joueurs de test dans la base locale (un refusé, un accepté)
         : sans conséquence, à emporter par un prochain rejeu de `kikole_mock.sql`.
+- [x] **Plusieurs pages sans accès depuis le menu** (soit un lien caché, soit l'URL à
+      connaître) — icônes ajoutées dans `_Layout.cshtml`, gérées par rôle, en miroir dans
+      la barre desktop (`.site-nav-links`) et le tiroir mobile (`.site-nav-drawer`) :
+      Contact (connecté), Proposer un kikolé (PowerUser+), Actions admin/Statistiques
+      (Administrator). `Admin/PlayerSubmission` d'abord ajoutée en plus de la demande
+      initiale (trouvée en audit, elle n'était linkée que depuis `/Admin`, lui-même absent
+      du menu) — **revenu dessus** : pas d'icône dédiée, c'est une action d'administration
+      comme les autres, son seul point d'accès est désormais un lien texte
+      (`CheckSubmittedPlayers`) sur `Admin/Actions` (retiré de `Admin/Index`, où il vivait
+      avant). `PlayerCreationModel.DisplayPlayerSubmissionLink` gardée : elle sert aussi
+      (sans rapport) à conditionner l'affichage du champ indice anglais sur ce même
+      formulaire. Stats/KikolesStats : un seul logo (vers `Stats`, les
+      graphiques) plutôt que deux, `KikolesStats` restant accessible par un lien depuis
+      `Stats` (`KikolesStatsLink`) pour ne pas surcharger la barre.
+      Nettoyage des accès devenus redondants : liens toujours visibles du footer
+      (`SubmitKikole`/`ContactAdmin`, affichés même sans les droits requis) retirés ;
+      liens texte Stats/KikolesStats + `LeaderboardModel.IsAdmin` (devenu mort) retirés de
+      `Leaderboard/Index.cshtml`. `Admin/Club`/`Admin/PlayerEdit`/`Leaderboard/Palmares`/
+      `Home/Contest` laissés hors menu : déjà linkées depuis leur contexte d'usage.
+      Bug découvert en vérifiant : `.site-nav-drawer.open` avait un `max-height: 320px`
+      fixe (dimensionné pour l'ancienne liste courte) qui rognait silencieusement le bas
+      du tiroir pour un compte admin (8 lignes désormais) — corrigé en `80vh` avec défilement
+      interne. CSS versionné `?v=1` → `?v=4` dans `_Layout.cshtml` au passage (cache
+      navigateur sur ce fichier, sans quoi un visiteur ayant déjà chargé le site ne
+      verrait aucun des changements CSS de cette session avant un rechargement forcé).
+      Vérifié en direct : icônes visibles/masquées selon le rôle (standard/admin), tous
+      les liens fonctionnels, tiroir mobile sans coupure, barre desktop sans chevauchement
+      (testé à 1000px).
 - [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
       cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
       étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,
@@ -471,6 +499,35 @@ Branche de travail : `remaster-v2`.
       présent ? Comportement actuel non vérifié/décidé.
 - [ ] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`. Le champ est un texte libre rendu tel quel.
+- [x] **Mots de passe des comptes de test changés** (`admin` → `admin12345`,
+      `joueur1` → `NouveauMdp1234`, laissé tel quel après les sessions de vérification
+      précédentes) — `admin123`/`test123` ne respectaient plus le minimum de 10 caractères
+      exigé pour tout nouveau mot de passe, sans quoi impossibles à re-saisir depuis
+      l'application elle-même. Mis à jour aux deux endroits : la base locale (mêmes
+      hashs, format historique SHA256+sel pour rester fixture de démonstration du rehash
+      automatique — cf. commentaire en tête de `kikole_mock.sql`) et le script
+      `kikole_mock.sql` lui-même (littéraux `INSERT` + commentaire des identifiants), pour
+      qu'un rejeu futur reste cohérent avec la base actuelle. `joueur2` inchangé
+      (`test123`) : il partageait jusqu'ici le même hash que `joueur1` dans le script,
+      désormais deux littéraux séparés puisque leurs mots de passe divergent.
+- [ ] **Page Contact : remplacer l'email par une vraie logique d'échange dans le site.**
+      `Home/Contact.cshtml` demande une adresse email de contact alors que la page crée
+      déjà une vraie discussion en base (`DiscussionDto`, table `discussions`, liée à
+      `UserId`) — l'email est redondant avec le compte déjà connecté. Remplacer par un
+      vrai fil de discussion questions/réponses dans le site (l'utilisateur voit ses
+      échanges, l'admin répond depuis quelque part) plutôt qu'un formulaire à sens unique.
+      Implique une vue admin pour répondre (`AdminController` n'a aujourd'hui qu'un
+      affichage brut des discussions sur `Admin/Actions`, sans réponse possible) — chantier
+      à cadrer avant de s'y attaquer.
+- [ ] **Revoir complètement le footer.** Réduit à la mention de copyright après avoir
+      retiré "Proposer un kikolé !"/"Contact" (redondants avec le nouveau menu, cf.
+      ci-dessus) et "Vous aimez le vélo ?" (lien personnel, retiré à la demande) — il ne
+      reste presque plus rien dedans, l'occasion de repenser ce qui doit vraiment y vivre
+      plutôt que de le laisser à l'état de résidu.
+- [ ] **Fusionner `Leaderboard/KikolesStats` dans `Leaderboard/Stats`**, en bloc
+      "collapsible" au même titre que "Répartition des joueurs par critère" et "Nombre
+      d'utilisateurs actifs" déjà présents sur cette page — plutôt que la page séparée
+      reliée par un simple lien (`KikolesStatsLink`) mis en place entre-temps.
 
 **Volontairement en dernier :** le seul poste qui ne bloque rien et ne se déprécie pas.
 

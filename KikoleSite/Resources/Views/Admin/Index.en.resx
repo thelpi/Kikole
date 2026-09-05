@@ -138,9 +138,6 @@
   <data name="AvoidAmbiguousPos" xml:space="preserve">
     <value>as a rule of thumb, avoid players with too much ambiguous position</value>
   </data>
-  <data name="CheckSubmittedPlayers" xml:space="preserve">
-    <value>Check submitted players</value>
-  </data>
   <data name="ClubsCareer" xml:space="preserve">
     <value>Clubs career</value>
   </data>

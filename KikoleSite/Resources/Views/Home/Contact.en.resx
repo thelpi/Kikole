@@ -120,9 +120,6 @@
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact the administrator</value>
   </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>You are logged as</value>
-  </data>
   <data name="ToSend" xml:space="preserve">
     <value>Send</value>
   </data>

@@ -9,7 +9,5 @@
         public string? ErrorMessage { get; set; }
 
         public string? SuccessMessage { get; set; }
-
-        public string? LoggedAs { get; set; }
     }
 }

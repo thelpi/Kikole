@@ -171,14 +171,8 @@
   <data name="KFoundHeader" xml:space="preserve">
     <value>Kikolés found (created)</value>
   </data>
-  <data name="KikolesStatisticsPageLink" xml:space="preserve">
-    <value>Stats about kikolés</value>
-  </data>
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>
-  </data>
-  <data name="NewPageBuilding" xml:space="preserve">
-    <value>Statistics</value>
   </data>
   <data name="NotYetPoints" xml:space="preserve">
     <value>N/A</value>
@@ -206,9 +200,6 @@
   </data>
   <data name="SortType" xml:space="preserve">
     <value>Sort type:</value>
-  </data>
-  <data name="StatisticsPageLink" xml:space="preserve">
-    <value>Stats about website</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Time</value>

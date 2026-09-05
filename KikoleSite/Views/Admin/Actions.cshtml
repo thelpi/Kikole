@@ -9,7 +9,8 @@
 }
 
 <h3>@localizer["AdminActions"]</h3>
-<form method="post" action="/Admin/RecomputeBadges">
+<div><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
+<form method="post" action="/Admin/RecomputeBadges" class="mediumTopMargin">
     <input type="submit" value="@localizer["RecomputeBadges"]" />
 </form>
 <form method="post" action="/Admin/RecomputeLeaders" class="mediumTopMargin">

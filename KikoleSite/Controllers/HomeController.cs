@@ -72,12 +72,7 @@ public class HomeController : KikoleBaseController
     [Authorization]
     public IActionResult Contact()
     {
-        var model = new ContactModel
-        {
-            LoggedAs = UserLogin
-        };
-
-        return View(model);
+        return View(new ContactModel());
     }
 
     [HttpPost]
@@ -102,7 +97,6 @@ public class HomeController : KikoleBaseController
             model.Message = null;
         }
 
-        model.LoggedAs = UserLogin;
         return View(model);
     }
 

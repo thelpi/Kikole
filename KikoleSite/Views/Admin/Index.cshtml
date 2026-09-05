@@ -10,11 +10,6 @@ else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     <div class="greentext mediumTopMargin">@Model.InfoMessage</div>
 }
 
-@if (Model.DisplayPlayerSubmissionLink)
-{
-    <div class="mediumTopMargin"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
-}
-
 <h3>@localizer["SubmitPlayerTitle"]</h3>
 <form method="post" action="/Admin">
     <div class="largeTopMargin">

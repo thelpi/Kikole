@@ -174,7 +174,7 @@ body { padding-top: 0; }
   transition: max-height 0.25s ease;
 }
 
-.site-nav-drawer.open { max-height: 320px; }
+.site-nav-drawer.open { max-height: 80vh; overflow-y: auto; }
 
 .site-nav-drawer-inner { padding: 8px 18px 14px; }
 

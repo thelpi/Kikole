@@ -255,8 +255,7 @@ public class LeaderboardController : KikoleBaseController
             LeaderboardDay = _clock.Today,
             DaySortType = DayLeaderSorts.BestTime,
             Dayboard = dailyBoard,
-            GlobalLeaderboard = globalLeaderboard,
-            IsAdmin = IsTypeOfUser(UserTypes.Administrator)
+            GlobalLeaderboard = globalLeaderboard
         };
     }
 
