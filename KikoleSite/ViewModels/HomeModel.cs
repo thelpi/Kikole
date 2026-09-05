@@ -47,6 +47,14 @@ public class HomeModel
     public bool IsCreator { get; set; }
 
     /// <summary>
+    /// Vrai uniquement sur la reponse HTTP qui vient de faire gagner le kikole (la
+    /// proposition qui cree la ligne <c>leaders</c>) - jamais vrai sur une simple
+    /// re-consultation d'un jour deja trouve. Sert a n'afficher la popup de victoire
+    /// (felicitations + badges + cadran) qu'une seule fois, au moment ou ca arrive.
+    /// </summary>
+    public bool JustWon { get; set; }
+
+    /// <summary>
     /// <c>Null</c> tant que non trouve ; sinon <c>true</c> si la proposition gagnante a
     /// ete soumise le jour meme du kikole, <c>false</c> si trouve en rattrapage (jour
     /// consulte plus tard). Calcule par le controleur, cf. <see cref="IsCreator"/> qui

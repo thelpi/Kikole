@@ -278,6 +278,7 @@ public class HomeController : KikoleBaseController
                 .ManageProposalResponseAsync(request, UserId, pInfo, countryContinents);
 
             response = responseTmp;
+            model.JustWon = leader != null;
 
             if (leader != null)
             {

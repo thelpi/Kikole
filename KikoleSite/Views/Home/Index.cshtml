@@ -87,12 +87,7 @@
         @if (!string.IsNullOrWhiteSpace(Model.PlayerName))
         {
             <div class="dossier-head">
-                @if (Model.CurrentDay == 0 && !Model.IsCreator)
-                {
-                    <div class="banner success">@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</div>
-                    await Html.RenderPartialAsync("Partial/Badges", Model.Badges);
-                }
-                else if (Model.CurrentDay == 0)
+                @if (Model.CurrentDay == 0)
                 {
                     <h1>@localizer["PlayerIs"] <span style="color:var(--stamp)">@Model.PlayerName</span></h1>
                 }
@@ -173,6 +168,21 @@
                     </div>
                 </div>
             </div>
+            @if (Model.CurrentDay == 0 && !Model.IsCreator && Model.JustWon)
+            {
+                <div class="win-modal open" id="winModal">
+                    <canvas class="win-modal-confetti" id="winModalConfetti"></canvas>
+                    <div class="win-modal-box">
+                        <div class="banner success">@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</div>
+                        <div class="scoreboard success win-modal-scoreboard">
+                            <div class="label">@localizer["Points"]</div>
+                            <div class="value">@Model.Points</div>
+                        </div>
+                        @{ await Html.RenderPartialAsync("Partial/Badges", Model.Badges); }
+                        <p class="win-modal-hint">@localizer["ClickToContinue"]</p>
+                    </div>
+                </div>
+            }
         }
         else
         {

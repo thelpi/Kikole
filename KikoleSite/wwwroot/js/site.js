@@ -67,6 +67,94 @@ var confirmGiveUp = function () {
     form.requestSubmit(document.getElementById('giveUpTrigger'));
 };
 
+/* popup de victoire (Home/Index.cshtml) : deja rendue ouverte cote serveur quand
+   HomeModel.JustWon est vrai (une seule fois, sur la reponse qui fait vraiment
+   gagner - jamais sur une simple re-consultation d'un jour deja trouve). Pas de
+   bouton pour l'ouvrir ici, juste la fermeture au clic (n'importe ou dessus) et le
+   feu d'artifice lance une fois au chargement. */
+$(function () {
+    var modal = document.getElementById('winModal');
+    if (!modal) {
+        return;
+    }
+
+    modal.addEventListener('click', function () {
+        modal.classList.remove('open');
+    });
+
+    var canvas = document.getElementById('winModalConfetti');
+    if (canvas && canvas.getContext) {
+        launchWinConfetti(canvas);
+    }
+});
+
+var launchWinConfetti = function (canvas) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+
+    var resize = function () {
+        canvas.width = canvas.offsetWidth * dpr;
+        canvas.height = canvas.offsetHeight * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    var colors = ['#1f5e3e', '#ad8a3e', '#a6332b', '#dfb04c', '#faf6e9'];
+    var centerX = canvas.offsetWidth / 2;
+    var centerY = canvas.offsetHeight / 2;
+    var particleCount = 140;
+    var particles = [];
+    for (var i = 0; i < particleCount; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var speed = 3 + Math.random() * 7;
+        particles.push({
+            x: centerX,
+            y: centerY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 2,
+            size: 4 + Math.random() * 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.4
+        });
+    }
+
+    var gravity = 0.18;
+    var duration = 2600;
+    var startTime = Date.now();
+
+    var frame = function () {
+        var elapsed = Date.now() - startTime;
+        var lifeLeft = Math.max(0, 1 - elapsed / duration);
+        ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+        particles.forEach(function (p) {
+            p.vy += gravity;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rotation += p.rotationSpeed;
+
+            ctx.save();
+            ctx.globalAlpha = lifeLeft;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+            ctx.restore();
+        });
+
+        if (elapsed < duration) {
+            requestAnimationFrame(frame);
+        } else {
+            ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+            window.removeEventListener('resize', resize);
+        }
+    };
+
+    requestAnimationFrame(frame);
+};
+
 var loadKikolesStats = function (sort, desc) {
     $.ajax({
         url: '/kikoles-stats?sort=' + sort + '&desc=' + desc,

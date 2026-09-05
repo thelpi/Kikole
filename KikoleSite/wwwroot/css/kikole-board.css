@@ -1048,6 +1048,68 @@ body { padding-top: 0; }
   justify-content: flex-end;
 }
 
+/* popup de victoire (Home/Index.cshtml, JS site.js) : affichee ouverte des le
+   rendu serveur quand HomeModel.JustWon est vrai (une seule fois, au moment reel
+   ou le kikole est trouve - jamais sur une simple re-consultation), pas d'auto-
+   fermeture, un clic n'importe ou dessus la ferme. Le feu d'artifice (canvas,
+   site.js) est positionne derriere la carte et s'estompe seul, la carte reste
+   affichee tant qu'on n'a pas clique. */
+.kikole-board .win-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 60%, transparent);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 200;
+  cursor: pointer;
+}
+
+.kikole-board .win-modal.open { display: flex; }
+
+.kikole-board .win-modal-confetti {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.kikole-board .win-modal-box {
+  position: relative;
+  z-index: 1;
+  background: var(--paper-raised);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 26px 28px 22px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  cursor: default;
+}
+
+.kikole-board .win-modal-box .banner { text-align: left; }
+
+.kikole-board .win-modal-scoreboard {
+  display: inline-flex;
+  margin: 4px 0 6px;
+}
+
+.kikole-board .win-modal-box .badges-grid { padding: 0; margin-top: 14px; }
+
+.kikole-board .win-modal-hint {
+  margin: 16px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
 /* ---------------------------------------------------------- discussion
    (Home/Contact, Admin/Discussion) : fil de messages rendu par le partial
    Shared/Partial/DiscussionThread, "self"/"other" au lieu de "user"/"admin" pour

@@ -983,6 +983,75 @@ Branche de travail : `remaster-v2`.
         `margin-top: -6px` par défaut l'aurait collé au bouton).
       Build (0 avertissement) + 596 tests verts, vérifié en direct (admin, utilisateur
       standard, FR et EN).
+- [x] **Popup de victoire au moment où un kikolé est trouvé** — le bandeau "Félicitations
+      + liste des badges" était jusqu'ici affiché en permanence sur la page (dans le
+      dossier), y compris en revisitant un jour déjà résolu bien plus tard. Demande de
+      l'utilisateur : n'afficher ça qu'**une seule fois, au moment réel de la victoire**,
+      dans une popup qui ne se ferme qu'au clic (pas d'auto-fermeture), avec le cadran de
+      score bien visible dedans et — si faisable — un effet "feu d'artifice".
+      - **Distinguer "vient de gagner" de "rouvre un jour déjà trouvé"** — nouvelle
+        propriété `HomeModel.JustWon` (bool), posée dans `HomeController` (action POST)
+        exactement quand `leader != null` (i.e. `response.IsWin`, la ligne `leaders`
+        vient d'être créée à cet instant précis) — jamais vraie sur un GET de
+        re-consultation, jamais vraie non plus sur un jour différent d'aujourd'hui
+        (`CurrentDay != 0`, scope inchangé par rapport à l'ancien bandeau qui ne
+        s'affichait déjà que pour le jour courant).
+      - **Affichage "standard" simplifié** — `Home/Index.cshtml`, le titre du dossier
+        pour `CurrentDay == 0` est désormais unique pour créateur et non-créateur
+        ("Le joueur du jour est X"), l'ancienne branche dupliquant félicitations+badges
+        supprimée. Comme la popup est un simple calque par-dessus une page déjà rendue
+        dans son état "standard", il n'y a rien à faire au moment de la fermeture — le
+        contenu normal est déjà là dessous.
+      - **Popup** (`.win-modal`, nouveau, sur le même principe que `.confirm-modal`
+        existant — masquée par défaut, `.open` l'affiche — mais rendue *déjà ouverte*
+        par le serveur quand `Model.JustWon`, pas de bouton pour l'ouvrir) : bandeau
+        félicitations, un **cadran de score dupliqué** dedans (`.scoreboard.success`,
+        même style que celui du masthead, juste une seconde instance dans la popup —
+        plus simple et plus fiable qu'essayer de "percer" un trou dans le fond assombri
+        vers le vrai cadran), la liste des badges (`Partial/Badges` réutilisé tel quel),
+        et un indice textuel "cliquez n'importe où pour continuer" (pas de bouton de
+        fermeture visible). Fermeture au clic n'importe où sur la popup (`site.js`, un
+        seul `addEventListener('click', ...)` sur le conteneur englobant, backdrop et
+        carte confondus).
+      - **Feu d'artifice** — pas de librairie ajoutée (le projet évite les dépendances
+        externes quand une solution maison suffit) : un `<canvas>` en fond de popup
+        (`z-index` sous la carte, `pointer-events:none`) et ~140 particules rectangles
+        colorées (palette du site) projetées depuis le centre de l'écran dans toutes
+        les directions avec gravité, boucle `requestAnimationFrame` de 2,6s puis
+        nettoyage du canvas. Vérifié par lecture directe des pixels du canvas
+        (`getImageData`, non-transparents en cours d'animation, remis à zéro après) —
+        le rendu animé lui-même n'est pas capturable par une capture d'écran statique.
+      - **Vérifié en direct** : un vrai gain sur un jour passé (`day=20`, réponse
+        "Ronaldo") confirme que la popup ne se déclenche **pas** hors du jour courant
+        (comportement voulu, inchangé par rapport à l'ancien bandeau).
+      - **Bug réel, trouvé par l'utilisateur, raté par la première vérification** — un
+        gain du jour courant n'avait pas pu être rejoué avec de vraies données (le
+        kikolé du jour était déjà trouvé depuis le début de la session), donc la popup
+        avait été "vérifiée" en injectant à la main, via JS, le HTML qu'on *pensait*
+        que le serveur produirait — ce qui valide le CSS/JS mais absolument pas le
+        rendu Razor réel. Résultat : l'utilisateur teste en vrai et tombe sur
+        `await Html.RenderPartialAsync(...)` imprimé tel quel en toutes lettres à la
+        place des badges. Cause : cette ligne (statement C# "nu", sans `@`) était
+        imbriquée à deux niveaux de `<div>` de profondeur à l'intérieur du bloc
+        `@if { }` (`.win-modal` > `.win-modal-box` > ligne nue) ; le suivi implicite
+        code/balisage de Razor perd le fil à cette profondeur et traite la ligne comme
+        du texte brut plutôt que du C#, alors que le même appel fonctionne très bien
+        ailleurs dans le même fichier quand il est un enfant direct du bloc `@if`
+        (aucune imbrication supplémentaire). Corrigé en l'enveloppant explicitement
+        dans un mini bloc de code `@{ await Html.RenderPartialAsync(...); }`, qui force
+        le mode code quelle que soit la profondeur d'imbrication autour.
+        **Leçon retenue pour la suite** : ne plus se fier à une injection DOM manuelle
+        pour "vérifier" un rendu Razor conditionnel qu'on ne peut pas déclencher pour
+        de vrai — soit trouver un moyen de le déclencher réellement (ici : créer un
+        compte de test tout neuf via `/Account`, jouer et gagner le jour courant pour
+        de vrai), soit dire explicitement à l'utilisateur que ce point précis n'a pas
+        été vérifié en conditions réelles plutôt que de présenter une injection DOM
+        comme une vérification équivalente. Re-vérifié ensuite avec un compte fraîchement
+        créé (`testwinpopup`) : gain réel du jour courant, badges de premier gain
+        correctement affichés (plusieurs, la carte scrolle en interne au-delà de
+        `max-height:85vh`), fermeture au clic confirmée, page repasse bien à
+        l'affichage standard une fois fermée, popup absente d'un rechargement ultérieur.
+      Build (0 avertissement) + 596 tests verts.
 - [x] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
       extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une
@@ -1173,6 +1242,16 @@ Branche de travail : `remaster-v2`.
       méthode, sans toucher au rendu de la page ni à `site.js`.
 
 **Volontairement en dernier :** le seul poste qui ne bloque rien et ne se déprécie pas.
+
+- [ ] **Prochain chantier : mettre en valeur la série en cours ("streak")**, à la manière
+      des autres jeux du genre ou de Duolingo. Rien commencé, pas encore discuté avec
+      l'utilisateur (design, calcul exact de la série, où l'afficher) — juste posé ici
+      comme prochaine priorité déclarée. Point de départ probable côté données : le badge
+      `Dedicated` (streak de 30 jours, cf. section Qualité/badges plus haut) encode déjà
+      une notion de série consécutive dans `BadgeService`/`RespectLeadersRunConditionsInternal`
+      (utilisé aussi par `ThreeInARow`/`AWeekInARow`/`LegendTier`/etc.) — à voir si cette
+      logique (ou une partie) est réutilisable pour calculer une série "actuelle" à afficher
+      en direct, plutôt que la relation strictement au palier d'un badge.
 
 ---
 

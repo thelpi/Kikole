@@ -141,6 +141,9 @@
   <data name="ComeBackTomorrow" xml:space="preserve">
     <value>Come back tomorrow for a new player!</value>
   </data>
+  <data name="ClickToContinue" xml:space="preserve">
+    <value>Click anywhere to continue</value>
+  </data>
   <data name="CurrentDay" xml:space="preserve">
     <value>Current day</value>
   </data>
