@@ -977,6 +977,36 @@ Branche de travail : `remaster-v2`.
 
 ---
 
+## 5. Portabilité (démo sans WAMP)
+
+- [ ] **Rendre le dépôt auto-portant pour une démo** — besoin exprimé par l'utilisateur :
+      pouvoir `git pull` + Visual Studio sur un poste où WAMP est impossible à installer
+      (poste de bureau sans droits admin) et faire tourner le site sans étape d'install.
+      **Pas commencé, pas urgent — item posé pour une session future.**
+      - **Piste retenue, discutée avec l'utilisateur** : une distribution **MySQL
+        "no-install"** (l'archive ZIP officielle du serveur, pas l'installeur MSI/WAMP) —
+        se dézippe n'importe où sans droits admin, `mysqld.exe` se lance directement avec
+        un dossier de données dédié au repo. Choisie explicitement **pour ne toucher à
+        aucun code** : le connecteur (`MySqlConnector`), le schéma et tout le SQL brut des
+        repositories (Dapper, pas un ORM abstrayant le dialecte) restent identiques —
+        seule la façon de démarrer le serveur change. Scénario visé : un script (`.ps1`)
+        qui télécharge/dézippe/démarre `mysqld` puis rejoue `kikole.sql` + `kikole_mock.sql`
+        contre lui, pour un "clone → un script → F5".
+      - **Piste explicitement écartée par l'utilisateur** : basculer sur SQLite (ou un
+        autre moteur embarqué) pour un site 100% sans serveur — plus "auto-portant" dans
+        l'absolu, mais implique de réécrire une partie du SQL brut des repositories
+        (`TRUNCATE`, `AUTO_INCREMENT`, spécificités MySQL), ce que l'utilisateur ne veut
+        pas faire pour ce seul besoin de démo.
+      - **Reste à faire le jour où ce chantier démarre** : choisir/figer une version MySQL
+        "no-install" (cohérente avec la 9.1 utilisée en local, cf. tableau en tête de
+        fichier), écrire le script de bootstrap (téléchargement, port dédié pour ne pas
+        entrer en conflit avec un WAMP existant sur d'autres postes, dossier de données
+        sous le repo ou dans un chemin utilisateur, rejeu des deux scripts SQL), et
+        vérifier la chaîne de connexion / user-secrets nécessaires (cf. section
+        « Partis pris » plus bas) sur un poste réellement dépourvu de WAMP.
+
+---
+
 ## Base de production : ce qui a été fait, ce qui reste possible
 
 Les fichiers bruts se trouvent dans `C:\wamp64_ok\bin\mysql\mysql9.1.0\data\dbs6116785` :
