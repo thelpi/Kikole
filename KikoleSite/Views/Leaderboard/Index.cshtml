@@ -50,13 +50,13 @@
                                 </td>
                                 <td class="tabData">@leader.TimeString</td>
                                 <td class="tabData">
-                                    @if (leader.IsCreator)
+                                    @if (!leader.IsCreator && Model.Dayboard.CanViewDetails)
                                     {
-                                        @(leader.Points)
+                                        <a href="/Leaderboard/UserDay?userId=@leader.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">@leader.Points</a>
                                     }
                                     else
                                     {
-                                        <a href="/Leaderboard/UserDay?userId=@leader.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">@leader.Points</a>
+                                        @(leader.Points)
                                     }
                                 </td>
                             </tr>
@@ -77,7 +77,16 @@
                                     }
                                 </td>
                                 <td class="tabData">@localizer["NotYetTime"]</td>
-                                <td class="tabData"><a href="/Leaderboard/UserDay?userId=@search.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">(@search.Points)</a></td>
+                                <td class="tabData">
+                                    @if (Model.Dayboard.CanViewDetails)
+                                    {
+                                        <a href="/Leaderboard/UserDay?userId=@search.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">(@search.Points)</a>
+                                    }
+                                    else
+                                    {
+                                        @($"({search.Points})")
+                                    }
+                                </td>
                             </tr>
                             i++;
                         }

@@ -14,6 +14,40 @@ $(function () {
     });
 });
 
+/* bandeau d'annonce admin (Partial/Announcement, Home/Index.cshtml) : replier/deplier
+   est purement local a la page (pas de persistance), "ne plus afficher" persiste
+   l'id du message dans un cookie pour ne pas le remontrer aux prochaines visites -
+   un futur message (autre id) n'est donc jamais masque par erreur. */
+$(function () {
+    var $announcement = $(".kikole-board .announcement");
+    if ($announcement.length === 0) {
+        return;
+    }
+
+    $announcement.find(".announcement-toggle").on("click", function () {
+        var collapsed = $announcement.toggleClass("collapsed").hasClass("collapsed");
+        $(this).attr("aria-expanded", collapsed ? "false" : "true");
+    });
+
+    $announcement.find(".announcement-dismiss").on("click", function () {
+        var messageId = $announcement.data("messageId");
+        if (messageId) {
+            var cookieName = "kikoleDismissedAnnouncements";
+            var existingRow = document.cookie.split("; ").find(function (row) {
+                return row.indexOf(cookieName + "=") === 0;
+            });
+            var ids = existingRow ? existingRow.split("=")[1].split(",") : [];
+            if (ids.indexOf(String(messageId)) === -1) {
+                ids.push(String(messageId));
+            }
+            var expires = new Date();
+            expires.setFullYear(expires.getFullYear() + 1);
+            document.cookie = cookieName + "=" + ids.join(",") + "; expires=" + expires.toUTCString() + "; path=/";
+        }
+        $announcement.remove();
+    });
+});
+
 /* modale de confirmation "Give up" (Home/Index.cshtml) : remplace le confirm() natif
    du navigateur, non personnalisable en CSS. Le bouton declencheur reste un vrai
    type="submit" (pour que son name="submit-GiveUp" soit lu par GetSubmitAction() cote
@@ -276,7 +310,7 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
 
                     var newCell = newRow.insertCell();
                     var newText = document.createTextNode(e.points);
-                    if (e.isCreator) {
+                    if (e.isCreator || !data.canViewDetails) {
                         newCell.appendChild(newText);
                     } else {
                         var userLink = document.createElement('a');
@@ -308,10 +342,14 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
                     newCell.classList.add('tabData');
 
                     var newCell = newRow.insertCell();
-                    var userLink = document.createElement('a');
-                    userLink.href = '/Leaderboard/UserDay?userId=' + e.userId + '&date=' + data.date;
-                    userLink.append(document.createTextNode('(' + e.points + ')'));
-                    newCell.appendChild(userLink);
+                    if (data.canViewDetails) {
+                        var userLink = document.createElement('a');
+                        userLink.href = '/Leaderboard/UserDay?userId=' + e.userId + '&date=' + data.date;
+                        userLink.append(document.createTextNode('(' + e.points + ')'));
+                        newCell.appendChild(userLink);
+                    } else {
+                        newCell.appendChild(document.createTextNode('(' + e.points + ')'));
+                    }
                     newCell.classList.add('tabData');
 
                     i++;
@@ -356,7 +394,8 @@ $(function () {
 /* years autocompletion */
 $(function () {
     var availableTags = [];
-    for (var i = 1850; i <= 2010; i++)
+    var maxYear = new Date().getFullYear() - 10;
+    for (var i = 1850; i <= maxYear; i++)
         availableTags.push(i.toString());
     $("#birthYearValue").autocomplete({
         source: availableTags,

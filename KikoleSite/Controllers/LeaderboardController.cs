@@ -263,6 +263,16 @@ public class LeaderboardController : KikoleBaseController
                 .GetDayboardAsync(date, sortType, await _internationalService.GetCountryContinentsAsync());
         }
 
+        // le grant "today" ci-dessus ne sert qu'a decider si LE TABLEAU du jour doit
+        // etre masque (cf. ci-dessus) - le detail par utilisateur (lien vers UserDay)
+        // est une autorisation distincte, propre au jour reellement affiche : un
+        // classement achete (PaidBoard) ou un jour passe jamais joue laisse voir le
+        // tableau mais pas le detail (meme regle que la garde de l'action UserDay).
+        var dayGrant = date == _clock.Today
+            ? todayGrantEnsured
+            : await _proposalService.GetGrantAccessForDayAsync(UserId, date);
+        dayboard.CanViewDetails = dayGrant is DayGrantTypes.Found or DayGrantTypes.Creator or DayGrantTypes.Admin;
+
         return (dayboard, todayGrantEnsured);
     }
 

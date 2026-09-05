@@ -784,6 +784,110 @@ Branche de travail : `remaster-v2`.
         abandon volontaire sur un jour antérieur) → "Trouvé le 05/09/2026" (la date réelle
         de l'abandon, pas celle du jour affiché) — cadran bien en style grisé + valeur
         verte (`.other-day.found`) dans ce second cas.
+- [x] **Nouvelle relecture complète du site par l'utilisateur, 6 points** :
+      - **Annonces admin (`Model.Message`) : plus en rouge, repliable, "ne plus
+        afficher".** L'ancien rendu (`<div class="banner error">`) empruntait la couleur
+        d'erreur alors que ce n'en est pas une. Nouveau composant `Partial/Announcement`
+        (+ resx dédié `Announcement.*.resx`) : bandeau neutre (`.banner.info`, palette
+        papier plutôt que rouge/vert), icône "i" en cercle, libellé "Annonce", bouton
+        replier/déplier (purement visuel, non persisté) et bouton "×" qui retire le
+        bandeau ET mémorise l'id du message dans un cookie
+        (`kikoleDismissedAnnouncements`, liste d'ids séparés par virgules) — un futur
+        message (autre id) n'est donc jamais masqué par erreur, contrairement à un simple
+        flag booléen. Le filtrage se fait **côté serveur** (`HomeController
+        .SetAnnouncementAsync`/`IsAnnouncementDismissed`, factorisé pour les deux points
+        d'entrée qui posaient `model.Message` avant) : le bandeau ne s'affiche même pas
+        dans le HTML si son id est dans le cookie, pas de flash côté client. Nouvelle
+        propriété `HomeModel.MessageId` (`ulong?`) pour porter l'id jusqu'à la vue.
+      - **Bandeau "Proposition ... incorrecte/correcte" jugé "collé" au conteneur** —
+        discuté avec l'utilisateur (option snackbar bas-droite vs rester en place) :
+        **reste en place** (feedback au plus près du champ concerné, plus fiable qu'un
+        coin d'écran pour l'interaction la plus fréquente du jeu). Premier essai
+        (`border-radius` 4px→6px + `box-shadow` discrète) **insuffisant** — vérifié
+        servi correctement (contenu de `kikole-board.css` inspecté en direct via
+        `fetch`/`getComputedStyle`, pas un souci de cache), mais visuellement trop
+        proche de l'original pour se remarquer. Corrigé plus franchement en deuxième
+        passe : liseré de 4px sur le bord gauche (`border-left-color`, vert `--pitch`
+        pour info/succès, rouge `--stamp` pour erreur — langage "toast" classique) +
+        ombre nettement plus marquée (`0 8px 20px` au lieu de `0 4px 14px`). Cette fois
+        le bandeau se détache clairement de la page.
+      - **Position : ordre et persistance de la liste des essais ratés.** Deux bugs
+        dans `Home/Index.cshtml` : (a) la liste apparaissait **avant** le menu déroulant,
+        seule catégorie dans ce cas (club/continent/pays/année ont toutes le motif
+        [champ] puis [essais]) — réordonné pour matcher. (b) la liste restait affichée
+        même une fois la position trouvée, alors que continent/pays/année la font déjà
+        disparaître à ce moment — discuté avec l'utilisateur (garder partout vs disparaître
+        partout) : **disparaît une fois trouvé**, position alignée sur les 3 autres
+        (une fois la catégorie résolue, plus moyen d'y proposer, donc plus d'utilité
+        fonctionnelle à garder l'historique — contrairement aux clubs, laissés à part,
+        où le total à trouver reste inconnu). Pur changement de vue, aucune logique
+        serveur touchée (`IncorrectPositions` continue d'être peuplée comme avant).
+      - **Année de naissance : plafond `2010` en dur → `année courante - 10`.** Present
+        à deux endroits distincts : `HomeController.IsValidInput` (validation serveur,
+        passé de `static` à instance pour accéder à `_clock`) et `site.js` (liste
+        d'autocomplétion `#birthYearValue`, généré via `new Date().getFullYear() - 10`
+        côté client — pas besoin de la faire remonter du serveur, un simple calcul de
+        date suffit). Vérifié en direct : autocomplétion plafonnée à 2016, soumission de
+        2020 rejetée serveur ("Requête invalide").
+      - **Classement : lien vers le détail d'un score visible avant d'avoir soi-même
+        trouvé le joueur du jour concerné.** Cas cité par l'utilisateur : un utilisateur
+        ayant "acheté" l'accès au classement du jour (`DayGrantTypes.PaidBoard`) voit le
+        tableau mais tombait sur une page "pas les droits" en cliquant le score d'un
+        autre joueur (`LeaderboardController.UserDay` exige `Found`/`Creator`/`Admin`).
+        En creusant : le problème n'est pas limité au jour même — un jour passé jamais
+        joué a le même souci (le tableau des jours passés est toujours visible, sans
+        rapport avec le droit d'accès au détail). Corrigé à la source plutôt qu'au cas
+        par cas : nouvelle propriété `Dayboard.CanViewDetails` (bool), calculée dans
+        `LeaderboardController.GetDailyboardAsync` via `GetGrantAccessForDayAsync` sur
+        la date **réellement affichée** (pas seulement "aujourd'hui" — `todayGrantEnsured`
+        existant ne sert qu'à décider si le tableau du jour même doit être masqué, un
+        besoin différent). Elle voyage gratuitement jusqu'au JSON de
+        `/daily-leaderboard-details` (propriété publique de `Dayboard`, sérialisée
+        `canViewDetails` en camelCase comme le reste) — aucun changement necessaire côté
+        `LeaderboardModel`/`InitializeModelAsync`, qui portait déjà `Dayboard` tel quel.
+        Lien conditionné par `Model.Dayboard.CanViewDetails` sur le rendu serveur initial
+        (`Leaderboard/Index.cshtml`, classement et "recherches en cours") et par
+        `data.canViewDetails` côté `site.js` (`loadDailyLeaderboard`, régénéré en AJAX au
+        changement de tri/date) — même flag des deux côtés, aucune divergence possible.
+        Vérifié : flag `false` sur un jour jamais joué par l'utilisateur (même avec des
+        scores d'autres joueurs dedans, testé en simulant le rendu AJAX), `true` sur un
+        jour où trouvé (y compris un abandon volontaire, qui crée bien une ligne
+        `leaders`).
+      Build (0 avertissement) + 596 tests verts après chaque étape, vérification
+      navigateur complète pour les 6 points.
+- [x] **Retour utilisateur après test du lot ci-dessus : point 2 pas encore satisfaisant,
+      + une petite salve de corrections mineures sur `Admin/Club.cshtml`.**
+      - **Vraie cause du bandeau "collé" enfin identifiée** — le premier essai
+        (`border-radius`/`box-shadow` sur `.banner`) était bien servi (revérifié en
+        direct via `fetch`/`getComputedStyle`, pas un souci de cache navigateur), mais
+        beaucoup trop discret pour se remarquer. **Cause réelle, repérée en re-regardant
+        le HTML plutôt que le CSS** : ce bandeau (`Model.MessageToDisplay`) est le seul
+        enfant direct de `.dossier` (la carte beige), qui elle-même n'a **aucun**
+        padding — tout le padding vit dans `.dossier-head` (22px/26px/18px). Le bandeau
+        "Félicitations" juste à côté, lui, était déjà correctement placé *à l'intérieur*
+        de `.dossier-head` et en héritait. Corrigé en déplaçant simplement le bandeau
+        à l'intérieur de `.dossier-head` (avant le bloc `.clue`) plutôt qu'en ajoutant
+        encore du CSS — aucune nouvelle règle nécessaire, le padding existant suffit.
+        Gardé au passage le liseré coloré + l'ombre plus marquée de l'essai précédent
+        (utiles, l'utilisateur avait confirmé les voir). Vérifié en direct : marge nette
+        en haut/gauche/droite avant le contenu de l'indice du jour.
+      - **`Admin/Club.cshtml` : ordre et libellés des champs.** Nouvel ordre (après le
+        champ de recherche initial, inchangé) : Pays, Nom principal (FR), Nom principal
+        (EN), Noms alternatifs (FR), Noms alternatifs (EN) — remplace l'ancien ordre
+        EN-avant-FR avec Pays en dernier. Libellés simplifiés en conséquence
+        (`MainNameFr`/`MainNameEn` : "Nom principal (titre page wiki français/anglais)"
+        → "Nom principal (FR/EN)" ; nouvelles clés dédiées `AlternativeNamesFr`/
+        `AlternativeNamesEn` au lieu d'une seule clé `AlternativeNames` réutilisée deux
+        fois, ambiguë par construction). Ancien bloc d'aide à deux lignes
+        (`AlternativeTip`/`DontMindDiacritics`) remplacé par un nouveau texte à trois
+        lignes sous les champs (`MainNameHint`/`AlternativeNamesHint`/
+        `AlternativeNamesExample`, FR+EN) : conseil Wikipédia pour le nom principal,
+        explication + exemple concret ("PSG"/"Paris Saint-Germain",
+        "Matra Racing"/"Racing Club de France") pour les alias — anciennes clés
+        devenues inutiles supprimées des deux resx. Pur remaniement de vue/resx,
+        `ClubCreationModel`/`AdminController` non touchés (les champs existaient déjà
+        tels quels). Vérifié en direct (compte admin) : ordre et libellés corrects.
+      Build (0 avertissement) + 596 tests verts, vérification navigateur des deux points.
 - [x] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
       extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une

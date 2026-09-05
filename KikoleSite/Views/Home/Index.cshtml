@@ -13,10 +13,7 @@
     }
     else if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {
-        @if (!string.IsNullOrWhiteSpace(Model.Message))
-        {
-            <div class="banner error">@Html.Raw(Model.Message)</div>
-        }
+        await Html.RenderPartialAsync("Partial/Announcement", Model);
         await Html.RenderPartialAsync("Partial/Rules");
         <div class="auth-notice">
             <p>@localizer["YouAreNotLogged"]</p>
@@ -25,10 +22,7 @@
     }
     else
     {
-        @if (!string.IsNullOrWhiteSpace(Model.Message))
-        {
-            <div class="banner error">@Html.Raw(Model.Message)</div>
-        }
+        await Html.RenderPartialAsync("Partial/Announcement", Model);
 
         var scoreboardClass = Model.IsToday
             ? (Model.IsFound ? " success" : "")
@@ -182,11 +176,11 @@
         }
         else
         {
-            if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && !Model.IsErrorMessageForced)
-            {
-                <div class="banner @(Model.IsErrorMessage ? "error" : "success")">@Model.MessageToDisplay</div>
-            }
             <div class="dossier-head">
+                @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && !Model.IsErrorMessageForced)
+                {
+                    <div class="banner @(Model.IsErrorMessage ? "error" : "success")">@Model.MessageToDisplay</div>
+                }
                 <div class="clue">
                     <span class="tag">@localizer["DayClue"]</span>
                     @if (Model.Clue.IsImageUrl())
@@ -393,6 +387,8 @@
                 @if (string.IsNullOrWhiteSpace(Model.Position))
                 {
                     <div>
+                        @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @class = "blank", @id = "positionSubmission" })
+                        <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
                         @if (Model.IncorrectPositions?.Count > 0)
                         {
                             <div class="attempts">
@@ -402,27 +398,14 @@
                                 }
                             </div>
                         }
-                        @Html.DropDownListFor(m => m.PositionSubmission, Model.Positions, new { @class = "blank", @id = "positionSubmission" })
-                        <input type="submit" value="Ok" id="submitPosition" name="submit-Position" style="visibility:hidden; width: 0px" />
                     </div>
                     <div class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Position].points pts</div>
                 }
                 else
                 {
-                    <div>
-                        @if (Model.IncorrectPositions?.Count > 0)
-                        {
-                            <div class="attempts">
-                                @foreach (var iPosition in Model.IncorrectPositions)
-                                {
-                                    <div class="attempt"><s>@iPosition</s></div>
-                                }
-                            </div>
-                        }
-                        <div class="value">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7.5L5.5 11L12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                            @Model.Position
-                        </div>
+                    <div class="value">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7.5L5.5 11L12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        @Model.Position
                     </div>
                 }
             </form>

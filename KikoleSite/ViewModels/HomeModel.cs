@@ -15,6 +15,7 @@ public class HomeModel
     public string? Clue { get; set; }
     public string? EasyClue { get; set; }
     public string? Message { get; set; }
+    public ulong? MessageId { get; set; }
     public string? PlayerCreator { get; set; }
     public bool LeaderboardAvailable { get; set; }
     public DateTime CurrentDate { get; set; }

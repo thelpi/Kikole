@@ -25,6 +25,7 @@ namespace KikoleSite.Controllers;
 public class HomeController : KikoleBaseController
 {
     private const string GiveUpSubmitAction = "GiveUp";
+    private const string DismissedAnnouncementsCookie = "kikoleDismissedAnnouncements";
 
     private readonly IStringLocalizer<HomeController> _localizer;
     private readonly IDiscussionService _discussionService;
@@ -134,16 +135,14 @@ public class HomeController : KikoleBaseController
     [HttpGet]
     public async Task<IActionResult> Index([FromQuery] int? day, [FromQuery] string errorMessageForced)
     {
-        var msg = (await _messageRepository
-            .GetMessageAsync(_clock.Now))?.Message;
-
         var model = new HomeModel
         {
             CurrentDate = _clock.Today,
             Points = ScoreCalculator.BasePoints,
-            Message = msg,
             RegistrationInviteEnabled = _registrationOptions.InviteEnabled
         };
+
+        await SetAnnouncementAsync(model);
 
         if (day.HasValue
             && model.CurrentDay != day.Value
@@ -301,8 +300,7 @@ public class HomeController : KikoleBaseController
                 : _localizer["InvalidGuess", proposalType.GetLabel(true), !string.IsNullOrWhiteSpace(response.Tip) ? $" {response.Tip}" : ""];
         }
 
-        model.Message = (await _messageRepository
-            .GetMessageAsync(_clock.Now))?.Message;
+        await SetAnnouncementAsync(model);
 
         return await SetAndGetViewModelAsync(
                 null,
@@ -310,12 +308,12 @@ public class HomeController : KikoleBaseController
                 countryContinents);
     }
 
-    private static bool IsValidInput(ProposalTypes proposalType, string? value)
+    private bool IsValidInput(ProposalTypes proposalType, string? value)
     {
         switch (proposalType)
         {
             case ProposalTypes.Year:
-                return int.TryParse(value, out var yearV) && yearV >= 1850 && yearV <= 2010;
+                return int.TryParse(value, out var yearV) && yearV >= 1850 && yearV <= _clock.Today.Year - 10;
             case ProposalTypes.Position:
                 return value.IsEnumValue<Positions>();
             case ProposalTypes.Continent:
@@ -330,6 +328,28 @@ public class HomeController : KikoleBaseController
             default:
                 return true;
         }
+    }
+
+    private async Task SetAnnouncementAsync(HomeModel model)
+    {
+        var announcement = await _messageRepository
+            .GetMessageAsync(_clock.Now);
+
+        if (announcement == null || IsAnnouncementDismissed(announcement.Id))
+            return;
+
+        model.Message = announcement.Message;
+        model.MessageId = announcement.Id;
+    }
+
+    private bool IsAnnouncementDismissed(ulong messageId)
+    {
+        HttpContext.Request.Cookies.TryGetValue(DismissedAnnouncementsCookie, out var dismissed);
+
+        return !string.IsNullOrWhiteSpace(dismissed)
+            && dismissed
+                .Split(',')
+                .Any(id => ulong.TryParse(id, out var parsed) && parsed == messageId);
     }
 
     private async Task<IActionResult> SetAndGetViewModelAsync(

@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AlternativeNames" xml:space="preserve">
-    <value>Noms alternatifs</value>
+  <data name="AlternativeNamesEn" xml:space="preserve">
+    <value>Noms alternatifs (EN)</value>
   </data>
-  <data name="AlternativeTip" xml:space="preserve">
-    <value>si très différent du nom EN ou FR</value>
+  <data name="AlternativeNamesFr" xml:space="preserve">
+    <value>Noms alternatifs (FR)</value>
+  </data>
+  <data name="AlternativeNamesHint" xml:space="preserve">
+    <value>Les noms alternatifs sont optionnels, utiles quand le club a changé de nom ou possède une forme abrégée.</value>
+  </data>
+  <data name="AlternativeNamesExample" xml:space="preserve">
+    <value>Exemple : « PSG » pour « Paris Saint-Germain », « Matra Racing » pour « Racing Club de France ».</value>
   </data>
   <data name="Country" xml:space="preserve">
     <value>Pays</value>
@@ -132,14 +138,14 @@
   <data name="DoCreate" xml:space="preserve">
     <value>Créer le club</value>
   </data>
-  <data name="DontMindDiacritics" xml:space="preserve">
-    <value>ne pas se soucier des accents, ils seront ignorés</value>
-  </data>
   <data name="MainNameEn" xml:space="preserve">
-    <value>Nom principal (titre page wiki anglais)</value>
+    <value>Nom principal (EN)</value>
   </data>
   <data name="MainNameFr" xml:space="preserve">
-    <value>Nom principal (titre page wiki français)</value>
+    <value>Nom principal (FR)</value>
+  </data>
+  <data name="MainNameHint" xml:space="preserve">
+    <value>Pour le nom principal, privilégiez la page Wikipédia du club dans la langue cible.</value>
   </data>
   <data name="SearchAlreadyExists" xml:space="preserve">
     <value>Chercher si le club n'existe pas déjà :</value>

@@ -33,30 +33,30 @@
                 </div>
             }
             <div class="form-field">
-                <label>@localizer["MainNameEn"]</label>
-                @Html.TextBoxFor(x => x.MainNameEn, null, new { @class = "blank" })
-            </div>
-            <div class="form-field">
-                <label>@localizer["AlternativeNames"]</label>
-                @Html.TextAreaFor(x => x.AlternativeNamesEn, 4, 30, new { @class = "blank" })
+                <label>@localizer["Country"]</label>
+                <input type="text" id="countryName" name="CountryNameSubmissionValue" class="blank" />
+                <input type="hidden" id="countryId" name="Country" value="@Model.Country" />
             </div>
             <div class="form-field">
                 <label>@localizer["MainNameFr"]</label>
                 @Html.TextBoxFor(x => x.MainNameFr, null, new { @class = "blank" })
             </div>
             <div class="form-field">
-                <label>@localizer["AlternativeNames"]</label>
+                <label>@localizer["MainNameEn"]</label>
+                @Html.TextBoxFor(x => x.MainNameEn, null, new { @class = "blank" })
+            </div>
+            <div class="form-field">
+                <label>@localizer["AlternativeNamesFr"]</label>
                 @Html.TextAreaFor(x => x.AlternativeNamesFr, 4, 30, new { @class = "blank" })
             </div>
-            <div class="form-hint">
-                @localizer["AlternativeTip"]<br />
-                @localizer["DontMindDiacritics"]
-            </div>
-
             <div class="form-field">
-                <label>@localizer["Country"]</label>
-                <input type="text" id="countryName" name="CountryNameSubmissionValue" class="blank" />
-                <input type="hidden" id="countryId" name="Country" value="@Model.Country" />
+                <label>@localizer["AlternativeNamesEn"]</label>
+                @Html.TextAreaFor(x => x.AlternativeNamesEn, 4, 30, new { @class = "blank" })
+            </div>
+            <div class="form-hint">
+                @localizer["MainNameHint"]<br />
+                @localizer["AlternativeNamesHint"]<br />
+                @localizer["AlternativeNamesExample"]
             </div>
 
             @Html.HiddenFor(x => x.Id)
