@@ -347,6 +347,38 @@ Branche de travail : `remaster-v2`.
         (GET) — donc probablement lié à un état transitoire de layout (badges qui
         s'animent/se dimensionnent après coup ?) plutôt qu'au HTML/CSS statique. À
         reproduire et diagnostiquer.
+  - [ ] **Popup "Etes vous sûr ?" au clic sur "Montrer la réponse" en style par défaut du
+        navigateur.** `Views/Home/Index.cshtml` utilise `onclick="return confirm(...)"`
+        (bouton Give up) — sort complètement de l'habillage papier/encre. À remplacer par
+        une vraie modale stylée (nécessite un peu de JS : `confirm()` est bloquant et ne se
+        personnalise pas côté CSS).
+  - [ ] **Affichage "Le joueur du xxxx était xxxx." très bizarre (police, taille).**
+        `Views/Home/Index.cshtml`, cas "jour passé raté" : c'est un `<h1>` brut avec un
+        `<span class="redtext">` inline (resx `PlayerWas`), sans la police Bebas Neue /
+        traitement du reste du dossier — un oubli du passage en `.kikole-board`, à
+        harmoniser avec le reste du `.dossier-head`.
+  - [ ] **Datepicker du classement différent de celui de la page d'accueil (style natif du
+        navigateur).** `Leaderboard/Index.cshtml` utilise toujours `<input type="date">`
+        natif (juste ré-habillé en CSS a minima), alors que `Views/Home/Index.cshtml` a le
+        vrai datepicker jQuery UI stylé. Choix assumé au moment du passage de style
+        "basique" du classement (le widget jQuery UI y est branché sur une navigation
+        `onchange` custom vers `/?day=N`, pas réutilisable tel quel pour déclencher les
+        rafraîchissements AJAX de `initializeLeaderboards`) — mais l'écart visuel se voit,
+        à reprendre en branchant `onSelect` sur les mêmes `onchange` que `site.js` attend
+        déjà (`SortType`, `MinimalDate`, `MaximalDate`, `DaySortType`, `LeaderboardDay`).
+  - [ ] **Meilleur accès au palmarès depuis le classement.** Actuellement
+        `Leaderboard/Index.cshtml` a une carte `.form-card` dédiée qui ne contient qu'un
+        lien "Palmarès" — même gabarit que les cartes de contenu réel juste à côté, mais
+        vide, ce qui détonne. Pistes à explorer : un simple lien/bouton hors carte plutôt
+        qu'une carte dédiée, ou un onglet/segment de navigation entre "Classement" et
+        "Palmarès" au lieu de deux pages séparées par un lien.
+  - [ ] **Mise en valeur des kikolés "tentés/trouvés le jour même" à revoir.**
+        `Leaderboard/User.cshtml`, tableau "Statistiques quotidiennes" : convention actuelle
+        = texte en gras + astérisque dans l'en-tête expliqué par une légende sous le tableau
+        ("* en gras, kikolés tentés / trouvés le jour même."). Le libellé lui-même est bon,
+        c'est la mise en forme qui mériterait mieux qu'un gras + renvoi de légende — par
+        exemple une puce/icône dans la cellule, ou une teinte de fond dédiée sur la ligne ou
+        la cellule concernée, pour que ce soit lisible sans avoir à lire la légende.
 - [ ] **Formulaire "Changer la question et réponse de récupération" (page Compte) devrait
       redemander le mot de passe actuel.** Actuellement on peut changer la question/réponse
       de récupération sans se ré-authentifier, contrairement au changement de mot de passe.
