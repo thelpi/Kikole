@@ -315,10 +315,28 @@ Branche de travail : `remaster-v2`.
 
 - [ ] **Rendre le graphisme plus attrayant** — **en cours**. Direction validée : la page
       de jeu comme un dossier de scout (`kikole-board.css`, `Views/Home/Index.cshtml`),
-      cf. le plan `linear-pondering-wind.md`. Reste à faire : les autres pages (règles
-      pré-connexion, classement, admin) réutilisant les mêmes tokens une fois la page de
-      jeu stabilisée, et les badges (actuellement non retouchés, cf. `Partial/Badges.cshtml`)
-      — prévu en même temps que la page classement.
+      cf. le plan `linear-pondering-wind.md`. Fait depuis : menu de navigation global
+      (`_Layout.cshtml`), datepicker jQuery UI, page Compte (`Views/Account/Index.cshtml`)
+      et présentation/règles (`Partial/Rules.cshtml`) réutilisant les mêmes tokens. Reste à
+      faire : classement et admin, et les badges (actuellement non retouchés, cf.
+      `Partial/Badges.cshtml`) — prévu en même temps que la page classement.
+  - [ ] **Bug graphique : superposition des blocs beige au moment de la victoire.**
+        Une fois le joueur trouvé, quand la page s'affiche avec les badges puis le bloc
+        présentation/règles en dessous, un rendu bizarre apparaît (les blocs beige se
+        superposent). Semble ne se produire que sur le rendu de la page juste après la
+        victoire (POST qui affiche le résultat), pas en quittant puis revenant sur la page
+        (GET) — donc probablement lié à un état transitoire de layout (badges qui
+        s'animent/se dimensionnent après coup ?) plutôt qu'au HTML/CSS statique. À
+        reproduire et diagnostiquer.
+- [ ] **Formulaire "Changer la question et réponse de récupération" (page Compte) devrait
+      redemander le mot de passe actuel.** Actuellement on peut changer la question/réponse
+      de récupération sans se ré-authentifier, contrairement au changement de mot de passe.
+- [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
+      cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
+      étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,
+      pas claire, à rediscuter : quand on consulte un ancien jour raté, ce cadran doit-il
+      afficher le score de la journée en cours de consultation, ou toujours celui du jour
+      présent ? Comportement actuel non vérifié/décidé.
 - [ ] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`. Le champ est un texte libre rendu tel quel.
 
