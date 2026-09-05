@@ -144,14 +144,8 @@
   <data name="CurrentDay" xml:space="preserve">
     <value>Jour courant</value>
   </data>
-  <data name="CurrentScore" xml:space="preserve">
-    <value>Votre score actuel : &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt; points.</value>
-  </data>
   <data name="DayClue" xml:space="preserve">
     <value>Indice du jour :</value>
-  </data>
-  <data name="FinalScore" xml:space="preserve">
-    <value>Votre score final : &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="NationalityTitle" xml:space="preserve">
     <value>Nationalité sportive :</value>

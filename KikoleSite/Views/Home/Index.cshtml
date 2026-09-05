@@ -29,6 +29,7 @@
             <div class="banner error">@Html.Raw(Model.Message)</div>
         }
 
+        var justFoundToday = Model.CurrentDay == 0 && !Model.IsCreator && !string.IsNullOrWhiteSpace(Model.PlayerName);
         <div class="masthead">
             <div class="day-nav">
                 @if (!Model.NoPreviousDay)
@@ -45,7 +46,7 @@
                     <a href="/Admin/PlayerEdit?playerId=@Model.PlayerId">@localizer["GoToPlayerClues"]</a>
                 }
             </div>
-            <div class="scoreboard">
+            <div class="scoreboard@(justFoundToday ? " success" : "")">
                 <div class="label">@localizer["Points"]</div>
                 <div class="value">@Model.Points</div>
             </div>
@@ -62,7 +63,6 @@
                 @if (Model.CurrentDay == 0 && !Model.IsCreator)
                 {
                     <div class="banner success">@Html.Raw(string.Format(localizer["PlayerFoundCongrats"].Value, Model.PlayerName)) @localizer["ComeBackTomorrow"]</div>
-                    <div class="creator-line">@Html.Raw(string.Format(localizer["FinalScore"].Value, Model.Points))</div>
                     await Html.RenderPartialAsync("Partial/Badges", Model.Badges);
                 }
                 else if (Model.CurrentDay == 0)

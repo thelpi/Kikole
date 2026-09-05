@@ -322,6 +322,16 @@ body { padding-top: 0; }
   color: var(--board-accent);
 }
 
+/* joueur du jour trouve : le cadran devient la seule source du score (la ligne
+   "score final" a disparu, redondante) - surbrillance verte plutot qu'un badge
+   separe, tant qu'on est sur cet ecran de victoire */
+.kikole-board .scoreboard.success {
+  border-color: var(--pitch);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pitch) 40%, transparent), 0 6px 14px var(--shadow);
+}
+
+.kikole-board .scoreboard.success .value { color: #7fd99a; }
+
 /* ---------------------------------------------------------- formulaires generiques
    (page Compte, presentation/regles) : reprennent .banner/.blank/.actions ci-dessous
    dans un habillage plus simple qu'un dossier de joueur. */

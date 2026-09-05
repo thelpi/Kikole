@@ -671,12 +671,21 @@ Branche de travail : `remaster-v2`.
       Vérifié en direct : icônes visibles/masquées selon le rôle (standard/admin), tous
       les liens fonctionnels, tiroir mobile sans coupure, barre desktop sans chevauchement
       (testé à 1000px).
-- [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
-      cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
-      étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,
-      pas claire, à rediscuter : quand on consulte un ancien jour raté, ce cadran doit-il
-      afficher le score de la journée en cours de consultation, ou toujours celui du jour
-      présent ? Comportement actuel non vérifié/décidé.
+- [x] **"Votre score final : X points." (une fois le joueur trouvé) faisait doublon avec
+      le cadran de score en haut de page.** Ligne retirée (`Home/Index.cshtml`, clé resx
+      `FinalScore` devenue inutile supprimée FR/EN) ; au passage, `CurrentScore` — une
+      clé adjacente au même endroit, plus référencée nulle part dans cette vue depuis un
+      moment — retirée aussi. Le cadran devient la seule source du score, mais avec une
+      **surbrillance** quand le joueur du jour vient d'être trouvé (`.scoreboard.success`
+      : liseré + halo `--pitch`, valeur en vert clair `#7fd99a` plutôt que l'or habituel)
+      pour qu'il continue à jouer le rôle de confirmation visuelle que jouait l'ancienne
+      ligne. Condition (`CurrentDay == 0 && !IsCreator && PlayerName renseigné`) : jour
+      courant, trouvé, pas le créateur qui consulte son propre kikolé. Vérifié en direct :
+      cadran doré normal sur un jour non résolu, halo vert + valeur verte dès qu'un
+      kikolé est trouvé le jour même.
+      **Question restée ouverte, pas traitée** : sur un jour passé raté consulté, le
+      cadran doit-il afficher le score de la journée consultée ou toujours celui du jour
+      présent ? Comportement actuel non vérifié/décidé — à reprendre séparément.
 - [x] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
       extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une
