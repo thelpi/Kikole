@@ -100,34 +100,56 @@ var loadKikolesStats = function (sort, desc) {
     });
 };
 
-var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText) {
+var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId) {
     /* global */
     var sortType = document.getElementById('SortType');
     var fromDate = document.getElementById('MinimalDate');
     var toDate = document.getElementById('MaximalDate');
     sortType.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, youText, currentUserId);
     };
     fromDate.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, youText, currentUserId);
     };
     toDate.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, youText, currentUserId);
     };
 
     /* daily */
     var dailySortType = document.getElementById('DaySortType');
     var dailyDate = document.getElementById('LeaderboardDay');
     dailySortType.onchange = function () {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId);
     };
     dailyDate.onchange = function () {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId);
     };
 };
 
+/* cellule "utilisateur" partagee par les 3 lignes de tableau regenerees en AJAX
+   ci-dessous : ajoute le lien + le petit marqueur "(vous)" quand la ligne est celle
+   de l'utilisateur connecte (cf. Views/Leaderboard/Index.cshtml pour l'equivalent
+   cote rendu serveur). */
+var appendUsernameCell = function (row, userId, userName, href, youText, currentUserId) {
+    var newCell = row.insertCell();
+    var userLink = document.createElement('a');
+    userLink.href = href;
+    userLink.append(document.createTextNode(userName));
+    newCell.appendChild(userLink);
+    newCell.classList.add('tabData');
+    newCell.classList.add('redtext');
+    if (currentUserId && String(userId) === String(currentUserId)) {
+        newCell.classList.add('you');
+        var youTag = document.createElement('span');
+        youTag.classList.add('you-tag');
+        youTag.append(document.createTextNode('(' + youText + ')'));
+        newCell.appendChild(youTag);
+    }
+    return newCell;
+};
+
 /* leaderboard loading */
-var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText) {
+var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText, youText, currentUserId) {
     if (!dateMin || !dateMax) {
         return;
     }
@@ -150,13 +172,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
                 newCell.appendChild(newText);
                 newCell.classList.add('tabData');
 
-                var newCell = newRow.insertCell();
-                var userLink = document.createElement('a');
-                userLink.href = '/Leaderboard?userId=' + e.userId;
-                userLink.append(document.createTextNode(e.userName));
-                newCell.appendChild(userLink);
-                newCell.classList.add('tabData');
-                newCell.classList.add('redtext');
+                appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, youText, currentUserId);
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.points);
@@ -202,7 +218,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
     });
 };
 
-var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText) {
+var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId) {
     if (!date) {
         return;
     }
@@ -231,13 +247,7 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
                     newCell.appendChild(newText);
                     newCell.classList.add('tabData');
 
-                    var newCell = newRow.insertCell();
-                    var userLink = document.createElement('a');
-                    userLink.href = '/Leaderboard?userId=' + e.userId;
-                    userLink.append(document.createTextNode(e.userName));
-                    newCell.appendChild(userLink);
-                    newCell.classList.add('tabData');
-                    newCell.classList.add('redtext');
+                    appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, youText, currentUserId);
 
                     var newCell = newRow.insertCell();
                     var newText = document.createTextNode(e.timeString);
@@ -270,13 +280,7 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
                     newCell.appendChild(newText);
                     newCell.classList.add('tabData');
 
-                    var newCell = newRow.insertCell();
-                    var userLink = document.createElement('a');
-                    userLink.href = '/Leaderboard?userId=' + e.userId;
-                    userLink.append(document.createTextNode(e.userName));
-                    newCell.appendChild(userLink);
-                    newCell.classList.add('tabData');
-                    newCell.classList.add('redtext');
+                    appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, youText, currentUserId);
 
                     var newCell = newRow.insertCell();
                     var newText = document.createTextNode(noTimeYetText);

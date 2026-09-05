@@ -38,4 +38,11 @@ public class LeaderboardModel
     public required Dayboard Dayboard { get; set; }
 
     public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; } = [];
+
+    /// <summary>Utilisateur connecte : permet de surligner sa propre ligne dans les tableaux.</summary>
+    public ulong CurrentUserId { get; set; }
+
+    public IReadOnlyCollection<(DateTime date, (ulong userId, string login)[] podium)> MonthlyPodiums { get; set; } = [];
+
+    public IReadOnlyCollection<(ulong userId, string login, int first, int second, int third)> OverallPodium { get; set; } = [];
 }

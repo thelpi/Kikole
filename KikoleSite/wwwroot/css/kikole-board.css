@@ -346,6 +346,23 @@ body { padding-top: 0; }
 .kikole-board .redtext { color: var(--stamp); }
 .kikole-board .greentext { color: var(--pitch); }
 
+/* ligne "vous" dans un tableau (classement, podiums) : la cellule utilisateur
+   passe du rouge/or/argent/bronze habituel (lien generique, ou couleur de
+   medaille sur les podiums) au vert, en gras, avec un petit marqueur textuel -
+   le fond de ligne (even/odd/creator) n'est pas touche, les deux se superposent
+   sans conflit. Specificite (type + classe) plutot que !important : gagne face
+   a .redtext/.medal-gold/-silver/-bronze (deux classes) sans devoir lister
+   chaque combinaison. */
+.kikole-board td.you { color: var(--pitch-strong); font-weight: 700; }
+
+.kikole-board .you-tag {
+  margin-left: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--pitch);
+}
+
 .kikole-board .form-field { margin-bottom: 14px; }
 
 .kikole-board .form-row {

@@ -335,12 +335,38 @@ Branche de travail : `remaster-v2`.
       confirmé avec l'utilisateur : les pages statistiques réservées aux administrateurs
       (`Leaderboard/Stats.cshtml`, `Leaderboard/KikolesStats.cshtml`) — la seconde étant de
       toute façon prévue pour fusionner dans la première (cf. item dédié plus bas).
-  - [ ] **`Leaderboard/Palmares.cshtml` n'est pas localisée** (pas de resx, tout le texte
-        est en français en dur, y compris un reliquat anglais "No data to display" corrigé
-        au passage). Contrairement à toutes les autres pages du site, un utilisateur en
-        anglais verrait donc du français ici. Pas corrigé maintenant (pur travail de style
-        cette fois-ci) — prévoir l'ajout d'un `Palmares.fr.resx`/`Palmares.en.resx` le jour
-        où on y touche pour autre chose que du visuel.
+  - [x] **`Leaderboard/Palmares.cshtml` n'était pas localisée, et son intégration au reste
+        du site ne convainquait pas** (un lien depuis le classement vers une carte vide à
+        part le titre). **Résolu par une fusion complète** plutôt qu'une simple
+        localisation : `Palmares.cshtml`/`PalmaresModel`/l'action `Palmares()` supprimés,
+        leurs deux tableaux ("par mois" et "total") ajoutés comme deux
+        cartes supplémentaires directement sur `Leaderboard/Index.cshtml`, à la suite du
+        classement quotidien et général — `/Leaderboard/Palmares` n'existe plus du tout
+        (404), plus besoin d'un point d'accès dédié. Contenu localisé au passage (nouvelles
+        clés dans `Leaderboard/Index.*.resx`), y compris le reliquat anglais "No data to
+        display". Vocabulaire changé de "Palmarès" à "Podium" (demande explicite) :
+        "Podium mensuel" / "Podium général" — ce dernier fait écho à "Classement général"
+        juste au-dessus (même portée : cumul sur toute la période), plutôt que la
+        proposition "Cumul des podiums" avec laquelle l'utilisateur n'était pas satisfait.
+        Bug corrigé au passage : `PalmaresModel` projetait le tableau "total" sans l'id de
+        l'utilisateur (`x.user.Login` seul, pas `x.user.Id`), rendant les lignes non
+        cliquables contrairement au tableau "par mois" — aurait aussi empêché le surlignage
+        "vous" ci-dessous.
+  - [x] **Surbrillance de l'utilisateur connecté dans les tableaux** (classement quotidien,
+        classement général, les deux podiums) — n'existait pas, ajoutée à la demande de
+        l'utilisateur en marge du chantier Palmarès. Cellule utilisateur en vert gras +
+        petit suffixe "(vous)"/"(you)", plutôt qu'un fond de ligne : reste lisible même
+        combiné à la couleur d'une médaille (`.medal-gold/-silver/-bronze`) ou au fond doré
+        de la ligne "créateur du jour" (`.creator`), sans avoir à trancher une priorité
+        entre les deux. Un seul point d'entrée CSS (`.kikole-board td.you`, sélectionné par
+        spécificité plutôt que `!important`) couvre toutes les combinaisons. Les deux
+        tableaux de classement se régénèrent en AJAX au changement de tri/date
+        (`site.js`) : `initializeLeaderboards`/`loadGlobalLeaderboard`/
+        `loadDailyLeaderboard` reçoivent désormais l'id de l'utilisateur connecté et le
+        libellé "(vous)", via une fonction `appendUsernameCell` partagée pour ne pas
+        dupliquer la logique de surlignage à 3 endroits. Vérifié en direct (FR et EN) :
+        surlignage correct dans les 4 tableaux, persiste après un changement de tri
+        (rafraîchissement AJAX), route `/Leaderboard/Palmares` bien introuvable (404).
   - [x] **Certains badges peuvent-ils donner un indice gratuit par le seul fait d'être
         obtenus ?** Tout le monde peut voir les badges de tout le monde. **Vérifié :** la
         règle est déjà en place et testée (`BadgeService.GetUserBadgesAsync`, paramètre
@@ -385,12 +411,9 @@ Branche de travail : `remaster-v2`.
         déclenche `$(this).trigger("change")` pour réutiliser les handlers déjà posés par
         `initializeLeaderboards`, sans toucher à cette fonction. Vérifié en direct :
         sélection dans le calendrier stylé → tableau rafraîchi en AJAX, comme avant.
-  - [ ] **Meilleur accès au palmarès depuis le classement.** Actuellement
-        `Leaderboard/Index.cshtml` a une carte `.form-card` dédiée qui ne contient qu'un
-        lien "Palmarès" — même gabarit que les cartes de contenu réel juste à côté, mais
-        vide, ce qui détonne. Pistes à explorer : un simple lien/bouton hors carte plutôt
-        qu'une carte dédiée, ou un onglet/segment de navigation entre "Classement" et
-        "Palmarès" au lieu de deux pages séparées par un lien.
+  - [x] **Meilleur accès au palmarès depuis le classement.** Résolu par la fusion des deux
+        pages (cf. item "Palmarès" plus haut) — la carte vide ne pointe plus vers une page
+        séparée, les deux tableaux sont directement sur cette page.
   - [ ] **Mise en valeur des kikolés "tentés/trouvés le jour même" à revoir.**
         `Leaderboard/User.cshtml`, tableau "Statistiques quotidiennes" : convention actuelle
         = texte en gras + astérisque dans l'en-tête expliqué par une légende sous le tableau
@@ -490,9 +513,11 @@ Branche de travail : `remaster-v2`.
       Nettoyage des accès devenus redondants : liens toujours visibles du footer
       (`SubmitKikole`/`ContactAdmin`, affichés même sans les droits requis) retirés ;
       liens texte Stats/KikolesStats + `LeaderboardModel.IsAdmin` (devenu mort) retirés de
-      `Leaderboard/Index.cshtml`. `Admin/Club`/`Admin/PlayerEdit`/`Leaderboard/Palmares`
-      laissés hors menu : déjà linkées depuis leur contexte d'usage (`Home/Contest`,
-      alors dans le même cas, a depuis été supprimée — plus d'actualité).
+      `Leaderboard/Index.cshtml`. `Admin/Club`/`Admin/PlayerEdit` laissés hors menu : déjà
+      linkées depuis leur contexte d'usage (`Home/Contest`, alors dans le même cas, a
+      depuis été supprimée — plus d'actualité ; `Leaderboard/Palmares`, alors dans le même
+      cas aussi, a depuis été fusionnée dans `Leaderboard/Index` — la question de son accès
+      depuis le menu ne se pose plus du tout).
       Bug découvert en vérifiant : `.site-nav-drawer.open` avait un `max-height: 320px`
       fixe (dimensionné pour l'ancienne liste courte) qui rognait silencieusement le bas
       du tiroir pour un compte admin (8 lignes désormais) — corrigé en `80vh` avec défilement

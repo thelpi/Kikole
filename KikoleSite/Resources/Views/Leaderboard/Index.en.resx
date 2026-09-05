@@ -150,6 +150,9 @@
   <data name="EasyKikoleMonth" xml:space="preserve">
     <value>Easiest kikolés of the month</value>
   </data>
+  <data name="FirstHeader" xml:space="preserve">
+    <value>1st</value>
+  </data>
   <data name="FoundHeader" xml:space="preserve">
     <value>Found</value>
   </data>
@@ -174,6 +177,9 @@
   <data name="LeaderboardDesc" xml:space="preserve">
     <value>sort by {0}, from {1} to {2}</value>
   </data>
+  <data name="MonthlyPodiumTitle" xml:space="preserve">
+    <value>Monthly podium</value>
+  </data>
   <data name="NotYetPoints" xml:space="preserve">
     <value>N/A</value>
   </data>
@@ -183,8 +189,11 @@
   <data name="NoUserInTable" xml:space="preserve">
     <value>Nobody</value>
   </data>
-  <data name="PalmaresLink" xml:space="preserve">
-    <value>Prize list</value>
+  <data name="OverallPodiumTitle" xml:space="preserve">
+    <value>Overall podium</value>
+  </data>
+  <data name="PlayerHeader" xml:space="preserve">
+    <value>Player</value>
   </data>
   <data name="PointsHeader" xml:space="preserve">
     <value>Points</value>
@@ -198,8 +207,14 @@
   <data name="PvpRanking" xml:space="preserve">
     <value>PVP ranking:</value>
   </data>
+  <data name="SecondHeader" xml:space="preserve">
+    <value>2nd</value>
+  </data>
   <data name="SortType" xml:space="preserve">
     <value>Sort type:</value>
+  </data>
+  <data name="ThirdHeader" xml:space="preserve">
+    <value>3rd</value>
   </data>
   <data name="TimeHeader" xml:space="preserve">
     <value>Time</value>
@@ -212,5 +227,8 @@
   </data>
   <data name="UsernameHeaderInGoing" xml:space="preserve">
     <value>Searching...</value>
+  </data>
+  <data name="YouSuffix" xml:space="preserve">
+    <value>you</value>
   </data>
 </root>

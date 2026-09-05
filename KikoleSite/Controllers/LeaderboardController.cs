@@ -153,15 +153,6 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Palmares()
-    {
-        var data = await _leaderService
-            .GetPalmaresAsync();
-
-        return View("Palmares", new PalmaresModel(data));
-    }
-
-    [HttpGet]
     [Authorization(UserTypes.Administrator)]
     public IActionResult KikolesStats()
     {
@@ -247,6 +238,8 @@ public class LeaderboardController : KikoleBaseController
         var (globalLeaderboard, _) = await GetLeaderboardAsync(
                 _clock.FirstOfMonth, _clock.Today, LeaderSorts.TotalPoints, foundToday);
 
+        var palmares = await _leaderService.GetPalmaresAsync();
+
         return new LeaderboardModel
         {
             MinimalDate = _clock.FirstOfMonth,
@@ -255,7 +248,21 @@ public class LeaderboardController : KikoleBaseController
             LeaderboardDay = _clock.Today,
             DaySortType = DayLeaderSorts.BestTime,
             Dayboard = dailyBoard,
-            GlobalLeaderboard = globalLeaderboard
+            GlobalLeaderboard = globalLeaderboard,
+            CurrentUserId = UserId,
+            MonthlyPodiums = palmares.MonthlyPalmares
+                .Select(x => (
+                    new DateTime(x.Key.year, x.Key.month, 1),
+                    new[]
+                    {
+                        (x.Value.first.Id, x.Value.first.Login),
+                        (x.Value.second.Id, x.Value.second.Login),
+                        (x.Value.third.Id, x.Value.third.Login)
+                    }))
+                .ToList(),
+            OverallPodium = palmares.GlobalPalmares
+                .Select(x => (x.user.Id, x.user.Login, x.first, x.second, x.third))
+                .ToList()
         };
     }
 
