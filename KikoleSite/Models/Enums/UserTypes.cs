@@ -1,9 +1,8 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum UserTypes
 {
-    public enum UserTypes
-    {
-        StandardUser = 1,
-        PowerUser,
-        Administrator
-    }
+    StandardUser = 1,
+    PowerUser,
+    Administrator
 }

@@ -1,11 +1,10 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static bool CanBeMiss(this ProposalTypes proposalType)
     {
-        public static bool CanBeMiss(this ProposalTypes proposalType)
-        {
-            return proposalType != ProposalTypes.Clue
-                && proposalType != ProposalTypes.Leaderboard;
-        }
+        return proposalType != ProposalTypes.Clue
+            && proposalType != ProposalTypes.Leaderboard;
     }
 }

@@ -16,11 +16,11 @@ using Xunit;
 namespace KikoleSiteUnitTests.Services;
 
 /// <summary>
-/// Palmares mensuel : un podium par mois depuis FirstMonth, plus un cumul global
-/// des medailles. Les depots renvoient les memes donnees quel que soit le mois,
-/// ce qui permet de tester l'accumulation sur plusieurs iterations.
+/// Podiums mensuels depuis FirstMonth, plus un cumul global des medailles. Les depots
+/// renvoient les memes donnees quel que soit le mois, ce qui permet de tester
+/// l'accumulation sur plusieurs iterations.
 /// </summary>
-public class LeaderServicePalmaresTests
+public class LeaderServicePodiumsTests
 {
     private static readonly DateTime FirstMonth = TestCalendar.FirstMonth;
 
@@ -33,7 +33,7 @@ public class LeaderServicePalmaresTests
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
 
-    public LeaderServicePalmaresTests()
+    public LeaderServicePodiumsTests()
     {
         var localizer = new Mock<IStringLocalizer<Translations>>();
         localizer.Setup(_ => _[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
@@ -89,9 +89,9 @@ public class LeaderServicePalmaresTests
         SetupMonths(1);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.MonthlyPalmares.Should().BeEmpty();
+        podiums.MonthlyPodiums.Should().BeEmpty();
     }
 
     [Fact]
@@ -100,9 +100,9 @@ public class LeaderServicePalmaresTests
         SetupMonths(1);
         SetupContenders((1, "bronze", 100, 10), (2, "or", 900, 300), (3, "argent", 500, 20));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        var podium = palmares.MonthlyPalmares.Single().Value;
+        var podium = podiums.MonthlyPodiums.Single().Value;
         podium.first.Login.Should().Be("or");
         podium.second.Login.Should().Be("argent");
         podium.third.Login.Should().Be("bronze");
@@ -115,9 +115,9 @@ public class LeaderServicePalmaresTests
         SetupMonths(1);
         SetupContenders((1, "lent", 500, 300), (2, "rapide", 500, 30), (3, "dernier", 100, 10));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        var podium = palmares.MonthlyPalmares.Single().Value;
+        var podium = podiums.MonthlyPodiums.Single().Value;
         podium.first.Login.Should().Be("rapide");
         podium.second.Login.Should().Be("lent");
     }
@@ -128,9 +128,9 @@ public class LeaderServicePalmaresTests
         SetupMonths(1);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.MonthlyPalmares.Should().ContainKey((FirstMonth.Month, FirstMonth.Year));
+        podiums.MonthlyPodiums.Should().ContainKey((FirstMonth.Month, FirstMonth.Year));
     }
 
     // ------------------------------------------------------------- cumul global
@@ -142,11 +142,11 @@ public class LeaderServicePalmaresTests
         SetupMonths(3);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.MonthlyPalmares.Should().HaveCount(3);
+        podiums.MonthlyPodiums.Should().HaveCount(3);
 
-        var global = palmares.GlobalPalmares.ToList();
+        var global = podiums.OverallPodium.ToList();
         global.Single(g => g.user.Login == "a").first.Should().Be(3);
         global.Single(g => g.user.Login == "b").second.Should().Be(3);
         global.Single(g => g.user.Login == "c").third.Should().Be(3);
@@ -158,9 +158,9 @@ public class LeaderServicePalmaresTests
         SetupMonths(2);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.GlobalPalmares.Select(g => g.user.Login)
+        podiums.OverallPodium.Select(g => g.user.Login)
             .Should().ContainInOrder("a", "b", "c");
     }
 
@@ -170,10 +170,10 @@ public class LeaderServicePalmaresTests
         SetupMonths(4);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.GlobalPalmares.Should().HaveCount(3);
-        palmares.GlobalPalmares.Select(g => g.user.Id).Should().OnlyHaveUniqueItems();
+        podiums.OverallPodium.Should().HaveCount(3);
+        podiums.OverallPodium.Select(g => g.user.Id).Should().OnlyHaveUniqueItems();
     }
 
     [Fact]
@@ -184,10 +184,10 @@ public class LeaderServicePalmaresTests
         SetupMonths(3);
         SetupContenders((1, "a", 900, 60));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.MonthlyPalmares.Should().BeEmpty();
-        palmares.GlobalPalmares.Should().BeEmpty();
+        podiums.MonthlyPodiums.Should().BeEmpty();
+        podiums.OverallPodium.Should().BeEmpty();
     }
 
     [Fact]
@@ -197,10 +197,10 @@ public class LeaderServicePalmaresTests
         SetupMonths(3);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        palmares.MonthlyPalmares.Should().BeEmpty();
-        palmares.GlobalPalmares.Should().BeEmpty();
+        podiums.MonthlyPodiums.Should().BeEmpty();
+        podiums.OverallPodium.Should().BeEmpty();
     }
 
     [Fact]
@@ -209,15 +209,15 @@ public class LeaderServicePalmaresTests
         SetupMonths(3);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
 
-        var palmares = await _service.GetPalmaresAsync();
+        var podiums = await _service.GetPodiumsAsync();
 
-        var golds = palmares.GlobalPalmares.Sum(g => g.first);
-        var silvers = palmares.GlobalPalmares.Sum(g => g.second);
-        var bronzes = palmares.GlobalPalmares.Sum(g => g.third);
+        var golds = podiums.OverallPodium.Sum(g => g.first);
+        var silvers = podiums.OverallPodium.Sum(g => g.second);
+        var bronzes = podiums.OverallPodium.Sum(g => g.third);
 
-        golds.Should().Be(palmares.MonthlyPalmares.Count);
-        silvers.Should().Be(palmares.MonthlyPalmares.Count);
-        bronzes.Should().Be(palmares.MonthlyPalmares.Count);
+        golds.Should().Be(podiums.MonthlyPodiums.Count);
+        silvers.Should().Be(podiums.MonthlyPodiums.Count);
+        bronzes.Should().Be(podiums.MonthlyPodiums.Count);
     }
 
     [Fact]
@@ -228,7 +228,7 @@ public class LeaderServicePalmaresTests
         SetupMonths(1);
         SetupContenders((1, "a", 900, 60), (2, "b", 500, 90), (3, "c", 100, 120));
 
-        await _service.GetPalmaresAsync();
+        await _service.GetPodiumsAsync();
 
         _leaderRepository.Verify(
             _ => _.GetLeadersAsync(FirstMonth, FirstMonth.AddDays(10), true), Times.Once);

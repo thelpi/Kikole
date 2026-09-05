@@ -492,7 +492,7 @@ function drawStatisticPageCharts() {
     var playerDistributionDecadeDatas = [['Decade', 'Players percent']];
     var playerDistributionClubDatas = [['Club', 'Players count']];
     $.ajax({
-        url: '/Leaderboard/GetStatisticPlayersDistribution/',
+        url: '/Statistics/GetStatisticPlayersDistribution/',
         data: {},
         type: "GET",
         async: false,
@@ -512,7 +512,7 @@ function drawStatisticPageCharts() {
     var monthActivityDatas = [['Month', 'Players']];
     var dayActivityDatas = [['Day', 'Players']];
     $.ajax({
-        url: '/Leaderboard/GetStatisticActiveUsers/',
+        url: '/Statistics/GetStatisticActiveUsers/',
         data: {},
         type: "GET",
         async: false,

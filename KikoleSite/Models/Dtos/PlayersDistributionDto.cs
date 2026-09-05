@@ -1,9 +1,8 @@
-﻿namespace KikoleSite.Models.Dtos
-{
-    public record PlayersDistributionDto<T>
-    {
-        public required T Value { get; init; }
+﻿namespace KikoleSite.Models.Dtos;
 
-        public int Count { get; init; }
-    }
+public record PlayersDistributionDto<T>
+{
+    public required T Value { get; init; }
+
+    public int Count { get; init; }
 }

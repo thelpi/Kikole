@@ -1,9 +1,8 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum PlayerSubmissionErrors
 {
-    public enum PlayerSubmissionErrors
-    {
-        NoError,
-        PlayerNotFound,
-        PlayerAlreadyAcceptedOrRefused
-    }
+    NoError,
+    PlayerNotFound,
+    PlayerAlreadyAcceptedOrRefused
 }

@@ -333,8 +333,10 @@ Branche de travail : `remaster-v2`.
       temporairement promu PowerUser (reremis à son palier d'origine ensuite, joueur/
       message de test nettoyés de la base locale). Volontairement laissées de côté, choix
       confirmé avec l'utilisateur : les pages statistiques réservées aux administrateurs
-      (`Leaderboard/Stats.cshtml`, `Leaderboard/KikolesStats.cshtml`) — la seconde étant de
-      toute façon prévue pour fusionner dans la première (cf. item dédié plus bas).
+      (`Statistics/Stats.cshtml`, `Statistics/KikolesStats.cshtml`, déplacées depuis
+      `Leaderboard/` lors de l'extraction du contrôleur dédié, cf. item dédié plus bas) — la
+      seconde étant de toute façon prévue pour fusionner dans la première (cf. item dédié
+      plus bas).
   - [x] **`Leaderboard/Palmares.cshtml` n'était pas localisée, et son intégration au reste
         du site ne convainquait pas** (un lien depuis le classement vers une carte vide à
         part le titre). **Résolu par une fusion complète** plutôt qu'une simple
@@ -507,7 +509,7 @@ Branche de travail : `remaster-v2`.
       (`CheckSubmittedPlayers`) sur `Admin/Actions` (retiré de `Admin/Index`, où il vivait
       avant). `PlayerCreationModel.DisplayPlayerSubmissionLink` gardée : elle sert aussi
       (sans rapport) à conditionner l'affichage du champ indice anglais sur ce même
-      formulaire. Stats/KikolesStats : un seul logo (vers `Stats`, les
+      formulaire. Stats/KikolesStats : un seul logo (vers `Statistics/Stats`, les
       graphiques) plutôt que deux, `KikolesStats` restant accessible par un lien depuis
       `Stats` (`KikolesStatsLink`) pour ne pas surcharger la barre.
       Nettoyage des accès devenus redondants : liens toujours visibles du footer
@@ -560,10 +562,48 @@ Branche de travail : `remaster-v2`.
       ci-dessus) et "Vous aimez le vélo ?" (lien personnel, retiré à la demande) — il ne
       reste presque plus rien dedans, l'occasion de repenser ce qui doit vraiment y vivre
       plutôt que de le laisser à l'état de résidu.
-- [ ] **Fusionner `Leaderboard/KikolesStats` dans `Leaderboard/Stats`**, en bloc
+- [ ] **Fusionner `Statistics/KikolesStats` dans `Statistics/Stats`**, en bloc
       "collapsible" au même titre que "Répartition des joueurs par critère" et "Nombre
       d'utilisateurs actifs" déjà présents sur cette page — plutôt que la page séparée
       reliée par un simple lien (`KikolesStatsLink`) mis en place entre-temps.
+- [x] **Les routes statistiques vivaient dans `LeaderboardController`, jugé peu cohérent.**
+      Extraites dans un `StatisticsController` dédié (`Stats`, `GetStatisticPlayersDistribution`,
+      `GetStatisticActiveUsers`, `GetKikolesStatisticsAsync` (route `kikoles-stats`
+      inchangée), `KikolesStats` — les 5 actions et `IStatisticService`, plus rien lié aux
+      statistiques dans `LeaderboardController`). Vues et resx associées déplacées de
+      `Views/Leaderboard/` vers `Views/Statistics/` (routage conventionnel par nom de
+      contrôleur : `Stats()`/`KikolesStats()` n'ont pas de `[Route]` explicite). Références
+      mises à jour : icône `_Layout.cshtml` (desktop + tiroir mobile), lien
+      `KikolesStatsLink` sur `Stats.cshtml`, appels AJAX dans `site.js`
+      (`GetStatisticPlayersDistribution`/`GetStatisticActiveUsers`). Au passage, une entrée
+      `<Content Update>` fantôme dans `KikoleSite.csproj` référençant
+      `Views\Leaderboard\Palmares.cshtml` (fichier supprimé lors de la fusion Palmarès→Podium,
+      cf. plus haut, l'entrée csproj n'avait pas suivi) a été retirée. Vérifié en direct en
+      admin : icône de nav pointant vers `/Statistics/Stats`, page Stats et ses deux blocs
+      graphiques (requêtes AJAX en 200 sur les nouvelles URLs), lien vers `KikolesStats`
+      fonctionnel avec son tableau peuplé.
+- [x] **Namespaces à portée fichier : le reste.** 29 fichiers encore en syntaxe bloc
+      (`namespace X { ... }`), presque tous des DTO/enum (`Models/Dtos`, `Models/Enums`)
+      plus quelques ViewModels et `Translations.cs` — passés en `namespace X;`. Aucun autre
+      changement (juste une dé-indentation d'un niveau).
+- [x] **Palmarès → Podium côté back.** Vocabulaire déjà changé côté UI (cf. fusion
+      Palmarès/Podium plus haut) ; le back ne suivait pas. Tout renommé, aucun cas où
+      "palmarès" ne désignait pas un podium (vérifié en lisant `LeaderService.GetPalmaresAsync`
+      avant renommage) : `Models/Palmares.cs` → `Models/Podiums.cs` (classe `Palmares` →
+      `Podiums`, `MonthlyPalmares`/`GlobalPalmares` → `MonthlyPodiums`/`OverallPodium`, mêmes
+      noms que `LeaderboardModel` pour rester cohérent), `ILeaderService`/`LeaderService
+      .GetPalmaresAsync` → `GetPodiumsAsync`, `LeaderService.CreditPalmaresPosition` →
+      `CreditPodiumPosition`, variable locale `palmares` → `podiums` dans
+      `LeaderboardController.InitializeModelAsync`. Tests renommés en miroir
+      (`LeaderServicePalmaresTests.cs` → `LeaderServicePodiumsTests.cs`).
+- [x] **Perf : `LeaderboardController.InitializeModelAsync` enchaînait 3 `await` alors que
+      deux des trois appels sont indépendants.** Le classement général dépend de
+      `foundToday` (issu du dayboard du jour), mais le dayboard et les podiums ne dépendent
+      de rien d'autre : les deux partent maintenant en parallèle (`Task` démarrées avant le
+      premier `await`), le classement général reste séquentiel après le dayboard puisqu'il
+      a besoin de son résultat. Option choisie plutôt que le chargement par bloc en AJAX
+      (l'autre option proposée) : gain similaire pour un changement contenu à une seule
+      méthode, sans toucher au rendu de la page ni à `site.js`.
 
 **Volontairement en dernier :** le seul poste qui ne bloque rien et ne se déprécie pas.
 

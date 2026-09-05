@@ -972,7 +972,7 @@ body { padding-top: 0; }
 }
 
 /* ---------------------------------------------------------- tableaux de donnees
-   (classement, palmares, statistiques utilisateur) : classes historiques de site.css
+   (classement, podiums, statistiques utilisateur) : classes historiques de site.css
    (tabData, tabDataHead, even/odd/creator, fillN...) reprises telles quelles - certaines
    sont regenerees par site.js (tableaux du classement, cf. loadGlobalLeaderboard /
    loadDailyLeaderboard) donc ni les noms de classe ni les id ne peuvent changer. */

@@ -342,7 +342,7 @@ public class LeaderService : ILeaderService
         };
     }
 
-    public async Task<Palmares> GetPalmaresAsync()
+    public async Task<Podiums> GetPodiumsAsync()
     {
         var months = new Dictionary<(int month, int year), (User first, User second, User third)>();
 
@@ -369,22 +369,22 @@ public class LeaderService : ILeaderService
             // les medailles ne sont distribuees qu'une fois le podium complet : sinon
             // un mois comptant moins de trois joueurs classes serait ecarte de la liste
             // des podiums mensuels tout en creditant le cumul global, et les deux
-            // tableaux de la page Palmares afficheraient des totaux incoherents
+            // tableaux de la page Leaderboard afficheraient des totaux incoherents
             if (orderedLdItems.Count >= PodiumSize)
             {
                 months.Add((date.Month, date.Year), (
-                    CreditPalmaresPosition(users, orderedLdItems[0], 0),
-                    CreditPalmaresPosition(users, orderedLdItems[1], 1),
-                    CreditPalmaresPosition(users, orderedLdItems[2], 2)));
+                    CreditPodiumPosition(users, orderedLdItems[0], 0),
+                    CreditPodiumPosition(users, orderedLdItems[1], 1),
+                    CreditPodiumPosition(users, orderedLdItems[2], 2)));
             }
 
             date = nextMonth;
         }
 
-        return new Palmares
+        return new Podiums
         {
-            MonthlyPalmares = months,
-            GlobalPalmares = users.Values
+            MonthlyPodiums = months,
+            OverallPodium = users.Values
                 .Select(x => x)
                 .OrderByDescending(x => x.Item2)
                 .ThenByDescending(x => x.Item3)
@@ -398,7 +398,7 @@ public class LeaderService : ILeaderService
     /// (0 = or, 1 = argent, 2 = bronze), en creant l'utilisateur s'il est inconnu.
     /// N'est appelee que sur un podium complet.
     /// </summary>
-    private static User CreditPalmaresPosition(
+    private static User CreditPodiumPosition(
         Dictionary<ulong, (User, int, int, int)> users, LeaderboardItem item, int position)
     {
         var golds = position == 0 ? 1 : 0;
