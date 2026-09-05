@@ -61,6 +61,40 @@ Branche de travail : `remaster-v2`.
         `GROUP BY ip HAVING COUNT(*) > seuil`. Remis à plus tard, décision explicite.
       - Rappel posé dès le départ : l'IP est un signal, pas une preuve (CGNAT, VPN) —
         l'objectif est de relever le coût de la triche occasionnelle, pas de l'éliminer.
+- [ ] **Outillage admin sur les comptes et les abus de droits `PowerUser`** — reprend et
+      précise la "vue admin reportée" ci-dessus, plus des demandes explicites de
+      l'utilisateur. Rien commencé, posé ici pour une session future :
+      - **Limiter le nombre de clubs créés par un `PowerUser` (non admin)** — pas de
+        plafond aujourd'hui (`AdminController`/`Admin/Club.cshtml`, ouvert à tout
+        `PowerUser`). Décider d'un seuil (par jour ? au total ? glissant ?) et du
+        comportement au dépassement (blocage silencieux, message, notification admin).
+      - **Limiter le nombre de kikolés proposés par un `PowerUser` (non admin)** — même
+        besoin, sur `Admin/Index.cshtml` (formulaire de proposition de joueur) cette
+        fois. Probablement la même mécanique de plafond que pour les clubs, à
+        factoriser plutôt qu'à dupliquer si l'implémentation converge.
+      - **Vue admin : changer le palier d'un utilisateur** (standard ↔ `PowerUser`,
+        dans les deux sens) — aujourd'hui aucune vue ne liste les utilisateurs ni ne
+        permet de modifier `user_type_id` après l'inscription (le seul chemin vers
+        `PowerUser` est manuel, en base). C'est aussi le mécanisme qui donnerait suite
+        aux demandes envoyées via le nouveau bouton "Créer un kikolé" → Contact (cf.
+        item précédent) : l'admin lit la demande, puis irait ici pour l'accorder.
+      - **Vue admin : désactiver un compte** — colonne `is_disabled` déjà présente sur
+        `users` (utilisée par `SubSqlValidUsers`, un utilisateur désactivé est déjà
+        exclu des classements/statistiques), mais rien dans `AdminController` ne
+        permet de la faire passer à vrai depuis l'interface — modification en base
+        directe uniquement pour l'instant.
+      - **Vue admin : forcer un mot de passe sur un compte** — cas d'usage : compte
+        perdu (mot de passe oublié, réponse de récupération oubliée aussi ou jamais
+        renseignée), mais l'utilisateur est joignable par un canal externe (email,
+        Discord...) pour confirmer son identité autrement. Passerait par
+        `UserManager<ApplicationUser>` (déjà utilisé partout ailleurs pour les
+        opérations de mot de passe, ex. `AccountController`), pas de nouvelle
+        primitive de sécurité à inventer.
+      - Les trois vues admin ci-dessus (palier, désactivation, mot de passe forcé)
+        cohabiteraient naturellement dans un même écran "gestion des utilisateurs"
+        (liste + détail, même schéma que `Leaderboard/Index`→`User.cshtml` ou
+        `Admin/Discussions`→`Discussion.cshtml`) plutôt que trois pages séparées — à
+        confirmer le jour où ce chantier démarre.
 
 ---
 
