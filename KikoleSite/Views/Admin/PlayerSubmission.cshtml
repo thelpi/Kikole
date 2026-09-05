@@ -1,126 +1,139 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model PlayerSubmissionsModel
 
-@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-{
-    <div class="redtext mediumTopMargin">Error: @Model.ErrorMessage</div>
-}
-else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
-{
-    <div class="greentext mediumTopMargin">@Model.InfoMessage</div>
-}
-
-@if (Model.SelectedPlayer != null)
-{
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["CreatorLogin"]</label>
-            <div>@Model.SelectedPlayer.Login</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["Name"]</label>
-            <div>@Model.SelectedPlayer.Name</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["AllowedNames"]</label>
-            <div>@Model.SelectedPlayer.AllowedNames</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["YearOfBirth"]</label>
-            <div>@Model.SelectedPlayer.YearOfBirth</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["Country"]</label>
-            <div>@Model.SelectedPlayer.Country</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["Continent"]</label>
-            <div>@Model.SelectedPlayer.Continent</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["Clue"]</label>
-            <div>@Model.SelectedPlayer.Clue</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["EasyClue"]</label>
-            <div>@Model.SelectedPlayer.EasyClue</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["Position"]</label>
-            <div>@Model.SelectedPlayer.Position</div>
-        </div>
-        <div class="mediumTopMargin">
-            <label>@localizer["Clubs"]</label>
-            @foreach (var club in Model.SelectedPlayer.Clubs.OrderBy(x => x.HistoryPosition))
-            {
-                if (club.IsLoan)
-                {
-                    <div>@club.HistoryPosition - @club.Name - (@localizer["LoanInitial"])</div>
-                }
-                else
-                {
-                    <div>@club.HistoryPosition - @club.Name</div>
-                }
-            }
-        </div>
-        <div class="smallTopMargin">
-            <label>@localizer["CheckClubName"]</label>
-            <div>
-                <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
-            </div>
-        </div>
-    </div>
-    <form method="post" action="/Admin/AcceptPlayer">
-        @Html.HiddenFor(m => m.SelectedId)
-        <div class="largeTopMargin">
-            <label>@localizer["AcceptPlayer"]</label>
-            <div>
-                <input type="text" name="ClueOverwriteEn" style="width: 300px" /> (@localizer["EnShort"])
-            </div>
-            <div>
-                <input type="text" name="ClueOverwriteFr" style="width: 300px" /> (@localizer["FrShort"])
-            </div>
-            <div>@localizer["EasyClue"]</div>
-            <div>
-                <input type="text" name="EasyClueOverwriteEn" style="width: 300px" /> (@localizer["EnShort"])
-            </div>
-            <div>
-                <input type="text" name="EasyClueOverwriteFr" style="width: 300px" /> (@localizer["FrShort"])
-            </div>
-            <input type="submit" value="@localizer["Ok"]" />
-        </div>
-    </form>
-    <form method="post" action="/Admin/RefusePlayer">
-        @Html.HiddenFor(m => m.SelectedId)
-        <div class="largeTopMargin">
-            <label>@localizer["RefusePlayer"]</label>
-            <div>
-                <input type="text" name="RefusalReason" style="width: 300px" />
-                <input type="submit" value="@localizer["Ko"]" />
-            </div>
-        </div>
-    </form>
-}
-else
-{
-    if (Model.Players.Count == 0)
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
-        <div class="largeTopMargin">
-            <label>@localizer["NoPlayerToValidate"]</label>
+        <div class="banner error">@Model.ErrorMessage</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
+    {
+        <div class="banner success">@Model.InfoMessage</div>
+    }
+
+    @if (Model.SelectedPlayer != null)
+    {
+        <div class="form-card">
+            <div class="form-field">
+                <label>@localizer["CreatorLogin"]</label>
+                <div class="form-static">@Model.SelectedPlayer.Login</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["Name"]</label>
+                <div class="form-static">@Model.SelectedPlayer.Name</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["AllowedNames"]</label>
+                <div class="form-static">@Model.SelectedPlayer.AllowedNames</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["YearOfBirth"]</label>
+                <div class="form-static">@Model.SelectedPlayer.YearOfBirth</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["Country"]</label>
+                <div class="form-static">@Model.SelectedPlayer.Country</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["Continent"]</label>
+                <div class="form-static">@Model.SelectedPlayer.Continent</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["Clue"]</label>
+                <div class="form-static">@Model.SelectedPlayer.Clue</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["EasyClue"]</label>
+                <div class="form-static">@Model.SelectedPlayer.EasyClue</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["Position"]</label>
+                <div class="form-static">@Model.SelectedPlayer.Position</div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["Clubs"]</label>
+                <div class="club-list">
+                    @foreach (var club in Model.SelectedPlayer.Clubs.OrderBy(x => x.HistoryPosition))
+                    {
+                        <div class="club">
+                            @club.HistoryPosition &mdash; @club.Name
+                            @if (club.IsLoan)
+                            {
+                                <span class="loan">@localizer["LoanInitial"]</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="form-field">
+                <label>@localizer["CheckClubName"]</label>
+                <input type="text" name="dummyClub" id="clubName" class="blank" />
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h3>@localizer["AcceptPlayer"]</h3>
+            <form method="post" action="/Admin/AcceptPlayer">
+                @Html.HiddenFor(m => m.SelectedId)
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>@localizer["Clue"] (@localizer["EnShort"])</label>
+                        <input type="text" name="ClueOverwriteEn" class="blank" />
+                    </div>
+                    <div class="form-field">
+                        <label>@localizer["Clue"] (@localizer["FrShort"])</label>
+                        <input type="text" name="ClueOverwriteFr" class="blank" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>@localizer["EasyClue"] (@localizer["EnShort"])</label>
+                        <input type="text" name="EasyClueOverwriteEn" class="blank" />
+                    </div>
+                    <div class="form-field">
+                        <label>@localizer["EasyClue"] (@localizer["FrShort"])</label>
+                        <input type="text" name="EasyClueOverwriteFr" class="blank" />
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="submit">@localizer["Ok"]</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="form-card">
+            <h3>@localizer["RefusePlayer"]</h3>
+            <form method="post" action="/Admin/RefusePlayer">
+                @Html.HiddenFor(m => m.SelectedId)
+                <div class="form-field">
+                    <label>@localizer["RefusalReason"]</label>
+                    <input type="text" name="RefusalReason" class="blank" />
+                </div>
+                <div class="actions">
+                    <button type="submit">@localizer["Ko"]</button>
+                </div>
+            </form>
         </div>
     }
     else
     {
-        <form method="post" action="/Admin/ChoosePlayer">
-            <div class="largeTopMargin">
-                <label>@localizer["SelectPlayer"]</label>
-                <div>
-                    @Html.DropDownListFor(m => m.SelectedId, Model.Players.Select(p => new SelectListItem(p.Name, p.Id.ToString())))
-                </div>
-                <div>
-                    <input type="submit" value="Pick" />
-                </div>
-            </div>
-        </form>
+        <div class="form-card">
+            @if (Model.Players.Count == 0)
+            {
+                <p>@localizer["NoPlayerToValidate"]</p>
+            }
+            else
+            {
+                <form method="post" action="/Admin/ChoosePlayer">
+                    <div class="form-field">
+                        <label>@localizer["SelectPlayer"]</label>
+                        @Html.DropDownListFor(m => m.SelectedId, Model.Players.Select(p => new SelectListItem(p.Name, p.Id.ToString())), new { @class = "blank" })
+                    </div>
+                    <div class="actions">
+                        <button type="submit">Pick</button>
+                    </div>
+                </form>
+            }
+        </div>
     }
-}
+</div>

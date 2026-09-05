@@ -1,76 +1,68 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model ClubCreationModel
 
-@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-{
-    <div class="redtext mediumTopMargin">Error: @Model.ErrorMessage</div>
-}
-else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
-{
-    <div class="greentext mediumTopMargin">@Model.InfoMessage</div>
-}
-
-<h3>@localizer["CreateClubTitle"]</h3>
-<form method="post" action="/Admin/Club">
-    @if (Model.Id == 0)
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["SearchAlreadyExists"]</label>
-            </div>
-            <div>
-                <input type="text" name="dummyClub" id="clubName" style="width: 250px" />
-            </div>
-        </div>
+        <div class="banner error">@Model.ErrorMessage</div>
     }
-    else
+    else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     {
-        <div class="largeTopMargin">
-            @if (Model.Id > 1)
+        <div class="banner success">@Model.InfoMessage</div>
+    }
+
+    <div class="form-card">
+        <h3>@localizer["CreateClubTitle"]</h3>
+        <form method="post" action="/Admin/Club">
+            @if (Model.Id == 0)
             {
-                <a href="/Admin/Club?clubId=@(Model.Id - 1)">Précédent</a>
-                <span> - </span>
+                <div class="form-field">
+                    <label>@localizer["SearchAlreadyExists"]</label>
+                    <input type="text" name="dummyClub" id="clubName" class="blank" />
+                </div>
             }
-            <a href="/Admin/Club?clubId=@(Model.Id + 1)">Suivant</a>
-        </div>
-    }
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["MainNameEn"]</label>
-        </div>
-        @Html.TextBoxFor(x => x.MainNameEn, null, new { @style = "width: 250px" })
-    </div>
-    <div class="smallTopMargin">
-        <label>@localizer["AlternativeNames"]</label>
-        <div>
-            @Html.TextAreaFor(x => x.AlternativeNamesEn, 4, 30, null)
-        </div>
-    </div>
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["MainNameFr"]</label>
-        </div>
-        @Html.TextBoxFor(x => x.MainNameFr, null, new { @style = "width: 250px" })
-    </div>
-    <div class="smallTopMargin">
-        <label>@localizer["AlternativeNames"]</label>
-        <div>
-            @Html.TextAreaFor(x => x.AlternativeNamesFr, 4, 30, null)
-        </div>
-    </div>
-    <div style="font-size: small">(@localizer["AlternativeTip"])</div>
-    <div style="font-size: small">(@localizer["DontMindDiacritics"])</div>
+            else
+            {
+                <div class="form-hint">
+                    @if (Model.Id > 1)
+                    {
+                        <a href="/Admin/Club?clubId=@(Model.Id - 1)">Précédent</a>
+                        <span> - </span>
+                    }
+                    <a href="/Admin/Club?clubId=@(Model.Id + 1)">Suivant</a>
+                </div>
+            }
+            <div class="form-field">
+                <label>@localizer["MainNameEn"]</label>
+                @Html.TextBoxFor(x => x.MainNameEn, null, new { @class = "blank" })
+            </div>
+            <div class="form-field">
+                <label>@localizer["AlternativeNames"]</label>
+                @Html.TextAreaFor(x => x.AlternativeNamesEn, 4, 30, new { @class = "blank" })
+            </div>
+            <div class="form-field">
+                <label>@localizer["MainNameFr"]</label>
+                @Html.TextBoxFor(x => x.MainNameFr, null, new { @class = "blank" })
+            </div>
+            <div class="form-field">
+                <label>@localizer["AlternativeNames"]</label>
+                @Html.TextAreaFor(x => x.AlternativeNamesFr, 4, 30, new { @class = "blank" })
+            </div>
+            <div class="form-hint">
+                @localizer["AlternativeTip"]<br />
+                @localizer["DontMindDiacritics"]
+            </div>
 
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["Country"]</label>
-        </div>
-        <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 250px" />
-        <input type="hidden" id="countryId" name="Country" value="@Model.Country" />
-    </div>
+            <div class="form-field">
+                <label>@localizer["Country"]</label>
+                <input type="text" id="countryName" name="CountryNameSubmissionValue" class="blank" />
+                <input type="hidden" id="countryId" name="Country" value="@Model.Country" />
+            </div>
 
-    <div class="largeTopMargin">
-        @Html.HiddenFor(x => x.Id)
-        <input type="submit" name="submit-club" value="@localizer["DoCreate"]" />
+            @Html.HiddenFor(x => x.Id)
+            <div class="actions">
+                <button type="submit" name="submit-club">@localizer["DoCreate"]</button>
+            </div>
+        </form>
     </div>
-</form>
+</div>

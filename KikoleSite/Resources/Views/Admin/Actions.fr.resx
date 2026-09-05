@@ -129,6 +129,15 @@
   <data name="CheckSubmittedPlayers" xml:space="preserve">
     <value>Vérifier les joueurs proposés</value>
   </data>
+  <data name="MessageDateEndLabel" xml:space="preserve">
+    <value>Affiché jusqu'au</value>
+  </data>
+  <data name="MessageDateStartLabel" xml:space="preserve">
+    <value>Affiché à partir du</value>
+  </data>
+  <data name="MessageLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
   <data name="ReassignPlayers" xml:space="preserve">
     <value>Réassigner la date des joueurs</value>
   </data>

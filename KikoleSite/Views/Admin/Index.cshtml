@@ -1,162 +1,140 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model PlayerCreationModel
 
-@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-{
-    <div class="redtext mediumTopMargin">@Model.ErrorMessage</div>
-}
-else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
-{
-    <div class="greentext mediumTopMargin">@Model.InfoMessage</div>
-}
-
-<h3>@localizer["SubmitPlayerTitle"]</h3>
-<form method="post" action="/Admin">
-    <div class="largeTopMargin">
-        <div><label>@localizer["Name"]</label></div>
-        <input type="text" name="Name" style="width: 250px" />
-        <div style="font-size: small">(@localizer["WikiPlayerName"])</div>
-    </div>
-
-    <div class="largeTopMargin">
-        <label>@localizer["AlternativeNames"]</label>
-    </div>
-    @for (var i = 0; i < 5; i++)
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
-        var name = $"AlternativeName{i}";
-        <div class="smallTopMargin">
-            <input type="text" name="@name" style="width: 250px" />
-        </div>
+        <div class="banner error">@Model.ErrorMessage</div>
     }
-    <div style="font-size: small">(@localizer["AltNameTip1"])</div>
-    <div style="font-size: small">(@localizer["AltNameTip2"])</div>
-
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["YearOfBirth"]</label>
-        </div>
-        <input type="text" id="birthYearValue" name="YearOfBirth" style="width: 100px" />
-    </div>
-
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["Nationality"]</label>
-        </div>
-        <div>
-            <input type="text" id="countryName" name="CountryNameSubmissionValue" style="width: 300px" />
-            <input type="hidden" id="countryId" name="Country" />
-        </div>
-        <div style="font-size: small">(@localizer["TipAboutNationality"])</div>
-    </div>
-
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["AlternativeNationality"]</label>
-        </div>
-        <div>
-            <input type="text" id="alternativeCountryName" name="AlternativeCountryNameSubmissionValue" style="width: 300px" />
-            <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" />
-        </div>
-        <div style="font-size: small">(@localizer["TipAboutAlternativeNationality"])</div>
-    </div>
-
-    @if (Model.DisplayPlayerSubmissionLink)
+    else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     {
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["ClueEn"]</label>
-            </div>
-            <input type="text" name="ClueEn" style="width: 300px" />
-        </div>
-
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["ClueFr"]</label>
-            </div>
-            <input type="text" name="ClueFr" style="width: 300px" />
-        </div>
-
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["EasyClueEn"]</label>
-            </div>
-            <input type="text" name="EasyClueEn" style="width: 300px" />
-        </div>
-
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["EasyClueFr"]</label>
-            </div>
-            <input type="text" name="EasyClueFr" style="width: 300px" />
-        </div>
-    }
-    else
-    {
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["Clue"]</label>
-            </div>
-            <input type="text" name="ClueEn" style="width: 300px" />
-            <div style="font-size: small">(@localizer["AcceptedLanguages"])</div>
-            <div style="font-size: small">(@localizer["AdminOverrideClue"])</div>
-        </div>
-
-        <div class="largeTopMargin">
-            <div>
-                <label>@localizer["EasyClue"]</label>
-            </div>
-            <input type="text" name="EasyClueEn" style="width: 300px" />
-            <div style="font-size: small">(@localizer["AcceptedLanguages"])</div>
-            <div style="font-size: small">(@localizer["AdminOverrideClue"])</div>
-        </div>
+        <div class="banner success">@Model.InfoMessage</div>
     }
 
-    <div class="largeTopMargin">
-        <div><label>@localizer["Position"]</label></div>
-        @Html.DropDownListFor(m => m.Position, Model.Positions, new { @style = "width: 150px" })
-        <div style="font-size: small">(@localizer["AvoidAmbiguousPos"])</div>
-    </div>
-
-    <div class="largeTopMargin">
-        <div><label>@localizer["AlternativePosition"]</label></div>
-        @Html.DropDownListFor(m => m.AlternativePosition, Model.Positions, new { @style = "width: 150px" })
-        <div style="font-size: small">(@localizer["TipAboutAlternativePosition"])</div>
-    </div>
-
-    <div class="largeTopMargin">
-        <div>
-            <label>@localizer["ClubsCareer"]</label>
-        </div>
-        <div>
-            <a href="/Admin/Club" target="_blank">@localizer["AddClubTab"]</a>
-        </div>
-        <div style="font-size: small">(@localizer["ClubsTip1"])</div>
-        @for (var i = 0; i < 15; i++)
-        {
-            var name = $"Club{i}";
-            var idName = $"Club{i}Id";
-            var loanChk = $"IsLoan{i}";
-            <div class="smallTopMargin">
-                <input type="text" id="@name" name="@(name)Value" style="width: 250px" />
-                <input type="hidden" id="@idName" name="@idName" />
-                <span>@localizer["IsLoan"]</span>
-                @Html.CheckBox(loanChk)
+    <div class="form-card">
+        <h3>@localizer["SubmitPlayerTitle"]</h3>
+        <form method="post" action="/Admin">
+            <div class="form-field">
+                <label>@localizer["Name"]</label>
+                <input type="text" name="Name" class="blank" />
+                <div class="form-hint">@localizer["WikiPlayerName"]</div>
             </div>
-        }
-    </div>
-    <div style="font-size: small">(@localizer["ClubsTip1"])</div>
-    <div style="font-size: small">(@localizer["ClubsTip2"])</div>
 
-    <div class="largeTopMargin">
-        <label>@localizer["RemainsAnonymous"]</label> @Html.CheckBoxFor(m => m.HideCreator)
-    </div>
-    <div style="font-size: small">(@localizer["RemainsAnonymousTip"])</div>
+            <div class="form-field">
+                <label>@localizer["AlternativeNames"]</label>
+                @for (var i = 0; i < 5; i++)
+                {
+                    var name = $"AlternativeName{i}";
+                    <input type="text" name="@name" class="blank" style="margin-bottom:6px" />
+                }
+                <div class="form-hint">
+                    @localizer["AltNameTip1"]<br />
+                    @localizer["AltNameTip2"]
+                </div>
+            </div>
 
-    <div class="largeTopMargin">
-        <input type="submit" name="submit-club" value="@localizer["SubmitPlayerGo"]" />
-    </div>
+            <div class="form-field">
+                <label>@localizer["YearOfBirth"]</label>
+                <input type="text" id="birthYearValue" name="YearOfBirth" class="blank" style="max-width:100px" />
+            </div>
 
-    <div class="largeTopMargin">
-        @Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ScoreCalculator.SubmissionPoints))
+            <div class="form-field">
+                <label>@localizer["Nationality"]</label>
+                <input type="text" id="countryName" name="CountryNameSubmissionValue" class="blank" />
+                <input type="hidden" id="countryId" name="Country" />
+            </div>
+
+            <div class="form-field">
+                <label>@localizer["AlternativeNationality"]</label>
+                <input type="text" id="alternativeCountryName" name="AlternativeCountryNameSubmissionValue" class="blank" />
+                <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" />
+                <div class="form-hint">@localizer["TipAboutAlternativeNationality"]</div>
+            </div>
+
+            @if (Model.DisplayPlayerSubmissionLink)
+            {
+                <div class="form-field">
+                    <label>@localizer["ClueEn"]</label>
+                    <input type="text" name="ClueEn" class="blank" />
+                </div>
+
+                <div class="form-field">
+                    <label>@localizer["ClueFr"]</label>
+                    <input type="text" name="ClueFr" class="blank" />
+                </div>
+
+                <div class="form-field">
+                    <label>@localizer["EasyClueEn"]</label>
+                    <input type="text" name="EasyClueEn" class="blank" />
+                </div>
+
+                <div class="form-field">
+                    <label>@localizer["EasyClueFr"]</label>
+                    <input type="text" name="EasyClueFr" class="blank" />
+                </div>
+            }
+            else
+            {
+                <div class="form-field">
+                    <label>@localizer["Clue"]</label>
+                    <input type="text" name="ClueEn" class="blank" />
+                    <div class="form-hint">
+                        @localizer["AcceptedLanguages"]<br />
+                        @localizer["AdminOverrideClue"]
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label>@localizer["EasyClue"]</label>
+                    <input type="text" name="EasyClueEn" class="blank" />
+                    <div class="form-hint">
+                        @localizer["AcceptedLanguages"]<br />
+                        @localizer["AdminOverrideClue"]
+                    </div>
+                </div>
+            }
+
+            <div class="form-field">
+                <label>@localizer["Position"]</label>
+                @Html.DropDownListFor(m => m.Position, Model.Positions, new { @class = "blank" })
+            </div>
+
+            <div class="form-field">
+                <label>@localizer["AlternativePosition"]</label>
+                @Html.DropDownListFor(m => m.AlternativePosition, Model.Positions, new { @class = "blank" })
+                <div class="form-hint">@localizer["TipAboutAlternativePosition"]</div>
+            </div>
+
+            <div class="form-field">
+                <label>@localizer["ClubsCareer"]</label>
+                <div class="small-link" style="margin-top:0"><a href="/Admin/Club" target="_blank">@localizer["AddClubTab"]</a></div>
+                <div class="form-hint">@localizer["ClubsTip1"]</div>
+                @for (var i = 0; i < 15; i++)
+                {
+                    var name = $"Club{i}";
+                    var idName = $"Club{i}Id";
+                    var loanChk = $"IsLoan{i}";
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                        <input type="text" id="@name" name="@(name)Value" class="blank" />
+                        <input type="hidden" id="@idName" name="@idName" />
+                        <label style="font-size:11px;color:var(--ink-soft);white-space:nowrap">@localizer["IsLoan"]</label>
+                        @Html.CheckBox(loanChk)
+                    </div>
+                }
+                <div class="form-hint">@localizer["ClubsTip2"]</div>
+            </div>
+
+            <div class="form-field">
+                <label style="display:inline">@localizer["RemainsAnonymous"]</label>
+                @Html.CheckBoxFor(m => m.HideCreator)
+                <div class="form-hint">@localizer["RemainsAnonymousTip"]</div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" name="submit-club">@localizer["SubmitPlayerGo"]</button>
+            </div>
+
+            <p class="form-hint" style="margin-top:14px">@Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ScoreCalculator.SubmissionPoints))</p>
+        </form>
     </div>
-</form>
+</div>

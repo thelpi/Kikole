@@ -168,8 +168,11 @@
   <data name="Position" xml:space="preserve">
     <value>Position</value>
   </data>
+  <data name="RefusalReason" xml:space="preserve">
+    <value>Raison du rejet</value>
+  </data>
   <data name="RefusePlayer" xml:space="preserve">
-    <value>Refuser le joueur (raison du rejet)</value>
+    <value>Refuser le joueur</value>
   </data>
   <data name="SelectPlayer" xml:space="preserve">
     <value>Sélection d'un joueur</value>

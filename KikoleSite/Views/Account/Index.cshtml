@@ -92,7 +92,7 @@
             <form method="post" action="/Account/Create">
                 @if (Model.RegistrationInviteEnabled)
                 {
-                    <p class="form-hint"><a href="/Home/Contest">@localizer["FreeRegistrationClosed"]</a></p>
+                    <p class="form-hint">@localizer["FreeRegistrationClosed"]</p>
                     <div class="form-field">
                         <label>@localizer["SetRegistrationId"]</label>
                         @Html.TextBoxFor(m => m.RegistrationId, new { @class = "blank" })

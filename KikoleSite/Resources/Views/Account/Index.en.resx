@@ -133,7 +133,7 @@
     <value>Current password:</value>
   </data>
   <data name="FreeRegistrationClosed" xml:space="preserve">
-    <value>Registration on invitation for now, follow the link to know why</value>
+    <value>Registration on invitation for now</value>
   </data>
   <data name="GetPwdByQuestion" xml:space="preserve">
     <value>Recover password with secret question</value>

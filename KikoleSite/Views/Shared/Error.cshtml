@@ -1,5 +1,11 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 
-<h1 class="text-danger">@localizer["ErrorTitle"]</h1>
-<h2 class="text-danger">@localizer["ErrorMessage"]</h2>
-<a href="/Home">@localizer["BackToHome"]</a>
+<div class="kikole-board">
+    <div class="form-card">
+        <h2 class="profile-name" style="color:var(--stamp)">@localizer["ErrorTitle"]</h2>
+        <p>@localizer["ErrorMessage"]</p>
+        <div class="actions">
+            <a href="/Home">@localizer["BackToHome"]</a>
+        </div>
+    </div>
+</div>

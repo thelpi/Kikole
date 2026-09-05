@@ -135,9 +135,6 @@
   <data name="AltNameTip2" xml:space="preserve">
     <value>don't mind diacritics, it will be considered equal</value>
   </data>
-  <data name="AvoidAmbiguousPos" xml:space="preserve">
-    <value>as a rule of thumb, avoid players with too much ambiguous position</value>
-  </data>
   <data name="ClubsCareer" xml:space="preserve">
     <value>Clubs career</value>
   </data>
@@ -145,7 +142,7 @@
     <value>in chronological order, senior career only, without B teams</value>
   </data>
   <data name="ClubsTip2" xml:space="preserve">
-    <value>if more than 15 clubs, set the first 15 and the administrator will complete the rest; please create the clubs</value>
+    <value>if more than 15 clubs, set the first 15 and the administrator will complete the rest; please create the missing clubs beforehand</value>
   </data>
   <data name="Clue" xml:space="preserve">
     <value>Clue</value>
@@ -154,7 +151,7 @@
     <value>Name</value>
   </data>
   <data name="Nationality" xml:space="preserve">
-    <value>Nationality</value>
+    <value>Sporting nationality</value>
   </data>
   <data name="AlternativeNationality" xml:space="preserve">
     <value>Alternative nationality</value>
@@ -176,9 +173,6 @@
   </data>
   <data name="SubmitPlayerTitle" xml:space="preserve">
     <value>Submit a player</value>
-  </data>
-  <data name="TipAboutNationality" xml:space="preserve">
-    <value>keep in mind it's the country, not the international selection</value>
   </data>
   <data name="TipAboutAlternativeNationality" xml:space="preserve">
     <value>optional: only if the player represented a defunct sporting nation in addition to their current country (e.g. East Germany then Germany)</value>

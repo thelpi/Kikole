@@ -63,12 +63,6 @@ public class HomeController : KikoleBaseController
     }
 
     [HttpGet]
-    public IActionResult Contest()
-    {
-        return View();
-    }
-
-    [HttpGet]
     [Authorization]
     public IActionResult Contact()
     {

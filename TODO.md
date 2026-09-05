@@ -313,18 +313,28 @@ Branche de travail : `remaster-v2`.
 
 ## 4. Interface
 
-- [ ] **Rendre le graphisme plus attrayant** — **en cours**. Direction validée : la page
-      de jeu comme un dossier de scout (`kikole-board.css`, `Views/Home/Index.cshtml`),
-      cf. le plan `linear-pondering-wind.md`. Fait depuis : menu de navigation global
-      (`_Layout.cshtml`), datepicker jQuery UI, page Compte (`Views/Account/Index.cshtml`),
-      présentation/règles (`Partial/Rules.cshtml`), fiches badge (`Partial/Badges.cshtml`),
-      classement (`Leaderboard/Index.cshtml`), palmarès (`Leaderboard/Palmares.cshtml`) et
-      détail des statistiques d'un utilisateur (`Leaderboard/User.cshtml`,
-      `Leaderboard/UserDay.cshtml`) — tableaux de données réhabillés avec les classes
-      historiques de `site.css` conservées telles quelles (certaines sont régénérées par
-      `site.js` en AJAX, cf. `initializeLeaderboards`). Volontairement laissées de côté :
-      les pages statistiques réservées aux administrateurs (`Leaderboard/Stats.cshtml`,
-      `Leaderboard/KikolesStats.cshtml`).
+- [x] **Rendre le graphisme plus attrayant.** Direction validée : la page de jeu comme un
+      dossier de scout (`kikole-board.css`, `Views/Home/Index.cshtml`), cf. le plan
+      `linear-pondering-wind.md`. Toutes les pages passées, sauf exception explicite :
+      menu de navigation global (`_Layout.cshtml`), datepicker jQuery UI, page Compte,
+      présentation/règles, fiches badge, classement, palmarès, détail des statistiques
+      d'un utilisateur, puis dans un dernier lot — page Contact, page Concours d'octobre,
+      page d'erreur générique, et les cinq pages `Admin` (créer un joueur, créer/éditer un
+      club, éditer les indices d'un joueur publié, valider les joueurs proposés, actions
+      d'administration). Tableaux de données réhabillés avec les classes historiques de
+      `site.css` conservées telles quelles (certaines sont régénérées par `site.js` en
+      AJAX, cf. `initializeLeaderboards`) ; nouveaux composants génériques ajoutés au
+      passage (`textarea.blank`, `input[type="datetime-local"]`, `input[type="checkbox"]`
+      accentué, `.actions a` pour un lien qui a l'air d'un bouton). Formulaires à
+      interactions JS non triviales (autocomplétion club/pays/année, lignes de club
+      dynamiques `Admin/Index.cshtml`, vérif. club par nom `Admin/Club.cshtml`) revérifiés
+      en direct sans changement d'`id`/`name` : soumissions, autocomplétion (requêtes AJAX
+      confirmées), cycle complet proposition → acceptation/refus testé avec un compte
+      temporairement promu PowerUser (reremis à son palier d'origine ensuite, joueur/
+      message de test nettoyés de la base locale). Volontairement laissées de côté, choix
+      confirmé avec l'utilisateur : les pages statistiques réservées aux administrateurs
+      (`Leaderboard/Stats.cshtml`, `Leaderboard/KikolesStats.cshtml`) — la seconde étant de
+      toute façon prévue pour fusionner dans la première (cf. item dédié plus bas).
   - [ ] **`Leaderboard/Palmares.cshtml` n'est pas localisée** (pas de resx, tout le texte
         est en français en dur, y compris un reliquat anglais "No data to display" corrigé
         au passage). Contrairement à toutes les autres pages du site, un utilisateur en
@@ -480,8 +490,9 @@ Branche de travail : `remaster-v2`.
       Nettoyage des accès devenus redondants : liens toujours visibles du footer
       (`SubmitKikole`/`ContactAdmin`, affichés même sans les droits requis) retirés ;
       liens texte Stats/KikolesStats + `LeaderboardModel.IsAdmin` (devenu mort) retirés de
-      `Leaderboard/Index.cshtml`. `Admin/Club`/`Admin/PlayerEdit`/`Leaderboard/Palmares`/
-      `Home/Contest` laissés hors menu : déjà linkées depuis leur contexte d'usage.
+      `Leaderboard/Index.cshtml`. `Admin/Club`/`Admin/PlayerEdit`/`Leaderboard/Palmares`
+      laissés hors menu : déjà linkées depuis leur contexte d'usage (`Home/Contest`,
+      alors dans le même cas, a depuis été supprimée — plus d'actualité).
       Bug découvert en vérifiant : `.site-nav-drawer.open` avait un `max-height: 320px`
       fixe (dimensionné pour l'ancienne liste courte) qui rognait silencieusement le bas
       du tiroir pour un compte admin (8 lignes désormais) — corrigé en `80vh` avec défilement

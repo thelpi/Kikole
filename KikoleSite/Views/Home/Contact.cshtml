@@ -1,32 +1,29 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model ContactModel
-<div>
+
+<div class="kikole-board">
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
-        <div class="redtext mediumTopMargin" style="font-size: large">
-            @Model.ErrorMessage
-        </div>
+        <div class="banner error">@Model.ErrorMessage</div>
     }
     @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
     {
-        <div class="greentext mediumTopMargin" style="font-size: large">
-            @Model.SuccessMessage
-        </div>
+        <div class="banner success">@Model.SuccessMessage</div>
     }
-    <h3>@localizer["ContactAdmin"]</h3>
-    <form method="post" action="/Home/Contact">
-        <div>
-            <label>@localizer["YourEmail"]</label>
-            <div>
-                @Html.TextBoxFor(m => m.Email)
+    <div class="form-card">
+        <h3>@localizer["ContactAdmin"]</h3>
+        <form method="post" action="/Home/Contact">
+            <div class="form-field">
+                <label>@localizer["YourEmail"]</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "blank" })
             </div>
-            <label>@localizer["YourMessage"]</label>
-            <div>
-                @Html.TextAreaFor(m => m.Message)
+            <div class="form-field">
+                <label>@localizer["YourMessage"]</label>
+                @Html.TextAreaFor(m => m.Message, new { @class = "blank" })
             </div>
-            <div>
-                <input type="submit" value="@localizer["ToSend"]" />
+            <div class="actions">
+                <button type="submit">@localizer["ToSend"]</button>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
