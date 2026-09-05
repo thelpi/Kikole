@@ -400,19 +400,24 @@ Branche de travail : `remaster-v2`.
       façon déjà accès au compte via la session volée — pas de surface d'attaque nouvelle.
       Vérifié en direct : mauvais mot de passe → rejeté (`Mot de passe invalide`), bon mot
       de passe → mise à jour acceptée.
-  - [ ] **Bug découvert en testant ci-dessus, plus large que ce formulaire :**
-        `AccountController.Index` (POST) ne renseigne `model.IsAuthenticated`/`model.Login`
-        que dans les branches de **succès** de chaque formulaire ; sur n'importe quelle
-        erreur de validation en étant connecté (mot de passe actuel incorrect, mots de passe
-        qui ne correspondent pas...), le bandeau d'erreur s'affiche bien mais la page bascule
-        sur le jeu de formulaires "non connecté" (Connexion/Créer un compte/Récupération) au
-        lieu de rester sur les 3 cartes "connecté" — confirmé aussi bien sur
-        `submit-changepassword` (préexistant, pas introduit par le point ci-dessus) que sur
-        `submit-resetqanda`. L'état de connexion réel n'est pas affecté (juste l'affichage) :
-        se déconnecter/reconnecter ou revenir sur `/Account` en GET suffit à voir la page
-        correcte. Piste de correctif simple : renseigner `model.IsAuthenticated`/`Login`
-        une seule fois en haut de l'action, avant le `switch`, plutôt que dans chaque branche
-        de succès.
+  - [x] **Bug découvert en testant ci-dessus, plus large que ce formulaire :**
+        `AccountController.Index` (POST) ne renseignait `model.IsAuthenticated`/
+        `model.Login` que dans les branches de **succès** de chaque formulaire ; sur
+        n'importe quelle erreur de validation en étant connecté (mot de passe actuel
+        incorrect, mots de passe qui ne correspondent pas...), le bandeau d'erreur
+        s'affichait bien mais la page basculait sur le jeu de formulaires "non connecté"
+        (Connexion/Créer un compte/Récupération) au lieu de rester sur les 3 cartes
+        "connecté" — confirmé aussi bien sur `submit-changepassword` (préexistant, pas
+        introduit par le point ci-dessus) que sur `submit-resetqanda`. L'état de connexion
+        réel n'était pas affecté (juste l'affichage). **Corrigé** : les affectations
+        ad hoc dans chaque branche de succès sont retirées, remplacées par une affectation
+        unique juste avant `return View(model)`, basée sur l'état réel (`UserId > 0`) —
+        fonctionne aussi pour "logoff", qui réinitialise `HttpContext.User` avant d'arriver
+        à ce point. Sans arbitrage : c'était mécanique, pas une question de design.
+        Re-vérifié en direct : mot de passe incorrect sur les deux formulaires → reste sur
+        la vue connectée avec l'erreur ; mot de passe déjà compromis (vérif HIBP) → idem ;
+        changement de mot de passe réussi → reste connecté ; déconnexion → bascule
+        correctement sur la vue "non connecté".
 - [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
       cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
       étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,

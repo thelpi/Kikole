@@ -196,8 +196,6 @@ public class AccountController : KikoleBaseController
                     await _userManager.UpdateAsync(user);
 
                     model.SuccessInfo = _localizer["QandAUpdated"];
-                    model.IsAuthenticated = true;
-                    model.Login = UserLogin;
                 }
             }
         }
@@ -300,13 +298,18 @@ public class AccountController : KikoleBaseController
                 if (!change.Succeeded)
                     model.Error = MapPasswordErrorMessage(change, "ResetPasswordError");
                 else
-                {
-                    model.IsAuthenticated = true;
-                    model.Login = UserLogin;
                     model.SuccessInfo = _localizer["PasswordChanged"];
-                }
             }
         }
+
+        // reflete l'etat de connexion reel au moment du rendu (plutot que de le
+        // recopier a la main dans chaque branche de succes ci-dessus, ce qui oubliait
+        // les branches d'erreur : un mot de passe incorrect par exemple affichait bien
+        // le message d'erreur, mais faisait retomber la page sur le jeu de formulaires
+        // "non connecte"). Fonctionne aussi pour "logoff", qui reinitialise HttpContext.User
+        // avant d'arriver ici : UserId reflete alors deja la deconnexion.
+        model.IsAuthenticated = UserId > 0;
+        model.Login = UserLogin;
 
         return View(model);
     }
