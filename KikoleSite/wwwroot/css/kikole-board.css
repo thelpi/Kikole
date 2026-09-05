@@ -734,6 +734,170 @@ body { padding-top: 0; }
 
 .kikole-board .actions button:disabled .cost { color: var(--ink-soft); }
 
+/* ---------------------------------------------------------- badges */
+
+.kikole-board .badges-label {
+  padding: 0 26px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kikole-board .badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 0 26px 20px;
+}
+
+.kikole-board .badge-card {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--paper-line);
+  border-radius: 6px;
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kikole-board .badge-card.secret {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--gold) 16%, var(--paper)), var(--paper) 70%);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--paper-line));
+}
+
+.kikole-board .badge-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.kikole-board .badge-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--pitch);
+}
+
+.kikole-board .badge-card.secret .badge-icon { color: var(--gold); }
+
+.kikole-board .badge-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--pitch-strong);
+  padding-top: 2px;
+}
+
+.kikole-board .badge-card.secret .badge-name { color: color-mix(in srgb, var(--gold) 65%, var(--ink)); }
+
+.kikole-board .badge-seal {
+  margin-left: auto;
+  flex: none;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 2px 5px;
+  white-space: nowrap;
+}
+
+.kikole-board .badge-desc { font-size: 12.5px; }
+
+.kikole-board .badge-desc summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink-soft);
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px dashed var(--paper-line);
+  padding-bottom: 1px;
+}
+
+.kikole-board .badge-desc summary::-webkit-details-marker { display: none; }
+
+.kikole-board .badge-desc summary::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-soft);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.kikole-board .badge-desc[open] summary::before { content: "\2212"; }
+
+.kikole-board .badge-desc summary:hover { color: var(--pitch-strong); }
+.kikole-board .badge-desc summary:hover::before { border-color: var(--pitch-strong); color: var(--pitch-strong); }
+
+.kikole-board .badge-desc p {
+  margin: 6px 0 0;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.kikole-board .badge-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kikole-board .badge-date {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pitch);
+  border: 1px solid var(--pitch);
+  border-radius: 3px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.kikole-board .badge-date.secret {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.kikole-board .badge-holders {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.kikole-board .badge-holders b { color: var(--stamp); font-weight: 600; }
+
+.kikole-board .badge-holders.solo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--gold) 65%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.kikole-board .badge-holders.solo svg { width: 11px; height: 11px; flex: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .kikole-board .actions button { transition: none; }
 }

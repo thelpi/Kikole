@@ -1,28 +1,52 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@using KikoleSite.Helpers
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model IReadOnlyCollection<KikoleSite.Models.UserBadge>
 @if (Model?.Count > 0)
 {
-    <div>@localizer["BadgesAcquired"]</div>
-    foreach (var badge in Model)
-    {
-        var color = !badge.Hidden ? "transparent" : "gold";
-        <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
-            <div class="greentext" style="text-align:center; font-size: large">@badge.Name</div>
-            <div style="text-align:center">@badge.Description</div>
-            @if (!badge.Hidden)
-            {
-                <div style="text-align:center">@localizer["BadgeGotThe"] @badge.GetDate.ToString("yyyy-MM-dd")</div>
-            }
-            @if (badge.Users == 1)
-            {
-                <div style="text-align:center; font-weight: bold">@localizer["SoloWithBadge"]</div>
-            }
-            else
-            {
-                var v = badge.Users - 1;
-                <div style="text-align:center"><span class="redtext">@v</span> @localizer[v == 1 ? "SingleWithBadge" : "MultipleWithBadge"]</div>
-            }
-        </div>
-    }
-    <div style="clear: both" />
+    <div class="badges-label">@localizer["BadgesAcquired"]</div>
+    <div class="badges-grid">
+        @foreach (var badge in Model)
+        {
+            <div class="badge-card @(badge.Hidden ? "secret" : "")">
+                <div class="badge-head">
+                    <svg class="badge-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6" />
+                        <path d="M9 14.5L7.5 21L12 18.5L16.5 21L15 14.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                        <path d="M12 6.2L12.9 8.1L15 8.4L13.5 9.8L13.9 11.9L12 10.9L10.1 11.9L10.5 9.8L9 8.4L11.1 8.1L12 6.2Z" fill="currentColor" />
+                    </svg>
+                    <div class="badge-name">@badge.Name</div>
+                    @if (badge.Hidden)
+                    {
+                        <span class="badge-seal">@localizer["BadgeSecret"]</span>
+                    }
+                </div>
+                <details class="badge-desc">
+                    <summary>@localizer["BadgeDetails"]</summary>
+                    <p>@badge.Description</p>
+                </details>
+                <div class="badge-foot">
+                    @if (badge.Hidden)
+                    {
+                        <span class="badge-date secret">@localizer["BadgeSecret"]</span>
+                    }
+                    else
+                    {
+                        <span class="badge-date">@localizer["BadgeGotThe"] @badge.GetDate.ToNaString()</span>
+                    }
+                    @if (badge.Users == 1)
+                    {
+                        <span class="badge-holders solo">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.6-.4L12 2z" /></svg>
+                            @localizer["SoloWithBadge"]
+                        </span>
+                    }
+                    else
+                    {
+                        var v = badge.Users - 1;
+                        <span class="badge-holders"><b>@v</b> @localizer[v == 1 ? "SingleWithBadge" : "MultipleWithBadge"]</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
 }

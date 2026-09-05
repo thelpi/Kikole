@@ -117,19 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BadgeDetails" xml:space="preserve">
+    <value>details</value>
+  </data>
   <data name="BadgeGotThe" xml:space="preserve">
     <value>Got the</value>
+  </data>
+  <data name="BadgeSecret" xml:space="preserve">
+    <value>Secret badge</value>
   </data>
   <data name="BadgesAcquired" xml:space="preserve">
     <value>You get the following badges:</value>
   </data>
   <data name="MultipleWithBadge" xml:space="preserve">
-    <value>other users have this badge.</value>
+    <value>other holders</value>
   </data>
   <data name="SingleWithBadge" xml:space="preserve">
-    <value>other user has this badge.</value>
+    <value>other holder</value>
   </data>
   <data name="SoloWithBadge" xml:space="preserve">
-    <value>You're the &lt;span class="redtext"&gt;only one&lt;/span&gt; with this badge!</value>
+    <value>you're the only one to have it</value>
   </data>
 </root>
