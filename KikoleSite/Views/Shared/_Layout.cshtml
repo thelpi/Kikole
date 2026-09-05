@@ -71,8 +71,8 @@
                 @if (isLoggedIn)
                 {
                     <span class="site-nav-user">@currentUserLogin</span>
-                    <form method="post" action="/Account" class="site-nav-logout-form">
-                        <button type="submit" name="submit-logoff" class="site-nav-icon-btn site-nav-logout"
+                    <form method="post" action="/Account/LogOut" class="site-nav-logout-form">
+                        <button type="submit" class="site-nav-icon-btn site-nav-logout"
                                 title="@localizer["LogOut"]" aria-label="@localizer["LogOut"]">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 4h4v16h-4" /><path d="M4 12h11" /><path d="M11.5 8.5 15 12l-3.5 3.5" />
@@ -127,8 +127,8 @@
                                title="@(isEnglish ? "Passer en français" : "Switch to English")">
                                 <img src="@flagPath" alt="" />
                             </a>
-                            <form method="post" action="/Account">
-                                <button type="submit" name="submit-logoff" class="site-nav-icon-btn site-nav-logout"
+                            <form method="post" action="/Account/LogOut">
+                                <button type="submit" class="site-nav-icon-btn site-nav-logout"
                                         title="@localizer["LogOut"]" aria-label="@localizer["LogOut"]">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M14 4h4v16h-4" /><path d="M4 12h11" /><path d="M11.5 8.5 15 12l-3.5 3.5" />

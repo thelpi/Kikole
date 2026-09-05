@@ -418,6 +418,27 @@ Branche de travail : `remaster-v2`.
         la vue connectée avec l'erreur ; mot de passe déjà compromis (vérif HIBP) → idem ;
         changement de mot de passe réussi → reste connecté ; déconnexion → bascule
         correctement sur la vue "non connecté".
+  - [x] **`AccountController.Index` (POST) éclaté en une action par formulaire**, à la
+        place du `if/else if` unique dispatché par nom de bouton (`GetSubmitAction()`,
+        toujours utilisé tel quel par `AdminController`/`HomeController`, hors périmètre
+        ici). Sept actions dédiées (`LogOut`, `LogIn`, `GetLoginQuestion`, `ResetPassword`,
+        `ResetQAndA`, `Create`, `ChangePassword`), chaque `<form>` de
+        `Views/Account/Index.cshtml` pointant directement sur la sienne (routing
+        conventionnel déjà en place, pas de nouvelle route à déclarer) ; les `name="submit-
+        xxx"` des boutons n'ont plus lieu d'être, retirés. `ResetQAndA`/`ChangePassword`
+        passent de la vérification manuelle `if (UserId == 0) return
+        RedirectToAction("ErrorIndex", "Home")` à `[Authorization]` (même attribut déjà
+        utilisé par `LeaderboardController`, policy déjà branchée sur `/Home/ErrorIndex`
+        via `LoginPath`/`AccessDeniedPath` — comportement identique, juste déclaratif). La
+        redirection interne "create" réussi → connexion automatique appelle maintenant
+        directement l'action `LogIn` au lieu de rappeler `Index` avec un indicateur
+        `ForceLoginAction` (propriété supprimée de `AccountModel`, elle n'existait que pour
+        ça). Fin de méthode factorisée en un seul point (`RenderIndex`), ce qui rend la
+        classe de bug ci-dessus structurellement impossible à réintroduire par erreur.
+        Aucun test existant sur ce contrôleur (déjà noté hors périmètre plus haut) ; les
+        7 parcours (connexion, inscription, déconnexion, changement de mot de passe,
+        changement Q&A, question puis réponse de récupération) et le rejet `[Authorization]`
+        d'un accès non connecté ont été revérifiés en direct dans le navigateur.
 - [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
       cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
       étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,

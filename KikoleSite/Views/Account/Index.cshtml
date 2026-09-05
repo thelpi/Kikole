@@ -15,20 +15,20 @@
     {
         <div class="form-card">
             <h3>@localizer["LogOut"]</h3>
-            <form method="post" action="/Account">
+            <form method="post" action="/Account/LogOut">
                 <div class="form-field">
                     <label>@localizer["LoggedAs"]</label>
                     <div class="form-static">@Model.Login</div>
                 </div>
                 <div class="actions">
-                    <button type="submit" name="submit-logoff">@localizer["LogOut"]</button>
+                    <button type="submit">@localizer["LogOut"]</button>
                 </div>
             </form>
         </div>
 
         <div class="form-card">
             <h3>@localizer["ChangePassword"]</h3>
-            <form method="post" action="/Account">
+            <form method="post" action="/Account/ChangePassword">
                 <div class="form-field">
                     <label>@localizer["CurrentPwd"]</label>
                     @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
@@ -42,14 +42,14 @@
                     @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
                 </div>
                 <div class="actions">
-                    <button type="submit" name="submit-changepassword">@localizer["Update"]</button>
+                    <button type="submit">@localizer["Update"]</button>
                 </div>
             </form>
         </div>
 
         <div class="form-card">
             <h3>@localizer["ChangeQAndA"]</h3>
-            <form method="post" action="/Account">
+            <form method="post" action="/Account/ResetQAndA">
                 <div class="form-field">
                     <label>@localizer["CurrentPwd"]</label>
                     @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
@@ -63,7 +63,7 @@
                     @Html.PasswordFor(m => m.RecoveryACreate, new { @class = "blank" })
                 </div>
                 <div class="actions">
-                    <button type="submit" name="submit-resetqanda">@localizer["Update"]</button>
+                    <button type="submit">@localizer["Update"]</button>
                 </div>
             </form>
         </div>
@@ -72,7 +72,7 @@
     {
         <div class="form-card">
             <h3>@localizer["LogIn"]</h3>
-            <form method="post" action="/Account">
+            <form method="post" action="/Account/LogIn">
                 <div class="form-field">
                     <label>@localizer["SetLogin"]</label>
                     @Html.TextBoxFor(m => m.LoginSubmission, new { @class = "blank" })
@@ -82,14 +82,14 @@
                     @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
                 </div>
                 <div class="actions">
-                    <button type="submit" name="submit-login">@localizer["LogIn"]</button>
+                    <button type="submit">@localizer["LogIn"]</button>
                 </div>
             </form>
         </div>
 
         <div class="form-card">
             <h3>@localizer["CreateAccount"]</h3>
-            <form method="post" action="/Account">
+            <form method="post" action="/Account/Create">
                 @if (Model.RegistrationInviteEnabled)
                 {
                     <p class="form-hint"><a href="/Home/Contest">@localizer["FreeRegistrationClosed"]</a></p>
@@ -121,14 +121,14 @@
                     @Html.PasswordFor(m => m.RecoveryACreate, new { @class = "blank" })
                 </div>
                 <div class="actions">
-                    <button type="submit" name="submit-create">@localizer["Create"]</button>
+                    <button type="submit">@localizer["Create"]</button>
                 </div>
             </form>
         </div>
 
         <div class="form-card">
             <h3>@localizer["GetPwdByQuestion"]</h3>
-            <form method="post" action="/Account">
+            <form method="post" action="@(string.IsNullOrWhiteSpace(Model.QuestionRecovery) ? "/Account/GetLoginQuestion" : "/Account/ResetPassword")">
                 @if (string.IsNullOrWhiteSpace(Model.QuestionRecovery))
                 {
                     <div class="form-field">
@@ -137,7 +137,7 @@
                     </div>
                     @* soumission volontairement invisible : cette premiere etape ne se
                        valide qu'a la touche Entree, pas via un bouton visible. *@
-                    <button type="submit" name="submit-getloginquestion" style="visibility: hidden">@localizer["Update"]</button>
+                    <button type="submit" style="visibility: hidden">@localizer["Update"]</button>
                 }
                 else
                 {
@@ -163,7 +163,7 @@
                         @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
                     </div>
                     <div class="actions">
-                        <button type="submit" name="submit-resetpassword">@localizer["Update"]</button>
+                        <button type="submit">@localizer["Update"]</button>
                     </div>
                 }
             </form>
