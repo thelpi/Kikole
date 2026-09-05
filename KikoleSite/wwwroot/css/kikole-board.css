@@ -343,6 +343,48 @@ body { padding-top: 0; }
 
 .kikole-board .form-card a { color: var(--pitch-strong); }
 
+/* sections repliables (Statistics/Stats.cshtml) : le JS (site.js, deja en place) ne
+   gere que l'ouverture/fermeture (classe .active + display block/none), tout l'habillage
+   vient d'ici - remplace le look gris plat de site.css dans ce scope. */
+.kikole-board .collapsible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: var(--pitch-strong);
+  cursor: pointer;
+  text-align: left;
+}
+
+.kikole-board .collapsible:hover,
+.kikole-board .collapsible.active { background: transparent; }
+
+.kikole-board .collapsible::after {
+  content: "+";
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--pitch);
+}
+
+.kikole-board .collapsible.active::after { content: "\2212"; }
+
+.kikole-board .collapsiblecontent { padding-top: 16px; }
+
+.kikole-board .chart-empty {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 4px 0 12px;
+}
+
 .kikole-board .redtext { color: var(--stamp); }
 .kikole-board .greentext { color: var(--pitch); }
 

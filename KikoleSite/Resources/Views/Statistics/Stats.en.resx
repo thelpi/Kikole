@@ -120,10 +120,46 @@
   <data name="ActiveUsersTitle" xml:space="preserve">
     <value>Active users count</value>
   </data>
-  <data name="KikolesStatsLink" xml:space="preserve">
-    <value>See kikolés statistics</value>
+  <data name="KikolesStatsTitle" xml:space="preserve">
+    <value>Kikolés statistics</value>
   </data>
   <data name="PlayersDistributionTitle" xml:space="preserve">
     <value>Players distribution by criteria</value>
+  </data>
+  <data name="SortLabel" xml:space="preserve">
+    <value>Sort:</value>
+  </data>
+  <data name="DescendingLabel" xml:space="preserve">
+    <value>Descending:</value>
+  </data>
+  <data name="DateHeader" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="NameHeader" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="CreatorHeader" xml:space="preserve">
+    <value>Creator</value>
+  </data>
+  <data name="AveragePointsSameDayHeader" xml:space="preserve">
+    <value>Average points (same day)</value>
+  </data>
+  <data name="TriesSameDayHeader" xml:space="preserve">
+    <value>Players who tried (same day)</value>
+  </data>
+  <data name="SuccessesSameDayHeader" xml:space="preserve">
+    <value>Players who found (same day)</value>
+  </data>
+  <data name="AveragePointsTotalHeader" xml:space="preserve">
+    <value>Average points (total)</value>
+  </data>
+  <data name="TriesTotalHeader" xml:space="preserve">
+    <value>Players who tried (total)</value>
+  </data>
+  <data name="SuccessesTotalHeader" xml:space="preserve">
+    <value>Players who found (total)</value>
+  </data>
+  <data name="BestTimeHeader" xml:space="preserve">
+    <value>Best time</value>
   </data>
 </root>

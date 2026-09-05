@@ -92,11 +92,4 @@ public class StatisticsController : KikoleBaseController
 
         return Json(datas);
     }
-
-    [HttpGet]
-    [Authorization(UserTypes.Administrator)]
-    public IActionResult KikolesStats()
-    {
-        return View("KikolesStats");
-    }
 }

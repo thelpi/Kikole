@@ -1,20 +1,87 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@using KikoleSite.Helpers
+@using KikoleSite.Models.Enums
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 
-<div><a href="/Statistics/KikolesStats">@localizer["KikolesStatsLink"]</a></div>
+<div class="kikole-board">
+    <div class="form-card">
+        <button type="button" class="collapsible">@localizer["KikolesStatsTitle"]</button>
+        <div class="collapsiblecontent" style="display: none">
+            <img id="loading-image" width="40" height="40" src="/images/ajax-loader.gif" style="display: none" />
+            <div id="sort-block" class="form-row">
+                <div class="form-field">
+                    <label>@localizer["SortLabel"]</label>
+                    <select id="sort-selection" class="blank">
+                        <option value="@PlayerSorts.AttempsCountOverall">@PlayerSorts.AttempsCountOverall.GetLabel()</option>
+                        <option value="@PlayerSorts.AttempsCountSameDay" selected>@PlayerSorts.AttempsCountSameDay.GetLabel()</option>
+                        <option value="@PlayerSorts.BestTime">@PlayerSorts.BestTime.GetLabel()</option>
+                        <option value="@PlayerSorts.CreatorLogin">@PlayerSorts.CreatorLogin.GetLabel()</option>
+                        <option value="@PlayerSorts.LeadersCountOverall">@PlayerSorts.LeadersCountOverall.GetLabel()</option>
+                        <option value="@PlayerSorts.LeadersCountSameDay">@PlayerSorts.LeadersCountSameDay.GetLabel()</option>
+                        <option value="@PlayerSorts.Name">@PlayerSorts.Name.GetLabel()</option>
+                        <option value="@PlayerSorts.PointsOverall">@PlayerSorts.PointsOverall.GetLabel()</option>
+                        <option value="@PlayerSorts.PointsSameDay">@PlayerSorts.PointsSameDay.GetLabel()</option>
+                        <option value="@PlayerSorts.PublicationDate">@PlayerSorts.PublicationDate.GetLabel()</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>@localizer["DescendingLabel"]</label>
+                    <input type="checkbox" checked id="sort-desc-selection" />
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table id="kikolesStatsTab">
+                    <thead>
+                        <tr>
+                            <th class="tabDataHead">@localizer["DateHeader"]</th>
+                            <th class="tabDataHead">@localizer["NameHeader"]</th>
+                            <th class="tabDataHead">@localizer["CreatorHeader"]</th>
+                            <th class="tabDataHead">@localizer["AveragePointsSameDayHeader"]</th>
+                            <th class="tabDataHead">@localizer["TriesSameDayHeader"]</th>
+                            <th class="tabDataHead">@localizer["SuccessesSameDayHeader"]</th>
+                            <th class="tabDataHead">@localizer["AveragePointsTotalHeader"]</th>
+                            <th class="tabDataHead">@localizer["TriesTotalHeader"]</th>
+                            <th class="tabDataHead">@localizer["SuccessesTotalHeader"]</th>
+                            <th class="tabDataHead">@localizer["BestTimeHeader"]</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-<button type="button" class="collapsible">@localizer["PlayersDistributionTitle"]</button>
-<div class="collapsiblecontent" style="display: none">
-    <div id="playerDistributionCountryChart"></div>
-    <div id="playerDistributionPositionChart"></div>
-    <div id="playerDistributionDecadeChart"></div>
-    <div id="playerDistributionClubChart"></div>
-</div>
+    <div class="form-card">
+        <button type="button" class="collapsible">@localizer["PlayersDistributionTitle"]</button>
+        <div class="collapsiblecontent" style="display: none">
+            <div id="playerDistributionCountryChart"></div>
+            <div id="playerDistributionPositionChart"></div>
+            <div id="playerDistributionDecadeChart"></div>
+            <div id="playerDistributionClubChart"></div>
+        </div>
+    </div>
 
-<button type="button" class="collapsible">@localizer["ActiveUsersTitle"]</button>
-<div class="collapsiblecontent" style="display: none">
-    <div id="dayActiveUsersChart"></div>
-    <div id="weekActiveUsersChart"></div>
-    <div id="monthActiveUsersChart"></div>
+    <div class="form-card">
+        <button type="button" class="collapsible">@localizer["ActiveUsersTitle"]</button>
+        <div class="collapsiblecontent" style="display: none">
+            <div id="dayActiveUsersChart"></div>
+            <div id="weekActiveUsersChart"></div>
+            <div id="monthActiveUsersChart"></div>
+        </div>
+    </div>
 </div>
 
 <div style="display: none" id="googleChartEnabler"></div>
+
+<script>
+    $(function () {
+        var descCheckBox = document.getElementById('sort-desc-selection');
+        var sortSelect = document.getElementById('sort-selection');
+        descCheckBox.onchange = function () {
+            loadKikolesStats(sortSelect.value, descCheckBox.checked);
+        };
+        sortSelect.onchange = function () {
+            loadKikolesStats(sortSelect.value, descCheckBox.checked);
+        }
+        loadKikolesStats('AttempsCountSameDay', true);
+    });
+</script>

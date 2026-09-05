@@ -131,6 +131,24 @@ public static class ViewHelper
         };
     }
 
+    public static string GetLabel(this PlayerSorts sort)
+    {
+        return sort switch
+        {
+            PlayerSorts.PublicationDate => IsFrench() ? "Date" : "Date",
+            PlayerSorts.Name => IsFrench() ? "Nom" : "Name",
+            PlayerSorts.CreatorLogin => IsFrench() ? "Créateur" : "Creator",
+            PlayerSorts.PointsSameDay => IsFrench() ? "Moyenne de points (jour même)" : "Average points (same day)",
+            PlayerSorts.PointsOverall => IsFrench() ? "Moyenne de points (total)" : "Average points (total)",
+            PlayerSorts.AttempsCountSameDay => IsFrench() ? "Joueurs ayant tentés (jour même)" : "Players who tried (same day)",
+            PlayerSorts.AttempsCountOverall => IsFrench() ? "Joueurs ayant tentés (total)" : "Players who tried (total)",
+            PlayerSorts.LeadersCountSameDay => IsFrench() ? "Joueurs ayant trouvés (jour même)" : "Players who found (same day)",
+            PlayerSorts.LeadersCountOverall => IsFrench() ? "Joueurs ayant trouvés (total)" : "Players who found (total)",
+            PlayerSorts.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
+            _ => throw new NotImplementedException(),
+        };
+    }
+
     public static string GetLabel(this DayLeaderSorts sort)
     {
         return sort switch

@@ -47,6 +47,7 @@ var loadKikolesStats = function (sort, desc) {
             var table = document.getElementById('kikolesStatsTab');
             var tbodyRef = table.getElementsByTagName('tbody')[0];
             var newtbody = document.createElement('tbody');
+            var i = 0;
             data.forEach(e => {
                 var background = i % 2 == 0 ? "even" : "odd";
                 var newRow = newtbody.insertRow();
@@ -516,10 +517,10 @@ function drawStatisticPageCharts() {
         type: "GET",
         async: false,
         success: function (data) {
-            data.country.forEach(item => playerDistributionCountryDatas.push([item.Key, item.Value]));
-            data.position.forEach(item => playerDistributionPositionDatas.push([item.Key, item.Value]));
-            data.decade.forEach(item => playerDistributionDecadeDatas.push([item.Key, item.Value]));
-            data.club.forEach(item => playerDistributionClubDatas.push([item.Key, item.Value]));
+            data.country.forEach(item => playerDistributionCountryDatas.push([item.key, item.value]));
+            data.position.forEach(item => playerDistributionPositionDatas.push([item.key, item.value]));
+            data.decade.forEach(item => playerDistributionDecadeDatas.push([item.key, item.value]));
+            data.club.forEach(item => playerDistributionClubDatas.push([item.key, item.value]));
         }
     });
     buildPlayerDistributionPieChartGraph('playerDistributionCountryChart', playerDistributionCountryDatas, 'Distribution by country');
@@ -536,9 +537,9 @@ function drawStatisticPageCharts() {
         type: "GET",
         async: false,
         success: function (data) {
-            data.weekly.forEach(item => weekActivityDatas.push([item.Key, item.Value]));
-            data.monthly.forEach(item => monthActivityDatas.push([item.Key, item.Value]));
-            data.daily.forEach(item => dayActivityDatas.push([item.Key, item.Value]));
+            data.weekly.forEach(item => weekActivityDatas.push([item.key, item.value]));
+            data.monthly.forEach(item => monthActivityDatas.push([item.key, item.value]));
+            data.daily.forEach(item => dayActivityDatas.push([item.key, item.value]));
         }
     });
     buildActiveUsersLineChartGraph('dayActiveUsersChart', dayActivityDatas, 'Date');
@@ -546,14 +547,33 @@ function drawStatisticPageCharts() {
     buildActiveUsersLineChartGraph('monthActiveUsersChart', monthActivityDatas, 'Month');
 }
 
+/* sourceDatas contient toujours la ligne d'en-tete (cf. drawStatisticPageCharts) : sans
+   ligne de donnee derriere, arrayToDataTable ne peut deduire aucun type de colonne et
+   google.visualization plante avec "Data column(s) for axis #0 cannot be of type string"
+   plutot que d'afficher un graphique vide - un jeu de donnees local (fenetre de dates
+   trop recente pour avoir de l'historique, par exemple) tombe facilement dans ce cas. */
+function hasChartData(sourceDatas) {
+    return sourceDatas.length > 1;
+}
+
+function showNoChartData(elementId) {
+    var container = document.getElementById(elementId);
+    container.textContent = 'No data available yet.';
+    container.classList.add('chart-empty');
+}
+
 function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
+    if (!hasChartData(sourceDatas)) {
+        showNoChartData(elementId);
+        return;
+    }
     var tableDats = google.visualization.arrayToDataTable(sourceDatas);
     var options = {
         hAxis: { title: yAxisTitle },
         vAxis: { title: 'Active users' },
         legend: 'none',
-        width: 1600,
-        height: 900
+        width: '100%',
+        height: 360
     };
     new google.visualization
         .LineChart(document.getElementById(elementId))
@@ -561,11 +581,15 @@ function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
 }
 
 function buildPlayerDistributionPieChartGraph(elementId, sourceDatas, pieTitle) {
+    if (!hasChartData(sourceDatas)) {
+        showNoChartData(elementId);
+        return;
+    }
     var data = google.visualization.arrayToDataTable(sourceDatas);
     var options = {
         title: pieTitle,
-        width: 1600,
-        height: 900
+        width: '100%',
+        height: 360
     };
     new google.visualization
         .PieChart(document.getElementById(elementId))
@@ -573,11 +597,15 @@ function buildPlayerDistributionPieChartGraph(elementId, sourceDatas, pieTitle) 
 }
 
 function buildPlayerDistributionColumnChartGraph(elementId, sourceDatas, title) {
+    if (!hasChartData(sourceDatas)) {
+        showNoChartData(elementId);
+        return;
+    }
     var data = google.visualization.arrayToDataTable(sourceDatas);
     var options = {
         title: title,
-        width: 1600,
-        height: 900
+        width: '100%',
+        height: 360
     };
     new google.visualization
         .ColumnChart(document.getElementById(elementId))

@@ -597,10 +597,54 @@ Branche de travail : `remaster-v2`.
       sur disque mais jamais chargés par `_Layout.cshtml` — résidus du scaffold ASP.NET MVC
       d'origine. Chantier à part entière (rupture potentielle jQuery UI et Bootstrap 3→5),
       pas juste un bump de version — à cadrer avant de s'y lancer.
-- [ ] **Fusionner `Statistics/KikolesStats` dans `Statistics/Stats`**, en bloc
+- [x] **Fusionné `Statistics/KikolesStats` dans `Statistics/Stats`**, en 3ème bloc
       "collapsible" au même titre que "Répartition des joueurs par critère" et "Nombre
-      d'utilisateurs actifs" déjà présents sur cette page — plutôt que la page séparée
-      reliée par un simple lien (`KikolesStatsLink`) mis en place entre-temps.
+      d'utilisateurs actifs" — la page séparée reliée par un simple lien (`KikolesStatsLink`)
+      disparaît. `KikolesStats.cshtml` supprimée, action `KikolesStats()` retirée du
+      contrôleur (`GetKikolesStatisticsAsync`/route `kikoles-stats` inchangée, c'est
+      l'endpoint JSON qui alimente le tableau, pas une vue). Contenu localisé au passage
+      (il était en français en dur, alors que le reste de la page utilise déjà des resx) :
+      nouvelles clés `SortLabel`/`DescendingLabel`/en-têtes de colonnes dans
+      `Statistics/Stats.*.resx` ; les libellés du menu de tri (`PlayerSorts`) suivent le
+      même principe que `LeaderSorts`/`DayLeaderSorts` déjà en place, nouveau
+      `ViewHelper.GetLabel(PlayerSorts)`, testé (`ViewHelperTests`). `KikolesStatsLink`
+      renommée `KikolesStatsTitle` (c'est un titre de section, plus un lien).
+      **Charte graphique appliquée** à tout le contenu : page passée en `.kikole-board`,
+      tableau/sélecteur de tri/case à cocher réutilisent les composants existants
+      (`table-wrap`/`tabData`, `select.blank`, accent-color coché) ; nouveau style pour
+      `.collapsible`/`.collapsiblecontent` (bouton pleine largeur, chevron +/− qui
+      bascule sur `.active`, remplace le gris plat de `site.css` dans ce scope). Bug
+      trouvé au passage en touchant ce code : la boucle de génération des lignes du
+      tableau (`loadKikolesStats`, `site.js`) utilisait une variable `i` jamais déclarée
+      (fuite de global, `NaN % 2` en permanence) — les lignes ne zébraient jamais
+      correctement ; corrigé (`var i = 0;` avant la boucle), vérifié en direct
+      (alternance beige/crème correcte).
+- [x] **Rien ne s'affichait dans "Répartition des joueurs par critère"/"Nombre
+      d'utilisateurs actifs" (`Statistics/Stats`), erreur navigateur "Data column(s) for
+      axis #0 cannot be of type string".** Deux bugs distincts, malgré le même symptôme :
+      - **Répartition des joueurs** : régression liée à la migration du sérialiseur JSON.
+        `site.js` lisait `item.Key`/`item.Value` (PascalCase, casse historique de
+        Newtonsoft.Json/l'ancien projet 2023) alors que `System.Text.Json` (utilisé par
+        `Json()` depuis la refonte ASP.NET Core, casse par défaut camelCase) sérialise les
+        `KeyValuePair<,>` en `key`/`value` — chaque ligne remontait `[undefined,
+        undefined]`, d'où l'erreur de type côté Google Charts. Confirmé en tapant
+        directement l'URL de l'endpoint JSON en admin (`{"key":"France","value":50.0}`,
+        pas `Key`/`Value`). Corrigé : `item.key`/`item.value` dans `site.js` (seul endroit
+        du fichier resté en PascalCase — `loadKikolesStats` utilisait déjà la bonne casse,
+        preuve que la régression datait bien d'avant que cette fonction soit écrite/revue).
+      - **Nombre d'utilisateurs actifs** : pas un bug de code mais une vraie absence de
+        données sur la base locale actuelle — `GetActiveUsersAsync` filtre
+        `creation_date < Yesterday`, et toutes les propositions en base (48, vérifié par
+        requête directe) sont datées d'aujourd'hui/hier soir (activité de test récente),
+        donc aucune ne passe le filtre. Ceci dit, le vrai défaut est ailleurs : un jeu de
+        données vide fait planter `google.visualization` au lieu d'afficher un état vide
+        propre — n'importe quelle fenêtre de dates trop récente (base fraîchement rejouée,
+        par exemple) retombe dans le même crash. Corrigé à la racine : les 3 fonctions de
+        construction de graphique (`site.js`) vérifient désormais `sourceDatas.length > 1`
+        avant d'appeler `arrayToDataTable`/`.draw()`, et affichent "No data available yet."
+        (nouvelle classe `.chart-empty`) sinon. Vérifié en direct : les deux sections
+        affichent maintenant leurs vrais graphiques (camemberts pays/poste/décennie,
+        histogramme clubs) quand la donnée existe, et un message propre sinon.
 - [x] **Les routes statistiques vivaient dans `LeaderboardController`, jugé peu cohérent.**
       Extraites dans un `StatisticsController` dédié (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `GetKikolesStatisticsAsync` (route `kikoles-stats`

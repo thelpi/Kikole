@@ -255,6 +255,9 @@ public class ViewHelperTests
 
             foreach (DayLeaderSorts sort in Enum.GetValues(typeof(DayLeaderSorts)))
                 sort.GetLabel().Should().NotBeNullOrWhiteSpace();
+
+            foreach (PlayerSorts sort in Enum.GetValues(typeof(PlayerSorts)))
+                sort.GetLabel().Should().NotBeNullOrWhiteSpace();
         }
     }
 
