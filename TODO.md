@@ -98,6 +98,135 @@ Branche de travail : `remaster-v2`.
       - Ensuite : encore quelques pays si besoin, puis le Royaume-Uni (clubs déjà possible
         maintenant que la bascule FIFA ci-dessous est faite — Angleterre/Écosse/Galles/
         Irlande du Nord existent).
+      - [ ] **Chantier en cours (autonome) : Espagne, Allemagne, Angleterre, Pays-Bas,
+        Belgique, Portugal, Écosse, Turquie.** Consigne exacte de l'utilisateur : Division
+        1 et 2 (source `Championship/Football Manager 2001/2002`, même méthode que
+        Italie/Grèce), + un 3ème échelon pour l'Angleterre spécifiquement, + clubs de
+        division inférieure **pour les 8 pays** (pas seulement l'Angleterre — précision
+        explicite de l'utilisateur après une première lecture ambiguë) si pertinence
+        historique ou club actuellement en D1/D2. "À la moindre ambiguïté : consigner et
+        arbitrer a posteriori" — utiliser cette section pour tout ce qui reste ouvert.
+        - `country_id` (enum Countries, déjà en base) : Belgique 22, Allemagne 84,
+          Pays-Bas 157, Portugal 179, Espagne 210, Turquie 228, Angleterre 235, Écosse 250.
+        - Fichier cible : `kikole.sql` (le catalogue de référence complet vit là, pas dans
+          `kikole_mock.sql` — vérifié : la base locale actuelle n'a que 12 clubs, la
+          fixture volontairement minimale de `kikole_mock.sql`, pas les 176 clubs
+          France/Italie/Grèce déjà sourcés qui eux ne vivent que dans `kikole.sql`).
+          Prochain `id` disponible dans `clubs` : **177** (vérifié, le max actuel est 176).
+        - **Fichiers source localisés** : `C:\Program Files (x86)\Championship Manager 01-02\Data`
+          — `club.dat` (6 146 980 octets, **tous pays confondus**, pas un fichier par
+          pays — correction de l'utilisateur, ma demande initiale de "fichiers par pays"
+          était une mauvaise hypothèse) + `fra.lng`/`eng.lng` (traductions, pas encore
+          exploitées — cf. point ouvert plus bas).
+        - **Format binaire de `club.dat` reverse-engineered (nouveau, à partir de zéro —
+          aucune note de la session Italie/Grèce n'a survécu)** :
+          - Enregistrements de longueur fixe **581 octets**, **10 580 clubs** au total
+            (6 146 980 / 581, division exacte).
+          - Nom complet du club : chaîne C (ASCII/Windows-1252, terminée par `\0`) à
+            l'offset **+4** dans l'enregistrement, largeur max 51 octets.
+          - Offset **+83** (1 octet) = **ID Nation**. Validé par isolement : filtrer sur
+            une valeur donne exactement l'ensemble des clubs (grands et petits/amateurs)
+            d'un seul pays.
+          - Offset **+87** (1 octet) = **ID Division/compétition (saison 2001-02)**.
+            Validé : filtrer nation+compétition reproduit exactement l'effectif D1 connu
+            de chaque championnat (ex. Espagne → 20 clubs = les 20 de Liga 2001-02 pile,
+            Angleterre → 20 = Premier League pile, etc.) Note : offset +91 recopie
+            toujours la même valeur que +87 dans tous les échantillons testés — cause non
+            investiguée (champ redondant ?), sans conséquence puisque +87 seul suffit à
+            filtrer.
+          - Extraction faite en PowerShell (`[System.IO.File]::ReadAllBytes`, encodage
+            Windows-1252 pour les caractères accentués) : `Bash`/Git Bash n'a pas `strings`
+            ni d'outil binaire pratique dans cet environnement. Attention si un script
+            PowerShell génère du SQL réinjecté ensuite via `sed`/sed -i 'Nr fichier' :
+            `Set-Content -Encoding UTF8` ajoute un BOM, qui casse la syntaxe SQL une fois
+            spliced au milieu d'un fichier existant — buté dessus deux fois cette session,
+            `sed -i '<ligne>s/^\xEF\xBB\xBF//'` pour le retirer.
+          - **Nation / Division 1 / Division 2 confirmés, effectifs validés par les noms
+            (tous vérifiés club par club, correspondent exactement aux championnats
+            2001-02 réels). Les ID ci-dessous ("Espagne 171", etc.) sont l'ID Nation
+            interne au jeu (offset +83), pas le `country_id` de l'enum Countries de
+            l'appli (déjà donné plus haut : Espagne 210, Allemagne 84, etc.) — deux
+            systèmes d'ID différents, à ne pas confondre lors d'un futur import** :
+            - Espagne 171 : D1=52 (20, Liga), D2=53 (22, Segunda División).
+            - Allemagne 73 : D1=16 (18, Bundesliga), D2=17 (18, 2.Bundesliga).
+            - Angleterre 60 : D1=7 (20, Premier League), D2=8 (24, Football League
+              Division One), **D3=9 (24, Football League Division Two)** — le 3ème
+              échelon demandé spécifiquement pour ce pays.
+            - Pays-Bas 83 : D1=22 (18, Eredivisie), D2=23 (18, Eerste Divisie).
+            - Belgique 19 : D1=0 (18, Division 1), D2=1 (18, Division 2).
+            - Portugal 149 : D1=46 (18, Primeira Liga), D2=47 (18, Segunda Divisão).
+            - Turquie 192 : D1=174 (18, Süper Lig), D2=29 (20, 1.Lig).
+            - Écosse 160 : D1=34 (12, Scottish Premier League — effectif réel de
+              l'époque, la SPL était déjà réduite à 12 clubs), D2=35 (10, Division One).
+            - **Total D1+D2(+D3 Angleterre) = 314 clubs** (42+36+68+36+36+36+38+22) —
+              nettement plus que France+Italie+Grèce réunis (176). Rien qu'avec ces
+              deux/trois échelons obligatoires, le volume est déjà important — cf.
+              remarque de l'utilisateur ("ça va déjà en faire pas mal").
+            - **Échelons inférieurs repérés mais PAS inclus par défaut** (comptage
+              disponible, en attente de jugement "pertinence historique ou club
+              actuellement D1/D2" - piste pour une passe ultérieure séparée, comme la
+              Serie C italienne l'a été après la Serie A/B) : Espagne comp 54/55/56/57
+              (Segunda B, 4 groupes régionaux, 80 clubs dont beaucoup de réserves "B") ;
+              Allemagne comp 20/21 (Regionalliga Nord/Süd, 36, dont plusieurs grands noms
+              historiques déchus : Kickers Offenbach, Rot-Weiss Essen, Fortuna Düsseldorf) ;
+              Angleterre comp 10 (Division Three officielle, 24 — 4ème palier réel, hors
+              périmètre du "3ème échelon" demandé, sauf pertinence historique individuelle) ;
+              Belgique comp 2/130/131/132/133 (régionalisé, ~80) ; Portugal comp 48/49/50
+              (3 zones régionales, 60, dont Académica de Coimbra dans la D2 elle-même en
+              fait, à vérifier zone par zone) ; Turquie comp 33/34/35/36 (2.Lig régionalisé,
+              ~40) ; Écosse comp 36/37 (Division Two/Three, 20).
+          - **Point non résolu, contournement pragmatique adopté** : le champ "nom court"
+            repéré juste après le nom complet (offset +55, préfixé d'un octet `0xFF`) n'a
+            pas été décodé — pas nécessaire pour les noms canoniques. Idem pour `fra.lng`/
+            `eng.lng` : un premier test (recherche de "Juventus" dans `eng.lng`) n'a rien
+            donné d'exploitable en l'état (pas d'alignement positionnel simple malgré une
+            taille de fichier identique aux deux langues). **Décision prise pour avancer** :
+            nom canonique EN = nom canonique FR pour tous les clubs de ces 8 pays, sauf
+            cas particulier connu avec certitude (aucun identifié pour l'instant) — cohérent
+            avec la remarque déjà actée pour la France ("identique EN/FR pour la quasi-
+            totalité de ces clubs"), et les divergences EN/FR type "Juventus Torino" vs
+            "Juventus FC" semblent être une particularité italienne, pas une règle générale
+            du jeu. Les alias restent possibles au cas par cas (jugement humain/notoriété),
+            pas extraits mécaniquement du fichier.
+      - [x] **314 clubs insérés dans `kikole.sql`** (ids 177-490, `clubs` +
+        `club_translations` EN/FR) : Espagne 42 (D1 20 + D2 22), Allemagne 36 (18+18),
+        Angleterre 68 (D1 20 + D2 24 + D3 24), Pays-Bas 36 (18+18), Belgique 36 (18+18),
+        Portugal 36 (18+18), Turquie 38 (18+20), Écosse 22 (12+10). Généré par script
+        (extraction directe depuis `club.dat`, cf. offsets ci-dessus) plutôt que saisi à
+        la main — 314 lignes, aucune ambiguïté sur cette partie. **Vérifié avant
+        d'écrire dans le fichier final** : chargement isolé dans une base de test
+        jetable (`kikole_test`, détruite après coup) à partir de la section
+        `clubs`/`club_translations` de `kikole.sql` — 0 erreur, 490 clubs au total
+        (176 + 314), répartition par pays exacte, 314 clubs avec traductions EN+FR.
+      - [x] **Tension `kikole_mock.sql`/catalogue résolue** (décision de l'utilisateur,
+        deux consignes) : (1) `kikole_mock.sql` ne truncate/ne définit plus jamais
+        `clubs`/`club_translations` — ces tables rejoignent officiellement les données
+        de référence préservées entre deux rejeux (comme `countries`/`badges`), le
+        commentaire d'en-tête du script mis à jour en conséquence. (2) Les joueurs de la
+        fixture (Andrea Pirlo + le pool de 8 joueurs mockés) référencent désormais les
+        vrais id du catalogue complet plutôt qu'une numérotation locale 1-12 :
+        correspondance documentée en commentaire dans `kikole_mock.sql` (ex. Real
+        Madrid C.F. = 189, Manchester United = 268...). "New York City FC" (sans
+        équivalent dans le sourcing pays par pays) a été essayé un temps comme entrée de
+        catalogue à part, puis **retiré** sur retour de l'utilisateur : plus simple de
+        raccourcir la carrière mockée d'Andrea Pirlo (elle s'arrête à la Juventus) que
+        d'ajouter une entrée hors périmètre au milieu d'un import par ailleurs propre —
+        une carrière mockée incomplète n'a aucune importance, c'est un fixture de test.
+        **Migration one-shot appliquée à la base locale** (justifiée : elle n'avait en
+        réalité jamais eu le catalogue complet chargé, seulement les 12 clubs de
+        l'ancienne fixture, avec un id 1 en collision directe avec `kikole.sql` lui-même
+        - Angers SCO côté catalogue, AS Cannes côté mock) : `clubs`/`club_translations`
+        vidées puis rechargées avec les 490 lignes de `kikole.sql`, puis
+        `kikole_mock.sql` rejoué en entier — 0 erreur, vérifié que les carrières
+        (Zidane, Beckham, Ronaldinho, Pirlo...) pointent vers les bons clubs du
+        catalogue réel. Ce sera désormais le comportement normal et permanent : plus
+        besoin d'y revenir à chaque futur rejeu.
+      - **Reste (passe séparée, curation manuelle, pas commencée)** : les échelons
+        inférieurs listés ci-dessus (Espagne Segunda B, Allemagne Regionalliga,
+        Angleterre Division Three, Belgique/Portugal/Turquie 3ème palier régionalisé,
+        Écosse Division Two/Three) — décider club par club sur la base de la pertinence
+        historique, pas d'inclusion en bloc. Volume total disponible si tout était inclus :
+        largement supérieur aux 314 déjà ajoutés, donc vraiment une passe à part.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
