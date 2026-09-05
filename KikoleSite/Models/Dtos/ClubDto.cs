@@ -1,9 +1,8 @@
-﻿namespace KikoleSite.Models.Dtos
-{
-    public record ClubDto : BaseDto
-    {
-        public required string Name { get; init; }
+﻿namespace KikoleSite.Models.Dtos;
 
-        public ulong CountryId { get; init; }
-    }
+public record ClubDto : BaseDto
+{
+    public required string Name { get; init; }
+
+    public ulong CountryId { get; init; }
 }

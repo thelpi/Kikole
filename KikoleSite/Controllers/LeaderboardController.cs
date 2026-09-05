@@ -17,9 +17,7 @@ namespace KikoleSite.Controllers;
 public class LeaderboardController : KikoleBaseController
 {
     private const string AnonymizedPlayerName = "***";
-    private const int DistributionSizeLimit = 25;
 
-    private readonly IStatisticService _statisticService;
     private readonly ILeaderService _leaderService;
     private readonly IProposalService _proposalService;
 
@@ -30,7 +28,6 @@ public class LeaderboardController : KikoleBaseController
         IPlayerService playerService,
         IBadgeService badgeService,
         ILeaderService leaderService,
-        IStatisticService statisticService,
         IProposalService proposalService,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
@@ -41,7 +38,6 @@ public class LeaderboardController : KikoleBaseController
             badgeService,
             httpContextAccessor)
     {
-        _statisticService = statisticService;
         _leaderService = leaderService;
         _proposalService = proposalService;
     }
@@ -79,61 +75,6 @@ public class LeaderboardController : KikoleBaseController
         return View("User", new UserStatsModel(stats, badges, allBadges, userId == UserId, _clock));
     }
 
-    [HttpGet]
-    [Authorization(UserTypes.Administrator)]
-    public IActionResult Stats()
-    {
-        return View();
-    }
-
-    [HttpGet]
-    [Authorization(UserTypes.Administrator)]
-    public async Task<JsonResult> GetStatisticPlayersDistribution()
-    {
-        var datas = await _statisticService
-            .GetPlayersDistributionAsync(UserId, ViewHelper.GetLanguage(), DistributionSizeLimit);
-
-        return Json(new
-        {
-            country = datas.CountriesDistribution.Select(_ =>
-                new KeyValuePair<string, decimal>(_.Value.Name, Math.Round(_.Rate, 2))),
-            decade = datas.DecadesDistribution.Select(_ =>
-                new KeyValuePair<string, decimal>(_.Value.ToString(), Math.Round(_.Rate, 2))),
-            position = datas.PositionsDistribution.Select(_ =>
-                new KeyValuePair<string, decimal>(_.Value.GetLabel(), Math.Round(_.Rate, 2))),
-            club = datas.ClubsDistribution.Select(_ =>
-                new KeyValuePair<string, decimal>(_.Value.Name, _.Count))
-        });
-    }
-
-    [HttpGet]
-    [Authorization(UserTypes.Administrator)]
-    public async Task<JsonResult> GetStatisticActiveUsers()
-    {
-        var datas = await _statisticService
-            .GetActiveUsersAsync(null, _clock.Yesterday);
-
-        return Json(new
-        {
-            monthly = datas.MonthlyDatas.Select(_ =>
-                new KeyValuePair<string, int>($"{_.Key.m.ToString().PadLeft(2, '0')} ({_.Key.y.ToString().Substring(2, 2)})", _.Value)),
-            weekly = datas.WeeklyDatas.Select(_ =>
-                new KeyValuePair<string, int>($"{_.Key.w.ToString().PadLeft(2, '0')} ({_.Key.y.ToString().Substring(2, 2)})", _.Value)),
-            daily = datas.DailyDatas.Select(_ =>
-                new KeyValuePair<string, int>(_.Key.GetNumDayLabel(), _.Value))
-        });
-    }
-
-    [HttpGet("kikoles-stats")]
-    [Authorization(UserTypes.Administrator)]
-    public async Task<JsonResult> GetKikolesStatisticsAsync([FromQuery] PlayerSorts sort, [FromQuery] bool desc)
-    {
-        var datas = await _statisticService
-            .GetPlayersStatisticsAsync(UserId, AnonymizedPlayerName, sort, desc);
-
-        return Json(datas);
-    }
-
     [HttpGet("global-leaderboard-details")]
     public async Task<JsonResult> GetGlobalLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
     {
@@ -150,22 +91,6 @@ public class LeaderboardController : KikoleBaseController
                 date, sortType, null);
 
         return Json(dailyBoard);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Palmares()
-    {
-        var data = await _leaderService
-            .GetPalmaresAsync();
-
-        return View("Palmares", new PalmaresModel(data));
-    }
-
-    [HttpGet]
-    [Authorization(UserTypes.Administrator)]
-    public IActionResult KikolesStats()
-    {
-        return View("KikolesStats");
     }
 
     [HttpGet]
@@ -241,11 +166,17 @@ public class LeaderboardController : KikoleBaseController
     /// </summary>
     private async Task<LeaderboardModel> InitializeModelAsync()
     {
-        var (dailyBoard, foundToday) = await GetDailyboardAsync(
-                _clock.Today, DayLeaderSorts.BestTime, null);
+        // le classement general depend de "foundToday" (issu du dayboard) : seul le
+        // dayboard et les podiums, independants l'un de l'autre, peuvent partir en //
+        var dayboardTask = GetDailyboardAsync(_clock.Today, DayLeaderSorts.BestTime, null);
+        var podiumsTask = _leaderService.GetPodiumsAsync();
+
+        var (dailyBoard, foundToday) = await dayboardTask;
 
         var (globalLeaderboard, _) = await GetLeaderboardAsync(
                 _clock.FirstOfMonth, _clock.Today, LeaderSorts.TotalPoints, foundToday);
+
+        var podiums = await podiumsTask;
 
         return new LeaderboardModel
         {
@@ -256,7 +187,20 @@ public class LeaderboardController : KikoleBaseController
             DaySortType = DayLeaderSorts.BestTime,
             Dayboard = dailyBoard,
             GlobalLeaderboard = globalLeaderboard,
-            IsAdmin = IsTypeOfUser(UserTypes.Administrator)
+            CurrentUserId = UserId,
+            MonthlyPodiums = podiums.MonthlyPodiums
+                .Select(x => (
+                    new DateTime(x.Key.year, x.Key.month, 1),
+                    new[]
+                    {
+                        (x.Value.first.Id, x.Value.first.Login),
+                        (x.Value.second.Id, x.Value.second.Login),
+                        (x.Value.third.Id, x.Value.third.Login)
+                    }))
+                .ToList(),
+            OverallPodium = podiums.OverallPodium
+                .Select(x => (x.user.Id, x.user.Login, x.first, x.second, x.third))
+                .ToList()
         };
     }
 

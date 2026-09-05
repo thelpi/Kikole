@@ -1,0 +1,23 @@
+@using KikoleSite.Helpers
+@model DiscussionThreadModel
+
+<div class="discussion-thread">
+    @if (Model.Messages.Count == 0)
+    {
+        <p class="discussion-empty">@Model.NoMessagesText</p>
+    }
+    else
+    {
+        foreach (var message in Model.Messages)
+        {
+            var isSelf = message.IsFromAdmin == Model.ViewerIsAdmin;
+            <div class="discussion-message @(isSelf ? "self" : "other")">
+                <div class="discussion-message-meta">
+                    <span class="discussion-message-author">@(isSelf ? Model.SelfLabel : Model.OtherLabel)</span>
+                    <span class="discussion-message-date">@message.CreationDate.ToStringHour()</span>
+                </div>
+                <p>@message.Message</p>
+            </div>
+        }
+    }
+</div>

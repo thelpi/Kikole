@@ -39,6 +39,10 @@ public class LeaderboardModel
 
     public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; } = [];
 
-    /// <summary>Les liens vers les pages de statistiques ne sont proposes qu'a l'administrateur, seul a y avoir acces.</summary>
-    public bool IsAdmin { get; set; }
+    /// <summary>Utilisateur connecte : permet de surligner sa propre ligne dans les tableaux.</summary>
+    public ulong CurrentUserId { get; set; }
+
+    public IReadOnlyCollection<(DateTime date, (ulong userId, string login)[] podium)> MonthlyPodiums { get; set; } = [];
+
+    public IReadOnlyCollection<(ulong userId, string login, int first, int second, int third)> OverallPodium { get; set; } = [];
 }

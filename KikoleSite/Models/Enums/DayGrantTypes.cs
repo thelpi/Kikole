@@ -1,11 +1,10 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum DayGrantTypes
 {
-    public enum DayGrantTypes
-    {
-        None,
-        Admin,
-        Creator,
-        PaidBoard,
-        Found
-    }
+    None,
+    Admin,
+    Creator,
+    PaidBoard,
+    Found
 }

@@ -1,15 +1,13 @@
-﻿namespace KikoleSite.ViewModels
+using System.Collections.Generic;
+using KikoleSite.Models.Dtos;
+
+namespace KikoleSite.ViewModels;
+
+public class ContactModel
 {
-    public class ContactModel
-    {
-        public string? Email { get; set; }
+    public IReadOnlyCollection<DiscussionMessageDto> Messages { get; set; } = [];
 
-        public string? Message { get; set; }
+    public string? NewMessage { get; set; }
 
-        public string? ErrorMessage { get; set; }
-
-        public string? SuccessMessage { get; set; }
-
-        public string? LoggedAs { get; set; }
-    }
+    public string? ErrorMessage { get; set; }
 }

@@ -144,23 +144,23 @@
   <data name="CurrentDay" xml:space="preserve">
     <value>Current day</value>
   </data>
-  <data name="CurrentScore" xml:space="preserve">
-    <value>Your current score: &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt; points.</value>
-  </data>
   <data name="DayClue" xml:space="preserve">
     <value>Clue of the day:</value>
-  </data>
-  <data name="FinalScore" xml:space="preserve">
-    <value>Your final score: &lt;span class="redtext" style="font-style: italic"&gt;{0}&lt;/span&gt; points.</value>
-  </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>You are logged as</value>
   </data>
   <data name="NationalityTitle" xml:space="preserve">
     <value>Sporting nationality:</value>
   </data>
   <data name="NextDay" xml:space="preserve">
     <value>Next day</value>
+  </data>
+  <data name="BackToToday" xml:space="preserve">
+    <value>Back to today</value>
+  </data>
+  <data name="FoundOnTime" xml:space="preserve">
+    <value>Found the same day!</value>
+  </data>
+  <data name="FoundLate" xml:space="preserve">
+    <value>Found on {0}</value>
   </data>
   <data name="OneClubAtATime" xml:space="preserve">
     <value>one club at a time</value>
@@ -187,7 +187,7 @@
     <value>see &lt;a href="#country-rules"&gt;rules&lt;/a&gt;</value>
   </data>
   <data name="TipAboutPosition" xml:space="preserve">
-    <value>the player may have two positions, only one is required</value>
+    <value>two positions possible</value>
   </data>
   <data name="TypePlayerName" xml:space="preserve">
     <value>Type the player's name here:</value>
@@ -254,6 +254,9 @@
   </data>
   <data name="GiveUpConfirmation" xml:space="preserve">
     <value>Are you sure?</value>
+  </data>
+  <data name="CancelAction" xml:space="preserve">
+    <value>Cancel</value>
   </data>
   <data name="LeaderboardAccess" xml:space="preserve">
     <value>Access to today's ranking</value>

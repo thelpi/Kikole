@@ -120,16 +120,19 @@
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact the administrator</value>
   </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>You are logged as</value>
-  </data>
   <data name="ToSend" xml:space="preserve">
     <value>Send</value>
   </data>
-  <data name="YourEmail" xml:space="preserve">
-    <value>Your email</value>
-  </data>
   <data name="YourMessage" xml:space="preserve">
     <value>Your message</value>
+  </data>
+  <data name="FromAdmin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="FromYou" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="NoMessagesYet" xml:space="preserve">
+    <value>You haven't written yet. Ask your question below.</value>
   </data>
 </root>

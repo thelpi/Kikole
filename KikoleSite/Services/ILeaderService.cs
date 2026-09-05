@@ -47,8 +47,8 @@ public interface ILeaderService
     Task ComputeMissingLeadersAsync(IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
-    /// Gets palmares.
+    /// Gets podiums.
     /// </summary>
     /// <returns>Nothing.</returns>
-    Task<Palmares> GetPalmaresAsync();
+    Task<Podiums> GetPodiumsAsync();
 }

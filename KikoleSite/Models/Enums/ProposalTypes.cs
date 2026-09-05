@@ -1,14 +1,13 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum ProposalTypes
 {
-    public enum ProposalTypes
-    {
-        Name = 1,
-        Club,
-        Year,
-        Country,
-        Clue,
-        Position,
-        Leaderboard,
-        Continent
-    }
+    Name = 1,
+    Club,
+    Year,
+    Country,
+    Clue,
+    Position,
+    Leaderboard,
+    Continent
 }

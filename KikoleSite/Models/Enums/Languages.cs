@@ -1,8 +1,7 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum Languages
 {
-    public enum Languages
-    {
-        en = 1,
-        fr
-    }
+    en = 1,
+    fr
 }

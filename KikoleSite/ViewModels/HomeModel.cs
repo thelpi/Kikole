@@ -45,6 +45,20 @@ public class HomeModel
     public bool NoPreviousDay { get; set; }
     public bool IsCreator { get; set; }
 
+    /// <summary>
+    /// <c>Null</c> tant que non trouve ; sinon <c>true</c> si la proposition gagnante a
+    /// ete soumise le jour meme du kikole, <c>false</c> si trouve en rattrapage (jour
+    /// consulte plus tard). Calcule par le controleur, cf. <see cref="IsCreator"/> qui
+    /// n'a pas de notion de delai (le createur voit sa propre reponse d'office).
+    /// </summary>
+    public bool? FoundOnTime { get; set; }
+
+    /// <summary>
+    /// Date reelle de la proposition gagnante (peut differer de <see cref="DateOfDay"/>
+    /// quand trouve en rattrapage). <c>Null</c> tant que non trouve.
+    /// </summary>
+    public DateTime? FoundDate { get; set; }
+
     public IReadOnlyList<string> IncorrectClubs { get; set; } = [];
     public IReadOnlyList<string> IncorrectCountries { get; set; } = [];
     public IReadOnlyList<string> IncorrectContinents { get; set; } = [];
@@ -54,7 +68,15 @@ public class HomeModel
 
     public int NextDay => CurrentDay - 1;
     public int PreviousDay => CurrentDay + 1;
-    public DateTime DateOfDay => CurrentDate.AddDays(-CurrentDay);
+    public bool IsToday => CurrentDay == 0;
+    public bool IsFound => !IsCreator && !string.IsNullOrWhiteSpace(PlayerName);
+    public bool HasNextDay => CurrentDay > 0 || IsAdmin;
+    // CurrentDate n'est jamais posté par le client (uniquement renseigné par le
+    // controleur) : la validation automatique du modele lit cette propriete des le
+    // model binding d'un POST, avant que le controleur n'ait eu la main - a ce
+    // moment CurrentDate vaut encore default(DateTime), et lui soustraire des jours
+    // deborde des que CurrentDay != 0. Se degrader plutot que planter.
+    public DateTime DateOfDay => CurrentDate == default ? default : CurrentDate.AddDays(-CurrentDay);
 
     internal string? GetValueFromProposalType(ProposalTypes proposalType)
     {

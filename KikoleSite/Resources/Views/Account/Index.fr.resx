@@ -133,7 +133,7 @@
     <value>Mot de passe actuel :</value>
   </data>
   <data name="FreeRegistrationClosed" xml:space="preserve">
-    <value>Inscription désormais sur invitation, suivez le lien pour savoir pourquoi</value>
+    <value>Inscription désormais sur invitation</value>
   </data>
   <data name="GetPwdByQuestion" xml:space="preserve">
     <value>Récupérer le mot de passe avec la question secrète</value>
@@ -152,6 +152,12 @@
   </data>
   <data name="NewPwd" xml:space="preserve">
     <value>Nouveau mot de passe :</value>
+  </data>
+  <data name="NewRecAnswer" xml:space="preserve">
+    <value>Nouvelle réponse de récupération :</value>
+  </data>
+  <data name="NewRecQuestion" xml:space="preserve">
+    <value>Nouvelle question de récupération :</value>
   </data>
   <data name="RecAnswer" xml:space="preserve">
     <value>Réponse de récupération :</value>

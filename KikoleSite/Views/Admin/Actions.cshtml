@@ -1,61 +1,49 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model AdminModel
 
-@if (!string.IsNullOrWhiteSpace(Model?.ActionFeedback))
-{
-    <div style="margin-bottom: 10px">
-        @Model.ActionFeedback
-    </div>
-}
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model?.ActionFeedback))
+    {
+        <div class="banner success">@Model.ActionFeedback</div>
+    }
 
-<h3>@localizer["AdminActions"]</h3>
-<form method="post" action="/Admin/Actions">
-    <div>
-        <input type="submit" value="@localizer["RecomputeBadges"]" name="submit-recomputebadges" />
-    </div>
-    <div class="mediumTopMargin">
-        <input type="submit" value="@localizer["RecomputeLeaders"]" name="submit-recomputeleaders" />
-    </div>
-    <div class="mediumTopMargin">
-        <input type="submit" value="@localizer["ReassignPlayers"]" name="submit-reassignplayers" />
-    </div>
-    <fieldset class="mediumTopMargin">
-        <legend>@localizer["AddGlobalMessage"]</legend>
-        <div>
-            @Html.TextBoxFor(m => m.Message, new { @style = "width: 400px" });
+    <div class="form-card">
+        <h3>@localizer["AdminActions"]</h3>
+        <div class="small-link"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Discussions">@localizer["ViewDiscussions"]</a></div>
+        <div class="actions" style="margin-top:14px">
+            <form method="post" action="/Admin/RecomputeBadges">
+                <button type="submit">@localizer["RecomputeBadges"]</button>
+            </form>
+            <form method="post" action="/Admin/RecomputeLeaders">
+                <button type="submit">@localizer["RecomputeLeaders"]</button>
+            </form>
+            <form method="post" action="/Admin/ReassignPlayers">
+                <button type="submit">@localizer["ReassignPlayers"]</button>
+            </form>
         </div>
-        <div class="smallTopMargin">
-            @Html.EditorFor(m => m.MessageDateStart);
-        </div>
-        <div class="smallTopMargin">
-            @Html.EditorFor(m => m.MessageDateEnd);
-        </div>
-        <input class="smallTopMargin" type="submit" value="@localizer["ActionAddMessage"]" name="submit-insertmessage" />
-    </fieldset>
-</form>
+    </div>
 
-@if (Model?.Discussions.Count > 0)
-{
-    <h3>Discussions</h3>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 50px">User</th>
-                <th style="width: 150px">Email</th>
-                <th style="width: 100px">Date</th>
-                <th style="width: 300px">Message</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var discussion in Model.Discussions)
-            {
-                <tr>
-                    <td>@discussion.UserId</td>
-                    <td>@discussion.Email</td>
-                    <td>@discussion.CreationDate</td>
-                    <td>@Html.Raw(discussion.Message)</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <div class="form-card">
+        <h3>@localizer["AddGlobalMessage"]</h3>
+        <form method="post" action="/Admin/InsertMessage">
+            <div class="form-field">
+                <label>@localizer["MessageLabel"]</label>
+                @Html.TextBoxFor(m => m.Message, new { @class = "blank" })
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>@localizer["MessageDateStartLabel"]</label>
+                    @Html.EditorFor(m => m.MessageDateStart)
+                </div>
+                <div class="form-field">
+                    <label>@localizer["MessageDateEndLabel"]</label>
+                    @Html.EditorFor(m => m.MessageDateEnd)
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit">@localizer["ActionAddMessage"]</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,148 +1,266 @@
-﻿@using KikoleSite.Helpers
+@using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject KikoleSite.IGameCalendar gameCalendar
+@inject KikoleSite.IClock clock
 @model LeaderboardModel
-
-<h3>@localizer["DailyLeaderboard"]</h3>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
-    @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
-</div>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabelSmall">@localizer["Date"]</label>
-    @Html.EditorFor(m => m.LeaderboardDay)
-</div>
-<table id="dailyLeaderboardTable" class="smallTopMargin">
-    <thead>
-        <tr>
-            <th class="tabDataHead">@localizer["PosShortHeader"]</th>
-            <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
-            <th class="tabDataHead">@localizer["TimeHeader"]</th>
-            <th class="tabDataHead">@localizer["PointsHeader"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (!Model.Dayboard.Hidden)
-        {
-            var i = 0;
-            var lastRank = 1;
-            foreach (var leader in Model.Dayboard.Leaders)
-            {
-                var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
-                <tr class="@trClass">
-                    <td class="tabData">@leader.Rank</td>
-                    <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                    <td class="tabData">@leader.TimeString</td>
-                    <td class="tabData">
-                        @if (leader.IsCreator)
-                        {
-                            @(leader.Points)
-                        }
-                        else
-                        {
-                            <a href="/Leaderboard/UserDay?userId=@leader.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">@leader.Points</a>
-                        }
-                    </td>
-                </tr>
-                lastRank = leader.Rank + 1;
-                i++;
-            }
-            foreach (var search in Model.Dayboard.Searchers)
-            {
-                var trClass = i % 2 == 0 ? "even" : "odd";
-                <tr class="@trClass">
-                    <td class="tabData">@lastRank</td>
-                    <td class="tabData redtext"><a href="/Leaderboard?userId=@search.UserId">@search.UserName</a></td>
-                    <td class="tabData">@localizer["NotYetTime"]</td>
-                    <td class="tabData"><a href="/Leaderboard/UserDay?userId=@search.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">(@search.Points)</a></td>
-                </tr>
-                i++;
-            }
-            if (i == 0)
-            {
-                <tr class="even">
-                    <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
-                </tr>
-            }
-        }
-        else
-        {
-            <tr class="even">
-                <td colspan="4" class="tabData">@localizer["HiddenDayboard"]</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<h3>@localizer["GeneralLeaderboard"]</h3>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabelSmall">@localizer["SortType"]</label>
-    @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())))
-</div>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabelSmall">@localizer["FromDate"]</label>
-    @Html.EditorFor(m => m.MinimalDate)
-</div>
-<div class="smallTopMargin">
-    <label class="mainFormSectionLabelSmall">@localizer["ToDate"]</label>
-    @Html.EditorFor(m => m.MaximalDate)
-</div>
-<table id="globalLeaderboardTable" class="smallTopMargin">
-    <thead>
-        <tr>
-            <th class="tabDataHead">@localizer["PosShortHeader"]</th>
-            <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
-            <th class="tabDataHead">@localizer["PointsHeader"]</th>
-            <th class="tabDataHead">@localizer["BestTimeHeader"]</th>
-            <th class="tabDataHead">@localizer["FoundHeader"]</th>
-            <th class="tabDataHead">@localizer["AttemptedHeader"]</th>
-            <th class="tabDataHead">@localizer["ProposedHeader"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var j = 0;
-        }
-        @if (Model.GlobalLeaderboard.Count > 0)
-        {
-            j = 0;
-            foreach (var leader in Model.GlobalLeaderboard)
-            {
-                var trClass = j % 2 == 0 ? "even" : "odd";
-                <tr class="@trClass">
-                    <td class="tabData">@leader.Rank</td>
-                    <td class="tabData redtext"><a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a></td>
-                    <td class="tabData">@leader.Points</td>
-                    <td class="tabData">@leader.BestTimeString</td>
-                    <td class="tabData">@leader.KikolesFound</td>
-                    <td class="tabData">@leader.KikolesAttempted</td>
-                    <td class="tabData">@leader.KikolesProposed</td>
-                </tr>
-                j++;
-            }
-        }
-        else
-        {
-            <tr class="even">
-                <td colspan="7" class="tabData">@localizer["NoUserInTable"]</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<h3>
-    <a href="/Leaderboard/Palmares">@localizer["PalmaresLink"]</a>
-</h3>
-
-@if (Model.IsAdmin)
-{
-    <h3>@localizer["NewPageBuilding"]</h3>
-    <h4>
-        <a href="/Leaderboard/Stats">@localizer["StatisticsPageLink"]</a>
-    </h4>
-    <h4>
-        <a href="/Leaderboard/KikolesStats">@localizer["KikolesStatisticsPageLink"]</a>
-    </h4>
+@{
+    bool IsYou(ulong userId) => userId != 0 && userId == Model.CurrentUserId;
+    var minDate = gameCalendar.FirstDate.ToString("yyyy-MM-dd");
+    var maxDate = clock.Today.ToString("yyyy-MM-dd");
 }
+
+<div class="kikole-board">
+    <div class="form-card">
+        <h3>@localizer["DailyLeaderboard"]</h3>
+        <div class="form-field">
+            <label>@localizer["SortType"]</label>
+            @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
+        </div>
+        <div class="form-field">
+            <label>@localizer["Date"]</label>
+            <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
+        </div>
+        <div class="table-wrap">
+            <table id="dailyLeaderboardTable">
+                <thead>
+                    <tr>
+                        <th class="tabDataHead">@localizer["PosShortHeader"]</th>
+                        <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
+                        <th class="tabDataHead">@localizer["TimeHeader"]</th>
+                        <th class="tabDataHead">@localizer["PointsHeader"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Dayboard.Hidden)
+                    {
+                        var i = 0;
+                        var lastRank = 1;
+                        foreach (var leader in Model.Dayboard.Leaders)
+                        {
+                            var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
+                            var isYou = IsYou(leader.UserId);
+                            <tr class="@trClass">
+                                <td class="tabData">@leader.Rank</td>
+                                <td class="tabData redtext@(isYou ? " you" : "")">
+                                    <a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a>
+                                    @if (isYou)
+                                    {
+                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
+                                    }
+                                </td>
+                                <td class="tabData">@leader.TimeString</td>
+                                <td class="tabData">
+                                    @if (leader.IsCreator)
+                                    {
+                                        @(leader.Points)
+                                    }
+                                    else
+                                    {
+                                        <a href="/Leaderboard/UserDay?userId=@leader.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">@leader.Points</a>
+                                    }
+                                </td>
+                            </tr>
+                            lastRank = leader.Rank + 1;
+                            i++;
+                        }
+                        foreach (var search in Model.Dayboard.Searchers)
+                        {
+                            var trClass = i % 2 == 0 ? "even" : "odd";
+                            var isYou = IsYou(search.UserId);
+                            <tr class="@trClass">
+                                <td class="tabData">@lastRank</td>
+                                <td class="tabData redtext@(isYou ? " you" : "")">
+                                    <a href="/Leaderboard?userId=@search.UserId">@search.UserName</a>
+                                    @if (isYou)
+                                    {
+                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
+                                    }
+                                </td>
+                                <td class="tabData">@localizer["NotYetTime"]</td>
+                                <td class="tabData"><a href="/Leaderboard/UserDay?userId=@search.UserId&date=@Model.Dayboard.Date.ToString("yyyy-MM-dd")">(@search.Points)</a></td>
+                            </tr>
+                            i++;
+                        }
+                        if (i == 0)
+                        {
+                            <tr class="even">
+                                <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="even">
+                            <td colspan="4" class="tabData">@localizer["HiddenDayboard"]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3>@localizer["GeneralLeaderboard"]</h3>
+        <div class="form-field">
+            <label>@localizer["SortType"]</label>
+            @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
+        </div>
+        <div class="form-row">
+            <div class="form-field">
+                <label>@localizer["FromDate"]</label>
+                <input type="text" id="MinimalDate" name="MinimalDate" class="date-field" readonly value="@Model.MinimalDate.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
+            </div>
+            <div class="form-field">
+                <label>@localizer["ToDate"]</label>
+                <input type="text" id="MaximalDate" name="MaximalDate" class="date-field" readonly value="@Model.MaximalDate.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table id="globalLeaderboardTable">
+                <thead>
+                    <tr>
+                        <th class="tabDataHead">@localizer["PosShortHeader"]</th>
+                        <th class="tabDataHead redtext">@localizer["UsernameHeader"]</th>
+                        <th class="tabDataHead">@localizer["PointsHeader"]</th>
+                        <th class="tabDataHead">@localizer["BestTimeHeader"]</th>
+                        <th class="tabDataHead">@localizer["FoundHeader"]</th>
+                        <th class="tabDataHead">@localizer["AttemptedHeader"]</th>
+                        <th class="tabDataHead">@localizer["ProposedHeader"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var j = 0;
+                    }
+                    @if (Model.GlobalLeaderboard.Count > 0)
+                    {
+                        j = 0;
+                        foreach (var leader in Model.GlobalLeaderboard)
+                        {
+                            var trClass = j % 2 == 0 ? "even" : "odd";
+                            var isYou = IsYou(leader.UserId);
+                            <tr class="@trClass">
+                                <td class="tabData">@leader.Rank</td>
+                                <td class="tabData redtext@(isYou ? " you" : "")">
+                                    <a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a>
+                                    @if (isYou)
+                                    {
+                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
+                                    }
+                                </td>
+                                <td class="tabData">@leader.Points</td>
+                                <td class="tabData">@leader.BestTimeString</td>
+                                <td class="tabData">@leader.KikolesFound</td>
+                                <td class="tabData">@leader.KikolesAttempted</td>
+                                <td class="tabData">@leader.KikolesProposed</td>
+                            </tr>
+                            j++;
+                        }
+                    }
+                    else
+                    {
+                        <tr class="even">
+                            <td colspan="7" class="tabData">@localizer["NoUserInTable"]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3>@localizer["MonthlyPodiumTitle"]</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="tabDataHead">@localizer["Date"]</th>
+                        <th class="tabDataHead">@localizer["FirstHeader"]</th>
+                        <th class="tabDataHead">@localizer["SecondHeader"]</th>
+                        <th class="tabDataHead">@localizer["ThirdHeader"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.MonthlyPodiums.Count == 0)
+                    {
+                        <tr class="even">
+                            <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var k = 0;
+                        foreach (var (date, podium) in Model.MonthlyPodiums)
+                        {
+                            var trClass = k % 2 == 0 ? "even" : "odd";
+                            <tr class="@trClass">
+                                <td class="tabData">@date.ToString("MMM yyyy")</td>
+                                @foreach (var (medalClass, holder) in new[] { ("medal-gold", podium[0]), ("medal-silver", podium[1]), ("medal-bronze", podium[2]) })
+                                {
+                                    var isYou = IsYou(holder.userId);
+                                    <td class="tabData @medalClass@(isYou ? " you" : "")">
+                                        <a href="/Leaderboard?userId=@holder.userId">@holder.login</a>
+                                        @if (isYou)
+                                        {
+                                            <span class="you-tag">(@localizer["YouSuffix"])</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                            k++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3>@localizer["OverallPodiumTitle"]</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="tabDataHead redtext">@localizer["PlayerHeader"]</th>
+                        <th class="tabDataHead">@localizer["FirstHeader"]</th>
+                        <th class="tabDataHead">@localizer["SecondHeader"]</th>
+                        <th class="tabDataHead">@localizer["ThirdHeader"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OverallPodium.Count == 0)
+                    {
+                        <tr class="even">
+                            <td colspan="4" class="tabData">@localizer["NoUserInTable"]</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var m = 0;
+                        foreach (var entry in Model.OverallPodium)
+                        {
+                            var trClass = m % 2 == 0 ? "even" : "odd";
+                            var isYou = IsYou(entry.userId);
+                            <tr class="@trClass">
+                                <td class="tabData redtext@(isYou ? " you" : "")">
+                                    @entry.login
+                                    @if (isYou)
+                                    {
+                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
+                                    }
+                                </td>
+                                <td class="tabData medal-gold">@entry.first</td>
+                                <td class="tabData medal-silver">@entry.second</td>
+                                <td class="tabData medal-bronze">@entry.third</td>
+                            </tr>
+                            m++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
     $(function () {
@@ -150,6 +268,8 @@
             @Html.Raw(Json.Serialize(localizer["NoUserInTable"].Value)),
             @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value)),
             @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value)),
-            @Html.Raw(Json.Serialize(localizer["HiddenDayboard"].Value)));
+            @Html.Raw(Json.Serialize(localizer["HiddenDayboard"].Value)),
+            @Html.Raw(Json.Serialize(localizer["YouSuffix"].Value)),
+            @Model.CurrentUserId);
     });
 </script>

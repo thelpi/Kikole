@@ -1,0 +1,1440 @@
+/* Habillage "dossier de scout" de la page de jeu (Views/Home/Index.cshtml).
+   Scope : tout sous .kikole-board, sauf les tokens (:root, globaux et sans risque),
+   .site-nav (chrome globale de _Layout.cshtml, presente sur toutes les pages) et
+   .ui-autocomplete / .ui-datepicker (widgets jQuery UI attaches en enfant direct
+   de <body>, impossible a scoper autrement). Voir
+   C:\Users\LPI\.claude\plans\linear-pondering-wind.md. */
+
+:root {
+  --paper: #efe9d8;
+  --paper-raised: #faf6e9;
+  --paper-line: #e2dac2;
+  --ink: #1c2b22;
+  --ink-soft: #4a5a4f;
+  --pitch: #1f5e3e;
+  --pitch-strong: #17462f;
+  --pitch-soft: #dbe6da;
+  --stamp: #a6332b;
+  --stamp-soft: #f3e0dc;
+  --gold: #ad8a3e;
+  --shadow: rgba(28, 43, 34, 0.16);
+
+  /* tableau d'affichage : toujours sombre, comme un vrai ecran de stade */
+  --board-bg: #12201a;
+  --board-fg: #f4eeda;
+  --board-accent: #dfb04c;
+}
+
+/* ---------------------------------------------------------- navigation globale
+   Chrome de _Layout.cshtml, presente sur toutes les pages (pas seulement sous
+   .kikole-board) : remplace l'ancienne navbar Bootstrap fixe. */
+
+body { padding-top: 0; }
+
+.site-nav {
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  background: var(--board-bg);
+  color: var(--board-fg);
+  box-sizing: border-box;
+}
+
+.site-nav * { box-sizing: border-box; }
+
+.site-nav-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 18px;
+  height: 52px;
+}
+
+.site-nav-brand {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--board-fg);
+  text-decoration: none;
+  flex: none;
+}
+
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--board-fg) 20%, transparent);
+}
+
+.site-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-nav-icon,
+.site-nav-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--board-fg);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+/* pastille "message a lire" (icones Contact et Actions admin, cf. _Layout.cshtml) */
+.site-nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--stamp);
+  border: 1.5px solid var(--board-bg);
+}
+
+.site-nav-badge-inline {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--stamp);
+}
+
+.site-nav-icon svg,
+.site-nav-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.site-nav-icon:hover,
+.site-nav-icon-btn:hover {
+  background: color-mix(in srgb, var(--board-fg) 12%, transparent);
+}
+
+.site-nav-logout-form { display: contents; }
+
+.site-nav-logout:hover {
+  background: color-mix(in srgb, var(--stamp) 55%, transparent);
+}
+
+.site-nav-flag img {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+}
+
+.site-nav-user {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--board-fg) 80%, transparent);
+}
+
+.site-nav-login {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--board-accent);
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--board-accent) 55%, transparent);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.site-nav-login:hover {
+  background: color-mix(in srgb, var(--board-accent) 15%, transparent);
+}
+
+.site-nav-burger {
+  display: none;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.site-nav-burger:hover { background: color-mix(in srgb, var(--board-fg) 12%, transparent); }
+
+.site-nav-burger span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  background: var(--board-fg);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.site-nav-burger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.site-nav-burger.open span:nth-child(2) { opacity: 0; }
+.site-nav-burger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.site-nav-drawer {
+  display: none;
+  max-height: 0;
+  overflow: hidden;
+  background: var(--paper-raised);
+  transition: max-height 0.25s ease;
+}
+
+.site-nav-drawer.open { max-height: 80vh; overflow-y: auto; }
+
+.site-nav-drawer-inner { padding: 8px 18px 14px; }
+
+.site-nav-drawer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-nav-drawer-row:hover { color: var(--pitch-strong); }
+
+.site-nav-drawer-row svg {
+  width: 17px;
+  height: 17px;
+  color: var(--pitch);
+  flex: none;
+}
+
+.site-nav-drawer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+
+.site-nav-drawer-foot .site-nav-user { color: var(--ink-soft); }
+.site-nav-drawer-foot .site-nav-icon-btn { color: var(--pitch-strong); }
+.site-nav-drawer-foot .site-nav-icon-btn:hover { background: var(--pitch-soft); }
+.site-nav-drawer-foot .site-nav-logout:hover { background: var(--stamp-soft); color: var(--stamp); }
+.site-nav-drawer-foot-actions { display: flex; align-items: center; gap: 4px; }
+
+@media (max-width: 680px) {
+  .site-nav-links,
+  .site-nav-right { display: none; }
+  .site-nav-burger { display: inline-flex; }
+  .site-nav-drawer { display: block; }
+}
+
+.kikole-board {
+  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  color: var(--ink);
+  max-width: 640px;
+  margin: 20px auto 0;
+}
+
+.kikole-board * { box-sizing: border-box; }
+
+/* ---------------------------------------------------------- masthead */
+
+.kikole-board .masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.kikole-board .day-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.kikole-board .day-nav-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 5px;
+  color: var(--pitch-strong);
+  transition: background 0.15s ease;
+}
+
+.kikole-board .day-nav-arrow svg { width: 16px; height: 16px; }
+
+.kikole-board a.day-nav-arrow:hover { background: var(--pitch-soft); }
+
+.kikole-board .day-nav-arrow.disabled {
+  color: var(--ink-soft);
+  opacity: 0.35;
+  cursor: default;
+}
+
+.kikole-board .day-nav .small-link { margin-left: 4px; }
+
+.kikole-board .date-field {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid var(--paper-line);
+  border-radius: 5px;
+  padding: 5px 6px;
+  background: var(--paper-raised);
+  color: var(--pitch-strong);
+  width: 110px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.kikole-board .date-field:hover { border-color: var(--pitch-soft); }
+
+.kikole-board .date-field:focus-visible {
+  outline: none;
+  border-color: var(--pitch);
+}
+
+.kikole-board .day-nav .date-field { width: 96px; }
+
+.kikole-board .scoreboard {
+  background: var(--board-bg);
+  color: var(--board-fg);
+  border: 1px solid color-mix(in srgb, var(--board-fg) 15%, transparent);
+  border-radius: 6px;
+  padding: 8px 16px 6px;
+  text-align: right;
+  box-shadow: 0 6px 14px var(--shadow);
+  flex: none;
+}
+
+.kikole-board .scoreboard .label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.kikole-board .scoreboard .value {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 30px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--board-accent);
+}
+
+/* joueur du jour trouve : le cadran devient la seule source du score (la ligne
+   "score final" a disparu, redondante) - surbrillance verte plutot qu'un badge
+   separe, tant qu'on est sur cet ecran de victoire */
+.kikole-board .scoreboard.success {
+  border-color: var(--pitch);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pitch) 40%, transparent), 0 6px 14px var(--shadow);
+}
+
+.kikole-board .scoreboard.success .value { color: #7fd99a; }
+
+/* jour consulte different d'aujourd'hui : le cadran reste exact (le score affiche est
+   deja celui du jour consulte, cf. CurrentDay), mais attenue pour signaler que ce n'est
+   pas le score du jour present - evite de le confondre avec un score "live". .found
+   garde une trace discrete (teinte verte, sans le halo de .success) plutot que de
+   perdre completement l'info "ce jour-la a ete trouve" en s'eloignant d'aujourd'hui. */
+.kikole-board .scoreboard.other-day {
+  border-color: color-mix(in srgb, var(--board-fg) 15%, transparent);
+  box-shadow: none;
+}
+
+.kikole-board .scoreboard.other-day .label,
+.kikole-board .scoreboard.other-day .value { opacity: 0.55; }
+
+.kikole-board .scoreboard.other-day .value { color: var(--board-fg); }
+
+.kikole-board .scoreboard.other-day.found .value { color: #7fd99a; }
+
+/* ---------------------------------------------------------- formulaires generiques
+   (page Compte, presentation/regles) : reprennent .banner/.blank/.actions ci-dessous
+   dans un habillage plus simple qu'un dossier de joueur. */
+
+.kikole-board .form-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: 6px;
+  box-shadow: 0 12px 28px var(--shadow);
+  padding: 22px 26px;
+  margin-bottom: 20px;
+}
+
+.kikole-board .form-card h3 {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 20px;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+  color: var(--pitch-strong);
+  margin: 22px 0 12px;
+}
+
+.kikole-board .form-card h3:first-child { margin-top: 0; }
+
+.kikole-board .form-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+
+.kikole-board .form-card p:last-child { margin-bottom: 0; }
+
+.kikole-board .form-card ul {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.kikole-board .form-card a { color: var(--pitch-strong); }
+
+/* sections repliables (Statistics/Stats.cshtml) : le JS (site.js, deja en place) ne
+   gere que l'ouverture/fermeture (classe .active + display block/none), tout l'habillage
+   vient d'ici - remplace le look gris plat de site.css dans ce scope. */
+.kikole-board .collapsible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: var(--pitch-strong);
+  cursor: pointer;
+  text-align: left;
+}
+
+.kikole-board .collapsible:hover,
+.kikole-board .collapsible.active { background: transparent; }
+
+.kikole-board .collapsible::after {
+  content: "+";
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--pitch);
+}
+
+.kikole-board .collapsible.active::after { content: "\2212"; }
+
+.kikole-board .collapsiblecontent { padding-top: 16px; }
+
+.kikole-board .chart-empty {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+  padding: 4px 0 12px;
+}
+
+.kikole-board .redtext { color: var(--stamp); }
+.kikole-board .greentext { color: var(--pitch); }
+
+/* ligne "vous" dans un tableau (classement, podiums) : la cellule utilisateur
+   passe du rouge/or/argent/bronze habituel (lien generique, ou couleur de
+   medaille sur les podiums) au vert, en gras, avec un petit marqueur textuel -
+   le fond de ligne (even/odd/creator) n'est pas touche, les deux se superposent
+   sans conflit. Specificite (type + classe) plutot que !important : gagne face
+   a .redtext/.medal-gold/-silver/-bronze (deux classes) sans devoir lister
+   chaque combinaison. */
+.kikole-board td.you { color: var(--pitch-strong); font-weight: 700; }
+
+.kikole-board .you-tag {
+  margin-left: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--pitch);
+}
+
+.kikole-board .form-field { margin-bottom: 14px; }
+
+.kikole-board .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.kikole-board .form-row .form-field { margin-bottom: 14px; }
+
+.kikole-board .form-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.kikole-board .form-field .blank { max-width: 320px; }
+
+.kikole-board .form-static {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pitch-strong);
+}
+
+.kikole-board .form-hint {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: -6px 0 14px;
+}
+
+.kikole-board .form-hint a { color: var(--pitch-strong); }
+
+.kikole-board .auth-notice p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.kikole-board .auth-notice p:last-child { margin-bottom: 0; }
+.kikole-board .auth-notice a { color: var(--pitch-strong); font-weight: 600; }
+
+.kikole-board hr {
+  border: none;
+  border-top: 1px solid var(--paper-line);
+  margin: 28px 0;
+}
+
+/* ---------------------------------------------------------- bandeaux */
+
+.kikole-board .banner {
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  border: 1px solid transparent;
+}
+
+.kikole-board .banner.success {
+  background: var(--pitch-soft);
+  border-color: color-mix(in srgb, var(--pitch) 35%, transparent);
+  color: var(--pitch-strong);
+}
+
+.kikole-board .banner.error {
+  background: var(--stamp-soft);
+  border-color: color-mix(in srgb, var(--stamp) 35%, transparent);
+  color: var(--stamp);
+}
+
+.kikole-board .creator-line {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: -8px 0 14px;
+}
+
+/* ---------------------------------------------------------- dossier card */
+
+.kikole-board .dossier {
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  box-shadow: 0 18px 40px var(--shadow);
+}
+
+.kikole-board .dossier-head {
+  padding: 22px 26px 18px;
+  border-bottom: 1px dashed var(--paper-line);
+}
+
+.kikole-board .dossier-head h1 {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: normal;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--pitch-strong);
+  margin: 0 0 4px;
+}
+
+.kikole-board .clue {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.kikole-board .clue + .clue { margin-top: 8px; }
+
+.kikole-board .clue .tag {
+  flex: none;
+  width: 158px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pitch);
+  border: 1px solid var(--pitch);
+  border-radius: 3px;
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.kikole-board .clue p { margin: 0; font-style: italic; }
+
+/* indice d'epoque heberge en image (ex. i.imgur.com/xxx.png) plutot qu'en texte :
+   .clue est align-items:baseline pour le texte, corrige ici pour une image */
+.kikole-board .clue:has(.clue-image) { align-items: flex-start; }
+
+.kikole-board .clue-image {
+  display: block;
+  max-width: 220px;
+  max-height: 140px;
+  border: 1px solid var(--paper-line);
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------- rows */
+
+.kikole-board .rows { padding: 6px 26px 4px; }
+
+.kikole-board .dossier-row {
+  display: grid;
+  grid-template-columns: 128px 1fr auto;
+  align-items: start;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--paper-line);
+  margin: 0;
+}
+
+.kikole-board .dossier-row:last-child { border-bottom: none; }
+
+.kikole-board .dossier-row .field {
+  padding-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kikole-board .dossier-row .cost { padding-top: 3px; }
+
+.kikole-board .dossier-row .field .hint {
+  display: block;
+  margin-top: 5px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.kikole-board .dossier-row .field .hint a { color: var(--pitch-strong); }
+
+/* essais rates : visible qu'une categorie soit encore ouverte ou deja trouvee */
+
+.kikole-board .attempts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 7px;
+}
+
+.kikole-board .dossier-row.solved .attempts { margin: 0 0 7px; }
+
+.kikole-board .attempt {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.kikole-board .attempt .tag {
+  margin-left: 6px;
+  font-style: italic;
+}
+
+/* etat trouve */
+
+.kikole-board .dossier-row.solved .value {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.kikole-board .dossier-row.solved .value svg { flex: none; color: var(--pitch); margin-top: 3px; }
+
+.kikole-board .dossier-row.solved .cost {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--ink-soft) 60%, transparent);
+}
+
+/* champ a completer */
+
+.kikole-board .blank-wrap {
+  position: relative;
+  max-width: 260px;
+}
+
+.kikole-board .blank {
+  width: 100%;
+  border: none;
+  border-bottom: 2px dashed var(--paper-line);
+  background: transparent;
+  padding: 4px 2px 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.kikole-board .blank::placeholder { color: var(--ink-soft); font-style: italic; }
+
+.kikole-board .blank:focus-visible {
+  outline: none;
+  border-bottom: 2px solid var(--pitch);
+}
+
+.kikole-board select.blank {
+  border: 1px solid var(--paper-line);
+  border-radius: 3px;
+  padding: 5px 8px;
+  max-width: 190px;
+  background: var(--paper);
+}
+
+.kikole-board input[type="checkbox"] { accent-color: var(--pitch); }
+
+.kikole-board input[type="datetime-local"] {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--paper-line);
+  border-radius: 3px;
+  padding: 5px 8px;
+  background: var(--paper);
+  color: var(--pitch-strong);
+}
+
+.kikole-board textarea.blank {
+  border: 1px solid var(--paper-line);
+  border-radius: 3px;
+  padding: 8px 10px;
+  background: var(--paper);
+  min-height: 120px;
+  resize: vertical;
+  max-width: 100%;
+}
+
+.kikole-board .dossier-row.locked .cost {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--stamp);
+  background: var(--stamp-soft);
+  border: 1px solid color-mix(in srgb, var(--stamp) 45%, transparent);
+  border-radius: 999px;
+  padding: 3px 10px;
+  width: 76px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.kikole-board .small-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.kikole-board .small-link a { color: var(--pitch-strong); }
+
+/* clubs deja trouves */
+
+.kikole-board .club-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.kikole-board .club {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.kikole-board .club svg { flex: none; color: var(--pitch); margin-top: 3px; }
+
+.kikole-board .club .loan {
+  flex: none;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+/* ---------------------------------------------------------- final answer */
+
+.kikole-board .final {
+  margin: 4px 26px 24px;
+  padding-top: 18px;
+  border-top: 2px solid var(--pitch);
+}
+
+.kikole-board .final .field {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pitch-strong);
+  margin-bottom: 8px;
+}
+
+.kikole-board .final-input {
+  display: flex;
+  border: 1.5px solid var(--pitch);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--paper);
+  max-width: 420px;
+}
+
+.kikole-board .final-input input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.kikole-board .final-input input::placeholder { color: var(--ink-soft); }
+
+.kikole-board .final-input input:focus-visible {
+  outline: 2px solid var(--pitch);
+  outline-offset: -2px;
+}
+
+.kikole-board .final-input button {
+  flex: none;
+  border: none;
+  background: var(--pitch);
+  color: var(--paper-raised);
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 20px;
+  cursor: pointer;
+}
+
+.kikole-board .final-input button:hover { background: var(--pitch-strong); }
+.kikole-board .final-input button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.kikole-board .final .attempts { margin-top: 9px; }
+
+.kikole-board .final .caption {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.kikole-board .final .caption strong { color: var(--stamp); font-weight: 600; }
+
+/* ---------------------------------------------------------- actions */
+
+.kikole-board .actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.kikole-board .actions button,
+.kikole-board .actions a,
+.kikole-board .confirm-modal-actions button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  padding: 9px 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.12s ease;
+}
+
+.kikole-board .confirm-modal-actions button.secondary {
+  color: var(--ink-soft);
+  background: transparent;
+  border-color: var(--paper-line);
+}
+
+.kikole-board .actions button .cost { color: var(--stamp); margin-left: 6px; }
+
+.kikole-board .actions button:hover,
+.kikole-board .actions a:hover { transform: translateY(-1px); }
+.kikole-board .actions button:focus-visible,
+.kikole-board .actions a:focus-visible { outline: 2px solid var(--pitch); outline-offset: 2px; }
+
+.kikole-board .actions button:disabled {
+  cursor: default;
+  opacity: 0.5;
+  transform: none;
+}
+
+.kikole-board .actions button:disabled .cost { color: var(--ink-soft); }
+
+/* modale de confirmation (remplace confirm() natif du navigateur, cf. bouton "Give
+   up") : cachee par defaut, .open l'affiche - meme convention que .site-nav-drawer.open */
+.kikole-board .confirm-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.kikole-board .confirm-modal.open { display: flex; }
+
+.kikole-board .confirm-modal-box {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 22px 24px;
+  max-width: 320px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.kikole-board .confirm-modal-box p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.kikole-board .confirm-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ---------------------------------------------------------- discussion
+   (Home/Contact, Admin/Discussion) : fil de messages rendu par le partial
+   Shared/Partial/DiscussionThread, "self"/"other" au lieu de "user"/"admin" pour
+   fonctionner du point de vue de n'importe quel des deux lecteurs. */
+
+.kikole-board .discussion-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.kikole-board .discussion-empty {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.kikole-board .discussion-message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--paper-line);
+  background: var(--paper-raised);
+}
+
+.kikole-board .discussion-message.self {
+  align-self: flex-end;
+  background: var(--pitch-soft);
+  border-color: color-mix(in srgb, var(--pitch) 35%, transparent);
+}
+
+.kikole-board .discussion-message-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+.kikole-board .discussion-message p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+/* puce "non lu" (Admin/Discussions) : meme forme que .same-day-tag, palette --stamp
+   (rouge, deja la couleur "a traiter" du projet) plutot que --pitch (vert, deja pris
+   par .same-day-tag pour un tout autre sens). */
+.kikole-board .unread-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--stamp-soft);
+  color: var(--stamp);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---------------------------------------------------------- badges */
+
+.kikole-board .badges-label {
+  padding: 0 26px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kikole-board .badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 0 26px 20px;
+}
+
+.kikole-board .badge-card {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--paper-line);
+  border-radius: 6px;
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kikole-board .badge-card.secret {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--gold) 16%, var(--paper)), var(--paper) 70%);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--paper-line));
+}
+
+.kikole-board .badge-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.kikole-board .badge-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--pitch);
+}
+
+.kikole-board .badge-card.secret .badge-icon { color: var(--gold); }
+
+.kikole-board .badge-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--pitch-strong);
+  padding-top: 2px;
+}
+
+.kikole-board .badge-card.secret .badge-name { color: color-mix(in srgb, var(--gold) 65%, var(--ink)); }
+
+.kikole-board .badge-seal {
+  margin-left: auto;
+  flex: none;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 2px 5px;
+  white-space: nowrap;
+}
+
+.kikole-board .badge-desc { font-size: 12.5px; }
+
+.kikole-board .badge-desc summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink-soft);
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px dashed var(--paper-line);
+  padding-bottom: 1px;
+}
+
+.kikole-board .badge-desc summary::-webkit-details-marker { display: none; }
+
+.kikole-board .badge-desc summary::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-soft);
+  font-size: 10px;
+  line-height: 1;
+}
+
+.kikole-board .badge-desc[open] summary::before { content: "\2212"; }
+
+.kikole-board .badge-desc summary:hover { color: var(--pitch-strong); }
+.kikole-board .badge-desc summary:hover::before { border-color: var(--pitch-strong); color: var(--pitch-strong); }
+
+.kikole-board .badge-desc p {
+  margin: 6px 0 0;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.kikole-board .badge-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kikole-board .badge-date {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pitch);
+  border: 1px solid var(--pitch);
+  border-radius: 3px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.kikole-board .badge-date.secret {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.kikole-board .badge-holders {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.kikole-board .badge-holders b { color: var(--stamp); font-weight: 600; }
+
+.kikole-board .badge-holders.solo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--gold) 65%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.kikole-board .badge-holders.solo svg { width: 11px; height: 11px; flex: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kikole-board .actions button { transition: none; }
+}
+
+@media (max-width: 480px) {
+  .kikole-board .dossier-row { grid-template-columns: 96px 1fr; }
+  .kikole-board .dossier-row .cost { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+}
+
+/* ---------------------------------------------------------- tableaux de donnees
+   (classement, podiums, statistiques utilisateur) : classes historiques de site.css
+   (tabData, tabDataHead, even/odd/creator, fillN...) reprises telles quelles - certaines
+   sont regenerees par site.js (tableaux du classement, cf. loadGlobalLeaderboard /
+   loadDailyLeaderboard) donc ni les noms de classe ni les id ne peuvent changer. */
+
+.kikole-board .table-wrap { overflow-x: auto; }
+
+.kikole-board table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.kikole-board thead th {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 2px solid var(--pitch);
+  padding: 8px 10px;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.kikole-board tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.kikole-board tbody tr:last-child td { border-bottom: none; }
+
+.kikole-board .even td { background: var(--paper-raised); }
+.kikole-board .odd td { background: var(--paper); }
+
+.kikole-board .creator td {
+  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+  font-weight: 600;
+}
+
+.kikole-board .tabDataBold { font-weight: 700; color: var(--pitch-strong); }
+.kikole-board .tabDataHeadBg { background: transparent; }
+
+/* puce "le jour meme" (Leaderboard/User.cshtml, colonnes Tente ?/Trouve ?) : teinte de
+   fond + texte en gras, lisible directement sans avoir a lire une legende sous le
+   tableau - le titre HTML natif (survol) donne le detail pour qui le cherche. */
+.kikole-board .same-day-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--pitch-soft);
+  color: var(--pitch-strong);
+  font-weight: 700;
+}
+
+.kikole-board .fillCorrect { background: var(--pitch-soft); }
+.kikole-board .fillIncorrect { background: var(--stamp-soft); }
+
+.kikole-board .fill1 { background: color-mix(in srgb, var(--pitch) 18%, var(--paper)); }
+.kikole-board .fill2 { background: color-mix(in srgb, var(--gold) 22%, var(--paper)); }
+.kikole-board .fill3 { background: color-mix(in srgb, var(--stamp) 14%, var(--paper)); }
+.kikole-board .fill4 { background: color-mix(in srgb, var(--pitch-strong) 16%, var(--paper)); }
+.kikole-board .fill5 { background: color-mix(in srgb, #4a6fa5 22%, var(--paper)); }
+.kikole-board .fill6 { background: color-mix(in srgb, #8a6fb0 20%, var(--paper)); }
+.kikole-board .fill7 { background: color-mix(in srgb, #b0784a 20%, var(--paper)); }
+.kikole-board .fill8 { background: color-mix(in srgb, var(--ink-soft) 16%, var(--paper)); }
+
+.kikole-board .table-caption {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: -4px 0 12px;
+}
+
+@media (max-width: 480px) {
+  .kikole-board table { font-size: 11.5px; }
+  .kikole-board thead th,
+  .kikole-board tbody td { padding: 6px 7px; }
+}
+
+.kikole-board .medal-gold { color: var(--gold); font-weight: 700; }
+.kikole-board .medal-silver { color: #8a8f92; font-weight: 700; }
+.kikole-board .medal-bronze { color: #a8703f; font-weight: 700; }
+
+.kikole-board .profile-name {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: normal;
+  font-size: 24px;
+  letter-spacing: 0.02em;
+  color: var(--stamp);
+  margin: 0 0 14px;
+}
+
+.kikole-board .badge-card.missing {
+  background: transparent;
+  border-style: dashed;
+}
+
+.kikole-board .badge-card.missing .badge-icon { color: var(--ink-soft); opacity: 0.5; }
+.kikole-board .badge-card.missing .badge-name { color: var(--ink-soft); }
+
+/* ---------------------------------------------------------- autocompletion jQuery UI
+   Le widget s'attache en enfant direct de <body>, hors de .kikole-board : override
+   global necessaire, sans risque puisque c'est le meme composant partout sur le site. */
+
+.ui-autocomplete {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  box-shadow: 0 10px 24px var(--shadow);
+  padding: 4px;
+}
+
+.ui-autocomplete .ui-menu-item-wrapper {
+  padding: 6px 10px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+.ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
+  background: var(--pitch);
+  color: var(--paper-raised);
+  border: none;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------ datepicker jQuery UI
+   Meme contrainte que .ui-autocomplete ci-dessus : #ui-datepicker-div s'attache en
+   enfant direct de <body>. */
+
+.ui-datepicker {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  box-shadow: 0 10px 24px var(--shadow);
+  padding: 8px;
+  width: 240px;
+}
+
+.ui-datepicker .ui-datepicker-header {
+  background: var(--pitch);
+  color: var(--paper-raised);
+  border: none;
+  border-radius: 3px;
+  padding: 4px 0;
+}
+
+.ui-datepicker .ui-datepicker-title {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+  top: 4px;
+  cursor: pointer;
+}
+
+.ui-datepicker .ui-datepicker-prev .ui-icon,
+.ui-datepicker .ui-datepicker-next .ui-icon {
+  filter: invert(1);
+}
+
+.ui-datepicker .ui-datepicker-prev:hover,
+.ui-datepicker .ui-datepicker-next:hover {
+  background: transparent;
+  border: none;
+  top: 4px;
+}
+
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  background: var(--paper-raised);
+  color: var(--pitch-strong);
+  border: 1px solid color-mix(in srgb, var(--paper-raised) 60%, transparent);
+  border-radius: 2px;
+}
+
+.ui-datepicker table {
+  margin: 6px 0 0;
+}
+
+.ui-datepicker th {
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.ui-datepicker td {
+  padding: 1px;
+}
+
+.ui-datepicker td a,
+.ui-datepicker td span {
+  text-align: center;
+  border-radius: 3px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  padding: 4px 0;
+}
+
+.ui-datepicker td a:hover {
+  background: var(--pitch-soft);
+  border: none;
+}
+
+.ui-datepicker td .ui-state-active {
+  background: var(--pitch);
+  color: var(--paper-raised);
+}
+
+.ui-datepicker td.ui-datepicker-today a {
+  border: 1px solid var(--gold);
+}
+
+.ui-datepicker .ui-datepicker-buttonpane {
+  border-top: 1px solid var(--paper-line);
+}
+
+.ui-datepicker .ui-datepicker-buttonpane button {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--pitch-strong);
+  background: transparent;
+  border: none;
+}

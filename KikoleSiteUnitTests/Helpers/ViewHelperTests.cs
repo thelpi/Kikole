@@ -255,7 +255,34 @@ public class ViewHelperTests
 
             foreach (DayLeaderSorts sort in Enum.GetValues(typeof(DayLeaderSorts)))
                 sort.GetLabel().Should().NotBeNullOrWhiteSpace();
+
+            foreach (PlayerSorts sort in Enum.GetValues(typeof(PlayerSorts)))
+                sort.GetLabel().Should().NotBeNullOrWhiteSpace();
         }
+    }
+
+    // ------------------------------------------------------------- indices en image
+
+    [Theory]
+    [InlineData("https://i.imgur.com/YwR1hdd.png")]
+    [InlineData("http://example.com/photo.JPG")]
+    [InlineData("https://example.com/path/pic.webp?token=abc")]
+    public void IsImageUrl_DetectsCommonImageExtensions(string url)
+    {
+        url.IsImageUrl().Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("Deux buts de la tête en finale de Coupe du monde.")]
+    [InlineData("https://example.com/no-extension")]
+    [InlineData("not-a-url.png")]
+    [InlineData("ftp://example.com/photo.png")]
+    public void IsImageUrl_RejectsPlainTextAndNonHttpValues(string? value)
+    {
+        value.IsImageUrl().Should().BeFalse();
     }
 
     // ------------------------------------------------------------- selection de langue

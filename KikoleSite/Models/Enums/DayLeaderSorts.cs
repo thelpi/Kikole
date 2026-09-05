@@ -1,8 +1,7 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum DayLeaderSorts
 {
-    public enum DayLeaderSorts
-    {
-        BestTime,
-        TotalPoints
-    }
+    BestTime,
+    TotalPoints
 }

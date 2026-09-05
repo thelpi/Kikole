@@ -1,8 +1,7 @@
-﻿namespace KikoleSite.Models.Dtos
+﻿namespace KikoleSite.Models.Dtos;
+
+public record RegistrationGuidDto
 {
-    public record RegistrationGuidDto
-    {
-        public required string Id { get; init; }
-        public ulong? UserId { get; init; }
-    }
+    public required string Id { get; init; }
+    public ulong? UserId { get; init; }
 }

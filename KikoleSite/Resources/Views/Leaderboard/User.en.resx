@@ -168,6 +168,12 @@
   <data name="Username" xml:space="preserve">
     <value>Username:</value>
   </data>
+  <data name="BadgeDetails" xml:space="preserve">
+    <value>details</value>
+  </data>
+  <data name="BadgeSecret" xml:space="preserve">
+    <value>Secret badge</value>
+  </data>
   <data name="BadgesHead" xml:space="preserve">
     <value>Badges</value>
   </data>
@@ -196,7 +202,7 @@
     <value>has this badge</value>
   </data>
   <data name="OnlyOne" xml:space="preserve">
-    <value>You're the &lt;span class="redtext"&gt;only one&lt;/span&gt; with this badge!</value>
+    <value>you're the only one to have it</value>
   </data>
   <data name="OtherUser" xml:space="preserve">
     <value>other user has this badge</value>
@@ -217,7 +223,7 @@
     <value>Impossible to own</value>
   </data>
   <data name="OnlyOneNotMe" xml:space="preserve">
-    <value>&lt;span class="redtext"&gt;Only one&lt;/span&gt; with this badge!</value>
+    <value>the only one to have it</value>
   </data>
   <data name="OtherUsersNotMe" xml:space="preserve">
     <value>users have this badge</value>
@@ -233,9 +239,6 @@
   </data>
   <data name="AveragePoints" xml:space="preserve">
     <value>Average points</value>
-  </data>
-  <data name="BoldFirstDay" xml:space="preserve">
-    <value>* in bold, kikolés tried / found the first day.</value>
   </data>
   <data name="CurrentDay" xml:space="preserve">
     <value>The first day</value>

@@ -1,172 +1,232 @@
-﻿@using KikoleSite.Helpers
+@using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @model UserStatsModel
 
-<h3>@localizer["GeneralInfo"]</h3>
-<fieldset class="smallTopMargin">
-    <legend class="redtext">@Model.Login</legend>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["RegistrationDate"]</label>
-        <label class="redtext">@Model.RegistrationDate.ToNaString()</label>
+<div class="kikole-board">
+    <div class="form-card">
+        <h2 class="profile-name">@Model.Login</h2>
+        <div class="form-field">
+            <label>@localizer["RegistrationDate"]</label>
+            <div class="form-static">@Model.RegistrationDate.ToNaString()</div>
+        </div>
+        <div class="form-field">
+            <label>@localizer["BestTime"]</label>
+            <div class="form-static">@Model.BestTime</div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="tabDataHead"></th>
+                        <th class="tabDataHead">@localizer["DayOne"]</th>
+                        <th class="tabDataHead">@localizer["AllDays"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="even">
+                        <td class="tabData">@localizer["Attempts"]</td>
+                        <td class="tabData">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</td>
+                        <td class="tabData">@Model.Attempts (@Model.AttemptRate %)</td>
+                    </tr>
+                    <tr class="odd">
+                        <td class="tabData">@localizer["Successes"]</td>
+                        <td class="tabData">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</td>
+                        <td class="tabData">@Model.Successes (@Model.SuccessRate %)</td>
+                    </tr>
+                    <tr class="even">
+                        <td class="tabData">@localizer["TotalScore"]</td>
+                        <td class="tabData">@Model.TotalPointsDayOne</td>
+                        <td class="tabData">@Model.TotalPoints</td>
+                    </tr>
+                    <tr class="odd">
+                        <td class="tabData">@localizer["AveragePoints"]</td>
+                        <td class="tabData">@Model.PointsPerAttemptDayOne</td>
+                        <td class="tabData">@Model.PointsPerAttempt</td>
+                    </tr>
+                    <tr class="even">
+                        <td class="tabData">@localizer["BestScore"]</td>
+                        <td class="tabData">@Model.BestPointsDayOne</td>
+                        <td class="tabData">@Model.BestPoints</td>
+                    </tr>
+                    <tr class="odd">
+                        <td class="tabData">@localizer["AverageTime"]</td>
+                        <td class="tabData">@Model.AverageTimeDayOne</td>
+                        <td class="tabData">@Model.AverageTime</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="smallTopMargin">
-        <label class="mainFormSectionLabel">@localizer["BestTime"]</label>
-        <label class="redtext">@Model.BestTime</label>
+
+    <div class="form-card">
+        <h3>@localizer["StatsByDay"]</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="tabDataHead">@localizer["DateHeader"]</th>
+                        <th class="tabDataHead">@localizer["AnswerHeader"]</th>
+                        <th class="tabDataHead">@localizer["AttemptHeader"]</th>
+                        <th class="tabDataHead">@localizer["SuccessHeader"]</th>
+                        <th class="tabDataHead">@localizer["PointsHeader"]</th>
+                        <th class="tabDataHead">@localizer["PointsRankHeader"]</th>
+                        <th class="tabDataHead">@localizer["TimeHeader"]</th>
+                        <th class="tabDataHead">@localizer["TimeRankHeader"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var i = 0;
+                    }
+                    @foreach (var stat in Model.Stats)
+                    {
+                        var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
+                        <tr class="@trClass">
+                            <td class="tabData"><a href="/?day=@stat.DaysBefore">@stat.Date.ToNaString()</a></td>
+                            <td class="tabData">@stat.Answer</td>
+                            <td class="tabData">
+                                @if (stat.AttemptDayOne == true)
+                                {
+                                    <span class="same-day-tag" title="@localizer["CurrentDay"]">@stat.Attempt.ToYesNo()</span>
+                                }
+                                else
+                                {
+                                    @stat.Attempt.ToYesNo()
+                                }
+                            </td>
+                            <td class="tabData">
+                                @if (stat.SuccessDayOne == true)
+                                {
+                                    <span class="same-day-tag" title="@localizer["CurrentDay"]">@stat.Success.ToYesNo()</span>
+                                }
+                                else
+                                {
+                                    @stat.Success.ToYesNo()
+                                }
+                            </td>
+                            <td class="tabData">@stat.Points.ToNaString()</td>
+                            <td class="tabData">@stat.PointsPosition.ToNaString()</td>
+                            <td class="tabData">@stat.Time.ToNaString()</td>
+                            <td class="tabData">@stat.TimePosition.ToNaString()</td>
+                        </tr>
+                        i++;
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <table class="smallTopMargin">
-        <thead>
-            <tr>
-                <th class="tabDataHead"></th>
-                <th class="tabDataHead">@localizer["DayOne"]</th>
-                <th class="tabDataHead">@localizer["AllDays"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="even">
-                <td class="tabData">@localizer["Attempts"]</td>
-                <td class="tabData">@Model.AttemptsDayOne (@Model.AttemptDayOneRate %)</td>
-                <td class="tabData">@Model.Attempts (@Model.AttemptRate %)</td>
-            </tr>
-            <tr class="odd">
-                <td class="tabData">@localizer["Successes"]</td>
-                <td class="tabData">@Model.SuccessesDayOne (@Model.SuccessDayOneRate %)</td>
-                <td class="tabData">@Model.Successes (@Model.SuccessRate %)</td>
-            </tr>
-            <tr class="even">
-                <td class="tabData">@localizer["TotalScore"]</td>
-                <td class="tabData">@Model.TotalPointsDayOne</td>
-                <td class="tabData">@Model.TotalPoints</td>
-            </tr>
-            <tr class="odd">
-                <td class="tabData">@localizer["AveragePoints"]</td>
-                <td class="tabData">@Model.PointsPerAttemptDayOne</td>
-                <td class="tabData">@Model.PointsPerAttempt</td>
-            </tr>
-            <tr class="even">
-                <td class="tabData">@localizer["BestScore"]</td>
-                <td class="tabData">@Model.BestPointsDayOne</td>
-                <td class="tabData">@Model.BestPoints</td>
-            </tr>
-            <tr class="odd">
-                <td class="tabData">@localizer["AverageTime"]</td>
-                <td class="tabData">@Model.AverageTimeDayOne</td>
-                <td class="tabData">@Model.AverageTime</td>
-            </tr>
-        </tbody>
-    </table>
-</fieldset>
-
-<h3>@localizer["StatsByDay"]</h3>
-<table class="mediumTopMargin">
-    <thead>
-        <tr>
-            <th class="tabDataHead">@localizer["DateHeader"]</th>
-            <th class="tabDataHead">@localizer["AnswerHeader"]</th>
-            <th class="tabDataHead">@localizer["AttemptHeader"] *</th>
-            <th class="tabDataHead">@localizer["SuccessHeader"] *</th>
-            <th class="tabDataHead">@localizer["PointsHeader"]</th>
-            <th class="tabDataHead">@localizer["PointsRankHeader"]</th>
-            <th class="tabDataHead">@localizer["TimeHeader"]</th>
-            <th class="tabDataHead">@localizer["TimeRankHeader"]</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var i = 0;
-        }
-        @foreach (var stat in Model.Stats)
+    <div class="form-card">
+        <h3>@localizer["BadgesHead"] &mdash; @localizer["BadgeYouOwn"]</h3>
+        @if (Model.Badges.Count == 0)
         {
-            var attemptTdClass = stat.AttemptDayOne == true ? "tabDataBold" : "tabData";
-            var successTdClass = stat.SuccessDayOne == true ? "tabDataBold" : "tabData";
-            var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
-            <tr class="@trClass">
-                <td class="tabData"><a href="/?day=@stat.DaysBefore">@stat.Date.ToNaString()</a></td>
-                <td class="tabData">@stat.Answer</td>
-                <td class="@attemptTdClass">@stat.Attempt.ToYesNo()</td>
-                <td class="@successTdClass">@stat.Success.ToYesNo()</td>
-                <td class="tabData">@stat.Points.ToNaString()</td>
-                <td class="tabData">@stat.PointsPosition.ToNaString()</td>
-                <td class="tabData">@stat.Time.ToNaString()</td>
-                <td class="tabData">@stat.TimePosition.ToNaString()</td>
-            </tr>
-            i++;
+            <p>@localizer["NoBadge"]</p>
         }
-    </tbody>
-</table>
-<div>@localizer["BoldFirstDay"]</div>
-
-<h3>@localizer["BadgesHead"]</h3>
-<fieldset class="smallTopMargin">
-    <legend>@localizer["BadgeYouOwn"]</legend>
-    @if (Model.Badges.Count == 0)
-    {
-        <div>@localizer["NoBadge"]</div>
-    }
-    else
-    {
-        foreach (var badge in Model.Badges)
+        else
         {
-            var color = !badge.Hidden ? "transparent" : "gold";
-            <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; border-color: black; padding: 5px; margin: 5px; border-radius: 5%; background-color: @color">
-                <div class="greentext" style="text-align:center; font-size: large">@badge.Name</div>
-                <div style="text-align:center">@badge.Description</div>
-                @if (!badge.Hidden)
+            <div class="badges-grid">
+                @foreach (var badge in Model.Badges)
                 {
-                    <div style="text-align:center">@localizer["GotThe"] @badge.GetDate.ToNaString()</div>
-                }
-                @if (Model.IsHimself)
-                {
-                    if (badge.Users == 1)
-                    {
-                        <div style="text-align:center; font-weight: bold">@localizer["OnlyOne"]</div>
-                    }
-                    else
-                    {
-                        var v = badge.Users - 1;
-                        <div style="text-align:center"><span class="redtext">@v</span> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</div>
-                    }
-                }
-                else
-                {
-                    if (badge.Users == 1)
-                    {
-                        <div style="text-align:center; font-weight: bold">@localizer["OnlyOneNotMe"]</div>
-                    }
-                    else
-                    {
-                        <div style="text-align:center"><span class="redtext">@badge.Users</span> @localizer["OtherUsersNotMe"]</div>
-                    }
+                    <div class="badge-card @(badge.Hidden ? "secret" : "")">
+                        <div class="badge-head">
+                            <svg class="badge-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6" />
+                                <path d="M9 14.5L7.5 21L12 18.5L16.5 21L15 14.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                                <path d="M12 6.2L12.9 8.1L15 8.4L13.5 9.8L13.9 11.9L12 10.9L10.1 11.9L10.5 9.8L9 8.4L11.1 8.1L12 6.2Z" fill="currentColor" />
+                            </svg>
+                            <div class="badge-name">@badge.Name</div>
+                            @if (badge.Hidden)
+                            {
+                                <span class="badge-seal">@localizer["BadgeSecret"]</span>
+                            }
+                        </div>
+                        <details class="badge-desc">
+                            <summary>@localizer["BadgeDetails"]</summary>
+                            <p>@badge.Description</p>
+                        </details>
+                        <div class="badge-foot">
+                            @if (badge.Hidden)
+                            {
+                                <span class="badge-date secret">@localizer["BadgeSecret"]</span>
+                            }
+                            else
+                            {
+                                <span class="badge-date">@localizer["GotThe"] @badge.GetDate.ToNaString()</span>
+                            }
+                            @if (Model.IsHimself)
+                            {
+                                if (badge.Users == 1)
+                                {
+                                    <span class="badge-holders solo">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.6-.4L12 2z" /></svg>
+                                        @localizer["OnlyOne"]
+                                    </span>
+                                }
+                                else
+                                {
+                                    var v = badge.Users - 1;
+                                    <span class="badge-holders"><b>@v</b> @localizer[v == 1 ? "OtherUser" : "OtherUsers"]</span>
+                                }
+                            }
+                            else
+                            {
+                                if (badge.Users == 1)
+                                {
+                                    <span class="badge-holders solo">
+                                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.6-.4L12 2z" /></svg>
+                                        @localizer["OnlyOneNotMe"]
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge-holders"><b>@badge.Users</b> @localizer["OtherUsersNotMe"]</span>
+                                }
+                            }
+                        </div>
+                    </div>
                 }
             </div>
         }
-        <div style="clear: both" />
-    }
-</fieldset>
+    </div>
 
-<fieldset class="smallTopMargin">
-    <legend>@localizer["BadgeYouDontOwn"]</legend>
-    @if (Model.MissingBadges.Count == 0)
-    {
-        <div>@localizer["EveryBadge"]</div>
-    }
-    else
-    {
-        foreach (var badge in Model.MissingBadges)
+    <div class="form-card">
+        <h3>@localizer["BadgesHead"] &mdash; @localizer["BadgeYouDontOwn"]</h3>
+        @if (Model.MissingBadges.Count == 0)
         {
-            <div class="smallTopMargin" style="float: left; width: 350px; min-height: 120px; border: solid 1px; padding: 5px; margin: 5px; border-radius: 5%;">
-                <div class="redtext" style="text-align:center; font-size: large">@badge.Name</div>
-                <div style="text-align:center">@badge.Description</div>
-                @if (badge.Users == 0)
+            <p>@localizer["EveryBadge"]</p>
+        }
+        else
+        {
+            <div class="badges-grid">
+                @foreach (var badge in Model.MissingBadges)
                 {
-                    <div style="text-align:center; font-weight: bold"><span class="redtext">@localizer["Nobody"]</span> @localizer["NoUserBadges"]</div>
-                }
-                else
-                {
-                    <div style="text-align:center; font-weight: bold"><span class="redtext">@badge.Users</span> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</div>
+                    <div class="badge-card missing">
+                        <div class="badge-head">
+                            <svg class="badge-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6" />
+                                <path d="M9 14.5L7.5 21L12 18.5L16.5 21L15 14.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                                <path d="M12 6.2L12.9 8.1L15 8.4L13.5 9.8L13.9 11.9L12 10.9L10.1 11.9L10.5 9.8L9 8.4L11.1 8.1L12 6.2Z" fill="currentColor" />
+                            </svg>
+                            <div class="badge-name">@badge.Name</div>
+                        </div>
+                        <details class="badge-desc">
+                            <summary>@localizer["BadgeDetails"]</summary>
+                            <p>@badge.Description</p>
+                        </details>
+                        <div class="badge-foot">
+                            @if (badge.Users == 0)
+                            {
+                                <span class="badge-holders"><b>@localizer["Nobody"]</b> @localizer["NoUserBadges"]</span>
+                            }
+                            else
+                            {
+                                <span class="badge-holders"><b>@badge.Users</b> @localizer[badge.Users == 1 ? "UserBadges" : "UsersBadges"]</span>
+                            }
+                        </div>
+                    </div>
                 }
             </div>
         }
-        <div style="clear: both" />
-    }
-</fieldset>
+    </div>
+</div>

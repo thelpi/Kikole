@@ -126,6 +126,21 @@
   <data name="AdminActions" xml:space="preserve">
     <value>Administrative actions</value>
   </data>
+  <data name="CheckSubmittedPlayers" xml:space="preserve">
+    <value>Check submitted players</value>
+  </data>
+  <data name="ViewDiscussions" xml:space="preserve">
+    <value>View discussions</value>
+  </data>
+  <data name="MessageDateEndLabel" xml:space="preserve">
+    <value>Shown until</value>
+  </data>
+  <data name="MessageDateStartLabel" xml:space="preserve">
+    <value>Shown from</value>
+  </data>
+  <data name="MessageLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
   <data name="ReassignPlayers" xml:space="preserve">
     <value>Reassign players' dates</value>
   </data>

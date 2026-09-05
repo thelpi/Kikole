@@ -1,12 +1,11 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum Continents
 {
-    public enum Continents
-    {
-        Europe = 1,
-        Africa,
-        Asia,
-        NorthAmerica,
-        SouthAmerica,
-        Oceania
-    }
+    Europe = 1,
+    Africa,
+    Asia,
+    NorthAmerica,
+    SouthAmerica,
+    Oceania
 }

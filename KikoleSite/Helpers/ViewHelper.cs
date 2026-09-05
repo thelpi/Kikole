@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Helpers;
@@ -13,6 +14,24 @@ public static class ViewHelper
     public const string DayPatternEn = "MM-dd";
     public const string DayPatternFr = "dd/MM";
     public const string Iso8859Code = "ISO-8859-8";
+
+    private static readonly string[] ImageExtensions =
+        [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+
+    // certains indices sont d'anciennes captures d'ecran hebergees en ligne (ex.
+    // https://i.imgur.com/YwR1hdd.png) plutot que du texte : on les detecte pour les
+    // rendre en <img> au lieu d'afficher l'URL brute telle quelle
+    public static bool IsImageUrl(this string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)
+            || !Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return false;
+        }
+
+        return ImageExtensions.Any(ext => uri.AbsolutePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
 
     public static string ToNaString(this object? data)
     {
@@ -108,6 +127,24 @@ public static class ViewHelper
             LeaderSorts.TotalPoints => IsFrench() ? "Points" : "Points",
             LeaderSorts.SuccessCountOverall => IsFrench() ? "Nombre de succès (inc. hors-délai)" : "Success count (inc. out of time)",
             LeaderSorts.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+            _ => throw new NotImplementedException(),
+        };
+    }
+
+    public static string GetLabel(this PlayerSorts sort)
+    {
+        return sort switch
+        {
+            PlayerSorts.PublicationDate => IsFrench() ? "Date" : "Date",
+            PlayerSorts.Name => IsFrench() ? "Nom" : "Name",
+            PlayerSorts.CreatorLogin => IsFrench() ? "Créateur" : "Creator",
+            PlayerSorts.PointsSameDay => IsFrench() ? "Moyenne de points (jour même)" : "Average points (same day)",
+            PlayerSorts.PointsOverall => IsFrench() ? "Moyenne de points (total)" : "Average points (total)",
+            PlayerSorts.AttempsCountSameDay => IsFrench() ? "Joueurs ayant tentés (jour même)" : "Players who tried (same day)",
+            PlayerSorts.AttempsCountOverall => IsFrench() ? "Joueurs ayant tentés (total)" : "Players who tried (total)",
+            PlayerSorts.LeadersCountSameDay => IsFrench() ? "Joueurs ayant trouvés (jour même)" : "Players who found (same day)",
+            PlayerSorts.LeadersCountOverall => IsFrench() ? "Joueurs ayant trouvés (total)" : "Players who found (total)",
+            PlayerSorts.BestTime => IsFrench() ? "Meilleur temps" : "Best time",
             _ => throw new NotImplementedException(),
         };
     }

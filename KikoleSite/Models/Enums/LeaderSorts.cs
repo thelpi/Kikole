@@ -1,11 +1,10 @@
-﻿namespace KikoleSite.Models.Enums
+﻿namespace KikoleSite.Models.Enums;
+
+public enum LeaderSorts
 {
-    public enum LeaderSorts
-    {
-        SuccessCount,
-        BestTime,
-        TotalPoints,
-        SuccessCountOverall,
-        TotalPointsOverall
-    }
+    SuccessCount,
+    BestTime,
+    TotalPoints,
+    SuccessCountOverall,
+    TotalPointsOverall
 }

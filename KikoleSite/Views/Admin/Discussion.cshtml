@@ -1,0 +1,35 @@
+@using KikoleSite.Helpers
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model AdminDiscussionModel
+
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="banner error">@Model.ErrorMessage</div>
+    }
+    <div class="form-card">
+        <h3>@Model.UserLogin</h3>
+        @{
+            var threadModel = new DiscussionThreadModel
+            {
+                Messages = Model.Messages,
+                ViewerIsAdmin = true,
+                SelfLabel = localizer["FromYou"].Value,
+                OtherLabel = Model.UserLogin,
+                NoMessagesText = localizer["NoMessagesYet"].Value
+            };
+        }
+        @await Html.PartialAsync("Partial/DiscussionThread", threadModel)
+        <form method="post">
+            @Html.HiddenFor(m => m.DiscussionId)
+            <div class="form-field">
+                <label>@localizer["YourReply"]</label>
+                @Html.TextAreaFor(m => m.NewMessage, new { @class = "blank" })
+            </div>
+            <div class="actions">
+                <button type="submit">@localizer["ToSend"]</button>
+            </div>
+        </form>
+    </div>
+    <div><a asp-controller="Admin" asp-action="Discussions">@localizer["BackToList"]</a></div>
+</div>

@@ -20,7 +20,7 @@ namespace KikoleSite.Controllers;
 public class AdminController : KikoleBaseController
 {
     private readonly IStringLocalizer<AdminController> _localizer;
-    private readonly IDiscussionRepository _discussionRepository;
+    private readonly IDiscussionService _discussionService;
     private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
 
@@ -33,7 +33,7 @@ public class AdminController : KikoleBaseController
         IPlayerService playerService,
         IBadgeService badgeService,
         ILeaderService leaderService,
-        IDiscussionRepository discussionRepository,
+        IDiscussionService discussionService,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             internationalService,
@@ -44,7 +44,7 @@ public class AdminController : KikoleBaseController
             httpContextAccessor)
     {
         _localizer = localizer;
-        _discussionRepository = discussionRepository;
+        _discussionService = discussionService;
         _leaderService = leaderService;
         _messageRepository = messageRepository;
     }
@@ -53,53 +53,111 @@ public class AdminController : KikoleBaseController
     [Authorization(UserTypes.Administrator)]
     public async Task<IActionResult> Actions()
     {
+        return await RenderActionsAsync(new AdminModel());
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> RecomputeBadges()
+    {
+        await _badgeService
+            .ResetBadgesAsync(ViewHelper.GetLanguage());
+
+        return await RenderActionsAsync(new AdminModel());
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> RecomputeLeaders()
+    {
+        await _leaderService
+            .ComputeMissingLeadersAsync(await _internationalService.GetCountryContinentsAsync());
+
+        return await RenderActionsAsync(new AdminModel());
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> ReassignPlayers()
+    {
+        await _playerService
+            .ReassignPlayersOfTheDayAsync();
+
+        return await RenderActionsAsync(new AdminModel());
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> InsertMessage(AdminModel model)
+    {
+        await _messageRepository
+            .InsertMessageAsync(new Models.Dtos.MessageDto
+            {
+                DisplayTo = model.MessageDateEnd,
+                DisplayFrom = model.MessageDateStart,
+                CreationDate = _clock.Now,
+                Message = model.Message ?? string.Empty
+            });
+
+        return await RenderActionsAsync(new AdminModel { ActionFeedback = "Annonce créée" });
+    }
+
+    /// <summary>
+    /// Rend la vue Actions avec ses valeurs par defaut (dates du formulaire de message) :
+    /// appele par le GET et par chacune des actions POST ci-dessus.
+    /// </summary>
+    private Task<IActionResult> RenderActionsAsync(AdminModel model)
+    {
         // default : from now without ms to tomorrow 23:59:59
-        return View(new AdminModel
+        model.MessageDateStart = _clock.NowSeconds;
+        model.MessageDateEnd = _clock.TomorrowEnd;
+        return Task.FromResult<IActionResult>(View("Actions", model));
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Discussions()
+    {
+        var discussions = await _discussionService.GetAllDiscussionsAsync();
+        return View(new AdminDiscussionsModel { Discussions = discussions });
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Discussion(ulong discussionId)
+    {
+        var summary = (await _discussionService.GetAllDiscussionsAsync())
+            .FirstOrDefault(d => d.DiscussionId == discussionId);
+
+        if (summary == null)
+            return RedirectToAction("Discussions", "Admin");
+
+        var messages = await _discussionService.GetThreadForAdminAsync(discussionId);
+
+        return View(new AdminDiscussionModel
         {
-            MessageDateStart = _clock.NowSeconds,
-            MessageDateEnd = _clock.TomorrowEnd,
-            Discussions = await _discussionRepository
-                .GetDiscussionsAsync()
+            DiscussionId = discussionId,
+            UserLogin = summary.UserLogin,
+            Messages = messages
         });
     }
 
     [HttpPost]
     [Authorization(UserTypes.Administrator)]
-    public async Task<IActionResult> Actions(AdminModel model)
+    public async Task<IActionResult> Discussion(AdminDiscussionModel model)
     {
-        var action = GetSubmitAction();
+        if (string.IsNullOrWhiteSpace(model.NewMessage))
+            model.ErrorMessage = _localizer["InvalidMessage"];
+        else
+            await _discussionService.PostAdminReplyAsync(model.DiscussionId, model.NewMessage);
 
-        switch (action)
-        {
-            case "recomputebadges":
-                await _badgeService
-                    .ResetBadgesAsync(ViewHelper.GetLanguage());
-                break;
-            case "recomputeleaders":
-                await _leaderService
-                    .ComputeMissingLeadersAsync(await _internationalService.GetCountryContinentsAsync());
-                break;
-            case "reassignplayers":
-                await _playerService
-                    .ReassignPlayersOfTheDayAsync();
-                break;
-            case "insertmessage":
-                if (model == null)
-                    return RedirectToAction("ErrorIndex", "Home");
+        var summary = (await _discussionService.GetAllDiscussionsAsync())
+            .FirstOrDefault(d => d.DiscussionId == model.DiscussionId);
 
-                await _messageRepository
-                    .InsertMessageAsync(new Models.Dtos.MessageDto
-                    {
-                        DisplayTo = model.MessageDateEnd,
-                        DisplayFrom = model.MessageDateStart,
-                        CreationDate = _clock.Now,
-                        Message = model.Message ?? string.Empty
-                    });
-
-                model.Message = null;
-                model.ActionFeedback = "Annonce créée";
-                break;
-        }
+        if (summary != null)
+            model.UserLogin = summary.UserLogin;
+        model.Messages = await _discussionService.GetThreadForAdminAsync(model.DiscussionId);
+        model.NewMessage = null;
 
         return View(model);
     }
@@ -120,73 +178,97 @@ public class AdminController : KikoleBaseController
 
     [HttpPost]
     [Authorization(UserTypes.Administrator)]
-    public async Task<IActionResult> PlayerSubmission(PlayerSubmissionsModel model)
+    public async Task<IActionResult> AcceptPlayer(PlayerSubmissionsModel model)
     {
-        if (model == null)
-            return RedirectToAction("PlayerSubmission", "Admin");
+        return await RespondToSubmissionAsync(model, isAccepted: true);
+    }
 
-        model.Players = await GetPlayerSubmissionsList();
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> RefusePlayer(PlayerSubmissionsModel model)
+    {
+        return await RespondToSubmissionAsync(model, isAccepted: false);
+    }
 
-        if (model.Players.Count == 0)
-            return RedirectToAction("PlayerSubmission", "Admin");
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> ChoosePlayer(PlayerSubmissionsModel model)
+    {
+        var redirect = await EnsurePendingSubmissionsAsync(model);
+        if (redirect != null)
+            return redirect;
 
-        var action = GetSubmitAction();
-
-        if (action == "accepted" || action == "refusal")
+        if (model.SelectedPlayer == null)
         {
-            var request = new PlayerSubmissionValidationRequest
-            {
-                ClueEditLanguages = new Dictionary<Languages, string?>
-                {
-                    { Languages.fr, model.ClueOverwriteFr }
-                },
-                ClueEditEn = model.ClueOverwriteEn,
-                EasyClueEditLanguages = new Dictionary<Languages, string?>
-                {
-                    { Languages.fr, model.EasyClueOverwriteFr }
-                },
-                EasyClueEditEn = model.EasyClueOverwriteEn,
-                IsAccepted = action == "accepted",
-                PlayerId = model.SelectedId,
-                RefusalReason = model.RefusalReason
-            };
+            model.ErrorMessage = _localizer["InvalidSelectedPlayer"];
+            model.SelectedId = 0;
+        }
 
-            var validityCheck = request.IsValid(_localizer);
-            if (!string.IsNullOrWhiteSpace(validityCheck))
-                model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityCheck);
+        return View("PlayerSubmission", model);
+    }
+
+    private async Task<IActionResult> RespondToSubmissionAsync(PlayerSubmissionsModel model, bool isAccepted)
+    {
+        var redirect = await EnsurePendingSubmissionsAsync(model);
+        if (redirect != null)
+            return redirect;
+
+        var request = new PlayerSubmissionValidationRequest
+        {
+            ClueEditLanguages = new Dictionary<Languages, string?>
+            {
+                { Languages.fr, model.ClueOverwriteFr }
+            },
+            ClueEditEn = model.ClueOverwriteEn,
+            EasyClueEditLanguages = new Dictionary<Languages, string?>
+            {
+                { Languages.fr, model.EasyClueOverwriteFr }
+            },
+            EasyClueEditEn = model.EasyClueOverwriteEn,
+            IsAccepted = isAccepted,
+            PlayerId = model.SelectedId,
+            RefusalReason = model.RefusalReason
+        };
+
+        var validityCheck = request.IsValid(_localizer);
+        if (!string.IsNullOrWhiteSpace(validityCheck))
+            model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityCheck);
+        else
+        {
+            var (result, userId, badges) = await _playerService
+                .ValidatePlayerSubmissionAsync(request);
+
+            if (result == PlayerSubmissionErrors.PlayerNotFound)
+                model.ErrorMessage = _localizer["PlayerDoesNotExist"];
+            else if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
+                model.ErrorMessage = _localizer["RejectAndPublicationDateCombined"];
             else
             {
-                var (result, userId, badges) = await _playerService
-                    .ValidatePlayerSubmissionAsync(request);
-
-                if (result == PlayerSubmissionErrors.PlayerNotFound)
-                    model.ErrorMessage = _localizer["PlayerDoesNotExist"];
-                else if (result == PlayerSubmissionErrors.PlayerAlreadyAcceptedOrRefused)
-                    model.ErrorMessage = _localizer["RejectAndPublicationDateCombined"];
-                else
+                foreach (var badge in badges)
                 {
-                    foreach (var badge in badges)
-                    {
-                        await _badgeService
-                            .AddBadgeToUserAsync(badge, userId);
-                    }
-
-                    return RedirectToAction("PlayerSubmission", "Admin");
+                    await _badgeService
+                        .AddBadgeToUserAsync(badge, userId);
                 }
-            }
-        }
-        else if (action == "pchoice")
-        {
-            if (model.SelectedPlayer == null)
-            {
-                model.ErrorMessage = _localizer["InvalidSelectedPlayer"];
-                model.SelectedId = 0;
-            }
-        }
-        else
-            return RedirectToAction("PlayerSubmission", "Admin");
 
-        return View(model);
+                return RedirectToAction("PlayerSubmission", "Admin");
+            }
+        }
+
+        return View("PlayerSubmission", model);
+    }
+
+    /// <summary>
+    /// Recharge la liste des soumissions en attente sur le modele (necessaire a
+    /// <see cref="PlayerSubmissionsModel.SelectedPlayer"/>) ; redirige vers la liste s'il
+    /// n'y en a plus, comme au chargement initial.
+    /// </summary>
+    private async Task<IActionResult?> EnsurePendingSubmissionsAsync(PlayerSubmissionsModel model)
+    {
+        model.Players = await GetPlayerSubmissionsList();
+
+        return model.Players.Count == 0
+            ? RedirectToAction("PlayerSubmission", "Admin")
+            : null;
     }
 
     [HttpGet]

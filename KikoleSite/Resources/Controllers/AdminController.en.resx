@@ -198,6 +198,9 @@
   <data name="InvalidPublicationDate" xml:space="preserve">
     <value>Invalid publication date</value>
   </data>
+  <data name="InvalidMessage" xml:space="preserve">
+    <value>The message is empty.</value>
+  </data>
   <data name="InvalidQOrA" xml:space="preserve">
     <value>Invalid question or answer</value>
   </data>
