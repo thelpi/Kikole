@@ -174,7 +174,8 @@ public class AccountController : KikoleBaseController
             if (UserId == 0)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            if (string.IsNullOrWhiteSpace(model.RecoveryQCreate)
+            if (string.IsNullOrWhiteSpace(model.PasswordSubmission)
+                || string.IsNullOrWhiteSpace(model.RecoveryQCreate)
                 || string.IsNullOrWhiteSpace(model.RecoveryACreate))
                 model.Error = _localizer["InvalidForm"];
             else
@@ -183,14 +184,21 @@ public class AccountController : KikoleBaseController
                 if (user == null)
                     return RedirectToAction("ErrorIndex", "Home");
 
-                user.PasswordResetQuestion = model.RecoveryQCreate;
-                user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, model.RecoveryACreate);
+                if (!await _userManager.CheckPasswordAsync(user, model.PasswordSubmission))
+                {
+                    model.Error = _localizer["InvalidPassword"];
+                }
+                else
+                {
+                    user.PasswordResetQuestion = model.RecoveryQCreate;
+                    user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, model.RecoveryACreate);
 
-                await _userManager.UpdateAsync(user);
+                    await _userManager.UpdateAsync(user);
 
-                model.SuccessInfo = _localizer["QandAUpdated"];
-                model.IsAuthenticated = true;
-                model.Login = UserLogin;
+                    model.SuccessInfo = _localizer["QandAUpdated"];
+                    model.IsAuthenticated = true;
+                    model.Login = UserLogin;
+                }
             }
         }
         else if (submitFrom == "create")

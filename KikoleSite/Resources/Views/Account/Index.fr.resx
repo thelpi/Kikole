@@ -153,6 +153,12 @@
   <data name="NewPwd" xml:space="preserve">
     <value>Nouveau mot de passe :</value>
   </data>
+  <data name="NewRecAnswer" xml:space="preserve">
+    <value>Nouvelle réponse de récupération :</value>
+  </data>
+  <data name="NewRecQuestion" xml:space="preserve">
+    <value>Nouvelle question de récupération :</value>
+  </data>
   <data name="RecAnswer" xml:space="preserve">
     <value>Réponse de récupération :</value>
   </data>

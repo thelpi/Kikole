@@ -11,7 +11,7 @@
         </div>
         <div class="form-field">
             <label>@localizer["Date"]</label>
-            @Html.EditorFor(m => m.LeaderboardDay)
+            <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" />
         </div>
         <div class="table-wrap">
             <table id="dailyLeaderboardTable">
@@ -84,13 +84,15 @@
             <label>@localizer["SortType"]</label>
             @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
         </div>
-        <div class="form-field">
-            <label>@localizer["FromDate"]</label>
-            @Html.EditorFor(m => m.MinimalDate)
-        </div>
-        <div class="form-field">
-            <label>@localizer["ToDate"]</label>
-            @Html.EditorFor(m => m.MaximalDate)
+        <div class="form-row">
+            <div class="form-field">
+                <label>@localizer["FromDate"]</label>
+                <input type="text" id="MinimalDate" name="MinimalDate" class="date-field" readonly value="@Model.MinimalDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="form-field">
+                <label>@localizer["ToDate"]</label>
+                <input type="text" id="MaximalDate" name="MaximalDate" class="date-field" readonly value="@Model.MaximalDate.ToString("yyyy-MM-dd")" />
+            </div>
         </div>
         <div class="table-wrap">
             <table id="globalLeaderboardTable">

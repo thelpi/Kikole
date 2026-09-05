@@ -578,28 +578,30 @@ function daysBetween(startDate, endDate) {
     }
 }
 
-/* day navigation datepicker */
+/* jQuery UI datepicker : regionalisation partagee FR/EN */
+var kikoleDatepickerRegional = {
+    fr: {
+        closeText: "Fermer",
+        prevText: "Préc.",
+        nextText: "Suiv.",
+        currentText: "Aujourd'hui",
+        monthNames: ["janvier", "février", "mars", "avril", "mai", "juin",
+            "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+        monthNamesShort: ["janv.", "févr.", "mars", "avr.", "mai", "juin",
+            "juil.", "août", "sept.", "oct.", "nov.", "déc."],
+        dayNamesMin: ["D", "L", "M", "M", "J", "V", "S"],
+        weekHeader: "Sem.",
+        dateFormat: "dd/mm/yy",
+        firstDay: 1
+    },
+    en: {
+        dateFormat: "mm/dd/yy",
+        firstDay: 0
+    }
+};
+
+/* day navigation datepicker (page d'accueil) */
 $(function () {
-    var regionalByLang = {
-        fr: {
-            closeText: "Fermer",
-            prevText: "Préc.",
-            nextText: "Suiv.",
-            currentText: "Aujourd'hui",
-            monthNames: ["janvier", "février", "mars", "avril", "mai", "juin",
-                "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
-            monthNamesShort: ["janv.", "févr.", "mars", "avr.", "mai", "juin",
-                "juil.", "août", "sept.", "oct.", "nov.", "déc."],
-            dayNamesMin: ["D", "L", "M", "M", "J", "V", "S"],
-            weekHeader: "Sem.",
-            dateFormat: "dd/mm/yy",
-            firstDay: 1
-        },
-        en: {
-            dateFormat: "mm/dd/yy",
-            firstDay: 0
-        }
-    };
     var lang = document.body.getAttribute("data-lang") === "en" ? "en" : "fr";
     $("#dayDatepicker").datepicker($.extend({
         changeMonth: true,
@@ -608,12 +610,30 @@ $(function () {
             var picked = $(this).datepicker("getDate");
             window.location.href = "/?day=" + daysBetween(picked, Date.now());
         }
-    }, regionalByLang[lang]));
+    }, kikoleDatepickerRegional[lang]));
     var initialDate = $("#dayDatepicker").data("date");
     if (initialDate) {
         var parts = initialDate.split("-");
         $("#dayDatepicker").datepicker("setDate", new Date(parts[0], parts[1] - 1, parts[2]));
     }
+});
+
+/* datepickers du classement (Leaderboard/Index) : meme widget, mais format ISO
+   (yyyy-mm-dd) impose quelle que soit la langue - c'est la valeur brute lue par
+   initializeLeaderboards pour les appels AJAX, seuls les libelles du calendrier
+   (mois, "aujourd'hui"...) restent localises. jQuery UI ne declenche pas l'evenement
+   "change" natif a la selection, d'ou le trigger manuel pour reutiliser les handlers
+   deja poses par initializeLeaderboards. */
+$(function () {
+    var lang = document.body.getAttribute("data-lang") === "en" ? "en" : "fr";
+    $("#LeaderboardDay, #MinimalDate, #MaximalDate").datepicker($.extend({}, kikoleDatepickerRegional[lang], {
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        onSelect: function () {
+            $(this).trigger("change");
+        }
+    }));
 });
 
 Date.prototype.yyyymmdd = function () {

@@ -356,20 +356,25 @@ Branche de travail : `remaster-v2`.
         (bouton Give up) — sort complètement de l'habillage papier/encre. À remplacer par
         une vraie modale stylée (nécessite un peu de JS : `confirm()` est bloquant et ne se
         personnalise pas côté CSS).
-  - [ ] **Affichage "Le joueur du xxxx était xxxx." très bizarre (police, taille).**
-        `Views/Home/Index.cshtml`, cas "jour passé raté" : c'est un `<h1>` brut avec un
-        `<span class="redtext">` inline (resx `PlayerWas`), sans la police Bebas Neue /
-        traitement du reste du dossier — un oubli du passage en `.kikole-board`, à
-        harmoniser avec le reste du `.dossier-head`.
-  - [ ] **Datepicker du classement différent de celui de la page d'accueil (style natif du
-        navigateur).** `Leaderboard/Index.cshtml` utilise toujours `<input type="date">`
-        natif (juste ré-habillé en CSS a minima), alors que `Views/Home/Index.cshtml` a le
-        vrai datepicker jQuery UI stylé. Choix assumé au moment du passage de style
-        "basique" du classement (le widget jQuery UI y est branché sur une navigation
-        `onchange` custom vers `/?day=N`, pas réutilisable tel quel pour déclencher les
-        rafraîchissements AJAX de `initializeLeaderboards`) — mais l'écart visuel se voit,
-        à reprendre en branchant `onSelect` sur les mêmes `onchange` que `site.js` attend
-        déjà (`SortType`, `MinimalDate`, `MaximalDate`, `DaySortType`, `LeaderboardDay`).
+  - [x] **Affichage "Le joueur du xxxx était xxxx." très bizarre (police, taille).**
+        `Views/Home/Index.cshtml`, cas "jour passé raté" (et son jumeau "PlayerIs", même
+        souci, cas où le créateur consulte son propre kikolé du jour) : `<h1>` brut sans
+        style, un oubli du passage en `.kikole-board`. Corrigé par une règle
+        `.kikole-board .dossier-head h1` (Bebas Neue, même traitement que le reste du
+        dossier) ; les deux `<h1>` n'ont plus que leur `<span>` de couleur inline. Vérifié
+        en direct sur un jour passé.
+  - [x] **Datepicker du classement différent de celui de la page d'accueil (style natif du
+        navigateur).** `Leaderboard/Index.cshtml` utilisait `<input type="date">` natif.
+        Corrigé : les 3 champs (`LeaderboardDay`, `MinimalDate`, `MaximalDate`) sont
+        maintenant de vrais champs texte `readonly` avec le même widget jQuery UI que la
+        page d'accueil (`kikoleDatepickerRegional`, hissé en variable partagée dans
+        `site.js` pour les deux usages). Format forcé en ISO (`yy-mm-dd`) quelle que soit la
+        langue — c'est la valeur brute lue par `initializeLeaderboards` pour les appels
+        AJAX, seuls les libellés du calendrier (mois, "Aujourd'hui"...) restent localisés.
+        jQuery UI ne déclenchant pas l'évènement `change` natif à la sélection, `onSelect`
+        déclenche `$(this).trigger("change")` pour réutiliser les handlers déjà posés par
+        `initializeLeaderboards`, sans toucher à cette fonction. Vérifié en direct :
+        sélection dans le calendrier stylé → tableau rafraîchi en AJAX, comme avant.
   - [ ] **Meilleur accès au palmarès depuis le classement.** Actuellement
         `Leaderboard/Index.cshtml` a une carte `.form-card` dédiée qui ne contient qu'un
         lien "Palmarès" — même gabarit que les cartes de contenu réel juste à côté, mais
@@ -383,9 +388,31 @@ Branche de travail : `remaster-v2`.
         c'est la mise en forme qui mériterait mieux qu'un gras + renvoi de légende — par
         exemple une puce/icône dans la cellule, ou une teinte de fond dédiée sur la ligne ou
         la cellule concernée, pour que ce soit lisible sans avoir à lire la légende.
-- [ ] **Formulaire "Changer la question et réponse de récupération" (page Compte) devrait
-      redemander le mot de passe actuel.** Actuellement on peut changer la question/réponse
-      de récupération sans se ré-authentifier, contrairement au changement de mot de passe.
+- [x] **Formulaire "Changer la question et réponse de récupération" (page Compte) devrait
+      redemander le mot de passe actuel.** Corrigé : nouveau champ mot de passe actuel sur
+      ce formulaire (réutilise `AccountModel.PasswordSubmission`, déjà partagé par les
+      formulaires Connexion/Changer le mot de passe), vérifié côté serveur via
+      `UserManager.CheckPasswordAsync` avant d'accepter la mise à jour (message d'erreur :
+      `InvalidPassword`, une clé resx de `AccountController` qui existait déjà mais n'était
+      utilisée nulle part). Pas de verrou anti-bruteforce ajouté ici (contrairement à la
+      réponse de récupération sur le formulaire mot de passe oublié) : ce formulaire exige
+      déjà une session authentifiée, donc un attaquant qui devine ce mot de passe a de toute
+      façon déjà accès au compte via la session volée — pas de surface d'attaque nouvelle.
+      Vérifié en direct : mauvais mot de passe → rejeté (`Mot de passe invalide`), bon mot
+      de passe → mise à jour acceptée.
+  - [ ] **Bug découvert en testant ci-dessus, plus large que ce formulaire :**
+        `AccountController.Index` (POST) ne renseigne `model.IsAuthenticated`/`model.Login`
+        que dans les branches de **succès** de chaque formulaire ; sur n'importe quelle
+        erreur de validation en étant connecté (mot de passe actuel incorrect, mots de passe
+        qui ne correspondent pas...), le bandeau d'erreur s'affiche bien mais la page bascule
+        sur le jeu de formulaires "non connecté" (Connexion/Créer un compte/Récupération) au
+        lieu de rester sur les 3 cartes "connecté" — confirmé aussi bien sur
+        `submit-changepassword` (préexistant, pas introduit par le point ci-dessus) que sur
+        `submit-resetqanda`. L'état de connexion réel n'est pas affecté (juste l'affichage) :
+        se déconnecter/reconnecter ou revenir sur `/Account` en GET suffit à voir la page
+        correcte. Piste de correctif simple : renseigner `model.IsAuthenticated`/`Login`
+        une seule fois en haut de l'action, avant le `switch`, plutôt que dans chaque branche
+        de succès.
 - [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
       cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
       étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,

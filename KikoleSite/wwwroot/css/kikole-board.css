@@ -253,7 +253,7 @@ body { padding-top: 0; }
 
 .kikole-board .day-nav a:hover { text-decoration: underline; }
 
-.kikole-board .day-nav .date-field {
+.kikole-board .date-field {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
   font-weight: 600;
@@ -263,14 +263,16 @@ body { padding-top: 0; }
   padding: 2px 2px 3px;
   background: transparent;
   color: var(--pitch-strong);
-  width: 78px;
+  width: 110px;
   cursor: pointer;
 }
 
-.kikole-board .day-nav .date-field:focus-visible {
+.kikole-board .date-field:focus-visible {
   outline: none;
   border-bottom: 1px solid var(--pitch);
 }
+
+.kikole-board .day-nav .date-field { width: 78px; }
 
 .kikole-board .scoreboard {
   background: var(--board-bg);
@@ -345,6 +347,14 @@ body { padding-top: 0; }
 .kikole-board .greentext { color: var(--pitch); }
 
 .kikole-board .form-field { margin-bottom: 14px; }
+
+.kikole-board .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.kikole-board .form-row .form-field { margin-bottom: 14px; }
 
 .kikole-board .form-field label {
   display: block;
@@ -428,6 +438,15 @@ body { padding-top: 0; }
 .kikole-board .dossier-head {
   padding: 22px 26px 18px;
   border-bottom: 1px dashed var(--paper-line);
+}
+
+.kikole-board .dossier-head h1 {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: normal;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  color: var(--pitch-strong);
+  margin: 0 0 4px;
 }
 
 .kikole-board .clue {
@@ -969,23 +988,6 @@ body { padding-top: 0; }
   font-size: 11px;
   color: var(--ink-soft);
   margin: -4px 0 12px;
-}
-
-.kikole-board input[type="date"] {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 12px;
-  font-weight: 600;
-  border: none;
-  border-bottom: 1px dashed var(--paper-line);
-  border-radius: 0;
-  padding: 3px 2px;
-  background: transparent;
-  color: var(--pitch-strong);
-}
-
-.kikole-board input[type="date"]:focus-visible {
-  outline: none;
-  border-bottom: 1px solid var(--pitch);
 }
 
 @media (max-width: 480px) {

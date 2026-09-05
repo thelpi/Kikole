@@ -153,6 +153,12 @@
   <data name="NewPwd" xml:space="preserve">
     <value>New password:</value>
   </data>
+  <data name="NewRecAnswer" xml:space="preserve">
+    <value>New recovery answer:</value>
+  </data>
+  <data name="NewRecQuestion" xml:space="preserve">
+    <value>New recovery question:</value>
+  </data>
   <data name="RecAnswer" xml:space="preserve">
     <value>Recovery answer:</value>
   </data>

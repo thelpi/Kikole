@@ -51,11 +51,15 @@
             <h3>@localizer["ChangeQAndA"]</h3>
             <form method="post" action="/Account">
                 <div class="form-field">
-                    <label>@localizer["RecQuestion"]</label>
+                    <label>@localizer["CurrentPwd"]</label>
+                    @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                </div>
+                <div class="form-field">
+                    <label>@localizer["NewRecQuestion"]</label>
                     @Html.TextBoxFor(m => m.RecoveryQCreate, new { @class = "blank" })
                 </div>
                 <div class="form-field">
-                    <label>@localizer["RecAnswer"]</label>
+                    <label>@localizer["NewRecAnswer"]</label>
                     @Html.PasswordFor(m => m.RecoveryACreate, new { @class = "blank" })
                 </div>
                 <div class="actions">

@@ -67,11 +67,11 @@
                 }
                 else if (Model.CurrentDay == 0)
                 {
-                    <h1 style="margin:0">@localizer["PlayerIs"] <span style="color:var(--stamp)">@Model.PlayerName</span></h1>
+                    <h1>@localizer["PlayerIs"] <span style="color:var(--stamp)">@Model.PlayerName</span></h1>
                 }
                 else
                 {
-                    <h1 style="margin:0">@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, Model.DateOfDay.ToNaString()))</h1>
+                    <h1>@Html.Raw(string.Format(localizer["PlayerWas"].Value, Model.PlayerName, Model.DateOfDay.ToNaString()))</h1>
                 }
                 @if (Model.IsAdmin)
                 {
