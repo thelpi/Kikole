@@ -1,5 +1,6 @@
 ﻿@using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject KikoleSite.IGameCalendar gameCalendar
 @model HomeModel
 <div class="kikole-board">
     @if (!string.IsNullOrWhiteSpace(Model.MessageToDisplay) && Model.IsErrorMessageForced)
@@ -29,24 +30,56 @@
             <div class="banner error">@Html.Raw(Model.Message)</div>
         }
 
-        var justFoundToday = Model.CurrentDay == 0 && !Model.IsCreator && !string.IsNullOrWhiteSpace(Model.PlayerName);
+        var scoreboardClass = Model.IsToday
+            ? (Model.IsFound ? " success" : "")
+            : (Model.IsFound ? " other-day found" : " other-day");
+        var scoreboardTitle = Model.IsFound && Model.FoundOnTime.HasValue
+            ? (Model.FoundOnTime.Value
+                ? localizer["FoundOnTime"].Value
+                : string.Format(localizer["FoundLate"].Value, Model.FoundDate?.ToNaString()))
+            : string.Empty;
         <div class="masthead">
             <div class="day-nav">
                 @if (!Model.NoPreviousDay)
                 {
-                    <a href="/?day=@Model.PreviousDay">@localizer["PreviousDay"]</a>
+                    <a class="day-nav-arrow" href="/?day=@Model.PreviousDay" title="@localizer["PreviousDay"]" aria-label="@localizer["PreviousDay"]">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+                    </a>
                 }
-                <input type="text" id="dayDatepicker" class="date-field" readonly data-date="@Model.DateOfDay.ToString("yyyy-MM-dd")">
-                @if (Model.CurrentDay > 0 || Model.IsAdmin)
+                else
                 {
-                    <a href="/?day=@Model.NextDay">@localizer["NextDay"]</a>
+                    <span class="day-nav-arrow disabled" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+                    </span>
+                }
+                <input type="text" id="dayDatepicker" class="date-field" readonly
+                       data-date="@Model.DateOfDay.ToString("yyyy-MM-dd")"
+                       data-min-date="@gameCalendar.FirstDate.ToString("yyyy-MM-dd")"
+                       data-max-date="@(Model.IsAdmin ? "" : Model.CurrentDate.ToString("yyyy-MM-dd"))">
+                @if (Model.HasNextDay)
+                {
+                    <a class="day-nav-arrow" href="/?day=@Model.NextDay" title="@localizer["NextDay"]" aria-label="@localizer["NextDay"]">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                    </a>
+                }
+                else
+                {
+                    <span class="day-nav-arrow disabled" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                    </span>
+                }
+                @if (!Model.IsToday)
+                {
+                    <a class="day-nav-arrow" href="/" title="@localizer["BackToToday"]" aria-label="@localizer["BackToToday"]">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l6 6-6 6" /><path d="M12 6l6 6-6 6" /></svg>
+                    </a>
                 }
                 @if (Model.IsAdmin && Model.CurrentDay < 0)
                 {
-                    <a href="/Admin/PlayerEdit?playerId=@Model.PlayerId">@localizer["GoToPlayerClues"]</a>
+                    <a class="small-link" href="/Admin/PlayerEdit?playerId=@Model.PlayerId">@localizer["GoToPlayerClues"]</a>
                 }
             </div>
-            <div class="scoreboard@(justFoundToday ? " success" : "")">
+            <div class="scoreboard@(scoreboardClass)" title="@scoreboardTitle">
                 <div class="label">@localizer["Points"]</div>
                 <div class="value">@Model.Points</div>
             </div>

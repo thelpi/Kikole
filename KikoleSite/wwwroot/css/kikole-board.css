@@ -263,38 +263,57 @@ body { padding-top: 0; }
 .kikole-board .day-nav {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   font-size: 12px;
 }
 
-.kikole-board .day-nav a {
+.kikole-board .day-nav-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 5px;
   color: var(--pitch-strong);
-  font-weight: 600;
-  text-decoration: none;
+  transition: background 0.15s ease;
 }
 
-.kikole-board .day-nav a:hover { text-decoration: underline; }
+.kikole-board .day-nav-arrow svg { width: 16px; height: 16px; }
+
+.kikole-board a.day-nav-arrow:hover { background: var(--pitch-soft); }
+
+.kikole-board .day-nav-arrow.disabled {
+  color: var(--ink-soft);
+  opacity: 0.35;
+  cursor: default;
+}
+
+.kikole-board .day-nav .small-link { margin-left: 4px; }
 
 .kikole-board .date-field {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
   font-weight: 600;
-  border: none;
-  border-bottom: 1px dashed var(--paper-line);
-  border-radius: 0;
-  padding: 2px 2px 3px;
-  background: transparent;
+  text-align: center;
+  border: 1px solid var(--paper-line);
+  border-radius: 5px;
+  padding: 5px 6px;
+  background: var(--paper-raised);
   color: var(--pitch-strong);
   width: 110px;
   cursor: pointer;
+  transition: border-color 0.15s ease;
 }
+
+.kikole-board .date-field:hover { border-color: var(--pitch-soft); }
 
 .kikole-board .date-field:focus-visible {
   outline: none;
-  border-bottom: 1px solid var(--pitch);
+  border-color: var(--pitch);
 }
 
-.kikole-board .day-nav .date-field { width: 78px; }
+.kikole-board .day-nav .date-field { width: 96px; }
 
 .kikole-board .scoreboard {
   background: var(--board-bg);
@@ -331,6 +350,23 @@ body { padding-top: 0; }
 }
 
 .kikole-board .scoreboard.success .value { color: #7fd99a; }
+
+/* jour consulte different d'aujourd'hui : le cadran reste exact (le score affiche est
+   deja celui du jour consulte, cf. CurrentDay), mais attenue pour signaler que ce n'est
+   pas le score du jour present - evite de le confondre avec un score "live". .found
+   garde une trace discrete (teinte verte, sans le halo de .success) plutot que de
+   perdre completement l'info "ce jour-la a ete trouve" en s'eloignant d'aujourd'hui. */
+.kikole-board .scoreboard.other-day {
+  border-color: color-mix(in srgb, var(--board-fg) 15%, transparent);
+  box-shadow: none;
+}
+
+.kikole-board .scoreboard.other-day .label,
+.kikole-board .scoreboard.other-day .value { opacity: 0.55; }
+
+.kikole-board .scoreboard.other-day .value { color: var(--board-fg); }
+
+.kikole-board .scoreboard.other-day.found .value { color: #7fd99a; }
 
 /* ---------------------------------------------------------- formulaires generiques
    (page Compte, presentation/regles) : reprennent .banner/.blank/.actions ci-dessous

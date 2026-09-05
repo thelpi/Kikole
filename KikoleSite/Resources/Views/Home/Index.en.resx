@@ -153,6 +153,15 @@
   <data name="NextDay" xml:space="preserve">
     <value>Next day</value>
   </data>
+  <data name="BackToToday" xml:space="preserve">
+    <value>Back to today</value>
+  </data>
+  <data name="FoundOnTime" xml:space="preserve">
+    <value>Found the same day!</value>
+  </data>
+  <data name="FoundLate" xml:space="preserve">
+    <value>Found on {0}</value>
+  </data>
   <data name="OneClubAtATime" xml:space="preserve">
     <value>one club at a time</value>
   </data>

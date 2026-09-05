@@ -1,8 +1,12 @@
 @using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject KikoleSite.IGameCalendar gameCalendar
+@inject KikoleSite.IClock clock
 @model LeaderboardModel
 @{
     bool IsYou(ulong userId) => userId != 0 && userId == Model.CurrentUserId;
+    var minDate = gameCalendar.FirstDate.ToString("yyyy-MM-dd");
+    var maxDate = clock.Today.ToString("yyyy-MM-dd");
 }
 
 <div class="kikole-board">
@@ -14,7 +18,7 @@
         </div>
         <div class="form-field">
             <label>@localizer["Date"]</label>
-            <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" />
+            <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
         </div>
         <div class="table-wrap">
             <table id="dailyLeaderboardTable">
@@ -104,11 +108,11 @@
         <div class="form-row">
             <div class="form-field">
                 <label>@localizer["FromDate"]</label>
-                <input type="text" id="MinimalDate" name="MinimalDate" class="date-field" readonly value="@Model.MinimalDate.ToString("yyyy-MM-dd")" />
+                <input type="text" id="MinimalDate" name="MinimalDate" class="date-field" readonly value="@Model.MinimalDate.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
             </div>
             <div class="form-field">
                 <label>@localizer["ToDate"]</label>
-                <input type="text" id="MaximalDate" name="MaximalDate" class="date-field" readonly value="@Model.MaximalDate.ToString("yyyy-MM-dd")" />
+                <input type="text" id="MaximalDate" name="MaximalDate" class="date-field" readonly value="@Model.MaximalDate.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
             </div>
         </div>
         <div class="table-wrap">

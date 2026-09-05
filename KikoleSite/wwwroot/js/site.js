@@ -651,21 +651,36 @@ var kikoleDatepickerRegional = {
     }
 };
 
-/* day navigation datepicker (page d'accueil) */
+/* day navigation datepicker (page d'accueil) : borne a la plage techniquement valide
+   (data-min-date/data-max-date, poses par Home/Index.cshtml) plutot que de compter sur
+   le serveur pour rattraper un jour hors plage apres coup - evite de proposer un jour
+   qui redirigera silencieusement vers aujourd'hui (avant HiddenDate) une fois selectionne. */
+var parseIsoDate = function (iso) {
+    var parts = iso.split("-");
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+};
+
 $(function () {
     var lang = document.body.getAttribute("data-lang") === "en" ? "en" : "fr";
-    $("#dayDatepicker").datepicker($.extend({
+    var $dayDatepicker = $("#dayDatepicker");
+    var options = $.extend({
         changeMonth: true,
         changeYear: true,
         onSelect: function () {
             var picked = $(this).datepicker("getDate");
             window.location.href = "/?day=" + daysBetween(picked, Date.now());
         }
-    }, kikoleDatepickerRegional[lang]));
-    var initialDate = $("#dayDatepicker").data("date");
+    }, kikoleDatepickerRegional[lang]);
+
+    var minDate = $dayDatepicker.data("minDate");
+    if (minDate) options.minDate = parseIsoDate(minDate);
+    var maxDate = $dayDatepicker.data("maxDate");
+    if (maxDate) options.maxDate = parseIsoDate(maxDate);
+
+    $dayDatepicker.datepicker(options);
+    var initialDate = $dayDatepicker.data("date");
     if (initialDate) {
-        var parts = initialDate.split("-");
-        $("#dayDatepicker").datepicker("setDate", new Date(parts[0], parts[1] - 1, parts[2]));
+        $dayDatepicker.datepicker("setDate", parseIsoDate(initialDate));
     }
 });
 
@@ -677,14 +692,22 @@ $(function () {
    deja poses par initializeLeaderboards. */
 $(function () {
     var lang = document.body.getAttribute("data-lang") === "en" ? "en" : "fr";
-    $("#LeaderboardDay, #MinimalDate, #MaximalDate").datepicker($.extend({}, kikoleDatepickerRegional[lang], {
+    var $leaderboardDatepickers = $("#LeaderboardDay, #MinimalDate, #MaximalDate");
+    var options = $.extend({}, kikoleDatepickerRegional[lang], {
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         changeYear: true,
         onSelect: function () {
             $(this).trigger("change");
         }
-    }));
+    });
+
+    var minDate = $leaderboardDatepickers.data("minDate");
+    if (minDate) options.minDate = parseIsoDate(minDate);
+    var maxDate = $leaderboardDatepickers.data("maxDate");
+    if (maxDate) options.maxDate = parseIsoDate(maxDate);
+
+    $leaderboardDatepickers.datepicker(options);
 });
 
 Date.prototype.yyyymmdd = function () {

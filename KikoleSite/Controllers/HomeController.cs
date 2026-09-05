@@ -373,6 +373,13 @@ public class HomeController : KikoleBaseController
 
                 foreach (var p in proposals)
                     model.SetPropertiesFromProposal(p, countries, continents, countryContinents, positions, clubs, easyClue);
+
+                var winningProposal = proposals.FirstOrDefault(p => p.IsWin);
+                if (winningProposal != null)
+                {
+                    model.FoundOnTime = winningProposal.Date.Date == proposalDate.Date;
+                    model.FoundDate = winningProposal.Date.Date;
+                }
             }
         }
 

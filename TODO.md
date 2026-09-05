@@ -551,6 +551,9 @@ Branche de travail : `remaster-v2`.
         déclenche `$(this).trigger("change")` pour réutiliser les handlers déjà posés par
         `initializeLeaderboards`, sans toucher à cette fonction. Vérifié en direct :
         sélection dans le calendrier stylé → tableau rafraîchi en AJAX, comme avant.
+        **Plage min/max ajoutée après coup** — voir l'item dédié plus bas (section
+        "datepicker verrouillé sur la plage jouable"), qui couvre ces 3 champs en plus de
+        celui de la page d'accueil.
   - [x] **Meilleur accès au palmarès depuis le classement.** Résolu par la fusion des deux
         pages (cf. item "Palmarès" plus haut) — la carte vide ne pointe plus vers une page
         séparée, les deux tableaux sont directement sur cette page.
@@ -683,9 +686,104 @@ Branche de travail : `remaster-v2`.
       courant, trouvé, pas le créateur qui consulte son propre kikolé. Vérifié en direct :
       cadran doré normal sur un jour non résolu, halo vert + valeur verte dès qu'un
       kikolé est trouvé le jour même.
-      **Question restée ouverte, pas traitée** : sur un jour passé raté consulté, le
-      cadran doit-il afficher le score de la journée consultée ou toujours celui du jour
-      présent ? Comportement actuel non vérifié/décidé — à reprendre séparément.
+      **Question des jours passés, tranchée** : le cadran affichait déjà le score du
+      jour consulté (`Points` est calculé sur `CurrentDay`, jamais un total permanent —
+      vérifié dans le code, pas une supposition) ; le vrai sujet était donc de signaler
+      visuellement qu'on n'est plus sur le jour présent, pas de changer la donnée
+      affichée. Discussion des options avec l'utilisateur (rester tel quel / griser /
+      double cadran) — retenu : griser, sans ajouter de deuxième cadran (aurait
+      réintroduit la question "lequel des deux scores compte vraiment", alors que le
+      site n'a nulle part ailleurs la notion de "score courant permanent"). Résultat :
+      **4 styles de cadran** selon jour courant/autre jour × trouvé/pas trouvé —
+      `.scoreboard` (doré, jour courant en cours), `.scoreboard.success` (vert + halo,
+      jour courant trouvé), `.scoreboard.other-day` (grisé/atténué, jour passé non
+      résolu), `.scoreboard.other-day.found` (grisé + valeur teintée de vert sans halo,
+      jour passé trouvé/abandonné — pour ne pas perdre cette information en s'éloignant
+      d'aujourd'hui). Vérifié en direct les 4 cas (y compris en forçant un abandon sur
+      un jour passé, qui déclenche bien `.other-day.found` avec 0 pts).
+      **Bonus fait dans la foulée** : `Home/Index.cshtml`, le bloc "Jour précédent / date
+      / Jour suivant" jugé un peu terne par l'utilisateur — remplacé par des flèches en
+      icônes SVG (cohérentes avec les autres pictos du site) encadrant la date, dont
+      l'apparence passe d'un simple soulignement à une vraie puce (fond/bordure/coins
+      arrondis) ; état désactivé visible (grisé, non cliquable) plutôt qu'absent quand il
+      n'y a pas de jour précédent/suivant, pour que le groupe ne se décale pas visuellement
+      selon le contexte. `id`/`class="date-field"` du champ conservés (widget jQuery UI
+      existant non touché).
+- [x] **Trois retouches supplémentaires sur la navigation jour par jour**, demandées par
+      l'utilisateur juste après le point précédent :
+      - **Flèche "retour à aujourd'hui" (double chevron)** — `Home/Index.cshtml`,
+        `<a class="day-nav-arrow">` supplémentaire (icône SVG double flèche, même famille
+        que les flèches simples), affichée uniquement quand `CurrentDay != 0` (donc jamais
+        visible en plus de la flèche "jour suivant" quand elles pointent au même endroit
+        un jour normal — les deux coexistent seulement pour offrir un raccourci direct
+        plutôt que de cliquer "suivant" plusieurs fois). Simple lien `href="/"`, pas de JS.
+      - **Info-bulle "trouvé dans les délais / en rattrapage" au survol du cadran** —
+        nouvelle propriété `HomeModel.FoundOnTime` (`bool?`, `null` tant que non trouvé),
+        calculée dans `HomeController.SetAndGetViewModelAsync` en comparant la date de la
+        proposition gagnante (`ProposalResponse.IsWin`, déjà `internal`) à la date
+        consultée — couvre à la fois le POST gagnant immédiat et une re-consultation GET
+        ultérieure, un seul chemin de code pour les deux. Rendu en attribut `title` natif
+        sur `.scoreboard` (pas de tooltip JS custom), deux nouvelles clés resx
+        (`FoundOnTime`/`FoundLate`, `Home/Index.*.resx`).
+      - **Datepicker verrouillé sur la plage jouable** — jusqu'ici aucune borne
+        (`minDate`/`maxDate` jQuery UI), un jour avant `FirstDate` ou après aujourd'hui
+        restait sélectionnable dans le calendrier ; seul un redirect serveur après coup
+        rattrapait le cas. Corrigé sur les 4 champs concernés : `#dayDatepicker`
+        (`Home/Index.cshtml`, `data-min-date`/`data-max-date` calculés via
+        `@@inject IGameCalendar`/`Model.CurrentDate`, borne haute non plafonnée pour un
+        administrateur) et `#LeaderboardDay`/`#MinimalDate`/`#MaximalDate`
+        (`Leaderboard/Index.cshtml`, `@@inject IGameCalendar`/`@@inject IClock` ajoutés à
+        cette vue, bornes `FirstDate`→`Today` identiques pour tout le monde — pas de cas
+        administrateur ici, `LeaderboardController.EnsureDateAsync` plafonne déjà tout le
+        monde à `_clock.Today` côté serveur). Nouvel helper partagé `site.js`
+        (`parseIsoDate`, une date ISO en `Date` locale plutôt que `new Date(iso)` qui
+        interprète UTC et peut décaler d'un jour selon le fuseau) lu par les deux blocs
+        d'initialisation datepicker via `data-min-date`/`data-max-date`. Vérifié en direct
+        (build 0 avertissement, 596 tests verts, puis navigateur) : `#dayDatepicker` avec
+        `minDate`/`maxDate` calendrier correctement bornés, les 3 champs du classement
+        idem (jours après aujourd'hui grisés dans le calendrier).
+      - **Confirmé au passage (question de l'utilisateur, pas un changement de code)** :
+        l'accès au jour caché (`HiddenDate`, le tout premier joueur publié) exige toujours
+        les deux mêmes conditions qu'avant — avoir trouvé ou créé tous les jours depuis
+        `FirstDate` (y compris en rattrapage, `PlayerService.CanDisplayHiddenPlayerAsync`)
+        et taper le numéro de jour directement dans l'URL, `NoPreviousDay` empêchant "Jour
+        précédent" d'atteindre `HiddenDate` par construction (`FirstDate` est sa dernière
+        valeur). Nuance découverte en implémentant le point ci-dessus : avant ce
+        verrouillage, le datepicker n'avait techniquement *aucune* borne — l'impossibilité
+        d'atteindre `HiddenDate` par ce biais tenait uniquement au redirect serveur
+        (`HomeController.Index`, `DateOfDay < HiddenDate` → `day=0`), pas à un vrai
+        verrou côté client. Après ce chantier, c'est désormais un verrou réel des deux
+        côtés.
+- [x] **Trois derniers réglages fins sur ce même lot**, relus par l'utilisateur après coup :
+      - **Datepickers du classement trop "bland"** — les 3 champs (`LeaderboardDay`,
+        `MinimalDate`, `MaximalDate`) n'avaient que le style neutre générique
+        (`.kikole-board .date-field` : simple soulignement pointillé), le style "puce"
+        (fond/bordure/coins arrondis) n'étant appliqué qu'au champ de la page d'accueil
+        via le sélecteur plus spécifique `.day-nav .date-field`. Résolu en fusionnant les
+        deux règles : le style puce est passé dans la règle de base `.date-field` (seuls 4
+        champs au total dans tout le site utilisent cette classe, aucun autre usage à
+        préserver), `.day-nav .date-field` ne garde plus qu'une largeur réduite (96px vs
+        110px, pour tenir entre les deux flèches). `?v=` de `kikole-board.css` passé à 12.
+      - **`isToday`/`isFound`/`hasNextDay` remontés dans `HomeModel`** — trois variables
+        `@{ }` locales à `Home/Index.cshtml`, ne dépendant que de propriétés déjà sur le
+        modèle (`CurrentDay`, `IsCreator`, `PlayerName`, `IsAdmin`) : promues en propriétés
+        calculées (`IsToday`, `IsFound`, `HasNextDay`), même motif que `NextDay`/
+        `PreviousDay`/`DateOfDay` déjà sur `HomeModel`. La vue ne calcule plus que
+        `scoreboardClass`/`scoreboardTitle`, qui eux dépendent du `localizer` (raison de
+        rester dans la vue).
+      - **Libellés de l'info-bulle du cadran jugés redondants** — "Trouvé dans les délais,
+        le jour même" / "Trouvé en rattrapage, après coup" reformulés en "Trouvé le jour
+        même !" / "Trouvé le {0}" (le `{0}` affichant la vraie date de la proposition
+        gagnante, pas le jour consulté — les deux ne coïncident que dans le cas "trouvé à
+        temps"). Nécessitait de faire remonter cette date : nouvelle propriété
+        `HomeModel.FoundDate` (`DateTime?`), posée par `HomeController` à côté de
+        `FoundOnTime` (même source, `winningProposal.Date`), formatée en vue via
+        `ToNaString()` (extension déjà utilisée partout ailleurs sur le site pour les
+        dates lisibles, FR/EN sensible à la culture). Vérifié en direct : jour courant
+        trouvé → "Trouvé le jour même !" ; jour passé trouvé en rattrapage (test via
+        abandon volontaire sur un jour antérieur) → "Trouvé le 05/09/2026" (la date réelle
+        de l'abandon, pas celle du jour affiché) — cadran bien en style grisé + valeur
+        verte (`.other-day.found`) dans ce second cas.
 - [x] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
       extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une
