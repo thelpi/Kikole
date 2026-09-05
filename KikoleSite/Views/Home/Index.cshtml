@@ -79,11 +79,25 @@
                 }
                 <div class="clue">
                     <span class="tag">@localizer["DayClue"]</span>
-                    <p>@Html.Raw(Model.Clue)</p>
+                    @if (Model.Clue.IsImageUrl())
+                    {
+                        <img class="clue-image" src="@Model.Clue" alt="@localizer["DayClue"]" />
+                    }
+                    else
+                    {
+                        <p>@Html.Raw(Model.Clue)</p>
+                    }
                 </div>
                 <div class="clue">
                     <span class="tag">@localizer["EasyDayClue"]</span>
-                    <p>@Html.Raw(Model.EasyClue)</p>
+                    @if (Model.EasyClue.IsImageUrl())
+                    {
+                        <img class="clue-image" src="@Model.EasyClue" alt="@localizer["EasyDayClue"]" />
+                    }
+                    else
+                    {
+                        <p>@Html.Raw(Model.EasyClue)</p>
+                    }
                 </div>
             </div>
             <div class="rows">
@@ -142,13 +156,27 @@
             <div class="dossier-head">
                 <div class="clue">
                     <span class="tag">@localizer["DayClue"]</span>
-                    <p>@Html.Raw(Model.Clue)</p>
+                    @if (Model.Clue.IsImageUrl())
+                    {
+                        <img class="clue-image" src="@Model.Clue" alt="@localizer["DayClue"]" />
+                    }
+                    else
+                    {
+                        <p>@Html.Raw(Model.Clue)</p>
+                    }
                 </div>
                 @if (!string.IsNullOrWhiteSpace(Model.EasyClue))
                 {
                     <div class="clue">
                         <span class="tag">@localizer["EasyDayClue"]</span>
-                        <p>@Html.Raw(Model.EasyClue)</p>
+                        @if (Model.EasyClue.IsImageUrl())
+                        {
+                            <img class="clue-image" src="@Model.EasyClue" alt="@localizer["EasyDayClue"]" />
+                        }
+                        else
+                        {
+                            <p>@Html.Raw(Model.EasyClue)</p>
+                        }
                     </div>
                 }
             </div>
@@ -164,10 +192,19 @@
                     }
                     @if (Model.CurrentDay > 0)
                     {
-                        <form method="post" action="/" style="margin:0">
+                        <form method="post" action="/" id="giveUpForm" style="margin:0">
                             @Html.HiddenFor(m => m.CurrentDay)
-                            <button type="submit" onclick="return confirm('@localizer["GiveUpConfirmation"]')" name="submit-GiveUp">@localizer["GiveUp"] <span class="cost">@localizer["NoPoints"]</span></button>
+                            <button type="submit" onclick="return openGiveUpModal(event)" id="giveUpTrigger" name="submit-GiveUp">@localizer["GiveUp"] <span class="cost">@localizer["NoPoints"]</span></button>
                         </form>
+                        <div class="confirm-modal" id="giveUpModal">
+                            <div class="confirm-modal-box">
+                                <p>@localizer["GiveUpConfirmation"]</p>
+                                <div class="confirm-modal-actions">
+                                    <button type="button" class="secondary" onclick="closeGiveUpModal()">@localizer["CancelAction"]</button>
+                                    <button type="button" onclick="confirmGiveUp()">@localizer["GiveUp"]</button>
+                                </div>
+                            </div>
+                        </div>
                     }
                     else if (!Model.LeaderboardAvailable)
                     {

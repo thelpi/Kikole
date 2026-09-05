@@ -14,6 +14,25 @@ $(function () {
     });
 });
 
+/* modale de confirmation "Give up" (Home/Index.cshtml) : remplace le confirm() natif
+   du navigateur, non personnalisable en CSS. Le bouton declencheur reste un vrai
+   type="submit" (pour que son name="submit-GiveUp" soit lu par GetSubmitAction() cote
+   serveur) : on bloque juste la soumission tant que la modale n'est pas confirmee. */
+var openGiveUpModal = function (event) {
+    event.preventDefault();
+    document.getElementById('giveUpModal').classList.add('open');
+    return false;
+};
+
+var closeGiveUpModal = function () {
+    document.getElementById('giveUpModal').classList.remove('open');
+};
+
+var confirmGiveUp = function () {
+    var form = document.getElementById('giveUpForm');
+    form.requestSubmit(document.getElementById('giveUpTrigger'));
+};
+
 var loadKikolesStats = function (sort, desc) {
     $.ajax({
         url: '/kikoles-stats?sort=' + sort + '&desc=' + desc,

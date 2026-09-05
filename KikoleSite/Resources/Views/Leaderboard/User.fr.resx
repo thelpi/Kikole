@@ -240,9 +240,6 @@
   <data name="AveragePoints" xml:space="preserve">
     <value>Moyenne de points</value>
   </data>
-  <data name="BoldFirstDay" xml:space="preserve">
-    <value>* en gras, kikolés tentés / trouvés le jour même.</value>
-  </data>
   <data name="CurrentDay" xml:space="preserve">
     <value>Le jour même</value>
   </data>

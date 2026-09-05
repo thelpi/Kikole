@@ -67,8 +67,8 @@
                     <tr>
                         <th class="tabDataHead">@localizer["DateHeader"]</th>
                         <th class="tabDataHead">@localizer["AnswerHeader"]</th>
-                        <th class="tabDataHead">@localizer["AttemptHeader"] *</th>
-                        <th class="tabDataHead">@localizer["SuccessHeader"] *</th>
+                        <th class="tabDataHead">@localizer["AttemptHeader"]</th>
+                        <th class="tabDataHead">@localizer["SuccessHeader"]</th>
                         <th class="tabDataHead">@localizer["PointsHeader"]</th>
                         <th class="tabDataHead">@localizer["PointsRankHeader"]</th>
                         <th class="tabDataHead">@localizer["TimeHeader"]</th>
@@ -81,14 +81,30 @@
                     }
                     @foreach (var stat in Model.Stats)
                     {
-                        var attemptTdClass = stat.AttemptDayOne == true ? "tabDataBold" : "tabData";
-                        var successTdClass = stat.SuccessDayOne == true ? "tabDataBold" : "tabData";
                         var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
                         <tr class="@trClass">
                             <td class="tabData"><a href="/?day=@stat.DaysBefore">@stat.Date.ToNaString()</a></td>
                             <td class="tabData">@stat.Answer</td>
-                            <td class="@attemptTdClass">@stat.Attempt.ToYesNo()</td>
-                            <td class="@successTdClass">@stat.Success.ToYesNo()</td>
+                            <td class="tabData">
+                                @if (stat.AttemptDayOne == true)
+                                {
+                                    <span class="same-day-tag" title="@localizer["CurrentDay"]">@stat.Attempt.ToYesNo()</span>
+                                }
+                                else
+                                {
+                                    @stat.Attempt.ToYesNo()
+                                }
+                            </td>
+                            <td class="tabData">
+                                @if (stat.SuccessDayOne == true)
+                                {
+                                    <span class="same-day-tag" title="@localizer["CurrentDay"]">@stat.Success.ToYesNo()</span>
+                                }
+                                else
+                                {
+                                    @stat.Success.ToYesNo()
+                                }
+                            </td>
                             <td class="tabData">@stat.Points.ToNaString()</td>
                             <td class="tabData">@stat.PointsPosition.ToNaString()</td>
                             <td class="tabData">@stat.Time.ToNaString()</td>
@@ -99,7 +115,6 @@
                 </tbody>
             </table>
         </div>
-        <div class="form-hint" style="margin-top:10px">@localizer["BoldFirstDay"]</div>
     </div>
 
     <div class="form-card">

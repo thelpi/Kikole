@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Helpers;
@@ -13,6 +14,24 @@ public static class ViewHelper
     public const string DayPatternEn = "MM-dd";
     public const string DayPatternFr = "dd/MM";
     public const string Iso8859Code = "ISO-8859-8";
+
+    private static readonly string[] ImageExtensions =
+        [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+
+    // certains indices sont d'anciennes captures d'ecran hebergees en ligne (ex.
+    // https://i.imgur.com/YwR1hdd.png) plutot que du texte : on les detecte pour les
+    // rendre en <img> au lieu d'afficher l'URL brute telle quelle
+    public static bool IsImageUrl(this string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)
+            || !Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return false;
+        }
+
+        return ImageExtensions.Any(ext => uri.AbsolutePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
 
     public static string ToNaString(this object? data)
     {

@@ -492,6 +492,18 @@ body { padding-top: 0; }
 
 .kikole-board .clue p { margin: 0; font-style: italic; }
 
+/* indice d'epoque heberge en image (ex. i.imgur.com/xxx.png) plutot qu'en texte :
+   .clue est align-items:baseline pour le texte, corrige ici pour une image */
+.kikole-board .clue:has(.clue-image) { align-items: flex-start; }
+
+.kikole-board .clue-image {
+  display: block;
+  max-width: 220px;
+  max-height: 140px;
+  border: 1px solid var(--paper-line);
+  border-radius: 3px;
+}
+
 /* ---------------------------------------------------------- rows */
 
 .kikole-board .rows { padding: 6px 26px 4px; }
@@ -766,7 +778,8 @@ body { padding-top: 0; }
 }
 
 .kikole-board .actions button,
-.kikole-board .actions a {
+.kikole-board .actions a,
+.kikole-board .confirm-modal-actions button {
   font-family: "IBM Plex Mono", monospace;
   font-size: 11px;
   font-weight: 600;
@@ -783,6 +796,12 @@ body { padding-top: 0; }
   transition: transform 0.12s ease;
 }
 
+.kikole-board .confirm-modal-actions button.secondary {
+  color: var(--ink-soft);
+  background: transparent;
+  border-color: var(--paper-line);
+}
+
 .kikole-board .actions button .cost { color: var(--stamp); margin-left: 6px; }
 
 .kikole-board .actions button:hover,
@@ -797,6 +816,42 @@ body { padding-top: 0; }
 }
 
 .kikole-board .actions button:disabled .cost { color: var(--ink-soft); }
+
+/* modale de confirmation (remplace confirm() natif du navigateur, cf. bouton "Give
+   up") : cachee par defaut, .open l'affiche - meme convention que .site-nav-drawer.open */
+.kikole-board .confirm-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.kikole-board .confirm-modal.open { display: flex; }
+
+.kikole-board .confirm-modal-box {
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 22px 24px;
+  max-width: 320px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.kikole-board .confirm-modal-box p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.kikole-board .confirm-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
 
 /* ---------------------------------------------------------- badges */
 
@@ -1016,6 +1071,18 @@ body { padding-top: 0; }
 
 .kikole-board .tabDataBold { font-weight: 700; color: var(--pitch-strong); }
 .kikole-board .tabDataHeadBg { background: transparent; }
+
+/* puce "le jour meme" (Leaderboard/User.cshtml, colonnes Tente ?/Trouve ?) : teinte de
+   fond + texte en gras, lisible directement sans avoir a lire une legende sous le
+   tableau - le titre HTML natif (survol) donne le detail pour qui le cherche. */
+.kikole-board .same-day-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--pitch-soft);
+  color: var(--pitch-strong);
+  font-weight: 700;
+}
 
 .kikole-board .fillCorrect { background: var(--pitch-soft); }
 .kikole-board .fillIncorrect { background: var(--stamp-soft); }

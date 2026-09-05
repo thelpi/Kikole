@@ -389,11 +389,20 @@ Branche de travail : `remaster-v2`.
         (GET) — donc probablement lié à un état transitoire de layout (badges qui
         s'animent/se dimensionnent après coup ?) plutôt qu'au HTML/CSS statique. À
         reproduire et diagnostiquer.
-  - [ ] **Popup "Etes vous sûr ?" au clic sur "Montrer la réponse" en style par défaut du
-        navigateur.** `Views/Home/Index.cshtml` utilise `onclick="return confirm(...)"`
-        (bouton Give up) — sort complètement de l'habillage papier/encre. À remplacer par
-        une vraie modale stylée (nécessite un peu de JS : `confirm()` est bloquant et ne se
-        personnalise pas côté CSS).
+  - [x] **Popup "Etes vous sûr ?" au clic sur "Montrer la réponse" en style par défaut du
+        navigateur.** `Views/Home/Index.cshtml` utilisait `onclick="return confirm(...)"`
+        (bouton Give up) — sortait complètement de l'habillage papier/encre. Remplacé par
+        une vraie modale (`.confirm-modal`, cachée par défaut, `.open` l'affiche — même
+        convention que `.site-nav-drawer.open`). Le bouton déclencheur reste un vrai
+        `type="submit" name="submit-GiveUp"` (pour que `GetSubmitAction()` le lise côté
+        serveur) : `onclick="return openGiveUpModal(event)"` bloque juste la soumission
+        tant que la modale n'est pas confirmée (`site.js`) ; le bouton "confirmer" de la
+        modale appelle `form.requestSubmit(triggerButton)` en repassant le bouton d'origine
+        comme *submitter*, seule façon que son `name`/`value` soit inclus dans le POST sans
+        dupliquer le formulaire. Nouvelle clé resx `CancelAction` (`Home/Index.*.resx`).
+        Vérifié en direct (`joueur1`, un jour non résolu) : ouverture, Annuler (aucune
+        requête envoyée, état inchangé), puis Confirmer (POST réel, `submit-GiveUp` bien lu
+        côté serveur, page affichant la réponse avec 0 point).
   - [x] **Affichage "Le joueur du xxxx était xxxx." très bizarre (police, taille).**
         `Views/Home/Index.cshtml`, cas "jour passé raté" (et son jumeau "PlayerIs", même
         souci, cas où le créateur consulte son propre kikolé du jour) : `<h1>` brut sans
@@ -416,13 +425,17 @@ Branche de travail : `remaster-v2`.
   - [x] **Meilleur accès au palmarès depuis le classement.** Résolu par la fusion des deux
         pages (cf. item "Palmarès" plus haut) — la carte vide ne pointe plus vers une page
         séparée, les deux tableaux sont directement sur cette page.
-  - [ ] **Mise en valeur des kikolés "tentés/trouvés le jour même" à revoir.**
-        `Leaderboard/User.cshtml`, tableau "Statistiques quotidiennes" : convention actuelle
-        = texte en gras + astérisque dans l'en-tête expliqué par une légende sous le tableau
-        ("* en gras, kikolés tentés / trouvés le jour même."). Le libellé lui-même est bon,
-        c'est la mise en forme qui mériterait mieux qu'un gras + renvoi de légende — par
-        exemple une puce/icône dans la cellule, ou une teinte de fond dédiée sur la ligne ou
-        la cellule concernée, pour que ce soit lisible sans avoir à lire la légende.
+  - [x] **Mise en valeur des kikolés "tentés/trouvés le jour même" à revoir.**
+        `Leaderboard/User.cshtml`, tableau "Statistiques quotidiennes" : l'ancienne
+        convention (texte en gras + astérisque dans l'en-tête, expliqué par une légende
+        sous le tableau) obligeait à lire la légende pour comprendre. Remplacée par une
+        puce/teinte de fond (`.same-day-tag`, fond `--pitch-soft`/texte `--pitch-strong`,
+        forme pilule) directement sur "Oui"/"Non" quand `AttemptDayOne`/`SuccessDayOne` est
+        vrai, lisible sans légende ; un `title` (attribut natif, réutilise la clé resx
+        existante `CurrentDay`) donne le détail à qui survole. Astérisques d'en-tête et
+        légende (`BoldFirstDay`) retirés, clé resx devenue inutile supprimée (FR/EN).
+        Vérifié en direct et par inspection DOM (`getComputedStyle`) sur le profil de
+        `joueur1`.
 - [x] **Formulaire "Changer la question et réponse de récupération" (page Compte) devrait
       redemander le mot de passe actuel.** Corrigé : nouveau champ mot de passe actuel sur
       ce formulaire (réutilise `AccountModel.PasswordSubmission`, déjà partagé par les
@@ -535,8 +548,18 @@ Branche de travail : `remaster-v2`.
       pas claire, à rediscuter : quand on consulte un ancien jour raté, ce cadran doit-il
       afficher le score de la journée en cours de consultation, ou toujours celui du jour
       présent ? Comportement actuel non vérifié/décidé.
-- [ ] **Les indices peuvent être des images** — un indice d'époque vaut
-      `https://i.imgur.com/YwR1hdd.png`. Le champ est un texte libre rendu tel quel.
+- [x] **Les indices peuvent être des images** — un indice d'époque vaut
+      `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
+      extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une
+      extension d'image usuelle) qui bascule le rendu de `Model.Clue`/`Model.EasyClue` en
+      `<img class="clue-image">` plutôt qu'en `<p>` texte, aux 4 endroits concernés
+      (`Home/Index.cshtml`, états "trouvé"/"en cours"). Taille plafonnée, bordure papier
+      (`.clue-image`), `.clue:has(.clue-image)` corrige l'alignement (`.clue` est
+      `align-items:baseline`, pensé pour du texte). Couvert par 9 nouveaux tests
+      (`ViewHelperTests.IsImageUrl_*`, extensions valides/query string, rejets texte/URL
+      sans extension/non-http). Vérifié en direct : un indice de test basculé
+      temporairement sur une vraie image en base locale (rendu correct, `.clue-image`
+      bien présente), reverti à son texte d'origine juste après.
 - [x] **Mots de passe des comptes de test changés** (`admin` → `admin12345`,
       `joueur1` → `NouveauMdp1234`, laissé tel quel après les sessions de vérification
       précédentes) — `admin123`/`test123` ne respectaient plus le minimum de 10 caractères

@@ -252,6 +252,9 @@
   <data name="GiveUpConfirmation" xml:space="preserve">
     <value>Are you sure?</value>
   </data>
+  <data name="CancelAction" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
   <data name="LeaderboardAccess" xml:space="preserve">
     <value>Access to today's ranking</value>
   </data>

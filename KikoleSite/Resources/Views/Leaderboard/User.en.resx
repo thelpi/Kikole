@@ -240,9 +240,6 @@
   <data name="AveragePoints" xml:space="preserve">
     <value>Average points</value>
   </data>
-  <data name="BoldFirstDay" xml:space="preserve">
-    <value>* in bold, kikolés tried / found the first day.</value>
-  </data>
   <data name="CurrentDay" xml:space="preserve">
     <value>The first day</value>
   </data>
