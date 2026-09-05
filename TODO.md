@@ -439,6 +439,30 @@ Branche de travail : `remaster-v2`.
         7 parcours (connexion, inscription, déconnexion, changement de mot de passe,
         changement Q&A, question puis réponse de récupération) et le rejet `[Authorization]`
         d'un accès non connecté ont été revérifiés en direct dans le navigateur.
+  - [x] **Même chantier appliqué à `AdminController`**, seul autre contrôleur où le motif
+        s'appliquait vraiment (vérifié aussi `HomeController.Index` : là le nom du bouton
+        encode une valeur de `ProposalTypes`, pas une opération distincte — tout le corps
+        est déjà partagé, éclater en 8 actions aurait dupliqué ~90% du code pour rien ;
+        laissé tel quel, volontairement).
+      - `Actions` (POST) → 4 actions dédiées (`RecomputeBadges`, `RecomputeLeaders`,
+        `ReassignPlayers`, `InsertMessage`), le seul `<form>` à 4 boutons de
+        `Views/Admin/Actions.cshtml` éclaté en 4 `<form>` ; fin de méthode factorisée
+        (`RenderActionsAsync`) pour les valeurs par défaut (dates du formulaire de message,
+        discussions).
+      - `PlayerSubmission` (POST) → `pchoice` devient `ChoosePlayer` (déjà un formulaire
+        séparé). `accepted`/`refusal` partageaient presque tout leur code (ne divergent que
+        sur `IsAccepted`) : plutôt que de dupliquer, `AcceptPlayer`/`RefusePlayer` délèguent
+        toutes les deux à une méthode privée commune (`RespondToSubmissionAsync`), même
+        principe que la garde `Players.Count == 0 → redirect` factorisée à part
+        (`EnsurePendingSubmissionsAsync`) puisque les 3 actions en ont besoin.
+      - Comme pour Account, aucun test existant sur ce contrôleur. Les 7 actions
+        revérifiées en direct dans le navigateur : les 3 boutons simples, l'ajout de
+        message (jusqu'à sa réapparition en bandeau sur la page d'accueil), et le cycle
+        complet proposition → validation avec un compte temporairement promu PowerUser en
+        base locale (`ChoosePlayer`, `RefusePlayer`, puis `AcceptPlayer` avec ses indices de
+        substitution requis) — compte reremis à son palier d'origine une fois le test
+        terminé. Ça laisse deux joueurs de test dans la base locale (un refusé, un accepté)
+        : sans conséquence, à emporter par un prochain rejeu de `kikole_mock.sql`.
 - [ ] **"Votre score final : X points." (une fois le joueur trouvé) fait doublon avec le
       cadran de score en haut de page.** Pistes : retirer la ligne redondante, et/ou
       étiqueter le cadran du haut "Score du jour :" pour clarifier. Question ouverte liée,

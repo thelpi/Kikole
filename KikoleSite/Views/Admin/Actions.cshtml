@@ -9,17 +9,17 @@
 }
 
 <h3>@localizer["AdminActions"]</h3>
-<form method="post" action="/Admin/Actions">
-    <div>
-        <input type="submit" value="@localizer["RecomputeBadges"]" name="submit-recomputebadges" />
-    </div>
-    <div class="mediumTopMargin">
-        <input type="submit" value="@localizer["RecomputeLeaders"]" name="submit-recomputeleaders" />
-    </div>
-    <div class="mediumTopMargin">
-        <input type="submit" value="@localizer["ReassignPlayers"]" name="submit-reassignplayers" />
-    </div>
-    <fieldset class="mediumTopMargin">
+<form method="post" action="/Admin/RecomputeBadges">
+    <input type="submit" value="@localizer["RecomputeBadges"]" />
+</form>
+<form method="post" action="/Admin/RecomputeLeaders" class="mediumTopMargin">
+    <input type="submit" value="@localizer["RecomputeLeaders"]" />
+</form>
+<form method="post" action="/Admin/ReassignPlayers" class="mediumTopMargin">
+    <input type="submit" value="@localizer["ReassignPlayers"]" />
+</form>
+<form method="post" action="/Admin/InsertMessage" class="mediumTopMargin">
+    <fieldset>
         <legend>@localizer["AddGlobalMessage"]</legend>
         <div>
             @Html.TextBoxFor(m => m.Message, new { @style = "width: 400px" });
@@ -30,7 +30,7 @@
         <div class="smallTopMargin">
             @Html.EditorFor(m => m.MessageDateEnd);
         </div>
-        <input class="smallTopMargin" type="submit" value="@localizer["ActionAddMessage"]" name="submit-insertmessage" />
+        <input class="smallTopMargin" type="submit" value="@localizer["ActionAddMessage"]" />
     </fieldset>
 </form>
 
