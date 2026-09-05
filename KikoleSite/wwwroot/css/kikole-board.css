@@ -508,6 +508,10 @@ body { padding-top: 0; }
   margin: -6px 0 14px;
 }
 
+/* .spaced : le -6px par defaut colle trop un hint qui suit une checkbox ou un
+   <select> plutot qu'un champ texte classique (Admin/Index.cshtml). */
+.kikole-board .form-hint.spaced { margin-top: 6px; }
+
 .kikole-board .form-hint a { color: var(--pitch-strong); }
 
 .kikole-board .auth-notice p {

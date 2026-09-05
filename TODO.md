@@ -888,6 +888,40 @@ Branche de travail : `remaster-v2`.
         `ClubCreationModel`/`AdminController` non touchés (les champs existaient déjà
         tels quels). Vérifié en direct (compte admin) : ordre et libellés corrects.
       Build (0 avertissement) + 596 tests verts, vérification navigateur des deux points.
+- [x] **"J'archive" (lot précédent validé) + nouvelle salve de remarques mineures,
+      `Admin/Index.cshtml` (page de création d'un joueur) et `Home/Index.cshtml`.**
+      - **Indice "utilisez le titre de la page Wikipédia en anglais" (champ Nom)** —
+        retiré complètement, y compris la clé resx `WikiPlayerName` (FR+EN), plus
+        aucune référence nulle part.
+      - **Trois indices trop "collés" au champ au-dessus** (nationalité alternative,
+        poste alternatif, anonymat du créateur) — cause : `.form-hint` a un
+        `margin-top: -6px` par défaut, pensé pour suivre un champ texte classique,
+        trop serré après une `<select>` ou une checkbox. Plutôt que de toucher la
+        règle globale (utilisée largement ailleurs, aucune plainte dessus), nouveau
+        modificateur `.form-hint.spaced` (`margin-top: 6px`), appliqué uniquement à
+        ces 3 indices (`TipAboutAlternativeNationality`, `TipAboutAlternativePosition`,
+        `RemainsAnonymousTip`).
+      - **Checkbox "Prêt ?" pas alignée avec son libellé** — taille par défaut du
+        navigateur pour la checkbox, non maîtrisée. Fixée à 14×14px
+        (`@Html.CheckBox(loanChk, new { style = "..." })`) et `line-height:14px`
+        ajouté sur le `<label>` voisin pour que les deux boîtes fassent la même
+        hauteur ; `align-items:center` déjà présent sur la ligne fait le reste.
+        Vérifié par mesure DOM (`getBoundingClientRect`) : les deux éléments font
+        bien 14px de haut, centres verticaux à ~2.5px près (l'écart résiduel vient
+        de la métrique de la police, pas de la boîte elle-même — jugé suffisant).
+      - **Lien "Créer un club (nouvel onglet)" déplacé en fin de section** "Carrière
+        en club" — était avant le premier indice et les 15 lignes de club, maintenant
+        après tout ça. La marge `margin-top:0` qui compensait sa position d'origine
+        (juste sous le label) a été retirée, la marge par défaut de `.small-link`
+        (8px) convient mieux après le dernier indice.
+      - **"deux positions possibles" (indice à côté du champ Position, page
+        d'accueil) retiré** — jugé prêtant à confusion par l'utilisateur, en attente
+        d'une meilleure formulation. Seul le `<span class="hint">` a été retiré de
+        `Home/Index.cshtml` ; la clé resx `TipAboutPosition` (FR+EN) est conservée
+        mais vidée (valeur vide), pour ne pas avoir à la recréer le jour où une
+        meilleure formulation est trouvée.
+      Build (0 avertissement) + 596 tests verts, vérifications navigateur (DOM/mesures
+      pour l'alignement checkbox, lecture directe pour le reste).
 - [x] **Les indices peuvent être des images** — un indice d'époque vaut
       `https://i.imgur.com/YwR1hdd.png`, rendu tel quel en texte brut jusqu'ici. Nouvelle
       extension `ViewHelper.IsImageUrl` (URL absolue http/https se terminant par une

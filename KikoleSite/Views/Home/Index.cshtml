@@ -383,7 +383,7 @@
             <!-- position -->
             <form method="post" action="/" class="dossier-row @(string.IsNullOrWhiteSpace(Model.Position) ? "locked" : "solved")">
                 @Html.HiddenFor(m => m.CurrentDay)
-                <div class="field">@localizer["PositionTitle"]<span class="hint">@localizer["TipAboutPosition"]</span></div>
+                        <div class="field">@localizer["PositionTitle"]<span class="hint">@localizer["TipAboutPosition"]</span></div>
                 @if (string.IsNullOrWhiteSpace(Model.Position))
                 {
                     <div>

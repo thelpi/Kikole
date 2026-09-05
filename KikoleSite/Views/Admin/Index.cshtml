@@ -17,7 +17,6 @@
             <div class="form-field">
                 <label>@localizer["Name"]</label>
                 <input type="text" name="Name" class="blank" />
-                <div class="form-hint">@localizer["WikiPlayerName"]</div>
             </div>
 
             <div class="form-field">
@@ -48,7 +47,7 @@
                 <label>@localizer["AlternativeNationality"]</label>
                 <input type="text" id="alternativeCountryName" name="AlternativeCountryNameSubmissionValue" class="blank" />
                 <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" />
-                <div class="form-hint">@localizer["TipAboutAlternativeNationality"]</div>
+                <div class="form-hint spaced">@localizer["TipAboutAlternativeNationality"]</div>
             </div>
 
             @if (Model.DisplayPlayerSubmissionLink)
@@ -102,12 +101,11 @@
             <div class="form-field">
                 <label>@localizer["AlternativePosition"]</label>
                 @Html.DropDownListFor(m => m.AlternativePosition, Model.Positions, new { @class = "blank" })
-                <div class="form-hint">@localizer["TipAboutAlternativePosition"]</div>
+                <div class="form-hint spaced">@localizer["TipAboutAlternativePosition"]</div>
             </div>
 
             <div class="form-field">
                 <label>@localizer["ClubsCareer"]</label>
-                <div class="small-link" style="margin-top:0"><a href="/Admin/Club" target="_blank">@localizer["AddClubTab"]</a></div>
                 <div class="form-hint">@localizer["ClubsTip1"]</div>
                 @for (var i = 0; i < 15; i++)
                 {
@@ -117,17 +115,18 @@
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                         <input type="text" id="@name" name="@(name)Value" class="blank" />
                         <input type="hidden" id="@idName" name="@idName" />
-                        <label style="font-size:11px;color:var(--ink-soft);white-space:nowrap">@localizer["IsLoan"]</label>
-                        @Html.CheckBox(loanChk)
+                        <label style="font-size:11px;color:var(--ink-soft);white-space:nowrap;line-height:14px">@localizer["IsLoan"]</label>
+                        @Html.CheckBox(loanChk, new { style = "margin:0;width:14px;height:14px" })
                     </div>
                 }
                 <div class="form-hint">@localizer["ClubsTip2"]</div>
+                <div class="small-link"><a href="/Admin/Club" target="_blank">@localizer["AddClubTab"]</a></div>
             </div>
 
             <div class="form-field">
                 <label style="display:inline">@localizer["RemainsAnonymous"]</label>
                 @Html.CheckBoxFor(m => m.HideCreator)
-                <div class="form-hint">@localizer["RemainsAnonymousTip"]</div>
+                <div class="form-hint spaced">@localizer["RemainsAnonymousTip"]</div>
             </div>
 
             <div class="actions">

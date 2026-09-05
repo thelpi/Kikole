@@ -180,9 +180,6 @@
   <data name="TipAboutAlternativePosition" xml:space="preserve">
     <value>optional: only if the player plausibly fits two different positions (e.g. attacking midfielder / forward)</value>
   </data>
-  <data name="WikiPlayerName" xml:space="preserve">
-    <value>use english Wikipedia page title</value>
-  </data>
   <data name="YearOfBirth" xml:space="preserve">
     <value>Year of birth</value>
   </data>
