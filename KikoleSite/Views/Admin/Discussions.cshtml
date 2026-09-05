@@ -1,0 +1,50 @@
+@using KikoleSite.Helpers
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model AdminDiscussionsModel
+
+<div class="kikole-board">
+    <div class="form-card">
+        <h3>@localizer["Title"]</h3>
+        @if (Model.Discussions.Count == 0)
+        {
+            <p>@localizer["NoDiscussions"]</p>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="tabDataHead">@localizer["UserHeader"]</th>
+                            <th class="tabDataHead">@localizer["LastMessageHeader"]</th>
+                            <th class="tabDataHead"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var i = 0;
+                        }
+                        @foreach (var discussion in Model.Discussions)
+                        {
+                            var trClass = i % 2 == 0 ? "even" : "odd";
+                            <tr class="@trClass">
+                                <td class="tabData">
+                                    @discussion.UserLogin
+                                    @if (discussion.HasUnreadFromUser)
+                                    {
+                                        <span class="unread-tag">@localizer["UnreadTag"]</span>
+                                    }
+                                </td>
+                                <td class="tabData">@discussion.LastMessageDate?.ToStringHour()</td>
+                                <td class="tabData">
+                                    <a asp-controller="Admin" asp-action="Discussion" asp-route-discussionId="@discussion.DiscussionId">@localizer["OpenLink"]</a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

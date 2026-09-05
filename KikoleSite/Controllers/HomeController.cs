@@ -27,7 +27,7 @@ public class HomeController : KikoleBaseController
     private const string GiveUpSubmitAction = "GiveUp";
 
     private readonly IStringLocalizer<HomeController> _localizer;
-    private readonly IDiscussionRepository _discussionRepository;
+    private readonly IDiscussionService _discussionService;
     private readonly IProposalService _proposalService;
     private readonly IMessageRepository _messageRepository;
     private readonly SignInManager<ApplicationUser> _signInManager;
@@ -42,7 +42,7 @@ public class HomeController : KikoleBaseController
         IPlayerService playerService,
         IProposalService proposalService,
         IBadgeService badgeService,
-        IDiscussionRepository discussionRepository,
+        IDiscussionService discussionService,
         SignInManager<ApplicationUser> signInManager,
         IOptions<RegistrationOptions> registrationOptions,
         IHttpContextAccessor httpContextAccessor)
@@ -55,7 +55,7 @@ public class HomeController : KikoleBaseController
             httpContextAccessor)
     {
         _localizer = localizer;
-        _discussionRepository = discussionRepository;
+        _discussionService = discussionService;
         _proposalService = proposalService;
         _messageRepository = messageRepository;
         _signInManager = signInManager;
@@ -64,33 +64,31 @@ public class HomeController : KikoleBaseController
 
     [HttpGet]
     [Authorization]
-    public IActionResult Contact()
+    public async Task<IActionResult> Contact()
     {
-        return View(new ContactModel());
+        // l'admin ne discute jamais avec lui-meme : cf. _Layout.cshtml, l'icone Contact
+        // ne lui est de toute facon pas presentee, ce redirect est la garde ceinture-bretelles
+        if (IsTypeOfUser(UserTypes.Administrator))
+            return RedirectToAction("Discussions", "Admin");
+
+        var messages = await _discussionService.GetOwnThreadAsync(UserId);
+        return View(new ContactModel { Messages = messages });
     }
 
     [HttpPost]
     [Authorization]
     public async Task<IActionResult> Contact(ContactModel model)
     {
-        if (string.IsNullOrWhiteSpace(model.Email))
-            model.ErrorMessage = _localizer["InvalidEmail"];
-        else if (string.IsNullOrWhiteSpace(model.Message))
+        if (IsTypeOfUser(UserTypes.Administrator))
+            return RedirectToAction("Discussions", "Admin");
+
+        if (string.IsNullOrWhiteSpace(model.NewMessage))
             model.ErrorMessage = _localizer["InvalidMessage"];
         else
-        {
-            await _discussionRepository
-                .CreateDiscussionAsync(new Models.Dtos.DiscussionDto
-                {
-                    Email = model.Email,
-                    UserId = UserId,
-                    Message = model.Message
-                });
+            await _discussionService.PostUserMessageAsync(UserId, model.NewMessage);
 
-            model.SuccessMessage = _localizer["SuccessContactSent"];
-            model.Message = null;
-        }
-
+        model.Messages = await _discussionService.GetOwnThreadAsync(UserId);
+        model.NewMessage = null;
         return View(model);
     }
 

@@ -10,6 +10,7 @@
     <div class="form-card">
         <h3>@localizer["AdminActions"]</h3>
         <div class="small-link"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Discussions">@localizer["ViewDiscussions"]</a></div>
         <div class="actions" style="margin-top:14px">
             <form method="post" action="/Admin/RecomputeBadges">
                 <button type="submit">@localizer["RecomputeBadges"]</button>
@@ -45,39 +46,4 @@
             </div>
         </form>
     </div>
-
-    @if (Model?.Discussions.Count > 0)
-    {
-        <div class="form-card">
-            <h3>Discussions</h3>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="tabDataHead">User</th>
-                            <th class="tabDataHead">Email</th>
-                            <th class="tabDataHead">Date</th>
-                            <th class="tabDataHead">Message</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            var i = 0;
-                        }
-                        @foreach (var discussion in Model.Discussions)
-                        {
-                            var trClass = i % 2 == 0 ? "even" : "odd";
-                            <tr class="@trClass">
-                                <td class="tabData">@discussion.UserId</td>
-                                <td class="tabData">@discussion.Email</td>
-                                <td class="tabData">@discussion.CreationDate</td>
-                                <td class="tabData">@Html.Raw(discussion.Message)</td>
-                            </tr>
-                            i++;
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    }
 </div>

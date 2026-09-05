@@ -36,6 +36,7 @@ TRUNCATE TABLE player_clubs;
 TRUNCATE TABLE players;
 TRUNCATE TABLE club_translations;
 TRUNCATE TABLE clubs;
+TRUNCATE TABLE discussion_messages;
 TRUNCATE TABLE discussions;
 TRUNCATE TABLE messages;
 TRUNCATE TABLE registration_guids;

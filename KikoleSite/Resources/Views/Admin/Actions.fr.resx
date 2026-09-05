@@ -129,6 +129,9 @@
   <data name="CheckSubmittedPlayers" xml:space="preserve">
     <value>Vérifier les joueurs proposés</value>
   </data>
+  <data name="ViewDiscussions" xml:space="preserve">
+    <value>Voir les discussions</value>
+  </data>
   <data name="MessageDateEndLabel" xml:space="preserve">
     <value>Affiché jusqu'au</value>
   </data>

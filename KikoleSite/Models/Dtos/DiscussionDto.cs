@@ -1,10 +1,12 @@
-﻿namespace KikoleSite.Models.Dtos;
+using System;
 
-public record DiscussionDto : BaseDto
+namespace KikoleSite.Models.Dtos;
+
+public record DiscussionDto
 {
-    public ulong UserId { get; init; }
+    public ulong Id { get; init; }
 
-    public required string Email { get; init; }
+    public required ulong UserId { get; init; }
 
-    public required string Message { get; init; }
+    public DateTime CreationDate { get; init; }
 }

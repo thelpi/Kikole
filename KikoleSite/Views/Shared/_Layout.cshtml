@@ -1,4 +1,5 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject KikoleSite.Services.IDiscussionService discussionService
 @{
     Context.Request.Cookies.TryGetValue(
         Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
@@ -25,6 +26,16 @@
         : KikoleSite.Models.Enums.UserTypes.StandardUser;
     var isPowerUser = isLoggedIn && (ulong)userType >= (ulong)KikoleSite.Models.Enums.UserTypes.PowerUser;
     var isAdmin = isLoggedIn && (ulong)userType >= (ulong)KikoleSite.Models.Enums.UserTypes.Administrator;
+
+    // "a lire" sur l'icone Contact (utilisateur standard/power) ou Actions admin
+    // (administrateur, qui n'a pas de fil personnel - cf. Home/Contact) : fait ici
+    // plutot que via un ViewComponent (jamais utilise dans ce projet, et le layout
+    // injecte deja ses propres services directement, comme localizer ci-dessus).
+    var hasUnreadMessages = false;
+    if (isAdmin)
+        hasUnreadMessages = await discussionService.HasUnreadMessagesForAdminAsync();
+    else if (isLoggedIn)
+        hasUnreadMessages = await discussionService.HasUnreadMessagesForUserAsync(currentUserId);
 }
 <!DOCTYPE html>
 <html>
@@ -47,7 +58,7 @@
     </environment>
     <link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="Stylesheet">
     <!-- apres jquery-ui.css : .ui-autocomplete doit gagner la cascade sur le theme "smoothness" -->
-    <link rel="stylesheet" href="~/css/kikole-board.css?v=8" />
+    <link rel="stylesheet" href="~/css/kikole-board.css?v=9" />
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
@@ -71,11 +82,18 @@
                             <circle cx="12" cy="8" r="3.4" /><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" />
                         </svg>
                     </a>
+                }
+                @if (isLoggedIn && !isAdmin)
+                {
                     <a class="site-nav-icon" asp-area="" asp-controller="Home" asp-action="Contact"
                        title="@localizer["ContactAdmin"]" aria-label="@localizer["ContactAdmin"]">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M4 6l8 7 8-7" />
                         </svg>
+                        @if (hasUnreadMessages)
+                        {
+                            <span class="site-nav-badge" aria-hidden="true"></span>
+                        }
                     </a>
                 }
                 @if (isPowerUser)
@@ -94,6 +112,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2 2.8-2.8Z" />
                         </svg>
+                        @if (hasUnreadMessages)
+                        {
+                            <span class="site-nav-badge" aria-hidden="true"></span>
+                        }
                     </a>
                     <a class="site-nav-icon" asp-area="" asp-controller="Statistics" asp-action="Stats"
                        title="@localizer["Statistics"]" aria-label="@localizer["Statistics"]">
@@ -154,11 +176,18 @@
                         </svg>
                         @localizer["Account"]
                     </a>
+                }
+                @if (isLoggedIn && !isAdmin)
+                {
                     <a class="site-nav-drawer-row" asp-area="" asp-controller="Home" asp-action="Contact">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M4 6l8 7 8-7" />
                         </svg>
                         @localizer["ContactAdmin"]
+                        @if (hasUnreadMessages)
+                        {
+                            <span class="site-nav-badge-inline" aria-hidden="true"></span>
+                        }
                     </a>
                 }
                 @if (isPowerUser)
@@ -177,6 +206,10 @@
                             <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2 2.8-2.8Z" />
                         </svg>
                         @localizer["AdminActions"]
+                        @if (hasUnreadMessages)
+                        {
+                            <span class="site-nav-badge-inline" aria-hidden="true"></span>
+                        }
                     </a>
                     <a class="site-nav-drawer-row" asp-area="" asp-controller="Statistics" asp-action="Stats">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">

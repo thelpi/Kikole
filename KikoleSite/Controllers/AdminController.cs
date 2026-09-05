@@ -20,7 +20,7 @@ namespace KikoleSite.Controllers;
 public class AdminController : KikoleBaseController
 {
     private readonly IStringLocalizer<AdminController> _localizer;
-    private readonly IDiscussionRepository _discussionRepository;
+    private readonly IDiscussionService _discussionService;
     private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
 
@@ -33,7 +33,7 @@ public class AdminController : KikoleBaseController
         IPlayerService playerService,
         IBadgeService badgeService,
         ILeaderService leaderService,
-        IDiscussionRepository discussionRepository,
+        IDiscussionService discussionService,
         IHttpContextAccessor httpContextAccessor)
         : base(userRepository,
             internationalService,
@@ -44,7 +44,7 @@ public class AdminController : KikoleBaseController
             httpContextAccessor)
     {
         _localizer = localizer;
-        _discussionRepository = discussionRepository;
+        _discussionService = discussionService;
         _leaderService = leaderService;
         _messageRepository = messageRepository;
     }
@@ -103,16 +103,63 @@ public class AdminController : KikoleBaseController
     }
 
     /// <summary>
-    /// Rend la vue Actions avec ses valeurs par defaut (dates du formulaire de message,
-    /// discussions) : appele par le GET et par chacune des actions POST ci-dessus.
+    /// Rend la vue Actions avec ses valeurs par defaut (dates du formulaire de message) :
+    /// appele par le GET et par chacune des actions POST ci-dessus.
     /// </summary>
-    private async Task<IActionResult> RenderActionsAsync(AdminModel model)
+    private Task<IActionResult> RenderActionsAsync(AdminModel model)
     {
         // default : from now without ms to tomorrow 23:59:59
         model.MessageDateStart = _clock.NowSeconds;
         model.MessageDateEnd = _clock.TomorrowEnd;
-        model.Discussions = await _discussionRepository.GetDiscussionsAsync();
-        return View("Actions", model);
+        return Task.FromResult<IActionResult>(View("Actions", model));
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Discussions()
+    {
+        var discussions = await _discussionService.GetAllDiscussionsAsync();
+        return View(new AdminDiscussionsModel { Discussions = discussions });
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Discussion(ulong discussionId)
+    {
+        var summary = (await _discussionService.GetAllDiscussionsAsync())
+            .FirstOrDefault(d => d.DiscussionId == discussionId);
+
+        if (summary == null)
+            return RedirectToAction("Discussions", "Admin");
+
+        var messages = await _discussionService.GetThreadForAdminAsync(discussionId);
+
+        return View(new AdminDiscussionModel
+        {
+            DiscussionId = discussionId,
+            UserLogin = summary.UserLogin,
+            Messages = messages
+        });
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Discussion(AdminDiscussionModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.NewMessage))
+            model.ErrorMessage = _localizer["InvalidMessage"];
+        else
+            await _discussionService.PostAdminReplyAsync(model.DiscussionId, model.NewMessage);
+
+        var summary = (await _discussionService.GetAllDiscussionsAsync())
+            .FirstOrDefault(d => d.DiscussionId == model.DiscussionId);
+
+        if (summary != null)
+            model.UserLogin = summary.UserLogin;
+        model.Messages = await _discussionService.GetThreadForAdminAsync(model.DiscussionId);
+        model.NewMessage = null;
+
+        return View(model);
     }
 
     [HttpGet]

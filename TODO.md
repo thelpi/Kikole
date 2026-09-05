@@ -571,15 +571,68 @@ Branche de travail : `remaster-v2`.
       qu'un rejeu futur reste cohérent avec la base actuelle. `joueur2` inchangé
       (`test123`) : il partageait jusqu'ici le même hash que `joueur1` dans le script,
       désormais deux littéraux séparés puisque leurs mots de passe divergent.
-- [ ] **Page Contact : remplacer l'email par une vraie logique d'échange dans le site.**
-      `Home/Contact.cshtml` demande une adresse email de contact alors que la page crée
-      déjà une vraie discussion en base (`DiscussionDto`, table `discussions`, liée à
-      `UserId`) — l'email est redondant avec le compte déjà connecté. Remplacer par un
-      vrai fil de discussion questions/réponses dans le site (l'utilisateur voit ses
-      échanges, l'admin répond depuis quelque part) plutôt qu'un formulaire à sens unique.
-      Implique une vue admin pour répondre (`AdminController` n'a aujourd'hui qu'un
-      affichage brut des discussions sur `Admin/Actions`, sans réponse possible) — chantier
-      à cadrer avant de s'y attaquer.
+- [x] **Page Contact : remplacer l'email par une vraie logique d'échange dans le site.**
+      `Home/Contact.cshtml` demandait une adresse email alors que la page créait déjà une
+      ligne en base liée à `UserId` — l'email était redondant avec le compte déjà
+      connecté, et il n'existait aucun moyen de répondre. Remplacé par un vrai fil de
+      discussion, une par utilisateur (jamais initiée par l'admin), avec accusé de
+      lecture et pastille "à lire" dans le menu.
+      **Schéma** : `discussions` redéfinie (`id, user_id` UNIQUE+FK, `creation_date` —
+      plus d'`email`/`message`/`update_date`, ce dernier délibérément absent pour éviter
+      un champ dénormalisé à resynchroniser à chaque insert : le tri "dernière activité"
+      côté admin passe par un `MAX(creation_date)` joint sur la nouvelle table plutôt).
+      Nouvelle table `discussion_messages` (`id, discussion_id, message, creation_date,
+      is_from_admin, is_read`) — un bool explicite plutôt qu'un ID de message précédent
+      pour indiquer l'auteur : pas de threading non-linéaire à modéliser ici, les
+      messages d'un fil sont déjà strictement ordonnés par date. Base locale recréée
+      directement (confirmé : pas de données à migrer), `kikole.sql`/`kikole_mock.sql`
+      mis à jour en miroir.
+      **Backend** : `IDiscussionRepository`/`DiscussionRepository` entièrement
+      redessinés (get-or-create, marquage lu/non-lu, requête agrégée pour la liste admin
+      avec jointure sur `users` pour le login, évite le N+1). Nouvelle couche
+      `IDiscussionService`/`DiscussionService` — contrairement à avant (contrôleurs
+      parlant directement au dépôt), justifiée ici par 3 points d'appel différents (page
+      Contact, inbox admin, layout pour la pastille) qui doivent tous appliquer la même
+      logique de marquage lu/non-lu.
+      **L'admin n'a pas de fil personnel** : comme il n'initie jamais de discussion,
+      l'icône "Contact" du menu lui est désormais masquée (`isLoggedIn && !isAdmin`,
+      vérifié en direct desktop + tiroir mobile) et `HomeController.Contact` le
+      redirige quand même vers `Admin/Discussions` en ceinture-bretelles. Son point
+      d'entrée devient l'icône "Actions admin" existante, via un lien texte sur
+      `Admin/Actions.cshtml` (même schéma que `CheckSubmittedPlayers`) vers deux
+      nouvelles vues : `Admin/Discussions.cshtml` (liste, pastille "non lu" par
+      utilisateur) → `Admin/Discussion.cshtml` (historique + réponse), même principe
+      liste→détail que `Leaderboard/Index.cshtml`→`User.cshtml`. La table brute
+      auparavant sur `Admin/Actions.cshtml` (non localisée, `@Html.Raw` sans échappement)
+      a disparu avec.
+      **Rendu du fil** partagé entre `Home/Contact.cshtml` et `Admin/Discussion.cshtml`
+      via un nouveau partial (`Shared/Partial/DiscussionThread.cshtml`, le premier de ce
+      projet à vivre sous `Views/Shared/` plutôt que sous le contrôleur qui l'utilise,
+      puisque celui-ci est réellement partagé entre deux contrôleurs) : purement de la
+      présentation (bulles "self"/"other"), chaque vue appelante fournit ses propres
+      libellés ("Vous"/"Admin" côté utilisateur, "Vous"/le login côté admin) — le
+      partial n'a pas sa propre resx, pas besoin de connaître le point de vue.
+      **Pastille "à lire"** (`.site-nav-badge`/`-inline`, palette `--stamp` déjà "à
+      traiter" dans ce projet) : calculée directement dans `_Layout.cshtml` via
+      `@inject IDiscussionService` et un appel dans le bloc `@{ }` existant (comme
+      `localizer` déjà injecté) plutôt qu'un `ViewComponent` — jamais utilisé dans ce
+      projet, disproportionné pour un seul badge.
+      `IDiscussionService.HasUnreadMessagesAsync(userId, isAdmin)` (un seul point d'entrée
+      avec un bool) repérée après coup comme mal conçue : `userId` devient mort quand
+      `isAdmin` est vrai, et rien n'empêchait un appelant de passer une combinaison
+      incohérente (ex. un `userId` d'administrateur avec `isAdmin: false`). Éclatée en
+      deux méthodes (`HasUnreadMessagesForUserAsync(userId)` /
+      `HasUnreadMessagesForAdminAsync()`), miroir de ce qui existait déjà à ce niveau
+      côté repository — la fusion en un seul point d'entrée n'apportait rien et
+      recréait exactement le problème que le repository évitait déjà.
+      Testé (`DiscussionServiceTests`, 9 nouveaux tests : get-or-create au premier
+      message seulement, pas de création sur une simple lecture de fil vide, marquage
+      lu/non-lu dans les deux sens, bascule utilisateur/admin de la pastille). Vérifié
+      en direct de bout en bout : `joueur1` envoie un message (fil vide → échange
+      affiché, pas de pastille), `admin` voit la pastille sur "Actions admin", ouvre le
+      fil (pastille de la ligne disparaît), répond ; retour `joueur1` : pastille sur
+      "Contact", fil à jour, pastille disparaît après lecture. Icône "Contact" confirmée
+      absente du menu admin (desktop et tiroir mobile) tout du long.
 - [ ] **Revoir complètement le footer.** Réduit à la mention de copyright après avoir
       retiré "Proposer un kikolé !"/"Contact" (redondants avec le nouveau menu, cf.
       ci-dessus) et "Vous aimez le vélo ?" (lien personnel, retiré à la demande) — il ne

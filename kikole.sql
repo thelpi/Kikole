@@ -1185,10 +1185,16 @@ INSERT INTO country_translations (country_id, language_id, `name`) VALUES
 CREATE TABLE discussions (
   id bigint(20) UNSIGNED NOT NULL,
   user_id bigint(20) UNSIGNED NOT NULL,
-  email varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  creation_date datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE discussion_messages (
+  id bigint(20) UNSIGNED NOT NULL,
+  discussion_id bigint(20) UNSIGNED NOT NULL,
   message text COLLATE utf8mb4_unicode_ci NOT NULL,
   creation_date datetime NOT NULL,
-  update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  is_from_admin tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  is_read tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE languages (
@@ -1382,7 +1388,11 @@ ALTER TABLE country_translations
 
 ALTER TABLE discussions
   ADD PRIMARY KEY (id),
-  ADD KEY user_id (user_id);
+  ADD UNIQUE KEY user_id (user_id);
+
+ALTER TABLE discussion_messages
+  ADD PRIMARY KEY (id),
+  ADD KEY discussion_id (discussion_id);
 
 ALTER TABLE languages
   ADD PRIMARY KEY (id),
@@ -1460,6 +1470,8 @@ ALTER TABLE countries
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE discussions
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE discussion_messages
+  MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE languages
   MODIFY id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE leaders
@@ -1511,6 +1523,9 @@ ALTER TABLE country_translations
 
 ALTER TABLE discussions
   ADD CONSTRAINT fk_discussions_user_id FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE discussion_messages
+  ADD CONSTRAINT fk_discussion_messages_discussion_id FOREIGN KEY (discussion_id) REFERENCES discussions (id);
 
 ALTER TABLE leaders
   ADD CONSTRAINT fk_leaders_user_id FOREIGN KEY (user_id) REFERENCES users (id);

@@ -1,5 +1,6 @@
+@using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
-@model ContactModel
+@model AdminDiscussionModel
 
 <div class="kikole-board">
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -7,21 +8,22 @@
         <div class="banner error">@Model.ErrorMessage</div>
     }
     <div class="form-card">
-        <h3>@localizer["ContactAdmin"]</h3>
+        <h3>@Model.UserLogin</h3>
         @{
             var threadModel = new DiscussionThreadModel
             {
                 Messages = Model.Messages,
-                ViewerIsAdmin = false,
+                ViewerIsAdmin = true,
                 SelfLabel = localizer["FromYou"].Value,
-                OtherLabel = localizer["FromAdmin"].Value,
+                OtherLabel = Model.UserLogin,
                 NoMessagesText = localizer["NoMessagesYet"].Value
             };
         }
         @await Html.PartialAsync("Partial/DiscussionThread", threadModel)
-        <form method="post" action="/Home/Contact">
+        <form method="post">
+            @Html.HiddenFor(m => m.DiscussionId)
             <div class="form-field">
-                <label>@localizer["YourMessage"]</label>
+                <label>@localizer["YourReply"]</label>
                 @Html.TextAreaFor(m => m.NewMessage, new { @class = "blank" })
             </div>
             <div class="actions">
@@ -29,4 +31,5 @@
             </div>
         </form>
     </div>
+    <div><a asp-controller="Admin" asp-action="Discussions">@localizer["BackToList"]</a></div>
 </div>

@@ -120,9 +120,6 @@
   <data name="AuthenticationRequired" xml:space="preserve">
     <value>Vous devez être connecté et avoir les autorisations nécessaires pour effectuer cette action.</value>
   </data>
-  <data name="InvalidEmail" xml:space="preserve">
-    <value>L'email est vide.</value>
-  </data>
   <data name="InvalidGuess" xml:space="preserve">
     <value>Proposition {0} incorrecte.{1}</value>
   </data>
@@ -131,9 +128,6 @@
   </data>
   <data name="InvalidRequest" xml:space="preserve">
     <value>Requête invalide</value>
-  </data>
-  <data name="SuccessContactSent" xml:space="preserve">
-    <value>Message envoyé avec succès.</value>
   </data>
   <data name="ValidGuess" xml:space="preserve">
     <value>Proposition {0} correcte.</value>
