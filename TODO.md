@@ -562,6 +562,18 @@ Branche de travail : `remaster-v2`.
       ci-dessus) et "Vous aimez le vélo ?" (lien personnel, retiré à la demande) — il ne
       reste presque plus rien dedans, l'occasion de repenser ce qui doit vraiment y vivre
       plutôt que de le laisser à l'état de résidu.
+- [ ] **Dépendances front datées, à moderniser.** Chargées en prod uniquement en CDN, sans
+      fallback ni SRI : jQuery **1.12.4** (`_Layout.cshtml`, sortie en 2016, ligne 1.x
+      abandonnée — actuelle : 3.7.x), jQuery UI **1.12.1** (même génération, utilisé pour
+      l'autocomplétion club/pays/année et les datepickers — pas anodin à toucher),
+      Bootstrap **3.4.1** en CDN mais **3.3.7** dans le fallback local
+      (`wwwroot/lib/bootstrap/.bower.json`, versions divergentes entre les deux chemins) —
+      Bootstrap 3 lui-même très daté (actuel : Bootstrap 5, classes CSS différentes,
+      rupture probable sur les vues qui en dépendent). Repéré au passage, mort : `wwwroot
+      /lib/jquery` (3.3.1), `jquery-validation`, `jquery-validation-unobtrusive` présents
+      sur disque mais jamais chargés par `_Layout.cshtml` — résidus du scaffold ASP.NET MVC
+      d'origine. Chantier à part entière (rupture potentielle jQuery UI et Bootstrap 3→5),
+      pas juste un bump de version — à cadrer avant de s'y lancer.
 - [ ] **Fusionner `Statistics/KikolesStats` dans `Statistics/Stats`**, en bloc
       "collapsible" au même titre que "Répartition des joueurs par critère" et "Nombre
       d'utilisateurs actifs" déjà présents sur cette page — plutôt que la page séparée
