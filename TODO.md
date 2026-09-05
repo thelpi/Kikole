@@ -331,14 +331,18 @@ Branche de travail : `remaster-v2`.
         anglais verrait donc du français ici. Pas corrigé maintenant (pur travail de style
         cette fois-ci) — prévoir l'ajout d'un `Palmares.fr.resx`/`Palmares.en.resx` le jour
         où on y touche pour autre chose que du visuel.
-  - [ ] **Certains badges peuvent-ils donner un indice gratuit par le seul fait d'être
-        obtenus ?** Tout le monde peut voir les badges de tout le monde. À date, les noms
-        de badges (`Models/Enums/Badges.cs`) semblent plutôt liés au comportement du joueur
-        qui les obtient (régularité, rapidité, absence d'indice...) qu'à une caractéristique
-        du footballeur du jour — donc a priori pas de fuite directe. À vérifier badge par
-        badge dans `BadgeService.cs` pour être sûr qu'aucun n'est conditionné par un trait
-        du joueur cherché (ex. son poste, sa nationalité), ce qui serait un indice gratuit
-        dès qu'on voit quelqu'un l'obtenir en cours de journée.
+  - [x] **Certains badges peuvent-ils donner un indice gratuit par le seul fait d'être
+        obtenus ?** Tout le monde peut voir les badges de tout le monde. **Vérifié :** la
+        règle est déjà en place et testée (`BadgeService.GetUserBadgesAsync`, paramètre
+        `foundToday`) — tant qu'on n'a pas trouvé le joueur du jour (et qu'on n'est ni
+        administrateur, ni le créateur du joueur du jour, ni passé par l'accès payant au
+        classement — cf. `DayGrantTypes`), on ne voit aucun badge obtenu par un autre
+        utilisateur *le jour même*, quel que soit le badge (pas seulement les badges
+        secrets). Confirmé par les tests unitaires existants
+        (`FoundTodayFalseExcludesBadgesEarnedToday` et les tests voisins dans
+        `BadgeServiceTests.cs`) et re-vérifié en direct dans le navigateur (joueur2, qui
+        n'avait pas trouvé le joueur du jour, ne voyait pas les badges du jour de joueur1 ;
+        un compte administrateur les voyait). Aucun changement de code nécessaire.
   - [ ] **Bug graphique : superposition des blocs beige au moment de la victoire.**
         Une fois le joueur trouvé, quand la page s'affiche avec les badges puis le bloc
         présentation/règles en dessous, un rendu bizarre apparaît (les blocs beige se
