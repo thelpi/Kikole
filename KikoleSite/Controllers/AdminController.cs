@@ -578,11 +578,17 @@ public class AdminController : KikoleBaseController
 
     private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
     {
+        // countries/continents sont independants de pls (et l'un de l'autre) : partent
+        // en // de la chaine countryContinents -> pls, qui elle reste sequentielle
+        var countriesTask = GetCountriesAsync();
+
+        var continentsTask = GetContinentsAsync();
+
         var pls = await _playerService.GetPlayerSubmissionsAsync(await _internationalService.GetCountryContinentsAsync());
 
-        var countries = await GetCountriesAsync();
+        var countries = await countriesTask;
 
-        var continents = await GetContinentsAsync();
+        var continents = await continentsTask;
 
         return pls
             .Select(p => new PlayerSubmissionModel

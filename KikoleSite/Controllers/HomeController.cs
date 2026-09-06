@@ -216,10 +216,15 @@ public class HomeController : KikoleBaseController
 
         var daysBefore = (uint)model.CurrentDay;
 
-        var pInfo = await _playerService
+        // independants l'un de l'autre : partent en // plutot qu'en sequence
+        var pInfoTask = _playerService
             .GetPlayerOfTheDayFullInfoAsync(_clock.Today.AddDays(-daysBefore));
 
-        var countryContinents = await _internationalService.GetCountryContinentsAsync();
+        var countryContinentsTask = _internationalService.GetCountryContinentsAsync();
+
+        var pInfo = await pInfoTask;
+
+        var countryContinents = await countryContinentsTask;
 
         var ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
@@ -369,17 +374,34 @@ public class HomeController : KikoleBaseController
         IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var proposalDate = model.DateOfDay;
+        var language = ViewHelper.GetLanguage();
 
-        var playerCreator = UserId > 0
-            ? await _playerService
-                .GetPlayerOfTheDayFromUserPovAsync(UserId, proposalDate)
+        // independants les uns des autres (le streak ne depend meme de rien d'autre dans
+        // cette methode) : partent tous en // plutot qu'en sequence
+        Task<PlayerCreator>? playerCreatorTask = UserId > 0
+            ? _playerService.GetPlayerOfTheDayFromUserPovAsync(UserId, proposalDate)
             : null;
 
-        var clue = await _playerService
-            .GetPlayerClueAsync(proposalDate, false, ViewHelper.GetLanguage());
+        var clueTask = _playerService.GetPlayerClueAsync(proposalDate, false, language);
 
-        var easyClue = await _playerService
-            .GetPlayerClueAsync(proposalDate, true, ViewHelper.GetLanguage());
+        var easyClueTask = _playerService.GetPlayerClueAsync(proposalDate, true, language);
+
+        Task<UserStreak>? streakTask = UserId > 0
+            ? _leaderService.GetUserStreakAsync(UserId)
+            : null;
+
+        var playerCreator = playerCreatorTask == null ? null : await playerCreatorTask;
+
+        var clue = await clueTask;
+
+        var easyClue = await easyClueTask;
+
+        // alimentes par la branche "proposals" ci-dessous quand elle s'execute ; sinon
+        // recalcules paresseusement par le bloc final plus bas (IInternationalService ne
+        // cache rien : sans ce partage, un joueur trouve ou un createur ferait deux fois
+        // le meme aller-retour pour ces deux referentiels dans la meme requete)
+        IReadOnlyDictionary<ulong, string>? countries = null;
+        IReadOnlyDictionary<ulong, string>? continents = null;
 
         if (UserId > 0)
         {
@@ -389,17 +411,24 @@ public class HomeController : KikoleBaseController
             }
             else
             {
-                var proposals = await _proposalService
+                var proposalsTask = _proposalService
                     .GetProposalsAsync(proposalDate, UserId, countryContinents);
 
-                var countries = await GetCountriesAsync();
+                var countriesTask = GetCountriesAsync();
 
-                var continents = await GetContinentsAsync();
+                var continentsTask = GetContinentsAsync();
+
+                var clubsTask = _internationalService.GetClubsAsync();
+
+                var proposals = await proposalsTask;
+
+                countries = await countriesTask;
+
+                continents = await continentsTask;
 
                 var positions = GetPositions();
 
-                var language = ViewHelper.GetLanguage();
-                var clubs = (await _internationalService.GetClubsAsync())
+                var clubs = (await clubsTask)
                     .ToDictionary(c => c.Id, c => c.GetCanonicalName(language));
 
                 foreach (var p in proposals)
@@ -429,9 +458,7 @@ public class HomeController : KikoleBaseController
 
         model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
         model.LoggedAs = UserLogin;
-        model.Streak = UserId > 0
-            ? await _leaderService.GetUserStreakAsync(UserId)
-            : null;
+        model.Streak = streakTask == null ? null : await streakTask;
         model.Positions = new[] { new SelectListItem("", "0") }
             .Concat(GetPositions()
                 .Select(p => new SelectListItem(p.Value, p.Key.ToString())))
@@ -447,9 +474,9 @@ public class HomeController : KikoleBaseController
             var pp = await _playerService
                 .GetPlayerOfTheDayFullInfoAsync(proposalDate);
 
-            var countries = await GetCountriesAsync();
+            countries ??= await GetCountriesAsync();
 
-            var continents = await GetContinentsAsync();
+            continents ??= await GetContinentsAsync();
 
             model.CountryName = countries.FirstOrDefault(c => c.Key == pp.Player.CountryId).Value;
             if (pp.Player.AlternativeCountryId.HasValue

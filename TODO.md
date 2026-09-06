@@ -1267,34 +1267,47 @@ Branche de travail : `remaster-v2`.
       rien d'observable), les dépôts (décision actée plus haut), et les branches
       d'`AdminController`/`HomeController`/`LeaderboardController` non retouchées par le
       chantier ci-dessous.
-- [ ] **Parallélisation d'appels service/repo independants, repérés en auditant les
+- [x] **Parallélisation d'appels service/repo independants, repérés en auditant les
       contrôleurs à la demande de l'utilisateur** (juste après l'ajout du "streak" ci-dessus).
       Vérifié au préalable : `BaseRepository` ouvre une connexion MySQL neuve à chaque
       appel (pas de connexion/contexte partagé façon EF), donc paralléliser des appels
-      repo indépendants est sans risque de ce côté. Analysé mais pas encore implémenté —
-      les tests de l'item ci-dessus doivent rester verts après coup, c'est tout leur rôle :
-      - `HomeController.Index` (POST) : `pInfo`/`countryContinents`
-        ([HomeController.cs:219-222](KikoleSite/Controllers/HomeController.cs)), appelés
-        après toutes les validations donc sans travail gâché possible.
-      - `HomeController.SetAndGetViewModelAsync` : `playerCreator`/`clue`/`easyClue` (+ le
-        futur calcul de `Streak`, qui ne dépend de rien d'autre dans la méthode — peut
-        partir en même temps que les trois précédents) ; puis, dans la branche "pas
-        créateur", `proposals`/`countries`/`continents`/`clubs`. Au passage : `countries`/
-        `continents` sont aujourd'hui **rappelés une seconde fois** plus loin dans la même
-        méthode (bloc "joueur trouvé") — `IInternationalService` ne cache rien, donc ce
-        n'est pas qu'une histoire de parallélisme, il faut calculer une fois et réutiliser.
+      repo indépendants est sans risque de ce côté. Les 6 candidats sûrs, tous implémentés
+      selon le même patron déjà en place dans `LeaderboardController.InitializeModelAsync`
+      (démarrer les `Task` avant le premier `await`, puis les attendre dans l'ordre où le
+      résultat est utilisé — pas de `Task.WhenAll`, juste des variables de tâche) :
+      - `HomeController.Index` (POST) : `pInfo`/`countryContinents`, appelés après toutes
+        les validations donc sans travail gâché possible.
+      - `HomeController.SetAndGetViewModelAsync` : `playerCreator`/`clue`/`easyClue`/
+        `Streak` (ce dernier ne dépendait de rien d'autre dans la méthode — sorti de sa
+        position d'origine, en toute fin, pour partir en même temps que les trois
+        précédents) ; puis, dans la branche "pas créateur", `proposals`/`countries`/
+        `continents`/`clubs`. Au passage, le vrai bug corrigé (pas qu'une histoire de
+        parallélisme) : `countries`/`continents` étaient **rappelés une seconde fois** plus
+        loin dans la même méthode (bloc "joueur trouvé") alors qu'`IInternationalService`
+        ne cache rien — les deux variables sont maintenant déclarées en tête de méthode
+        (`null` par défaut), remplies par la branche "proposals" si elle s'exécute, sinon
+        calculées paresseusement (`??=`) par le bloc final : un seul aller-retour DB dans
+        tous les cas, jamais deux.
       - `LeaderboardController.UserDay` : `db` (`GetDayboardAsync`)/`proposals`
         (`GetProposalsAsync`), une fois `countryContinents` résolu et toutes les gardes
-        d'accès passées (donc sans le compromis "travail gâché sur un accès refusé" qui
-        écarte de paralléliser la chaîne de gardes elle-même, cf. plus bas).
-      - `AdminController.GetPlayerSubmissionsList` : `countries`/`continents`, indépendants
-        entre eux et de `pls`, utilisé par 3 points d'entrée (`PlayerSubmission`,
-        accepter/refuser, `ChoosePlayer`).
+        d'accès passées.
+      - `AdminController.GetPlayerSubmissionsList` : `countries`/`continents` démarrés
+        avant la chaîne séquentielle `countryContinents` → `pls` (qui, elle, reste
+        obligatoirement séquentielle).
       - `LeaderboardController.GetDailyboardAsync` (privée) : `todayGrantEnsured` et
-        `EnsureDateAsync(date, DayGrantTypes.Found)` — ce dernier ne lit jamais
-        `todayGrant`, il reçoit une valeur fixe.
+        `EnsureDateAsync(date, DayGrantTypes.Found)` — ce dernier ne lisant jamais
+        `todayGrant` (valeur fixe passée en argument), les deux sont indépendants ;
+        `todayGrant` déjà connu (non `null`) est enveloppé dans `Task.FromResult` pour
+        garder la même structure "deux tâches démarrées ensemble" sans appel réseau en trop.
       - `LeaderboardController.GetLeaderboardAsync` (privée) : les deux `EnsureDateAsync`
-        (min/max) sont indépendants entre eux — gain mineur.
+        (min/max), indépendants entre eux.
+      **Vérifié** : `dotnet build` (0 avertissement), `dotnet test` (623 tests toujours
+      verts, y compris les 22 nouveaux du point précédent — écrits justement pour ça, sans
+      aucune modification nécessaire côté tests) ; en direct dans le navigateur (`joueur1`) :
+      page d'accueil (bandeau série + cadran corrects), achat du classement du jour en POST
+      (`-25 pts`, aucune erreur serveur), page `/Leaderboard` (tableau du jour, classement
+      général, podiums — tous alimentés par les méthodes retouchées) — aucune erreur dans
+      les logs serveur sur l'ensemble de la session.
       Étudié et volontairement écarté (compromis réel, pas juste "pas encore fait") :
       les badges après une victoire (`PrepareNewLeaderBadgesAsync`/
       `PrepareNonLeaderBadgesAsync`, `HomeController.Index` POST) — `Badges.Dedicated`

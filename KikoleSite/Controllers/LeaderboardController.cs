@@ -123,11 +123,17 @@ public class LeaderboardController : KikoleBaseController
 
         var countryContinents = await _internationalService.GetCountryContinentsAsync();
 
-        var db = await _leaderService
+        // toutes les gardes d'acces sont deja passees a ce stade : plus de travail a
+        // eviter en cas de refus, db/proposals peuvent partir en // sans compromis
+        var dbTask = _leaderService
             .GetDayboardAsync(actualDate.Date, DayLeaderSorts.BestTime, countryContinents);
 
-        var proposals = await _proposalService
+        var proposalsTask = _proposalService
             .GetProposalsAsync(actualDate.Date, userId, countryContinents);
+
+        var db = await dbTask;
+
+        var proposals = await proposalsTask;
 
         var items = new List<UserDayItemModel>(proposals.Count);
         foreach (var proposal in proposals)
@@ -219,8 +225,12 @@ public class LeaderboardController : KikoleBaseController
             return (new List<Models.LeaderboardItem>(), todayGrantEnsured);
         }
 
-        minDate = await EnsureDateAsync(minDate, todayGrantEnsured);
-        maxDate = await EnsureDateAsync(maxDate, todayGrantEnsured);
+        // independants l'un de l'autre : partent en //
+        var minDateTask = EnsureDateAsync(minDate, todayGrantEnsured);
+        var maxDateTask = EnsureDateAsync(maxDate, todayGrantEnsured);
+
+        minDate = await minDateTask;
+        maxDate = await maxDateTask;
 
         if (maxDate < minDate)
         {
@@ -238,10 +248,17 @@ public class LeaderboardController : KikoleBaseController
     private async Task<(Models.Dayboard, DayGrantTypes)> GetDailyboardAsync(
         DateTime date, DayLeaderSorts sortType, DayGrantTypes? todayGrant)
     {
-        var todayGrantEnsured = todayGrant ?? await _proposalService
-            .GetGrantAccessForDayAsync(UserId, _clock.Today);
+        // EnsureDateAsync ci-dessous recoit une valeur figee (DayGrantTypes.Found), pas
+        // todayGrant : les deux sont donc independants et partent en //
+        var todayGrantTask = todayGrant.HasValue
+            ? Task.FromResult(todayGrant.Value)
+            : _proposalService.GetGrantAccessForDayAsync(UserId, _clock.Today);
 
-        date = await EnsureDateAsync(date, DayGrantTypes.Found); // any DayGrantTypes but "None"
+        var dateTask = EnsureDateAsync(date, DayGrantTypes.Found); // any DayGrantTypes but "None"
+
+        var todayGrantEnsured = await todayGrantTask;
+
+        date = await dateTask;
 
         Dayboard dayboard;
         if (date == _clock.Today && todayGrantEnsured == DayGrantTypes.None)
