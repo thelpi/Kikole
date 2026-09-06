@@ -452,6 +452,11 @@ Branche de travail : `remaster-v2`.
         le seuil).
       Couverture de `BadgeService` désormais complète sur les deux lots identifiés à
       l'audit initial.
+- [ ] **Refaire une passe sur les badges éventuellement manquants**, demandé par
+      l'utilisateur. Portée pas encore précisée avec lui : à clarifier au démarrage de ce
+      chantier — badges déjà définis (`Badges`, `BadgeService`) mais dont une condition
+      resterait non couverte ou buguée, ou nouvelles idées de badges pas encore
+      implémentées. Rien commencé.
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à
