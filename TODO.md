@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **577** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **623** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -1237,6 +1237,76 @@ Branche de travail : `remaster-v2`.
       a besoin de son résultat. Option choisie plutôt que le chargement par bloc en AJAX
       (l'autre option proposée) : gain similaire pour un changement contenu à une seule
       méthode, sans toucher au rendu de la page ni à `site.js`.
+- [x] **`HomeController`/`LeaderboardController`/le reste d'`AdminController` sortis du
+      "hors périmètre" test acté plus haut** (le motif invoqué à l'époque —
+      `SignInManager<ApplicationUser>` ne peut pas se mocker via une interface — a une
+      solution standard restée non essayée jusqu'ici). Nouveau `IdentityMocks.cs`
+      (`KikoleSiteUnitTests/Controllers/`) : `UserManager<TUser>`/`SignInManager<TUser>`
+      sont des classes concrètes, mais la quasi-totalité de leurs membres sont `virtual` —
+      Moq peut donc les mocker en leur fournissant des dépendances bouchon pour satisfaire
+      le constructeur, sans jamais réellement appeler leurs méthodes (aucune action testée
+      de `HomeController` ne passe par `_signInManager`, seul `Error()` l'utilise). 22
+      nouveaux tests, en filet de régression avant le chantier de parallélisation ci-dessous
+      (les scénarios fixent le comportement observable actuel, pas l'ordre séquentiel/
+      parallèle des appels) :
+      - `HomeControllerTests.cs` (10) : `Index` GET (visiteur anonyme, connecté non-créateur
+        pas encore trouvé, créateur, joueur trouvé via proposition — ce dernier exerce à la
+        fois la branche "proposals" et le bloc final, les deux endroits qui rappellent
+        `countries`/`continents`) et `Index` POST (modèle nul, action de soumission
+        illisible, valeur invalide donc réentrance dans le GET, proposition valide gagnante/
+        perdante, abandon "Give up").
+      - `LeaderboardControllerTests.cs` (10) : `UserDay` (chemin nominal + 5 gardes d'accès
+        qui redirigent), `GetGlobalLeaderboardDetailsAsync`/`GetDailyLeaderboardDetailsAsync`
+        (dont le cas masqué faute de droit sur le jour), `Index` sans `userId` (assemble
+        dayboard/classement/podiums via `InitializeModelAsync`).
+      - `AdminControllerTests.cs` (2) : `PlayerSubmission` (mappage pays/continent) et le
+        garde "plus rien à valider" partagé par `AcceptPlayer`/`RefusePlayer`/`ChoosePlayer`.
+      Reste hors périmètre sans changement : `AccountController` (Identity y est appelé
+      pour de vrai sur presque chaque action — `UserManager.CreateAsync`/
+      `SignInManager.PasswordSignInAsync`/etc. — donc les mocker ne fixerait quasiment
+      rien d'observable), les dépôts (décision actée plus haut), et les branches
+      d'`AdminController`/`HomeController`/`LeaderboardController` non retouchées par le
+      chantier ci-dessous.
+- [ ] **Parallélisation d'appels service/repo independants, repérés en auditant les
+      contrôleurs à la demande de l'utilisateur** (juste après l'ajout du "streak" ci-dessus).
+      Vérifié au préalable : `BaseRepository` ouvre une connexion MySQL neuve à chaque
+      appel (pas de connexion/contexte partagé façon EF), donc paralléliser des appels
+      repo indépendants est sans risque de ce côté. Analysé mais pas encore implémenté —
+      les tests de l'item ci-dessus doivent rester verts après coup, c'est tout leur rôle :
+      - `HomeController.Index` (POST) : `pInfo`/`countryContinents`
+        ([HomeController.cs:219-222](KikoleSite/Controllers/HomeController.cs)), appelés
+        après toutes les validations donc sans travail gâché possible.
+      - `HomeController.SetAndGetViewModelAsync` : `playerCreator`/`clue`/`easyClue` (+ le
+        futur calcul de `Streak`, qui ne dépend de rien d'autre dans la méthode — peut
+        partir en même temps que les trois précédents) ; puis, dans la branche "pas
+        créateur", `proposals`/`countries`/`continents`/`clubs`. Au passage : `countries`/
+        `continents` sont aujourd'hui **rappelés une seconde fois** plus loin dans la même
+        méthode (bloc "joueur trouvé") — `IInternationalService` ne cache rien, donc ce
+        n'est pas qu'une histoire de parallélisme, il faut calculer une fois et réutiliser.
+      - `LeaderboardController.UserDay` : `db` (`GetDayboardAsync`)/`proposals`
+        (`GetProposalsAsync`), une fois `countryContinents` résolu et toutes les gardes
+        d'accès passées (donc sans le compromis "travail gâché sur un accès refusé" qui
+        écarte de paralléliser la chaîne de gardes elle-même, cf. plus bas).
+      - `AdminController.GetPlayerSubmissionsList` : `countries`/`continents`, indépendants
+        entre eux et de `pls`, utilisé par 3 points d'entrée (`PlayerSubmission`,
+        accepter/refuser, `ChoosePlayer`).
+      - `LeaderboardController.GetDailyboardAsync` (privée) : `todayGrantEnsured` et
+        `EnsureDateAsync(date, DayGrantTypes.Found)` — ce dernier ne lit jamais
+        `todayGrant`, il reçoit une valeur fixe.
+      - `LeaderboardController.GetLeaderboardAsync` (privée) : les deux `EnsureDateAsync`
+        (min/max) sont indépendants entre eux — gain mineur.
+      Étudié et volontairement écarté (compromis réel, pas juste "pas encore fait") :
+      les badges après une victoire (`PrepareNewLeaderBadgesAsync`/
+      `PrepareNonLeaderBadgesAsync`, `HomeController.Index` POST) — `Badges.Dedicated`
+      n'est aujourd'hui jamais inséré par les deux méthodes à la fois, mais
+      `BadgeService.InsertBadgeIfNotAlreadyAsync` fait un check-then-insert sans contrainte
+      d'unicité en base (`user_id`, `badge_id`) : paralléliser recréerait une vraie race
+      condition le jour où un badge finirait par être atteignable par les deux chemins ; la
+      chaîne de gardes de `UserDay` (`user`/`canSee`/`player`, chacune pouvant interrompre
+      la requête) ; `AdminController.Index(PlayerCreationModel)` POST, où `clubsReferential`
+      n'est chargé qu'après validation du formulaire (paresse volontaire, cas fréquent de
+      re-soumission après une faute de frappe) ; `AccountController.Create`, où
+      `FindByNameAsync` est court-circuité si déjà rate-limité.
 
 **Volontairement en dernier :** le seul poste qui ne bloque rien et ne se déprécie pas.
 
