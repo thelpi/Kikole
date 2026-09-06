@@ -14,23 +14,44 @@ $(function () {
     });
 });
 
-/* bandeau d'annonce admin (Partial/Announcement, Home/Index.cshtml) : replier/deplier
-   est purement local a la page (pas de persistance), "ne plus afficher" persiste
-   l'id du message dans un cookie pour ne pas le remontrer aux prochaines visites -
-   un futur message (autre id) n'est donc jamais masque par erreur. */
+/* bandeau d'annonce admin (Partial/Announcement, Home/Index.cshtml) : l'etat
+   replie/deplie persiste (localStorage, cle par id de message) pour survivre a un
+   changement de page - un futur message (autre id) redemarre toujours deplie.
+   "ne plus afficher" persiste l'id du message dans un cookie pour ne pas le
+   remontrer aux prochaines visites - un futur message (autre id) n'est donc jamais
+   masque par erreur. */
 $(function () {
     var $announcement = $(".kikole-board .announcement");
     if ($announcement.length === 0) {
         return;
     }
 
-    $announcement.find(".announcement-toggle").on("click", function () {
+    var messageId = $announcement.data("messageId");
+    var collapseStorageKey = "kikoleCollapsedAnnouncement";
+    var $toggle = $announcement.find(".announcement-toggle");
+
+    var storedCollapsedId = null;
+    try {
+        storedCollapsedId = localStorage.getItem(collapseStorageKey);
+    } catch (e) { /* stockage indisponible (navigation privee, etc.) */ }
+    if (messageId && storedCollapsedId === String(messageId)) {
+        $announcement.addClass("collapsed");
+        $toggle.attr("aria-expanded", "false");
+    }
+
+    $toggle.on("click", function () {
         var collapsed = $announcement.toggleClass("collapsed").hasClass("collapsed");
         $(this).attr("aria-expanded", collapsed ? "false" : "true");
+        try {
+            if (collapsed && messageId) {
+                localStorage.setItem(collapseStorageKey, String(messageId));
+            } else {
+                localStorage.removeItem(collapseStorageKey);
+            }
+        } catch (e) { /* stockage indisponible */ }
     });
 
     $announcement.find(".announcement-dismiss").on("click", function () {
-        var messageId = $announcement.data("messageId");
         if (messageId) {
             var cookieName = "kikoleDismissedAnnouncements";
             var existingRow = document.cookie.split("; ").find(function (row) {
@@ -43,6 +64,11 @@ $(function () {
             var expires = new Date();
             expires.setFullYear(expires.getFullYear() + 1);
             document.cookie = cookieName + "=" + ids.join(",") + "; expires=" + expires.toUTCString() + "; path=/";
+            try {
+                if (localStorage.getItem(collapseStorageKey) === String(messageId)) {
+                    localStorage.removeItem(collapseStorageKey);
+                }
+            } catch (e) { /* stockage indisponible */ }
         }
         $announcement.remove();
     });

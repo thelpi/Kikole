@@ -51,4 +51,11 @@ public interface ILeaderService
     /// </summary>
     /// <returns>Nothing.</returns>
     Task<Podiums> GetPodiumsAsync();
+
+    /// <summary>
+    /// Gets the current and best "found on time" streak of a user.
+    /// </summary>
+    /// <param name="userId">User identifier.</param>
+    /// <returns>The user's streak.</returns>
+    Task<UserStreak> GetUserStreakAsync(ulong userId);
 }

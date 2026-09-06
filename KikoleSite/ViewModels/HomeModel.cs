@@ -55,6 +55,13 @@ public class HomeModel
     public bool JustWon { get; set; }
 
     /// <summary>
+    /// <c>Null</c> pour un visiteur non connecte ; sinon la serie de jours consecutifs
+    /// trouves a temps par l'utilisateur connecte, tous jours confondus (pas seulement
+    /// le jour affiche). Alimente le pictogramme de serie a cote du cadran de points.
+    /// </summary>
+    public UserStreak? Streak { get; set; }
+
+    /// <summary>
     /// <c>Null</c> tant que non trouve ; sinon <c>true</c> si la proposition gagnante a
     /// ete soumise le jour meme du kikole, <c>false</c> si trouve en rattrapage (jour
     /// consulte plus tard). Calcule par le controleur, cf. <see cref="IsCreator"/> qui

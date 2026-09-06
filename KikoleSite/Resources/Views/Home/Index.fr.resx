@@ -273,4 +273,10 @@
   <data name="AllowedNames" xml:space="preserve">
     <value>Noms autorisés :</value>
   </data>
+  <data name="CurrentStreakLabel" xml:space="preserve">
+    <value>Série en cours : {0} jours</value>
+  </data>
+  <data name="BestStreakLabel" xml:space="preserve">
+    <value>Record : {0} jours</value>
+  </data>
 </root>

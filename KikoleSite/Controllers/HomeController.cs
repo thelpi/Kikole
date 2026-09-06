@@ -30,6 +30,7 @@ public class HomeController : KikoleBaseController
     private readonly IStringLocalizer<HomeController> _localizer;
     private readonly IDiscussionService _discussionService;
     private readonly IProposalService _proposalService;
+    private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly RegistrationOptions _registrationOptions;
@@ -42,6 +43,7 @@ public class HomeController : KikoleBaseController
         IGameCalendar gameCalendar,
         IPlayerService playerService,
         IProposalService proposalService,
+        ILeaderService leaderService,
         IBadgeService badgeService,
         IDiscussionService discussionService,
         SignInManager<ApplicationUser> signInManager,
@@ -58,6 +60,7 @@ public class HomeController : KikoleBaseController
         _localizer = localizer;
         _discussionService = discussionService;
         _proposalService = proposalService;
+        _leaderService = leaderService;
         _messageRepository = messageRepository;
         _signInManager = signInManager;
         _registrationOptions = registrationOptions.Value;
@@ -426,6 +429,9 @@ public class HomeController : KikoleBaseController
 
         model.PlayerCreator = playerCreator?.CanDisplayCreator == true ? playerCreator?.Login : null;
         model.LoggedAs = UserLogin;
+        model.Streak = UserId > 0
+            ? await _leaderService.GetUserStreakAsync(UserId)
+            : null;
         model.Positions = new[] { new SelectListItem("", "0") }
             .Concat(GetPositions()
                 .Select(p => new SelectListItem(p.Value, p.Key.ToString())))

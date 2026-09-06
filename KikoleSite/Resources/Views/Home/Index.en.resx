@@ -273,4 +273,10 @@
   <data name="AllowedNames" xml:space="preserve">
     <value>Allowed names:</value>
   </data>
+  <data name="CurrentStreakLabel" xml:space="preserve">
+    <value>Current streak: {0} days</value>
+  </data>
+  <data name="BestStreakLabel" xml:space="preserve">
+    <value>Best streak: {0} days</value>
+  </data>
 </root>

@@ -73,9 +73,27 @@
                     <a class="small-link" href="/Admin/PlayerEdit?playerId=@Model.PlayerId">@localizer["GoToPlayerClues"]</a>
                 }
             </div>
-            <div class="scoreboard@(scoreboardClass)" title="@scoreboardTitle">
-                <div class="label">@localizer["Points"]</div>
-                <div class="value">@Model.Points</div>
+            <div class="masthead-score">
+                @if (Model.Streak?.HasStreak == true)
+                {
+                    <div class="streak">
+                        <svg class="streak-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 17 9 11 13 15 21 6" />
+                            <polyline points="14 6 21 6 21 13" />
+                        </svg>
+                        <div class="streak-lines">
+                            <div class="streak-line current">@string.Format(localizer["CurrentStreakLabel"].Value, Model.Streak.Current)</div>
+                            @if (Model.Streak.Best != Model.Streak.Current)
+                            {
+                                <div class="streak-line best">@string.Format(localizer["BestStreakLabel"].Value, Model.Streak.Best)</div>
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="scoreboard@(scoreboardClass)" title="@scoreboardTitle">
+                    <div class="label">@localizer["Points"]</div>
+                    <div class="value">@Model.Points</div>
+                </div>
             </div>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PlayerCreator))

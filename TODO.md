@@ -544,14 +544,6 @@ Branche de travail : `remaster-v2`.
         `BadgeServiceTests.cs`) et re-vérifié en direct dans le navigateur (joueur2, qui
         n'avait pas trouvé le joueur du jour, ne voyait pas les badges du jour de joueur1 ;
         un compte administrateur les voyait). Aucun changement de code nécessaire.
-  - [ ] **Bug graphique : superposition des blocs beige au moment de la victoire.**
-        Une fois le joueur trouvé, quand la page s'affiche avec les badges puis le bloc
-        présentation/règles en dessous, un rendu bizarre apparaît (les blocs beige se
-        superposent). Semble ne se produire que sur le rendu de la page juste après la
-        victoire (POST qui affiche le résultat), pas en quittant puis revenant sur la page
-        (GET) — donc probablement lié à un état transitoire de layout (badges qui
-        s'animent/se dimensionnent après coup ?) plutôt qu'au HTML/CSS statique. À
-        reproduire et diagnostiquer.
   - [x] **Popup "Etes vous sûr ?" au clic sur "Montrer la réponse" en style par défaut du
         navigateur.** `Views/Home/Index.cshtml` utilisait `onclick="return confirm(...)"`
         (bouton Give up) — sortait complètement de l'habillage papier/encre. Remplacé par
@@ -824,8 +816,8 @@ Branche de travail : `remaster-v2`.
         d'erreur alors que ce n'en est pas une. Nouveau composant `Partial/Announcement`
         (+ resx dédié `Announcement.*.resx`) : bandeau neutre (`.banner.info`, palette
         papier plutôt que rouge/vert), icône "i" en cercle, libellé "Annonce", bouton
-        replier/déplier (purement visuel, non persisté) et bouton "×" qui retire le
-        bandeau ET mémorise l'id du message dans un cookie
+        replier/déplier et bouton "×" qui retire le bandeau ET mémorise l'id du message
+        dans un cookie
         (`kikoleDismissedAnnouncements`, liste d'ids séparés par virgules) — un futur
         message (autre id) n'est donc jamais masqué par erreur, contrairement à un simple
         flag booléen. Le filtrage se fait **côté serveur** (`HomeController
@@ -833,6 +825,11 @@ Branche de travail : `remaster-v2`.
         d'entrée qui posaient `model.Message` avant) : le bandeau ne s'affiche même pas
         dans le HTML si son id est dans le cookie, pas de flash côté client. Nouvelle
         propriété `HomeModel.MessageId` (`ulong?`) pour porter l'id jusqu'à la vue.
+        **Suite (signalé par l'utilisateur après coup) :** le replier/déplier ne
+        persistait pas — se redépliait à chaque changement de page. Fix dans `site.js` :
+        état stocké dans `localStorage` (clé unique, valeur = l'id du message replié
+        s'il y en a un), clé par id de message donc un futur message (autre id)
+        redémarre toujours déplié, même logique que le cookie de "ne plus afficher".
       - **Bandeau "Proposition ... incorrecte/correcte" jugé "collé" au conteneur** —
         discuté avec l'utilisateur (option snackbar bas-droite vs rester en place) :
         **reste en place** (feedback au plus près du champ concerné, plus fiable qu'un
@@ -1243,15 +1240,29 @@ Branche de travail : `remaster-v2`.
 
 **Volontairement en dernier :** le seul poste qui ne bloque rien et ne se déprécie pas.
 
-- [ ] **Prochain chantier : mettre en valeur la série en cours ("streak")**, à la manière
-      des autres jeux du genre ou de Duolingo. Rien commencé, pas encore discuté avec
-      l'utilisateur (design, calcul exact de la série, où l'afficher) — juste posé ici
-      comme prochaine priorité déclarée. Point de départ probable côté données : le badge
-      `Dedicated` (streak de 30 jours, cf. section Qualité/badges plus haut) encode déjà
-      une notion de série consécutive dans `BadgeService`/`RespectLeadersRunConditionsInternal`
-      (utilisé aussi par `ThreeInARow`/`AWeekInARow`/`LegendTier`/etc.) — à voir si cette
-      logique (ou une partie) est réutilisable pour calculer une série "actuelle" à afficher
-      en direct, plutôt que la relation strictement au palier d'un badge.
+- [x] **Mise en valeur de la série en cours ("streak"), première passe.** Affichage
+      permanent à gauche du cadran de points (`.masthead-score`, `Views/Home/Index.cshtml`) :
+      pictogramme (flèche montante style "trending-up") + deux lignes de texte, "Série en
+      cours : X jours" et "Record : X jours" (cette dernière seulement si différente de la
+      série en cours) ; rien ne s'affiche avant la toute première victoire à temps de
+      l'utilisateur (`UserStreak.HasStreak`). Calcul volontairement indépendant de la
+      logique de badges (`RespectLeadersRunConditionsInternal`, pensée pour verifier un
+      palier fixe autour d'une victoire donnée, pas pour calculer une série glissante) :
+      nouvelle méthode `ILeaderService.GetUserStreakAsync` (`LeaderService.cs`), qui
+      s'appuie sur `ILeaderRepository.GetUserLeadersAsync(FirstDate, Today, onTimeOnly:
+      true, userId)` (déjà existante) — `onTimeOnly: true` car seul un kikolé trouvé le
+      jour même compte pour la série, un rattrapage tardif ne doit pas la faire semblant de
+      continuer. Règle retenue pour "série en cours" : le jour courant, tant qu'il n'est pas
+      encore joué, ne casse pas une série arrêtée hier (comme Duolingo) ; tout vrai trou
+      dans le passé la casse. "Record" = plus longue série jamais réalisée (inclut la série
+      en cours si c'est elle la plus longue). Nouveau modèle `UserStreak` (`Models/`).
+      Passe volontairement simple, sans les jours de création de kikolé (contrairement à
+      certains badges type `creatorIncludeInRun`) : à affiner si l'utilisateur le demande
+      une fois le premier rendu vu en usage réel. 5 tests unitaires ajoutés
+      (`LeaderServiceTests.cs`, région `GetUserStreakAsync`) : aucune victoire jamais,
+      série continue jusqu'à aujourd'hui, jour courant pas encore joué (ne casse pas),
+      trou dans le passé (casse), record différent de la série en cours. Vérifié en direct
+      (`joueur1`, CSS `kikole-board.css?v=17`).
 
 ---
 

@@ -393,6 +393,50 @@ public class LeaderService : ILeaderService
         };
     }
 
+    /// <inheritdoc />
+    public async Task<UserStreak> GetUserStreakAsync(ulong userId)
+    {
+        var leaders = await _leaderRepository
+            .GetUserLeadersAsync(_gameCalendar.FirstDate, _clock.Today, true, userId);
+
+        var foundDates = leaders
+            .Select(l => l.ProposalDate.Date)
+            .ToHashSet();
+
+        var best = 0;
+        var run = 0;
+        var previousDate = default(DateTime?);
+        foreach (var date in foundDates.OrderBy(d => d))
+        {
+            run = previousDate.HasValue && date == previousDate.Value.AddDays(1)
+                ? run + 1
+                : 1;
+            best = Math.Max(best, run);
+            previousDate = date;
+        }
+
+        // le jour courant, pas encore joue, ne casse pas une serie arretee hier :
+        // seul un vrai trou (jour passe non trouve) interrompt le decompte
+        var current = 0;
+        var day = _clock.Today;
+        var firstDay = true;
+        while (day >= _gameCalendar.FirstDate)
+        {
+            if (foundDates.Contains(day))
+                current++;
+            else if (!firstDay)
+                break;
+            firstDay = false;
+            day = day.AddDays(-1);
+        }
+
+        return new UserStreak
+        {
+            Current = current,
+            Best = Math.Max(best, current)
+        };
+    }
+
     /// <summary>
     /// Credite au cumul global la medaille correspondant a la position occupee
     /// (0 = or, 1 = argent, 2 = bronze), en creant l'utilisateur s'il est inconnu.

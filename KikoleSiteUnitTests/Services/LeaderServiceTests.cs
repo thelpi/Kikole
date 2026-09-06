@@ -379,6 +379,77 @@ public class LeaderServiceTests
             _ => _.CreateLeaderAsync(It.Is<LeaderDto>(l => l.Points == livePoints)), Times.Once);
     }
 
+    // ------------------------------------------------------------- GetUserStreakAsync
+
+    private void SetupStreak(DateTime today, params DateTime[] foundDates)
+    {
+        _clock.Setup(_ => _.Today).Returns(today);
+        _leaderRepository
+            .Setup(_ => _.GetUserLeadersAsync(TestCalendar.FirstDate, today, true, 1))
+            .ReturnsAsync(foundDates.Select(d => Leader(1, 800, 60, d)).ToList());
+    }
+
+    [Fact]
+    public async Task GetUserStreakAsync_NeverFoundAnything_HasNoStreak()
+    {
+        SetupStreak(Day.AddDays(10));
+
+        var result = await _service.GetUserStreakAsync(1);
+
+        result.HasStreak.Should().BeFalse();
+        result.Current.Should().Be(0);
+        result.Best.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetUserStreakAsync_ConsecutiveDaysEndingToday_AreAllCounted()
+    {
+        var today = Day.AddDays(10);
+        SetupStreak(today, today, today.AddDays(-1), today.AddDays(-2));
+
+        var result = await _service.GetUserStreakAsync(1);
+
+        result.Current.Should().Be(3);
+        result.Best.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GetUserStreakAsync_TodayNotYetPlayed_DoesNotBreakTheStreak()
+    {
+        // le jour courant n'est pas encore joue : la serie arretee hier reste valable
+        var today = Day.AddDays(10);
+        SetupStreak(today, today.AddDays(-1), today.AddDays(-2));
+
+        var result = await _service.GetUserStreakAsync(1);
+
+        result.Current.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetUserStreakAsync_AGapInThePast_BreaksTheStreak()
+    {
+        var today = Day.AddDays(10);
+        SetupStreak(today, today, today.AddDays(-5));
+
+        var result = await _service.GetUserStreakAsync(1);
+
+        result.Current.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetUserStreakAsync_BestStreakKeepsTheLongestHistoricalRun()
+    {
+        var today = Day.AddDays(10);
+        SetupStreak(today,
+            today, // serie en cours : 1 jour
+            today.AddDays(-5), today.AddDays(-6), today.AddDays(-7), today.AddDays(-8)); // ancienne serie : 4 jours
+
+        var result = await _service.GetUserStreakAsync(1);
+
+        result.Current.Should().Be(1);
+        result.Best.Should().Be(4);
+    }
+
     // ------------------------------------------------------------- GetDayboardAsync
 
     private void SetupDayboard(

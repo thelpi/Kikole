@@ -315,6 +315,49 @@ body { padding-top: 0; }
 
 .kikole-board .day-nav .date-field { width: 96px; }
 
+.kikole-board .masthead-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+/* serie de jours consecutifs trouves a temps (cf. HomeModel.Streak) : pictogramme +
+   deux lignes de texte, directement a gauche du cadran de points. */
+.kikole-board .streak {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kikole-board .streak-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--pitch);
+}
+
+.kikole-board .streak-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.kikole-board .streak-line {
+  font-size: 11px;
+}
+
+.kikole-board .streak-line.current {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.kikole-board .streak-line.best {
+  color: var(--ink-soft);
+}
+
 .kikole-board .scoreboard {
   background: var(--board-bg);
   color: var(--board-fg);
