@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using KikoleSite;
 using KikoleSite.Controllers;
+using KikoleSite.Helpers;
 using KikoleSite.Identity;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
@@ -262,5 +263,65 @@ public class LeaderboardControllerTests
         var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.LeaderboardModel>().Subject;
         model.Dayboard.Should().BeSameAs(dayboard);
         model.CurrentUserId.Should().Be(1);
+    }
+
+    // ------------------------------------------------------------- Index (userId != 0)
+
+    [Fact]
+    public async Task Index_WithUnknownUserId_FallsBackToTheDefaultModel()
+    {
+        SetUser(1);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(1, Today)).ReturnsAsync(DayGrantTypes.Found);
+        _leaderService
+            .Setup(_ => _.GetUserStatisticsAsync(99, 1, "***", true))
+            .ReturnsAsync((UserStat?)null);
+
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        var dayboard = new Dayboard { Date = Today, Leaders = [], Searchers = [] };
+        _leaderService.Setup(_ => _.GetDayboardAsync(Today, DayLeaderSorts.BestTime, TestCountryContinents.Map)).ReturnsAsync(dayboard);
+        _leaderService
+            .Setup(_ => _.GetLeaderboardAsync(new DateTime(Today.Year, Today.Month, 1), Today, LeaderSorts.TotalPoints))
+            .ReturnsAsync(new List<LeaderboardItem>());
+        _leaderService.Setup(_ => _.GetPodiumsAsync()).ReturnsAsync(new Podiums
+        {
+            MonthlyPodiums = new Dictionary<(int month, int year), (User first, User second, User third)>(),
+            OverallPodium = []
+        });
+
+        var result = await _controller.Index(userId: 99);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.LeaderboardModel>().Subject;
+        model.Dayboard.Should().BeSameAs(dayboard);
+        _badgeService.Verify(_ => _.GetUserBadgesAsync(It.IsAny<ulong>(), It.IsAny<ulong>(), It.IsAny<Languages>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Index_WithKnownUserId_BuildsTheUserStatsModel()
+    {
+        const ulong viewer = 1;
+        const ulong viewedUser = 2;
+        SetUser(viewer);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(viewer, Today)).ReturnsAsync(DayGrantTypes.Found);
+
+        var stats = new UserStat(
+            [new DailyUserStat(Today, "Zidane", 500)],
+            "cible",
+            Today.AddYears(-1));
+        _leaderService
+            .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", true))
+            .ReturnsAsync(stats);
+
+        var language = ViewHelper.GetLanguage();
+        _badgeService
+            .Setup(_ => _.GetUserBadgesAsync(viewedUser, viewer, language, true))
+            .ReturnsAsync(Array.Empty<UserBadge>());
+        _badgeService.Setup(_ => _.GetAllBadgesAsync(language)).ReturnsAsync(Array.Empty<Badge>());
+
+        var result = await _controller.Index(userId: viewedUser);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.UserStatsModel>().Subject;
+        model.Login.Should().Be("cible");
+        model.IsHimself.Should().BeFalse();
+        model.TotalPoints.Should().Be(500);
     }
 }

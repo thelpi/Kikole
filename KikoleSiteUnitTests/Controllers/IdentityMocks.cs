@@ -23,15 +23,22 @@ internal static class IdentityMocks
             store.Object, null, null, null, null, null, null, null, null);
     }
 
+    /// <summary>Variante "consommateur" : le controleur ne fait qu'y injecter l'objet,
+    /// sans jamais appeler ses methodes dans les actions testees (cf. HomeController).</summary>
     internal static SignInManager<ApplicationUser> MockSignInManager()
     {
-        var userManager = MockUserManager();
+        return MockSignInManager(MockUserManager()).Object;
+    }
+
+    /// <summary>Variante "configurable" : le controleur appelle reellement ses methodes
+    /// (cf. AccountController) - l'appelant garde la main sur le mock pour poser des
+    /// <c>Setup</c>/<c>Verify</c>.</summary>
+    internal static Mock<SignInManager<ApplicationUser>> MockSignInManager(Mock<UserManager<ApplicationUser>> userManager)
+    {
         var contextAccessor = new Mock<IHttpContextAccessor>();
         var claimsFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
 
-        var signInManager = new Mock<SignInManager<ApplicationUser>>(
+        return new Mock<SignInManager<ApplicationUser>>(
             userManager.Object, contextAccessor.Object, claimsFactory.Object, null, null, null, null);
-
-        return signInManager.Object;
     }
 }

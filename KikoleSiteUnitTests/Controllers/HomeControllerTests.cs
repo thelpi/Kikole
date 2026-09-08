@@ -53,10 +53,13 @@ public class HomeControllerTests
     private readonly Mock<IBadgeService> _badgeService = new();
     private readonly Mock<IDiscussionService> _discussionService = new();
     private readonly Mock<IStringLocalizer<HomeController>> _localizer = new();
+    private readonly Mock<Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser>> _signInManager;
     private readonly HomeController _controller;
 
     public HomeControllerTests()
     {
+        _signInManager = IdentityMocks.MockSignInManager(IdentityMocks.MockUserManager());
+
         _clock.Setup(_ => _.Today).Returns(Today);
         _clock.Setup(_ => _.Now).Returns(Today);
 
@@ -81,7 +84,7 @@ public class HomeControllerTests
             _leaderService.Object,
             _badgeService.Object,
             _discussionService.Object,
-            IdentityMocks.MockSignInManager(),
+            _signInManager.Object,
             Options.Create(new RegistrationOptions()),
             httpContextAccessor.Object)
         {
@@ -448,5 +451,97 @@ public class HomeControllerTests
             It.IsAny<ulong>(), It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), It.IsAny<Languages>()), Times.Never);
         _badgeService.Verify(_ => _.PrepareNewLeaderBadgesAsync(
             It.IsAny<LeaderDto>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyCollection<ProposalDto>>(), It.IsAny<Languages>()), Times.Never);
+    }
+
+    // ------------------------------------------------------------- Contact
+
+    [Fact]
+    public async Task ContactGet_AsAdministrator_RedirectsToAdminDiscussions()
+    {
+        SetUser(userId: 1, login: "admin", userType: UserTypes.Administrator);
+
+        var result = await _controller.Contact();
+
+        result.Should().BeOfType<RedirectToActionResult>()
+            .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "Discussions" && r.ControllerName == "Admin");
+        _discussionService.Verify(_ => _.GetOwnThreadAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ContactGet_RequestAccess_PrefillsThePowerUserRequestMessage()
+    {
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        var thread = Array.Empty<DiscussionMessageDto>();
+        _discussionService.Setup(_ => _.GetOwnThreadAsync(7)).ReturnsAsync(thread);
+
+        var result = await _controller.Contact(requestAccess: true);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<ContactModel>().Subject;
+        model.NewMessage.Should().Be("RequestPowerUserMessage");
+        model.Messages.Should().BeSameAs(thread);
+    }
+
+    [Fact]
+    public async Task ContactPost_EmptyMessage_SetsErrorAndDoesNotPost()
+    {
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        _discussionService.Setup(_ => _.GetOwnThreadAsync(7)).ReturnsAsync(Array.Empty<DiscussionMessageDto>());
+
+        var result = await _controller.Contact(new ContactModel { NewMessage = "   " });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<ContactModel>().Subject;
+        model.ErrorMessage.Should().Be("InvalidMessage");
+        _discussionService.Verify(_ => _.PostUserMessageAsync(It.IsAny<ulong>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ContactPost_ValidMessage_PostsAndRefreshesTheThread()
+    {
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        var refreshed = new[] { new DiscussionMessageDto { Id = 1, DiscussionId = 3, Message = "salut" } };
+        _discussionService.Setup(_ => _.GetOwnThreadAsync(7)).ReturnsAsync(refreshed);
+
+        var result = await _controller.Contact(new ContactModel { NewMessage = "un message" });
+
+        _discussionService.Verify(_ => _.PostUserMessageAsync(7, "un message"), Times.Once);
+        var model = ((ViewResult)result).Model.Should().BeOfType<ContactModel>().Subject;
+        model.Messages.Should().BeSameAs(refreshed);
+        model.NewMessage.Should().BeNull();
+    }
+
+    // ------------------------------------------------------------- Error / ErrorIndex / SwitchLang
+
+    [Fact]
+    public async Task Error_SignsOutAndRedirectsToHome()
+    {
+        var result = await _controller.Error();
+
+        _signInManager.Verify(_ => _.SignOutAsync(), Times.Once);
+        result.Should().BeOfType<RedirectToActionResult>()
+            .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "Index" && r.ControllerName == "Home");
+    }
+
+    [Fact]
+    public async Task ErrorIndex_RendersHomeWithTheAuthenticationRequiredMessage()
+    {
+        SetUser(userId: null, login: null, userType: null);
+        SetupCountryContinents();
+        SetupClues();
+
+        var result = await _controller.ErrorIndex();
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Subject;
+        model.IsErrorMessageForced.Should().BeTrue();
+        model.MessageToDisplay.Should().Be("AuthenticationRequired");
+    }
+
+    [Fact]
+    public void SwitchLang_NoExistingCookie_SwitchesToEnglishAndRedirects()
+    {
+        var result = _controller.SwitchLang("/leaderboard");
+
+        result.Should().BeOfType<RedirectResult>().Which.Url.Should().Be("/leaderboard");
+        var setCookie = Uri.UnescapeDataString(_httpContext.Response.Headers["Set-Cookie"].ToString());
+        setCookie.Should().Contain("uic=en");
     }
 }

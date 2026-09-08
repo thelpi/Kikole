@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **623** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **674** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -1266,12 +1266,35 @@ Branche de travail : `remaster-v2`.
         dayboard/classement/podiums via `InitializeModelAsync`).
       - `AdminControllerTests.cs` (2) : `PlayerSubmission` (mappage pays/continent) et le
         garde "plus rien à valider" partagé par `AcceptPlayer`/`RefusePlayer`/`ChoosePlayer`.
-      Reste hors périmètre sans changement : `AccountController` (Identity y est appelé
-      pour de vrai sur presque chaque action — `UserManager.CreateAsync`/
-      `SignInManager.PasswordSignInAsync`/etc. — donc les mocker ne fixerait quasiment
-      rien d'observable), les dépôts (décision actée plus haut), et les branches
-      d'`AdminController`/`HomeController`/`LeaderboardController` non retouchées par le
-      chantier ci-dessous.
+      À l'époque laissé hors périmètre : `AccountController` (Identity y est appelé pour de
+      vrai sur presque chaque action), les branches d'`AdminController`/`HomeController`/
+      `LeaderboardController` non retouchées par le chantier de parallélisation, et
+      `StatisticsController`. **Comblé juste après** (demande explicite de l'utilisateur,
+      "ce qui reste côté contrôleur") — l'hypothèse de départ sur `AccountController` était
+      fausse : `UserManager`/`SignInManager` se mockent exactement comme n'importe quelle
+      dépendance (`.Setup(...)`/`.Verify(...)` sur leurs membres `virtual`), rien de
+      spécifique à Identity ne bloquait ces tests. 47 tests supplémentaires :
+      - `AccountControllerTests.cs` (18) : un scénario heureux + un ou deux échecs par
+        action (`LogIn`, `GetLoginQuestion`, `ResetPassword`, `ResetQAndA`, `Create`,
+        `ChangePassword`, `LogOut`, `Index`). Piège rencontré et corrigé : `SignInResult`
+        existe à la fois dans `Microsoft.AspNetCore.Identity` et `Microsoft.AspNetCore.Mvc`
+        (alias `using` nécessaire) ; le login automatique après `Create` interroge
+        `FindByNameAsync` une seconde fois avec le même login que la vérification
+        "existe déjà" — `SetupSequence` plutôt que `Setup` pour distinguer les deux appels.
+      - `StatisticsControllerTests.cs` (4) : les 4 actions ne font que mettre en forme le
+        retour du service en JSON (la logique reste testée dans `StatisticServiceTests`) —
+        vérifié via `dynamic` sur `JsonResult.Value` (les types anonymes du contrôleur sont
+        accessibles depuis les tests grâce à l'`InternalsVisibleTo` déjà en place).
+      - `LeaderboardControllerTests.cs` : +2 (`Index` avec `userId` — statistiques
+        introuvables → modèle par défaut, utilisateur connu → `UserStatsModel`).
+      - `AdminControllerTests.cs` : +20 (`Actions`/`RecomputeBadges`/`RecomputeLeaders`/
+        `ReassignPlayers`/`InsertMessage`, `Discussions`/`Discussion` GET+POST, création de
+        joueur POST (nom manquant + soumission minimale valide), `Club` GET+POST (dont le
+        refus non-admin), `PlayerEdit` GET+POST).
+      - `HomeControllerTests.cs` : +7 (`Contact` GET+POST, `Error`, `ErrorIndex`,
+        `SwitchLang`).
+      Seuls restent hors périmètre, décision actée plus haut et inchangée : les dépôts.
+      `dotnet test` : 674 tests verts (601 avant ce chantier de tests de contrôleurs).
 - [x] **Parallélisation d'appels service/repo independants, repérés en auditant les
       contrôleurs à la demande de l'utilisateur** (juste après l'ajout du "streak" ci-dessus).
       Vérifié au préalable : `BaseRepository` ouvre une connexion MySQL neuve à chaque
