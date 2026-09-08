@@ -4,7 +4,7 @@ using FluentAssertions;
 using KikoleSite.Repositories;
 using Xunit;
 
-namespace KikoleSiteUnitTests.Integration;
+namespace KikoleSiteIntegrationTests.Integration;
 
 /// <summary>
 /// Caracterise la regle « trouve a temps » (<c>proposal_date = DATE(creation_date)</c>),

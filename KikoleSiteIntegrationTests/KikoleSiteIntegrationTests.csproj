@@ -8,6 +8,8 @@
     <!-- necessaire pour que le compilateur signale les using inutiles (CS8019) -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- distinct de celui de KikoleSiteUnitTests : chaine de connexion propre a ce projet -->
+    <UserSecretsId>371e531b-c72a-43f5-98fb-a14ac582166d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,14 +21,12 @@
     </PackageReference>
     <!-- FluentAssertions reste en 6.x : la 7.0 bascule sous licence commerciale -->
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="Moq" Version="4.18.4" />
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <!-- ConfigurationBuilder simple (LegacyCompatiblePasswordHasherTests) : pas de user
-         secrets ici, ceux-ci vivent desormais dans KikoleSiteIntegrationTests -->
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>

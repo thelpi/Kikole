@@ -4,7 +4,7 @@ using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
 using Xunit;
 
-namespace KikoleSiteUnitTests.Integration;
+namespace KikoleSiteIntegrationTests.Integration;
 
 /// <summary>
 /// Caracterise <see cref="ProposalRepository.GetMissingUsersAsLeaderAsync"/> : un

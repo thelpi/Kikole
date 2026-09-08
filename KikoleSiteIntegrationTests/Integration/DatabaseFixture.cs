@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using Xunit;
 
-namespace KikoleSiteUnitTests.Integration;
+namespace KikoleSiteIntegrationTests.Integration;
 
 /// <summary>
 /// Connecte les tests d'integration a la vraie base MySQL locale (WAMP) et la remet a

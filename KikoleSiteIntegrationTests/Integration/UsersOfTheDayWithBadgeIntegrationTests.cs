@@ -5,7 +5,7 @@ using KikoleSite.Models.Dtos;
 using KikoleSite.Repositories;
 using Xunit;
 
-namespace KikoleSiteUnitTests.Integration;
+namespace KikoleSiteIntegrationTests.Integration;
 
 /// <summary>
 /// Caracterise <see cref="BadgeRepository.GetUsersOfTheDayWithBadgeAsync"/> : filtre les

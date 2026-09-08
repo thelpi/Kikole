@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace KikoleSiteUnitTests.Integration;
+namespace KikoleSiteIntegrationTests.Integration;
 
 /// <summary>
 /// Une seule instance de <see cref="DatabaseFixture"/> (et donc un seul reset via

@@ -4,7 +4,7 @@ using FluentAssertions;
 using KikoleSite.Repositories;
 using Xunit;
 
-namespace KikoleSiteUnitTests.Integration;
+namespace KikoleSiteIntegrationTests.Integration;
 
 /// <summary>
 /// Caracterise <c>BaseRepository.SubSqlValidUsers</c> (« joueur classable » = ni

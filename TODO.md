@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **674** unitaires (mockés, rapides) + **5** d'intégration (vraie base, `--filter Category=Integration`), projet `KikoleSiteUnitTests` |
+| Tests | **674** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -345,10 +345,12 @@ Branche de travail : `remaster-v2`.
       les 490 tests unitaires** : ceux-ci simulent les dépôts, donc vérifient que le service
       passe les bons paramètres, jamais ce que le SQL en fait.
 
-      **(a) Infra de tests d'intégration en place** — `KikoleSiteUnitTests/Integration/`,
-      vraie base MySQL locale, `[Trait("Category","Integration")]` pour rester filtrable
-      (`dotnet test --filter Category!=Integration` pour la suite rapide inchangée ;
-      `dotnet test` seul les inclut désormais si WAMP tourne). Voir « Partis pris ».
+      **(a) Infra de tests d'intégration en place** — vraie base MySQL locale. Écrite au
+      départ dans `KikoleSiteUnitTests/Integration/` avec `[Trait("Category","Integration")]`
+      pour rester filtrable, **déplacée depuis** dans son propre projet
+      (`KikoleSiteIntegrationTests`, séparation complète demandée par l'utilisateur — voir
+      « Partis pris »). `dotnet test` à la racine construit et exécute les deux projets côte
+      à côte ; `KikoleSiteUnitTests` seul ne touche plus jamais WAMP.
 
       Par gravité décroissante :
       - **`StatisticRepository.UserPlayerLinkSql`** — la question qui la motivait est
@@ -1802,15 +1804,32 @@ les hachages de toute façon.
   justifie pas une interface dédiée.
 
 **Tests d'intégration**
-- **Même projet (`KikoleSiteUnitTests/Integration/`), pas un projet dédié.** Filtrable via
-  `[Trait("Category","Integration")]` (`dotnet test --filter Category!=Integration` retrouve
-  les 490 tests rapides et mockés) ; un `.csproj` séparé aurait ajouté du wiring de solution
-  pour une distinction que le trait suffit à faire. Effet de bord assumé : `dotnet test` sans
-  filtre inclut maintenant ces tests, donc échoue si WAMP n'est pas démarré.
-- **`UserSecretsId` propre au projet de tests**, chaîne de connexion re-posée une fois
-  (`dotnet user-secrets set "ConnectionStrings:Kikole" "..." --project KikoleSiteUnitTests`)
-  plutôt que d'emprunter celui de `KikoleSite` : autonome et standard, la petite duplication
-  vaut mieux qu'un lien caché entre deux projets.
+- **Projet dédié (`KikoleSiteIntegrationTests`), pas le trait `[Trait("Category","Integration")]`
+  dans `KikoleSiteUnitTests`.** Revenu sur la décision initiale (ci-dessous, barrée) à la
+  demande explicite de l'utilisateur : séparation complète plutôt qu'une distinction par
+  trait au sein du même projet. Les 7 fichiers (`DatabaseFixture`/`DatabaseCollection` +
+  les 5 classes de tests) déplacés tels quels, seul le namespace change
+  (`KikoleSiteUnitTests.Integration` → `KikoleSiteIntegrationTests.Integration`). Les 4
+  builders de DTO utilisés (`PlayerDtoBuilder`/`UserDtoBuilder`/`LeaderDtoBuilder`/
+  `ProposalDtoBuilder`) sont **copiés** dans un `Builders/DtoBuilders.cs` propre au nouveau
+  projet plutôt que partagés par référence de projet — chaque projet de tests reste
+  autonome, sans dépendre de l'autre ; les builders inutilisés ici (`ClubDtoBuilder`,
+  `BadgeDtoBuilder`, etc., restés dans `KikoleSiteUnitTests`) n'ont pas été copiés, pour ne
+  pas trimballer du code mort. `dotnet test` sans filtre à la racine construit maintenant
+  les deux projets côte à côte (visible dans la sortie, chacun avec son propre résumé) ;
+  `KikoleSiteUnitTests` seul (`dotnet test KikoleSiteUnitTests/...`) ne dépend plus de WAMP
+  du tout, plus besoin du `--filter Category!=Integration` d'avant (le trait a disparu avec
+  le déplacement, il n'y a plus rien à filtrer dans ce projet).
+- ~~Même projet (`KikoleSiteUnitTests/Integration/`), pas un projet dédié.~~ Décision
+  initiale, abandonnée ci-dessus. Le raisonnement de l'époque (un `.csproj` séparé aurait
+  ajouté du wiring de solution pour une distinction que le trait suffisait à faire) reste
+  vrai en soi, mais la préférence de l'utilisateur pour une séparation complète l'a emporté.
+- **`UserSecretsId` propre à `KikoleSiteIntegrationTests`** (nouveau GUID, distinct de
+  l'ancien `UserSecretsId` de `KikoleSiteUnitTests` qui a disparu avec le déplacement) —
+  chaîne de connexion recopiée depuis l'ancien emplacement
+  (`%APPDATA%\Microsoft\UserSecrets\<ancien-id>\secrets.json` → `<nouveau-id>\secrets.json`)
+  pour que le nouveau projet fonctionne sans reconfiguration manuelle ; l'ancien dossier de
+  secrets n'a pas été supprimé (orphelin inoffensif, à nettoyer à l'occasion si souhaité).
 - **`DatabaseFixture` (`IAsyncLifetime`) remet la base à l'état de `kikole_mock.sql`** avant
   chaque run — même mécanisme que les smoke tests manuels de ce chantier, `kikole_mock.sql`
   étant déjà idempotent (TRUNCATE puis re-INSERT). Les scénarios spécifiques à un test
