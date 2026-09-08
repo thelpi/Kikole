@@ -580,6 +580,15 @@ public class BadgeService : IBadgeService
                     leader.ProposalDate, leader.UserId, playerOfTheDay.BadgeId.Value, collectedBadges, allBadges);
         }
 
+        // le joueur cache (HiddenDate, la veille de FirstDate) n'est jamais trouve "a
+        // temps" (IsCurrentDay compare a une date qui n'existe plus) : verifie ici, hors
+        // du bloc IsCurrentDay ci-dessus, sans quoi la condition ne se declencherait jamais
+        if (leader.ProposalDate.Date == _gameCalendar.HiddenDate.Date)
+        {
+            await InsertBadgeIfNotAlreadyAsync(
+                    leader.ProposalDate, leader.UserId, (ulong)Badges.TheEnd, collectedBadges, allBadges);
+        }
+
         return await GetUserBadgesAsync(
                 collectedBadges, leader.ProposalDate, allBadges, language);
     }

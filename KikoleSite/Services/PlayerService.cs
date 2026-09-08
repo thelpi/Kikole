@@ -17,6 +17,14 @@ namespace KikoleSite.Services;
 /// <seealso cref="IPlayerService"/>
 public class PlayerService : IPlayerService
 {
+    /// <summary>
+    /// Le joueur caché (<see cref="IGameCalendar.HiddenDate"/>) ne devient accessible
+    /// qu'une fois cette ancienneté de jeu atteinte (cf. <see cref="CanDisplayHiddenPlayerAsync"/>) :
+    /// sans ce plancher, la condition "aucun jour manqué depuis le début" serait triviale
+    /// à tout début de partie (peu de jours à couvrir).
+    /// </summary>
+    private const int MinimumDaysBeforeHiddenPlayer = 30;
+
     private readonly IPlayerHandler _playerHandler;
     private readonly IPlayerRepository _playerRepository;
     private readonly IUserRepository _userRepository;
@@ -276,6 +284,15 @@ public class PlayerService : IPlayerService
     /// <inheritdoc />
     public async Task<bool> CanDisplayHiddenPlayerAsync(ulong userId)
     {
+        var countToFind = (_clock.Today - _gameCalendar.FirstDate).Days + 1;
+
+        // le jeu doit avoir assez de recul pour que "aucun jour manque depuis le debut"
+        // signifie quelque chose ; sans ce plancher, ce serait trivial en debut de partie
+        if (countToFind < MinimumDaysBeforeHiddenPlayer)
+        {
+            return false;
+        }
+
         var leaderFound = await _leaderRepository
             .GetUserLeadersAsync(_gameCalendar.HiddenDate, _gameCalendar.HiddenDate, false, userId);
 
@@ -289,8 +306,6 @@ public class PlayerService : IPlayerService
 
         var leaders = await _leaderRepository
             .GetUserLeadersAsync(_gameCalendar.FirstDate, null, false, userId);
-
-        var countToFind = (_clock.Today - _gameCalendar.FirstDate).Days + 1;
 
         var createdCount = createdPlayers.Count(_ => _.PublicationDate <= _clock.Today);
 

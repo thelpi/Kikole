@@ -31,5 +31,6 @@ public enum Badges
     MetroBoulotKikoleDodo,
     OneMinuteChrono,
     SurLeFil,
-    Phoenix
+    Phoenix,
+    TheEnd
 }

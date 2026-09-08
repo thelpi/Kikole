@@ -1159,6 +1159,28 @@ public class BadgeServiceTests
             "0 point disqualifie avant meme de regarder les 7 jours precedents");
     }
 
+    // ------------------------------------------------------------- TheEnd
+
+    [Fact]
+    public async Task FindingTheHiddenDayPlayerGrantsTheEnd()
+    {
+        // le joueur cache n'est, par construction, jamais trouve "a temps" (sa date est
+        // anterieure au lancement du jeu) : la creation est volontairement tres eloignee
+        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(TestCalendar.HiddenDate).WithCreationDate(TestCalendar.HiddenDate.AddDays(500)).WithPoints(1000).WithTime(60).Build();
+
+        await Run(leader, Player());
+
+        ShouldHaveGranted(Badges.TheEnd);
+    }
+
+    [Fact]
+    public async Task FindingARegularDayDoesNotGrantTheEnd()
+    {
+        await Run(Leader(1000, 60), Player());
+
+        ShouldNotHaveGranted(Badges.TheEnd);
+    }
+
     // ------------------------------------------------------------- ResetBadgesAsync
 
     [Fact]

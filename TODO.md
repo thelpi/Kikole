@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **674** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
+| Tests | **687** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -508,6 +508,35 @@ Branche de travail : `remaster-v2`.
         (`AlternativePositionId`), ce badge serait quasi automatique au bout d'une semaine
         de jeu normale. Retenu comme angle à retravailler plus tard (préciser la condition
         pour qu'elle reste un vrai défi), pas abandonné.
+      - [x] **`TheEnd`** ("The end?" / "La fin ?"), pour le joueur caché de la page 0 (avant
+        le tout premier jour, accessible uniquement par l'URL — cf. `PlayerService
+        .CanDisplayHiddenPlayerAsync`). Reprend délibérément le nom d'un badge supprimé de
+        l'ancien jeu (`Restauration/badges_2023.md`, id 24 "Reach the 'end' of the game").
+        **Décision actée avec l'utilisateur : pas de rattachement via `players.badge_id`**
+        (le mécanisme dédié déjà en place, cf. discussion précédente — conservé tel quel
+        mais toujours inutilisé, aucun joueur ne s'en sert) — badge "standard", détecté dans
+        `PrepareNewLeaderBadgesInternalAsync` par `leader.ProposalDate == _gameCalendar
+        .HiddenDate`. Piège évité : ce check est placé **hors** du bloc `if
+        (leader.IsCurrentDay)` (comme `playerOfTheDay.BadgeId`/`PlayerBasedBadgeCondition`)
+        — le jour caché étant antérieur à `FirstDate`, `IsCurrentDay` (qui compare à la date
+        de création) n'est jamais vrai pour lui ; placé dans le bloc gaté, le badge ne se
+        serait jamais déclenché.
+        - **Deuxième demande de l'utilisateur dans la foulée** : ajouter un plancher de
+          **30 jours d'ancienneté de partie** avant que le joueur caché soit accessible du
+          tout (`PlayerService.CanDisplayHiddenPlayerAsync`, nouvelle constante
+          `MinimumDaysBeforeHiddenPlayer`) — sans ça, la condition existante ("aucun jour
+          manqué depuis le début") est triviale en tout début de partie (peu de jours à
+          couvrir). Placé en tout premier check, avant même le raccourci "déjà trouvé une
+          fois" : personne n'a accès avant ce plancher, peu importe son historique.
+        - `Badges.cs` (31), `kikole.sql` (`badges`/`badge_translations`), testé
+          (`BadgeServiceTests.cs`, 2 tests ; `PlayerServiceTests.cs`, 4 tests existants
+          adaptés au nouveau plancher + 1 nouveau dédié à ce plancher).
+        - Vérifié en direct (seed du badge + navigation `/?day=32` avec un compte jetable
+          sans historique : page "presque au but" affichée sans erreur, comme avant ;
+          "The end?" bien rendu sur une page de statistiques existante, nom + description
+          FR corrects). Pas de test live d'un vrai déblocage (nécessiterait un historique
+          réel de 30+ jours sans trou, pas simulable rapidement) — couvert par les tests
+          unitaires à la place.
 - [ ] **Classement des participants par % de badges obtenus.** Demandé en aparté par
       l'utilisateur pendant ce même chantier (2026-09-08). Rien commencé — probablement un
       nouveau `LeaderSorts` (cf. `LeaderboardController`/`LeaderService.GetLeaderboardAsync`)

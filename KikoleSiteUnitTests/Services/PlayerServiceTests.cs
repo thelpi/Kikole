@@ -414,7 +414,8 @@ public class PlayerServiceTests
     [Fact]
     public async Task CanDisplayHiddenPlayerAsync_WhoeverAlreadyFoundItKeepsAccess()
     {
-        SetupHiddenDay(hiddenDayLeaders: 1, allLeaders: 0, createdPlayers: 0, daysSinceFirstDate: 10);
+        // 34 jours ecoules : au-dela du plancher de 30 jours d'anciennete du jeu
+        SetupHiddenDay(hiddenDayLeaders: 1, allLeaders: 0, createdPlayers: 0, daysSinceFirstDate: 34);
 
         var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
@@ -424,8 +425,8 @@ public class PlayerServiceTests
     [Fact]
     public async Task CanDisplayHiddenPlayerAsync_RequiresAPerfectRecordOverEveryDay()
     {
-        // 4 jours ecoules depuis FirstDate, donc 5 journees a couvrir
-        SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 5, createdPlayers: 0, daysSinceFirstDate: 4);
+        // 29 jours ecoules depuis FirstDate, donc 30 journees a couvrir (le plancher pile atteint)
+        SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 30, createdPlayers: 0, daysSinceFirstDate: 29);
 
         var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
@@ -435,7 +436,7 @@ public class PlayerServiceTests
     [Fact]
     public async Task CanDisplayHiddenPlayerAsync_ASubmittedPlayerCountsAsACoveredDay()
     {
-        SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 4, createdPlayers: 1, daysSinceFirstDate: 4);
+        SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 29, createdPlayers: 1, daysSinceFirstDate: 29);
 
         var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
@@ -445,7 +446,20 @@ public class PlayerServiceTests
     [Fact]
     public async Task CanDisplayHiddenPlayerAsync_OneMissingDayIsEnoughToRefuse()
     {
-        SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 4, createdPlayers: 0, daysSinceFirstDate: 4);
+        SetupHiddenDay(hiddenDayLeaders: 0, allLeaders: 29, createdPlayers: 0, daysSinceFirstDate: 29);
+
+        var result = await _service.CanDisplayHiddenPlayerAsync(7);
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task CanDisplayHiddenPlayerAsync_BeforeThirtyDaysOfHistoryAlwaysRefusesEvenWithAPerfectRecord()
+    {
+        // le jeu n'a que 10 jours d'existence : le plancher refuse l'acces, meme avec un
+        // historique parfait ou un acces deja obtenu (verifie que le plancher est teste
+        // avant le raccourci "deja trouve" ci-dessous, pas apres)
+        SetupHiddenDay(hiddenDayLeaders: 1, allLeaders: 11, createdPlayers: 0, daysSinceFirstDate: 10);
 
         var result = await _service.CanDisplayHiddenPlayerAsync(7);
 
