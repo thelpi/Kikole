@@ -177,6 +177,18 @@
   <data name="SetRegistrationId" xml:space="preserve">
     <value>Registration id:</value>
   </data>
+  <data name="SponsorLogin" xml:space="preserve">
+    <value>Your sponsor's login (optional):</value>
+  </data>
+  <data name="Sponsorship" xml:space="preserve">
+    <value>Sponsorship</value>
+  </data>
+  <data name="YourSponsor" xml:space="preserve">
+    <value>Your sponsor:</value>
+  </data>
+  <data name="YourGodchildren" xml:space="preserve">
+    <value>Your godchildren:</value>
+  </data>
   <data name="TipRecovery" xml:space="preserve">
     <value>Fields below are optional, but if you lose your password, the answer to this question might save you!</value>
   </data>

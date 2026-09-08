@@ -22,6 +22,16 @@ public interface IUserRepository
 
     Task<IReadOnlyCollection<UserDto>> GetUsersByIdsAsync(IReadOnlyCollection<ulong> userIds);
 
+    /// <summary>
+    /// Utilisateur par identifiant, y compris s'il est désactivé (contrairement à
+    /// <see cref="GetUserByIdAsync"/>) : sert à afficher le parrain d'un compte même si
+    /// celui-ci a depuis été désactivé.
+    /// </summary>
+    Task<UserDto?> GetUserByIdIncludingDisabledAsync(ulong userId);
+
+    /// <summary>Filleuls (utilisateurs parrainés par <paramref name="sponsorUserId"/>), y compris les désactivés.</summary>
+    Task<IReadOnlyCollection<UserDto>> GetGodchildrenAsync(ulong sponsorUserId);
+
     Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id);
 
     Task LinkRegistrationGuidToUserAsync(string id, ulong userId);

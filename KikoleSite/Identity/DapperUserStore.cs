@@ -171,7 +171,8 @@ public class DapperUserStore :
             SecurityStamp = user.SecurityStamp ?? Guid.NewGuid().ToString(),
             LockoutEnd = user.LockoutEnd?.UtcDateTime,
             AccessFailedCount = user.AccessFailedCount,
-            LockoutEnabled = user.LockoutEnabled
+            LockoutEnabled = user.LockoutEnabled,
+            SponsorUserId = user.SponsorUserId
         };
     }
 
@@ -196,7 +197,8 @@ public class DapperUserStore :
                 : null,
             AccessFailedCount = dto.AccessFailedCount,
             LockoutEnabled = dto.LockoutEnabled,
-            CreationDate = dto.CreationDate
+            CreationDate = dto.CreationDate,
+            SponsorUserId = dto.SponsorUserId
         };
     }
 }

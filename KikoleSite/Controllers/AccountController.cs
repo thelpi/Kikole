@@ -22,12 +22,14 @@ public class AccountController : KikoleBaseController
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
+    private readonly ILookupNormalizer _lookupNormalizer;
     private readonly RegistrationOptions _registrationOptions;
 
     public AccountController(IStringLocalizer<AccountController> localizer,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IPasswordHasher<ApplicationUser> passwordHasher,
+        ILookupNormalizer lookupNormalizer,
         IOptions<RegistrationOptions> registrationOptions,
         IUserRepository userRepository,
         IInternationalService internationalService,
@@ -48,13 +50,14 @@ public class AccountController : KikoleBaseController
         _userManager = userManager;
         _signInManager = signInManager;
         _passwordHasher = passwordHasher;
+        _lookupNormalizer = lookupNormalizer;
         _registrationOptions = registrationOptions.Value;
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return RenderIndex(new AccountModel());
+        return await RenderIndexAsync(new AccountModel());
     }
 
     [HttpPost]
@@ -66,7 +69,7 @@ public class AccountController : KikoleBaseController
         // le menu de _Layout afficherait encore l'utilisateur comme connecte sur
         // cette meme page.
         HttpContext.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity());
-        return RenderIndex(new AccountModel());
+        return await RenderIndexAsync(new AccountModel());
     }
 
     [HttpPost]
@@ -100,7 +103,7 @@ public class AccountController : KikoleBaseController
             }
         }
 
-        return RenderIndex(model);
+        return await RenderIndexAsync(model);
     }
 
     [HttpPost]
@@ -118,7 +121,7 @@ public class AccountController : KikoleBaseController
                 model.Error = _localizer["UserDoesNotExist"];
         }
 
-        return RenderIndex(model);
+        return await RenderIndexAsync(model);
     }
 
     [HttpPost]
@@ -168,7 +171,7 @@ public class AccountController : KikoleBaseController
             }
         }
 
-        return RenderIndex(model);
+        return await RenderIndexAsync(model);
     }
 
     [HttpPost]
@@ -195,7 +198,7 @@ public class AccountController : KikoleBaseController
             model.SuccessInfo = _localizer["QandAUpdated"];
         }
 
-        return RenderIndex(model);
+        return await RenderIndexAsync(model);
     }
 
     [HttpPost]
@@ -243,13 +246,17 @@ public class AccountController : KikoleBaseController
                     model.Error = _localizer["UsedRegistrationId"];
                 else
                 {
+                    var sponsorUserId = await ResolveSponsorUserIdAsync(
+                            model.SponsorLoginSubmission, model.LoginCreateSubmission);
+
                     var request = new UserRequest
                     {
                         Login = model.LoginCreateSubmission,
                         Password = model.PasswordCreate1Submission,
                         PasswordResetQuestion = model.RecoveryQCreate,
                         PasswordResetAnswer = model.RecoveryACreate?.Trim(),
-                        Ip = clientIp
+                        Ip = clientIp,
+                        SponsorUserId = sponsorUserId
                     };
 
                     var (user, rawPasswordResetAnswer) = request.ToApplicationUser();
@@ -275,7 +282,7 @@ public class AccountController : KikoleBaseController
             }
         }
 
-        return RenderIndex(model);
+        return await RenderIndexAsync(model);
     }
 
     [HttpPost]
@@ -301,18 +308,57 @@ public class AccountController : KikoleBaseController
                 model.SuccessInfo = _localizer["PasswordChanged"];
         }
 
-        return RenderIndex(model);
+        return await RenderIndexAsync(model);
+    }
+
+    /// <summary>
+    /// Resout le login de parrain saisi a l'inscription en identifiant, silencieusement :
+    /// aucune des trois raisons de refus (login inconnu, parrain desactive, auto-parrainage)
+    /// ne bloque l'inscription ni ne remonte d'erreur - <c>sponsor_user_id</c> reste juste
+    /// a <c>null</c>, comme demande.
+    /// </summary>
+    private async Task<ulong?> ResolveSponsorUserIdAsync(string? sponsorLoginSubmission, string newAccountLogin)
+    {
+        if (string.IsNullOrWhiteSpace(sponsorLoginSubmission))
+            return null;
+
+        var sponsor = await _userManager.FindByNameAsync(sponsorLoginSubmission);
+        if (sponsor == null || sponsor.IsDisabled)
+            return null;
+
+        var normalizedNewLogin = _lookupNormalizer.NormalizeName(newAccountLogin);
+        if (sponsor.NormalizedUserName == normalizedNewLogin)
+            return null;
+
+        return sponsor.Id;
     }
 
     /// <summary>
     /// Rend la vue Index en refletant l'etat de connexion reel (plutot que de le recopier
     /// a la main a la fin de chaque action, ce qui oublie facilement un cas d'erreur).
     /// </summary>
-    private IActionResult RenderIndex(AccountModel model)
+    private async Task<IActionResult> RenderIndexAsync(AccountModel model)
     {
         model.RegistrationInviteEnabled = _registrationOptions.InviteEnabled;
         model.IsAuthenticated = UserId > 0;
         model.Login = UserLogin;
+
+        if (UserId > 0)
+        {
+            var me = await _userManager.FindByIdAsync(UserId.ToString());
+            if (me?.SponsorUserId.HasValue == true)
+            {
+                var sponsor = await _userRepository.GetUserByIdIncludingDisabledAsync(me.SponsorUserId.Value);
+                model.SponsorLogin = sponsor?.Login;
+            }
+
+            var godchildren = await _userRepository.GetGodchildrenAsync(UserId);
+            model.Godchildren = godchildren
+                .Select(g => (g.Login, g.IsDisabled))
+                .OrderBy(g => g.Login)
+                .ToList();
+        }
+
         return View("Index", model);
     }
 

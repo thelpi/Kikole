@@ -1974,6 +1974,7 @@ CREATE TABLE users (
   lockout_end datetime DEFAULT NULL,
   access_failed_count int(10) UNSIGNED NOT NULL DEFAULT '0',
   lockout_enabled tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
+  sponsor_user_id bigint(20) UNSIGNED DEFAULT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
@@ -2102,7 +2103,8 @@ ALTER TABLE users
   ADD UNIQUE KEY normalized_login (normalized_login),
   ADD KEY lang_id (language_id),
   ADD KEY is_disabled (is_disabled),
-  ADD KEY user_type_id (user_type_id);
+  ADD KEY user_type_id (user_type_id),
+  ADD KEY sponsor_user_id (sponsor_user_id);
 
 ALTER TABLE user_badges
   ADD PRIMARY KEY (user_id,badge_id),
@@ -2209,7 +2211,8 @@ ALTER TABLE registration_guids
 
 ALTER TABLE users
   ADD CONSTRAINT fk_users_language_id FOREIGN KEY (language_id) REFERENCES languages (id),
-  ADD CONSTRAINT fk_users_user_type_id FOREIGN KEY (user_type_id) REFERENCES user_types (id);
+  ADD CONSTRAINT fk_users_user_type_id FOREIGN KEY (user_type_id) REFERENCES user_types (id),
+  ADD CONSTRAINT fk_users_sponsor_user_id FOREIGN KEY (sponsor_user_id) REFERENCES users (id);
 
 ALTER TABLE user_badges
   ADD CONSTRAINT fk_user_badges_user_id FOREIGN KEY (user_id) REFERENCES users (id),

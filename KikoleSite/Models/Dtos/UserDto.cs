@@ -31,4 +31,11 @@ public record UserDto : BaseDto
     public int AccessFailedCount { get; init; }
 
     public bool LockoutEnabled { get; init; }
+
+    /// <summary>
+    /// Utilisateur ayant parraine celui-ci a l'inscription (login saisi dans le formulaire,
+    /// resolu et fige a la creation du compte - ne change jamais ensuite). <c>Null</c> si
+    /// non parraine, ou si le login saisi ne correspondait a personne d'eligible.
+    /// </summary>
+    public ulong? SponsorUserId { get; init; }
 }

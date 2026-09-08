@@ -67,6 +67,39 @@
                 </div>
             </form>
         </div>
+
+        @if (Model.HasSponsorshipInfo)
+        {
+            <div class="form-card">
+                <h3>@localizer["Sponsorship"]</h3>
+                @if (!string.IsNullOrWhiteSpace(Model.SponsorLogin))
+                {
+                    <div class="form-field">
+                        <label>@localizer["YourSponsor"]</label>
+                        <div class="form-static">@Model.SponsorLogin</div>
+                    </div>
+                }
+                @if (Model.Godchildren.Count > 0)
+                {
+                    <div class="form-field">
+                        <label>@localizer["YourGodchildren"]</label>
+                        <div class="form-static">
+                            @foreach (var godchild in Model.Godchildren)
+                            {
+                                @if (godchild.IsDisabled)
+                                {
+                                    <div><s>@godchild.Login</s></div>
+                                }
+                                else
+                                {
+                                    <div>@godchild.Login</div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     }
     else
     {
@@ -110,6 +143,10 @@
                 <div class="form-field">
                     <label>@localizer["RepeatPwd"]</label>
                     @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
+                </div>
+                <div class="form-field">
+                    <label>@localizer["SponsorLogin"]</label>
+                    @Html.TextBoxFor(m => m.SponsorLoginSubmission, new { @class = "blank" })
                 </div>
                 <p class="form-hint">@localizer["TipRecovery"]</p>
                 <div class="form-field">

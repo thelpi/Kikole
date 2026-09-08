@@ -177,6 +177,18 @@
   <data name="SetRegistrationId" xml:space="preserve">
     <value>Code d'inscription :</value>
   </data>
+  <data name="SponsorLogin" xml:space="preserve">
+    <value>Login de votre parrain (optionnel) :</value>
+  </data>
+  <data name="Sponsorship" xml:space="preserve">
+    <value>Parrainage</value>
+  </data>
+  <data name="YourSponsor" xml:space="preserve">
+    <value>Votre parrain :</value>
+  </data>
+  <data name="YourGodchildren" xml:space="preserve">
+    <value>Vos filleuls :</value>
+  </data>
   <data name="TipRecovery" xml:space="preserve">
     <value>Les champs ci-dessous sont optionnels, mais si vous perdez votre mot de passe, la réponse à cette question peut vous sauver !</value>
   </data>

@@ -38,6 +38,7 @@ public class UserRepository : BaseRepository, IUserRepository
                 ("lockout_end", user.LockoutEnd),
                 ("access_failed_count", user.AccessFailedCount),
                 ("lockout_enabled", user.LockoutEnabled ? 1 : 0),
+                ("sponsor_user_id", user.SponsorUserId),
                 ("creation_date", Clock.Now));
     }
 
@@ -110,6 +111,16 @@ public class UserRepository : BaseRepository, IUserRepository
         return await ExecuteReaderAsync<UserDto>(
                 "SELECT * FROM users WHERE id IN @userIds AND is_disabled = 0",
                 new { userIds });
+    }
+
+    public async Task<UserDto?> GetUserByIdIncludingDisabledAsync(ulong userId)
+    {
+        return await GetDtoAsync<UserDto>("users", ("id", userId));
+    }
+
+    public async Task<IReadOnlyCollection<UserDto>> GetGodchildrenAsync(ulong sponsorUserId)
+    {
+        return await GetDtosAsync<UserDto>("users", ("sponsor_user_id", sponsorUserId));
     }
 
     public async Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id)

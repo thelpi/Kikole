@@ -24,4 +24,6 @@ public class ApplicationUser : IdentityUser<ulong>
     public bool IsDisabled { get; set; }
 
     public DateTime CreationDate { get; set; }
+
+    public ulong? SponsorUserId { get; set; }
 }

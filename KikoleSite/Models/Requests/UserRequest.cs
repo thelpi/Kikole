@@ -20,6 +20,13 @@ public record UserRequest
     public required string? Ip { get; init; }
 
     /// <summary>
+    /// Deja resolu (et valide - existe, pas desactive, pas soi-meme) par l'appelant :
+    /// ce record ne fait aucun acces aux donnees, cf. le principe deja suivi ailleurs
+    /// dans le projet.
+    /// </summary>
+    public ulong? SponsorUserId { get; init; }
+
+    /// <summary>
     /// La reponse de securite n'est pas hachee ici : ce record n'a pas a connaitre
     /// l'algorithme de hachage. L'appelant la hache lui-meme avant de creer le compte.
     /// </summary>
@@ -42,7 +49,8 @@ public record UserRequest
             UserType = UserTypes.StandardUser,
             PasswordResetQuestion = realPasswordResetQuestion,
             PasswordResetAnswerHash = string.Empty,
-            Ip = Ip
+            Ip = Ip,
+            SponsorUserId = SponsorUserId
         };
 
         return (user, rawPasswordResetAnswer);

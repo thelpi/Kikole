@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using KikoleSite;
 using KikoleSite.Configuration;
 using KikoleSite.Controllers;
 using KikoleSite.Identity;
+using KikoleSite.Models.Dtos;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
@@ -55,11 +57,17 @@ public class AccountControllerTests
         httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
         _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
 
+        // RenderIndexAsync l'appelle systematiquement des qu'un utilisateur est connecte
+        // (section parrainage) : par defaut, aucun filleul, comme pour les autres mocks
+        // "silencieux" ci-dessus
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(It.IsAny<ulong>())).ReturnsAsync(new List<UserDto>());
+
         _controller = new AccountController(
             _localizer.Object,
             _userManager.Object,
             _signInManager.Object,
             _passwordHasher.Object,
+            new SanitizingLookupNormalizer(),
             new OptionsWrapper<RegistrationOptions>(_registrationOptions),
             _userRepository.Object,
             _internationalService.Object,
@@ -87,9 +95,9 @@ public class AccountControllerTests
     // ------------------------------------------------------------- Index / LogOut
 
     [Fact]
-    public void Index_Get_RendersTheUnauthenticatedView()
+    public async Task Index_Get_RendersTheUnauthenticatedView()
     {
-        var result = _controller.Index();
+        var result = await _controller.Index();
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
         model.IsAuthenticated.Should().BeFalse();
@@ -359,6 +367,145 @@ public class AccountControllerTests
             .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "Index" && r.ControllerName == "Home");
         _userManager.Verify(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234"), Times.Once);
         _userRepository.Verify(_ => _.CreateLoginHistoryAsync(9, It.IsAny<string?>()), Times.Once);
+    }
+
+    // ------------------------------------------------------------- Create (parrainage)
+
+    private void SetupPlainCreate(string login = "nouveau")
+    {
+        _userManager.Setup(_ => _.FindByNameAsync(login)).ReturnsAsync((ApplicationUser?)null);
+        _userManager
+            .Setup(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234"))
+            .ReturnsAsync(IdentityResult.Success);
+        // le LogIn automatique post-creation echoue silencieusement (non teste ici) : evite
+        // d'avoir a mocker un troisieme scenario juste pour ces tests de resolution du parrain
+        _signInManager
+            .Setup(_ => _.PasswordSignInAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234", true, true))
+            .ReturnsAsync(SignInResult.Failed);
+    }
+
+    [Fact]
+    public async Task Create_WithAValidSponsor_SetsSponsorUserId()
+    {
+        SetupPlainCreate();
+        var sponsor = BuildUser(id: 42, login: "parrain1");
+        _userManager.Setup(_ => _.FindByNameAsync("parrain1")).ReturnsAsync(sponsor);
+
+        await _controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            SponsorLoginSubmission = "parrain1"
+        });
+
+        _userManager.Verify(_ => _.CreateAsync(
+            It.Is<ApplicationUser>(u => u.SponsorUserId == 42UL), "NouveauMdp1234"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_WithAnUnknownSponsorLogin_SilentlyLeavesSponsorUserIdNull()
+    {
+        SetupPlainCreate();
+        _userManager.Setup(_ => _.FindByNameAsync("inconnu")).ReturnsAsync((ApplicationUser?)null);
+
+        await _controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            SponsorLoginSubmission = "inconnu"
+        });
+
+        _userManager.Verify(_ => _.CreateAsync(
+            It.Is<ApplicationUser>(u => u.SponsorUserId == null), "NouveauMdp1234"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_WithADisabledSponsor_SilentlyLeavesSponsorUserIdNull()
+    {
+        SetupPlainCreate();
+        var sponsor = BuildUser(id: 42, login: "parrain1");
+        sponsor.IsDisabled = true;
+        _userManager.Setup(_ => _.FindByNameAsync("parrain1")).ReturnsAsync(sponsor);
+
+        await _controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            SponsorLoginSubmission = "parrain1"
+        });
+
+        _userManager.Verify(_ => _.CreateAsync(
+            It.Is<ApplicationUser>(u => u.SponsorUserId == null), "NouveauMdp1234"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_WithSelfAsSponsorDifferentCase_SilentlyLeavesSponsorUserIdNull()
+    {
+        SetupPlainCreate();
+        // "NOUVEAU" (le parrain saisi) et "nouveau" (le login choisi) doivent etre reconnus
+        // comme le meme compte via le normaliseur (Sanitize + majuscules), pas une simple
+        // comparaison de chaines
+        // NormalizedUserName pose explicitement : en production, DapperUserStore.ToUser le
+        // renseigne toujours depuis UserDto.NormalizedLogin ; BuildUser() ne le fait pas par
+        // defaut (aucun autre test existant n'en a besoin).
+        var self = BuildUser(id: 9, login: "NOUVEAU");
+        self.NormalizedUserName = "NOUVEAU";
+        _userManager.Setup(_ => _.FindByNameAsync("NOUVEAU")).ReturnsAsync(self);
+
+        await _controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            SponsorLoginSubmission = "NOUVEAU"
+        });
+
+        _userManager.Verify(_ => _.CreateAsync(
+            It.Is<ApplicationUser>(u => u.SponsorUserId == null), "NouveauMdp1234"), Times.Once);
+    }
+
+    // ------------------------------------------------------------- Index (parrainage)
+
+    [Fact]
+    public async Task Index_Get_AuthenticatedWithoutSponsorshipInfo_LeavesTheSectionEmpty()
+    {
+        SetCurrentUser(1);
+        var me = BuildUser(id: 1, login: "joueur1");
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(me);
+
+        var result = await _controller.Index();
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.HasSponsorshipInfo.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Index_Get_AuthenticatedWithSponsorAndGodchildren_PopulatesTheSponsorshipSection()
+    {
+        SetCurrentUser(1);
+        var me = BuildUser(id: 1, login: "joueur1");
+        me.SponsorUserId = 42;
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(me);
+        _userRepository
+            .Setup(_ => _.GetUserByIdIncludingDisabledAsync(42))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(42).WithLogin("parrain1").Build());
+        _userRepository
+            .Setup(_ => _.GetGodchildrenAsync(1))
+            .ReturnsAsync(new[]
+            {
+                UserDtoBuilder.Valid().WithId(2).WithLogin("filleul1").Build(),
+                UserDtoBuilder.Valid().WithId(3).WithLogin("filleul2").WithDisabled().Build()
+            });
+
+        var result = await _controller.Index();
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.HasSponsorshipInfo.Should().BeTrue();
+        model.SponsorLogin.Should().Be("parrain1");
+        model.Godchildren.Should().BeEquivalentTo(new[] { ("filleul1", false), ("filleul2", true) });
     }
 
     // ------------------------------------------------------------- ChangePassword

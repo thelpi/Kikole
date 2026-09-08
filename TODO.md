@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **687** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
+| Tests | **693** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -95,12 +95,46 @@ Branche de travail : `remaster-v2`.
         (liste + détail, même schéma que `Leaderboard/Index`→`User.cshtml` ou
         `Admin/Discussions`→`Discussion.cshtml`) plutôt que trois pages séparées — à
         confirmer le jour où ce chantier démarre.
-- [ ] **Système de parrainage.** Noté en aparté par l'utilisateur pendant le chantier
-      badges (session du 2026-09-08) : idée de badge qui en dépend, gardée pour plus tard
-      sans le détail pour l'instant. Rien commencé, ni la fonctionnalité elle-même
-      (comment un utilisateur en parraine un autre, qu'est-ce que ça change côté compte —
-      probablement une colonne `referrer_user_id` ou une table dédiée, cf. le schéma
-      `users` actuel) ni le badge qui s'appuierait dessus.
+- [x] **Système de parrainage.** Noté en aparté pendant le chantier badges (2026-09-08),
+      implémenté dans la foulée (badge associé volontairement pas encore fait — prochaine
+      étape, gardée à part). Spec de l'utilisateur suivie telle quelle :
+      - **Schéma** : colonne `users.sponsor_user_id` (nullable, FK vers `users(id)`,
+        indexée) — `kikole.sql` mis à jour. Fixée à l'inscription, ne change jamais
+        ensuite (pas de champ dans `UpdateUserAsync`, volontairement).
+      - **Inscription** (`Account/Index.cshtml`, nouveau champ "Login de votre parrain
+        (optionnel) :") : résolu dans `AccountController.ResolveSponsorUserIdAsync`,
+        appelé juste avant la création du compte. Les trois cas d'échec (login inconnu,
+        parrain désactivé, auto-parrainage) sont **tous silencieux** — `sponsor_user_id`
+        reste `null`, aucune erreur affichée, comme demandé. L'auto-parrainage est détecté
+        via `ILookupNormalizer` (le même que celui qui garantit l'unicité des logins,
+        `SanitizingLookupNormalizer` — Sanitize + majuscules), pas une comparaison de
+        chaînes brute, pour rester cohérent avec la casse/les accents.
+      - **Page "Mon compte"** : nouvelle carte "Parrainage", visible uniquement si
+        `SponsorLogin != null || Godchildren.Count > 0` (`AccountModel.HasSponsorshipInfo`).
+        Piège évité : `GetUserByIdAsync`/`GetUsersByIdsAsync` filtrent `is_disabled = 0` —
+        inutilisables ici, sinon un parrain désactivé disparaîtrait silencieusement de la
+        page de son filleul. Nouvelle méthode dédiée
+        `IUserRepository.GetUserByIdIncludingDisabledAsync` pour le parrain, et
+        `GetGodchildrenAsync` (tous les filleuls, désactivés inclus) pour la liste — les
+        filleuls désactivés s'affichent barrés (`<s>`, même convention que les propositions
+        incorrectes ailleurs sur le site), pas masqués.
+      - `RenderIndex` (appelée par les 8 actions du contrôleur) passée en async pour
+        peupler cette section — appelée systématiquement quand connecté, y compris après
+        un simple changement de mot de passe : léger coût accepté pour ne pas dupliquer la
+        logique d'affichage entre les 8 points d'entrée.
+      - `ApplicationUser`/`DapperUserStore` (le store Identity maison) mis à jour pour
+        porter `SponsorUserId` de bout en bout — même mécanique déjà en place pour
+        `UserType`/`LanguageId`/etc.
+      - Testé (`AccountControllerTests.cs`, +6 : les 3 cas silencieux de résolution du
+        parrain dont un dédié à la casse/normalisation, + affichage section vide/peuplée).
+        `dotnet test` : 693 tests unitaires verts.
+      - **Reste à faire, volontairement pas fait ici** : appliquer la migration
+        (`ALTER TABLE users ADD COLUMN sponsor_user_id ...`) sur la base locale déjà créée
+        (`kikole.sql` ne sert qu'à la création initiale, pas rejoué en incrémental) — pas
+        fait sans redemander, l'utilisateur ayant explicitement demandé (juste après le
+        chantier badges précédent) de ne plus relancer de test réel/vérification live sans
+        lui demander d'abord. Le badge associé au parrainage (mentionné par l'utilisateur
+        comme motivation initiale) reste à définir et implémenter séparément.
 
 ---
 
