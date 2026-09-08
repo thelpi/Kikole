@@ -198,6 +198,14 @@ public class BadgeService : IBadgeService
             {
                 Badges.YourFirstSuccess,
                 l => true
+            },
+            {
+                // Le barème (ScoreCalculator) n'a que des couts fixes multiples de 25 ;
+                // seul l'indice facile (-50% du reste, arrondi, achetable une seule fois)
+                // peut casser cette regle. 13 est le plancher mathematique non-nul du jeu :
+                // aucune combinaison de mauvaises reponses + indice ne peut faire moins.
+                Badges.SurLeFil,
+                l => l.Points == 13
             }
         };
 
@@ -476,6 +484,12 @@ public class BadgeService : IBadgeService
                 }
             }
 
+            if (await RespectsPhoenixConditionAsync(leader, proposalsBeforeWin, myDay1History))
+            {
+                await InsertBadgeIfNotAlreadyAsync(
+                        leader.ProposalDate, leader.UserId, (ulong)Badges.Phoenix, collectedBadges, allBadges);
+            }
+
             foreach (var badge in LeaderRunBasedBadgeCondition.Keys)
             {
                 var (runCount, checkFunc, incPlayerSubmission) = LeaderRunBasedBadgeCondition[badge];
@@ -568,6 +582,55 @@ public class BadgeService : IBadgeService
 
         return await GetUserBadgesAsync(
                 collectedBadges, leader.ProposalDate, allBadges, language);
+    }
+
+    /// <summary>
+    /// Badge "Phoenix" : le jour courant doit etre une victoire "propre" (points &gt; 0,
+    /// sans indice facile), precedee de 7 jours consecutifs ou l'utilisateur a tente sa
+    /// chance (au moins une proposition) sans jamais decrocher une victoire aussi propre
+    /// - echec, victoire en rattrapage (hors delai) ou victoire a 0 point comptent tous
+    /// comme un jour "rate" ; un jour sans la moindre proposition (absence, pas echec)
+    /// casse la serie plutot que de compter comme une tentative. Les jours ou
+    /// l'utilisateur est le createur du kikole ne sont pas traites a part (contrairement
+    /// aux badges de serie bases sur <see cref="RespectLeadersRunConditionsInternal"/>) :
+    /// simplification volontaire, a revoir si le cas se presente en pratique.
+    /// </summary>
+    private async Task<bool> RespectsPhoenixConditionAsync(
+        LeaderDto leader,
+        IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
+        IEnumerable<LeaderDto> myDay1History)
+    {
+        if (leader.Points <= 0 || proposalsBeforeWin.Any(p => (ProposalTypes)p.ProposalTypeId == ProposalTypes.Clue))
+            return false;
+
+        var startDate = leader.ProposalDate.AddDays(-7);
+        var endDate = leader.ProposalDate.AddDays(-1);
+
+        var recentProposals = await _proposalRepository
+            .GetProposalsAsync(startDate, endDate, leader.UserId);
+
+        var dateToConsider = endDate;
+        while (dateToConsider >= startDate)
+        {
+            var dayProposals = recentProposals
+                .Where(p => p.ProposalDate == dateToConsider)
+                .ToList();
+
+            if (dayProposals.Count == 0)
+                return false;
+
+            var dayLeader = myDay1History.FirstOrDefault(l => l.ProposalDate == dateToConsider);
+            var cleanWin = dayLeader != null
+                && dayLeader.Points > 0
+                && !dayProposals.Any(p => (ProposalTypes)p.ProposalTypeId == ProposalTypes.Clue);
+
+            if (cleanWin)
+                return false;
+
+            dateToConsider = dateToConsider.AddDays(-1);
+        }
+
+        return true;
     }
 
     private static bool RespectLeadersRunConditions(LeaderDto leader,

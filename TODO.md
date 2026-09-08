@@ -95,6 +95,12 @@ Branche de travail : `remaster-v2`.
         (liste + détail, même schéma que `Leaderboard/Index`→`User.cshtml` ou
         `Admin/Discussions`→`Discussion.cshtml`) plutôt que trois pages séparées — à
         confirmer le jour où ce chantier démarre.
+- [ ] **Système de parrainage.** Noté en aparté par l'utilisateur pendant le chantier
+      badges (session du 2026-09-08) : idée de badge qui en dépend, gardée pour plus tard
+      sans le détail pour l'instant. Rien commencé, ni la fonctionnalité elle-même
+      (comment un utilisateur en parraine un autre, qu'est-ce que ça change côté compte —
+      probablement une colonne `referrer_user_id` ou une table dédiée, cf. le schéma
+      `users` actuel) ni le badge qui s'appuierait dessus.
 
 ---
 
@@ -458,7 +464,56 @@ Branche de travail : `remaster-v2`.
       l'utilisateur. Portée pas encore précisée avec lui : à clarifier au démarrage de ce
       chantier — badges déjà définis (`Badges`, `BadgeService`) mais dont une condition
       resterait non couverte ou buguée, ou nouvelles idées de badges pas encore
-      implémentées. Rien commencé.
+      implémentées.
+      - [x] **`SurLeFil`** — trouver le kikolé avec exactement 13 points restants (le
+        plancher mathématique non-nul du barème : 1000 → 25 via des propositions ratées
+        classiques, multiples de 25 seulement → indice facile acheté à 25 restants,
+        arrondi bancaire de 12.5 sur 12 → 13. Pas atteignable autrement, ni 1 ni 10 ne le
+        sont). `LeaderBasedBadgeCondition[Badges.SurLeFil] = l => l.Points == 13`
+        (`BadgeService.cs`).
+      - [x] **`Phoenix`** — victoire "propre" (points > 0, sans indice facile) précédée de
+        7 jours consécutifs où l'utilisateur a *tenté sa chance* (au moins une proposition
+        soumise, précision de l'utilisateur — un jour sans la moindre tentative casse la
+        série, ne compte pas comme un "échec") sans jamais décrocher une victoire aussi
+        propre (échec, victoire hors délai, ou victoire à 0 point comptent tous comme
+        rate). Nouvelle méthode dédiée `RespectsPhoenixConditionAsync` (`BadgeService.cs`)
+        plutôt que le patron générique `RespectLeadersRunConditionsInternal` (pensé pour
+        l'inverse : une série de *bons* jours, pas de mauvais). Simplification assumée et
+        documentée dans le code : contrairement aux badges de série existants, les jours où
+        l'utilisateur est le créateur du kikolé du jour ne sont pas traités à part — à
+        revoir si le cas se présente en pratique.
+      - Les deux ajoutés à `Badges.cs` (29, 30), `kikole.sql` (lignes `badges`/
+        `badge_translations`, + seedées directement en base locale via un test
+        d'intégration jetable, créé puis supprimé) et testés (`BadgeServiceTests.cs`, 7
+        nouveaux tests : 2 pour `SurLeFil`, 5 pour `Phoenix` couvrant chacune des 3
+        façons de rater un jour + les deux conditions du jour de la victoire).
+      - **Vérifié en direct, de bout en bout** (compte jetable `testbadge13c`, via `fetch`
+        pour piloter 39 propositions "Pays" fausses sans passer par l'UI un par un) : 1000
+        → 25 points confirmés après les 39 échecs, → 13 confirmés après achat de l'indice
+        facile, victoire réelle sur "Clarence Seedorf" à 13 points sans erreur serveur,
+        badge `Sur le fil` bien crédité (page `Leaderboard?userId=...`), `Phoenix` bien
+        absent (indice facile utilisé ce jour-là, condition qui l'exclut explicitement).
+        **Fausse alerte en cours de route, notée pour la prochaine fois** : une "erreur
+        serveur" est apparue lors d'une première tentative de victoire — cause réelle :
+        un test d'intégration lancé *entre-temps* (pour lire le nom du joueur du jour) a
+        rejoué `kikole_mock.sql` via `DatabaseFixture.InitializeAsync`, supprimant le
+        compte de test en cours de partie sous ses pieds. Rien à voir avec le code des
+        badges. Leçon : ne jamais lancer `dotnet test` sur `KikoleSiteIntegrationTests`
+        pendant une session de vérification live sur la même base — chaque run réinitialise
+        `users`/`players`/`proposals`/`leaders` (mais pas `badges`/`badge_translations`,
+        non touchées par `kikole_mock.sql`).
+      - **Idée écartée après discussion : "Grand Chelem"** (trouver un joueur à chacun des
+        4 postes sur une fenêtre de 7 jours) — l'utilisateur varie déjà ses joueurs
+        proposés, et avec les postes alternatifs désormais possibles
+        (`AlternativePositionId`), ce badge serait quasi automatique au bout d'une semaine
+        de jeu normale. Retenu comme angle à retravailler plus tard (préciser la condition
+        pour qu'elle reste un vrai défi), pas abandonné.
+- [ ] **Classement des participants par % de badges obtenus.** Demandé en aparté par
+      l'utilisateur pendant ce même chantier (2026-09-08). Rien commencé — probablement un
+      nouveau `LeaderSorts` (cf. `LeaderboardController`/`LeaderService.GetLeaderboardAsync`)
+      calculant, par utilisateur, `(badges obtenus / total des badges) %` ; à voir si les
+      badges cachés doivent compter dans le total ou être exclus du calcul pour tout le
+      monde sauf leur détenteur.
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à

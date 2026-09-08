@@ -29,5 +29,7 @@ public enum Badges
     HellOfAWeek,
     TheBreakfastClub,
     MetroBoulotKikoleDodo,
-    OneMinuteChrono
+    OneMinuteChrono,
+    SurLeFil,
+    Phoenix
 }

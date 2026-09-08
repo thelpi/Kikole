@@ -64,6 +64,10 @@ public class BadgeServiceTests
             .ReturnsAsync(new List<LeaderDto>());
         _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
             .ReturnsAsync(new List<PlayerDto>());
+        // par defaut aucune proposition recente (badge Phoenix) : les tests qui n'en ont
+        // pas besoin n'ont pas a le mocker explicitement, comme pour les deux setups ci-dessus
+        _proposalRepository.Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>()))
+            .ReturnsAsync(new List<ProposalDto>());
 
         _service = new BadgeService(
             _playerHandler.Object,
@@ -1006,6 +1010,153 @@ public class BadgeServiceTests
         await RunStreak(ConsecutiveWins(7, points: 500)); // 3500 au total
 
         ShouldNotHaveGranted(Badges.HellOfAWeek);
+    }
+
+    // ------------------------------------------------------------- SurLeFil
+
+    [Fact]
+    public async Task FindingWith13PointsGrantsSurLeFil()
+    {
+        // 13 est le plancher mathematique non-nul du barème (cf. commentaire du service) :
+        // 25 points restants, achat de l'indice facile (arrondi bancaire de 12.5 -> 12)
+        await Run(Leader(13, 60), Player());
+
+        ShouldHaveGranted(Badges.SurLeFil);
+    }
+
+    [Theory]
+    [InlineData((ushort)0)]
+    [InlineData((ushort)12)]
+    [InlineData((ushort)14)]
+    [InlineData((ushort)25)]
+    public async Task OtherScoresDoNotGrantSurLeFil(ushort points)
+    {
+        await Run(Leader(points, 60), Player());
+
+        ShouldNotHaveGranted(Badges.SurLeFil);
+    }
+
+    // ------------------------------------------------------------- Phoenix
+
+    private static ProposalDto ProposalOn(DateTime date, ProposalTypes type, bool successful = false)
+    {
+        return ProposalDtoBuilder.Valid().WithUser(UserId).WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithValue("x").WithProposalDate(date).WithCreationDate(date.AddMinutes(1)).Build();
+    }
+
+    /// <summary>
+    /// Prepare 7 jours "rates" avant <see cref="WinDay"/> (chacun avec au moins une
+    /// proposition, sans jamais de victoire propre), puis simule le gain du jour avec les
+    /// propositions fournies. <paramref name="dayOverrides"/> permet de personnaliser un
+    /// jour precis (proposition(s) + eventuel leader) ; par defaut chaque jour n'a qu'une
+    /// proposition ratee (Country), sans aucune ligne <c>leaders</c> (jamais trouve).
+    /// </summary>
+    private async Task RunPhoenix(
+        IReadOnlyCollection<ProposalDto> winProposals,
+        IReadOnlyDictionary<int, (IReadOnlyCollection<ProposalDto> proposals, LeaderDto? leader)>? dayOverrides = null)
+    {
+        var overrides = dayOverrides ?? new Dictionary<int, (IReadOnlyCollection<ProposalDto>, LeaderDto?)>();
+        var player = Player() with { PublicationDate = WinDay };
+        SetupPlayerFull(player);
+
+        var todayLeader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(1000).OnTheDay(WinDay, 60).Build();
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(WinDay, It.IsAny<bool>()))
+            .ReturnsAsync(new List<LeaderDto> { todayLeader });
+
+        var allRecentProposals = new List<ProposalDto>();
+        for (var i = 1; i <= 7; i++)
+        {
+            var date = WinDay.AddDays(-i);
+            if (overrides.TryGetValue(i, out var over))
+            {
+                allRecentProposals.AddRange(over.proposals);
+                _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(date, It.IsAny<bool>()))
+                    .ReturnsAsync(over.leader == null ? new List<LeaderDto>() : new List<LeaderDto> { over.leader });
+            }
+            else
+            {
+                allRecentProposals.Add(ProposalOn(date, ProposalTypes.Country));
+                _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(date, It.IsAny<bool>()))
+                    .ReturnsAsync(new List<LeaderDto>());
+            }
+        }
+        _proposalRepository
+            .Setup(_ => _.GetProposalsAsync(WinDay.AddDays(-7), WinDay.AddDays(-1), UserId))
+            .ReturnsAsync(allRecentProposals);
+
+        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, winProposals.ToList(), Languages.en);
+    }
+
+    [Fact]
+    public async Task SevenBadDaysThenACleanWinGrantsPhoenix()
+    {
+        // jour -1 : trouve en rattrapage (hors delai) ; jour -2 : trouve a temps mais 0
+        // point ; jours -3 a -7 : jamais trouve (defaut de RunPhoenix)
+        var catchUpLeader = LeaderDtoBuilder.Valid().WithUserId(UserId).AsCatchUp(WinDay.AddDays(-1)).WithPoints(500).Build();
+        var zeroPointLeader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(0).OnTheDay(WinDay.AddDays(-2), 90).Build();
+
+        await RunPhoenix(
+            winProposals: [ProposalOn(WinDay, ProposalTypes.Country)],
+            dayOverrides: new Dictionary<int, (IReadOnlyCollection<ProposalDto>, LeaderDto?)>
+            {
+                { 1, ([ProposalOn(WinDay.AddDays(-1), ProposalTypes.Name, successful: true)], catchUpLeader) },
+                { 2, ([ProposalOn(WinDay.AddDays(-2), ProposalTypes.Name, successful: true)], zeroPointLeader) }
+            });
+
+        ShouldHaveGranted(Badges.Phoenix);
+    }
+
+    [Fact]
+    public async Task ADayWithoutAnyAttemptBreaksThePhoenixStreak()
+    {
+        await RunPhoenix(
+            winProposals: [],
+            dayOverrides: new Dictionary<int, (IReadOnlyCollection<ProposalDto>, LeaderDto?)>
+            {
+                { 3, (Array.Empty<ProposalDto>(), null) } // absence, pas un echec
+            });
+
+        ShouldNotHaveGranted(Badges.Phoenix);
+    }
+
+    [Fact]
+    public async Task ACleanWinDuringTheSevenDaysBreaksThePhoenixStreak()
+    {
+        var cleanWinLeader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(700).OnTheDay(WinDay.AddDays(-4), 45).Build();
+
+        await RunPhoenix(
+            winProposals: [],
+            dayOverrides: new Dictionary<int, (IReadOnlyCollection<ProposalDto>, LeaderDto?)>
+            {
+                { 4, ([ProposalOn(WinDay.AddDays(-4), ProposalTypes.Name, successful: true)], cleanWinLeader) }
+            });
+
+        ShouldNotHaveGranted(Badges.Phoenix);
+    }
+
+    [Fact]
+    public async Task UsingTheEasyClueOnTheWinningDayPreventsPhoenix()
+    {
+        await RunPhoenix(winProposals: [ProposalOn(WinDay, ProposalTypes.Clue, successful: true)]);
+
+        ShouldNotHaveGranted(Badges.Phoenix);
+    }
+
+    [Fact]
+    public async Task ZeroPointsOnTheWinningDayPreventsPhoenix()
+    {
+        var player = Player() with { PublicationDate = WinDay };
+        SetupPlayerFull(player);
+
+        var todayLeader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(0).OnTheDay(WinDay, 60).Build();
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(WinDay, It.IsAny<bool>()))
+            .ReturnsAsync(new List<LeaderDto> { todayLeader });
+
+        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en);
+
+        ShouldNotHaveGranted(Badges.Phoenix);
+        _proposalRepository.Verify(
+            _ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>()), Times.Never,
+            "0 point disqualifie avant meme de regarder les 7 jours precedents");
     }
 
     // ------------------------------------------------------------- ResetBadgesAsync
