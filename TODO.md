@@ -360,7 +360,7 @@ Branche de travail : `remaster-v2`.
           encore plus bas repérés lors du cadrage initial (Espagne Tercera, Allemagne
           Oberliga, etc.) — hors périmètre de cette passe, qui s'arrêtait au palier
           explicitement listé pour chaque pays.
-      - [ ] **Nouveaux pays d'Europe (en cours, 2026-09-09)** — extraction de `club.dat`
+      - [x] **Nouveaux pays d'Europe (terminé, 2026-09-09)** — extraction de `club.dat`
         sur les 182 nations qu'il contient (10 580 clubs), filtrage aux pays d'Europe
         pas encore traités (France/Italie/Grèce/Espagne/Allemagne/Angleterre/Pays-Bas/
         Belgique/Portugal/Turquie/Écosse exclus, déjà faits). L'utilisateur a ensuite
@@ -467,6 +467,18 @@ Branche de travail : `remaster-v2`.
           distincte, pas rattachée à la Serbie dans le tableau de l'utilisateur. Vérifié
           (`kikole_test`) : 0 erreur, 1100 clubs au total, répartition exacte (Slovaquie
           10, Suède 34, Serbie 88), traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 8/8 (dernier) : Suisse, Ukraine, Galles** — ids 1101-1156. Suisse :
+          D1 (12, comp250) + D2 (12, comp251) complets, aucun club de palier inférieur
+          retenu (comp252, 45 candidats scannés, rien de reconnaissable). Ukraine : D1
+          seul (14, comp58 — Dinamo Kiev et Shakhtar Donetsk confirmés dedans). Galles :
+          D1 seul (18, comp186 — mêmes clubs fondateurs de la Welsh Premier League déjà
+          repérés lors du cadrage initial). Vérifié (`kikole_test`) : 0 erreur, **1156
+          clubs au total** (490 + 666 sur les 8 lots), répartition exacte (Suisse 24,
+          Ukraine 14, Galles 18), traductions EN+FR complètes, aucun id dupliqué.
+        - **Chantier "nouveaux pays d'Europe" terminé** (24/24 pays importés). Reste
+          identique au lot précédent (82 clubs des échelons inférieurs des 8 premiers
+          pays) : appliquer la migration sur la base locale via un test d'intégration
+          jetable, pas fait sans confirmation explicite de l'utilisateur au préalable.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
