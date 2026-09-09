@@ -425,6 +425,16 @@ Branche de travail : `remaster-v2`.
           Vérifié (`kikole_test`) : 0 erreur, 810 clubs au total, répartition exacte
           (Hongrie 16, Islande 11, Irlande 12), traductions EN+FR complètes, aucun id
           dupliqué.
+        - [x] **Lot 5/8 : Israël, Irlande du Nord, Norvège** — ids 811-870. Israël : D1
+          seul (17, comp58). Irlande du Nord : D1 seul (10, comp154 — Linfield/Glentoran/
+          Cliftonville confirmés dedans, grands noms historiques de l'Irish League).
+          Norvège : D1 (14, comp59 — Rosenborg BK et FK Bodø/Glimt confirmés dedans) + D2
+          (16, comp60) complets, + 3 clubs de palier régional inférieur (comp61/63)
+          montés depuis en Eliteserien ou historiquement dominants : Fredrikstad FK
+          (champion à répétition avant l'ère Tippeligaen), Ullensaker-Kisa et Ranheim IL
+          (montées ponctuelles en Eliteserien dans les années 2010). Vérifié
+          (`kikole_test`) : 0 erreur, 870 clubs au total, répartition exacte (Israël 17,
+          Irlande du Nord 10, Norvège 33), traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
