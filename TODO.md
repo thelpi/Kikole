@@ -315,12 +315,51 @@ Branche de travail : `remaster-v2`.
         (Zidane, Beckham, Ronaldinho, Pirlo...) pointent vers les bons clubs du
         catalogue réel. Ce sera désormais le comportement normal et permanent : plus
         besoin d'y revenir à chaque futur rejeu.
-      - **Reste (passe séparée, curation manuelle, pas commencée)** : les échelons
-        inférieurs listés ci-dessus (Espagne Segunda B, Allemagne Regionalliga,
-        Angleterre Division Three, Belgique/Portugal/Turquie 3ème palier régionalisé,
-        Écosse Division Two/Three) — décider club par club sur la base de la pertinence
-        historique, pas d'inclusion en bloc. Volume total disponible si tout était inclus :
-        largement supérieur aux 314 déjà ajoutés, donc vraiment une passe à part.
+      - [x] **Échelons inférieurs des 8 pays — 82 clubs curés** (2026-09-09). Extraction
+        identique (`club.dat`, offsets nation/compétition déjà reverse-engineered),
+        340 candidats au total (Espagne Segunda B 80, Allemagne Regionalliga 36,
+        Angleterre Division Three 24, Belgique Promotion régionalisée 80, Portugal 3
+        zones régionales 60, Turquie 2.Lig régionalisé 40, Écosse Division Two/Three 20).
+        Décision club par club (pas d'inclusion en bloc), sur deux critères cumulés :
+        **pertinence historique** (a déjà évolué en D1/D2 à un moment de son histoire —
+        titre national, coupe majeure, longue présence en 2ème division) **ou club
+        actuellement en D1/D2**. Équipes réserve/B exclues d'office avant même ce
+        jugement (`... B`, `... Amateure`, `... U21` — 26 sur les 340, mécanique, aucun
+        jugement de pertinence nécessaire puisque le club "premier" correspondant est
+        déjà au catalogue). Résultat : **82 retenus sur 314 candidats premier-effectif**
+        (Espagne 19/63, Allemagne 22/32, Angleterre 7/24, Belgique 4/80, Portugal 12/55,
+        Turquie 10/40, Écosse 8/20) — la Belgique en particulier confirme être restée un
+        vrai niveau amateur régional en 2001-02 (seuls trois clubs de ce palier bas ont
+        depuis perçé en D1 : Zulte Waregem, tout juste fusionné cette année-là, Oostende,
+        Kortrijk). Exemples de l'autre sens (inclus malgré un nom peu connu aujourd'hui) :
+        Fortuna Düsseldorf/Kickers Offenbach/SC Rot-Weiss Essen (grands noms allemands
+        déchus, déjà repérés au moment du cadrage), Real Unión de Irún (double vainqueur
+        de la Copa del Rey 1913/1918, membre fondateur de la Liga 1929), Queen's Park
+        (club fondateur du football écossais, 1867).
+        - Ids **491-572** dans `clubs`/`club_translations` (EN=FR, même convention que
+          le lot précédent). **Vérifié avant écriture finale** : chargement isolé dans
+          une base de test jetable (`kikole_test`, détruite après coup) — 0 erreur, 572
+          clubs au total (490 + 82), répartition par pays exacte, traductions EN+FR
+          complètes pour les 82 nouveaux (vérifié par `LEFT JOIN ... IS NULL`).
+        - **Angleterre — nuance de périmètre** : la compétition 10 (`Division Three`
+          officielle 2001-02, aujourd'hui League Two) est le 4ème palier réel, hors du
+          "3ème échelon" explicitement demandé pour ce pays (déjà couvert par la
+          compétition 9 dans le lot précédent) — inclus ici seulement à titre de
+          pertinence historique individuelle (Hull City, Luton Town, Swansea City,
+          Oxford United : passages Premier League/Championship ; Carlisle United,
+          Leyton Orient : une saison en First Division historique ; Plymouth Argyle :
+          promotion récente en Championship), pas comme un échelon entier à couvrir.
+        - **Point de méthode, à garder en tête si ce chantier reprend** : cette passe
+          repose sur des connaissances factuelles (parcours de club, années de titre,
+          division actuelle) reconstituées de mémoire plutôt que sourcées club par club
+          comme Wikipedia l'avait été pour la France — fiabilité nécessairement moindre
+          sur les clubs les moins connus (~80 pays × divisions confondues). Pas de
+          vérification croisée effectuée club par club faute de temps ; à corriger au cas
+          par cas si une erreur factuelle est repérée en jouant.
+        - **Toujours pas couvert (laissé tel quel, décision inchangée)** : les paliers
+          encore plus bas repérés lors du cadrage initial (Espagne Tercera, Allemagne
+          Oberliga, etc.) — hors périmètre de cette passe, qui s'arrêtait au palier
+          explicitement listé pour chaque pays.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
