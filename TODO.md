@@ -403,6 +403,21 @@ Branche de travail : `remaster-v2`.
           Chypre : D1 complet (14, comp58), pas de scan inférieur. Vérifié
           (`kikole_test`) : 0 erreur, 699 clubs au total, répartition exacte (Bulgarie
           14, Croatie 41, Chypre 14), traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 3/8 : République tchèque, Danemark, Finlande** — ids 700-771.
+          République tchèque : D1 (16, comp206) + D2 (15, comp207 — `SK Sigma Olomouc B`
+          exclue comme réserve) complets, aucun club de palier régional inférieur retenu
+          (rien de reconnaissable dans les 8 groupes régionaux scannés). Danemark : D1
+          (12, comp4) + D2 (16, comp5) complets, + `FC Nordjylland` (comp101, avenir
+          glorieux : plusieurs titres de Superligaen depuis 2010, sous le nom de scène
+          « Farum Boldklub » de l'époque déjà présent en D2 sous son propre nom séparément
+          — pas de doublon). **Point de méthode notable** : Finlande a d'abord semblé
+          ambiguë (`comp38-45` avaient la même taille que `comp114-117`), résolu en
+          repérant HJK Helsinki (club le plus titré du pays) dans `comp114` — c'est la
+          vraie Veikkausliiga (D1, 12 clubs), `comp38-45`/`117` ne sont que des groupes
+          régionaux inférieurs. Finlande importée en D1 seul (12, comp114), sans doute
+          possible une fois HJK repéré. Vérifié (`kikole_test`) : 0 erreur, 771 clubs au
+          total, répartition exacte (Tchéquie 31, Danemark 29, Finlande 12), traductions
+          EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
