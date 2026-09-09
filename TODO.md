@@ -435,6 +435,24 @@ Branche de travail : `remaster-v2`.
           (montées ponctuelles en Eliteserien dans les années 2010). Vérifié
           (`kikole_test`) : 0 erreur, 870 clubs au total, répartition exacte (Israël 17,
           Irlande du Nord 10, Norvège 33), traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 6/8 : Pologne, Roumanie, Russie** — ids 871-968. Pologne : D1 (16,
+          comp133) + D2 (20, comp134) complets, + 8 clubs de palier inférieur (comp135,
+          60 candidats) au passé ou avenir glorieux : Cracovia Krakow (club historique,
+          plusieurs titres avant-guerre), Korona Kielce, Lechia Gdansk, Miedz Legnica,
+          Warta Poznan, Chrobry Glogow (tous montés en Ekstraklasa depuis), Polonia Bytom
+          (champion 1962-63), Rakow Czestochowa (**champion de Pologne 2023**, le plus
+          notable des huit). Roumanie : D1 seul (16, comp58 — Steaua et Dinamo Bucarest
+          confirmés dedans), pas de scan inférieur. Russie : D1 (16, comp176) + D2 (18,
+          comp177) complets, + 4 clubs de palier régional inférieur (comp180/181/183,
+          ~110 candidats répartis en 6 zones) au passé ou avenir glorieux : Terek Grozny
+          (actuel Akhmat Grozny, vainqueur de Coupe de Russie 2004), Luch Vladivostok,
+          Uralmash Yekaterinburg (probable lignée de l'actuel FC Ural, ancien nom du club
+          avant son renommage de 2009 — confiance moyenne sur la filiation), Gazovik
+          Orenburg (lignée du FC Orenburg actuel). **Zones non exhaustivement scannées**
+          (comp184 russe, 122 clubs amateurs) faute de temps — aucun grand nom
+          manifestement manqué à la relecture, mais pas une garantie absolue. Vérifié
+          (`kikole_test`) : 0 erreur, 968 clubs au total, répartition exacte (Pologne 44,
+          Roumanie 16, Russie 38), traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
