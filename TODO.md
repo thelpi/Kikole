@@ -392,6 +392,17 @@ Branche de travail : `remaster-v2`.
           détruite après coup) : 0 erreur, 630 clubs au total, répartition exacte
           (Autriche 27, Biélorussie 15, Bosnie-Herzégovine 16), traductions EN+FR
           complètes.
+        - [x] **Lot 2/8 : Bulgarie, Croatie, Chypre** — ids 631-699. Bulgarie : D1
+          complet (14, comp58), pas de scan inférieur (marqué "D1" seul). Croatie : D1
+          (16, comp138 — Hajduk Split et Dinamo Zagreb confirmés dedans) + D2 (20,
+          comp140) complets, + 5 clubs de palier régional inférieur (comp147/149/150/153)
+          au passé ou avenir glorieux : NK Split, NK Istra (T), NK Lokomotiva, NK
+          Karlovac, HNK Segesta — **confiance moyenne seulement** sur ces 5 (lien de
+          filiation avec les clubs actuels pas toujours certain, ex. NK Istra (T) vs
+          l'actuel NK Istra 1961 formé par fusion en 2006 ; à corriger si erreur repérée).
+          Chypre : D1 complet (14, comp58), pas de scan inférieur. Vérifié
+          (`kikole_test`) : 0 erreur, 699 clubs au total, répartition exacte (Bulgarie
+          14, Croatie 41, Chypre 14), traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
