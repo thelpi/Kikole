@@ -453,6 +453,20 @@ Branche de travail : `remaster-v2`.
           manifestement manqué à la relecture, mais pas une garantie absolue. Vérifié
           (`kikole_test`) : 0 erreur, 968 clubs au total, répartition exacte (Pologne 44,
           Roumanie 16, Russie 38), traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 7/8 : Slovaquie, Suède, Serbie-et-Monténégro (Yougoslavie)** — ids
+          969-1100. Slovaquie : D1 seul (10, comp58). Suède : D1 (14, comp38) + D2 (16,
+          comp39) complets, + 4 clubs de palier inférieur (Degerfors IF, Falkenberg FF,
+          IK Sirius FK, Varbergs BoIS FC — tous montés en Allsvenskan depuis 2015,
+          identifiés par recherche ciblée plutôt qu'en relisant les ~700 clubs suédois un
+          par un). Serbie-et-Monténégro : D1 (18, comp208 — **Étoile Rouge et Partizan
+          Belgrade confirmés dedans**, cf. vérification de la semaine dernière) + D2
+          régionalisée en 4 zones (66, comp114/115/116/117 — Voïvodine, Belgrade/Sud,
+          Ouest, Monténégro) complets, + 4 clubs de palier inférieur (Metalac Gornji
+          Milanovac, Jagodina, Macva Sabac, Vozdovac Belgrade). **Zone Kosovo (comp254,
+          4 clubs) volontairement exclue** : c'est aujourd'hui une fédération FIFA/UEFA
+          distincte, pas rattachée à la Serbie dans le tableau de l'utilisateur. Vérifié
+          (`kikole_test`) : 0 erreur, 1100 clubs au total, répartition exacte (Slovaquie
+          10, Suède 34, Serbie 88), traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
