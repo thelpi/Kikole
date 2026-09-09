@@ -360,6 +360,38 @@ Branche de travail : `remaster-v2`.
           encore plus bas repérés lors du cadrage initial (Espagne Tercera, Allemagne
           Oberliga, etc.) — hors périmètre de cette passe, qui s'arrêtait au palier
           explicitement listé pour chaque pays.
+      - [ ] **Nouveaux pays d'Europe (en cours, 2026-09-09)** — extraction de `club.dat`
+        sur les 182 nations qu'il contient (10 580 clubs), filtrage aux pays d'Europe
+        pas encore traités (France/Italie/Grèce/Espagne/Allemagne/Angleterre/Pays-Bas/
+        Belgique/Portugal/Turquie/Écosse exclus, déjà faits). L'utilisateur a ensuite
+        fixé, pays par pays, la ligne la plus profonde à importer (D1 seul, ou D1+D2) ;
+        17 pays ignorés (case vide dans son tableau) : Albanie, Andorre, Arménie,
+        Azerbaïdjan, Estonie, Îles Féroé, Géorgie, Kazakhstan, Lettonie, Liechtenstein,
+        Lituanie, Luxembourg, Macédoine, Malte, Moldavie, Saint-Marin, Slovénie — 24 pays
+        à importer. Pour les pays marqués "D2" (Autriche, Croatie, Rép. tchèque, Danemark,
+        Norvège, Pologne, Russie, Serbie-et-Monténégro, Suède, Suisse), consigne
+        supplémentaire : ajouter aussi, au cas par cas, les clubs de palier inférieur
+        "à passé ou avenir plus glorieux" (ex. un club de Regionalliga autrichienne
+        aujourd'hui en Bundesliga). Import fait par lots de 3 pays, avec pause de
+        vérification (chargement isolé dans `kikole_test`, détruite après coup) et commit
+        après chaque lot validé.
+        - [x] **Lot 1/8 : Autriche, Biélorussie, Bosnie-Herzégovine** — ids 573-630
+          dans `clubs`/`club_translations` (EN=FR). Autriche : D1 (10, comp245) + D2
+          (10, comp246) complets, + 7 clubs de Regionalliga/D3 (comp248/254) au passé ou
+          avenir glorieux (Altach, First Vienna FC 1894, FC Hartberg, Wiener Neustadt,
+          WSG Wattens, Kapfenberger SV, FCN St. Pölten — tous montés en Bundesliga à un
+          moment depuis 2001, sauf First Vienna, club le plus ancien de Vienne). Biélorussie :
+          D1 complet (15, comp58), pas de scan inférieur (pays marqué "D1" seul).
+          Bosnie-Herzégovine : D1 complet (16, comp58) — **point notable** : cette D1
+          2001-02 ne couvre que la fédération croato-bosniaque, seule présente dans
+          `club.dat` pour cette saison (la Republika Srpska, dont le très ancien
+          Borac Banja Luka, n'a fusionné dans un championnat national unifié qu'en 2002,
+          absente ici) ; pas de scan inférieur ajouté puisque le pays est marqué "D1" seul,
+          malgré la présence de Borac Banja Luka en palier "254" du fichier — décision
+          prise à la lettre de la consigne, pas d'exception. Vérifié (`kikole_test`,
+          détruite après coup) : 0 erreur, 630 clubs au total, répartition exacte
+          (Autriche 27, Biélorussie 15, Bosnie-Herzégovine 16), traductions EN+FR
+          complètes.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
