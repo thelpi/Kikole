@@ -42,9 +42,11 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (26, 'The Breakfast Club', 'Find 7 kikolés in a row before 9AM (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (27, 'Métro, boulot, kikolé, dodo', 'Find 7 kikolés in a row after 9PM (own submissions ignored)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (28, 'OneMinuteChrono', 'Find the kikolé and every piece of information, without error and without the easy clue, in less than a minute, counting from the first information found. The kikolé must have at least 5 clubs.', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
-(29, 'Sur le fil', 'Find the kikolé with exactly 13 points remaining', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
+(29, 'Down to the wire', 'Find the kikolé with exactly 13 points remaining', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (30, 'Phoenix', 'Find the kikolé with points and without the easy clue, after unsuccessful 7 days in a row', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
-(31, 'The end?', 'Reach the "end" of the game', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00');
+(31, 'The end?', 'Reach the "end" of the game', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
+(32, 'Don Corleone', 'Sponsor your first godchild', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
+(33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00');
 
 CREATE TABLE badge_translations (
   badge_id bigint(20) UNSIGNED NOT NULL,
@@ -83,7 +85,9 @@ INSERT INTO badge_translations (badge_id, language_id, description) VALUES
 (28, 2, 'Trouvez un kikolé avec toutes ses informations, sans erreur et sans l\'indice facile, en moins d\'une minute. Le compte à rebours commence à partir de la première information trouvée. Le kikolé doit avoir une carrière d\'au moins 5 clubs.'),
 (29, 2, 'Trouvez le kikolé avec exactement 13 points restants'),
 (30, 2, 'Trouvez un kikolé avec des points et sans l\'indice facile, juste après 7 jours d\'affilée infructueux'),
-(31, 2, 'Atteignez la « fin » du jeu');
+(31, 2, 'Atteignez la « fin » du jeu'),
+(32, 2, 'Parrainez votre premier filleul'),
+(33, 2, 'Parrainez 5 filleuls');
 
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,

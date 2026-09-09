@@ -68,6 +68,10 @@ public class BadgeServiceTests
         // pas besoin n'ont pas a le mocker explicitement, comme pour les deux setups ci-dessus
         _proposalRepository.Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>()))
             .ReturnsAsync(new List<ProposalDto>());
+        // par defaut personne n'a de filleul (badges de parrainage) : comme ci-dessus,
+        // seuls les tests qui en ont besoin surchargent ce mock
+        _userRepository.Setup(_ => _.GetSponsorUserIdsAsync())
+            .ReturnsAsync(new List<ulong>());
 
         _service = new BadgeService(
             _playerHandler.Object,
@@ -1012,16 +1016,16 @@ public class BadgeServiceTests
         ShouldNotHaveGranted(Badges.HellOfAWeek);
     }
 
-    // ------------------------------------------------------------- SurLeFil
+    // ------------------------------------------------------------- DownToTheWire
 
     [Fact]
-    public async Task FindingWith13PointsGrantsSurLeFil()
+    public async Task FindingWith13PointsGrantsDownToTheWire()
     {
         // 13 est le plancher mathematique non-nul du barème (cf. commentaire du service) :
         // 25 points restants, achat de l'indice facile (arrondi bancaire de 12.5 -> 12)
         await Run(Leader(13, 60), Player());
 
-        ShouldHaveGranted(Badges.SurLeFil);
+        ShouldHaveGranted(Badges.DownToTheWire);
     }
 
     [Theory]
@@ -1029,11 +1033,11 @@ public class BadgeServiceTests
     [InlineData((ushort)12)]
     [InlineData((ushort)14)]
     [InlineData((ushort)25)]
-    public async Task OtherScoresDoNotGrantSurLeFil(ushort points)
+    public async Task OtherScoresDoNotGrantDownToTheWire(ushort points)
     {
         await Run(Leader(points, 60), Player());
 
-        ShouldNotHaveGranted(Badges.SurLeFil);
+        ShouldNotHaveGranted(Badges.DownToTheWire);
     }
 
     // ------------------------------------------------------------- Phoenix
@@ -1181,6 +1185,78 @@ public class BadgeServiceTests
         ShouldNotHaveGranted(Badges.TheEnd);
     }
 
+    // ------------------------------------------------------------- Sponsorship badges
+
+    private static UserDto Godchild(ulong id, DateTime creationDate, bool disabled = false)
+    {
+        return UserDtoBuilder.Valid().WithId(id).WithCreationDate(creationDate).WithDisabled(disabled).Build();
+    }
+
+    [Fact]
+    public async Task FirstGodchildGrantsDonCorleone()
+    {
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(new List<UserDto> { Godchild(1, Day) });
+
+        await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
+
+        ShouldHaveGranted(Badges.DonCorleone);
+        ShouldNotHaveGranted(Badges.TheFamousFive);
+    }
+
+    [Fact]
+    public async Task NoGodchildGrantsNoSponsorshipBadge()
+    {
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(new List<UserDto>());
+
+        await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
+
+        ShouldNotHaveGranted(Badges.DonCorleone, Badges.TheFamousFive);
+    }
+
+    [Fact]
+    public async Task FifthGodchildGrantsTheFamousFiveAlongsideDonCorleone()
+    {
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(Enumerable.Range(1, 5)
+                .Select(i => Godchild((ulong)i, Day.AddDays(i)))
+                .ToList());
+
+        await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
+
+        ShouldHaveGranted(Badges.DonCorleone, Badges.TheFamousFive);
+    }
+
+    [Fact]
+    public async Task DisabledGodchildrenStillCountTowardsSponsorshipBadges()
+    {
+        // 4 filleuls desactives + 1 actif : le seuil "5" doit quand meme etre atteint,
+        // un filleul desactive ne fait jamais perdre sa place dans le decompte
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(Enumerable.Range(1, 5)
+                .Select(i => Godchild((ulong)i, Day.AddDays(i), disabled: i <= 4))
+                .ToList());
+
+        await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
+
+        ShouldHaveGranted(Badges.DonCorleone, Badges.TheFamousFive);
+    }
+
+    [Fact]
+    public async Task FourthGodchildDoesNotYetGrantTheFamousFive()
+    {
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(Enumerable.Range(1, 4)
+                .Select(i => Godchild((ulong)i, Day.AddDays(i)))
+                .ToList());
+
+        await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
+
+        ShouldHaveGranted(Badges.DonCorleone);
+        ShouldNotHaveGranted(Badges.TheFamousFive);
+    }
+
     // ------------------------------------------------------------- ResetBadgesAsync
 
     [Fact]
@@ -1205,5 +1281,21 @@ public class BadgeServiceTests
 
         _badgeRepository.Verify(
             _ => _.ResetBadgeDatasAsync((ulong)Badges.YourFirstSuccess), Times.Once);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_RecomputesSponsorshipBadgesForEverySponsor()
+    {
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
+            .ReturnsAsync(new List<PlayerDto>());
+
+        _userRepository.Setup(_ => _.GetSponsorUserIdsAsync())
+            .ReturnsAsync(new List<ulong> { UserId });
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(new List<UserDto> { Godchild(1, Day) });
+
+        await _service.ResetBadgesAsync(Languages.en);
+
+        ShouldHaveGranted(Badges.DonCorleone);
     }
 }

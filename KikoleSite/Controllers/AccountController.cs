@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Configuration;
 using KikoleSite.Controllers.Attributes;
+using KikoleSite.Helpers;
 using KikoleSite.Identity;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
@@ -271,6 +272,10 @@ public class AccountController : KikoleBaseController
                         if (inviteRequired)
                             await _userRepository
                                 .LinkRegistrationGuidToUserAsync(registrationId.ToString(), user.Id);
+
+                        if (sponsorUserId.HasValue)
+                            await _badgeService
+                                .PrepareSponsorshipBadgesAsync(sponsorUserId.Value, ViewHelper.GetLanguage());
 
                         return await LogIn(new AccountModel
                         {

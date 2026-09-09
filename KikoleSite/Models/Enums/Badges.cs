@@ -30,7 +30,9 @@ public enum Badges
     TheBreakfastClub,
     MetroBoulotKikoleDodo,
     OneMinuteChrono,
-    SurLeFil,
+    DownToTheWire,
     Phoenix,
-    TheEnd
+    TheEnd,
+    DonCorleone,
+    TheFamousFive
 }

@@ -123,6 +123,13 @@ public class UserRepository : BaseRepository, IUserRepository
         return await GetDtosAsync<UserDto>("users", ("sponsor_user_id", sponsorUserId));
     }
 
+    public async Task<IReadOnlyCollection<ulong>> GetSponsorUserIdsAsync()
+    {
+        return await ExecuteReaderAsync<ulong>(
+                "SELECT DISTINCT sponsor_user_id FROM users WHERE sponsor_user_id IS NOT NULL",
+                null);
+    }
+
     public async Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id)
     {
         return await GetDtoAsync<RegistrationGuidDto>(

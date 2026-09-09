@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **693** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
+| Tests | **699** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -96,8 +96,7 @@ Branche de travail : `remaster-v2`.
         `Admin/Discussions`→`Discussion.cshtml`) plutôt que trois pages séparées — à
         confirmer le jour où ce chantier démarre.
 - [x] **Système de parrainage.** Noté en aparté pendant le chantier badges (2026-09-08),
-      implémenté dans la foulée (badge associé volontairement pas encore fait — prochaine
-      étape, gardée à part). Spec de l'utilisateur suivie telle quelle :
+      implémenté dans la foulée. Spec de l'utilisateur suivie telle quelle :
       - **Schéma** : colonne `users.sponsor_user_id` (nullable, FK vers `users(id)`,
         indexée) — `kikole.sql` mis à jour. Fixée à l'inscription, ne change jamais
         ensuite (pas de champ dans `UpdateUserAsync`, volontairement).
@@ -127,14 +126,35 @@ Branche de travail : `remaster-v2`.
         `UserType`/`LanguageId`/etc.
       - Testé (`AccountControllerTests.cs`, +6 : les 3 cas silencieux de résolution du
         parrain dont un dédié à la casse/normalisation, + affichage section vide/peuplée).
-        `dotnet test` : 693 tests unitaires verts.
-      - **Reste à faire, volontairement pas fait ici** : appliquer la migration
-        (`ALTER TABLE users ADD COLUMN sponsor_user_id ...`) sur la base locale déjà créée
-        (`kikole.sql` ne sert qu'à la création initiale, pas rejoué en incrémental) — pas
-        fait sans redemander, l'utilisateur ayant explicitement demandé (juste après le
-        chantier badges précédent) de ne plus relancer de test réel/vérification live sans
-        lui demander d'abord. Le badge associé au parrainage (mentionné par l'utilisateur
-        comme motivation initiale) reste à définir et implémenter séparément.
+      - Migration (`ALTER TABLE users ADD COLUMN sponsor_user_id ...`) appliquée sur la
+        base locale via un test d'intégration jetable, sur confirmation explicite de
+        l'utilisateur (`kikole.sql` ne sert qu'à la création initiale, pas rejoué en
+        incrémental).
+      - **Badges associés** (2026-09-08, demandé juste après) : `Don Corleone` (1er
+        filleul parrainé) et `The Famous Five` (5e filleul parrainé) — ids 32/33,
+        `kikole.sql` + `Badges` enum mis à jour. Décompte basé sur
+        `IUserRepository.GetGodchildrenAsync`, qui inclut déjà les filleuls désactivés :
+        désactiver un filleul plus tard ne fait donc jamais perdre un badge déjà acquis,
+        comme demandé — que ce soit au moment de l'inscription
+        (`AccountController.Create` appelle `IBadgeService.PrepareSponsorshipBadgesAsync`
+        juste après la création réussie du compte, seulement si un parrain a été résolu)
+        ou lors du recalcul global (`BadgeService.ResetBadgesAsync`, étendu pour boucler
+        sur `IUserRepository.GetSponsorUserIdsAsync` en plus de la boucle jour par jour
+        existante — les badges de parrainage ne sont pas liés à une victoire du jour,
+        contrairement à la quasi-totalité du reste du fichier). Date du badge = date de
+        création du filleul qui a fait franchir le seuil (1er ou 5e par ordre
+        chronologique), pour un rendu cohérent quel que soit le déclencheur.
+        Testé (`BadgeServiceTests.cs`, +6). `dotnet test` : 699 tests unitaires verts.
+      - **Reste à faire, volontairement pas fait ici** : moyen de notifier l'utilisateur
+        qu'il vient de gagner un badge de parrainage — contrairement aux badges gagnés en
+        trouvant un kikolé, rien n'est affiché en direct au sponsor (qui n'est pas sur la
+        page au moment où le filleul s'inscrit) ; il ne le découvre aujourd'hui qu'en
+        consultant sa page badges. Réflexion à mener, pas bloquant pour le reste.
+      - **À reconsidérer (2026-09-08, changement d'avis annoncé mais pas encore fait)** :
+        l'utilisateur souhaite revenir sur la prise en compte des filleuls désactivés dans
+        le décompte des deux badges ci-dessus — comportement actuel à retravailler la
+        prochaine fois que ce chantier reprend (détail de ce qu'il faut changer à discuter
+        à ce moment-là, pas encore précisé).
 
 ---
 
@@ -499,11 +519,11 @@ Branche de travail : `remaster-v2`.
       chantier — badges déjà définis (`Badges`, `BadgeService`) mais dont une condition
       resterait non couverte ou buguée, ou nouvelles idées de badges pas encore
       implémentées.
-      - [x] **`SurLeFil`** — trouver le kikolé avec exactement 13 points restants (le
+      - [x] **`DownToTheWire`** — trouver le kikolé avec exactement 13 points restants (le
         plancher mathématique non-nul du barème : 1000 → 25 via des propositions ratées
         classiques, multiples de 25 seulement → indice facile acheté à 25 restants,
         arrondi bancaire de 12.5 sur 12 → 13. Pas atteignable autrement, ni 1 ni 10 ne le
-        sont). `LeaderBasedBadgeCondition[Badges.SurLeFil] = l => l.Points == 13`
+        sont). `LeaderBasedBadgeCondition[Badges.DownToTheWire] = l => l.Points == 13`
         (`BadgeService.cs`).
       - [x] **`Phoenix`** — victoire "propre" (points > 0, sans indice facile) précédée de
         7 jours consécutifs où l'utilisateur a *tenté sa chance* (au moins une proposition
@@ -519,13 +539,13 @@ Branche de travail : `remaster-v2`.
       - Les deux ajoutés à `Badges.cs` (29, 30), `kikole.sql` (lignes `badges`/
         `badge_translations`, + seedées directement en base locale via un test
         d'intégration jetable, créé puis supprimé) et testés (`BadgeServiceTests.cs`, 7
-        nouveaux tests : 2 pour `SurLeFil`, 5 pour `Phoenix` couvrant chacune des 3
+        nouveaux tests : 2 pour `DownToTheWire`, 5 pour `Phoenix` couvrant chacune des 3
         façons de rater un jour + les deux conditions du jour de la victoire).
       - **Vérifié en direct, de bout en bout** (compte jetable `testbadge13c`, via `fetch`
         pour piloter 39 propositions "Pays" fausses sans passer par l'UI un par un) : 1000
         → 25 points confirmés après les 39 échecs, → 13 confirmés après achat de l'indice
         facile, victoire réelle sur "Clarence Seedorf" à 13 points sans erreur serveur,
-        badge `Sur le fil` bien crédité (page `Leaderboard?userId=...`), `Phoenix` bien
+        badge `Down to the wire` bien crédité (page `Leaderboard?userId=...`), `Phoenix` bien
         absent (indice facile utilisé ce jour-là, condition qui l'exclut explicitement).
         **Fausse alerte en cours de route, notée pour la prochaine fois** : une "erreur
         serveur" est apparue lors d'une première tentative de victoire — cause réelle :

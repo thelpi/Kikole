@@ -39,6 +39,17 @@ public interface IBadgeService
         Languages language);
 
     /// <summary>
+    /// Prepares badges triggered by a sponsor gaining a godchild (disabled godchildren still count :
+    /// the threshold, once reached, is never revisited).
+    /// </summary>
+    /// <param name="sponsorUserId">Sponsor's user identifier.</param>
+    /// <param name="language">User language.</param>
+    /// <returns>Collection of <see cref="UserBadge"/>.</returns>
+    Task<IReadOnlyCollection<UserBadge>> PrepareSponsorshipBadgesAsync(
+        ulong sponsorUserId,
+        Languages language);
+
+    /// <summary>
     /// Add a badge to a user, if the user does not have the badge already and the badge is not unique.
     /// </summary>
     /// <param name="badge">Badge to add.</param>

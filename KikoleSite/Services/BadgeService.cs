@@ -204,7 +204,7 @@ public class BadgeService : IBadgeService
                 // seul l'indice facile (-50% du reste, arrondi, achetable une seule fois)
                 // peut casser cette regle. 13 est le plancher mathematique non-nul du jeu :
                 // aucune combinaison de mauvaises reponses + indice ne peut faire moins.
-                Badges.SurLeFil,
+                Badges.DownToTheWire,
                 l => l.Points == 13
             }
         };
@@ -301,6 +301,15 @@ public class BadgeService : IBadgeService
 
             date = date.AddDays(1);
         }
+
+        var sponsorUserIds = await _userRepository
+            .GetSponsorUserIdsAsync();
+
+        foreach (var sponsorUserId in sponsorUserIds)
+        {
+            var collectedBadges = new List<ulong>();
+            await PrepareSponsorshipBadgesInternalAsync(sponsorUserId, allBadges, collectedBadges);
+        }
     }
 
     /// <inheritdoc />
@@ -360,6 +369,51 @@ public class BadgeService : IBadgeService
 
         return await GetUserBadgesAsync(
                 collectedBadges, request.ProposalDateTime, allBadges, language);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyCollection<UserBadge>> PrepareSponsorshipBadgesAsync(
+        ulong sponsorUserId, Languages language)
+    {
+        var allBadges = await _badgeRepository
+            .GetBadgesAsync(true);
+
+        var collectedBadges = new List<ulong>();
+
+        await PrepareSponsorshipBadgesInternalAsync(sponsorUserId, allBadges, collectedBadges);
+
+        return await GetUserBadgesAsync(
+                collectedBadges, _clock.Now, allBadges, language);
+    }
+
+    /// <summary>
+    /// Badges "Don Corleone" (1er filleul) et "The Famous Five" (5e filleul) : le decompte
+    /// porte sur tous les filleuls, desactives compris (<see cref="IUserRepository.GetGodchildrenAsync"/>
+    /// ne filtre pas dessus) - un filleul desactive apres coup ne fait jamais perdre le
+    /// badge deja obtenu. Le seuil atteint fixe la date du badge (date d'inscription du
+    /// filleul qui l'a fait franchir), pour un rendu coherent que le declenchement vienne
+    /// de l'inscription elle-meme ou d'un recalcul global (<see cref="ResetBadgesAsync"/>).
+    /// </summary>
+    private async Task PrepareSponsorshipBadgesInternalAsync(
+        ulong sponsorUserId,
+        IReadOnlyCollection<BadgeDto> allBadges,
+        List<ulong> collectedBadges)
+    {
+        var godchildren = (await _userRepository.GetGodchildrenAsync(sponsorUserId))
+            .OrderBy(g => g.CreationDate)
+            .ToList();
+
+        if (godchildren.Count >= 1)
+        {
+            await InsertBadgeIfNotAlreadyAsync(
+                    godchildren[0].CreationDate, sponsorUserId, (ulong)Badges.DonCorleone, collectedBadges, allBadges);
+        }
+
+        if (godchildren.Count >= 5)
+        {
+            await InsertBadgeIfNotAlreadyAsync(
+                    godchildren[4].CreationDate, sponsorUserId, (ulong)Badges.TheFamousFive, collectedBadges, allBadges);
+        }
     }
 
     /// <inheritdoc />

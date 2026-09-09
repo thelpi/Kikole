@@ -32,6 +32,9 @@ public interface IUserRepository
     /// <summary>Filleuls (utilisateurs parrainés par <paramref name="sponsorUserId"/>), y compris les désactivés.</summary>
     Task<IReadOnlyCollection<UserDto>> GetGodchildrenAsync(ulong sponsorUserId);
 
+    /// <summary>Identifiants distincts des utilisateurs ayant au moins un filleul (sert au recalcul des badges de parrainage).</summary>
+    Task<IReadOnlyCollection<ulong>> GetSponsorUserIdsAsync();
+
     Task<RegistrationGuidDto?> GetRegistrationGuidAsync(string id);
 
     Task LinkRegistrationGuidToUserAsync(string id, ulong userId);
