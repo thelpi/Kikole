@@ -418,6 +418,13 @@ Branche de travail : `remaster-v2`.
           possible une fois HJK repéré. Vérifié (`kikole_test`) : 0 erreur, 771 clubs au
           total, répartition exacte (Tchéquie 31, Danemark 29, Finlande 12), traductions
           EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 4/8 : Hongrie, Islande, Irlande** — ids 772-810, les trois en D1
+          seul (comp58 pour Hongrie/Islande, comp119 pour l'Irlande — repéré via
+          Shamrock Rovers/Bohemian FC/Cork City, clubs historiques de la League of
+          Ireland), aucun scan de palier inférieur (aucun des trois marqué "D2").
+          Vérifié (`kikole_test`) : 0 erreur, 810 clubs au total, répartition exacte
+          (Hongrie 16, Islande 11, Irlande 12), traductions EN+FR complètes, aucun id
+          dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
