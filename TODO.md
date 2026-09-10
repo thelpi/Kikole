@@ -168,7 +168,7 @@ Branche de travail : `remaster-v2`.
       préexistant corrigé : `site.js` lisait `item.Value`/`item.Key` (casse Pascal) alors
       que `Json()` renvoie `value`/`key` — le menu déroulant pays/continent affichait des
       lignes vides depuis toujours.
-- [ ] **Remplir la base des clubs** — **en cours**, sourcée pays par pays. Méthode ayant
+- [x] **Remplir la base des clubs** — sourcée pays par pays. Méthode ayant
       évolué au fil du sourcing : Wikipedia (clubs actuels + historiques majeurs) pour la
       France, puis pivot vers `Championship Manager 01/02` (fichiers `.dat`/`.lng` du jeu,
       offset `Nation` reverse-engineered dans `club.dat`, traductions FR authentiques via
@@ -192,7 +192,7 @@ Branche de travail : `remaster-v2`.
       - Ensuite : encore quelques pays si besoin, puis le Royaume-Uni (clubs déjà possible
         maintenant que la bascule FIFA ci-dessous est faite — Angleterre/Écosse/Galles/
         Irlande du Nord existent).
-      - [ ] **Chantier en cours (autonome) : Espagne, Allemagne, Angleterre, Pays-Bas,
+      - [x] **Chantier (autonome) : Espagne, Allemagne, Angleterre, Pays-Bas,
         Belgique, Portugal, Écosse, Turquie.** Consigne exacte de l'utilisateur : Division
         1 et 2 (source `Championship/Football Manager 2001/2002`, même méthode que
         Italie/Grèce), + un 3ème échelon pour l'Angleterre spécifiquement, + clubs de
@@ -660,12 +660,20 @@ Branche de travail : `remaster-v2`.
           clubs au total**, répartition exacte par pays, traductions EN+FR complètes,
           aucun id dupliqué.
         - **Chantier "Amérique" terminé** (13 pays traités : 7 "à minima" + 6 "à
-          surveiller", 270 clubs ajoutés au total — 1431 → 1701). Un doute non tranché à
-          signaler au prochain point avec l'utilisateur : **Los Angeles FC** a été ajouté
-          côté USA sur initiative de Claude (même logique qu'Inter Miami — destination de
-          fin de carrière, Bale/Chiellini) mais l'utilisateur n'a confirmé explicitement
-          que l'exemple Inter Miami — à retirer si désapprouvé. Reste : migration base
-          locale (pas faite sans confirmation explicite).
+          surveiller", 270 clubs ajoutés au total — 1431 → 1701). **Los Angeles FC**
+          ajouté côté USA sur initiative de Claude (même logique qu'Inter Miami), confirmé
+          par l'utilisateur ("bien vu pour LAFC") — gardé.
+      - **Chantier clubs déclaré terminé par l'utilisateur (2026-09-10)** : "bon débarras".
+        **1701 clubs au total** dans `kikole.sql` (France/Italie/Grèce sourcées à part,
+        puis 8 grands pays d'Europe + leurs échelons inférieurs, puis 24 pays d'Europe
+        supplémentaires, puis 19 pays d'Afrique/Asie/Océanie, puis 13 pays d'Amérique).
+        **Reste volontairement non fait, décision explicite de clore ici** : les échelons
+        inférieurs des pays d'Afrique/Asie/Amérique (seule l'Europe a eu cette passe),
+        d'éventuels pays non couverts. **Reste à faire, pas une décision de clore** : la
+        migration sur la base locale n'a jamais été appliquée pendant tout ce chantier
+        (dernier accord explicite obtenu sur le tout premier lot, jamais redemandé
+        depuis) — toutes les insertions vivent dans `kikole.sql` mais pas encore dans la
+        base MySQL locale ; à faire d'un bloc quand l'utilisateur le demandera.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
