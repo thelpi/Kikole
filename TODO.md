@@ -534,6 +534,22 @@ Branche de travail : `remaster-v2`.
           (`kikole_test`) : 0 erreur, 1245 clubs au total, répartition exacte (Chine 14,
           Iran 14, Inde 12, Qatar 9), apostrophe de "Beijing Guo'an" correctement échappée
           et restituée, traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 3/5 : Arabie Saoudite, Égypte, Maroc** — ids 1246-1294, D1 seule
+          (`comp58` pour les trois). **Alias exhaustif pour l'Arabie Saoudite** : 12/12
+          clubs passés en revue individuellement, **aucun changement de nom identifié**
+          (Al Hilal, Al Nassr, Al Ittihad, Al Ahli, Al Shabab, Al Ittifaq, Al Wehda sont
+          tous des noms encore utilisés tels quels aujourd'hui) — contrairement à la
+          Chine, les clubs saoudiens ont des noms historiquement très stables, "exhaustif"
+          donne donc légitimement zéro alias plutôt qu'une recherche interrompue. Égypte :
+          rien de confiant identifié non plus (Al-Ahly/Zamalek/Al Masry inchangés).
+          **Maroc — particularité de source** : `club.dat` ne modélise pour ce pays qu'un
+          seul groupe générique (`comp254`, pas de découpage D1/D2 comme pour la plupart
+          des autres pays) — les 20 clubs de ce groupe (dont Raja et Wydad Casablanca,
+          les deux clubs dominants) ont été pris comme l'équivalent de la D1 faute de
+          mieux, décision similaire à celle prise pour la Côte d'Ivoire/Ghana/Sénégal
+          (même limite de source, voir lot 4). Vérifié (`kikole_test`) : 0 erreur, 1294
+          clubs au total, répartition exacte (Arabie Saoudite 12, Égypte 17, Maroc 20),
+          traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
