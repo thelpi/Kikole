@@ -586,6 +586,40 @@ Branche de travail : `remaster-v2`.
           long de ce chantier plutôt que via le Service Control Manager — à relancer
           proprement via WampServer à la prochaine session si besoin, ou à ignorer si ça
           fonctionne déjà (le process tourne toujours en tâche de fond).
+      - [ ] **Amérique (en cours, 2026-09-10)** — même méthode. D1 seule pour la plupart,
+        **D1+D2 pour Mexique/Brésil/Argentine** (consigne explicite). Liste "à minima" :
+        USA, Mexique, Brésil, Argentine, Colombie, Chili, Uruguay — Costa Rica proposé en
+        plus par Claude (Keylor Navas + quart de finale Mondial 2014) mais **finalement
+        classé par l'utilisateur en pays "à surveiller"**, pas en import complet, de même
+        que Venezuela (mentionné par Claude comme option plus faible). Pays "à
+        surveiller/scan opportuniste" (pas d'import D1 complet, juste un coup d'œil aux
+        clubs disponibles pour repérer d'éventuelles pépites) : Canada, Bolivie, Pérou,
+        Équateur, Paraguay, Costa Rica, Venezuela. **Canada absent de `club.dat`** — aucun
+        club canadien trouvé dans les 182 nations du fichier (probablement parce
+        qu'aucune ligue domestique canadienne n'existait en 2001-02, les clubs canadiens
+        jouaient alors dans l'A-League américaine) : rien à en tirer, pays à laisser de
+        côté faute de source. **Consigne spécifique USA** : vérifier les noms actuels des
+        clubs (alias) et repérer les clubs pertinents aujourd'hui mais absents de
+        `club.dat` faute d'exister encore en 2001 — deux ajoutés directement (pas de
+        source club.dat) : **Inter Miami CF** (Messi/Suárez/Busquets/Alba, exemple donné
+        par l'utilisateur) et **Los Angeles FC** (Bale/Chiellini, proposé par Claude en
+        plus, mêmes critères) — l'utilisateur n'a pas eu l'occasion de confirmer LAFC
+        explicitement, à retirer si désapprouvé.
+        - [x] **Lot 1 : USA, Colombie, Chili, Uruguay** — ids 1432-1495. USA : MLS 2001
+          (`comp31`, 12 clubs) + les 2 clubs ajoutés directement ci-dessus. 4 alias
+          ajoutés (franchises renommées depuis, filiation directe certaine) : Dallas
+          Burn→FC Dallas (2005), Kansas City Wizards→Sporting Kansas City (2011), NYNJ
+          Metrostars→New York Red Bulls (2006, exactement l'exemple cité par
+          l'utilisateur), Washington DC United→D.C. United (variante de ponctuation
+          actuelle). **Deux franchises de la MLS 2001 ont depuis disparu** (contraction
+          de la ligue fin 2001/2002) sans successeur : Miami Fusion FC, Tampa Bay Mutiny —
+          conservées telles quelles (exactes pour la saison 2001), aucun alias. Colombie
+          (16, `comp58`), Chili (16, `comp58` — Colo-Colo/Universidad de Chile/Universidad
+          Católica confirmés dedans), Uruguay (18, `comp58` — Peñarol et Nacional
+          confirmés dedans) : D1 seule, aucun alias (pas de renommage confiant identifié).
+          Vérifié (`kikole_test`) : 0 erreur, 1495 clubs au total, répartition exacte
+          (USA 14, Colombie 16, Chili 16, Uruguay 18), apostrophe de "O'Higgins"
+          correctement échappée, traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
