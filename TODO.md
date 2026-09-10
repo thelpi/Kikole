@@ -629,6 +629,22 @@ Branche de travail : `remaster-v2`.
           Vérifié (`kikole_test`) : 0 erreur, 1579 clubs au total, répartition exacte
           (Mexique 39, Argentine 45), apostrophe de "Newell's Old Boys" correctement
           échappée, traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 3 (dernier des pays "à minima") : Brésil (D1+D2)** — ids 1580-1635.
+          Saison 2001 exceptionnellement large (28 clubs en D1 cette année-là, format
+          élargi ponctuel). D1 confirmée via `comp65` (Flamengo/Vasco/Fluminense/
+          Botafogo/São Paulo/Santos/Palmeiras/Corinthians tous dedans), D2 confirmée via
+          `comp79` (Ceará/Náutico/Paysandu/Fortaleza/Criciúma, noms classiques de Série
+          B). `comp80` (Série C, 56 clubs) et `comp254` (amateur, 240 clubs) écartés,
+          hors périmètre D1+D2 demandé. Les suffixes entre parenthèses du fichier source
+          ("(MG)", "(SP)", "(RN)", "(RJ)", "(AM)") conservés tels quels — désambiguïsation
+          entre clubs homonymes de villes différentes, même convention déjà vue ailleurs
+          (ex. "Al Ahli (KSA)"). Vérifié (`kikole_test`) : 0 erreur, **1635 clubs au
+          total**, répartition exacte (Brésil 56), traductions EN+FR complètes, aucun id
+          dupliqué.
+        - **Les 7 pays "à minima" sont maintenant tous importés.** Reste : les 7 pays "à
+          surveiller" (Canada — impossible, absent de `club.dat` — Bolivie, Pérou,
+          Équateur, Paraguay, Costa Rica, Venezuela) en scan opportuniste, puis la
+          migration base locale (pas faite sans confirmation explicite, comme d'habitude).
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
