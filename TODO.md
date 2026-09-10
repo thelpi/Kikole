@@ -620,6 +620,15 @@ Branche de travail : `remaster-v2`.
           Vérifié (`kikole_test`) : 0 erreur, 1495 clubs au total, répartition exacte
           (USA 14, Colombie 16, Chili 16, Uruguay 18), apostrophe de "O'Higgins"
           correctement échappée, traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 2 : Mexique (D1+D2), Argentine (D1+D2)** — ids 1496-1579. Mexique :
+          D1 (19, `comp214`) + D2 (20, `comp215`) complets, réserve `comp216` exclue
+          (`Club América B` explicite + 4 autres non retenues, pas de vraie D2/D3 réelle
+          pour ces dernières). Argentine : D1 (20, `comp63` — Boca/River confirmés
+          dedans) + D2 "Primera B Nacional" (25, `comp64`) complets. Aucun alias (pas
+          demandé pour ces deux, best-effort non fait faute de temps vu le volume).
+          Vérifié (`kikole_test`) : 0 erreur, 1579 clubs au total, répartition exacte
+          (Mexique 39, Argentine 45), apostrophe de "Newell's Old Boys" correctement
+          échappée, traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
