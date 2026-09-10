@@ -516,6 +516,24 @@ Branche de travail : `remaster-v2`.
           normal). Vérifié (`kikole_test`) : 0 erreur, 1196 clubs au total, répartition
           exacte (Australie 14, Corée du Sud 10, Japon 16), traductions EN+FR complètes,
           aucun id dupliqué.
+        - [x] **Lot 2/5 : Chine, Iran, Inde, Qatar** — ids 1197-1245, D1 seule
+          (`comp194` Jia-A League, `comp58` Azadegan League, `comp58` National Football
+          League, `comp58` Qatar Stars League). **Alias exhaustif pour la Chine** (14/14
+          clubs passés en revue un par un, filiation actuelle documentée quand elle est
+          sûre) : Beijing Guo'an→Beijing Guoan (variante translittération), Shandong
+          Luneng→Shandong Taishan, Tianjin Teda→Tianjin Jinmen Tiger, Shenzhen Pingan→
+          Shenzhen Peng City, Chongqing Lifan→Chongqing Liangjiang Athletic (club dissous
+          depuis 2022, alias gardé pour la traçabilité historique) ; 9 des 14 sans alias
+          ajouté faute de filiation certaine (renommages/relocalisations trop enchevêtrés
+          pour trancher sans recherche dédiée — cas notable : "Chinese Army", l'équipe de
+          l'armée chinoise (Bayi), dissoute en 2003, aucun successeur). 3 alias
+          best-effort ajoutés côté Iran/Inde (hors obligation, faits par cohérence) :
+          Pirouzi Tehran→Persepolis F.C. (le club a changé de nom plusieurs fois depuis
+          les années 1980, "Pirouzi" est l'ancien nom), Teraktor Sazi Tabriz→Tractor
+          F.C., Mohun Bagan Athletic Club→Mohun Bagan Super Giant. Vérifié
+          (`kikole_test`) : 0 erreur, 1245 clubs au total, répartition exacte (Chine 14,
+          Iran 14, Inde 12, Qatar 9), apostrophe de "Beijing Guo'an" correctement échappée
+          et restituée, traductions EN+FR complètes, aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
