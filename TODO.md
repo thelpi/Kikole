@@ -550,6 +550,18 @@ Branche de travail : `remaster-v2`.
           (même limite de source, voir lot 4). Vérifié (`kikole_test`) : 0 erreur, 1294
           clubs au total, répartition exacte (Arabie Saoudite 12, Égypte 17, Maroc 20),
           traductions EN+FR complètes, aucun id dupliqué.
+        - [x] **Lot 4/5 : Tunisie, Algérie, Nigeria, Cameroun** — ids 1295-1357, D1 seule
+          (`comp58` pour les quatre). Nigeria : un alias ajouté, Iwuanyanwu Nationale→
+          Heartland FC (renommage confirmé après changement de propriétaire ~2004).
+          **Cameroun — même particularité de source que le Maroc** : `club.dat` ne
+          modélise que 4 clubs sous un comp dédié (58) + 15 autres sous le comp générique
+          254, sans découpage D1/D2 réel ; les deux groupes combinés (19 clubs, dont Coton
+          Sport de Garoua et Canon Yaoundé, les deux clubs dominants de l'époque) ont été
+          pris comme l'équivalent complet de la D1. Vérifié (`kikole_test`) : 0 erreur,
+          1357 clubs au total, répartition exacte (Tunisie 12, Algérie 16, Nigeria 16,
+          Cameroun 19), apostrophes des noms algériens (d'Aïn M'lila, d'Oran, d'Alger,
+          d'Annaba) correctement échappées et restituées, traductions EN+FR complètes,
+          aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
