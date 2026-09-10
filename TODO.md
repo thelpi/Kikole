@@ -586,7 +586,7 @@ Branche de travail : `remaster-v2`.
           long de ce chantier plutôt que via le Service Control Manager — à relancer
           proprement via WampServer à la prochaine session si besoin, ou à ignorer si ça
           fonctionne déjà (le process tourne toujours en tâche de fond).
-      - [ ] **Amérique (en cours, 2026-09-10)** — même méthode. D1 seule pour la plupart,
+      - [x] **Amérique (terminé, 2026-09-10)** — même méthode. D1 seule pour la plupart,
         **D1+D2 pour Mexique/Brésil/Argentine** (consigne explicite). Liste "à minima" :
         USA, Mexique, Brésil, Argentine, Colombie, Chili, Uruguay — Costa Rica proposé en
         plus par Claude (Keylor Navas + quart de finale Mondial 2014) mais **finalement
@@ -645,6 +645,27 @@ Branche de travail : `remaster-v2`.
           surveiller" (Canada — impossible, absent de `club.dat` — Bolivie, Pérou,
           Équateur, Paraguay, Costa Rica, Venezuela) en scan opportuniste, puis la
           migration base locale (pas faite sans confirmation explicite, comme d'habitude).
+        - [x] **Lot 4 (dernier) : Bolivie, Pérou, Équateur, Paraguay, Costa Rica,
+          Venezuela — scan opportuniste** — ids 1636-1701. **Constat commun aux 6 pays**
+          (à part le Canada, totalement absent de `club.dat`) : le seul groupe exploitable
+          (`comp58`) s'est révélé être, dans chaque cas, une D1 propre et complète, sans
+          mélange avec des clubs amateurs à filtrer — rien à trier, le "scan" a donc
+          abouti au groupe entier plutôt qu'à une sélection au cas par cas. Bolivie (12,
+          Bolívar/The Strongest confirmés dedans), Pérou (12, Alianza Lima/Universitario/
+          Sporting Cristal/Cienciano — ce dernier vainqueur de Copa Sudamericana 2003),
+          Équateur (10, Barcelona SC/Emelec/El Nacional), Paraguay (10, Olimpia/Cerro
+          Porteño/Libertad/Guaraní), Costa Rica (12, Saprissa/Alajuelense — Saprissa est
+          l'club formateur de Keylor Navas, motivation initiale de l'ajout de ce pays),
+          Venezuela (10, Táchira/Caracas FC). Vérifié (`kikole_test`) : 0 erreur, **1701
+          clubs au total**, répartition exacte par pays, traductions EN+FR complètes,
+          aucun id dupliqué.
+        - **Chantier "Amérique" terminé** (13 pays traités : 7 "à minima" + 6 "à
+          surveiller", 270 clubs ajoutés au total — 1431 → 1701). Un doute non tranché à
+          signaler au prochain point avec l'utilisateur : **Los Angeles FC** a été ajouté
+          côté USA sur initiative de Claude (même logique qu'Inter Miami — destination de
+          fin de carrière, Bale/Chiellini) mais l'utilisateur n'a confirmé explicitement
+          que l'exemple Inter Miami — à retirer si désapprouvé. Reste : migration base
+          locale (pas faite sans confirmation explicite).
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
