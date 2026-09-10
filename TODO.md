@@ -479,6 +479,43 @@ Branche de travail : `remaster-v2`.
           identique au lot précédent (82 clubs des échelons inférieurs des 8 premiers
           pays) : appliquer la migration sur la base locale via un test d'intégration
           jetable, pas fait sans confirmation explicite de l'utilisateur au préalable.
+      - [ ] **Grandes nations Afrique/Asie/Océanie (en cours, 2026-09-10)** — même
+        méthode (`club.dat`), mais **D1 seule à chaque fois**, pas de D2/palier
+        inférieur. Liste arrêtée avec l'utilisateur sur trois critères (gros vivier de
+        joueurs connus, destination courante de fin de carrière, sélection nationale
+        solide) — proposition initiale de l'utilisateur, quatre ajouts suggérés et
+        acceptés (Côte d'Ivoire, Ghana, Sénégal — plus incontournables que Cameroun/
+        Afrique du Sud sur ces mêmes critères ; Irak), Océanie finalement laissée de
+        côté (seule la Nouvelle-Zélande aurait tenu la route, l'utilisateur a tranché
+        de ne pas l'inclure) : **19 pays au total**, aucun pays d'Océanie donc au final.
+        Australie, Corée du Sud, Japon, Chine, Iran, Inde, Qatar, Arabie Saoudite,
+        Égypte, Maroc, Tunisie, Algérie, Nigeria, Cameroun, Afrique du Sud, Côte
+        d'Ivoire, Ghana, Sénégal, Irak. Import par lots de 3-4 pays, vérification
+        (`kikole_test`) + commit après chaque lot, comme pour le chantier Europe.
+        **Consigne supplémentaire** : quand un alias de nom actuel est identifiable avec
+        certitude (club renommé/relocalisé depuis 2001-02), l'ajouter en
+        `club_translations` priorité 1 en plus du nom d'époque — exhaustif uniquement
+        pour Arabie Saoudite et Chine (demandé explicitement), best-effort ailleurs (fait
+        seulement quand la filiation est sûre sans recherche approfondie, pour limiter le
+        risque d'erreur factuelle sur des clubs moins connus).
+        - [x] **Lot 1/5 : Australie, Corée du Sud, Japon** — ids 1157-1196, D1 seule pour
+          les trois (National Soccer League `comp151` pour l'Australie — repérée via
+          Football Kingz/Marconi Stallions/Adelaide City, à distinguer des ligues
+          régionales par État qui composent le reste du fichier ; K-League `comp229` pour
+          la Corée ; J1 League `comp69` pour le Japon). 10 alias de nom actuel ajoutés
+          (best-effort, confiance haute) : Corée — Anyang LG Cheetahs→FC Seoul, Bucheon
+          SK→Jeju United, Pusan I.cons→Busan IPark, Songnam Ilhwa Chunma→Seongnam FC,
+          Taejon Citizen→Daejeon Hana Citizen, Ulsan Hyundai Horang-I→Ulsan HD ; Japon —
+          JEF United Ichihara→JEF United Chiba, Nagoya Grampus Eight→Nagoya Grampus,
+          Tokyo Verdy 1969→Tokyo Verdy, Consadole Sapporo→Hokkaido Consadole Sapporo.
+          **Panne WAMP rencontrée en démarrant ce chantier** : le service Windows
+          `wampmysqld64` était arrêté (`net start` refusé, accès admin requis) — contourné
+          en lançant `mysqld.exe --standalone` directement avec le `my.ini` existant,
+          sans passer par le Service Control Manager ; fonctionne, mais le service Windows
+          reste arrêté (à redémarrer proprement via WampServer au prochain lancement
+          normal). Vérifié (`kikole_test`) : 0 erreur, 1196 clubs au total, répartition
+          exacte (Australie 14, Corée du Sud 10, Japon 16), traductions EN+FR complètes,
+          aucun id dupliqué.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
