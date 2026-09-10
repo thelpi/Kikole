@@ -479,7 +479,7 @@ Branche de travail : `remaster-v2`.
           identique au lot précédent (82 clubs des échelons inférieurs des 8 premiers
           pays) : appliquer la migration sur la base locale via un test d'intégration
           jetable, pas fait sans confirmation explicite de l'utilisateur au préalable.
-      - [ ] **Grandes nations Afrique/Asie/Océanie (en cours, 2026-09-10)** — même
+      - [x] **Grandes nations Afrique/Asie/Océanie (terminé, 2026-09-10)** — même
         méthode (`club.dat`), mais **D1 seule à chaque fois**, pas de D2/palier
         inférieur. Liste arrêtée avec l'utilisateur sur trois critères (gros vivier de
         joueurs connus, destination courante de fin de carrière, sélection nationale
@@ -562,6 +562,30 @@ Branche de travail : `remaster-v2`.
           Cameroun 19), apostrophes des noms algériens (d'Aïn M'lila, d'Oran, d'Alger,
           d'Annaba) correctement échappées et restituées, traductions EN+FR complètes,
           aucun id dupliqué.
+        - [x] **Lot 5/5 (dernier) : Afrique du Sud, Côte d'Ivoire, Ghana, Sénégal, Irak**
+          — ids 1358-1431 (5 pays sur ce dernier lot plutôt que 3-4, pour clore le
+          chantier proprement plutôt que de laisser un lot solitaire d'un seul pays).
+          Afrique du Sud : D1 seule (18, `comp201` — Kaizer Chiefs et Orlando Pirates
+          confirmés dedans), 1 alias ajouté (Sundowns→Mamelodi Sundowns, nom encore en
+          usage aujourd'hui avec le préfixe complet). **Côte d'Ivoire, Ghana, Sénégal,
+          Irak — même particularité de source que Maroc/Cameroun** : aucun découpage
+          D1/D2 dans `club.dat` pour ces quatre pays (un seul groupe, `comp254` seul pour
+          Ghana/Sénégal, `comp58`+`254` combinés pour Côte d'Ivoire, `comp58`+`101`+`254`
+          combinés pour l'Irak) — pris tel quel comme équivalent de la D1, cohérence des
+          noms (ASEC Abidjan/Africa Sports, Asante Kotoko/Hearts of Oak, ASC Jeanne
+          d'Arc/Jaraaf, Al-Zawraa/Al-Talaba) avec les grands clubs historiques connus de
+          ces championnats. Vérifié (`kikole_test`) : 0 erreur, **1431 clubs au total**
+          (490 + 941 sur les 2 chantiers), répartition exacte (Afrique du Sud 18, Côte
+          d'Ivoire 12, Ghana 17, Sénégal 14, Irak 13), traductions EN+FR complètes, aucun
+          id dupliqué.
+        - **Chantier "grandes nations Afrique/Asie/Océanie" terminé** (19/19 pays
+          importés, 235 clubs ajoutés au total sur les 5 lots). Même reste que pour le
+          chantier Europe : migration sur la base locale pas appliquée sans confirmation
+          explicite au préalable. **Rappel du contournement WAMP** (lot 1) : le service
+          Windows `wampmysqld64` est resté démarré en standalone (`mysqld.exe`) tout le
+          long de ce chantier plutôt que via le Service Control Manager — à relancer
+          proprement via WampServer à la prochaine session si besoin, ou à ignorer si ça
+          fonctionne déjà (le process tourne toujours en tâche de fond).
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
