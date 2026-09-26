@@ -1603,6 +1603,19 @@ Branche de travail : `remaster-v2`.
       qu'un rejeu futur reste cohérent avec la base actuelle. `joueur2` inchangé
       (`test123`) : il partageait jusqu'ici le même hash que `joueur1` dans le script,
       désormais deux littéraux séparés puisque leurs mots de passe divergent.
+- [x] **Tampon de jours de `kikole_mock.sql` élargi de 7 jours à 6 mois** (2026-09-26) —
+      panne reproduite en local ("Une erreur est survenue" sur la page d'accueil,
+      silencieuse : `ErrorFilter` avale l'exception sans logguer par défaut, débusquée en
+      activant temporairement `LogsFilePathFormat`) : `PlayerService.GetPlayerClueAsync`
+      levait `Aucun joueur n'est programmé pour le {date}`, la table `players` ne
+      couvrant que jusqu'au 2026-09-15 (dernier rejeu du script le 2026-09-08, tampon de
+      `+7 DAY` d'origine — épuisé en un peu plus d'une semaine). Le script étant déjà
+      relatif à `CURDATE()` (aucune date en dur), pas besoin de le réécrire : `@last_date`
+      simplement passé de `DATE_ADD(CURDATE(), INTERVAL 7 DAY)` à `... INTERVAL 6 MONTH`,
+      pour tenir une pause bien plus longue avant de retomber dans le même état. Rejoué
+      contre la base locale (`clubs`/`club_translations`/badges intacts, confirmés non
+      truncated) : `players` couvre désormais 2026-08-25 → 2027-03-26 (214 jours), page
+      d'accueil vérifiée en direct, plus d'erreur.
 - [x] **Page Contact : remplacer l'email par une vraie logique d'échange dans le site.**
       `Home/Contact.cshtml` demandait une adresse email alors que la page créait déjà une
       ligne en base liée à `UserId` — l'email était redondant avec le compte déjà

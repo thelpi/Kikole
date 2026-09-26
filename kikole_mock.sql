@@ -17,7 +17,7 @@
 --   joueur2 / test123         (utilisateur standard)
 --   question de recuperation : reponse "kikole" pour les trois
 --
--- Joueurs du jour : generes de FirstDate a aujourd'hui + 7 jours (voir plus bas).
+-- Joueurs du jour : generes de FirstDate a aujourd'hui + 6 mois (voir plus bas).
 
 SET NAMES utf8mb4;
 USE kikole;
@@ -72,9 +72,11 @@ INSERT INTO registration_guids (id, user_id, creation_date) VALUES
 
 -- ---------------------------------------------------------------- joueurs du jour
 --
--- Les journees sont generees de FirstDate jusqu'a aujourd'hui + 7 jours, pour que
--- l'environnement local reste valable dans le temps : sans ca, passe minuit il n'y a
--- plus de joueur du jour et l'application tombe en erreur.
+-- Les journees sont generees de FirstDate jusqu'a aujourd'hui + 6 mois, pour que
+-- l'environnement local reste valable dans le temps meme apres une longue pause sans
+-- rejouer ce script : sans ca, passe la derniere journee generee, il n'y a plus de
+-- joueur du jour et l'application tombe en erreur (verifie en pratique : le tampon de
+-- 7 jours d'origine ne tenait qu'une grosse semaine avant de tomber en panne).
 --
 -- @first_date n'a plus a correspondre a quoi que ce soit dans le code : l'application
 -- deduit son calendrier du MIN(publication_date), qui est la journee cachee inseree
@@ -84,7 +86,7 @@ INSERT INTO registration_guids (id, user_id, creation_date) VALUES
 -- ce qui rend les insertions dependantes deterministes (carrieres, traductions).
 
 SET @first_date = DATE_SUB(CURDATE(), INTERVAL 1 MONTH);
-SET @last_date = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+SET @last_date = DATE_ADD(CURDATE(), INTERVAL 6 MONTH);
 SET @pool_size = 8;
 SET SESSION cte_max_recursion_depth = 10000;
 
