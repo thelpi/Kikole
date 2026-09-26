@@ -228,7 +228,10 @@
   <data name="UsernameHeaderInGoing" xml:space="preserve">
     <value>En recherche...</value>
   </data>
-  <data name="YouSuffix" xml:space="preserve">
-    <value>vous</value>
+  <data name="PagerPrevious" xml:space="preserve">
+    <value>Page précédente</value>
+  </data>
+  <data name="PagerNext" xml:space="preserve">
+    <value>Page suivante</value>
   </data>
 </root>

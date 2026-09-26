@@ -12,15 +12,17 @@
 <div class="kikole-board">
     <div class="form-card">
         <h3>@localizer["DailyLeaderboard"]</h3>
-        <div class="form-field">
-            <label>@localizer["SortType"]</label>
-            @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
+        <div class="form-row">
+            <div class="form-field">
+                <label>@localizer["SortType"]</label>
+                @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
+            </div>
+            <div class="form-field">
+                <label>@localizer["Date"]</label>
+                <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
+            </div>
         </div>
-        <div class="form-field">
-            <label>@localizer["Date"]</label>
-            <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
-        </div>
-        <div class="table-wrap">
+        <div class="table-wrap" data-prev-label="@localizer["PagerPrevious"]" data-next-label="@localizer["PagerNext"]">
             <table id="dailyLeaderboardTable">
                 <thead>
                     <tr>
@@ -39,14 +41,10 @@
                         {
                             var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
                             var isYou = IsYou(leader.UserId);
-                            <tr class="@trClass">
+                            <tr class="@trClass@(isYou ? " you-row" : "")">
                                 <td class="tabData">@leader.Rank</td>
                                 <td class="tabData redtext@(isYou ? " you" : "")">
                                     <a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a>
-                                    @if (isYou)
-                                    {
-                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
-                                    }
                                 </td>
                                 <td class="tabData">@leader.TimeString</td>
                                 <td class="tabData">
@@ -67,14 +65,10 @@
                         {
                             var trClass = i % 2 == 0 ? "even" : "odd";
                             var isYou = IsYou(search.UserId);
-                            <tr class="@trClass">
+                            <tr class="@trClass@(isYou ? " you-row" : "")">
                                 <td class="tabData">@lastRank</td>
                                 <td class="tabData redtext@(isYou ? " you" : "")">
                                     <a href="/Leaderboard?userId=@search.UserId">@search.UserName</a>
-                                    @if (isYou)
-                                    {
-                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
-                                    }
                                 </td>
                                 <td class="tabData">@localizer["NotYetTime"]</td>
                                 <td class="tabData">
@@ -110,11 +104,11 @@
 
     <div class="form-card">
         <h3>@localizer["GeneralLeaderboard"]</h3>
-        <div class="form-field">
-            <label>@localizer["SortType"]</label>
-            @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
-        </div>
         <div class="form-row">
+            <div class="form-field">
+                <label>@localizer["SortType"]</label>
+                @Html.DropDownListFor(m => m.SortType, Model.SortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
+            </div>
             <div class="form-field">
                 <label>@localizer["FromDate"]</label>
                 <input type="text" id="MinimalDate" name="MinimalDate" class="date-field" readonly value="@Model.MinimalDate.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
@@ -124,7 +118,7 @@
                 <input type="text" id="MaximalDate" name="MaximalDate" class="date-field" readonly value="@Model.MaximalDate.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
             </div>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap" data-prev-label="@localizer["PagerPrevious"]" data-next-label="@localizer["PagerNext"]">
             <table id="globalLeaderboardTable">
                 <thead>
                     <tr>
@@ -148,14 +142,10 @@
                         {
                             var trClass = j % 2 == 0 ? "even" : "odd";
                             var isYou = IsYou(leader.UserId);
-                            <tr class="@trClass">
+                            <tr class="@trClass@(isYou ? " you-row" : "")">
                                 <td class="tabData">@leader.Rank</td>
                                 <td class="tabData redtext@(isYou ? " you" : "")">
                                     <a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a>
-                                    @if (isYou)
-                                    {
-                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
-                                    }
                                 </td>
                                 <td class="tabData">@leader.Points</td>
                                 <td class="tabData">@leader.BestTimeString</td>
@@ -209,10 +199,6 @@
                                     var isYou = IsYou(holder.userId);
                                     <td class="tabData @medalClass@(isYou ? " you" : "")">
                                         <a href="/Leaderboard?userId=@holder.userId">@holder.login</a>
-                                        @if (isYou)
-                                        {
-                                            <span class="you-tag">(@localizer["YouSuffix"])</span>
-                                        }
                                     </td>
                                 }
                             </tr>
@@ -250,13 +236,9 @@
                         {
                             var trClass = m % 2 == 0 ? "even" : "odd";
                             var isYou = IsYou(entry.userId);
-                            <tr class="@trClass">
+                            <tr class="@trClass@(isYou ? " you-row" : "")">
                                 <td class="tabData redtext@(isYou ? " you" : "")">
                                     @entry.login
-                                    @if (isYou)
-                                    {
-                                        <span class="you-tag">(@localizer["YouSuffix"])</span>
-                                    }
                                 </td>
                                 <td class="tabData medal-gold">@entry.first</td>
                                 <td class="tabData medal-silver">@entry.second</td>
@@ -278,7 +260,6 @@
             @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value)),
             @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value)),
             @Html.Raw(Json.Serialize(localizer["HiddenDayboard"].Value)),
-            @Html.Raw(Json.Serialize(localizer["YouSuffix"].Value)),
             @Model.CurrentUserId);
     });
 </script>

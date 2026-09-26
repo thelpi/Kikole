@@ -1,4 +1,4 @@
-﻿$(document).ready(function () {
+$(document).ready(function () {
     /* loading google graph lib */
     if (document.getElementById('googleChartEnabler')) {
         google.charts.load('current', { packages: ['corechart'] });
@@ -272,37 +272,40 @@ var loadKikolesStats = function (sort, desc) {
     });
 };
 
-var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId) {
+var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId) {
+    paginateTable(document.getElementById('globalLeaderboardTable'));
+    paginateTable(document.getElementById('dailyLeaderboardTable'));
+
     /* global */
     var sortType = document.getElementById('SortType');
     var fromDate = document.getElementById('MinimalDate');
     var toDate = document.getElementById('MaximalDate');
     sortType.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, youText, currentUserId);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
     };
     fromDate.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, youText, currentUserId);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
     };
     toDate.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, youText, currentUserId);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
     };
 
     /* daily */
     var dailySortType = document.getElementById('DaySortType');
     var dailyDate = document.getElementById('LeaderboardDay');
     dailySortType.onchange = function () {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
     };
     dailyDate.onchange = function () {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
     };
 };
 
-/* cellule "utilisateur" partagee par les 3 lignes de tableau regenerees en AJAX
-   ci-dessous : ajoute le lien + le petit marqueur "(vous)" quand la ligne est celle
-   de l'utilisateur connecte (cf. Views/Leaderboard/Index.cshtml pour l'equivalent
-   cote rendu serveur). */
-var appendUsernameCell = function (row, userId, userName, href, youText, currentUserId) {
+/* cellule "utilisateur" partagee par les lignes de tableau regenerees en AJAX
+   ci-dessous : ajoute le lien, et marque la ligne de l'utilisateur connecte (classe
+   .you-row sur le <tr>, mise en forme dans kikole-board.css ; cf.
+   Views/Leaderboard/Index.cshtml pour l'equivalent cote rendu serveur). */
+var appendUsernameCell = function (row, userId, userName, href, currentUserId) {
     var newCell = row.insertCell();
     var userLink = document.createElement('a');
     userLink.href = href;
@@ -312,16 +315,76 @@ var appendUsernameCell = function (row, userId, userName, href, youText, current
     newCell.classList.add('redtext');
     if (currentUserId && String(userId) === String(currentUserId)) {
         newCell.classList.add('you');
-        var youTag = document.createElement('span');
-        youTag.classList.add('you-tag');
-        youTag.append(document.createTextNode('(' + youText + ')'));
-        newCell.appendChild(youTag);
+        row.classList.add('you-row');
     }
     return newCell;
 };
 
+/* pagination cote navigateur des classements : 25 lignes par page, fleches precedent /
+   suivant sans numero de page. Les donnees arrivent deja completes (rendu serveur ou
+   appel AJAX), on masque simplement les lignes hors page ; a rappeler apres chaque
+   remplacement du <tbody>. Libelles des fleches : data-prev-label / data-next-label
+   sur le .table-wrap (localises par la vue). */
+var LEADERBOARD_PAGE_SIZE = 25;
+
+var paginateTable = function (table) {
+    var wrap = table.closest('.table-wrap');
+    var old = wrap.parentNode.querySelector('.pager[data-for="' + table.id + '"]');
+    if (old) {
+        old.remove();
+    }
+
+    var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+    rows.forEach(function (r) { r.hidden = false; });
+    if (rows.length <= LEADERBOARD_PAGE_SIZE) {
+        return;
+    }
+
+    var chevron = function (d) {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+    };
+    var pager = document.createElement('div');
+    pager.className = 'pager';
+    pager.setAttribute('data-for', table.id);
+    pager.innerHTML =
+        '<button type="button" class="pager-btn" data-dir="-1" title="' + wrap.dataset.prevLabel + '" aria-label="' + wrap.dataset.prevLabel + '">' + chevron('M15 6l-6 6 6 6') + '</button>' +
+        '<span class="pager-range"></span>' +
+        '<button type="button" class="pager-btn" data-dir="1" title="' + wrap.dataset.nextLabel + '" aria-label="' + wrap.dataset.nextLabel + '">' + chevron('M9 6l6 6-6 6') + '</button>';
+    wrap.insertAdjacentElement('afterend', pager);
+
+    var pageCount = Math.ceil(rows.length / LEADERBOARD_PAGE_SIZE);
+    var page = 0;
+    var buttons = pager.querySelectorAll('.pager-btn');
+
+    var show = function () {
+        var start = page * LEADERBOARD_PAGE_SIZE;
+        var end = Math.min(start + LEADERBOARD_PAGE_SIZE, rows.length);
+        var zebra = 0;
+        rows.forEach(function (r, i) {
+            var visible = i >= start && i < end;
+            r.hidden = !visible;
+            if (visible && !r.classList.contains('creator')) {
+                r.classList.remove('even', 'odd');
+                r.classList.add(zebra % 2 === 0 ? 'even' : 'odd');
+                zebra++;
+            }
+        });
+        pager.querySelector('.pager-range').textContent = (start + 1) + '\u2013' + end + ' / ' + rows.length;
+        buttons[0].disabled = page === 0;
+        buttons[1].disabled = page === pageCount - 1;
+    };
+
+    buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+            page = Math.max(0, Math.min(pageCount - 1, page + parseInt(b.getAttribute('data-dir'), 10)));
+            show();
+        });
+    });
+    show();
+};
+
 /* leaderboard loading */
-var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText, youText, currentUserId) {
+var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText, currentUserId) {
     if (!dateMin || !dateMax) {
         return;
     }
@@ -344,7 +407,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
                 newCell.appendChild(newText);
                 newCell.classList.add('tabData');
 
-                appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, youText, currentUserId);
+                appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, currentUserId);
 
                 var newCell = newRow.insertCell();
                 var newText = document.createTextNode(e.points);
@@ -383,6 +446,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
                 newCell.colSpan = 7;
             }
             table.replaceChild(newtbody, tbodyRef);
+            paginateTable(table);
         },
         error: function (data) {
             alert('Call error: ' + JSON.stringify(data));
@@ -390,7 +454,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
     });
 };
 
-var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, youText, currentUserId) {
+var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId) {
     if (!date) {
         return;
     }
@@ -419,7 +483,7 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
                     newCell.appendChild(newText);
                     newCell.classList.add('tabData');
 
-                    appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, youText, currentUserId);
+                    appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, currentUserId);
 
                     var newCell = newRow.insertCell();
                     var newText = document.createTextNode(e.timeString);
@@ -452,7 +516,7 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
                     newCell.appendChild(newText);
                     newCell.classList.add('tabData');
 
-                    appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, youText, currentUserId);
+                    appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, currentUserId);
 
                     var newCell = newRow.insertCell();
                     var newText = document.createTextNode(noTimeYetText);
@@ -493,6 +557,7 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
             }
             
             table.replaceChild(newtbody, tbodyRef);
+            paginateTable(table);
         },
         error: function (data) {
             alert('Call error: ' + JSON.stringify(data));

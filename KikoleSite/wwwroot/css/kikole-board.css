@@ -543,14 +543,6 @@ body { padding-top: 0; }
    chaque combinaison. */
 .kikole-board td.you { color: var(--accent); font-weight: 700; }
 
-.kikole-board .you-tag {
-  margin-left: 5px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--accent);
-}
-
 .kikole-board .form-field { margin-bottom: 14px; }
 
 .kikole-board .form-row {
@@ -1915,3 +1907,55 @@ body { padding-top: 0; }
 .kikole-board .form-static.accent { color: var(--accent); }
 /* zone de saisie d'un message (Contact, Admin/Discussion) : pleine largeur, comme les bulles */
 .kikole-board .form-field textarea.blank { max-width: 100%; }
+/* ---------------------------------------------------------- classements (2026-09-26) */
+
+/* ligne du joueur connecte : fond teinte + barre d'accent a gauche + nom en gras ; remplace
+   l'ancien "(vous)" et ne repose pas sur la couleur seule (barre + graisse) */
+.kikole-board tr.you-row td { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+.kikole-board tr.you-row td:first-child { box-shadow: inset 4px 0 0 var(--accent); }
+.kikole-board tr.you-row td.you a { color: var(--accent); font-weight: 700; }
+
+/* pagination (site.js, paginateTable) : fleches uniquement, plage affichee au centre */
+.kikole-board .pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.kikole-board .pager-range {
+  min-width: 96px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.kikole-board .pager-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.kikole-board .pager-btn svg { width: 18px; height: 18px; }
+
+.kikole-board .pager-btn:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.kikole-board .pager-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.kikole-board .pager-btn:disabled { opacity: 0.35; cursor: default; }
