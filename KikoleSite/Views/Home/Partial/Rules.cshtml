@@ -1,8 +1,13 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @using KikoleSite.Models;
 @using KikoleSite.Models.Enums;
-<div class="form-card">
+<div class="form-card rules-card">
+    <h2>@localizer["RulesTitle"]</h2>
     @localizer["Rules"]
+</div>
+
+<div class="form-card rules-card">
+    <h2>@localizer["ScoreTitle"]</h2>
     <p>@localizer["ScoreIntro"]</p>
     <ul>
         <li>@Html.Raw(string.Format(localizer["StarterPoints"].Value, ScoreCalculator.BasePoints))</li>
@@ -17,8 +22,14 @@
         <li>@localizer["GoodGuess"]</li>
         <li>@Html.Raw(string.Format(localizer["SubmissionPoints"].Value, ScoreCalculator.SubmissionPoints))</li>
     </ul>
+</div>
+
+<div class="form-card rules-card">
+    <h2>@localizer["DetailsTitle"]</h2>
     <h3 id="country-rules">@localizer["AboutCountry"]</h3>
     @localizer["AboutCountryDetails"]
     <h3 id="clubs-rules">@localizer["AboutClubs"]</h3>
     @localizer["AboutClubsDetails"]
+    <h3 id="position-rules">@localizer["AboutPosition"]</h3>
+    @localizer["AboutPositionDetails"]
 </div>

@@ -1980,7 +1980,10 @@ INSERT INTO clubs (id, `name`, country_id, creation_date) VALUES
 (1698, 'Deportivo Táchira Fútbol Club', 241, '2026-09-10 00:00:00'),
 (1699, 'Estudiantes de Mérida Fútbol Club', 241, '2026-09-10 00:00:00'),
 (1700, 'Monagas Sport Club', 241, '2026-09-10 00:00:00'),
-(1701, 'Universidad de los Andes Fútbol Club', 241, '2026-09-10 00:00:00');
+(1701, 'Universidad de los Andes Fútbol Club', 241, '2026-09-10 00:00:00'),
+-- ajout hors lots (2026-09-26, demande de l'utilisateur) : club de Valbuena, accepte malgre son statut
+-- amateur (cf. texte de la page d'accueil, section Carriere en club)
+(1702, 'FC Libourne', 77, '2026-09-26 00:00:00');
 
 CREATE TABLE club_translations (
   club_id bigint(20) UNSIGNED NOT NULL,
@@ -3725,7 +3728,9 @@ INSERT INTO club_translations (club_id, language_id, priority, `name`) VALUES
 (1698, 2, 0, 'Deportivo Táchira Fútbol Club'), (1698, 1, 0, 'Deportivo Táchira Fútbol Club'),
 (1699, 2, 0, 'Estudiantes de Mérida Fútbol Club'), (1699, 1, 0, 'Estudiantes de Mérida Fútbol Club'),
 (1700, 2, 0, 'Monagas Sport Club'), (1700, 1, 0, 'Monagas Sport Club'),
-(1701, 2, 0, 'Universidad de los Andes Fútbol Club'), (1701, 1, 0, 'Universidad de los Andes Fútbol Club');
+(1701, 2, 0, 'Universidad de los Andes Fútbol Club'), (1701, 1, 0, 'Universidad de los Andes Fútbol Club'),
+(1702, 2, 0, 'FC Libourne'), (1702, 2, 1, 'Libourne Football Association 2024'), (1702, 2, 2, 'Libourne'), (1702, 2, 3, 'FC Libourne-Saint-Seurin'),
+(1702, 1, 0, 'FC Libourne'), (1702, 1, 1, 'Libourne Football Association 2024'), (1702, 1, 2, 'Libourne'), (1702, 1, 3, 'FC Libourne-Saint-Seurin');
 
 CREATE TABLE continents (
   id bigint(20) UNSIGNED NOT NULL,

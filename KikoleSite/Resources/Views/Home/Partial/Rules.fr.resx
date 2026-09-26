@@ -118,24 +118,25 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutClubs" xml:space="preserve">
-    <value>A propos des clubs</value>
+    <value>Carrière en club</value>
   </data>
   <data name="AboutClubsDetails" xml:space="preserve">
-    <value>&lt;p&gt;Seuls les clubs professionels sont présents dans la carrière du joueur : les réserves et les clubs juniors sont exclus.&lt;/p&gt;
-&lt;p&gt;Exemple : Edouard Mendy n'a pas joué à l'Olympique de Marseille (réserve), ni au Havre (junior).&lt;/p&gt;
+    <value>&lt;p&gt;D'une manière générale, seuls les clubs professionnels sont présents dans la carrière du joueur : les réserves, les équipes B et les clubs juniors sont exclus.&lt;/p&gt;
+&lt;p&gt;Exemple : Édouard Mendy n'a pas joué à l'Olympique de Marseille (réserve), ni au Havre (junior).&lt;/p&gt;
+&lt;p&gt;L'amateurisme d'un club peut toutefois être ambigu : « FC Libourne » sera accepté pour Valbuena, vu sa relative importance pour ce joueur.&lt;/p&gt;
 &lt;p&gt;Les prêts sont inclus dans la carrière, et explicitement indiqués quand c'est le cas.&lt;/p&gt;
-&lt;p&gt;L'autocomplétion est exhaustive. Cela signifie que si vous cherchez un club en particulier et qu'il n'apparait pas, alors le joueur du jour n'a pas joué dans ce club.&lt;/p&gt;</value>
+&lt;p&gt;L'autocomplétion est exhaustive. Cela signifie que si vous cherchez un club en particulier et qu'il n'apparaît pas, alors le joueur du jour n'a pas joué dans ce club.&lt;/p&gt;</value>
   </data>
   <data name="AboutCountry" xml:space="preserve">
-    <value>A propos de la nationalité</value>
+    <value>Nationalité des joueurs</value>
   </data>
   <data name="AboutCountryDetails" xml:space="preserve">
     <value>&lt;p&gt;La nationalité est celle &lt;strong&gt;sportive&lt;/strong&gt;, pas administrative.&lt;/p&gt;
-&lt;p&gt;Elle correspond donc, dans le cas le plus courant, à la sélection pour laquelle le joueur a joué (exemple : Angleterre pour David Beckham). La liste des pays est &lt;a target="_blank" href="https://fr.wikipedia.org/wiki/Liste_des_codes_pays_de_la_FIFA#Listes_des_codes_pays_actuels_affili%C3%A9s_%C3%A0_la_FIFA"&gt;celle de la FIFA&lt;/a&gt; ; les pays mentionnés comme "non reconnus par la FIFA" sont exclus.&lt;/p&gt;
-&lt;p&gt;Les principales sélections disparues sont également présentes : URSS, ex-Yougoslavie, RDA, Tchécoslovaquie. Cela permet par exemple à Lev Yachine d'avoir sa véritable sélection, même si, dans un tel cas, la nationalité actuelle la plus proche (ici la Russie) reste également autorisée.&lt;/p&gt;
-&lt;p&gt;Note : la RFA n'existe pas en tant que telle (fusionnée avec l'Allemagne), de même que la Serbie-et-Monténégro (fusionnée avec la Serbie).&lt;/p&gt;
-&lt;p&gt;Par ailleurs, si un joueur a représenté deux sélections A différentes — typiquement une disparue, puis son successeur —, les deux sont acceptées. Exemple : Robert Prosinečki, avec l'ex-Yougoslavie et la Croatie.&lt;/p&gt;
-&lt;p&gt;Enfin, cas particulier du précédent : si les deux sélections sont sur des continents différents (exemple : Algérie puis France, ou l'inverse), les deux continents sont également acceptés.&lt;/p&gt;</value>
+&lt;p&gt;Elle correspond donc, dans le cas le plus courant, à la sélection pour laquelle le joueur a joué (exemple : Angleterre pour David Beckham). La liste des pays est &lt;a target="_blank" href="https://fr.wikipedia.org/wiki/Liste_des_codes_pays_de_la_FIFA#Listes_des_codes_pays_actuels_affili%C3%A9s_%C3%A0_la_FIFA"&gt;celle de la FIFA&lt;/a&gt; ; les pays mentionnés comme « non reconnus par la FIFA » sont exclus.&lt;/p&gt;
+&lt;p&gt;Les principales sélections disparues sont également présentes : URSS, ex-Yougoslavie, RDA, Tchécoslovaquie. Cela permet par exemple à Lev Yachine d'avoir sa véritable sélection, même si, dans un tel cas, la nationalité actuelle la plus proche (ici la Russie) reste également autorisée.&lt;/p&gt;
+&lt;p&gt;Note : la RFA n'existe pas en tant que telle (fusionnée avec l'Allemagne), de même que la Serbie-et-Monténégro (fusionnée avec la Serbie).&lt;/p&gt;
+&lt;p&gt;Par ailleurs, si un joueur a représenté deux sélections A différentes — typiquement une disparue, puis son successeur —, les deux sont acceptées. Exemple : Robert Prosinečki, avec l'ex-Yougoslavie et la Croatie.&lt;/p&gt;
+&lt;p&gt;Enfin, cas particulier du précédent : si les deux sélections sont sur des continents différents (exemple : Algérie puis France, ou l'inverse), les deux continents sont également acceptés.&lt;/p&gt;</value>
   </data>
   <data name="BadGuessClub" xml:space="preserve">
     <value>Une proposition incorrecte pour un des clubs coûte &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
@@ -165,20 +166,38 @@
     <value>Une proposition correcte dans n'importe quelle catégorie ne coûte &lt;span class="greentext" style="font-size: large"&gt;aucun point&lt;/span&gt;.</value>
   </data>
   <data name="Rules" xml:space="preserve">
-    <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu où vous devez deviner un nouveau footballeur &lt;span class="redtext"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Vos adversaires doivent deviner le même joueur, donc soyez le meilleur pour apparaître dans le &lt;a href="/Leaderboard"&gt;classement&lt;/a&gt;!&lt;/p&gt;
-&lt;p&gt;Pour trouver le joueur du jour, vous pouvez faire des propositions concernant son année de naissance, poste, nationalité et carrière en club. Un indice de départ est également donné.&lt;/p&gt;
-&lt;p&gt;Veuillez noter que le joueur peut être actif ou retraité, de plus les joueuses sont parfois possibles bien que rare.&lt;/p&gt;
-&lt;p&gt;Les joueurs de fiction (films, mangas...) ne sont pas autorisés.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;span class="redtext" style="font-size: large"&gt;"Kikolé ?"&lt;/span&gt; est un jeu où vous devez deviner un nouveau footballeur &lt;span class="redtext"&gt;tous les jours&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Vos adversaires doivent deviner le même joueur, donc soyez le meilleur pour apparaître dans le &lt;a href="/Leaderboard"&gt;classement&lt;/a&gt; !&lt;/p&gt;
+&lt;p&gt;Pour trouver le joueur du jour, vous pouvez faire des propositions concernant son année de naissance, son poste, sa nationalité et sa carrière en club. Un indice de départ est également donné.&lt;/p&gt;
+&lt;p&gt;Veuillez noter que le joueur peut être actif ou retraité ; de plus, les joueuses sont parfois possibles, bien que rares.&lt;/p&gt;
+&lt;p&gt;Les joueurs de fiction (films, mangas...) ne sont pas proposés.&lt;/p&gt;
 &lt;p&gt;Pour un problème technique, une réclamation ou proposer un joueur (un autre moyen de gagner des points), merci de &lt;a href="/Home/Contact"&gt;me contacter&lt;/a&gt; (il faut être connecté).&lt;/p&gt;</value>
   </data>
   <data name="ScoreIntro" xml:space="preserve">
-    <value>Le score est calculé par les rêgles suivantes :</value>
+    <value>Le score est calculé selon les règles suivantes :</value>
   </data>
   <data name="StarterPoints" xml:space="preserve">
     <value>Vous commencez avec &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="SubmissionPoints" xml:space="preserve">
-    <value>Si vous proposez un kikolé et qu'il est accepté, vous gagnerez &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points ce jour là.</value>
+    <value>Si vous proposez un kikolé et qu'il est accepté, vous gagnerez &lt;span class="greentext" style="font-size: large"&gt;{0}&lt;/span&gt; points ce jour-là.</value>
+  </data>
+  <data name="RulesTitle" xml:space="preserve">
+    <value>Kikolé ? Kezako ?</value>
+  </data>
+  <data name="ScoreTitle" xml:space="preserve">
+    <value>Calcul du score</value>
+  </data>
+  <data name="DetailsTitle" xml:space="preserve">
+    <value>Détails sur les joueurs proposés</value>
+  </data>
+  <data name="AboutPosition" xml:space="preserve">
+    <value>Positionnement</value>
+  </data>
+  <data name="AboutPositionDetails" xml:space="preserve">
+    <value>&lt;p&gt;Les joueurs peuvent parfois avoir plusieurs postes (exemple : milieu de terrain et attaquant) ; proposer un seul poste suffit à révéler les deux.&lt;/p&gt;
+&lt;p&gt;Un joueur ne peut pas avoir plus de deux postes.&lt;/p&gt;
+&lt;p&gt;Cela reste toutefois une information ambiguë : Eden Hazard apparaîtra comme « milieu de terrain / attaquant », mais Marquinhos n'apparaîtra que comme défenseur (sa courte période au milieu de terrain sera ignorée).&lt;/p&gt;
+&lt;p&gt;Ce choix, comme pour les nationalités et les clubs, relève de l'administrateur, qui valide toujours les soumissions créées par d'autres joueurs. Ces conventions sont parfois discutables, mais elles sont définitives : les réclamations à ce sujet ne seront pas traitées.&lt;/p&gt;</value>
   </data>
 </root>

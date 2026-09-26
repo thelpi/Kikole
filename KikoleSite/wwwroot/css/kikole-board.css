@@ -2074,3 +2074,21 @@ body { padding-top: 0; }
 .kikole-board .badge-card.missing .badge-desc summary { border-bottom-color: rgba(203, 195, 173, 0.35); }
 .kikole-board .badge-card.missing .badge-holders,
 .kikole-board .badge-card.missing .badge-holders b { color: #b3ab96; }
+/* page d'accueil : regles en trois sections (h2), avec sous-sections (h3) dans la derniere */
+.kikole-board .rules-card h2 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.kikole-board .rules-card h3 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--accent);
+  margin: 26px 0 8px;
+}
+
+.kikole-board .rules-card h2 + h3 { margin-top: 4px; }

@@ -691,7 +691,12 @@ Branche de travail : `remaster-v2`.
           ajouté côté USA sur initiative de Claude (même logique qu'Inter Miami), confirmé
           par l'utilisateur ("bien vu pour LAFC") — gardé.
       - **Chantier clubs déclaré terminé par l'utilisateur (2026-09-10)** : "bon débarras".
-        **1701 clubs au total** dans `kikole.sql` (France/Italie/Grèce sourcées à part,
+        **1701 clubs au total** dans `kikole.sql` (**1702 depuis l'ajout hors lots de « FC
+        Libourne » le 2026-09-26** : id 1702, France, club de Valbuena accepté malgré son statut
+        amateur, cf. section « Carrière en club » de la page d'accueil ; noms alternatifs
+        « Libourne Football Association 2024 », « Libourne », « FC Libourne-Saint-Seurin » ;
+        dans la base locale il porte l'id 1703, l'id 1702 y étant occupé par le club de test
+        « cest toto ») (France/Italie/Grèce sourcées à part,
         puis 8 grands pays d'Europe + leurs échelons inférieurs, puis 24 pays d'Europe
         supplémentaires, puis 19 pays d'Afrique/Asie/Océanie, puis 13 pays d'Amérique).
         **Reste volontairement non fait, décision explicite de clore ici** : les échelons
@@ -1708,7 +1713,7 @@ Branche de travail : `remaster-v2`.
       (`gstatic.com/charts`, page admin Stats) et au CDN Bootstrap (`stackpath`, hors
       Development). Point de vigilance RGPD (décision allemande de 2022 sur Google Fonts) :
       les héberger dans `wwwroot` règle le problème et supprime une dépendance réseau.
-      Chantier lié à « Dépendances front datées » ci-dessous (même fichier `_Layout.cshtml`)
+      Chantier lié à « Migrer jQuery et jQuery UI » et « Supprimer Bootstrap » ci-dessous (même fichier `_Layout.cshtml`)
       et au footer / mentions légales ci-dessus ; à cadrer ensemble.
 - [x] ~~Petits textes (10 à 11,5 px)~~ — **décision : on les conserve** (2026-09-26).
       Étiquettes d'indice, aides sous les champs, coûts, en-têtes de tableau restent à leur
@@ -1718,19 +1723,49 @@ Branche de travail : `remaster-v2`.
       de passe par question secrète ne protège que les administrateurs
       (`AccountController.IsRecoveryForbidden`, refus indiscernable d'une mauvaise réponse) ;
       les power users restent traités comme des comptes ordinaires.
-- [ ] **Dépendances front datées, à moderniser.** Chargées en prod uniquement en CDN, sans
-      fallback ni SRI : jQuery **1.12.4** (`_Layout.cshtml`, sortie en 2016, ligne 1.x
-      abandonnée — actuelle : 3.7.x), jQuery UI **1.12.1** (même génération, utilisé pour
-      l'autocomplétion club/pays/année et les datepickers — pas anodin à toucher),
-      Bootstrap **3.4.1** en CDN mais **3.3.7** dans le fallback local
-      (`wwwroot/lib/bootstrap/.bower.json`, versions divergentes entre les deux chemins) —
-      Bootstrap 3 lui-même très daté (actuel : Bootstrap 5, classes CSS différentes,
-      rupture probable sur les vues qui en dépendent). Repéré au passage, mort : `wwwroot
-      /lib/jquery` (3.3.1), `jquery-validation`, `jquery-validation-unobtrusive` présents
-      sur disque mais jamais chargés par `_Layout.cshtml` — résidus du scaffold ASP.NET MVC
-      d'origine. Chantier à part entière (rupture potentielle jQuery UI et Bootstrap 3→5),
-      pas juste un bump de version — à cadrer avant de s'y lancer.
-- [x] **Fusionné `Statistics/KikolesStats` dans `Statistics/Stats`**, en 3ème bloc
+- [ ] **Migrer jQuery et jQuery UI** (chantier distinct de la suppression de Bootstrap, cf.
+      item suivant). Chargés en prod uniquement en CDN, sans fallback ni SRI (`_Layout.cshtml`) :
+      jQuery **1.12.4** (2016, ligne 1.x abandonnée) et jQuery UI **1.12.1**. Failles connues
+      (numéros de CVE cités de mémoire, à confirmer par un scan OWASP Dependency-Check ou
+      retire.js) : jQuery 1.12.4 — XSS AJAX inter-domaines (CVE-2015-9251), pollution de
+      prototype `$.extend` (CVE-2019-11358), XSS `.html()`/`.append()` (CVE-2020-11022/11023),
+      toutes corrigées en 3.5 ; jQuery UI 1.12.1 — XSS datepicker `altField`/options `*Text`
+      et `.position()` (CVE-2021-41182/41183/41184, corrigées en 1.13.0) et `checkboxradio`
+      (CVE-2022-31160, corrigée en 1.13.2). **Exploitabilité faible aujourd'hui** : aucune API
+      concernée n'est utilisée (recherche de `.html(`, `.append(`, `innerHTML`, `_renderItem`,
+      `altField` dans `site.js` et les vues : aucune occurrence, les données JSON des
+      classements passent par `createTextNode`), mais un futur `.html()` sur un login ou un nom
+      de club serait exploitable. **Cible : jQuery 3.7.1 + jQuery UI 1.13.3** (Bootstrap 3.4.1
+      accepte jQuery 3). Périmètre réel modeste : `$.ajax`, `.on`, `.click`, autocomplétion
+      (clubs, pays, continents, années), datepickers (accueil + classements) — aucune API
+      supprimée entre jQuery 1 et 3 n'est utilisée (`.size()`, `.load()`, `.bind`, `.live`...
+      recherchés, rien trouvé). Trois étapes : (1) passer les deux `<script>` + le thème
+      jQuery UI dans `_Layout.cshtml`, avec le plugin jQuery Migrate le temps d'un premier
+      passage pour repérer les usages obsolètes, puis le retirer ; (2) retester autocomplétion,
+      datepickers (les surcharges de `kikole-board.css` visent les classes `ui-state-*`, qui
+      restent en 1.13), menu déroulant maison, classements AJAX, popin de victoire, pages
+      admin ; (3) idéalement en même temps que l'hébergement local + SRI (item « Ressources
+      externes »). Estimation : 1 à 2 h. À nettoyer au passage : `wwwroot/lib/jquery` (3.3.1,
+      lui aussi vulnérable), `jquery-validation` et `jquery-validation-unobtrusive`, présents
+      sur disque et servis en statique mais jamais chargés par `_Layout.cshtml` (résidus du
+      scaffold ASP.NET MVC d'origine).
+- [ ] **Supprimer Bootstrap.** Constat : **aucun composant ni classe Bootstrap n'est utilisé
+      dans les vues** (recherche de `data-toggle`, `modal`, `tooltip`, `btn-`, `navbar`,
+      `col-*`, `glyphicon`, etc. : rien) ; il ne reste que `container body-content`
+      (`_Layout.cshtml`) et sa remise à zéro CSS. Son JavaScript (`bootstrap.js`) est chargé
+      pour rien, donc ses failles XSS de composants (tooltip/popover/carousel, dont
+      CVE-2024-6531, sans correctif : Bootstrap 3 est en fin de vie) ne s'exécutent jamais.
+      Autre défaut : CDN en **3.4.1** mais fallback local en **3.3.7** (`wwwroot/lib/bootstrap
+      /.bower.json`), deux versions différentes selon le chemin. À faire : (1) **avant tout,
+      relever ce que le CSS Bootstrap apporte silencieusement** — `.container` (largeur,
+      marges), `box-sizing`, et surtout la base typographique de `body` (taille et
+      `line-height`, 1.42857) dont dépend probablement la mise en page de tout le site ;
+      (2) reporter l'essentiel dans `kikole-board.css` (une dizaine de lignes) ; (3) retirer
+      les `<link>` Bootstrap (Development et CDN), les `<script>` et le fallback de
+      `_Layout.cshtml`, puis supprimer `wwwroot/lib/bootstrap` ; (4) retester toutes les
+      pages en desktop et mobile (risque principal : régressions d'interlignes ou de
+      largeur). Règle une partie de l'item « Ressources externes » (un CDN de moins) et
+      supprime définitivement la question d'un passage à Bootstrap 5.- [x] **Fusionné `Statistics/KikolesStats` dans `Statistics/Stats`**, en 3ème bloc
       "collapsible" au même titre que "Répartition des joueurs par critère" et "Nombre
       d'utilisateurs actifs" — la page séparée reliée par un simple lien (`KikolesStatsLink`)
       disparaît. `KikolesStats.cshtml` supprimée, action `KikolesStats()` retirée du
