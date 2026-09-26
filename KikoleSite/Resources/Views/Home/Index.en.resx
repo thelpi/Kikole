@@ -279,4 +279,10 @@
   <data name="BestStreakLabel" xml:space="preserve">
     <value>Best streak: {0} days</value>
   </data>
+  <data name="CurrentStreakLabelOne" xml:space="preserve">
+    <value>Current streak: {0} day</value>
+  </data>
+  <data name="BestStreakLabelOne" xml:space="preserve">
+    <value>Best streak: {0} day</value>
+  </data>
 </root>

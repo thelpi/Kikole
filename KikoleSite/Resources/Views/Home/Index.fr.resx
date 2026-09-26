@@ -279,4 +279,10 @@
   <data name="BestStreakLabel" xml:space="preserve">
     <value>Record : {0} jours</value>
   </data>
+  <data name="CurrentStreakLabelOne" xml:space="preserve">
+    <value>Série en cours : {0} jour</value>
+  </data>
+  <data name="BestStreakLabelOne" xml:space="preserve">
+    <value>Record : {0} jour</value>
+  </data>
 </root>

@@ -872,6 +872,73 @@ Date.prototype.yyyymmdd = function () {
     ].join('-');
 };
 
+/* listes deroulantes personnalisees : remplace l'affichage des <select class="blank"> par un
+   bouton + un panneau dont les elements ont le meme style que la valeur selectionnee. Le
+   <select> natif reste dans le DOM (cache) et garde la valeur : formulaires et handlers
+   "change" existants continuent de fonctionner tels quels. */
+$(function () {
+    var closeAll = function (except) {
+        $(".dd.open").not(except).removeClass("open").find(".dd-btn").attr("aria-expanded", "false");
+    };
+
+    $("select.blank").each(function () {
+        var select = this;
+        var $dd = $('<div class="dd"></div>');
+        var $btn = $('<button type="button" class="dd-btn blank" aria-haspopup="listbox" aria-expanded="false"></button>');
+        var $list = $('<ul class="dd-list" role="listbox"></ul>');
+
+        var refresh = function () {
+            var opt = select.options[select.selectedIndex];
+            $btn.text(opt && opt.text ? opt.text : "—").toggleClass("placeholder", !opt || opt.value === "0" || opt.value === "");
+            $list.children().each(function (i) {
+                $(this).toggleClass("selected", i === select.selectedIndex).attr("aria-selected", i === select.selectedIndex);
+            });
+        };
+
+        var choose = function (index) {
+            if (select.selectedIndex !== index) {
+                select.selectedIndex = index;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+            refresh();
+            closeAll();
+            $btn.focus();
+        };
+
+        $.each(select.options, function (i, o) {
+            var $li = $('<li class="dd-item" role="option"></li>').text(o.text || "—");
+            if (o.value === "0" || o.value === "") $li.addClass("placeholder");
+            $li.on("click", function () { choose(i); });
+            $list.append($li);
+        });
+
+        $btn.on("click", function () {
+            var willOpen = !$dd.hasClass("open");
+            closeAll($dd);
+            $dd.toggleClass("open", willOpen);
+            $btn.attr("aria-expanded", willOpen ? "true" : "false");
+        });
+
+        $btn.on("keydown", function (e) {
+            if (e.key === "Escape") { closeAll(); return; }
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                e.preventDefault();
+                var next = Math.max(0, Math.min(select.options.length - 1, select.selectedIndex + (e.key === "ArrowDown" ? 1 : -1)));
+                choose(next);
+            }
+        });
+
+        $(select).addClass("dd-native").attr("tabindex", "-1").attr("aria-hidden", "true");
+        $dd.insertBefore(select).append($btn, $list, select);
+        $(select).on("change", refresh);
+        refresh();
+    });
+
+    $(document).on("click", function (e) {
+        if (!$(e.target).closest(".dd").length) closeAll();
+    });
+});
+
 Date.prototype.ddmmyyyy = function () {
     var mm = this.getMonth() + 1; // getMonth() is zero-based
     var dd = this.getDate();

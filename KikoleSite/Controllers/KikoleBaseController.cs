@@ -65,10 +65,9 @@ public abstract class KikoleBaseController : Controller
     public async Task<JsonResult> AutoCompleteClubs(string prefix)
     {
         var language = ViewHelper.GetLanguage();
-        var sanitizedPrefix = prefix.Sanitize();
 
         var clubs = (await GetClubsAsync())
-            .Where(c => c.MatchesSearch(language, sanitizedPrefix));
+            .Where(c => c.MatchesSearch(language, prefix));
 
         // le code pays leve l'ambiguite entre deux clubs homonymes de pays differents
         // (l'unicite en base est sur (name, country_id), pas name seul) ; le code ISO a
@@ -80,9 +79,9 @@ public abstract class KikoleBaseController : Controller
     [HttpPost]
     public async Task<JsonResult> AutoCompleteContinents(string prefix)
     {
+        var term = prefix.SanitizeForSearch();
         var continents = (await GetContinentsAsync())
-            .Where(c =>
-                c.Value.Sanitize().Contains(prefix.Sanitize()));
+            .Where(c => term.Length > 0 && c.Value.SanitizeForSearch().Contains(term));
 
         return Json(continents);
     }
@@ -90,9 +89,9 @@ public abstract class KikoleBaseController : Controller
     [HttpPost]
     public async Task<JsonResult> AutoCompleteCountries(string prefix)
     {
+        var term = prefix.SanitizeForSearch();
         var countries = (await GetCountriesAsync())
-            .Where(c =>
-                c.Value.Sanitize().Contains(prefix.Sanitize()));
+            .Where(c => term.Length > 0 && c.Value.SanitizeForSearch().Contains(term));
 
         return Json(countries);
     }

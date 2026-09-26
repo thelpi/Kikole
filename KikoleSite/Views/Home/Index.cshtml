@@ -82,10 +82,10 @@
                             <polyline points="14 6 21 6 21 13" />
                         </svg>
                         <div class="streak-lines">
-                            <div class="streak-line current">@string.Format(localizer["CurrentStreakLabel"].Value, Model.Streak.Current)</div>
+                            <div class="streak-line current">@string.Format(localizer[Model.Streak.Current == 1 ? "CurrentStreakLabelOne" : "CurrentStreakLabel"].Value, Model.Streak.Current)</div>
                             @if (Model.Streak.Best != Model.Streak.Current)
                             {
-                                <div class="streak-line best">@string.Format(localizer["BestStreakLabel"].Value, Model.Streak.Best)</div>
+                                <div class="streak-line best">@string.Format(localizer[Model.Streak.Best == 1 ? "BestStreakLabelOne" : "BestStreakLabel"].Value, Model.Streak.Best)</div>
                             }
                         </div>
                     </div>
@@ -107,7 +107,7 @@
             <div class="dossier-head">
                 @if (Model.CurrentDay == 0)
                 {
-                    <h1>@localizer["PlayerIs"] <span style="color:var(--stamp)">@Model.PlayerName</span></h1>
+                    <h1>@localizer["PlayerIs"] <span class="player-name">@Model.PlayerName</span></h1>
                 }
                 else
                 {
@@ -236,6 +236,9 @@
                 }
             </div>
             await Html.RenderPartialAsync("Partial/Badges", Model.Badges);
+            var hasActions = string.IsNullOrWhiteSpace(Model.EasyClue) || Model.CurrentDay > 0 || !Model.LeaderboardAvailable;
+            if (hasActions)
+            {
             <div class="rows" style="padding-top:18px">
                 <div class="actions">
                     @if (string.IsNullOrWhiteSpace(Model.EasyClue))
@@ -270,6 +273,7 @@
                     }
                 </div>
             </div>
+            }
             <div class="rows">
                 <!-- clubs -->
                 <form method="post" action="/" class="dossier-row locked">

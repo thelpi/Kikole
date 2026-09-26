@@ -55,6 +55,13 @@ internal static class StringHelper
         return value.Trim().RemoveDiacritics().ToLowerInvariant();
     }
 
+    // recherche tolerante (autocompletion) : ne garde que les lettres et chiffres, pour que
+    // "saint etienne", "saint-etienne" et "milan ac" trouvent "Saint-Étienne" / "Milan A.C."
+    internal static string SanitizeForSearch(this string value)
+    {
+        return new string(value.Sanitize().Where(char.IsLetterOrDigit).ToArray());
+    }
+
     internal static string SanitizeJoin(this IEnumerable<string> values, string sourceValue)
     {
         return string.Join(Separator, values.Select(Sanitize).Concat(new[] { sourceValue.Sanitize() }).Distinct());

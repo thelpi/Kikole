@@ -33,9 +33,11 @@ public class Club
         return NamesByLanguage[language][0];
     }
 
-    public bool MatchesSearch(Languages language, string sanitizedPrefix)
+    public bool MatchesSearch(Languages language, string searchTerm)
     {
-        return NamesByLanguage.TryGetValue(language, out var names)
-            && names.Any(n => n.Sanitize().Contains(sanitizedPrefix));
+        var term = searchTerm.SanitizeForSearch();
+        return term.Length > 0
+            && NamesByLanguage.TryGetValue(language, out var names)
+            && names.Any(n => n.SanitizeForSearch().Contains(term));
     }
 }

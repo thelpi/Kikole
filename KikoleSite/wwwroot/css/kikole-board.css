@@ -1,28 +1,51 @@
-/* Habillage "dossier de scout" de la page de jeu (Views/Home/Index.cshtml).
-   Scope : tout sous .kikole-board, sauf les tokens (:root, globaux et sans risque),
-   .site-nav (chrome globale de _Layout.cshtml, presente sur toutes les pages) et
-   .ui-autocomplete / .ui-datepicker (widgets jQuery UI attaches en enfant direct
-   de <body>, impossible a scoper autrement). Voir
-   C:\Users\LPI\.claude\plans\linear-pondering-wind.md. */
+/* Habillage du site (toutes les vues sous .kikole-board, cf. Views/Shared/_Layout.cshtml
+   qui enveloppe chaque page) + la navigation globale (.site-nav, presente sur toutes les
+   pages, en dehors de .kikole-board) + le fond de page (body/footer, hors .kikole-board).
+   Direction visuelle (2026-09-26, validee sur maquette) : mode sombre par defaut, contraste
+   eleve, une seule couleur d'accent (vert) reservee a l'action/la reussite, le rouge pour
+   le cout/l'erreur, l'or pour le score et les recompenses. Voir
+   C:\Users\LPI\.claude\plans\linear-pondering-wind.md pour le detail du scope des fichiers. */
 
 :root {
-  --paper: #efe9d8;
-  --paper-raised: #faf6e9;
-  --paper-line: #e2dac2;
-  --ink: #1c2b22;
-  --ink-soft: #4a5a4f;
-  --pitch: #1f5e3e;
-  --pitch-strong: #17462f;
-  --pitch-soft: #dbe6da;
-  --stamp: #a6332b;
-  --stamp-soft: #f3e0dc;
-  --gold: #ad8a3e;
-  --shadow: rgba(28, 43, 34, 0.16);
+  --bg: #0a0d12;
+  --surface: #141922;
+  --surface-2: #1b212c;
+  --surface-3: #232a37;
+  --border: #2a3140;
+  --border-soft: #1e2530;
+  --border-strong: #3f4a5f;
+  --text: #f2f4f8;
+  --text-muted: #a6afc1;
+  --text-faint: #6b7386;
+  --accent: #35d07f;
+  --accent-ink: #06210f;
+  --accent-soft: rgba(53, 208, 127, 0.14);
+  --warn: #ff7a6b;
+  --warn-soft: rgba(255, 122, 107, 0.13);
+  --gold: #e8b44c;
+  --gold-soft: rgba(232, 180, 76, 0.14);
+  --shadow: rgba(0, 0, 0, 0.45);
+}
 
-  /* tableau d'affichage : toujours sombre, comme un vrai ecran de stade */
-  --board-bg: #12201a;
-  --board-fg: #f4eeda;
-  --board-accent: #dfb04c;
+/* ---------------------------------------------------------- fond de page
+   Hors .kikole-board : le footer (copyright) et le <hr/> de _Layout.cshtml sont des
+   freres de RenderBody(), pas des enfants de .kikole-board. */
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.body-content > hr {
+  border: none;
+  border-top: 1px solid var(--border-soft);
+  margin: 28px 0 14px;
+}
+
+.body-content footer {
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
 }
 
 /* ---------------------------------------------------------- navigation globale
@@ -33,28 +56,29 @@ body { padding-top: 0; }
 
 .site-nav {
   font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
-  background: var(--board-bg);
-  color: var(--board-fg);
+  background: var(--surface-2);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .site-nav * { box-sizing: border-box; }
 
 .site-nav-inner {
-  max-width: 700px;
+  max-width: 836px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 0 18px;
-  height: 52px;
+  height: 64px;
 }
 
 .site-nav-brand {
   font-family: "Bebas Neue", sans-serif;
-  font-size: 22px;
+  font-size: 26px;
   letter-spacing: 0.02em;
-  color: var(--board-fg);
+  color: var(--accent);
   text-decoration: none;
   flex: none;
 }
@@ -64,7 +88,7 @@ body { padding-top: 0; }
   align-items: center;
   gap: 4px;
   padding-left: 12px;
-  border-left: 1px solid color-mix(in srgb, var(--board-fg) 20%, transparent);
+  border-left: 1px solid var(--border);
 }
 
 .site-nav-right {
@@ -80,15 +104,15 @@ body { padding-top: 0; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   background: transparent;
   border: none;
-  color: var(--board-fg);
+  color: var(--text-muted);
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 /* pastille "message a lire" (icones Contact et Actions admin, cf. _Layout.cshtml) */
@@ -99,8 +123,8 @@ body { padding-top: 0; }
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--stamp);
-  border: 1.5px solid var(--board-bg);
+  background: var(--warn);
+  border: 1.5px solid var(--surface-2);
 }
 
 .site-nav-badge-inline {
@@ -109,36 +133,38 @@ body { padding-top: 0; }
   height: 7px;
   margin-left: 6px;
   border-radius: 50%;
-  background: var(--stamp);
+  background: var(--warn);
 }
 
 .site-nav-icon svg,
 .site-nav-icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 23px;
+  height: 23px;
 }
 
 .site-nav-icon:hover,
 .site-nav-icon-btn:hover {
-  background: color-mix(in srgb, var(--board-fg) 12%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .site-nav-logout-form { display: contents; }
 
 .site-nav-logout:hover {
-  background: color-mix(in srgb, var(--stamp) 55%, transparent);
+  background: var(--warn-soft);
+  color: var(--warn);
 }
 
 .site-nav-flag img {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 2px;
 }
 
 .site-nav-user {
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--board-fg) 80%, transparent);
+  color: var(--accent);
 }
 
 .site-nav-login {
@@ -146,15 +172,15 @@ body { padding-top: 0; }
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--board-accent);
+  color: var(--accent);
   text-decoration: none;
-  border: 1px solid color-mix(in srgb, var(--board-accent) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
   border-radius: 999px;
   padding: 6px 12px;
 }
 
 .site-nav-login:hover {
-  background: color-mix(in srgb, var(--board-accent) 15%, transparent);
+  background: var(--accent-soft);
 }
 
 .site-nav-burger {
@@ -168,18 +194,18 @@ body { padding-top: 0; }
   gap: 4px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   margin-left: auto;
 }
 
-.site-nav-burger:hover { background: color-mix(in srgb, var(--board-fg) 12%, transparent); }
+.site-nav-burger:hover { background: var(--surface-3); }
 
 .site-nav-burger span {
   display: block;
   width: 17px;
   height: 2px;
-  background: var(--board-fg);
+  background: var(--text);
   border-radius: 2px;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -192,7 +218,8 @@ body { padding-top: 0; }
   display: none;
   max-height: 0;
   overflow: hidden;
-  background: var(--paper-raised);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
   transition: max-height 0.25s ease;
 }
 
@@ -204,19 +231,19 @@ body { padding-top: 0; }
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 2px;
-  border-bottom: 1px solid var(--paper-line);
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--border-soft);
   font-size: 13px;
-  color: var(--ink);
+  color: var(--text);
   text-decoration: none;
 }
 
-.site-nav-drawer-row:hover { color: var(--pitch-strong); }
+.site-nav-drawer-row:hover { color: var(--accent); }
 
 .site-nav-drawer-row svg {
   width: 17px;
   height: 17px;
-  color: var(--pitch);
+  color: var(--accent);
   flex: none;
 }
 
@@ -227,10 +254,10 @@ body { padding-top: 0; }
   padding-top: 10px;
 }
 
-.site-nav-drawer-foot .site-nav-user { color: var(--ink-soft); }
-.site-nav-drawer-foot .site-nav-icon-btn { color: var(--pitch-strong); }
-.site-nav-drawer-foot .site-nav-icon-btn:hover { background: var(--pitch-soft); }
-.site-nav-drawer-foot .site-nav-logout:hover { background: var(--stamp-soft); color: var(--stamp); }
+.site-nav-drawer-foot .site-nav-user { color: var(--accent); }
+.site-nav-drawer-foot .site-nav-icon-btn { color: var(--text); }
+.site-nav-drawer-foot .site-nav-icon-btn:hover { background: var(--surface-3); }
+.site-nav-drawer-foot .site-nav-logout:hover { background: var(--warn-soft); color: var(--warn); }
 .site-nav-drawer-foot-actions { display: flex; align-items: center; gap: 4px; }
 
 @media (max-width: 680px) {
@@ -242,8 +269,8 @@ body { padding-top: 0; }
 
 .kikole-board {
   font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
-  color: var(--ink);
-  max-width: 640px;
+  color: var(--text);
+  max-width: 800px;
   margin: 20px auto 0;
 }
 
@@ -263,7 +290,7 @@ body { padding-top: 0; }
 .kikole-board .day-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 12px;
 }
 
@@ -271,21 +298,23 @@ body { padding-top: 0; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   flex: none;
-  border-radius: 5px;
-  color: var(--pitch-strong);
-  transition: background 0.15s ease;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-muted);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .kikole-board .day-nav-arrow svg { width: 16px; height: 16px; }
 
-.kikole-board a.day-nav-arrow:hover { background: var(--pitch-soft); }
+.kikole-board a.day-nav-arrow:hover { color: var(--text); border-color: var(--text-faint); }
 
 .kikole-board .day-nav-arrow.disabled {
-  color: var(--ink-soft);
-  opacity: 0.35;
+  color: var(--text-faint);
+  opacity: 0.45;
   cursor: default;
 }
 
@@ -293,27 +322,28 @@ body { padding-top: 0; }
 
 .kikole-board .date-field {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-align: center;
-  border: 1px solid var(--paper-line);
-  border-radius: 5px;
-  padding: 5px 6px;
-  background: var(--paper-raised);
-  color: var(--pitch-strong);
-  width: 110px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  width: 116px;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: border-color 0.15s ease;
 }
 
-.kikole-board .date-field:hover { border-color: var(--pitch-soft); }
+.kikole-board .date-field:hover { border-color: var(--text-faint); }
 
 .kikole-board .date-field:focus-visible {
   outline: none;
-  border-color: var(--pitch);
+  border-color: var(--accent);
 }
 
-.kikole-board .day-nav .date-field { width: 96px; }
+.kikole-board .day-nav .date-field { width: 104px; }
 
 .kikole-board .masthead-score {
   display: flex;
@@ -334,7 +364,7 @@ body { padding-top: 0; }
   width: 20px;
   height: 20px;
   flex: none;
-  color: var(--pitch);
+  color: var(--accent);
 }
 
 .kikole-board .streak-lines {
@@ -351,29 +381,33 @@ body { padding-top: 0; }
 
 .kikole-board .streak-line.current {
   font-weight: 700;
-  color: var(--ink);
+  color: var(--text);
 }
 
 .kikole-board .streak-line.best {
-  color: var(--ink-soft);
+  color: var(--text-faint);
 }
 
 .kikole-board .scoreboard {
-  background: var(--board-bg);
-  color: var(--board-fg);
-  border: 1px solid color-mix(in srgb, var(--board-fg) 15%, transparent);
-  border-radius: 6px;
-  padding: 8px 16px 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 18px 7px;
   text-align: right;
   box-shadow: 0 6px 14px var(--shadow);
   flex: none;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 2px;
 }
 
 .kikole-board .scoreboard .label {
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.75;
+  color: var(--text-faint);
 }
 
 .kikole-board .scoreboard .value {
@@ -381,18 +415,18 @@ body { padding-top: 0; }
   font-size: 30px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--board-accent);
+  color: var(--gold);
 }
 
 /* joueur du jour trouve : le cadran devient la seule source du score (la ligne
    "score final" a disparu, redondante) - surbrillance verte plutot qu'un badge
    separe, tant qu'on est sur cet ecran de victoire */
 .kikole-board .scoreboard.success {
-  border-color: var(--pitch);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pitch) 40%, transparent), 0 6px 14px var(--shadow);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 6px 14px var(--shadow);
 }
 
-.kikole-board .scoreboard.success .value { color: #7fd99a; }
+.kikole-board .scoreboard.success .value { color: var(--accent); }
 
 /* jour consulte different d'aujourd'hui : le cadran reste exact (le score affiche est
    deja celui du jour consulte, cf. CurrentDay), mais attenue pour signaler que ce n'est
@@ -400,28 +434,28 @@ body { padding-top: 0; }
    garde une trace discrete (teinte verte, sans le halo de .success) plutot que de
    perdre completement l'info "ce jour-la a ete trouve" en s'eloignant d'aujourd'hui. */
 .kikole-board .scoreboard.other-day {
-  border-color: color-mix(in srgb, var(--board-fg) 15%, transparent);
+  border-color: var(--border);
   box-shadow: none;
 }
 
 .kikole-board .scoreboard.other-day .label,
 .kikole-board .scoreboard.other-day .value { opacity: 0.55; }
 
-.kikole-board .scoreboard.other-day .value { color: var(--board-fg); }
+.kikole-board .scoreboard.other-day .value { color: var(--text); }
 
-.kikole-board .scoreboard.other-day.found .value { color: #7fd99a; }
+.kikole-board .scoreboard.other-day.found .value { color: var(--accent); }
 
 /* ---------------------------------------------------------- formulaires generiques
    (page Compte, presentation/regles) : reprennent .banner/.blank/.actions ci-dessous
    dans un habillage plus simple qu'un dossier de joueur. */
 
 .kikole-board .form-card {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: 6px;
-  box-shadow: 0 12px 28px var(--shadow);
-  padding: 22px 26px;
-  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px var(--shadow);
+  padding: 16px 18px;
+  margin-bottom: 16px;
 }
 
 .kikole-board .form-card h3 {
@@ -429,7 +463,7 @@ body { padding-top: 0; }
   font-size: 20px;
   font-weight: normal;
   letter-spacing: 0.02em;
-  color: var(--pitch-strong);
+  color: var(--text);
   margin: 22px 0 12px;
 }
 
@@ -438,7 +472,7 @@ body { padding-top: 0; }
 .kikole-board .form-card p {
   font-size: 13px;
   line-height: 1.6;
-  color: var(--ink);
+  color: var(--text-muted);
   margin: 0 0 12px;
 }
 
@@ -449,10 +483,10 @@ body { padding-top: 0; }
   padding-left: 20px;
   font-size: 13px;
   line-height: 1.75;
-  color: var(--ink);
+  color: var(--text-muted);
 }
 
-.kikole-board .form-card a { color: var(--pitch-strong); }
+.kikole-board .form-card a { color: var(--accent); }
 
 /* sections repliables (Statistics/Stats.cshtml) : le JS (site.js, deja en place) ne
    gere que l'ouverture/fermeture (classe .active + display block/none), tout l'habillage
@@ -469,20 +503,20 @@ body { padding-top: 0; }
   font-family: "Bebas Neue", sans-serif;
   font-size: 20px;
   letter-spacing: 0.02em;
-  color: var(--pitch-strong);
+  color: var(--text);
   cursor: pointer;
   text-align: left;
 }
 
 .kikole-board .collapsible:hover,
-.kikole-board .collapsible.active { background: transparent; }
+.kikole-board .collapsible.active { background: transparent; color: var(--accent); }
 
 .kikole-board .collapsible::after {
   content: "+";
   font-family: "IBM Plex Mono", monospace;
   font-size: 18px;
   font-weight: 600;
-  color: var(--pitch);
+  color: var(--accent);
 }
 
 .kikole-board .collapsible.active::after { content: "\2212"; }
@@ -491,13 +525,13 @@ body { padding-top: 0; }
 
 .kikole-board .chart-empty {
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   font-style: italic;
   padding: 4px 0 12px;
 }
 
-.kikole-board .redtext { color: var(--stamp); }
-.kikole-board .greentext { color: var(--pitch); }
+.kikole-board .redtext { color: var(--warn); }
+.kikole-board .greentext { color: var(--accent); }
 
 /* ligne "vous" dans un tableau (classement, podiums) : la cellule utilisateur
    passe du rouge/or/argent/bronze habituel (lien generique, ou couleur de
@@ -506,14 +540,14 @@ body { padding-top: 0; }
    sans conflit. Specificite (type + classe) plutot que !important : gagne face
    a .redtext/.medal-gold/-silver/-bronze (deux classes) sans devoir lister
    chaque combinaison. */
-.kikole-board td.you { color: var(--pitch-strong); font-weight: 700; }
+.kikole-board td.you { color: var(--accent); font-weight: 700; }
 
 .kikole-board .you-tag {
   margin-left: 5px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--pitch);
+  color: var(--accent);
 }
 
 .kikole-board .form-field { margin-bottom: 14px; }
@@ -532,7 +566,7 @@ body { padding-top: 0; }
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   margin-bottom: 5px;
 }
 
@@ -541,12 +575,12 @@ body { padding-top: 0; }
 .kikole-board .form-static {
   font-size: 13px;
   font-weight: 600;
-  color: var(--pitch-strong);
+  color: var(--text);
 }
 
 .kikole-board .form-hint {
   font-size: 11.5px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   line-height: 1.5;
   margin: -6px 0 14px;
 }
@@ -555,21 +589,21 @@ body { padding-top: 0; }
    <select> plutot qu'un champ texte classique (Admin/Index.cshtml). */
 .kikole-board .form-hint.spaced { margin-top: 6px; }
 
-.kikole-board .form-hint a { color: var(--pitch-strong); }
+.kikole-board .form-hint a { color: var(--accent); }
 
 .kikole-board .auth-notice p {
   font-size: 13px;
   line-height: 1.6;
-  color: var(--ink);
+  color: var(--text-muted);
   margin: 0 0 10px;
 }
 
 .kikole-board .auth-notice p:last-child { margin-bottom: 0; }
-.kikole-board .auth-notice a { color: var(--pitch-strong); font-weight: 600; }
+.kikole-board .auth-notice a { color: var(--accent); font-weight: 600; }
 
 .kikole-board hr {
   border: none;
-  border-top: 1px solid var(--paper-line);
+  border-top: 1px solid var(--border-soft);
   margin: 28px 0;
 }
 
@@ -578,7 +612,7 @@ body { padding-top: 0; }
 .kikole-board .banner {
   font-size: 13px;
   padding: 11px 16px;
-  border-radius: 6px;
+  border-radius: 10px;
   margin-bottom: 14px;
   border: 1px solid transparent;
   border-left-width: 4px;
@@ -586,24 +620,24 @@ body { padding-top: 0; }
 }
 
 .kikole-board .banner.success {
-  background: var(--pitch-soft);
-  border-color: color-mix(in srgb, var(--pitch) 35%, transparent);
-  border-left-color: var(--pitch);
-  color: var(--pitch-strong);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  border-left-color: var(--accent);
+  color: var(--text);
 }
 
 .kikole-board .banner.error {
-  background: var(--stamp-soft);
-  border-color: color-mix(in srgb, var(--stamp) 35%, transparent);
-  border-left-color: var(--stamp);
-  color: var(--stamp);
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 35%, transparent);
+  border-left-color: var(--warn);
+  color: var(--text);
 }
 
 .kikole-board .banner.info {
-  background: var(--paper-raised);
-  border-color: var(--paper-line);
-  border-left-color: var(--pitch);
-  color: var(--ink);
+  background: var(--surface-2);
+  border-color: var(--border);
+  border-left-color: var(--accent);
+  color: var(--text-muted);
 }
 
 /* bandeau d'annonce admin (page d'accueil) : icone + libelle + replier/deplier +
@@ -623,7 +657,7 @@ body { padding-top: 0; }
   flex: none;
   width: 15px;
   height: 15px;
-  color: var(--pitch);
+  color: var(--accent);
 }
 
 .kikole-board .announcement-label {
@@ -632,7 +666,7 @@ body { padding-top: 0; }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ink-soft);
+  color: var(--text-muted);
 }
 
 .kikole-board .announcement-toggle,
@@ -643,17 +677,17 @@ body { padding-top: 0; }
   justify-content: center;
   width: 22px;
   height: 22px;
-  border-radius: 4px;
+  border-radius: 6px;
   border: none;
   background: transparent;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   cursor: pointer;
 }
 
 .kikole-board .announcement-toggle:hover,
 .kikole-board .announcement-dismiss:hover {
-  background: var(--paper-line);
-  color: var(--ink);
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .kikole-board .announcement-chevron {
@@ -678,21 +712,22 @@ body { padding-top: 0; }
 
 .kikole-board .creator-line {
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   margin: -8px 0 14px;
 }
 
 /* ---------------------------------------------------------- dossier card */
 
 .kikole-board .dossier {
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   box-shadow: 0 18px 40px var(--shadow);
 }
 
 .kikole-board .dossier-head {
-  padding: 22px 26px 18px;
-  border-bottom: 1px dashed var(--paper-line);
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .kikole-board .dossier-head h1 {
@@ -700,74 +735,92 @@ body { padding-top: 0; }
   font-weight: normal;
   font-size: 22px;
   letter-spacing: 0.02em;
-  color: var(--pitch-strong);
-  margin: 0 0 4px;
+  color: var(--text);
+  margin: 0 0 14px;
 }
+
+/* nom du joueur ("Le joueur du jour est X" / "Le joueur du ... etait X", ce dernier
+   vient du resx avec la classe .redtext) */
+.kikole-board .player-name,
+.kikole-board .dossier-head h1 .redtext { color: var(--gold); }
 
 .kikole-board .clue {
   display: flex;
-  gap: 10px;
-  align-items: baseline;
+  gap: 14px;
+  align-items: flex-start;
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
 }
 
-.kikole-board .clue + .clue { margin-top: 8px; }
+.kikole-board .clue + .clue { margin-top: 10px; }
 
 .kikole-board .clue .tag {
   flex: none;
-  width: 158px;
+  font-family: "IBM Plex Mono", monospace;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--pitch);
-  border: 1px solid var(--pitch);
-  border-radius: 3px;
-  padding: 2px 6px;
-  text-align: center;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 7px;
+  padding: 4px 8px;
+  margin-top: 1px;
 }
 
-.kikole-board .clue p { margin: 0; font-style: italic; }
+.kikole-board .clue p { margin: 0; color: var(--text); line-height: 1.5; }
 
-/* indice d'epoque heberge en image (ex. i.imgur.com/xxx.png) plutot qu'en texte :
-   .clue est align-items:baseline pour le texte, corrige ici pour une image */
-.kikole-board .clue:has(.clue-image) { align-items: flex-start; }
-
+/* indice d'epoque heberge en image (ex. i.imgur.com/xxx.png) plutot qu'en texte */
 .kikole-board .clue-image {
   display: block;
   max-width: 220px;
   max-height: 140px;
-  border: 1px solid var(--paper-line);
-  border-radius: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
 /* ---------------------------------------------------------- rows */
 
-.kikole-board .rows { padding: 6px 26px 4px; }
+.kikole-board .rows { padding: 4px 18px 2px; }
 
 .kikole-board .dossier-row {
   display: grid;
-  grid-template-columns: 128px 1fr auto;
+  grid-template-columns: 172px 1fr auto;
   align-items: start;
   gap: 14px;
-  padding: 15px 0;
-  border-bottom: 1px solid var(--paper-line);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
   margin: 0;
 }
 
 .kikole-board .dossier-row:last-child { border-bottom: none; }
 
-.kikole-board .dossier-row .field {
-  padding-top: 3px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.kikole-board .dossier-row.solved {
+  background: linear-gradient(90deg, var(--accent-soft), transparent 55%);
+  margin: 0 -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 8px;
 }
 
-.kikole-board .dossier-row .cost { padding-top: 3px; }
+.kikole-board .dossier-row .field {
+  padding-top: 13px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.kikole-board .dossier-row .cost { padding-top: 10px; }
+
+.kikole-board .dossier-row.solved .field { padding-top: 1px; }
+.kikole-board .dossier-row.solved .cost { padding-top: 1px; }
 
 .kikole-board .dossier-row .field .hint {
   display: block;
@@ -778,30 +831,43 @@ body { padding-top: 0; }
   letter-spacing: 0.01em;
   text-transform: none;
   line-height: 1.35;
-  color: var(--ink-soft);
+  color: var(--text-faint);
 }
 
-.kikole-board .dossier-row .field .hint a { color: var(--pitch-strong); }
+.kikole-board .dossier-row .field .hint a { color: var(--accent); }
 
-/* essais rates : visible qu'une categorie soit encore ouverte ou deja trouvee */
+/* essais rates : visible qu'une categorie soit encore ouverte ou deja trouvee -
+   chips arrondies, barrees, empilables (maquette "propositions fausses",
+   2026-09-26) plutot qu'une simple liste de lignes. */
 
 .kikole-board .attempts {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 7px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
-.kikole-board .dossier-row.solved .attempts { margin: 0 0 7px; }
+.kikole-board .dossier-row.solved .attempts { margin: 0 0 8px; }
 
 .kikole-board .attempt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
-  color: var(--ink-soft);
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+  border-radius: 20px;
+  padding: 5px 11px;
 }
 
+.kikole-board .attempt s { color: var(--warn); text-decoration-color: color-mix(in srgb, var(--warn) 55%, transparent); font-weight: 700; }
+
 .kikole-board .attempt .tag {
-  margin-left: 6px;
-  font-style: italic;
+  font-style: normal;
+  color: var(--text-faint);
 }
 
 /* etat trouve */
@@ -810,19 +876,32 @@ body { padding-top: 0; }
   font-family: "IBM Plex Mono", monospace;
   font-weight: 600;
   font-size: 15px;
-  color: var(--ink);
+  color: var(--text);
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 
-.kikole-board .dossier-row.solved .value svg { flex: none; color: var(--pitch); margin-top: 3px; }
+.kikole-board .dossier-row.solved .value svg,
+.kikole-board .club svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  padding: 4px;
+  box-sizing: content-box;
+  background: var(--accent);
+  border-radius: 50%;
+  color: var(--accent-ink);
+  stroke: var(--accent-ink);
+  stroke-width: 3;
+  margin-top: 0;
+}
 
 .kikole-board .dossier-row.solved .cost {
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--ink-soft) 60%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--text-faint) 60%, transparent);
 }
 
 /* champ a completer */
@@ -834,62 +913,131 @@ body { padding-top: 0; }
 
 .kikole-board .blank {
   width: 100%;
-  border: none;
-  border-bottom: 2px dashed var(--paper-line);
-  background: transparent;
-  padding: 4px 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  padding: 9px 12px;
   font-family: "IBM Plex Mono", monospace;
   font-size: 13px;
-  color: var(--ink);
+  color: var(--text);
 }
 
-.kikole-board .blank::placeholder { color: var(--ink-soft); font-style: italic; }
+/* boutons "Ok" caches (declenches en JS apres autocompletion) : sortis du flux, sinon
+   leur ligne invisible ajoute du vide sous chaque champ */
+.kikole-board .dossier-row input[type="submit"] {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+}
+
+.kikole-board .blank::placeholder { color: var(--text-faint); font-style: italic; }
 
 .kikole-board .blank:focus-visible {
-  outline: none;
-  border-bottom: 2px solid var(--pitch);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
 }
 
 .kikole-board select.blank {
-  border: 1px solid var(--paper-line);
-  border-radius: 3px;
-  padding: 5px 8px;
-  max-width: 190px;
-  background: var(--paper);
+  padding: 9px 12px;
+  max-width: 220px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a6afc1' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 32px;
 }
 
-.kikole-board input[type="checkbox"] { accent-color: var(--pitch); }
+/* liste deroulante personnalisee (cf. site.js) : le bouton et les elements du panneau
+   partagent le meme style, le <select> natif reste cache derriere */
+.kikole-board .dd { position: relative; max-width: 220px; }
+
+.kikole-board .dd-native { display: none; }
+
+.kikole-board .dd-btn {
+  display: block;
+  text-align: left;
+  cursor: pointer;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a6afc1' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.kikole-board .dd-btn.placeholder { color: var(--text-faint); font-style: italic; }
+
+.kikole-board .dd.open .dd-btn { border-color: var(--accent); }
+
+.kikole-board .dd-list {
+  display: none;
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  box-shadow: 0 14px 34px var(--shadow);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.kikole-board .dd.open .dd-list { display: block; }
+
+.kikole-board .dd-item {
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.kikole-board .dd-item.placeholder { color: var(--text-faint); font-style: italic; }
+
+.kikole-board .dd-item:hover { background: var(--surface-3); }
+
+.kikole-board .dd-item.selected { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+.kikole-board input[type="checkbox"] { accent-color: var(--accent); }
 
 .kikole-board input[type="datetime-local"] {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid var(--paper-line);
-  border-radius: 3px;
-  padding: 5px 8px;
-  background: var(--paper);
-  color: var(--pitch-strong);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 9px;
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .kikole-board textarea.blank {
-  border: 1px solid var(--paper-line);
-  border-radius: 3px;
-  padding: 8px 10px;
-  background: var(--paper);
+  border-radius: 9px;
+  padding: 10px 12px;
   min-height: 120px;
   resize: vertical;
   max-width: 100%;
 }
 
 .kikole-board .dossier-row.locked .cost {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--stamp);
-  background: var(--stamp-soft);
-  border: 1px solid color-mix(in srgb, var(--stamp) 45%, transparent);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
   border-radius: 999px;
-  padding: 3px 10px;
-  width: 76px;
+  padding: 4px 11px;
+  margin-top: 6px;
+  width: 82px;
   text-align: center;
   white-space: nowrap;
 }
@@ -900,28 +1048,26 @@ body { padding-top: 0; }
   font-size: 11px;
 }
 
-.kikole-board .small-link a { color: var(--pitch-strong); }
+.kikole-board .small-link a { color: var(--accent); }
 
 /* clubs deja trouves */
 
 .kikole-board .club-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin-bottom: 10px;
 }
 
 .kikole-board .club {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   font-family: "IBM Plex Mono", monospace;
   font-size: 14px;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--text);
 }
-
-.kikole-board .club svg { flex: none; color: var(--pitch); margin-top: 3px; }
 
 .kikole-board .club .loan {
   flex: none;
@@ -929,82 +1075,89 @@ body { padding-top: 0; }
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold);
-  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
-  border-radius: 3px;
-  padding: 1px 5px;
+  color: var(--text-faint);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 6px;
 }
 
 /* ---------------------------------------------------------- final answer */
 
 .kikole-board .final {
-  margin: 4px 26px 24px;
-  padding-top: 18px;
-  border-top: 2px solid var(--pitch);
+  margin: 14px 18px 18px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 .kikole-board .final .field {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--pitch-strong);
-  margin-bottom: 8px;
+  color: var(--accent);
+  margin-bottom: 10px;
 }
 
 .kikole-board .final-input {
   display: flex;
-  border: 1.5px solid var(--pitch);
-  border-radius: 4px;
-  overflow: hidden;
-  background: var(--paper);
-  max-width: 420px;
+  gap: 10px;
+  max-width: none;
+  background: transparent;
+  border: none;
+  overflow: visible;
 }
 
 .kikole-board .final-input input {
   flex: 1;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
   padding: 12px 14px;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 14px;
-  color: var(--ink);
+  font-size: 14.5px;
+  color: var(--text);
   min-width: 0;
 }
 
-.kikole-board .final-input input::placeholder { color: var(--ink-soft); }
+.kikole-board .final-input input::placeholder { color: var(--text-faint); }
 
 .kikole-board .final-input input:focus-visible {
-  outline: 2px solid var(--pitch);
-  outline-offset: -2px;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
 }
 
 .kikole-board .final-input button {
   flex: none;
   border: none;
-  background: var(--pitch);
-  color: var(--paper-raised);
-  font-family: "IBM Plex Mono", monospace;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0 20px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: "Manrope", "IBM Plex Mono", monospace;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  padding: 0 22px;
   cursor: pointer;
 }
 
-.kikole-board .final-input button:hover { background: var(--pitch-strong); }
+.kikole-board .final-input button:hover { filter: brightness(1.08); }
 .kikole-board .final-input button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-.kikole-board .final .attempts { margin-top: 9px; }
+.kikole-board .final .attempts { margin-top: 12px; }
 
 .kikole-board .final .caption {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
 }
 
-.kikole-board .final .caption strong { color: var(--stamp); font-weight: 600; }
+.kikole-board .final .caption strong { color: var(--warn); font-weight: 600; }
 
 /* ---------------------------------------------------------- actions */
 
@@ -1019,41 +1172,43 @@ body { padding-top: 0; }
 .kikole-board .actions a,
 .kikole-board .confirm-modal-actions button {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--paper-raised);
-  border: 1px solid var(--ink);
-  border-radius: 3px;
-  padding: 9px 14px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 11px 16px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
-  transition: transform 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .kikole-board .confirm-modal-actions button.secondary {
-  color: var(--ink-soft);
+  color: var(--text-muted);
   background: transparent;
-  border-color: var(--paper-line);
+  border-color: var(--border);
 }
 
-.kikole-board .actions button .cost { color: var(--stamp); margin-left: 6px; }
+.kikole-board .actions button .cost { color: var(--warn); font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 11.5px; }
 
 .kikole-board .actions button:hover,
-.kikole-board .actions a:hover { transform: translateY(-1px); }
+.kikole-board .actions a:hover { background: var(--surface-2); border-color: var(--text-faint); }
 .kikole-board .actions button:focus-visible,
-.kikole-board .actions a:focus-visible { outline: 2px solid var(--pitch); outline-offset: 2px; }
+.kikole-board .actions a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .kikole-board .actions button:disabled {
   cursor: default;
   opacity: 0.5;
-  transform: none;
 }
 
-.kikole-board .actions button:disabled .cost { color: var(--ink-soft); }
+.kikole-board .actions button:disabled:hover { background: var(--surface); border-color: var(--border); }
+.kikole-board .actions button:disabled .cost { color: var(--text-faint); }
 
 /* modale de confirmation (remplace confirm() natif du navigateur, cf. bouton "Give
    up") : cachee par defaut, .open l'affiche - meme convention que .site-nav-drawer.open */
@@ -1061,7 +1216,7 @@ body { padding-top: 0; }
   display: none;
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  background: rgba(5, 7, 10, 0.7);
   align-items: center;
   justify-content: center;
   padding: 20px;
@@ -1071,18 +1226,18 @@ body { padding-top: 0; }
 .kikole-board .confirm-modal.open { display: flex; }
 
 .kikole-board .confirm-modal-box {
-  background: var(--paper);
-  border: 1px solid var(--ink);
-  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   padding: 22px 24px;
   max-width: 320px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 .kikole-board .confirm-modal-box p {
   margin: 0 0 18px;
   font-size: 14px;
-  color: var(--ink);
+  color: var(--text);
 }
 
 .kikole-board .confirm-modal-actions {
@@ -1101,7 +1256,7 @@ body { padding-top: 0; }
   display: none;
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--ink) 60%, transparent);
+  background: rgba(5, 7, 10, 0.75);
   align-items: center;
   justify-content: center;
   padding: 20px;
@@ -1122,15 +1277,15 @@ body { padding-top: 0; }
 .kikole-board .win-modal-box {
   position: relative;
   z-index: 1;
-  background: var(--paper-raised);
+  background: var(--surface-2);
   border: 2px solid var(--gold);
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 26px 28px 22px;
-  max-width: 420px;
+  max-width: 560px;
   width: 100%;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
   text-align: center;
   cursor: default;
 }
@@ -1142,7 +1297,16 @@ body { padding-top: 0; }
   margin: 4px 0 6px;
 }
 
-.kikole-board .win-modal-box .badges-grid { padding: 0; margin-top: 14px; }
+.kikole-board .win-modal-box .badges-grid {
+  padding: 0;
+  margin-top: 14px;
+  grid-template-columns: repeat(2, 1fr);
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .kikole-board .win-modal-box .badges-grid { grid-template-columns: 1fr; }
+}
 
 .kikole-board .win-modal-hint {
   margin: 16px 0 0;
@@ -1150,7 +1314,7 @@ body { padding-top: 0; }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ink-soft);
+  color: var(--text-faint);
 }
 
 /* ---------------------------------------------------------- discussion
@@ -1167,22 +1331,22 @@ body { padding-top: 0; }
 
 .kikole-board .discussion-empty {
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   font-style: italic;
 }
 
 .kikole-board .discussion-message {
   max-width: 70%;
   padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--paper-line);
-  background: var(--paper-raised);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
 }
 
 .kikole-board .discussion-message.self {
   align-self: flex-end;
-  background: var(--pitch-soft);
-  border-color: color-mix(in srgb, var(--pitch) 35%, transparent);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .kikole-board .discussion-message-meta {
@@ -1193,27 +1357,27 @@ body { padding-top: 0; }
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   margin-bottom: 4px;
 }
 
 .kikole-board .discussion-message p {
   margin: 0;
   font-size: 13px;
-  color: var(--ink);
+  color: var(--text);
   white-space: pre-wrap;
 }
 
-/* puce "non lu" (Admin/Discussions) : meme forme que .same-day-tag, palette --stamp
-   (rouge, deja la couleur "a traiter" du projet) plutot que --pitch (vert, deja pris
+/* puce "non lu" (Admin/Discussions) : meme forme que .same-day-tag, palette --warn
+   (deja la couleur "a traiter" du projet) plutot que --accent (vert, deja pris
    par .same-day-tag pour un tout autre sens). */
 .kikole-board .unread-tag {
   display: inline-block;
   margin-left: 6px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--stamp-soft);
-  color: var(--stamp);
+  background: var(--warn-soft);
+  color: var(--warn);
   font-weight: 700;
   font-size: 10px;
   text-transform: uppercase;
@@ -1223,26 +1387,26 @@ body { padding-top: 0; }
 /* ---------------------------------------------------------- badges */
 
 .kikole-board .badges-label {
-  padding: 0 26px 4px;
+  padding: 0 18px 4px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--text-faint);
 }
 
 .kikole-board .badges-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
-  padding: 0 26px 20px;
+  padding: 0 18px 16px;
 }
 
 .kikole-board .badge-card {
   position: relative;
-  background: var(--paper);
-  border: 1px solid var(--paper-line);
-  border-radius: 6px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
   padding: 12px 14px 10px;
   display: flex;
   flex-direction: column;
@@ -1250,8 +1414,8 @@ body { padding-top: 0; }
 }
 
 .kikole-board .badge-card.secret {
-  background: linear-gradient(165deg, color-mix(in srgb, var(--gold) 16%, var(--paper)), var(--paper) 70%);
-  border-color: color-mix(in srgb, var(--gold) 55%, var(--paper-line));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--gold) 22%, var(--surface-3)), var(--surface-3) 70%);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border-strong));
 }
 
 .kikole-board .badge-head {
@@ -1264,7 +1428,7 @@ body { padding-top: 0; }
   flex: none;
   width: 26px;
   height: 26px;
-  color: var(--pitch);
+  color: var(--accent);
 }
 
 .kikole-board .badge-card.secret .badge-icon { color: var(--gold); }
@@ -1274,11 +1438,11 @@ body { padding-top: 0; }
   font-size: 16px;
   line-height: 1.15;
   letter-spacing: 0.01em;
-  color: var(--pitch-strong);
+  color: var(--text);
   padding-top: 2px;
 }
 
-.kikole-board .badge-card.secret .badge-name { color: color-mix(in srgb, var(--gold) 65%, var(--ink)); }
+.kikole-board .badge-card.secret .badge-name { color: color-mix(in srgb, var(--gold) 70%, var(--text)); }
 
 .kikole-board .badge-seal {
   margin-left: auto;
@@ -1289,7 +1453,7 @@ body { padding-top: 0; }
   text-transform: uppercase;
   color: var(--gold);
   border: 1px solid var(--gold);
-  border-radius: 3px;
+  border-radius: 5px;
   padding: 2px 5px;
   white-space: nowrap;
 }
@@ -1299,12 +1463,12 @@ body { padding-top: 0; }
 .kikole-board .badge-desc summary {
   cursor: pointer;
   list-style: none;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   font-size: 11px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border-bottom: 1px dashed var(--paper-line);
+  border-bottom: 1px dashed var(--border);
   padding-bottom: 1px;
 }
 
@@ -1318,20 +1482,20 @@ body { padding-top: 0; }
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  border: 1px solid var(--ink-soft);
+  border: 1px solid var(--text-muted);
   font-size: 10px;
   line-height: 1;
 }
 
 .kikole-board .badge-desc[open] summary::before { content: "\2212"; }
 
-.kikole-board .badge-desc summary:hover { color: var(--pitch-strong); }
-.kikole-board .badge-desc summary:hover::before { border-color: var(--pitch-strong); color: var(--pitch-strong); }
+.kikole-board .badge-desc summary:hover { color: var(--accent); }
+.kikole-board .badge-desc summary:hover::before { border-color: var(--accent); color: var(--accent); }
 
 .kikole-board .badge-desc p {
   margin: 6px 0 0;
   font-style: italic;
-  color: var(--ink);
+  color: var(--text-muted);
   line-height: 1.45;
 }
 
@@ -1350,9 +1514,9 @@ body { padding-top: 0; }
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--pitch);
-  border: 1px solid var(--pitch);
-  border-radius: 3px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
   padding: 2px 6px;
   white-space: nowrap;
 }
@@ -1364,21 +1528,21 @@ body { padding-top: 0; }
 
 .kikole-board .badge-holders {
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   text-align: right;
 }
 
-.kikole-board .badge-holders b { color: var(--stamp); font-weight: 600; }
+.kikole-board .badge-holders b { color: var(--warn); font-weight: 600; }
 
 .kikole-board .badge-holders.solo {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-weight: 600;
-  color: color-mix(in srgb, var(--gold) 65%, var(--ink));
-  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+  color: color-mix(in srgb, var(--gold) 70%, var(--text));
+  background: var(--gold-soft);
   border: 1px solid var(--gold);
-  border-radius: 3px;
+  border-radius: 5px;
   padding: 2px 6px;
 }
 
@@ -1389,8 +1553,17 @@ body { padding-top: 0; }
 }
 
 @media (max-width: 480px) {
-  .kikole-board .dossier-row { grid-template-columns: 96px 1fr; }
-  .kikole-board .dossier-row .cost { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+  .kikole-board .dossier-row { grid-template-columns: 1fr; row-gap: 10px; }
+  .kikole-board .dossier-row .cost { justify-self: start; }
+  .kikole-board .dossier-row.solved { margin: 0 -12px; padding-left: 12px; padding-right: 12px; }
+  .kikole-board .actions { flex-direction: column; }
+  .kikole-board .actions button,
+  .kikole-board .actions a { width: 100%; }
+  .kikole-board .final-input { flex-direction: column; }
+  .kikole-board .final-input button { padding: 13px; }
+  .kikole-board .dossier-head,
+  .kikole-board .rows { padding-left: 18px; padding-right: 18px; }
+  .kikole-board .final { margin-left: 18px; margin-right: 18px; }
 }
 
 /* ---------------------------------------------------------- tableaux de donnees
@@ -1406,7 +1579,7 @@ body { padding-top: 0; }
   border-collapse: collapse;
   font-family: "IBM Plex Mono", monospace;
   font-size: 12.5px;
-  color: var(--ink);
+  color: var(--text);
 }
 
 .kikole-board thead th {
@@ -1414,8 +1587,8 @@ body { padding-top: 0; }
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-soft);
-  border-bottom: 2px solid var(--pitch);
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--accent);
   padding: 8px 10px;
   white-space: nowrap;
   background: transparent;
@@ -1423,20 +1596,20 @@ body { padding-top: 0; }
 
 .kikole-board tbody td {
   padding: 7px 10px;
-  border-bottom: 1px solid var(--paper-line);
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .kikole-board tbody tr:last-child td { border-bottom: none; }
 
-.kikole-board .even td { background: var(--paper-raised); }
-.kikole-board .odd td { background: var(--paper); }
+.kikole-board .even td { background: var(--surface-2); }
+.kikole-board .odd td { background: var(--surface); }
 
 .kikole-board .creator td {
-  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
+  background: var(--gold-soft);
   font-weight: 600;
 }
 
-.kikole-board .tabDataBold { font-weight: 700; color: var(--pitch-strong); }
+.kikole-board .tabDataBold { font-weight: 700; color: var(--text); }
 .kikole-board .tabDataHeadBg { background: transparent; }
 
 /* puce "le jour meme" (Leaderboard/User.cshtml, colonnes Tente ?/Trouve ?) : teinte de
@@ -1446,26 +1619,26 @@ body { padding-top: 0; }
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--pitch-soft);
-  color: var(--pitch-strong);
+  background: var(--accent-soft);
+  color: var(--accent);
   font-weight: 700;
 }
 
-.kikole-board .fillCorrect { background: var(--pitch-soft); }
-.kikole-board .fillIncorrect { background: var(--stamp-soft); }
+.kikole-board .fillCorrect { background: var(--accent-soft); }
+.kikole-board .fillIncorrect { background: var(--warn-soft); }
 
-.kikole-board .fill1 { background: color-mix(in srgb, var(--pitch) 18%, var(--paper)); }
-.kikole-board .fill2 { background: color-mix(in srgb, var(--gold) 22%, var(--paper)); }
-.kikole-board .fill3 { background: color-mix(in srgb, var(--stamp) 14%, var(--paper)); }
-.kikole-board .fill4 { background: color-mix(in srgb, var(--pitch-strong) 16%, var(--paper)); }
-.kikole-board .fill5 { background: color-mix(in srgb, #4a6fa5 22%, var(--paper)); }
-.kikole-board .fill6 { background: color-mix(in srgb, #8a6fb0 20%, var(--paper)); }
-.kikole-board .fill7 { background: color-mix(in srgb, #b0784a 20%, var(--paper)); }
-.kikole-board .fill8 { background: color-mix(in srgb, var(--ink-soft) 16%, var(--paper)); }
+.kikole-board .fill1 { background: color-mix(in srgb, var(--accent) 20%, var(--surface)); }
+.kikole-board .fill2 { background: color-mix(in srgb, var(--gold) 24%, var(--surface)); }
+.kikole-board .fill3 { background: color-mix(in srgb, var(--warn) 16%, var(--surface)); }
+.kikole-board .fill4 { background: color-mix(in srgb, var(--accent) 32%, var(--surface)); }
+.kikole-board .fill5 { background: color-mix(in srgb, #4a6fa5 30%, var(--surface)); }
+.kikole-board .fill6 { background: color-mix(in srgb, #8a6fb0 28%, var(--surface)); }
+.kikole-board .fill7 { background: color-mix(in srgb, #b0784a 28%, var(--surface)); }
+.kikole-board .fill8 { background: color-mix(in srgb, var(--text-faint) 22%, var(--surface)); }
 
 .kikole-board .table-caption {
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--text-faint);
   margin: -4px 0 12px;
 }
 
@@ -1476,25 +1649,26 @@ body { padding-top: 0; }
 }
 
 .kikole-board .medal-gold { color: var(--gold); font-weight: 700; }
-.kikole-board .medal-silver { color: #8a8f92; font-weight: 700; }
-.kikole-board .medal-bronze { color: #a8703f; font-weight: 700; }
+.kikole-board .medal-silver { color: #9aa4b0; font-weight: 700; }
+.kikole-board .medal-bronze { color: #c9884f; font-weight: 700; }
 
 .kikole-board .profile-name {
   font-family: "Bebas Neue", sans-serif;
   font-weight: normal;
   font-size: 24px;
   letter-spacing: 0.02em;
-  color: var(--stamp);
+  color: var(--text);
   margin: 0 0 14px;
 }
 
 .kikole-board .badge-card.missing {
   background: transparent;
   border-style: dashed;
+  border-color: var(--border-strong);
 }
 
-.kikole-board .badge-card.missing .badge-icon { color: var(--ink-soft); opacity: 0.5; }
-.kikole-board .badge-card.missing .badge-name { color: var(--ink-soft); }
+.kikole-board .badge-card.missing .badge-icon { color: var(--text-faint); opacity: 0.6; }
+.kikole-board .badge-card.missing .badge-name { color: var(--text-faint); }
 
 /* ---------------------------------------------------------- autocompletion jQuery UI
    Le widget s'attache en enfant direct de <body>, hors de .kikole-board : override
@@ -1503,22 +1677,22 @@ body { padding-top: 0; }
 .ui-autocomplete {
   font-family: "IBM Plex Mono", monospace;
   font-size: 13px;
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: 4px;
-  box-shadow: 0 10px 24px var(--shadow);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 14px 34px var(--shadow);
   padding: 4px;
 }
 
 .ui-autocomplete .ui-menu-item-wrapper {
   padding: 6px 10px;
-  border-radius: 3px;
-  color: var(--ink);
+  border-radius: 6px;
+  color: var(--text);
 }
 
 .ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
-  background: var(--pitch);
-  color: var(--paper-raised);
+  background: var(--accent);
+  color: var(--accent-ink);
   border: none;
   margin: 0;
 }
@@ -1530,24 +1704,24 @@ body { padding-top: 0; }
 .ui-datepicker {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
-  background: var(--paper-raised);
-  border: 1px solid var(--paper-line);
-  border-radius: 4px;
-  box-shadow: 0 10px 24px var(--shadow);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 14px 34px var(--shadow);
   padding: 8px;
   width: 240px;
 }
 
 .ui-datepicker .ui-datepicker-header {
-  background: var(--pitch);
-  color: var(--paper-raised);
+  background: var(--accent);
+  color: var(--accent-ink);
   border: none;
-  border-radius: 3px;
+  border-radius: 7px;
   padding: 4px 0;
 }
 
 .ui-datepicker .ui-datepicker-title {
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.03em;
 }
 
@@ -1559,7 +1733,7 @@ body { padding-top: 0; }
 
 .ui-datepicker .ui-datepicker-prev .ui-icon,
 .ui-datepicker .ui-datepicker-next .ui-icon {
-  filter: invert(1);
+  filter: invert(1) brightness(0.2);
 }
 
 .ui-datepicker .ui-datepicker-prev:hover,
@@ -1572,19 +1746,25 @@ body { padding-top: 0; }
 .ui-datepicker select.ui-datepicker-month,
 .ui-datepicker select.ui-datepicker-year {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 11px;
-  background: var(--paper-raised);
-  color: var(--pitch-strong);
-  border: 1px solid color-mix(in srgb, var(--paper-raised) 60%, transparent);
-  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 6px;
+  height: auto;
 }
+
+.ui-datepicker .ui-datepicker-title select.ui-datepicker-month { width: 52%; margin-right: 2%; }
+.ui-datepicker .ui-datepicker-title select.ui-datepicker-year { width: 40%; }
 
 .ui-datepicker table {
   margin: 6px 0 0;
 }
 
 .ui-datepicker th {
-  color: var(--ink-soft);
+  color: var(--text-faint);
   font-weight: 600;
   font-size: 10px;
   text-transform: uppercase;
@@ -1594,37 +1774,42 @@ body { padding-top: 0; }
   padding: 1px;
 }
 
-.ui-datepicker td a,
-.ui-datepicker td span {
+.ui-datepicker td a.ui-state-default,
+.ui-datepicker td span.ui-state-default {
   text-align: center;
-  border-radius: 3px;
+  border-radius: 5px;
   border: none;
   background: transparent;
-  color: var(--ink);
-  padding: 4px 0;
+  color: var(--text);
+  padding: 5px 0;
 }
 
-.ui-datepicker td a:hover {
-  background: var(--pitch-soft);
+.ui-datepicker td span.ui-state-default { color: var(--text-faint); }
+
+.ui-datepicker td a.ui-state-default:hover {
+  background: var(--accent-soft);
   border: none;
 }
 
-.ui-datepicker td .ui-state-active {
-  background: var(--pitch);
-  color: var(--paper-raised);
+.ui-datepicker td a.ui-state-default.ui-state-active {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
 }
 
-.ui-datepicker td.ui-datepicker-today a {
+.ui-datepicker td.ui-datepicker-unselectable .ui-state-default { opacity: 0.4; }
+
+.ui-datepicker td.ui-datepicker-today a.ui-state-default {
   border: 1px solid var(--gold);
 }
 
 .ui-datepicker .ui-datepicker-buttonpane {
-  border-top: 1px solid var(--paper-line);
+  border-top: 1px solid var(--border);
 }
 
 .ui-datepicker .ui-datepicker-buttonpane button {
   font-family: "IBM Plex Mono", monospace;
-  color: var(--pitch-strong);
+  color: var(--text);
   background: transparent;
   border: none;
 }

@@ -95,6 +95,20 @@ public class StringHelperTests
         "Ødegaard".Sanitize().Should().Be("Odegaard".Sanitize());
     }
 
+    // ------------------------------------------------------------- SanitizeForSearch
+
+    [Theory]
+    [InlineData("Saint-Étienne", "saintetienne")]
+    [InlineData("saint etienne", "saintetienne")]
+    [InlineData("Milan A.C.", "milanac")]
+    [InlineData("milan ac", "milanac")]
+    [InlineData("Côte d'Ivoire", "cotedivoire")]
+    [InlineData("  -.  ", "")]
+    public void SanitizeForSearch_KeepsOnlyLettersAndDigits(string input, string expected)
+    {
+        input.SanitizeForSearch().Should().Be(expected);
+    }
+
     // ------------------------------------------------------------- Disjoin / SanitizeJoin
 
     [Fact]
