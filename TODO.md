@@ -999,9 +999,17 @@ Branche de travail : `remaster-v2`.
       Testé (`MappingModelsTests`, `BadgeServiceTests`), vérifié en direct (nom FR temporaire
       sur un badge : affiché en français, inchangé en anglais). **En attendant les
       traductions, chaque ligne FR de `kikole.sql` reprend le nom anglais** (33 badges).
-      - [ ] **Reste : fournir les noms français** (UPDATE des 33 lignes `language_id = 2`
-        dans `kikole.sql` ; certains noms sont des références à conserver, ex. « Don
-        Corleone », « Métro, boulot, kikolé, dodo »).
+      - [x] **Noms français fournis (2026-09-26)** : les 33 lignes `language_id = 2` de
+        `kikole.sql` portent maintenant un vrai nom français (propositions validées telles
+        quelles par l'utilisateur, ex. « Archéologie », « Sauvé par le gong », « Le Club des
+        Cinq » pour « The Famous Five » ; « Don Corleone » et « The Breakfast Club » restent
+        inchangés). Trois noms anglais ont changé dans `badges` : n° 3 « IT'S OVER 900**!** »,
+        et n° 9 (« Poop, Coffee, Cigarette, Kikolé ») et 27 (« Commute, work, kikolé,
+        sleep »), dont le nom d'origine était en réalité français. Appliqué aussi à la base
+        locale (badge 29 : « Down to the wire » côté anglais, « Sur le fil » côté français ;
+        les badges 32 et 33 n'y existent pas, la base locale n'a pas le parrainage).
+        Sept propositions étaient jugées incertaines (n° 3, 9, 10, 11, 12, 24, 27) : à
+        rouvrir si l'un d'eux déplaît à l'usage.
       - [ ] **Migration à jouer sur toute base existante (locale déjà faite, prod à faire)** :
         `ALTER TABLE badge_translations ADD COLUMN name varchar(255) COLLATE
         utf8mb4_unicode_ci NOT NULL AFTER language_id;` puis `UPDATE badge_translations t
