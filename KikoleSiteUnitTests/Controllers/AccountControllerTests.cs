@@ -221,8 +221,9 @@ public class AccountControllerTests
     }
 
     [Fact]
-    public async Task GetLoginQuestion_AdministratorAccount_BehavesLikeAnUnknownUser()
+    public async Task GetLoginQuestion_AdministratorAccount_BehavesLikeAnyOtherAccount()
     {
+        // "compte inconnu" ici contredirait "existe deja" a la creation et designerait l'admin
         var admin = BuildUser();
         admin.UserType = UserTypes.Administrator;
         _userManager.Setup(_ => _.FindByNameAsync("admin")).ReturnsAsync(admin);
@@ -230,18 +231,19 @@ public class AccountControllerTests
         var result = await _controller.GetLoginQuestion(new AccountModel { LoginRecoverySubmission = "admin" });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.QuestionRecovery.Should().BeNull();
-        model.Error.Should().Be("UserDoesNotExist");
+        model.QuestionRecovery.Should().Be("une question ?");
+        model.Error.Should().BeNull();
     }
 
     // ------------------------------------------------------------- ResetPassword
 
     [Fact]
-    public async Task ResetPassword_AdministratorAccount_IsRefusedWithoutTouchingTheAccount()
+    public async Task ResetPassword_AdministratorAccount_IsRefusedLikeAWrongAnswer()
     {
         var admin = BuildUser();
         admin.UserType = UserTypes.Administrator;
         _userManager.Setup(_ => _.FindByNameAsync("admin")).ReturnsAsync(admin);
+        _userManager.Setup(_ => _.IsLockedOutAsync(admin)).ReturnsAsync(false);
 
         var result = await _controller.ResetPassword(new AccountModel
         {
@@ -255,7 +257,8 @@ public class AccountControllerTests
         model.Error.Should().Be("ResetPasswordError");
         model.SuccessInfo.Should().BeNull();
         _userManager.Verify(_ => _.GeneratePasswordResetTokenAsync(It.IsAny<ApplicationUser>()), Times.Never);
-        _userManager.Verify(_ => _.AccessFailedAsync(It.IsAny<ApplicationUser>()), Times.Never);
+        _userManager.Verify(_ => _.ResetPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _userManager.Verify(_ => _.AccessFailedAsync(admin), Times.Once);
     }
 
     [Fact]

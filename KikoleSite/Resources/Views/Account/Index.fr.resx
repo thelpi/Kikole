@@ -144,6 +144,9 @@
   <data name="LogIn" xml:space="preserve">
     <value>Connexion</value>
   </data>
+  <data name="LogInTitle" xml:space="preserve">
+    <value>Se connecter</value>
+  </data>
   <data name="LoginRecover" xml:space="preserve">
     <value>Identifiant à récupérer</value>
   </data>

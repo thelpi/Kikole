@@ -122,9 +122,11 @@ public class AccountController : KikoleBaseController
         {
             var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
 
-            // un compte administrateur ne se recupere pas par question secrete : meme reponse
-            // que pour un compte inconnu, pour ne pas reveler qu'il s'agit d'un admin
-            if (user != null && !IsRecoveryForbidden(user))
+            // un administrateur se comporte ici comme n'importe quel compte (question affichee) :
+            // le refus n'intervient qu'a la reinitialisation, sous la forme d'un echec ordinaire.
+            // Repondre "compte inconnu" ici, alors que la creation de compte repond "existe deja",
+            // permettrait de reperer les administrateurs.
+            if (user != null)
                 model.QuestionRecovery = user.PasswordResetQuestion;
             else
                 model.Error = _localizer["UserDoesNotExist"];
@@ -145,10 +147,18 @@ public class AccountController : KikoleBaseController
         {
             var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
 
-            if (user == null || IsRecoveryForbidden(user))
+            if (user == null)
                 model.Error = _localizer["ResetPasswordError"];
             else if (await _userManager.IsLockedOutAsync(user))
                 model.Error = _localizer["AccountLockedOut"];
+            else if (IsRecoveryForbidden(user))
+            {
+                // un compte administrateur ne se recupere jamais par question secrete, mais le
+                // refus doit etre indiscernable d'une mauvaise reponse (meme message, meme
+                // compteur de verrouillage), sinon la tentative revele qui est administrateur
+                await _userManager.AccessFailedAsync(user);
+                model.Error = _localizer["ResetPasswordError"];
+            }
             else
             {
                 // la reponse de securite est un secret bien plus devinable qu'un mot de
