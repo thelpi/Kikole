@@ -669,11 +669,17 @@ Branche de travail : `remaster-v2`.
         supplémentaires, puis 19 pays d'Afrique/Asie/Océanie, puis 13 pays d'Amérique).
         **Reste volontairement non fait, décision explicite de clore ici** : les échelons
         inférieurs des pays d'Afrique/Asie/Amérique (seule l'Europe a eu cette passe),
-        d'éventuels pays non couverts. **Reste à faire, pas une décision de clore** : la
-        migration sur la base locale n'a jamais été appliquée pendant tout ce chantier
-        (dernier accord explicite obtenu sur le tout premier lot, jamais redemandé
-        depuis) — toutes les insertions vivent dans `kikole.sql` mais pas encore dans la
-        base MySQL locale ; à faire d'un bloc quand l'utilisateur le demandera.
+        d'éventuels pays non couverts.
+        - [x] **Migration appliquée à la base locale (2026-09-26)** — les 1211 clubs et
+          2470 traductions ajoutés depuis l'id 491 (tout le travail au-delà du baseline
+          initial de 490 clubs) insérés en une fois, extraits directement de `kikole.sql`
+          via un script PowerShell (ids > 490 uniquement, pour ne pas retoucher les 490
+          déjà présents) puis exécutés contre la base `kikole` réelle (pas de base de
+          test jetable ici — c'est la migration elle-même, demandée explicitement :
+          "tu peux commencer par le dernier point"). Vérifié après coup : 1701 clubs /
+          3796 traductions au total, aucune traduction EN ou FR manquante, aucun id
+          dupliqué, apostrophes intactes (Beijing Guo'an, O'Higgins, Connah's Quay
+          Nomads, Newell's Old Boys), Inter Miami CF et LAFC bien présents.
 - [x] ~~Pays/continent au sens FIFA plutôt qu'ONU~~ — `countries` est désormais la liste des
       211 fédérations FIFA (plus 4 nations sportives disparues, voir plus bas), codes à 3
       lettres, `continent_id NOT NULL` sur chaque ligne (confédération réelle, pas la
