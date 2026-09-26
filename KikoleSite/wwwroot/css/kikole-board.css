@@ -15,8 +15,10 @@
   --border-soft: #1e2530;
   --border-strong: #3f4a5f;
   --text: #f2f4f8;
-  --text-muted: #a6afc1;
-  --text-faint: #6b7386;
+  --text-muted: #c9d0dd;
+  --text-faint: #99a3b6;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
   --accent: #35d07f;
   --accent-ink: #06210f;
   --accent-soft: rgba(53, 208, 127, 0.14);
@@ -55,7 +57,7 @@ body {
 body { padding-top: 0; }
 
 .site-nav {
-  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  font-family: var(--font-sans);
   background: var(--surface-2);
   color: var(--text);
   border-bottom: 1px solid var(--border);
@@ -268,7 +270,7 @@ body { padding-top: 0; }
 }
 
 .kikole-board {
-  font-family: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  font-family: var(--font-sans);
   color: var(--text);
   max-width: 800px;
   margin: 20px auto 0;
@@ -321,7 +323,7 @@ body { padding-top: 0; }
 .kikole-board .day-nav .small-link { margin-left: 4px; }
 
 .kikole-board .date-field {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 700;
   text-align: center;
@@ -411,7 +413,7 @@ body { padding-top: 0; }
 }
 
 .kikole-board .scoreboard .value {
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--font-sans); font-weight: 700;
   font-size: 30px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -459,9 +461,8 @@ body { padding-top: 0; }
 }
 
 .kikole-board .form-card h3 {
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--font-sans); font-weight: 700;
   font-size: 20px;
-  font-weight: normal;
   letter-spacing: 0.02em;
   color: var(--text);
   margin: 22px 0 12px;
@@ -500,7 +501,7 @@ body { padding-top: 0; }
   padding: 4px 0;
   background: transparent;
   border: none;
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--font-sans); font-weight: 700;
   font-size: 20px;
   letter-spacing: 0.02em;
   color: var(--text);
@@ -513,7 +514,7 @@ body { padding-top: 0; }
 
 .kikole-board .collapsible::after {
   content: "+";
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 18px;
   font-weight: 600;
   color: var(--accent);
@@ -731,8 +732,7 @@ body { padding-top: 0; }
 }
 
 .kikole-board .dossier-head h1 {
-  font-family: "Bebas Neue", sans-serif;
-  font-weight: normal;
+  font-family: var(--font-sans); font-weight: 700;
   font-size: 22px;
   letter-spacing: 0.02em;
   color: var(--text);
@@ -747,7 +747,7 @@ body { padding-top: 0; }
 .kikole-board .clue {
   display: flex;
   gap: 14px;
-  align-items: flex-start;
+  align-items: baseline;
   font-size: 13px;
   color: var(--text-muted);
   background: var(--surface-2);
@@ -760,7 +760,7 @@ body { padding-top: 0; }
 
 .kikole-board .clue .tag {
   flex: none;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -770,10 +770,13 @@ body { padding-top: 0; }
   border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
   border-radius: 7px;
   padding: 4px 8px;
-  margin-top: 1px;
+  margin-top: 0;
 }
 
 .kikole-board .clue p { margin: 0; color: var(--text); line-height: 1.5; }
+
+/* indice image : pas de ligne de base a aligner, le libelle reste en haut */
+.kikole-board .clue:has(.clue-image) { align-items: flex-start; }
 
 /* indice d'epoque heberge en image (ex. i.imgur.com/xxx.png) plutot qu'en texte */
 .kikole-board .clue-image {
@@ -819,13 +822,13 @@ body { padding-top: 0; }
 
 .kikole-board .dossier-row .cost { padding-top: 10px; }
 
-.kikole-board .dossier-row.solved .field { padding-top: 1px; }
-.kikole-board .dossier-row.solved .cost { padding-top: 1px; }
+.kikole-board .dossier-row.solved .field { padding-top: 4px; }
+.kikole-board .dossier-row.solved .cost { padding-top: 4px; }
 
 .kikole-board .dossier-row .field .hint {
   display: block;
   margin-top: 5px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 10.5px;
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -853,7 +856,7 @@ body { padding-top: 0; }
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
@@ -873,8 +876,8 @@ body { padding-top: 0; }
 /* etat trouve */
 
 .kikole-board .dossier-row.solved .value {
-  font-family: "IBM Plex Mono", monospace;
-  font-weight: 600;
+  font-family: var(--font-sans);
+  font-weight: 500;
   font-size: 15px;
   color: var(--text);
   display: flex;
@@ -917,7 +920,7 @@ body { padding-top: 0; }
   border-radius: 9px;
   background: var(--surface-2);
   padding: 9px 12px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 13px;
   color: var(--text);
 }
@@ -995,7 +998,7 @@ body { padding-top: 0; }
 .kikole-board .dd-item {
   padding: 9px 12px;
   border-radius: 6px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 13px;
   color: var(--text);
   cursor: pointer;
@@ -1010,7 +1013,7 @@ body { padding-top: 0; }
 .kikole-board input[type="checkbox"] { accent-color: var(--accent); }
 
 .kikole-board input[type="datetime-local"] {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   border: 1px solid var(--border);
@@ -1063,9 +1066,9 @@ body { padding-top: 0; }
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text);
 }
 
@@ -1117,7 +1120,7 @@ body { padding-top: 0; }
   border-radius: 9px;
   background: var(--surface);
   padding: 12px 14px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 14.5px;
   color: var(--text);
   min-width: 0;
@@ -1137,7 +1140,7 @@ body { padding-top: 0; }
   border-radius: 9px;
   background: var(--accent);
   color: var(--accent-ink);
-  font-family: "Manrope", "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-weight: 800;
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -1171,7 +1174,7 @@ body { padding-top: 0; }
 .kikole-board .actions button,
 .kikole-board .actions a,
 .kikole-board .confirm-modal-actions button {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1195,7 +1198,7 @@ body { padding-top: 0; }
   border-color: var(--border);
 }
 
-.kikole-board .actions button .cost { color: var(--warn); font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 11.5px; }
+.kikole-board .actions button .cost { color: var(--warn); font-family: var(--font-sans); font-weight: 700; font-size: 11.5px; }
 
 .kikole-board .actions button:hover,
 .kikole-board .actions a:hover { background: var(--surface-2); border-color: var(--text-faint); }
@@ -1434,7 +1437,7 @@ body { padding-top: 0; }
 .kikole-board .badge-card.secret .badge-icon { color: var(--gold); }
 
 .kikole-board .badge-name {
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--font-sans); font-weight: 700;
   font-size: 16px;
   line-height: 1.15;
   letter-spacing: 0.01em;
@@ -1577,7 +1580,7 @@ body { padding-top: 0; }
 .kikole-board table {
   width: 100%;
   border-collapse: collapse;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 12.5px;
   color: var(--text);
 }
@@ -1653,8 +1656,7 @@ body { padding-top: 0; }
 .kikole-board .medal-bronze { color: #c9884f; font-weight: 700; }
 
 .kikole-board .profile-name {
-  font-family: "Bebas Neue", sans-serif;
-  font-weight: normal;
+  font-family: var(--font-sans); font-weight: 700;
   font-size: 24px;
   letter-spacing: 0.02em;
   color: var(--text);
@@ -1675,7 +1677,7 @@ body { padding-top: 0; }
    global necessaire, sans risque puisque c'est le meme composant partout sur le site. */
 
 .ui-autocomplete {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 13px;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -1702,7 +1704,7 @@ body { padding-top: 0; }
    enfant direct de <body>. */
 
 .ui-datepicker {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 12px;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -1745,7 +1747,7 @@ body { padding-top: 0; }
 
 .ui-datepicker select.ui-datepicker-month,
 .ui-datepicker select.ui-datepicker-year {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
   background: var(--surface);
@@ -1808,8 +1810,38 @@ body { padding-top: 0; }
 }
 
 .ui-datepicker .ui-datepicker-buttonpane button {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-sans);
   color: var(--text);
   background: transparent;
   border: none;
 }
+
+/* ---------------------------------------------------------- polices
+   IBM Plex Sans (500) pour le texte, IBM Plex Mono pour les etiquettes, couts, dates,
+   essais rates et tableaux (choix valide sur la page d'essais, variante E). Place en fin
+   de fichier pour l'emporter sans toucher aux regles de mise en page ci-dessus. */
+
+.kikole-board { font-weight: 500; }
+
+.kikole-board input,
+.kikole-board select,
+.kikole-board textarea { font-weight: 500; }
+
+.kikole-board .clue .tag,
+.kikole-board .attempt,
+.kikole-board .dossier-row.locked .cost,
+.kikole-board .actions button .cost,
+.kikole-board .club .loan,
+.kikole-board .badge-date,
+.kikole-board .badge-seal,
+.kikole-board .date-field,
+.kikole-board .scoreboard .label,
+.kikole-board .scoreboard .value,
+.kikole-board .streak-line,
+.kikole-board table,
+.kikole-board .same-day-tag,
+.kikole-board .unread-tag {
+  font-family: var(--font-mono);
+}
+
+.kikole-board .scoreboard .value { font-weight: 700; font-size: 28px; }

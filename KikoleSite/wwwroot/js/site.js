@@ -104,7 +104,11 @@ $(function () {
         return;
     }
 
-    modal.addEventListener('click', function () {
+    modal.addEventListener('click', function (e) {
+        // les elements interactifs (ex. "details" d'un badge) ne ferment pas la popup
+        if (e.target.closest('summary, details, a, button, input, select, textarea')) {
+            return;
+        }
         modal.classList.remove('open');
     });
 
