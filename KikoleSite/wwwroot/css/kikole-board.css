@@ -1845,3 +1845,40 @@ body { padding-top: 0; }
 }
 
 .kikole-board .scoreboard .value { font-weight: 700; font-size: 28px; }
+
+/* ---------------------------------------------------------- audit des pages (2026-09-26) */
+
+/* controles natifs (icone du calendrier, barres de defilement, cases) en sombre */
+:root { color-scheme: dark; }
+
+/* le fond de ligne vient des cellules (.even td / .odd td) ; celui de site.css (blanc) doit disparaitre */
+.kikole-board tr.even,
+.kikole-board tr.odd { background: transparent; }
+
+/* tableaux : le rouge historique des noms/entetes n'a plus de sens, on garde le vert des liens */
+.kikole-board thead .redtext { color: var(--text-muted); }
+.kikole-board td.redtext { color: var(--text); }
+.kikole-board td.redtext.you { color: var(--accent); }
+
+/* liens texte cotes a cotes (Admin/Actions) */
+.kikole-board .small-link { margin-right: 18px; }
+
+/* champs texte plus larges : les indices et noms etaient tronques dans un champ de 320px */
+.kikole-board .form-field .blank { max-width: 560px; }
+
+/* separe le bloc obligatoire du bloc facultatif (Account/Index, creation de compte) */
+.kikole-board .form-hint.section-break {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* boutons d'action : meme survol vert que les icones du menu */
+.kikole-board .actions button:hover,
+.kikole-board .actions a:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.kikole-board .actions button:disabled:hover { background: var(--surface); border-color: var(--border); color: var(--text); }

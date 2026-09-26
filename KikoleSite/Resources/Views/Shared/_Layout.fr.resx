@@ -133,7 +133,7 @@
     <value>Classement</value>
   </data>
   <data name="LogIn" xml:space="preserve">
-    <value>Connexion</value>
+    <value>Se connecter</value>
   </data>
   <data name="LogOut" xml:space="preserve">
     <value>Déconnexion</value>

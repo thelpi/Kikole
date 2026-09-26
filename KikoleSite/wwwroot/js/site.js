@@ -130,7 +130,7 @@ var launchWinConfetti = function (canvas) {
     resize();
     window.addEventListener('resize', resize);
 
-    var colors = ['#1f5e3e', '#ad8a3e', '#a6332b', '#dfb04c', '#faf6e9'];
+    var colors = ['#35d07f', '#e8b44c', '#ff7a6b', '#f2f4f8', '#6aa5ff'];
     var centerX = canvas.offsetWidth / 2;
     var centerY = canvas.offsetHeight / 2;
     var particleCount = 140;
@@ -719,19 +719,43 @@ function showNoChartData(elementId) {
     container.classList.add('chart-empty');
 }
 
+/* google.charts dessine par defaut sur fond blanc avec du texte sombre : options communes
+   pour rester dans la charte sombre (fond transparent, texte et grilles clairs, series
+   a fort contraste). */
+function darkChartOptions(extra) {
+    var text = { color: '#c9d0dd', fontName: 'IBM Plex Sans', fontSize: 12 };
+    var base = {
+        backgroundColor: 'transparent',
+        colors: ['#35d07f', '#e8b44c', '#ff7a6b', '#6aa5ff', '#b08cff', '#f08bd0', '#5fd6d6', '#ff9f43'],
+        titleTextStyle: { color: '#f2f4f8', fontName: 'IBM Plex Sans', fontSize: 14, bold: true },
+        legend: { textStyle: text },
+        hAxis: { textStyle: text, titleTextStyle: text, gridlines: { color: '#2a3140' }, baselineColor: '#3f4a5f' },
+        vAxis: { textStyle: text, titleTextStyle: text, gridlines: { color: '#2a3140' }, baselineColor: '#3f4a5f' },
+        pieSliceBorderColor: '#141922',
+        pieSliceTextStyle: { color: '#06210f' },
+        tooltip: { textStyle: { color: '#141922' } },
+        width: '100%',
+        height: 360
+    };
+    for (var key in extra) {
+        base[key] = (typeof extra[key] === 'object' && base[key] && !Array.isArray(extra[key]))
+            ? Object.assign({}, base[key], extra[key])
+            : extra[key];
+    }
+    return base;
+}
+
 function buildActiveUsersLineChartGraph(elementId, sourceDatas, yAxisTitle) {
     if (!hasChartData(sourceDatas)) {
         showNoChartData(elementId);
         return;
     }
     var tableDats = google.visualization.arrayToDataTable(sourceDatas);
-    var options = {
+    var options = darkChartOptions({
         hAxis: { title: yAxisTitle },
         vAxis: { title: 'Active users' },
-        legend: 'none',
-        width: '100%',
-        height: 360
-    };
+        legend: 'none'
+    });
     new google.visualization
         .LineChart(document.getElementById(elementId))
         .draw(tableDats, options);
@@ -743,11 +767,7 @@ function buildPlayerDistributionPieChartGraph(elementId, sourceDatas, pieTitle) 
         return;
     }
     var data = google.visualization.arrayToDataTable(sourceDatas);
-    var options = {
-        title: pieTitle,
-        width: '100%',
-        height: 360
-    };
+    var options = darkChartOptions({ title: pieTitle });
     new google.visualization
         .PieChart(document.getElementById(elementId))
         .draw(data, options);
@@ -759,11 +779,7 @@ function buildPlayerDistributionColumnChartGraph(elementId, sourceDatas, title) 
         return;
     }
     var data = google.visualization.arrayToDataTable(sourceDatas);
-    var options = {
-        title: title,
-        width: '100%',
-        height: 360
-    };
+    var options = darkChartOptions({ title: title });
     new google.visualization
         .ColumnChart(document.getElementById(elementId))
         .draw(data, options);

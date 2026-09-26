@@ -5,6 +5,7 @@ using KikoleSite.Configuration;
 using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
 using KikoleSite.Identity;
+using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
@@ -107,6 +108,11 @@ public class AccountController : KikoleBaseController
         return await RenderIndexAsync(model);
     }
 
+    private static bool IsRecoveryForbidden(ApplicationUser user)
+    {
+        return user.UserType >= UserTypes.Administrator;
+    }
+
     [HttpPost]
     public async Task<IActionResult> GetLoginQuestion(AccountModel model)
     {
@@ -116,7 +122,9 @@ public class AccountController : KikoleBaseController
         {
             var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
 
-            if (user != null)
+            // un compte administrateur ne se recupere pas par question secrete : meme reponse
+            // que pour un compte inconnu, pour ne pas reveler qu'il s'agit d'un admin
+            if (user != null && !IsRecoveryForbidden(user))
                 model.QuestionRecovery = user.PasswordResetQuestion;
             else
                 model.Error = _localizer["UserDoesNotExist"];
@@ -137,7 +145,7 @@ public class AccountController : KikoleBaseController
         {
             var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
 
-            if (user == null)
+            if (user == null || IsRecoveryForbidden(user))
                 model.Error = _localizer["ResetPasswordError"];
             else if (await _userManager.IsLockedOutAsync(user))
                 model.Error = _localizer["AccountLockedOut"];

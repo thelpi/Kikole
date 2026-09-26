@@ -220,7 +220,43 @@ public class AccountControllerTests
         model.QuestionRecovery.Should().Be("une question ?");
     }
 
+    [Fact]
+    public async Task GetLoginQuestion_AdministratorAccount_BehavesLikeAnUnknownUser()
+    {
+        var admin = BuildUser();
+        admin.UserType = UserTypes.Administrator;
+        _userManager.Setup(_ => _.FindByNameAsync("admin")).ReturnsAsync(admin);
+
+        var result = await _controller.GetLoginQuestion(new AccountModel { LoginRecoverySubmission = "admin" });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.QuestionRecovery.Should().BeNull();
+        model.Error.Should().Be("UserDoesNotExist");
+    }
+
     // ------------------------------------------------------------- ResetPassword
+
+    [Fact]
+    public async Task ResetPassword_AdministratorAccount_IsRefusedWithoutTouchingTheAccount()
+    {
+        var admin = BuildUser();
+        admin.UserType = UserTypes.Administrator;
+        _userManager.Setup(_ => _.FindByNameAsync("admin")).ReturnsAsync(admin);
+
+        var result = await _controller.ResetPassword(new AccountModel
+        {
+            LoginRecoverySubmission = "admin",
+            RecoveryACreate = "reponse",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("ResetPasswordError");
+        model.SuccessInfo.Should().BeNull();
+        _userManager.Verify(_ => _.GeneratePasswordResetTokenAsync(It.IsAny<ApplicationUser>()), Times.Never);
+        _userManager.Verify(_ => _.AccessFailedAsync(It.IsAny<ApplicationUser>()), Times.Never);
+    }
 
     [Fact]
     public async Task ResetPassword_UnknownUser_SetsResetPasswordError()

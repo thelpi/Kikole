@@ -141,7 +141,7 @@
   <data name="LoggedAs" xml:space="preserve">
     <value>You're logged as:</value>
   </data>
-  <data name="Login" xml:space="preserve">
+  <data name="LogIn" xml:space="preserve">
     <value>Log in</value>
   </data>
   <data name="LoginRecover" xml:space="preserve">
