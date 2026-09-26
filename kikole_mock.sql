@@ -15,7 +15,9 @@
 --   admin   / admin12345      (administrateur)
 --   joueur1 / NouveauMdp1234  (utilisateur standard)
 --   joueur2 / test123         (utilisateur standard)
---   question de recuperation : reponse "kikole" pour les trois
+--   lea, hugo, emma, lucas, chloe, nathan, manon, theo / test123 (utilisateurs standard,
+--   ids 4 a 11, ils alimentent les classements et podiums, cf. fin du script)
+--   question de recuperation : reponse "kikole" pour tous
 --
 -- Joueurs du jour : generes de FirstDate a aujourd'hui + 6 mois (voir plus bas).
 
@@ -23,29 +25,42 @@ SET NAMES utf8mb4;
 USE kikole;
 
 -- ---------------------------------------------------------------- remise a zero
--- TRUNCATE plutot que DELETE : remet aussi les compteurs AUTO_INCREMENT a 1,
--- pour que deux executations successives produisent exactement la meme base.
--- Ordre toujours sans importance (FOREIGN_KEY_CHECKS desactive le temps du bloc) : les
--- cles etrangeres ajoutees a la fin de kikole.sql interdisent sinon purement et
--- simplement TRUNCATE sur une table referencee (players, users), meme vide.
+-- Les compteurs AUTO_INCREMENT sont remis a 1 pour que deux executions successives
+-- produisent exactement la meme base. TRUNCATE n'est pas utilisable : les cles etrangeres
+-- ajoutees a la fin de kikole.sql l'interdisent sur une table referencee (players,
+-- users), meme vide, des que FOREIGN_KEY_CHECKS n'est pas a 0 dans la session.
 -- clubs/club_translations ne sont PLUS truncated : le catalogue complet (490+ clubs,
 -- sourced pays par pays) vit dans kikole.sql et doit survivre aux rejeux de ce script,
 -- voir le commentaire au-dessus des joueurs plus bas pour les id references ici.
 
+-- DELETE dans l'ordre des dependances (tables filles d'abord), puis remise a 1 des
+-- compteurs : TRUNCATE etait refuse (#1701) des que FOREIGN_KEY_CHECKS n'etait pas
+-- effectivement a 0 dans la session (import par certains outils web, qui ne conservent pas
+-- le SET d'une instruction a l'autre). Ainsi le script marche avec ou sans ce reglage.
 SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE proposals;
-TRUNCATE TABLE leaders;
-TRUNCATE TABLE user_badges;
-TRUNCATE TABLE player_clue_translations;
-TRUNCATE TABLE player_clubs;
-TRUNCATE TABLE players;
-TRUNCATE TABLE discussion_messages;
-TRUNCATE TABLE discussions;
-TRUNCATE TABLE messages;
-TRUNCATE TABLE registration_guids;
-TRUNCATE TABLE login_history;
-TRUNCATE TABLE users;
+DELETE FROM proposals;
+DELETE FROM leaders;
+DELETE FROM user_badges;
+DELETE FROM player_clue_translations;
+DELETE FROM player_clubs;
+DELETE FROM discussion_messages;
+DELETE FROM discussions;
+DELETE FROM messages;
+DELETE FROM registration_guids;
+DELETE FROM login_history;
+DELETE FROM players;
+DELETE FROM users;
 SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE proposals AUTO_INCREMENT = 1;
+ALTER TABLE leaders AUTO_INCREMENT = 1;
+ALTER TABLE user_badges AUTO_INCREMENT = 1;
+ALTER TABLE discussion_messages AUTO_INCREMENT = 1;
+ALTER TABLE discussions AUTO_INCREMENT = 1;
+ALTER TABLE messages AUTO_INCREMENT = 1;
+ALTER TABLE login_history AUTO_INCREMENT = 1;
+ALTER TABLE players AUTO_INCREMENT = 1;
+ALTER TABLE users AUTO_INCREMENT = 1;
 
 -- ---------------------------------------------------------------- utilisateurs
 
@@ -80,12 +95,13 @@ INSERT INTO registration_guids (id, user_id, creation_date) VALUES
 --
 -- @first_date n'a plus a correspondre a quoi que ce soit dans le code : l'application
 -- deduit son calendrier du MIN(publication_date), qui est la journee cachee inseree
--- juste en dessous. On part donc d'aujourd'hui moins un mois, pour avoir un historique.
+-- juste en dessous. On part donc d'aujourd'hui moins QUATRE mois, pour avoir un historique
+-- assez long pour plusieurs podiums mensuels (cf. joueurs fictifs en fin de script).
 --
 -- Un pool de 8 joueurs est parcouru en boucle ; l'identifiant vaut l'indice du jour + 2,
 -- ce qui rend les insertions dependantes deterministes (carrieres, traductions).
 
-SET @first_date = DATE_SUB(CURDATE(), INTERVAL 1 MONTH);
+SET @first_date = DATE_SUB(CURDATE(), INTERVAL 4 MONTH);
 SET @last_date = DATE_ADD(CURDATE(), INTERVAL 6 MONTH);
 SET @pool_size = 8;
 SET SESSION cte_max_recursion_depth = 10000;
@@ -184,6 +200,62 @@ UNION ALL
 SELECT mock_days.i + 2, 2, 0, mock_pool.clue_fr FROM mock_days JOIN mock_pool ON mock_pool.p = MOD(mock_days.i, @pool_size)
 UNION ALL
 SELECT mock_days.i + 2, 2, 1, mock_pool.easy_fr FROM mock_days JOIN mock_pool ON mock_pool.p = MOD(mock_days.i, @pool_size);
+
+-- ---------------------------------------------------------------- joueurs fictifs + historique
+--
+-- De quoi alimenter les classements et surtout les podiums (mensuel et global), qui
+-- exigent au moins 3 joueurs classes par mois COMPLET de jeu. 8 comptes en plus de
+-- joueur1/joueur2, ids 4 a 11, tous avec le mot de passe de joueur2 (test123) et la meme
+-- reponse de recuperation ("kikole") : lea, hugo, emma, lucas, chloe, nathan, manon, theo.
+--
+-- Les victoires sont generees de facon deterministe (pas de RAND : deux rejeux donnent la
+-- meme base) pour chaque jour PASSE, jamais aujourd'hui, pour laisser l'etat du jour
+-- courant vierge : proba de victoire propre a chaque joueur ET variable d'un mois a
+-- l'autre (le podium change donc d'un mois sur l'autre), points de 200 a 1000, heure de
+-- victoire entre 00h10 et 23h29 du jour meme (donc comptee "a temps" par les classements).
+-- Chaque victoire est doublee d'une proposition "nom" gagnante, pour que les tentatives
+-- de la fiche joueur restent coherentes avec le classement.
+
+INSERT INTO users (id, login, normalized_login, password, password_reset_question, password_reset_answer, language_id, user_type_id, is_disabled, concurrency_stamp, security_stamp, ip, creation_date) VALUES
+(4,  'lea',    'LEA',    '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:00:00')),
+(5,  'hugo',   'HUGO',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:05:00')),
+(6,  'emma',   'EMMA',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:10:00')),
+(7,  'lucas',  'LUCAS',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:15:00')),
+(8,  'chloe',  'CHLOE',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:20:00')),
+(9,  'nathan', 'NATHAN', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 1, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:25:00')),
+(10, 'manon',  'MANON',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:30:00')),
+(11, 'theo',   'THEO',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:35:00'));
+
+DROP TABLE IF EXISTS mock_wins;
+CREATE TABLE mock_wins (
+  user_id bigint unsigned NOT NULL,
+  proposal_date date NOT NULL,
+  points smallint unsigned NOT NULL,
+  minutes int unsigned NOT NULL,
+  PRIMARY KEY (user_id, proposal_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO mock_wins (user_id, proposal_date, points, minutes)
+SELECT u.id, d.d,
+       1000 - 100 * MOD(u.id * 7 + d.i * 3, 9),
+       10 + MOD(u.id * 97 + d.i * 131, 1400)
+FROM mock_days d
+JOIN users u ON u.id BETWEEN 2 AND 11
+WHERE d.d < CURDATE()
+  AND MOD(u.id * 31 + d.i * 17, 100) < 45 + 9 * MOD(u.id * 13 + MONTH(d.d) * 7, 6);
+
+INSERT INTO leaders (user_id, proposal_date, points, `time`, creation_date)
+SELECT user_id, proposal_date, points, minutes,
+       DATE_ADD(TIMESTAMP(proposal_date, '00:00:00'), INTERVAL minutes MINUTE)
+FROM mock_wins;
+
+INSERT INTO proposals (user_id, proposal_type_id, value, successful, ip, proposal_date, creation_date)
+SELECT w.user_id, 1, p.name, 1, '127.0.0.1', w.proposal_date,
+       DATE_ADD(TIMESTAMP(w.proposal_date, '00:00:00'), INTERVAL w.minutes MINUTE)
+FROM mock_wins w
+JOIN players p ON p.publication_date = w.proposal_date;
+
+DROP TABLE mock_wins;
 
 DROP TABLE mock_days;
 DROP TABLE mock_pool;

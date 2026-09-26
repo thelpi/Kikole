@@ -118,9 +118,17 @@ $(function () {
     }
 });
 
+/* feu d'artifice de la popup de victoire : une salve centrale puis une dizaine de bouquets
+   lances a des endroits aleatoires (particules a traînee lumineuse, qui retombent), plus
+   une pluie de confettis. Le canvas est devant la popup (cf. .win-modal-confetti) et laisse
+   passer les clics. Rien n'est anime si l'utilisateur a demande moins de mouvement. */
 var launchWinConfetti = function (canvas) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
     var ctx = canvas.getContext('2d');
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = 1; // resolution native ignoree : un canvas plein ecran en HiDPI ralentit les vieux postes
 
     var resize = function () {
         canvas.width = canvas.offsetWidth * dpr;
@@ -130,43 +138,108 @@ var launchWinConfetti = function (canvas) {
     resize();
     window.addEventListener('resize', resize);
 
-    var colors = ['#35d07f', '#e8b44c', '#ff7a6b', '#f2f4f8', '#6aa5ff'];
-    var centerX = canvas.offsetWidth / 2;
-    var centerY = canvas.offsetHeight / 2;
-    var particleCount = 140;
-    var particles = [];
-    for (var i = 0; i < particleCount; i++) {
-        var angle = Math.random() * Math.PI * 2;
-        var speed = 3 + Math.random() * 7;
-        particles.push({
-            x: centerX,
-            y: centerY,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed - 2,
-            size: 4 + Math.random() * 4,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 0.4
-        });
-    }
+    var colors = ['#e8b44c', '#f7d774', '#35d07f', '#ff7a6b', '#f2f4f8', '#6aa5ff', '#c58bff'];
+    var pick = function () { return colors[Math.floor(Math.random() * colors.length)]; };
+    var sparks = [];
+    var confetti = [];
 
-    var gravity = 0.18;
-    var duration = 2600;
+    var burst = function (x, y, count, power) {
+        var main = pick();
+        var alt = pick();
+        for (var i = 0; i < count; i++) {
+            var angle = (i / count) * Math.PI * 2 + Math.random() * 0.25;
+            var speed = power * (0.45 + Math.random() * 0.55);
+            sparks.push({
+                x: x, y: y, px: x, py: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                age: 0,
+                ttl: 50 + Math.random() * 35,
+                size: 1.6 + Math.random() * 2.2,
+                color: Math.random() < 0.78 ? main : alt
+            });
+        }
+    };
+
+    var shower = function (count) {
+        for (var i = 0; i < count; i++) {
+            confetti.push({
+                x: Math.random() * canvas.offsetWidth,
+                y: -12 - Math.random() * canvas.offsetHeight * 0.25,
+                vx: (Math.random() - 0.5) * 2.2,
+                vy: 2 + Math.random() * 3.2,
+                size: 6 + Math.random() * 6,
+                color: pick(),
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.35,
+                age: 0,
+                ttl: 130 + Math.random() * 60
+            });
+        }
+    };
+
+    // instants (ms) des salves ; la premiere, plus grosse, part du centre
+    var schedule = [0, 450, 950, 1450, 2000, 2600];
+    var next = 0;
     var startTime = Date.now();
 
     var frame = function () {
         var elapsed = Date.now() - startTime;
-        var lifeLeft = Math.max(0, 1 - elapsed / duration);
-        ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+        var w = canvas.offsetWidth;
+        var h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
 
-        particles.forEach(function (p) {
-            p.vy += gravity;
+        while (next < schedule.length && elapsed >= schedule[next]) {
+            if (next === 0) {
+                burst(w / 2, h * 0.42, 85, 11);
+                shower(26);
+            } else {
+                burst(w * (0.12 + Math.random() * 0.76), h * (0.14 + Math.random() * 0.42), 50, 8);
+                if (next % 2 === 1) {
+                    shower(16);
+                }
+            }
+            next++;
+        }
+
+        ctx.lineCap = 'round';
+        sparks = sparks.filter(function (p) { return p.age < p.ttl; });
+        sparks.forEach(function (p) {
+            p.px = p.x;
+            p.py = p.y;
+            p.vx *= 0.985;
+            p.vy = p.vy * 0.985 + 0.1;
             p.x += p.vx;
             p.y += p.vy;
+            p.age++;
+
+            var life = 1 - p.age / p.ttl;
+            ctx.strokeStyle = p.color;
+            // halo : meme trait en plus large et translucide (beaucoup moins cher qu'un shadowBlur)
+            ctx.globalAlpha = Math.max(0, life) * 0.22;
+            ctx.lineWidth = p.size * (0.5 + life * 0.7) * 3.2;
+            ctx.beginPath();
+            ctx.moveTo(p.px, p.py);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            ctx.globalAlpha = Math.max(0, life);
+            ctx.lineWidth = p.size * (0.5 + life * 0.7);
+            ctx.beginPath();
+            ctx.moveTo(p.px, p.py);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+        });
+
+        confetti = confetti.filter(function (p) { return p.age < p.ttl && p.y < h + 30; });
+        confetti.forEach(function (p) {
+            p.vy = Math.min(p.vy + 0.02, 5.5);
+            p.x += p.vx + Math.sin(p.age / 11) * 0.7;
+            p.y += p.vy;
             p.rotation += p.rotationSpeed;
+            p.age++;
 
             ctx.save();
-            ctx.globalAlpha = lifeLeft;
+            ctx.globalAlpha = Math.max(0, Math.min(1, (p.ttl - p.age) / 40));
             ctx.translate(p.x, p.y);
             ctx.rotate(p.rotation);
             ctx.fillStyle = p.color;
@@ -174,17 +247,18 @@ var launchWinConfetti = function (canvas) {
             ctx.restore();
         });
 
-        if (elapsed < duration) {
+        ctx.globalAlpha = 1;
+
+        if (next < schedule.length || sparks.length > 0 || confetti.length > 0) {
             requestAnimationFrame(frame);
         } else {
-            ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+            ctx.clearRect(0, 0, w, h);
             window.removeEventListener('resize', resize);
         }
     };
 
     requestAnimationFrame(frame);
 };
-
 var loadKikolesStats = function (sort, desc) {
     $.ajax({
         url: '/kikoles-stats?sort=' + sort + '&desc=' + desc,
@@ -275,6 +349,8 @@ var loadKikolesStats = function (sort, desc) {
 var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId) {
     paginateTable(document.getElementById('globalLeaderboardTable'));
     paginateTable(document.getElementById('dailyLeaderboardTable'));
+    paginateTableByGroup(document.getElementById('monthlyPodiumTable'));
+    paginateTable(document.getElementById('overallPodiumTable'));
 
     /* global */
     var sortType = document.getElementById('SortType');
@@ -393,14 +469,14 @@ var paginateTable = function (table) {
     show();
 };
 
-/* un mois par page (statistiques quotidiennes d'un joueur, plus recent d'abord) : chaque
-   <tr> porte data-month ("2026-09") et data-month-label (libelle localise). La fleche de
-   gauche remonte dans le temps (mois plus ancien), celle de droite revient vers le present. */
-var paginateTableByMonth = function (table) {
+/* un groupe de lignes par page (mois d'une fiche joueur, annee du podium mensuel, plus recent d'abord) : chaque
+   <tr> porte data-group ("2026-09") et data-group-label (libelle affiche). La fleche de
+   gauche remonte dans le temps (groupe plus ancien), celle de droite revient vers le present. */
+var paginateTableByGroup = function (table) {
     var rows = Array.prototype.slice.call(table.tBodies[0].rows);
     var months = [];
     rows.forEach(function (r) {
-        var m = r.getAttribute('data-month');
+        var m = r.getAttribute('data-group');
         if (m && months.indexOf(m) < 0) {
             months.push(m);
         }
@@ -416,9 +492,9 @@ var paginateTableByMonth = function (table) {
         var current = months[index];
         var label = '';
         rows.forEach(function (r) {
-            r.hidden = r.getAttribute('data-month') !== current;
+            r.hidden = r.getAttribute('data-group') !== current;
             if (!r.hidden && !label) {
-                label = r.getAttribute('data-month-label');
+                label = r.getAttribute('data-group-label');
             }
         });
         restripe(rows);
@@ -435,7 +511,7 @@ var paginateTableByMonth = function (table) {
 $(function () {
     var byDay = document.getElementById('userStatsByDayTable');
     if (byDay) {
-        paginateTableByMonth(byDay);
+        paginateTableByGroup(byDay);
     }
 });
 /* leaderboard loading */

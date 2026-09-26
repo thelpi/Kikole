@@ -84,7 +84,7 @@
                     @foreach (var stat in Model.Stats)
                     {
                         var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
-                        <tr class="@trClass" data-month="@stat.Date.ToString("yyyy-MM")" data-month-label="@stat.Date.ToString("MMMM yyyy")">
+                        <tr class="@trClass" data-group="@stat.Date.ToString("yyyy-MM")" data-group-label="@stat.Date.ToString("MMMM yyyy")">
                             <td class="tabData"><a href="/?day=@stat.DaysBefore">@stat.Date.ToNaString()</a></td>
                             <td class="tabData">@stat.Answer</td>
                             <td class="tabData">

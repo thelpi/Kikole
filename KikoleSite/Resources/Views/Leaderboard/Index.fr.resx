@@ -234,4 +234,10 @@
   <data name="PagerNext" xml:space="preserve">
     <value>Page suivante</value>
   </data>
+  <data name="PagerPreviousYear" xml:space="preserve">
+    <value>Année précédente</value>
+  </data>
+  <data name="PagerNextYear" xml:space="preserve">
+    <value>Année suivante</value>
+  </data>
 </root>

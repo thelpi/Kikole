@@ -169,8 +169,8 @@
 
     <div class="form-card">
         <h3>@localizer["MonthlyPodiumTitle"]</h3>
-        <div class="table-wrap">
-            <table>
+        <div class="table-wrap" data-prev-label="@localizer["PagerPreviousYear"]" data-next-label="@localizer["PagerNextYear"]">
+            <table id="monthlyPodiumTable">
                 <thead>
                     <tr>
                         <th class="tabDataHead">@localizer["Date"]</th>
@@ -189,10 +189,10 @@
                     else
                     {
                         var k = 0;
-                        foreach (var (date, podium) in Model.MonthlyPodiums)
+                        foreach (var (date, podium) in Model.MonthlyPodiums.OrderByDescending(x => x.Item1))
                         {
                             var trClass = k % 2 == 0 ? "even" : "odd";
-                            <tr class="@trClass">
+                            <tr class="@trClass" data-group="@date.Year" data-group-label="@date.Year">
                                 <td class="tabData">@date.ToString("MMM yyyy")</td>
                                 @foreach (var (medalClass, holder) in new[] { ("medal-gold", podium[0]), ("medal-silver", podium[1]), ("medal-bronze", podium[2]) })
                                 {
@@ -212,8 +212,8 @@
 
     <div class="form-card">
         <h3>@localizer["OverallPodiumTitle"]</h3>
-        <div class="table-wrap">
-            <table>
+        <div class="table-wrap" data-prev-label="@localizer["PagerPrevious"]" data-next-label="@localizer["PagerNext"]">
+            <table id="overallPodiumTable">
                 <thead>
                     <tr>
                         <th class="tabDataHead redtext">@localizer["PlayerHeader"]</th>

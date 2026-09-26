@@ -1644,7 +1644,7 @@ body { padding-top: 0; }
 }
 
 .kikole-board .medal-gold { color: var(--gold); font-weight: 700; }
-.kikole-board .medal-silver { color: #9aa4b0; font-weight: 700; }
+.kikole-board .medal-silver { color: #c3ccd8; font-weight: 700; }
 .kikole-board .medal-bronze { color: #c9884f; font-weight: 700; }
 
 .kikole-board .profile-name {
@@ -1963,7 +1963,8 @@ body { padding-top: 0; }
 .kikole-board .profile-name { color: var(--accent); }
 
 /* pagination par mois : libelle du mois capitalise ("Septembre 2026") */
-.kikole-board .pager[data-for="userStatsByDayTable"] .pager-range { text-transform: capitalize; min-width: 150px; font-family: var(--font-sans); font-size: 14px; }
+.kikole-board .pager[data-for="monthlyPodiumTable"] .pager-range,
+.kikole-board .pager[data-for="userStatsByDayTable"] .pager-range { text-transform: capitalize; min-width: 110px; font-family: var(--font-sans); font-size: 14px; }
 /* fleches jour joue precedent / suivant (Leaderboard/UserDay) : meme composant que la
    navigation de jour de la page de jeu, titre "Kikole du ..." entre les deux */
 .kikole-board .user-day-nav { margin: -2px 0 16px; gap: 10px; }
@@ -1978,3 +1979,98 @@ body { padding-top: 0; }
 }
 
 .kikole-board .dd-item { white-space: nowrap; }
+/* podiums : le nom (lien) prend la couleur de la medaille de sa colonne au lieu du vert des
+   liens ; le joueur connecte reste en vert d'accent, en gras, sur fond teinte */
+.kikole-board td[class*="medal-"] a { color: inherit; }
+
+.kikole-board td.you {
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  font-weight: 700;
+}
+/* ---------------------------------------------------------- badges "metal" (2026-09-26)
+   Badge obtenu = plaque de metal sombre a bordure epaisse (3px) en degrade d'or terni :
+   le fond est un degrade bronze/noir (padding-box), la bordure un degrade or clair -> or
+   sombre (border-box), plus un reflet diagonal et un liseré interieur. Le texte reste
+   clair sur fond sombre (contraste eleve). Badge secret : meme plaque, bord plus vif et
+   halo. Badge manquant : inchange (pointilles, aucun metal - on ne l'a pas gagne). */
+
+.kikole-board .badge-card {
+  position: relative;
+  overflow: hidden;
+  border: 3px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(155deg, #3b3320 0%, #221e14 38%, #2e2718 62%, #1b1810 100%) padding-box,
+    linear-gradient(135deg, #d8b356 0%, #7b5d1d 27%, #c39b3f 52%, #5b4413 78%, #b18831 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 228, 150, 0.22),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.kikole-board .badge-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 28%, rgba(255, 236, 170, 0.11) 46%, transparent 62%);
+}
+
+.kikole-board .badge-card .badge-icon {
+  color: #e6bf58;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
+}
+
+.kikole-board .badge-card .badge-name { color: #f8ebc0; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6); }
+
+.kikole-board .badge-card .badge-desc summary { border-bottom-color: rgba(230, 191, 88, 0.45); }
+.kikole-board .badge-card .badge-desc summary:hover { color: #f3d98a; }
+.kikole-board .badge-card .badge-desc summary:hover::before { border-color: #f3d98a; color: #f3d98a; }
+
+.kikole-board .badge-card .badge-date {
+  color: #f0cf78;
+  border-color: rgba(230, 191, 88, 0.7);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.kikole-board .badge-card .badge-holders b { color: #f8ebc0; }
+
+.kikole-board .badge-card.secret {
+  background:
+    linear-gradient(155deg, #4a3d1e 0%, #2a2213 40%, #37301a 62%, #1f1b0f 100%) padding-box,
+    linear-gradient(135deg, #f0d27c 0%, #9a7622 27%, #e2bd55 52%, #7a5c19 78%, #d3a63d 100%) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 232, 160, 0.3),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+    0 0 14px rgba(232, 180, 76, 0.32),
+    0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.kikole-board .badge-card.missing {
+  border: 2px dashed var(--border-strong);
+  background: transparent;
+  box-shadow: none;
+}
+
+.kikole-board .badge-card.missing::after { display: none; }
+.kikole-board .badge-card.missing .badge-icon { color: var(--text-faint); filter: none; }
+.kikole-board .badge-card.missing .badge-name { color: var(--text-faint); text-shadow: none; }
+
+/* feu d'artifice : le canvas passe devant la popin (pointer-events: none deja en place,
+   les clics traversent) */
+.kikole-board .win-modal-confetti { z-index: 2; }
+/* badge pas encore obtenu : la meme plaque, en version tres attenuee (metal presque eteint,
+   bordure de 3px brun-gris, reflet supprime) ; texte assez clair pour rester lisible */
+.kikole-board .badge-card.missing {
+  border: 3px solid transparent;
+  background:
+    linear-gradient(155deg, #23211c 0%, #1a1916 45%, #201e19 70%, #161512 100%) padding-box,
+    linear-gradient(135deg, #5f5843 0%, #3a3628 30%, #55503c 55%, #32301f 80%, #4d4735 100%) border-box;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.06), inset 0 -2px 5px rgba(0, 0, 0, 0.45);
+}
+
+.kikole-board .badge-card.missing .badge-icon { color: #8b7d55; filter: none; }
+.kikole-board .badge-card.missing .badge-name { color: #cbc3ad; text-shadow: none; }
+.kikole-board .badge-card.missing .badge-desc summary { border-bottom-color: rgba(203, 195, 173, 0.35); }
+.kikole-board .badge-card.missing .badge-holders,
+.kikole-board .badge-card.missing .badge-holders b { color: #b3ab96; }
