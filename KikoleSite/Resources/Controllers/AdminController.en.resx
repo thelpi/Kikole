@@ -129,6 +129,9 @@
   <data name="ClubOk" xml:space="preserve">
     <value>Club created!</value>
   </data>
+  <data name="ClubNameAlreadyExists" xml:space="preserve">
+    <value>A club already exists under this name</value>
+  </data>
   <data name="ClueAvailable" xml:space="preserve">
     <value>A new clue is available</value>
   </data>

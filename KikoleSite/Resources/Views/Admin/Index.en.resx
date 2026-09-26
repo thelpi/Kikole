@@ -139,7 +139,7 @@
     <value>Clubs career</value>
   </data>
   <data name="ClubsTip1" xml:space="preserve">
-    <value>in chronological order, senior career only, without B teams</value>
+    <value>in chronological order, senior career only, without B or amateur teams</value>
   </data>
   <data name="ClubsTip2" xml:space="preserve">
     <value>if more than 15 clubs, set the first 15 and the administrator will complete the rest; please create the missing clubs beforehand</value>
@@ -206,6 +206,6 @@
   </data>
   <data name="NewChartLaius" xml:space="preserve">
     <value>&lt;p&gt;If your kikolé is accepted by the moderator, it'll be scheduled for the next available day.&lt;/p&gt;
-&lt;p&gt;On this day, you won't be able to play but you'll win {0} points.&lt;/p&gt;</value>
+&lt;p&gt;On this day, you won't be able to play but you'll win &lt;strong class="greentext"&gt;{0} points&lt;/strong&gt;.&lt;/p&gt;</value>
   </data>
 </root>

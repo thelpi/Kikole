@@ -91,6 +91,81 @@ public class InternationalServiceTests
         club.Should().BeNull();
     }
 
+    // ------------------------------------------------------------- doublons de nom
+
+    private static ClubRequest NamedRequest(ulong id, ulong countryId, string frName, string enName, params string[] alternativesFr)
+    {
+        return new ClubRequest
+        {
+            Id = id,
+            CountryId = countryId,
+            NamesByLanguage = new Dictionary<Languages, IReadOnlyList<string>>
+            {
+                { Languages.fr, new[] { frName }.Concat(alternativesFr).ToList() },
+                { Languages.en, new[] { enName } }
+            }
+        };
+    }
+
+    private InternationalService ServiceWithMilan()
+    {
+        var clubRepository = new Mock<IClubRepository>();
+        clubRepository.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new List<ClubDto>
+        {
+            ClubDtoBuilder.Valid().WithId(1).WithName("Milan AC").WithCountryId(10).Build()
+        });
+        clubRepository.Setup(_ => _.GetClubTranslationsAsync()).ReturnsAsync(new List<ClubTranslationDto>
+        {
+            new() { ClubId = 1, LanguageId = (ulong)Languages.fr, Priority = 0, Name = "Milan AC" },
+            new() { ClubId = 1, LanguageId = (ulong)Languages.fr, Priority = 1, Name = "Milan A.C." },
+            new() { ClubId = 1, LanguageId = (ulong)Languages.en, Priority = 0, Name = "AC Milan" }
+        });
+
+        return new InternationalService(_internationalRepository.Object, clubRepository.Object);
+    }
+
+    [Theory]
+    [InlineData("Autre", "AC MILAN")]
+    [InlineData("milan ac", "Other")]
+    [InlineData("Autre", "Other", "Milan A.C.")]
+    [InlineData("Autre", "Other", "Milan-AC")]
+    [InlineData("Autre", "A.C. Milan")]
+    public async Task ClubNameAlreadyExistsAsync_SameCountry_MatchesAnyNameIgnoringCaseAndAccents(
+        string frName, string enName, params string[] alternativesFr)
+    {
+        var exists = await ServiceWithMilan()
+            .ClubNameAlreadyExistsAsync(NamedRequest(0, 10, frName, enName, alternativesFr));
+
+        exists.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ClubNameAlreadyExistsAsync_OtherCountry_IsAllowed()
+    {
+        var exists = await ServiceWithMilan()
+            .ClubNameAlreadyExistsAsync(NamedRequest(0, 11, "Milan AC", "AC Milan"));
+
+        exists.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ClubNameAlreadyExistsAsync_UpdatingTheClubItself_IsAllowed()
+    {
+        var exists = await ServiceWithMilan()
+            .ClubNameAlreadyExistsAsync(NamedRequest(1, 10, "Milan AC", "AC Milan"));
+
+        exists.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ClubNameAlreadyExistsAsync_NewNames_IsAllowed()
+    {
+        var exists = await ServiceWithMilan()
+            .ClubNameAlreadyExistsAsync(NamedRequest(0, 10, "Inter", "Inter Milan"));
+
+        exists.Should().BeFalse();
+    }
+
     // ------------------------------------------------------------- ecriture
 
     [Fact]

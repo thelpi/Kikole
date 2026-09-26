@@ -121,7 +121,13 @@
     <value>Retour à l'accueil</value>
   </data>
   <data name="ErrorMessage" xml:space="preserve">
-    <value>Une erreur s'est produite.</value>
+    <value>Vous pouvez réessayer ou revenir à l'accueil.</value>
+  </data>
+  <data name="ErrorPersists" xml:space="preserve">
+    <value>Si le problème persiste, &lt;a href="/Home/Contact"&gt;contactez l'administrateur&lt;/a&gt;.</value>
+  </data>
+  <data name="ErrorPersistsAnonymous" xml:space="preserve">
+    <value>Si le problème persiste, contactez l'administrateur.</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Une erreur est survenue</value>

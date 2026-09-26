@@ -263,3 +263,6 @@ __pycache__/
 *appsettings.json
 *appsettings.Development.json
 /.claude
+
+# journaux d'erreurs locaux (LogsFilePathFormat)
+ErrorLogs/

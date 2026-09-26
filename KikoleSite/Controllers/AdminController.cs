@@ -515,11 +515,16 @@ public class AdminController : KikoleBaseController
         var validityRequest = request.IsValid(_localizer);
         if (!string.IsNullOrWhiteSpace(validityRequest))
             model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
+        else if (await _internationalService.ClubNameAlreadyExistsAsync(request))
+            model.ErrorMessage = _localizer["ClubNameAlreadyExists"];
         else
         {
             await _internationalService
                 .CreateOrUpdateClubAsync(request);
 
+            // les champs re-affiches viennent d'abord de ce que le formulaire a poste
+            // (ModelState), pas du nouveau modele : sans ca le formulaire resterait rempli
+            ModelState.Clear();
             model = new ClubCreationModel
             {
                 InfoMessage = _localizer["ClubOk"]

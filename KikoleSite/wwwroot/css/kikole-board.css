@@ -1356,7 +1356,7 @@ body { padding-top: 0; }
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1882,3 +1882,36 @@ body { padding-top: 0; }
 }
 
 .kikole-board .actions button:disabled:hover { background: var(--surface); border-color: var(--border); color: var(--text); }
+
+/* case a cocher + libelle sur une ligne, centres verticalement (Admin/Index : "Pret ?", "Rester anonyme") */
+.kikole-board .check-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kikole-board .check-line .blank { flex: 1; min-width: 0; }
+
+.kikole-board .club-line-input { margin-bottom: 6px; }
+
+.kikole-board .check-line input[type="checkbox"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.kikole-board .form-field .check-label {
+  display: inline;
+  margin: 0;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* "vous gagnerez quand meme 1000 points" (resx, classe .greentext) */
+.kikole-board strong.greentext { font-weight: 700; }
+
+/* login affiche en vert (Account/Index, "Vous etes connecte en tant que") */
+.kikole-board .form-static.accent { color: var(--accent); }
+/* zone de saisie d'un message (Contact, Admin/Discussion) : pleine largeur, comme les bulles */
+.kikole-board .form-field textarea.blank { max-width: 100%; }

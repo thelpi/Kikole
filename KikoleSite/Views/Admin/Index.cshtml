@@ -112,11 +112,11 @@
                     var name = $"Club{i}";
                     var idName = $"Club{i}Id";
                     var loanChk = $"IsLoan{i}";
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                    <div class="check-line club-line-input">
                         <input type="text" id="@name" name="@(name)Value" class="blank" />
                         <input type="hidden" id="@idName" name="@idName" />
-                        <label style="font-size:11px;color:var(--text-muted);white-space:nowrap;line-height:14px">@localizer["IsLoan"]</label>
-                        @Html.CheckBox(loanChk, new { style = "margin:0;width:14px;height:14px" })
+                        <label class="check-label" for="@loanChk">@localizer["IsLoan"]</label>
+                        @Html.CheckBox(loanChk)
                     </div>
                 }
                 <div class="form-hint">@localizer["ClubsTip2"]</div>
@@ -124,8 +124,10 @@
             </div>
 
             <div class="form-field">
-                <label style="display:inline">@localizer["RemainsAnonymous"]</label>
-                @Html.CheckBoxFor(m => m.HideCreator)
+                <div class="check-line">
+                    <label class="check-label" for="@Html.IdFor(m => m.HideCreator)">@localizer["RemainsAnonymous"]</label>
+                    @Html.CheckBoxFor(m => m.HideCreator)
+                </div>
                 <div class="form-hint spaced">@localizer["RemainsAnonymousTip"]</div>
             </div>
 

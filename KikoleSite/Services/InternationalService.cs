@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Helpers;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
@@ -89,6 +90,26 @@ public class InternationalService : IInternationalService
         await _clubRepository.ReplaceClubTranslationsAsync(clubId, request.ToTranslationDtos(clubId));
 
         InvalidateClubs();
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ClubNameAlreadyExistsAsync(ClubRequest request)
+    {
+        var requested = request.NamesByLanguage.Values
+            .SelectMany(names => names)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name.SanitizeForSearch())
+            .ToHashSet();
+
+        var clubs = await GetClubsAsync();
+
+        return clubs.Any(club =>
+            club.Id != request.Id
+            && club.CountryId == request.CountryId
+            && club.NamesByLanguage.Values
+                .SelectMany(names => names)
+                .Append(club.Name)
+                .Any(name => requested.Contains(name.SanitizeForSearch())));
     }
 
     /// <inheritdoc />

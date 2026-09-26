@@ -129,6 +129,9 @@
   <data name="ClubOk" xml:space="preserve">
     <value>Club créé !</value>
   </data>
+  <data name="ClubNameAlreadyExists" xml:space="preserve">
+    <value>Un club existe déjà sous ce nom</value>
+  </data>
   <data name="ClueAvailable" xml:space="preserve">
     <value>Un nouvel indice est disponible</value>
   </data>

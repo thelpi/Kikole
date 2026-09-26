@@ -40,6 +40,19 @@ public interface IInternationalService
     Task CreateOrUpdateClubAsync(ClubRequest request);
 
     /// <summary>
+    /// Indique si un autre club du même pays porte déjà l'un des noms de la demande
+    /// (nom principal ou alternatif, dans n'importe quelle langue, sans tenir compte de la
+    /// casse, des accents ni de la ponctuation : "Milan A.C." = "Milan AC").
+    /// </summary>
+    /// <remarks>
+    /// La règle est vraie sur les données actuelles (aucun doublon de nom dans un même pays,
+    /// vérifié en base le 2026-09-26, y compris ponctuation ignorée) ; elle sert à ne pas la casser.
+    /// </remarks>
+    /// <param name="request">Club à enregistrer ; son identifiant est exclu de la comparaison.</param>
+    /// <returns><c>true</c> si un autre club du pays porte déjà l'un de ces noms.</returns>
+    Task<bool> ClubNameAlreadyExistsAsync(ClubRequest request);
+
+    /// <summary>
     /// Les nationalités dans la langue demandée, indexées par leur code pays.
     /// </summary>
     /// <param name="language">Langue d'affichage.</param>

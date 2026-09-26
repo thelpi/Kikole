@@ -139,7 +139,7 @@
     <value>Carrière en club</value>
   </data>
   <data name="ClubsTip1" xml:space="preserve">
-    <value>dans l'ordre chronologique, sans la carrière junior ni les équipes B</value>
+    <value>dans l'ordre chronologique, sans la carrière junior ni les équipes B ou amateurs</value>
   </data>
   <data name="ClubsTip2" xml:space="preserve">
     <value>si plus de 15 clubs, mettre les 15 premiers et l'administrateur complètera ; merci de créer les clubs manquants en avance</value>
@@ -206,6 +206,6 @@
   </data>
   <data name="NewChartLaius" xml:space="preserve">
     <value>&lt;p&gt;Si votre kikolé est accepté par le modérateur, il sera programmé pour le prochain jour disponible.&lt;/p&gt;
-&lt;p&gt;Ce jour là, vous ne pourrez pas jouer mais vous gagnerez quand même {0} points.&lt;/p&gt;</value>
+&lt;p&gt;Ce jour-là, vous ne pourrez pas jouer mais vous gagnerez quand même &lt;strong class="greentext"&gt;{0} points&lt;/strong&gt;.&lt;/p&gt;</value>
   </data>
 </root>
