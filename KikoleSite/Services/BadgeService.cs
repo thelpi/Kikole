@@ -827,18 +827,18 @@ public class BadgeService : IBadgeService
         IReadOnlyCollection<BadgeDto> badgesDto,
         Languages language)
     {
-        string? description = null;
+        BadgeTranslationDto? translation = null;
 
         if (language != Languages.en)
         {
-            description = await _badgeRepository
-                .GetBadgeDescriptionAsync(badge, (ulong)language);
+            translation = await _badgeRepository
+                .GetBadgeTranslationAsync(badge, (ulong)language);
         }
 
         var users = await _badgeRepository
             .GetUsersWithBadgeAsync(badge);
 
-        return new Badge(badgesDto.Single(_ => _.Id == badge), users.Count, description);
+        return new Badge(badgesDto.Single(_ => _.Id == badge), users.Count, translation);
     }
 
     private async Task<IReadOnlyCollection<LeaderDto>> GetLeadersHistoryAsync(

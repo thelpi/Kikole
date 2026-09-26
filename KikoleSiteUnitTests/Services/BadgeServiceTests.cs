@@ -737,7 +737,7 @@ public class BadgeServiceTests
     }
 
     [Fact]
-    public async Task GetAllBadgesAsync_UsesTheTranslatedDescriptionWhenNotEnglish()
+    public async Task GetAllBadgesAsync_UsesTheTranslatedNameAndDescriptionWhenNotEnglish()
     {
         _badgeRepository.Setup(_ => _.GetBadgesAsync(false))
             .ReturnsAsync(new List<BadgeDto>
@@ -745,12 +745,32 @@ public class BadgeServiceTests
                 BadgeDtoBuilder.Valid().WithId(1).WithName("A").WithDescription("English description").Build()
             });
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(1)).ReturnsAsync(new List<UserBadgeDto>());
-        _badgeRepository.Setup(_ => _.GetBadgeDescriptionAsync(1, (ulong)Languages.fr))
-            .ReturnsAsync("Description en francais");
+        _badgeRepository.Setup(_ => _.GetBadgeTranslationAsync(1, (ulong)Languages.fr))
+            .ReturnsAsync(new BadgeTranslationDto { Name = "Nom en francais", Description = "Description en francais" });
 
         var result = await _service.GetAllBadgesAsync(Languages.fr);
 
-        result.Should().ContainSingle().Which.Description.Should().Be("Description en francais");
+        var badge = result.Should().ContainSingle().Subject;
+        badge.Name.Should().Be("Nom en francais");
+        badge.Description.Should().Be("Description en francais");
+    }
+
+    [Fact]
+    public async Task GetAllBadgesAsync_KeepsTheEnglishNameAndDescriptionForEnglish()
+    {
+        _badgeRepository.Setup(_ => _.GetBadgesAsync(false))
+            .ReturnsAsync(new List<BadgeDto>
+            {
+                BadgeDtoBuilder.Valid().WithId(1).WithName("A").WithDescription("English description").Build()
+            });
+        _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(1)).ReturnsAsync(new List<UserBadgeDto>());
+
+        var result = await _service.GetAllBadgesAsync(Languages.en);
+
+        var badge = result.Should().ContainSingle().Subject;
+        badge.Name.Should().Be("A");
+        badge.Description.Should().Be("English description");
+        _badgeRepository.Verify(_ => _.GetBadgeTranslationAsync(It.IsAny<ulong>(), It.IsAny<ulong>()), Times.Never);
     }
 
     [Fact]
@@ -762,12 +782,14 @@ public class BadgeServiceTests
                 BadgeDtoBuilder.Valid().WithId(1).WithName("A").WithDescription("English description").Build()
             });
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(1)).ReturnsAsync(new List<UserBadgeDto>());
-        _badgeRepository.Setup(_ => _.GetBadgeDescriptionAsync(1, (ulong)Languages.fr))
-            .ReturnsAsync((string?)null);
+        _badgeRepository.Setup(_ => _.GetBadgeTranslationAsync(1, (ulong)Languages.fr))
+            .ReturnsAsync((BadgeTranslationDto?)null);
 
         var result = await _service.GetAllBadgesAsync(Languages.fr);
 
-        result.Should().ContainSingle().Which.Description.Should().Be("English description");
+        var badge = result.Should().ContainSingle().Subject;
+        badge.Name.Should().Be("A");
+        badge.Description.Should().Be("English description");
     }
 
     // ------------------------------------------------------------- OverTheTopPart1 / Part2 (unicite du jour)

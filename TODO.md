@@ -988,16 +988,25 @@ Branche de travail : `remaster-v2`.
       calculant, par utilisateur, `(badges obtenus / total des badges) %` ; à voir si les
       badges cachés doivent compter dans le total ou être exclus du calcul pour tout le
       monde sauf leur détenteur.
-- [ ] **Noms de badges en français.** Demandé par l'utilisateur (2026-09-26) pendant la
-      refonte visuelle : les badges ne devraient pas s'afficher en anglais en version
-      française, il faut leur trouver des équivalents FR. Constat : `badge_translations`
-      ne porte que la **description** (`description`, cf. `BadgeRepository.GetBadgeDescriptionAsync`) ;
-      le **nom** vient de `badges.name` (anglais : « Don Corleone », « The Famous Five »,
-      « OneMinuteChrono »…) et n'est jamais traduit. À faire : ajouter une colonne `name` à
-      `badge_translations` (schéma + `kikole.sql`), la remplir en FR pour chaque badge (à
-      valider avec l'utilisateur, certains noms sont des références à conserver), et
-      l'utiliser dans `BadgeService.GetBadgeAsync` comme pour la description.
-- [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
+- [x] **Noms de badges en français : mécanisme en place (2026-09-26), traductions à
+      fournir.** Demandé par l'utilisateur : les badges ne devaient pas s'afficher en anglais
+      en version française. `badge_translations` porte maintenant une colonne `name` en plus
+      de `description` (PK inchangée `(badge_id, language_id)`) ; nouveau
+      `BadgeTranslationDto` (`Name`, `Description`) et `IBadgeRepository.GetBadgeTranslationAsync`
+      (remplace `GetBadgeDescriptionAsync`) ; `Badge` prend nom et description traduits, avec
+      repli **champ par champ** sur `badges.name`/`badges.description` si la traduction est
+      absente ou vide ; `BadgeService.GetBadgeAsync` ne consulte la table qu'hors anglais.
+      Testé (`MappingModelsTests`, `BadgeServiceTests`), vérifié en direct (nom FR temporaire
+      sur un badge : affiché en français, inchangé en anglais). **En attendant les
+      traductions, chaque ligne FR de `kikole.sql` reprend le nom anglais** (33 badges).
+      - [ ] **Reste : fournir les noms français** (UPDATE des 33 lignes `language_id = 2`
+        dans `kikole.sql` ; certains noms sont des références à conserver, ex. « Don
+        Corleone », « Métro, boulot, kikolé, dodo »).
+      - [ ] **Migration à jouer sur toute base existante (locale déjà faite, prod à faire)** :
+        `ALTER TABLE badge_translations ADD COLUMN name varchar(255) COLLATE
+        utf8mb4_unicode_ci NOT NULL AFTER language_id;` puis `UPDATE badge_translations t
+        JOIN badges b ON b.id = t.badge_id SET t.name = b.name;`. Rétro-compatible : l'ancien
+        code ne lit que `description`, on peut donc migrer la base avant de déployer.- [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à
       `[Authorization(UserTypes.Administrator)]` — deux d'entre elles n'avaient jusqu'ici

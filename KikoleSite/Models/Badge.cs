@@ -14,11 +14,12 @@ public class Badge
 
     public bool Hidden { get; }
 
-    internal Badge(BadgeDto dto, int usersCount, string? description)
+    /// <param name="translation">Nom et description dans la langue demandée ; à défaut (ou champ vide), ceux du badge (anglais).</param>
+    internal Badge(BadgeDto dto, int usersCount, BadgeTranslationDto? translation)
     {
         Id = dto.Id;
-        Name = dto.Name;
-        Description = description ?? dto.Description;
+        Name = string.IsNullOrWhiteSpace(translation?.Name) ? dto.Name : translation.Name;
+        Description = string.IsNullOrWhiteSpace(translation?.Description) ? dto.Description : translation.Description;
         Users = usersCount;
         Hidden = dto.Hidden > 0;
     }

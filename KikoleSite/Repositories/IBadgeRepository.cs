@@ -23,5 +23,5 @@ public interface IBadgeRepository
 
     Task ResetBadgeDatasAsync(ulong badgeId);
 
-    Task<string?> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId);
+    Task<BadgeTranslationDto?> GetBadgeTranslationAsync(ulong badgeId, ulong languageId);
 }

@@ -129,8 +129,27 @@ public class MappingModelsTests
     {
         var dto = BadgeDtoBuilder.Valid().WithId(1).WithName("Un badge").WithDescription("english description").Build();
 
-        new Badge(dto, 1, "description française").Description.Should().Be("description française");
-        new Badge(dto, 1, null).Description.Should().Be("english description");
+        var translated = new Badge(dto, 1, new BadgeTranslationDto { Name = "Un badge en français", Description = "description française" });
+        translated.Name.Should().Be("Un badge en français");
+        translated.Description.Should().Be("description française");
+
+        var untranslated = new Badge(dto, 1, null);
+        untranslated.Name.Should().Be("Un badge");
+        untranslated.Description.Should().Be("english description");
+    }
+
+    [Fact]
+    public void Badge_FallsBackPerFieldWhenATranslatedFieldIsBlank()
+    {
+        var dto = BadgeDtoBuilder.Valid().WithId(1).WithName("A badge").WithDescription("english description").Build();
+
+        var blankName = new Badge(dto, 1, new BadgeTranslationDto { Name = " ", Description = "description française" });
+        blankName.Name.Should().Be("A badge");
+        blankName.Description.Should().Be("description française");
+
+        var blankDescription = new Badge(dto, 1, new BadgeTranslationDto { Name = "Un badge", Description = "" });
+        blankDescription.Name.Should().Be("Un badge");
+        blankDescription.Description.Should().Be("english description");
     }
 
     [Fact]

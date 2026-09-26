@@ -82,10 +82,10 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
                 new { badgeId });
     }
 
-    public async Task<string?> GetBadgeDescriptionAsync(ulong badgeId, ulong languageId)
+    public async Task<BadgeTranslationDto?> GetBadgeTranslationAsync(ulong badgeId, ulong languageId)
     {
-        return await ExecuteScalarAsync<string>(
-                "SELECT description FROM badge_translations " +
+        return await ExecuteScalarAsync<BadgeTranslationDto>(
+                "SELECT name, description FROM badge_translations " +
                 "WHERE badge_id = @badgeId " +
                 "AND language_id = @languageId",
                 new { badgeId, languageId });
