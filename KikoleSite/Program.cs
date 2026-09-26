@@ -120,14 +120,20 @@ builder.Services
 // supporte plusieurs implementations, executees toutes a chaque changement de mot de
 // passe). Timeout court + repli tolerant dans le validateur : l'API tierce ne doit jamais
 // bloquer un joueur.
-var hibpApiBaseUrl = builder.Configuration.GetValue<string>("HibpApiBaseUrl")
-    ?? "https://api.pwnedpasswords.com/";
-builder.Services.AddHttpClient(nameof(HibpPasswordValidator), client =>
+// "HibpCheckEnabled" (defaut vrai) permet de la couper : sur un poste dont l'acces a l'API est
+// bloque ou lent, chaque creation de compte / changement de mot de passe attend le timeout
+// (3 s) avant de laisser passer - desactive dans appsettings.Development.json.
+if (builder.Configuration.GetValue("HibpCheckEnabled", true))
 {
-    client.BaseAddress = new Uri(hibpApiBaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(3);
-});
-builder.Services.AddScoped<IPasswordValidator<ApplicationUser>, HibpPasswordValidator>();
+    var hibpApiBaseUrl = builder.Configuration.GetValue<string>("HibpApiBaseUrl")
+        ?? "https://api.pwnedpasswords.com/";
+    builder.Services.AddHttpClient(nameof(HibpPasswordValidator), client =>
+    {
+        client.BaseAddress = new Uri(hibpApiBaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(3);
+    });
+    builder.Services.AddScoped<IPasswordValidator<ApplicationUser>, HibpPasswordValidator>();
+}
 
 // remplace le normaliseur par defaut (majuscules seules) par celui qui applique la meme
 // regle de deduplication que le reste du projet (StringHelper.Sanitize).
