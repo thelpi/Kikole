@@ -255,4 +255,10 @@
   <data name="DayOne" xml:space="preserve">
     <value>Le 1er jour</value>
   </data>
+  <data name="PagerPreviousMonth" xml:space="preserve">
+    <value>Mois précédent</value>
+  </data>
+  <data name="PagerNextMonth" xml:space="preserve">
+    <value>Mois suivant</value>
+  </data>
 </root>

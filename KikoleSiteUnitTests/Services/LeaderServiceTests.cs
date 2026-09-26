@@ -219,6 +219,25 @@ public class LeaderServiceTests
         result.Should().BeEmpty();
     }
 
+    // ------------------------------------------------------------- GetUserStatisticsAsync
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_AdministratorHasNoPublicProfile_LikeAnUnknownUser()
+    {
+        _userRepository
+            .Setup(_ => _.GetUserByIdAsync(1))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithUserTypeId((ulong)UserTypes.Administrator).Build());
+        _userRepository
+            .Setup(_ => _.GetUserByIdAsync(404))
+            .ReturnsAsync((UserDto?)null);
+
+        var admin = await _service.GetUserStatisticsAsync(1, 0, "***", false);
+        var unknown = await _service.GetUserStatisticsAsync(404, 0, "***", false);
+
+        admin.Should().BeNull();
+        unknown.Should().BeNull();
+    }
+
     // ------------------------------------------------------------- ComputeMissingLeadersAsync
 
     private static ProposalDto Proposal(ProposalTypes type, bool successful, int minutes)

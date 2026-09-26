@@ -5,14 +5,16 @@
 <div class="kikole-board">
     <div class="form-card">
         <h2 class="profile-name">@Model.Login</h2>
-        <div class="form-field">
-            <label>@localizer["RegistrationDate"]</label>
-            <div class="form-static">@Model.RegistrationDate.ToNaString()</div>
-        </div>
-        <div class="form-field">
-            <label>@localizer["BestTime"]</label>
-            <div class="form-static">@Model.BestTime</div>
-        </div>
+        <div class="form-row">
+                <div class="form-field">
+                    <label>@localizer["RegistrationDate"]</label>
+                    <div class="form-static">@Model.RegistrationDate.ToNaString()</div>
+                </div>
+                <div class="form-field">
+                    <label>@localizer["BestTime"]</label>
+                    <div class="form-static">@Model.BestTime</div>
+                </div>
+            </div>
 
         <div class="table-wrap">
             <table>
@@ -61,8 +63,8 @@
 
     <div class="form-card">
         <h3>@localizer["StatsByDay"]</h3>
-        <div class="table-wrap">
-            <table>
+        <div class="table-wrap" data-prev-label="@localizer["PagerPreviousMonth"]" data-next-label="@localizer["PagerNextMonth"]">
+            <table id="userStatsByDayTable">
                 <thead>
                     <tr>
                         <th class="tabDataHead">@localizer["DateHeader"]</th>
@@ -82,7 +84,7 @@
                     @foreach (var stat in Model.Stats)
                     {
                         var trClass = stat.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
-                        <tr class="@trClass">
+                        <tr class="@trClass" data-month="@stat.Date.ToString("yyyy-MM")" data-month-label="@stat.Date.ToString("MMMM yyyy")">
                             <td class="tabData"><a href="/?day=@stat.DaysBefore">@stat.Date.ToNaString()</a></td>
                             <td class="tabData">@stat.Answer</td>
                             <td class="tabData">

@@ -144,4 +144,10 @@
   <data name="Value" xml:space="preserve">
     <value>Value</value>
   </data>
+  <data name="PreviousPlayedDay" xml:space="preserve">
+    <value>Previous day played</value>
+  </data>
+  <data name="NextPlayedDay" xml:space="preserve">
+    <value>Next day played</value>
+  </data>
 </root>

@@ -5,7 +5,33 @@
 <div class="kikole-board">
     <div class="form-card">
         <h2 class="profile-name">@Model.UserLogin</h2>
-        <div class="form-hint" style="margin:-4px 0 16px">@localizer["PlayerOf"] <span class="greentext">@Model.ProposalDate.ToNaString()</span></div>
+        <div class="day-nav user-day-nav">
+            @if (Model.PreviousDate.HasValue)
+            {
+                <a class="day-nav-arrow" href="/Leaderboard/UserDay?userId=@Model.UserId&date=@Model.PreviousDate.Value.ToString("yyyy-MM-dd")" title="@localizer["PreviousPlayedDay"]" aria-label="@localizer["PreviousPlayedDay"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+                </a>
+            }
+            else
+            {
+                <span class="day-nav-arrow disabled" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+                </span>
+            }
+            <span class="form-hint user-day-title">@localizer["PlayerOf"] <span class="greentext">@Model.ProposalDate.ToNaString()</span></span>
+            @if (Model.NextDate.HasValue)
+            {
+                <a class="day-nav-arrow" href="/Leaderboard/UserDay?userId=@Model.UserId&date=@Model.NextDate.Value.ToString("yyyy-MM-dd")" title="@localizer["NextPlayedDay"]" aria-label="@localizer["NextPlayedDay"]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                </a>
+            }
+            else
+            {
+                <span class="day-nav-arrow disabled" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                </span>
+            }
+        </div>
         <div class="form-field">
             <label>@localizer["PlayerToFind"]</label>
             <div class="form-static">@Model.PlayerName</div>

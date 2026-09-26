@@ -983,6 +983,15 @@ Branche de travail : `remaster-v2`.
       calculant, par utilisateur, `(badges obtenus / total des badges) %` ; à voir si les
       badges cachés doivent compter dans le total ou être exclus du calcul pour tout le
       monde sauf leur détenteur.
+- [ ] **Noms de badges en français.** Demandé par l'utilisateur (2026-09-26) pendant la
+      refonte visuelle : les badges ne devraient pas s'afficher en anglais en version
+      française, il faut leur trouver des équivalents FR. Constat : `badge_translations`
+      ne porte que la **description** (`description`, cf. `BadgeRepository.GetBadgeDescriptionAsync`) ;
+      le **nom** vient de `badges.name` (anglais : « Don Corleone », « The Famous Five »,
+      « OneMinuteChrono »…) et n'est jamais traduit. À faire : ajouter une colonne `name` à
+      `badge_translations` (schéma + `kikole.sql`), la remplir en FR pour chaque badge (à
+      valider avec l'utilisateur, certains noms sont des références à conserver), et
+      l'utiliser dans `BadgeService.GetBadgeAsync` comme pour la description.
 - [x] ~~Que faire des statistiques ?~~ — **décision : réservées à l'administrateur.** Les
       cinq actions concernées (`Stats`, `GetStatisticPlayersDistribution`,
       `GetStatisticActiveUsers`, `KikolesStats`, `GetKikolesStatisticsAsync`) sont passées à
@@ -1682,7 +1691,33 @@ Branche de travail : `remaster-v2`.
       retiré "Proposer un kikolé !"/"Contact" (redondants avec le nouveau menu, cf.
       ci-dessus) et "Vous aimez le vélo ?" (lien personnel, retiré à la demande) — il ne
       reste presque plus rien dedans, l'occasion de repenser ce qui doit vraiment y vivre
-      plutôt que de le laisser à l'état de résidu.
+      plutôt que de le laisser à l'état de résidu. À traiter avec les mentions légales
+      (identité de l'éditeur et de l'hébergeur, obligation LCEN) et l'information sur les
+      données personnelles (IP conservées : `users.ip`, historique de connexion, limitation
+      par IP) — le site collecte déjà des données personnelles sans email, donc le RGPD
+      s'applique déjà ; choix confirmé de rester **sans email** (2026-09-26).
+- [ ] **Refonte du texte de la page d'accueil** (introduction + règles). Demandé
+      (2026-09-26) : réorganiser le contenu (présentation / règles) et le rédiger ; le
+      texte est à écrire par l'utilisateur avant la mise en page. Aujourd'hui la page non
+      connectée empile annonce, règles (`Views/Home/Partial/Rules.cshtml`, gros bloc de
+      puces et sections « À propos de la nationalité / des clubs ») et bandeau de connexion,
+      et les règles sont répétées sous le jeu une fois connecté.
+- [ ] **Ressources externes chargées chez des tiers.** Chaque visiteur envoie son adresse IP
+      à Google Fonts (`fonts.googleapis.com`, IBM Plex Sans/Mono, Bebas Neue),
+      `code.jquery.com` (jQuery, jQuery UI + thème smoothness), Google Charts
+      (`gstatic.com/charts`, page admin Stats) et au CDN Bootstrap (`stackpath`, hors
+      Development). Point de vigilance RGPD (décision allemande de 2022 sur Google Fonts) :
+      les héberger dans `wwwroot` règle le problème et supprime une dépendance réseau.
+      Chantier lié à « Dépendances front datées » ci-dessous (même fichier `_Layout.cshtml`)
+      et au footer / mentions légales ci-dessus ; à cadrer ensemble.
+- [x] ~~Petits textes (10 à 11,5 px)~~ — **décision : on les conserve** (2026-09-26).
+      Étiquettes d'indice, aides sous les champs, coûts, en-têtes de tableau restent à leur
+      taille actuelle, malgré l'avis contraire donné à l'utilisateur (malvoyant) qui avait
+      proposé de tout passer à 12–13 px minimum, éventuellement avec des boutons A+/A−.
+- [x] ~~Comptes PowerUser : spécificités~~ — **décision : aucune.** La récupération de mot
+      de passe par question secrète ne protège que les administrateurs
+      (`AccountController.IsRecoveryForbidden`, refus indiscernable d'une mauvaise réponse) ;
+      les power users restent traités comme des comptes ordinaires.
 - [ ] **Dépendances front datées, à moderniser.** Chargées en prod uniquement en CDN, sans
       fallback ni SRI : jQuery **1.12.4** (`_Layout.cshtml`, sortie en 2016, ligne 1.x
       abandonnée — actuelle : 3.7.x), jQuery UI **1.12.1** (même génération, utilisé pour

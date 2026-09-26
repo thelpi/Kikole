@@ -155,16 +155,67 @@ public class LeaderboardController : KikoleBaseController
             ? proposals.Last().TotalPoints
             : ScoreCalculator.BasePoints;
 
+        var (previousDate, nextDate) = await GetNeighbourPlayedDaysAsync(userId, actualDate.Date);
+
         var model = new UserDayModel
         {
             ProposalDate = actualDate.Date,
             PlayerName = player.Player.Name,
             UserLogin = user.Login,
+            UserId = userId,
             ProposalDetails = items,
-            UserScore = db.Leaders.FirstOrDefault(_ => _.UserId == userId)?.Points ?? lastKnownPoints
+            UserScore = db.Leaders.FirstOrDefault(_ => _.UserId == userId)?.Points ?? lastKnownPoints,
+            PreviousDate = previousDate,
+            NextDate = nextDate
         };
 
         return View("UserDay", model);
+    }
+
+    /// <summary>
+    /// Jours joués les plus proches (avant / après) de <paramref name="date"/> pour ce joueur,
+    /// en ne gardant que ceux que le visiteur a le droit d'ouvrir : mêmes gardes d'accès que
+    /// <see cref="UserDay"/>, sinon une flèche mènerait à une page d'erreur. Un jour où le
+    /// joueur est créateur n'est pas un jour joué (aucune proposition), donc jamais proposé.
+    /// </summary>
+    private async Task<(DateTime? Previous, DateTime? Next)> GetNeighbourPlayedDaysAsync(ulong userId, DateTime date)
+    {
+        var todayGrant = await _proposalService
+            .GetGrantAccessForDayAsync(UserId, _clock.Today);
+
+        var stats = await _leaderService
+            .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName, todayGrant != DayGrantTypes.None);
+
+        if (stats == null)
+            return (null, null);
+
+        var playedDays = stats.Stats
+            .Where(s => s.Attempt)
+            .Select(s => s.Date.Date)
+            .Distinct()
+            .ToList();
+
+        var previous = await FirstViewableDayAsync(
+            playedDays.Where(d => d < date).OrderByDescending(d => d));
+
+        var next = await FirstViewableDayAsync(
+            playedDays.Where(d => d > date).OrderBy(d => d));
+
+        return (previous, next);
+    }
+
+    private async Task<DateTime?> FirstViewableDayAsync(IEnumerable<DateTime> candidates)
+    {
+        foreach (var candidate in candidates)
+        {
+            var grant = await _proposalService
+                .GetGrantAccessForDayAsync(UserId, candidate);
+
+            if (grant is DayGrantTypes.Creator or DayGrantTypes.Found or DayGrantTypes.Admin)
+                return candidate;
+        }
+
+        return null;
     }
 
     /// <summary>

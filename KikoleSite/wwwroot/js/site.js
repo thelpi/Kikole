@@ -320,24 +320,18 @@ var appendUsernameCell = function (row, userId, userName, href, currentUserId) {
     return newCell;
 };
 
-/* pagination cote navigateur des classements : 25 lignes par page, fleches precedent /
-   suivant sans numero de page. Les donnees arrivent deja completes (rendu serveur ou
-   appel AJAX), on masque simplement les lignes hors page ; a rappeler apres chaque
-   remplacement du <tbody>. Libelles des fleches : data-prev-label / data-next-label
-   sur le .table-wrap (localises par la vue). */
+/* pagination cote navigateur des tableaux : les donnees arrivent deja completes (rendu
+   serveur ou appel AJAX), on masque simplement les lignes hors page ; a rappeler apres
+   chaque remplacement du <tbody>. Fleches uniquement, sans numero de page. Libelles des
+   fleches : data-prev-label / data-next-label sur le .table-wrap (localises par la vue). */
 var LEADERBOARD_PAGE_SIZE = 25;
 
-var paginateTable = function (table) {
+/* barre de fleches placee sous le tableau (remplace l'eventuelle precedente) */
+var createPager = function (table) {
     var wrap = table.closest('.table-wrap');
     var old = wrap.parentNode.querySelector('.pager[data-for="' + table.id + '"]');
     if (old) {
         old.remove();
-    }
-
-    var rows = Array.prototype.slice.call(table.tBodies[0].rows);
-    rows.forEach(function (r) { r.hidden = false; });
-    if (rows.length <= LEADERBOARD_PAGE_SIZE) {
-        return;
     }
 
     var chevron = function (d) {
@@ -347,42 +341,103 @@ var paginateTable = function (table) {
     pager.className = 'pager';
     pager.setAttribute('data-for', table.id);
     pager.innerHTML =
-        '<button type="button" class="pager-btn" data-dir="-1" title="' + wrap.dataset.prevLabel + '" aria-label="' + wrap.dataset.prevLabel + '">' + chevron('M15 6l-6 6 6 6') + '</button>' +
+        '<button type="button" class="pager-btn" title="' + wrap.dataset.prevLabel + '" aria-label="' + wrap.dataset.prevLabel + '">' + chevron('M15 6l-6 6 6 6') + '</button>' +
         '<span class="pager-range"></span>' +
-        '<button type="button" class="pager-btn" data-dir="1" title="' + wrap.dataset.nextLabel + '" aria-label="' + wrap.dataset.nextLabel + '">' + chevron('M9 6l6 6-6 6') + '</button>';
+        '<button type="button" class="pager-btn" title="' + wrap.dataset.nextLabel + '" aria-label="' + wrap.dataset.nextLabel + '">' + chevron('M9 6l6 6-6 6') + '</button>';
     wrap.insertAdjacentElement('afterend', pager);
 
+    var buttons = pager.querySelectorAll('.pager-btn');
+    return { pager: pager, prev: buttons[0], next: buttons[1], label: pager.querySelector('.pager-range') };
+};
+
+/* alternance de couleurs recalculee sur les seules lignes visibles */
+var restripe = function (rows) {
+    var zebra = 0;
+    rows.forEach(function (r) {
+        if (!r.hidden && !r.classList.contains('creator')) {
+            r.classList.remove('even', 'odd');
+            r.classList.add(zebra % 2 === 0 ? 'even' : 'odd');
+            zebra++;
+        }
+    });
+};
+
+/* 25 lignes par page (classements) */
+var paginateTable = function (table) {
+    var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+    rows.forEach(function (r) { r.hidden = false; });
+    var old = table.closest('.table-wrap').parentNode.querySelector('.pager[data-for="' + table.id + '"]');
+    if (old) {
+        old.remove();
+    }
+    if (rows.length <= LEADERBOARD_PAGE_SIZE) {
+        return;
+    }
+
+    var ui = createPager(table);
     var pageCount = Math.ceil(rows.length / LEADERBOARD_PAGE_SIZE);
     var page = 0;
-    var buttons = pager.querySelectorAll('.pager-btn');
 
     var show = function () {
         var start = page * LEADERBOARD_PAGE_SIZE;
         var end = Math.min(start + LEADERBOARD_PAGE_SIZE, rows.length);
-        var zebra = 0;
-        rows.forEach(function (r, i) {
-            var visible = i >= start && i < end;
-            r.hidden = !visible;
-            if (visible && !r.classList.contains('creator')) {
-                r.classList.remove('even', 'odd');
-                r.classList.add(zebra % 2 === 0 ? 'even' : 'odd');
-                zebra++;
-            }
-        });
-        pager.querySelector('.pager-range').textContent = (start + 1) + '\u2013' + end + ' / ' + rows.length;
-        buttons[0].disabled = page === 0;
-        buttons[1].disabled = page === pageCount - 1;
+        rows.forEach(function (r, i) { r.hidden = !(i >= start && i < end); });
+        restripe(rows);
+        ui.label.textContent = (start + 1) + '\u2013' + end + ' / ' + rows.length;
+        ui.prev.disabled = page === 0;
+        ui.next.disabled = page === pageCount - 1;
     };
 
-    buttons.forEach(function (b) {
-        b.addEventListener('click', function () {
-            page = Math.max(0, Math.min(pageCount - 1, page + parseInt(b.getAttribute('data-dir'), 10)));
-            show();
-        });
-    });
+    ui.prev.addEventListener('click', function () { page = Math.max(0, page - 1); show(); });
+    ui.next.addEventListener('click', function () { page = Math.min(pageCount - 1, page + 1); show(); });
     show();
 };
 
+/* un mois par page (statistiques quotidiennes d'un joueur, plus recent d'abord) : chaque
+   <tr> porte data-month ("2026-09") et data-month-label (libelle localise). La fleche de
+   gauche remonte dans le temps (mois plus ancien), celle de droite revient vers le present. */
+var paginateTableByMonth = function (table) {
+    var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+    var months = [];
+    rows.forEach(function (r) {
+        var m = r.getAttribute('data-month');
+        if (m && months.indexOf(m) < 0) {
+            months.push(m);
+        }
+    });
+    if (months.length <= 1) {
+        return;
+    }
+
+    var ui = createPager(table);
+    var index = 0;
+
+    var show = function () {
+        var current = months[index];
+        var label = '';
+        rows.forEach(function (r) {
+            r.hidden = r.getAttribute('data-month') !== current;
+            if (!r.hidden && !label) {
+                label = r.getAttribute('data-month-label');
+            }
+        });
+        restripe(rows);
+        ui.label.textContent = label;
+        ui.prev.disabled = index === months.length - 1;
+        ui.next.disabled = index === 0;
+    };
+
+    ui.prev.addEventListener('click', function () { index = Math.min(months.length - 1, index + 1); show(); });
+    ui.next.addEventListener('click', function () { index = Math.max(0, index - 1); show(); });
+    show();
+};
+
+$(function () {
+    var byDay = document.getElementById('userStatsByDayTable');
+    if (byDay) {
+        paginateTableByMonth(byDay);
+    }
+});
 /* leaderboard loading */
 var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText, currentUserId) {
     if (!dateMin || !dateMax) {

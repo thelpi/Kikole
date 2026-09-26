@@ -144,7 +144,9 @@ public class LeaderService : ILeaderService
         var user = await _userRepository
             .GetUserByIdAsync(userId);
 
-        if (user == null)
+        // un administrateur n'a pas de fiche publique : indiscernable d'un compte inconnu,
+        // sinon /Leaderboard?userId=N (identifiants sequentiels) suffirait a les reperer
+        if (user == null || user.UserTypeId == (ulong)UserTypes.Administrator)
             return null;
 
         var requestUser = await _userRepository

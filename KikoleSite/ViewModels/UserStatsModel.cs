@@ -75,7 +75,9 @@ public class UserStatsModel
         AverageTime = apiStat.AverageTime.ToNaString();
         AverageTimeDayOne = apiStat.AverageTimeDayOne.ToNaString();
         BestTime = apiStat.BestTime.ToNaString();
+        // plus recent d'abord : la vue les pagine mois par mois en partant du mois courant
         Stats = apiStat.Stats
+            .OrderByDescending(s => s.Date)
             .Select(s => new SingleUserStatModel(s, clock))
             .ToList();
         Badges = badges;

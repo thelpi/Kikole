@@ -127,6 +127,71 @@ public class LeaderboardControllerTests
         model.ProposalDetails.Should().ContainSingle();
     }
 
+    private void SetUpUserDayNeighbours(ulong viewer, ulong viewedUser, params (int dayOffset, bool played, DayGrantTypes grant)[] days)
+    {
+        SetUser(viewer);
+
+        _userRepository
+            .Setup(_ => _.GetUserByIdAsync(viewedUser))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(viewedUser).WithLogin("cible").WithType(UserTypes.StandardUser).Build());
+
+        var playerFull = PlayerFullDtoBuilder.Valid().WithPlayer(PlayerDtoBuilder.Valid().WithCreator(99).Build()).Build();
+        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>())).ReturnsAsync(playerFull);
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        _leaderService
+            .Setup(_ => _.GetDayboardAsync(It.IsAny<DateTime>(), DayLeaderSorts.BestTime, TestCountryContinents.Map))
+            .ReturnsAsync(new Dayboard { Date = Today, Leaders = [], Searchers = [] });
+        _proposalService
+            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), viewedUser, TestCountryContinents.Map))
+            .ReturnsAsync(Array.Empty<ProposalResponse>());
+
+        // le jour consulte (Today) et le jour "courant" sont toujours consultables
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(viewer, Today)).ReturnsAsync(DayGrantTypes.Admin);
+        foreach (var (offset, _, grant) in days)
+            _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(viewer, Today.AddDays(offset))).ReturnsAsync(grant);
+
+        var stats = new UserStat(
+            days.Select(d => new DailyUserStat(viewedUser, Today.AddDays(d.dayOffset), "***", false, d.played, [], null)).ToList(),
+            "cible",
+            Today.AddYears(-1));
+        _leaderService
+            .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", true))
+            .ReturnsAsync(stats);
+    }
+
+    [Fact]
+    public async Task UserDay_NeighbourDays_SkipDaysNotPlayedAndDaysTheViewerCannotOpen()
+    {
+        // avant : -1 non joue, -2 joue mais non consultable, -3 joue et consultable
+        SetUpUserDayNeighbours(1, 2,
+            (-3, true, DayGrantTypes.Found),
+            (-2, true, DayGrantTypes.None),
+            (-1, false, DayGrantTypes.Found));
+
+        var result = await _controller.UserDay(2, Today.ToString("yyyy-MM-dd"));
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.UserDayModel>().Subject;
+        model.UserId.Should().Be(2);
+        model.PreviousDate.Should().Be(Today.AddDays(-3));
+        model.NextDate.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task UserDay_NeighbourDays_LinkToTheNextPlayedDayWhenThereIsOne()
+    {
+        // on consulte Today-2 : le jour suivant joue et consultable est Today-1, pas Today
+        SetUpUserDayNeighbours(1, 2,
+            (-2, true, DayGrantTypes.Found),
+            (-1, true, DayGrantTypes.Found),
+            (0, true, DayGrantTypes.Found));
+
+        var result = await _controller.UserDay(2, Today.AddDays(-2).ToString("yyyy-MM-dd"));
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.UserDayModel>().Subject;
+        model.PreviousDate.Should().BeNull();
+        model.NextDate.Should().Be(Today.AddDays(-1));
+    }
+
     [Fact]
     public async Task UserDay_UnparsableDate_RedirectsToErrorIndex()
     {
@@ -323,5 +388,37 @@ public class LeaderboardControllerTests
         model.Login.Should().Be("cible");
         model.IsHimself.Should().BeFalse();
         model.TotalPoints.Should().Be(500);
+    }
+
+    [Fact]
+    public async Task Index_WithKnownUserId_ListsTheDailyStatsMostRecentFirst()
+    {
+        const ulong viewer = 1;
+        const ulong viewedUser = 2;
+        SetUser(viewer);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(viewer, Today)).ReturnsAsync(DayGrantTypes.Found);
+
+        var stats = new UserStat(
+            [
+                new DailyUserStat(Today.AddDays(-2), "Ancien", 100),
+                new DailyUserStat(Today, "Recent", 300),
+                new DailyUserStat(Today.AddDays(-1), "Milieu", 200)
+            ],
+            "cible",
+            Today.AddYears(-1));
+        _leaderService
+            .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", true))
+            .ReturnsAsync(stats);
+
+        var language = ViewHelper.GetLanguage();
+        _badgeService
+            .Setup(_ => _.GetUserBadgesAsync(viewedUser, viewer, language, true))
+            .ReturnsAsync(Array.Empty<UserBadge>());
+        _badgeService.Setup(_ => _.GetAllBadgesAsync(language)).ReturnsAsync(Array.Empty<Badge>());
+
+        var result = await _controller.Index(userId: viewedUser);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.UserStatsModel>().Subject;
+        model.Stats.Select(s => s.Answer).Should().ContainInOrder("Recent", "Milieu", "Ancien");
     }
 }
