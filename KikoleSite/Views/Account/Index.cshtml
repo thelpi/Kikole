@@ -144,10 +144,13 @@
                     <label>@localizer["RepeatPwd"]</label>
                     @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
                 </div>
-                <div class="form-field">
-                    <label>@localizer["SponsorLogin"]</label>
-                    @Html.TextBoxFor(m => m.SponsorLoginSubmission, new { @class = "blank" })
-                </div>
+                @if (Model.SponsorshipEnabled)
+                {
+                    <div class="form-field">
+                        <label>@localizer["SponsorLogin"]</label>
+                        @Html.TextBoxFor(m => m.SponsorLoginSubmission, new { @class = "blank" })
+                    </div>
+                }
                 <p class="form-hint">@localizer["TipRecovery"]</p>
                 <div class="form-field">
                     <label>@localizer["RecQuestion"]</label>

@@ -32,11 +32,16 @@ public class AccountModel
 
     public bool RegistrationInviteEnabled { get; set; }
 
+    /// <summary>Systeme de parrainage actif (config <c>Registration:SponsorshipEnabled</c>) -
+    /// desactive, ni le champ d'inscription ni la section "Mon compte" ne s'affichent.</summary>
+    public bool SponsorshipEnabled { get; set; }
+
     /// <summary>Login du parrain de l'utilisateur connecte, ou <c>null</c> si non parraine.</summary>
     public string? SponsorLogin { get; set; }
 
     public IReadOnlyList<(string Login, bool IsDisabled)> Godchildren { get; set; } = [];
 
-    /// <summary>La section parrainage ne s'affiche que si elle a quelque chose a montrer.</summary>
-    public bool HasSponsorshipInfo => SponsorLogin != null || Godchildren.Count > 0;
+    /// <summary>La section parrainage ne s'affiche que si le systeme est actif et qu'elle
+    /// a quelque chose a montrer.</summary>
+    public bool HasSponsorshipInfo => SponsorshipEnabled && (SponsorLogin != null || Godchildren.Count > 0);
 }

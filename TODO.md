@@ -17,7 +17,7 @@ Branche de travail : `remaster-v2`.
 | Accès aux données | Dapper sur **MySqlConnector** (`MySql.Data` retiré) |
 | Références nullables | activées, **zéro avertissement** sur les deux projets |
 | Syntaxe | C# moderne : `record`/`init` sur les DTO et requêtes, namespaces à portée fichier, aucun `ConfigureAwait` |
-| Tests | **699** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
+| Tests | **702** unitaires (mockés, rapides, `KikoleSiteUnitTests`) + **5** d'intégration (vraie base, `KikoleSiteIntegrationTests`, projet séparé) |
 | Authentification | **ASP.NET Core Identity**, store Dapper maison (`KikoleSite/Identity/`) |
 | Base de production | extraite en texte (voir `Restauration/`) |
 
@@ -155,6 +155,33 @@ Branche de travail : `remaster-v2`.
         le décompte des deux badges ci-dessus — comportement actuel à retravailler la
         prochaine fois que ce chantier reprend (détail de ce qu'il faut changer à discuter
         à ce moment-là, pas encore précisé).
+      - [x] **Rendu optionnel via config (2026-09-26)** — l'utilisateur a un doute sur la
+        pertinence/validité globale du système (chantier de toute façon pas tout à fait
+        terminé, cf. point ci-dessus) et préfère pouvoir le couper sans décider maintenant.
+        Nouveau `Registration:SponsorshipEnabled` (bool, `false` par défaut dans
+        `appsettings.json` — choix délibéré vu le doute exprimé, à remonter à `true`
+        quand la décision sera prise). Désactivé : le champ "Login de votre parrain" ne
+        s'affiche plus sur le formulaire d'inscription (`Account/Index.cshtml`), aucun
+        `sponsor_user_id` n'est résolu à l'inscription même si le champ était rempli
+        (`AccountController.ResolveSponsorUserIdAsync` court-circuité en tête de
+        méthode), la section "Parrainage" de la page "Mon compte" ne s'affiche plus **même
+        pour un compte qui a déjà un parrain ou des filleuls en base** (`RenderIndexAsync`
+        saute entièrement le chargement, et `AccountModel.HasSponsorshipInfo` vérifie le
+        flag en plus des données comme filet de sécurité), et le recalcul des badges de
+        parrainage lors d'un recalcul global admin est sauté (`BadgeService.ResetBadgesAsync`,
+        nouvelle dépendance `IOptions<RegistrationOptions>` injectée). Les données
+        (`sponsor_user_id`, badges déjà obtenus) ne sont jamais effacées, seulement
+        masquées/ignorées tant que le flag est à `false` — remettre à `true` restaure tout
+        instantanément sans perte. **Portée volontairement limitée** : les badges déjà
+        obtenus (`DonCorleone`/`TheFamousFive`) restent visibles sur la page badges d'un
+        utilisateur qui les a — décision de ne pas les masquer rétroactivement, un badge
+        gagné reste gagné, seul le *mécanisme* d'acquisition est coupé. Testé (+3 tests :
+        `AccountControllerTests.cs` ×2, `BadgeServiceTests.cs` ×1, avec un nouvel helper
+        `BuildController`/`BuildService` dans chaque fichier pour construire une instance
+        avec une config différente de celle par défaut — `RegistrationOptions` étant un
+        `record` à propriétés `init`, la config ne peut pas être mutée après coup sur
+        l'instance déjà câblée dans le contrôleur/service de test). `dotnet build` propre,
+        `dotnet test` : 702 tests unitaires verts.
 
 ---
 

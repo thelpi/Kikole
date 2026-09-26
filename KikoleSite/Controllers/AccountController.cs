@@ -324,7 +324,7 @@ public class AccountController : KikoleBaseController
     /// </summary>
     private async Task<ulong?> ResolveSponsorUserIdAsync(string? sponsorLoginSubmission, string newAccountLogin)
     {
-        if (string.IsNullOrWhiteSpace(sponsorLoginSubmission))
+        if (!_registrationOptions.SponsorshipEnabled || string.IsNullOrWhiteSpace(sponsorLoginSubmission))
             return null;
 
         var sponsor = await _userManager.FindByNameAsync(sponsorLoginSubmission);
@@ -345,10 +345,11 @@ public class AccountController : KikoleBaseController
     private async Task<IActionResult> RenderIndexAsync(AccountModel model)
     {
         model.RegistrationInviteEnabled = _registrationOptions.InviteEnabled;
+        model.SponsorshipEnabled = _registrationOptions.SponsorshipEnabled;
         model.IsAuthenticated = UserId > 0;
         model.Login = UserLogin;
 
-        if (UserId > 0)
+        if (UserId > 0 && _registrationOptions.SponsorshipEnabled)
         {
             var me = await _userManager.FindByIdAsync(UserId.ToString());
             if (me?.SponsorUserId.HasValue == true)

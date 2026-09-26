@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KikoleSite.Configuration;
 using KikoleSite.Handlers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
+using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Services;
 
@@ -25,6 +27,7 @@ public class BadgeService : IBadgeService
     private readonly IUserRepository _userRepository;
     private readonly IClock _clock;
     private readonly IGameCalendar _gameCalendar;
+    private readonly RegistrationOptions _registrationOptions;
 
     /// <summary>
     /// Ctor.
@@ -37,6 +40,7 @@ public class BadgeService : IBadgeService
     /// <param name="userRepository">Instance of <see cref="IUserRepository"/>.</param>
     /// <param name="clock">Clock service.</param>
     /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
+    /// <param name="registrationOptions">Options de la section <c>Registration</c>.</param>
     public BadgeService(IPlayerHandler playerHandler,
         IBadgeRepository badgeRepository,
         ILeaderRepository leaderRepository,
@@ -44,7 +48,8 @@ public class BadgeService : IBadgeService
         IProposalRepository proposalRepository,
         IUserRepository userRepository,
         IClock clock,
-        IGameCalendar gameCalendar)
+        IGameCalendar gameCalendar,
+        IOptions<RegistrationOptions> registrationOptions)
     {
         _playerHandler = playerHandler;
         _badgeRepository = badgeRepository;
@@ -54,6 +59,7 @@ public class BadgeService : IBadgeService
         _userRepository = userRepository;
         _clock = clock;
         _gameCalendar = gameCalendar;
+        _registrationOptions = registrationOptions.Value;
     }
 
     private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
@@ -302,13 +308,16 @@ public class BadgeService : IBadgeService
             date = date.AddDays(1);
         }
 
-        var sponsorUserIds = await _userRepository
-            .GetSponsorUserIdsAsync();
-
-        foreach (var sponsorUserId in sponsorUserIds)
+        if (_registrationOptions.SponsorshipEnabled)
         {
-            var collectedBadges = new List<ulong>();
-            await PrepareSponsorshipBadgesInternalAsync(sponsorUserId, allBadges, collectedBadges);
+            var sponsorUserIds = await _userRepository
+                .GetSponsorUserIdsAsync();
+
+            foreach (var sponsorUserId in sponsorUserIds)
+            {
+                var collectedBadges = new List<ulong>();
+                await PrepareSponsorshipBadgesInternalAsync(sponsorUserId, allBadges, collectedBadges);
+            }
         }
     }
 

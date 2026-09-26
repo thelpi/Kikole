@@ -28,4 +28,15 @@ public record RegistrationOptions
     /// plusieurs joueurs légitimes partagent la même IP sortante).
     /// </summary>
     public IReadOnlyList<string> RateLimitWhitelistedIps { get; init; } = [];
+
+    /// <summary>
+    /// Système de parrainage (champ à l'inscription, section "Mon compte", badges
+    /// associés). Désactivé, rien ne s'affiche et rien ne se déclenche à ce sujet :
+    /// aucun <c>sponsor_user_id</c> résolu à l'inscription (même si le champ était
+    /// rempli), aucune section "Parrainage" affichée (même pour un compte qui en a
+    /// hérité avant la désactivation), aucun badge de parrainage recalculé lors d'un
+    /// recalcul global. Les données déjà en base ne sont jamais effacées, seulement
+    /// masquées/ignorées tant que c'est à <c>false</c>.
+    /// </summary>
+    public bool SponsorshipEnabled { get; init; }
 }

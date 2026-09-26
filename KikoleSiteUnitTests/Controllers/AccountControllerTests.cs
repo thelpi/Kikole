@@ -7,6 +7,7 @@ using KikoleSite.Configuration;
 using KikoleSite.Controllers;
 using KikoleSite.Identity;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
@@ -44,7 +45,7 @@ public class AccountControllerTests
     private readonly Mock<UserManager<ApplicationUser>> _userManager = IdentityMocks.MockUserManager();
     private readonly Mock<SignInManager<ApplicationUser>> _signInManager;
     private readonly Mock<IPasswordHasher<ApplicationUser>> _passwordHasher = new();
-    private readonly RegistrationOptions _registrationOptions = new();
+    private readonly RegistrationOptions _registrationOptions = new() { SponsorshipEnabled = true };
     private readonly AccountController _controller;
 
     public AccountControllerTests()
@@ -69,6 +70,33 @@ public class AccountControllerTests
             _passwordHasher.Object,
             new SanitizingLookupNormalizer(),
             new OptionsWrapper<RegistrationOptions>(_registrationOptions),
+            _userRepository.Object,
+            _internationalService.Object,
+            _clock.Object,
+            _gameCalendar.Object,
+            _playerService.Object,
+            _badgeService.Object,
+            httpContextAccessor.Object)
+        {
+            ControllerContext = new ControllerContext { HttpContext = _httpContext }
+        };
+    }
+
+    /// <summary>Instance dediee pour les tests qui ont besoin d'une config differente de
+    /// celle par defaut (<see cref="_registrationOptions"/> est immuable une fois passee
+    /// a <see cref="_controller"/>, cf. <c>init</c> sur <see cref="RegistrationOptions"/>).</summary>
+    private AccountController BuildController(RegistrationOptions options)
+    {
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
+
+        return new AccountController(
+            _localizer.Object,
+            _userManager.Object,
+            _signInManager.Object,
+            _passwordHasher.Object,
+            new SanitizingLookupNormalizer(),
+            new OptionsWrapper<RegistrationOptions>(options),
             _userRepository.Object,
             _internationalService.Object,
             _clock.Object,
@@ -467,6 +495,27 @@ public class AccountControllerTests
             It.Is<ApplicationUser>(u => u.SponsorUserId == null), "NouveauMdp1234"), Times.Once);
     }
 
+    [Fact]
+    public async Task Create_WithSponsorshipDisabled_SilentlyLeavesSponsorUserIdNullEvenWithAValidSponsor()
+    {
+        SetupPlainCreate();
+        var sponsor = BuildUser(id: 42, login: "parrain1");
+        _userManager.Setup(_ => _.FindByNameAsync("parrain1")).ReturnsAsync(sponsor);
+        var controller = BuildController(_registrationOptions with { SponsorshipEnabled = false });
+
+        await controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            SponsorLoginSubmission = "parrain1"
+        });
+
+        _userManager.Verify(_ => _.CreateAsync(
+            It.Is<ApplicationUser>(u => u.SponsorUserId == null), "NouveauMdp1234"), Times.Once);
+        _badgeService.Verify(_ => _.PrepareSponsorshipBadgesAsync(It.IsAny<ulong>(), It.IsAny<Languages>()), Times.Never);
+    }
+
     // ------------------------------------------------------------- Index (parrainage)
 
     [Fact]
@@ -506,6 +555,25 @@ public class AccountControllerTests
         model.HasSponsorshipInfo.Should().BeTrue();
         model.SponsorLogin.Should().Be("parrain1");
         model.Godchildren.Should().BeEquivalentTo(new[] { ("filleul1", false), ("filleul2", true) });
+    }
+
+    [Fact]
+    public async Task Index_Get_WithSponsorshipDisabled_LeavesTheSectionEmptyEvenWithExistingSponsorAndGodchildren()
+    {
+        SetCurrentUser(1);
+        var me = BuildUser(id: 1, login: "joueur1");
+        me.SponsorUserId = 42;
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(me);
+        var controller = BuildController(_registrationOptions with { SponsorshipEnabled = false });
+
+        var result = await controller.Index();
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.HasSponsorshipInfo.Should().BeFalse();
+        model.SponsorLogin.Should().BeNull();
+        model.Godchildren.Should().BeEmpty();
+        _userRepository.Verify(_ => _.GetUserByIdIncludingDisabledAsync(It.IsAny<ulong>()), Times.Never);
+        _userRepository.Verify(_ => _.GetGodchildrenAsync(It.IsAny<ulong>()), Times.Never);
     }
 
     // ------------------------------------------------------------- ChangePassword

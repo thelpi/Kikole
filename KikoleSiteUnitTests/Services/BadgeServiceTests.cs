@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite;
+using KikoleSite.Configuration;
 using KikoleSite.Handlers;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -36,6 +38,7 @@ public class BadgeServiceTests
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
+    private readonly RegistrationOptions _registrationOptions = new() { SponsorshipEnabled = true };
     private readonly BadgeService _service;
 
     private readonly List<UserBadgeDto> _inserted = [];
@@ -81,7 +84,25 @@ public class BadgeServiceTests
             _proposalRepository.Object,
             _userRepository.Object,
             _clock.Object,
-            _gameCalendar.Object);
+            _gameCalendar.Object,
+            new OptionsWrapper<RegistrationOptions>(_registrationOptions));
+    }
+
+    /// <summary>Instance dediee pour les tests qui ont besoin d'une config differente de
+    /// celle par defaut (<see cref="_registrationOptions"/> est immuable une fois passee
+    /// a <see cref="_service"/>, cf. <c>init</c> sur <see cref="RegistrationOptions"/>).</summary>
+    private BadgeService BuildService(bool sponsorshipEnabled)
+    {
+        return new BadgeService(
+            _playerHandler.Object,
+            _badgeRepository.Object,
+            _leaderRepository.Object,
+            _playerRepository.Object,
+            _proposalRepository.Object,
+            _userRepository.Object,
+            _clock.Object,
+            _gameCalendar.Object,
+            new OptionsWrapper<RegistrationOptions>(new RegistrationOptions { SponsorshipEnabled = sponsorshipEnabled }));
     }
 
     private static PlayerDto Player(ushort year = 1990, ulong? badgeId = null)
@@ -1297,5 +1318,22 @@ public class BadgeServiceTests
         await _service.ResetBadgesAsync(Languages.en);
 
         ShouldHaveGranted(Badges.DonCorleone);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_SkipsSponsorshipRecomputeWhenDisabled()
+    {
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
+            .ReturnsAsync(new List<PlayerDto>());
+
+        _userRepository.Setup(_ => _.GetSponsorUserIdsAsync())
+            .ReturnsAsync(new List<ulong> { UserId });
+        _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
+            .ReturnsAsync(new List<UserDto> { Godchild(1, Day) });
+
+        await BuildService(sponsorshipEnabled: false).ResetBadgesAsync(Languages.en);
+
+        ShouldNotHaveGranted(Badges.DonCorleone);
+        _userRepository.Verify(_ => _.GetSponsorUserIdsAsync(), Times.Never);
     }
 }
