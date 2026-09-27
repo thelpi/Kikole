@@ -236,35 +236,68 @@
                 }
             </div>
             await Html.RenderPartialAsync("Partial/Badges", Model.Badges);
-            var hasActions = string.IsNullOrWhiteSpace(Model.EasyClue) || Model.CurrentDay > 0 || !Model.LeaderboardAvailable;
-            if (hasActions)
+            var showClueButton = string.IsNullOrWhiteSpace(Model.EasyClue);
+            var showLeaderboardButton = Model.CurrentDay <= 0 && !Model.LeaderboardAvailable;
+            var hasActions = showClueButton || showLeaderboardButton;
+            <div class="final">
+                <div class="field">@localizer["TypePlayerName"]</div>
+                <form method="post" action="/" style="margin:0">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                    <div class="final-input">
+                        <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" placeholder="Zinédine Zidane, Kylian Mbappé…" />
+                        <div class="final-actions">
+                            <button type="submit" name="submit-Name" class="final-submit">Valider</button>
+                            @if (Model.CurrentDay > 0)
+                            {
+                                <button type="submit" form="giveUpForm" onclick="return openGiveUpModal(event)" id="giveUpTrigger" name="submit-GiveUp" class="final-reveal" title="@localizer["RevealPlayer"]" aria-label="@localizer["RevealPlayer"]">
+                                    <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    <span class="final-reveal-label">@localizer["RevealPlayer"]</span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </form>
+                @if (Model.IncorrectNames?.Count > 0)
+                {
+                    <div class="attempts">
+                        @foreach (var iName in Model.IncorrectNames)
+                        {
+                            <div class="attempt"><s>@iName</s></div>
+                        }
+                    </div>
+                }
+                <p class="caption">-<strong>@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points @localizer["PointsIfIncorrect"]</strong></p>
+            </div>
+            @if (Model.CurrentDay > 0)
             {
-            <div class="rows" style="padding-top:18px">
+                <form method="post" action="/" id="giveUpForm" style="margin:0">
+                    @Html.HiddenFor(m => m.CurrentDay)
+                </form>
+                <div class="confirm-modal" id="giveUpModal">
+                    <div class="confirm-modal-box">
+                        <p>@localizer["GiveUpConfirmation"]</p>
+                        <div class="confirm-modal-actions">
+                            <button type="button" class="secondary" onclick="closeGiveUpModal()">@localizer["CancelAction"]</button>
+                            <button type="button" onclick="confirmGiveUp()">@localizer["GiveUp"]</button>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (hasActions)
+            {
+            <div class="rows">
                 <div class="actions">
-                    @if (string.IsNullOrWhiteSpace(Model.EasyClue))
+                    @if (showClueButton)
                     {
                         <form method="post" action="/" style="margin:0">
                             @Html.HiddenFor(m => m.CurrentDay)
                             <button type="submit" name="submit-Clue">@localizer["NeedAnotherClue"] <span class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points% @localizer["PointsPercent"]</span></button>
                         </form>
                     }
-                    @if (Model.CurrentDay > 0)
-                    {
-                        <form method="post" action="/" id="giveUpForm" style="margin:0">
-                            @Html.HiddenFor(m => m.CurrentDay)
-                            <button type="submit" onclick="return openGiveUpModal(event)" id="giveUpTrigger" name="submit-GiveUp">@localizer["GiveUp"] <span class="cost">@localizer["NoPoints"]</span></button>
-                        </form>
-                        <div class="confirm-modal" id="giveUpModal">
-                            <div class="confirm-modal-box">
-                                <p>@localizer["GiveUpConfirmation"]</p>
-                                <div class="confirm-modal-actions">
-                                    <button type="button" class="secondary" onclick="closeGiveUpModal()">@localizer["CancelAction"]</button>
-                                    <button type="button" onclick="confirmGiveUp()">@localizer["GiveUp"]</button>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    else if (!Model.LeaderboardAvailable)
+                    @if (showLeaderboardButton)
                     {
                         <form method="post" action="/" style="margin:0">
                             @Html.HiddenFor(m => m.CurrentDay)
@@ -441,26 +474,6 @@
                     </div>
                 }
             </form>
-            </div>
-            <div class="final">
-                <div class="field">@localizer["TypePlayerName"]</div>
-                <form method="post" action="/" style="margin:0">
-                    @Html.HiddenFor(m => m.CurrentDay)
-                    <div class="final-input">
-                        <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" placeholder="Zinédine Zidane, Kylian Mbappé…" />
-                        <button type="submit" name="submit-Name">Valider</button>
-                    </div>
-                </form>
-                @if (Model.IncorrectNames?.Count > 0)
-                {
-                    <div class="attempts">
-                        @foreach (var iName in Model.IncorrectNames)
-                        {
-                            <div class="attempt"><s>@iName</s></div>
-                        }
-                    </div>
-                }
-                <p class="caption">-<strong>@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points @localizer["PointsIfIncorrect"]</strong></p>
             </div>
         }
         </div>

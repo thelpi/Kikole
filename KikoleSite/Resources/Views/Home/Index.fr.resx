@@ -252,6 +252,9 @@
   <data name="GiveUp" xml:space="preserve">
     <value>Montrer la réponse</value>
   </data>
+  <data name="RevealPlayer" xml:space="preserve">
+    <value>Dévoiler</value>
+  </data>
   <data name="NoPoints" xml:space="preserve">
     <value>retire tous les points</value>
   </data>

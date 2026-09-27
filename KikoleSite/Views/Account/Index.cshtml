@@ -35,15 +35,42 @@
             <form method="post" action="/Account/ChangePassword">
                 <div class="form-field">
                     <label>@localizer["CurrentPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-field">
                     <label>@localizer["NewPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-field">
                     <label>@localizer["RepeatPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="actions">
                     <button type="submit">@localizer["Update"]</button>
@@ -56,7 +83,16 @@
             <form method="post" action="/Account/ChangeEmail">
                 <div class="form-field">
                     <label>@localizer["CurrentPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-field">
                     <label>@localizer["NewEmail"]</label>
@@ -116,7 +152,16 @@
                 </div>
                 <div class="form-field">
                     <label>@localizer["SetPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="actions">
                     <button type="submit">@localizer["LogIn"]</button>
@@ -146,11 +191,29 @@
                 </div>
                 <div class="form-field">
                     <label>@localizer["SetPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="form-field">
                     <label>@localizer["RepeatPwd"]</label>
-                    @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
+                    <div class="password-wrap">
+                        @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
+                        <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                <circle cx="12" cy="12" r="3" />
+                                <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 @if (Model.SponsorshipEnabled)
                 {

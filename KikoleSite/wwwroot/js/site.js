@@ -14,6 +14,18 @@ $(function () {
     });
 });
 
+/* bouton "oeil" des champs mot de passe (Account/Index.cshtml, Account/ResetPassword.cshtml) :
+   bascule permanente affiche/masque (pas un maintien) - plus confortable a relire. */
+$(function () {
+    $(".password-toggle").on("click", function () {
+        var $btn = $(this);
+        var $input = $btn.siblings("input");
+        var showing = $input.attr("type") === "text";
+        $input.attr("type", showing ? "password" : "text");
+        $btn.toggleClass("showing", !showing);
+    });
+});
+
 /* bandeau d'annonce admin (Partial/Announcement, Home/Index.cshtml) : l'etat
    replie/deplie persiste (localStorage, cle par id de message) pour survivre a un
    changement de page - un futur message (autre id) redemarre toujours deplie.

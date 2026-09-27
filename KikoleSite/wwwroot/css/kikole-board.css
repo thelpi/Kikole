@@ -188,8 +188,10 @@ body { padding-top: 0; }
 .site-nav-burger {
   display: none;
   flex: none;
-  width: 34px;
-  height: 34px;
+  /* 44px : taille minimale recommandee pour une cible tactile confortable
+     (le trait visuel reste fin, seule la zone cliquable grandit) */
+  width: 44px;
+  height: 44px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -300,8 +302,10 @@ body { padding-top: 0; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  /* cible tactile confortable (cf. .site-nav-burger) : le bouton grandit,
+     l'icone (16px) garde sa taille */
+  width: 40px;
+  height: 40px;
   flex: none;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -845,6 +849,9 @@ body { padding-top: 0; }
 .kikole-board .dossier-row.solved .attempts { margin: 0 0 8px; }
 
 .kikole-board .attempt {
+  /* neutre (pas --warn) : une tentative deja faite est de l'historique resolu, pas un
+     avertissement actif - la confondre avec le cout en points (.cost, orange lui aussi
+     dans la meme rangee) rendait les deux illisibles d'un coup d'oeil */
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -852,13 +859,13 @@ body { padding-top: 0; }
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-  background: var(--warn-soft);
-  border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
   border-radius: 20px;
   padding: 5px 11px;
 }
 
-.kikole-board .attempt s { color: var(--warn); text-decoration-color: color-mix(in srgb, var(--warn) 55%, transparent); font-weight: 700; }
+.kikole-board .attempt s { color: var(--text-faint); text-decoration-color: color-mix(in srgb, var(--text-faint) 55%, transparent); font-weight: 700; }
 
 .kikole-board .attempt .tag {
   font-style: normal;
@@ -916,6 +923,40 @@ body { padding-top: 0; }
   font-size: 13px;
   color: var(--text);
 }
+
+/* champ mot de passe avec bascule afficher/masquer (oeil) : meme .blank en dessous,
+   juste de la place en plus a droite pour le bouton icone. Bascule permanente (jusqu'a
+   re-clic), pas seulement pendant l'appui - plus confortable a lire qu'un maintien. */
+.kikole-board .password-wrap {
+  position: relative;
+  max-width: 560px; /* aligne sur .form-field .blank, cf. plus bas dans ce fichier */
+}
+
+.kikole-board .password-wrap .blank { padding-right: 42px; }
+
+.kikole-board .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.kikole-board .password-toggle:hover { color: var(--text); background: var(--surface-3); }
+.kikole-board .password-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.kikole-board .password-toggle .icon-eye { width: 18px; height: 18px; }
+.kikole-board .password-toggle .icon-eye-slash { display: none; }
+.kikole-board .password-toggle.showing { color: var(--accent); }
+.kikole-board .password-toggle.showing .icon-eye-slash { display: block; }
 
 /* boutons "Ok" caches (declenches en JS apres autocompletion) : sortis du flux, sinon
    leur ligne invisible ajoute du vide sous chaque champ */
@@ -1126,23 +1167,48 @@ body { padding-top: 0; }
   border-color: var(--accent);
 }
 
-.kikole-board .final-input button {
+.kikole-board .final-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.kikole-board .final-submit,
+.kikole-board .final-reveal {
   flex: none;
   border: none;
   border-radius: 9px;
-  background: var(--accent);
-  color: var(--accent-ink);
   font-family: var(--font-sans);
   font-weight: 800;
   font-size: 13px;
   letter-spacing: 0.02em;
   text-transform: none;
-  padding: 0 22px;
   cursor: pointer;
 }
 
-.kikole-board .final-input button:hover { filter: brightness(1.08); }
-.kikole-board .final-input button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.kikole-board .final-submit {
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0 22px;
+}
+
+.kikole-board .final-submit:hover { filter: brightness(1.08); }
+.kikole-board .final-submit:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* "Devoiler" (jours precedents seulement) : meme gabarit que Valider, couleur distincte
+   (--warn) pour ne pas laisser croire que c'est une simple variante de validation. */
+.kikole-board .final-reveal {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--warn);
+  color: var(--bg);
+  padding: 0 16px;
+}
+
+.kikole-board .final-reveal:hover { filter: brightness(1.08); }
+.kikole-board .final-reveal:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.kikole-board .final-reveal .icon-eye { width: 16px; height: 16px; flex: none; }
 
 .kikole-board .final .attempts { margin-top: 12px; }
 
@@ -1193,7 +1259,8 @@ body { padding-top: 0; }
 .kikole-board .actions button .cost { color: var(--warn); font-family: var(--font-sans); font-weight: 700; font-size: 11.5px; }
 
 .kikole-board .actions button:hover,
-.kikole-board .actions a:hover { background: var(--surface-2); border-color: var(--text-faint); }
+.kikole-board .actions a:hover,
+.kikole-board .confirm-modal-actions button:hover { background: var(--surface-2); border-color: var(--text-faint); }
 .kikole-board .actions button:focus-visible,
 .kikole-board .actions a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -1555,7 +1622,17 @@ body { padding-top: 0; }
   .kikole-board .actions button,
   .kikole-board .actions a { width: 100%; }
   .kikole-board .final-input { flex-direction: column; }
-  .kikole-board .final-input button { padding: 13px; }
+  .kikole-board .final-submit { padding: 13px; flex: 1; }
+  /* "Devoiler" perd son libelle et devient un bouton carre (juste l'oeil) : sur une
+     colonne deja etroite, un deuxieme bouton pleine largeur ferait beaucoup de hauteur
+     pour une action secondaire */
+  .kikole-board .final-reveal {
+    flex: none;
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .kikole-board .final-reveal-label { display: none; }
   .kikole-board .dossier-head,
   .kikole-board .rows { padding-left: 18px; padding-right: 18px; }
   .kikole-board .final { margin-left: 18px; margin-right: 18px; }
@@ -1865,9 +1942,12 @@ body { padding-top: 0; }
   border-top: 1px solid var(--border-soft);
 }
 
-/* boutons d'action : meme survol vert que les icones du menu */
+/* boutons d'action : meme survol vert que les icones du menu - .confirm-modal-actions
+   partage le style de base (cf. plus haut) mais avait ete oublie ici, son survol restait
+   sur l'ancien gris neutre */
 .kikole-board .actions button:hover,
-.kikole-board .actions a:hover {
+.kikole-board .actions a:hover,
+.kikole-board .confirm-modal-actions button:hover {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--accent);
