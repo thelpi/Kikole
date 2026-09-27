@@ -867,6 +867,19 @@ Branche de travail : `remaster-v2`.
       `InternationalService` existant (déjà le point d'entrée pour pays/continents) sans
       ajouter de couche — même précédent que `Message`/`Discussion`, qui ne méritent pas
       de service dédié.
+- [ ] **Indices audio/mp3 et vidéo/mp4** (2026-09-27, question théorique de l'utilisateur,
+      pas encore implémenté). `Model.Clue`/`EasyClue` sont déjà du texte libre pouvant être
+      une URL détectée par `ViewHelper.IsImageUrl()` (URL http(s) + extension) pour basculer
+      sur un `<img>` au lieu du texte brut (`Views/Home/Index.cshtml`) — même principe à
+      étendre avec `IsAudioUrl()`/`IsVideoUrl()` (extensions `.mp3`/`.mp4`) rendant
+      `<audio controls>`/`<video controls>` (pas d'autoplay avec son de toute façon, bloqué
+      par les navigateurs — `controls` donne le bouton play nécessaire sans effort
+      supplémentaire).
+      **Décision de l'utilisateur sur l'hébergement** : solution locale `wwwroot` pour tous
+      les médias d'indice, y compris les images — changement d'avis explicite par rapport à
+      l'existant (les images d'indice actuelles sont hébergées ailleurs, ex. imgur, juste
+      référencées par URL). Implique, le jour où ce chantier démarre, de revoir aussi le
+      circuit des images déjà en place (pas seulement ajouter audio/vidéo à côté).
 
 ---
 
