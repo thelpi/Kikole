@@ -48,6 +48,7 @@ public class AccountControllerTests
     private readonly Mock<SignInManager<ApplicationUser>> _signInManager;
     private readonly Mock<IEmailProtector> _emailProtector = new();
     private readonly Mock<IEmailSender> _emailSender = new();
+    private readonly Mock<IRazorViewRenderer> _emailRenderer = new();
     private readonly Mock<ILogger<AccountController>> _logger = new();
     private readonly RegistrationOptions _registrationOptions = new() { SponsorshipEnabled = true };
     // SendingEnabled a false par defaut (comme en local) : la plupart des tests n'ont donc
@@ -96,6 +97,7 @@ public class AccountControllerTests
             new SanitizingLookupNormalizer(),
             _emailProtector.Object,
             _emailSender.Object,
+            _emailRenderer.Object,
             _logger.Object,
             new OptionsWrapper<RegistrationOptions>(registrationOptions),
             new OptionsWrapper<EmailOptions>(emailOptions),

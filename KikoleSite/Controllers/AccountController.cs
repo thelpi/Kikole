@@ -11,6 +11,7 @@ using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
+using KikoleSite.ViewModels.Emails;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,7 @@ public class AccountController : KikoleBaseController
     private readonly ILookupNormalizer _lookupNormalizer;
     private readonly IEmailProtector _emailProtector;
     private readonly IEmailSender _emailSender;
+    private readonly IRazorViewRenderer _emailRenderer;
     private readonly ILogger<AccountController> _logger;
     private readonly RegistrationOptions _registrationOptions;
     private readonly EmailOptions _emailOptions;
@@ -38,6 +40,7 @@ public class AccountController : KikoleBaseController
         ILookupNormalizer lookupNormalizer,
         IEmailProtector emailProtector,
         IEmailSender emailSender,
+        IRazorViewRenderer emailRenderer,
         ILogger<AccountController> logger,
         IOptions<RegistrationOptions> registrationOptions,
         IOptions<EmailOptions> emailOptions,
@@ -62,6 +65,7 @@ public class AccountController : KikoleBaseController
         _lookupNormalizer = lookupNormalizer;
         _emailProtector = emailProtector;
         _emailSender = emailSender;
+        _emailRenderer = emailRenderer;
         _logger = logger;
         _registrationOptions = registrationOptions.Value;
         _emailOptions = emailOptions.Value;
@@ -184,7 +188,10 @@ public class AccountController : KikoleBaseController
                     new { userId = user.Id, token }, Request.Scheme)!;
 
                 if (_emailOptions.SendingEnabled)
-                    await _emailSender.SendAsync(user.Email!, _localizer["ResetPasswordSubject"], BuildLinkEmailBody(_localizer["ResetPasswordBody"], link));
+                {
+                    var body = await RenderLinkEmailAsync(_localizer["ResetPasswordBody"], link);
+                    await _emailSender.SendAsync(user.Email!, _localizer["ResetPasswordSubject"], body);
+                }
                 else
                     _logger.LogInformation("[Email non envoye - developpement] Lien de reinitialisation pour {UserId} : {Link}", user.Id, link);
             }
@@ -276,7 +283,10 @@ public class AccountController : KikoleBaseController
                     new { userId = user.Id, newEmail, token }, Request.Scheme)!;
 
                 if (_emailOptions.SendingEnabled)
-                    await _emailSender.SendAsync(newEmail, _localizer["ConfirmEmailChangeSubject"], BuildLinkEmailBody(_localizer["ConfirmEmailChangeBody"], link));
+                {
+                    var body = await RenderLinkEmailAsync(_localizer["ConfirmEmailChangeBody"], link);
+                    await _emailSender.SendAsync(newEmail, _localizer["ConfirmEmailChangeSubject"], body);
+                }
                 else
                     _logger.LogInformation("[Email non envoye - developpement] Lien de changement d'email pour {UserId} : {Link}", user.Id, link);
 
@@ -398,7 +408,8 @@ public class AccountController : KikoleBaseController
                             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                             var link = Url.Action("ConfirmEmail", "Account",
                                 new { userId = user.Id, token }, Request.Scheme)!;
-                            await _emailSender.SendAsync(user.Email!, _localizer["ConfirmEmailSubject"], BuildLinkEmailBody(_localizer["ConfirmEmailBody"], link));
+                            var body = await RenderLinkEmailAsync(_localizer["ConfirmEmailBody"], link);
+                            await _emailSender.SendAsync(user.Email!, _localizer["ConfirmEmailSubject"], body);
                         }
                         else
                         {
@@ -469,8 +480,15 @@ public class AccountController : KikoleBaseController
         return sponsor.Id;
     }
 
-    private string BuildLinkEmailBody(string introduction, string link)
-        => $"<p>{introduction}</p><p><a href=\"{link}\">{link}</a></p><p>{_localizer["LinkValidityNotice", _emailOptions.TokenLifetimeHours]}</p>";
+    private Task<string> RenderLinkEmailAsync(string introduction, string link)
+    {
+        return _emailRenderer.RenderAsync("/Views/Emails/LinkEmail.cshtml", new LinkEmailModel
+        {
+            Introduction = introduction,
+            Link = link,
+            ValidityNotice = _localizer["LinkValidityNotice", _emailOptions.TokenLifetimeHours]
+        });
+    }
 
     /// <summary>
     /// Rend la vue Index en refletant l'etat de connexion reel (plutot que de le recopier

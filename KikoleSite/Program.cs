@@ -77,7 +77,10 @@ builder.Services
     .AddSingleton<IClock, Clock>()
     // seedable dans les tests (new Random(seed)) : PlayerService en a besoin pour un
     // melange deterministe, contrairement a Random.Shared qui n'est pas configurable.
-    .AddSingleton(new Random());
+    .AddSingleton(new Random())
+    // rendu des templates d'email (Views/Emails) en dehors d'une requete MVC — Scoped
+    // (pas Singleton) car ITempDataProvider, dont il depend, est lui-meme Scoped.
+    .AddScoped<IRazorViewRenderer, RazorViewRenderer>();
 
 // sections de configuration liees via le pattern standard IOptions<T> : les cles attendues
 // sont visibles au typage plutot que dispersees en chaines dans chaque classe qui en a
