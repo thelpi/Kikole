@@ -39,4 +39,11 @@ public record RegistrationOptions
     /// masquées/ignorées tant que c'est à <c>false</c>.
     /// </summary>
     public bool SponsorshipEnabled { get; init; }
+
+    /// <summary>
+    /// Domaines d'emails jetables refuses a l'inscription et au changement d'adresse
+    /// (comparaison insensible a la casse sur la partie apres l'arobase). Liste courte et
+    /// manuelle : n'arrete que les cas les plus connus, pas une protection exhaustive.
+    /// </summary>
+    public IReadOnlyList<string> BlockedEmailDomains { get; init; } = [];
 }

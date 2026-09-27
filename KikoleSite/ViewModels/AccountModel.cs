@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace KikoleSite.ViewModels;
 
@@ -8,14 +8,16 @@ public class AccountModel
 
     public string? Login { get; set; }
 
+    /// <summary>Adresse email de l'utilisateur connecte (dechiffree), pour affichage dans "Mon compte".</summary>
+    public string? Email { get; set; }
+
     public string? LoginSubmission { get; set; }
     public string? PasswordSubmission { get; set; }
 
     public string? LoginCreateSubmission { get; set; }
     public string? PasswordCreate1Submission { get; set; }
     public string? PasswordCreate2Submission { get; set; }
-    public string? RecoveryQCreate { get; set; }
-    public string? RecoveryACreate { get; set; }
+    public string? EmailCreateSubmission { get; set; }
 
     /// <summary>Login du parrain saisi a l'inscription (facultatif) - ignore en silence
     /// s'il ne correspond a personne d'eligible, cf. <c>AccountController.Create</c>.</summary>
@@ -24,9 +26,16 @@ public class AccountModel
     public string? Error { get; set; }
     public string? SuccessInfo { get; set; }
 
+    /// <summary>Email saisi sur le formulaire "mot de passe oublie".</summary>
+    public string? PasswordResetEmailSubmission { get; set; }
 
-    public string? LoginRecoverySubmission { get; set; }
-    public string? QuestionRecovery { get; set; }
+    /// <summary>Identifiant et jeton portes par le lien de reinitialisation (champs caches du formulaire dedie).</summary>
+    public string? ResetPasswordUserId { get; set; }
+    public string? ResetPasswordToken { get; set; }
+
+    /// <summary>Nouvelle adresse email demandee depuis "Mon compte" (avec confirmation).</summary>
+    public string? NewEmailSubmission { get; set; }
+    public string? NewEmailConfirmSubmission { get; set; }
 
     public string? RegistrationId { get; set; }
 

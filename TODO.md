@@ -182,6 +182,97 @@ Branche de travail : `remaster-v2`.
         `record` à propriétés `init`, la config ne peut pas être mutée après coup sur
         l'instance déjà câblée dans le contrôleur/service de test). `dotnet build` propre,
         `dotnet test` : 702 tests unitaires verts.
+- [x] **Inscription par email, abandon de la question secrète (2026-09-27)** — demandé
+      explicitement par l'utilisateur ("on va faire l'inscription par adresse email"),
+      arbitrages discutés puis "tu peux démarrer". Colonnes `password_reset_question`/
+      `password_reset_answer` supprimées de `users`, remplacées par `email_encrypted`
+      (AES-GCM, `KikoleSite/Identity/EmailProtector.cs`), `email_hash` (HMAC-SHA256,
+      `UNIQUE KEY`, sert à la connexion par email et à l'unicité sans déchiffrer) et
+      `email_confirmed`. Clé dédiée `EmailEncryptionKey` (user-secret local, séparée
+      d'`EncryptionKey`) — portable contrairement aux clés Data Protection par défaut
+      (liées au profil Windows), deux sous-clés dérivées (chiffrement/HMAC) comme pour
+      `LegacyCompatiblePasswordHasher`.
+      - **Confirmation par lien** (`Identity.SignIn.RequireConfirmedEmail = true`,
+        `Account/ConfirmEmail`) : tant que non confirmé, la connexion échoue
+        (`SignInResult.IsNotAllowed`). **Mot de passe oublié** : un seul champ email
+        (`Account/RequestPasswordReset`), réponse toujours identique que l'adresse soit
+        connue ou non (comme demandé), token Identity standard
+        (`GeneratePasswordResetTokenAsync`), page dédiée `Account/ResetPassword.cshtml`.
+        Un administrateur reste exclu de cette voie (`IsRecoveryForbidden`, hérité de
+        l'ancien système), invisible de l'extérieur puisque la réponse ne change jamais.
+        **Changement d'email connecté** (`Account/ChangeEmail`) : mot de passe + nouvelle
+        adresse + confirmation, lien envoyé à la nouvelle adresse
+        (`GenerateChangeEmailTokenAsync`/`ChangeEmailAsync`, le token auto-encode la
+        cible) — l'ancienne adresse reste seule active tant que le lien n'est pas suivi,
+        pas de risque de blocage entre-temps (préoccupation soulevée par l'utilisateur).
+      - **Connexion par login OU email** (standard, demandé explicitement) : `LogIn`
+        essaie `FindByNameAsync` puis `FindByEmailAsync`, libellé du formulaire mis à
+        jour en conséquence ("Login / Email :", nouvelle clé `LoginOrEmail` dédiée —
+        distincte de `SetLogin`, réutilisée telle quelle pour le champ identifiant de
+        l'inscription, qui lui n'accepte pas d'email).
+      - **Liste noire de domaines jetables** en config (`Registration:BlockedEmailDomains`,
+        comparaison insensible à la casse), pas d'unicité vérifiée côté Identity
+        (`RequireUniqueEmail` non activé) : le contrôle se fait à la main via
+        `IUserRepository.GetUserByEmailHashIncludingDisabledAsync`, cohérent avec le
+        contrôle d'unicité déjà manuel sur le login — unicité incluant les comptes
+        désactivés, comme demandé.
+      - **Contournement local** (`Email:SendingEnabled = false`, appsettings.Development)
+        : à l'inscription, le compte est auto-confirmé immédiatement (pas d'email
+        envoyé) ; pour la réinitialisation et le changement d'adresse, le lien est
+        seulement journalisé (`ILogger`), pas auto-appliqué. MailKit ajouté
+        (`SmtpEmailSender`) pour l'envoi réel — SMTP non renseigné à ce jour, prévu par
+        l'hébergement au moment du déploiement (`Email:SmtpHost` vide dans
+        `appsettings.json`).
+      - Testé : `EmailProtectorTests.cs` (nouveau, chiffrement non déterministe/hash
+        déterministe/normalisation), `AccountControllerTests.cs` largement réécrit
+        (connexion par email, non-confirmation, mot de passe oublié, changement
+        d'email, blocage de domaine, email déjà utilisé, envoi réel vs. auto-
+        confirmation). `dotnet test` : 739 tests unitaires verts.
+      - `kikole_mock.sql` : emails de démonstration (`<login>@kikole.test`)
+        pré-chiffrés avec une clé de dev fixe et documentée
+        (`EmailEncryptionKey = "KikoleDevEmailKey2026"`, même principe que
+        `EncryptionKey = "KikoleDevSalt2026"` pour les mots de passe) — ne fonctionnent
+        que si ce secret est bien celui configuré en local.
+      - **Migration de la vraie base locale (`kikole`) appliquée** (2026-09-27, décision
+        explicite de l'utilisateur : "valeurs bouchon générées") : `ALTER TABLE` (colonnes
+        ajoutées nullables, backfillées, puis repassées `NOT NULL` + `UNIQUE KEY` sur
+        `email_hash`, `password_reset_question`/`password_reset_answer` supprimées),
+        emails bouchon `<login>@kikole.test` générés pour les 16 comptes existants avec le
+        vrai algorithme (petit projet jetable référençant `KikoleSite.Identity
+        .EmailProtector`, supprimé après usage) et la clé de dev déjà en place.
+        **Incident en cours de route** : une première tentative de vérification sur
+        `kikole_pod` (base jetable) a en réalité rejoué `kikole_mock.sql` sur la vraie base
+        `kikole` — les deux scripts commencent par `USE kikole;`, qui écrase le nom de
+        base passé en ligne de commande à `mysql`. Toutes les données applicatives réelles
+        (joueurs, propositions, classements, discussions, 5 comptes de test) ont été
+        perdues ; sans conséquence ("la base locale n'a aucune importance", reconstruite
+        proprement ensuite depuis `kikole.sql` + `kikole_mock.sql`). **Point de méthode
+        pour la prochaine fois** : pour cibler une base autre que `kikole` avec ces deux
+        scripts, il faut une copie retouchée (`CREATE DATABASE`/`USE` réécrits), jamais un
+        simple nom de base passé à `mysql -D`.
+      - **Vérification bout-en-bout faite** (sur `kikole_pod`, base jetable retouchée comme
+        ci-dessus, supprimée après coup) : connexion par identifiant, connexion par email,
+        inscription + auto-confirmation locale + connexion automatique, mot de passe
+        oublié (message générique + lien journalisé) + réinitialisation, changement
+        d'email (ancienne adresse active entre-temps, lien journalisé, confirmation).
+        Tout fonctionnel.
+      - **Piège d'environnement rencontré ensuite, spécifique à cette machine** : l'appli
+        lancée depuis Visual Studio 2026 ne trouvait pas `EmailEncryptionKey`
+        ("La cle... est absente de la configuration"), alors que `dotnet run` en ligne de
+        commande fonctionnait avec le même secret. Deux contournements dans `Program.cs`
+        tentés puis **retirés** (`AddUserSecrets<Program>()` explicite, puis lecture
+        directe du fichier `secrets.json` par son chemin) : aucun n'a résolu le problème,
+        ce qui a fini par pointer vers la vraie cause — l'agent qui a développé ce
+        chantier tourne dans un environnement séparé de la session Windows où Visual
+        Studio s'exécute (fichiers projet partagés via `D:\`, mais pas le profil
+        utilisateur `%APPDATA%` où vivent les user-secrets) : le secret posé par l'agent
+        était donc invisible pour Visual Studio. Résolu en posant `EmailEncryptionKey`
+        directement depuis Visual Studio (clic droit sur `KikoleSite` → "Gérer les secrets
+        utilisateur"). **À garder en tête** : tout secret nécessaire en local doit être
+        posé par l'utilisateur lui-même (ou vérifié avec lui), pas seulement par l'agent.
+      - Mentions légales (RGPD/CNIL) liées à la collecte d'une adresse email —
+        explicitement reportées par l'utilisateur ("on assumera les conséquences
+        légales plus tard, quand on fera le footer"). Seul point encore ouvert.
 
 ---
 

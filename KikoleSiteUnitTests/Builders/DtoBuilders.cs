@@ -96,8 +96,9 @@ internal sealed class UserDtoBuilder
         Login = "joueur",
         NormalizedLogin = "JOUEUR",
         Password = "hash",
-        PasswordResetQuestion = "une question ?",
-        PasswordResetAnswer = "hash-reponse",
+        EmailEncrypted = "email-chiffre",
+        EmailHash = "email-hash",
+        EmailConfirmed = true,
         LanguageId = (ulong)Languages.fr,
         UserTypeId = (ulong)UserTypes.StandardUser,
         ConcurrencyStamp = "concurrency-stamp",
@@ -112,8 +113,9 @@ internal sealed class UserDtoBuilder
     internal UserDtoBuilder WithType(UserTypes type) { _dto = _dto with { UserTypeId = (ulong)type }; return this; }
     internal UserDtoBuilder WithUserTypeId(ulong id) { _dto = _dto with { UserTypeId = id }; return this; }
     internal UserDtoBuilder WithLanguageId(ulong id) { _dto = _dto with { LanguageId = id }; return this; }
-    internal UserDtoBuilder WithPasswordResetQuestion(string q) { _dto = _dto with { PasswordResetQuestion = q }; return this; }
-    internal UserDtoBuilder WithPasswordResetAnswer(string a) { _dto = _dto with { PasswordResetAnswer = a }; return this; }
+    internal UserDtoBuilder WithEmailEncrypted(string value) { _dto = _dto with { EmailEncrypted = value }; return this; }
+    internal UserDtoBuilder WithEmailHash(string value) { _dto = _dto with { EmailHash = value }; return this; }
+    internal UserDtoBuilder WithEmailConfirmed(bool confirmed = true) { _dto = _dto with { EmailConfirmed = confirmed }; return this; }
     internal UserDtoBuilder WithPassword(string password) { _dto = _dto with { Password = password }; return this; }
     internal UserDtoBuilder WithCreationDate(DateTime date) { _dto = _dto with { CreationDate = date }; return this; }
     internal UserDtoBuilder WithIp(string? ip) { _dto = _dto with { Ip = ip }; return this; }

@@ -126,11 +126,44 @@
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Echec de l'authentification : jeton invalide</value>
   </data>
+  <data name="ConfirmEmailBody" xml:space="preserve">
+    <value>Merci de votre inscription sur Kikolé. Cliquez sur le lien ci-dessous pour confirmer votre adresse email :</value>
+  </data>
+  <data name="ConfirmEmailChangeBody" xml:space="preserve">
+    <value>Cliquez sur le lien ci-dessous pour confirmer votre nouvelle adresse email :</value>
+  </data>
+  <data name="ConfirmEmailChangeSubject" xml:space="preserve">
+    <value>[Kikolé] Confirmez votre nouvelle adresse email</value>
+  </data>
+  <data name="ConfirmEmailSubject" xml:space="preserve">
+    <value>Bienvenue sur Kikolé ! Confirmez votre adresse email</value>
+  </data>
   <data name="ClubCreationFailure" xml:space="preserve">
     <value>Echec de la création du club</value>
   </data>
   <data name="ClueAvailable" xml:space="preserve">
     <value>Un nouvel indice est disponible</value>
+  </data>
+  <data name="EmailAlreadyUsed" xml:space="preserve">
+    <value>Cette adresse email est déjà utilisée</value>
+  </data>
+  <data name="EmailChangeRequested" xml:space="preserve">
+    <value>Un email de confirmation a été envoyé à la nouvelle adresse</value>
+  </data>
+  <data name="EmailChanged" xml:space="preserve">
+    <value>Votre adresse email a été mise à jour</value>
+  </data>
+  <data name="EmailConfirmationFailed" xml:space="preserve">
+    <value>Le lien de confirmation est invalide ou a expiré</value>
+  </data>
+  <data name="EmailConfirmed" xml:space="preserve">
+    <value>Votre adresse email est confirmée, vous pouvez vous connecter</value>
+  </data>
+  <data name="EmailDomainBlocked" xml:space="preserve">
+    <value>Les adresses email de ce fournisseur ne sont pas acceptées</value>
+  </data>
+  <data name="EmailNotConfirmed" xml:space="preserve">
+    <value>Confirmez votre adresse email avant de vous connecter (vérifiez vos courriers indésirables)</value>
   </data>
   <data name="EmptyClubsList" xml:space="preserve">
     <value>Liste des clubs vide</value>
@@ -158,6 +191,12 @@
   </data>
   <data name="InvalidCredentials" xml:space="preserve">
     <value>Identifiant ou mot de passe incorrect</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Adresse email invalide</value>
+  </data>
+  <data name="LinkValidityNotice" xml:space="preserve">
+    <value>Ce lien est valable {0} heures.</value>
   </data>
   <data name="InvalidForm" xml:space="preserve">
     <value>Formulaire invalide</value>
@@ -192,9 +231,6 @@
   <data name="InvalidPublicationDate" xml:space="preserve">
     <value>Date de publication invalide</value>
   </data>
-  <data name="InvalidQOrA" xml:space="preserve">
-    <value>Question ou réponse invalide</value>
-  </data>
   <data name="InvalidRegistrationGuidFormat" xml:space="preserve">
     <value>Le code d'inscription est dans un format invalide</value>
   </data>
@@ -213,6 +249,9 @@
   <data name="InvalidValue" xml:space="preserve">
     <value>Valeur incorrecte</value>
   </data>
+  <data name="NotMatchingEmail" xml:space="preserve">
+    <value>Les adresses email ne correspondent pas</value>
+  </data>
   <data name="NotMatchingPassword" xml:space="preserve">
     <value>Les mots de passe ne correspondent pas</value>
   </data>
@@ -225,14 +264,14 @@
   <data name="PasswordReset" xml:space="preserve">
     <value>Mot de passe réinitialisé</value>
   </data>
+  <data name="PasswordResetRequested" xml:space="preserve">
+    <value>Si cette adresse est associée à un compte, un email avec la marche à suivre vient de lui être envoyé</value>
+  </data>
   <data name="PlayerCreationFailure" xml:space="preserve">
     <value>Echec de la création du joueur</value>
   </data>
   <data name="PlayerDoesNotExist" xml:space="preserve">
     <value>Le joueur n'existe pas</value>
-  </data>
-  <data name="QandAUpdated" xml:space="preserve">
-    <value>Question et réponse mises à jour</value>
   </data>
   <data name="RefusalWithoutReason" xml:space="preserve">
     <value>Raison du refus non spécifiée</value>
@@ -240,8 +279,14 @@
   <data name="RejectAndPublicationDateCombined" xml:space="preserve">
     <value>Impossible de spécifier à la fois une date de rejet et de publication</value>
   </data>
+  <data name="ResetPasswordBody" xml:space="preserve">
+    <value>Une réinitialisation de mot de passe a été demandée pour ce compte. Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :</value>
+  </data>
   <data name="ResetPasswordError" xml:space="preserve">
     <value>Erreur lors de la réinitalisation du mot de passe</value>
+  </data>
+  <data name="ResetPasswordSubject" xml:space="preserve">
+    <value>Réinitialisation de votre mot de passe</value>
   </data>
   <data name="TipOlderPlayer" xml:space="preserve">
     <value>Le joueur est plus vieux</value>

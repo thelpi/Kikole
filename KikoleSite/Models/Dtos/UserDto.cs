@@ -10,9 +10,13 @@ public record UserDto : BaseDto
 
     public required string Password { get; init; }
 
-    public required string PasswordResetQuestion { get; init; }
+    /// <summary>Adresse email chiffree (AES-GCM) - lisible uniquement via <see cref="KikoleSite.Identity.IEmailProtector.Decrypt"/>, pour l'exploitation en cas de fraude.</summary>
+    public required string EmailEncrypted { get; init; }
 
-    public required string PasswordResetAnswer { get; init; }
+    /// <summary>Empreinte deterministe (HMAC-SHA256) de l'adresse normalisee - sert a la recherche, l'unicite et la connexion par email sans dechiffrer.</summary>
+    public required string EmailHash { get; init; }
+
+    public bool EmailConfirmed { get; init; }
 
     public ulong LanguageId { get; init; }
 

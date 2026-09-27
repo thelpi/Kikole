@@ -102,7 +102,7 @@ public class MappingModelsTests
     [Fact]
     public void User_KeepsOnlyTheIdentityFieldsAndDropsTheCredentials()
     {
-        var user = new User(UserDtoBuilder.Valid().WithId(7).WithLogin("joueur").WithPassword("un-hash-secret").WithPasswordResetAnswer("un-autre-hash").Build());
+        var user = new User(UserDtoBuilder.Valid().WithId(7).WithLogin("joueur").WithPassword("un-hash-secret").WithEmailEncrypted("un-autre-hash").Build());
 
         user.Id.Should().Be(7);
         user.Login.Should().Be("joueur");

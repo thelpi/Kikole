@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using KikoleSite.Configuration;
 using KikoleSite.Controllers.Attributes;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace KikoleSite.Controllers;
@@ -23,16 +25,22 @@ public class AccountController : KikoleBaseController
     private readonly IStringLocalizer<AccountController> _localizer;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
     private readonly ILookupNormalizer _lookupNormalizer;
+    private readonly IEmailProtector _emailProtector;
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger<AccountController> _logger;
     private readonly RegistrationOptions _registrationOptions;
+    private readonly EmailOptions _emailOptions;
 
     public AccountController(IStringLocalizer<AccountController> localizer,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IPasswordHasher<ApplicationUser> passwordHasher,
         ILookupNormalizer lookupNormalizer,
+        IEmailProtector emailProtector,
+        IEmailSender emailSender,
+        ILogger<AccountController> logger,
         IOptions<RegistrationOptions> registrationOptions,
+        IOptions<EmailOptions> emailOptions,
         IUserRepository userRepository,
         IInternationalService internationalService,
         IClock clock,
@@ -51,9 +59,12 @@ public class AccountController : KikoleBaseController
         _localizer = localizer;
         _userManager = userManager;
         _signInManager = signInManager;
-        _passwordHasher = passwordHasher;
         _lookupNormalizer = lookupNormalizer;
+        _emailProtector = emailProtector;
+        _emailSender = emailSender;
+        _logger = logger;
         _registrationOptions = registrationOptions.Value;
+        _emailOptions = emailOptions.Value;
     }
 
     [HttpGet]
@@ -82,7 +93,10 @@ public class AccountController : KikoleBaseController
             model.Error = _localizer["InvalidForm"];
         else
         {
-            var user = await _userManager.FindByNameAsync(model.LoginSubmission);
+            // connexion par login ou par email (standard) : on essaie d'abord le login,
+            // moins couteux et cas le plus frequent.
+            var user = await _userManager.FindByNameAsync(model.LoginSubmission)
+                ?? await _userManager.FindByEmailAsync(model.LoginSubmission);
 
             if (user == null)
                 model.Error = _localizer["InvalidCredentials"];
@@ -93,6 +107,9 @@ public class AccountController : KikoleBaseController
 
                 if (result.IsLockedOut)
                     model.Error = _localizer["AccountLockedOut"];
+                else if (result.IsNotAllowed)
+                    // RequireConfirmedEmail : refuse la connexion tant que l'adresse n'est pas confirmee.
+                    model.Error = _localizer["EmailNotConfirmed"];
                 else if (!result.Succeeded)
                     model.Error = _localizer["InvalidCredentials"];
                 else
@@ -113,108 +130,179 @@ public class AccountController : KikoleBaseController
         return user.UserType >= UserTypes.Administrator;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> GetLoginQuestion(AccountModel model)
+    private static bool IsValidEmailFormat(string email)
+        => MailAddress.TryCreate(email, out _);
+
+    private bool IsBlockedEmailDomain(string email)
     {
-        if (string.IsNullOrWhiteSpace(model.LoginRecoverySubmission))
-            model.Error = _localizer["InvalidForm"];
+        var atIndex = email.LastIndexOf('@');
+        if (atIndex < 0)
+            return false;
+
+        var domain = email[(atIndex + 1)..].Trim();
+        return _registrationOptions.BlockedEmailDomains
+            .Any(d => string.Equals(d, domain, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
+    {
+        var model = new AccountModel();
+
+        var user = string.IsNullOrWhiteSpace(userId) ? null : await _userManager.FindByIdAsync(userId);
+
+        if (user == null || string.IsNullOrWhiteSpace(token))
+            model.Error = _localizer["EmailConfirmationFailed"];
         else
         {
-            var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
-
-            // un administrateur se comporte ici comme n'importe quel compte (question affichee) :
-            // le refus n'intervient qu'a la reinitialisation, sous la forme d'un echec ordinaire.
-            // Repondre "compte inconnu" ici, alors que la creation de compte repond "existe deja",
-            // permettrait de reperer les administrateurs.
-            if (user != null)
-                model.QuestionRecovery = user.PasswordResetQuestion;
+            var confirmation = await _userManager.ConfirmEmailAsync(user, token);
+            if (confirmation.Succeeded)
+                model.SuccessInfo = _localizer["EmailConfirmed"];
             else
-                model.Error = _localizer["UserDoesNotExist"];
+                model.Error = _localizer["EmailConfirmationFailed"];
         }
 
         return await RenderIndexAsync(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RequestPasswordReset(AccountModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.PasswordResetEmailSubmission))
+            model.Error = _localizer["InvalidForm"];
+        else
+        {
+            // reponse toujours identique, que l'adresse soit connue ou non : evite d'en
+            // faire un moyen de deviner les comptes existants.
+            model.SuccessInfo = _localizer["PasswordResetRequested"];
+
+            var user = await _userManager.FindByEmailAsync(model.PasswordResetEmailSubmission);
+            if (user != null && !IsRecoveryForbidden(user))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var link = Url.Action("ResetPassword", "Account",
+                    new { userId = user.Id, token }, Request.Scheme)!;
+
+                if (_emailOptions.SendingEnabled)
+                    await _emailSender.SendAsync(user.Email!, _localizer["ResetPasswordSubject"], BuildLinkEmailBody(_localizer["ResetPasswordBody"], link));
+                else
+                    _logger.LogInformation("[Email non envoye - developpement] Lien de reinitialisation pour {UserId} : {Link}", user.Id, link);
+            }
+        }
+
+        return await RenderIndexAsync(model);
+    }
+
+    [HttpGet]
+    public IActionResult ResetPassword(ulong userId, string token)
+    {
+        if (userId == 0 || string.IsNullOrWhiteSpace(token))
+            return RedirectToAction("ErrorIndex", "Home");
+
+        return View("ResetPassword", new AccountModel
+        {
+            ResetPasswordUserId = userId.ToString(),
+            ResetPasswordToken = token
+        });
     }
 
     [HttpPost]
     public async Task<IActionResult> ResetPassword(AccountModel model)
     {
-        if (string.IsNullOrWhiteSpace(model.LoginRecoverySubmission)
-            || string.IsNullOrWhiteSpace(model.RecoveryACreate)
+        if (string.IsNullOrWhiteSpace(model.ResetPasswordUserId)
+            || string.IsNullOrWhiteSpace(model.ResetPasswordToken)
             || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
             || !string.Equals(model.PasswordCreate1Submission, model.PasswordCreate2Submission))
-            model.Error = _localizer["InvalidForm"];
-        else
         {
-            var user = await _userManager.FindByNameAsync(model.LoginRecoverySubmission);
-
-            if (user == null)
-                model.Error = _localizer["ResetPasswordError"];
-            else if (await _userManager.IsLockedOutAsync(user))
-                model.Error = _localizer["AccountLockedOut"];
-            else if (IsRecoveryForbidden(user))
-            {
-                // un compte administrateur ne se recupere jamais par question secrete, mais le
-                // refus doit etre indiscernable d'une mauvaise reponse (meme message, meme
-                // compteur de verrouillage), sinon la tentative revele qui est administrateur
-                await _userManager.AccessFailedAsync(user);
-                model.Error = _localizer["ResetPasswordError"];
-            }
-            else
-            {
-                // la reponse de securite est un secret bien plus devinable qu'un mot de
-                // passe : elle passe par le meme compteur de verrouillage que la connexion,
-                // sinon elle deviendrait le maillon faible.
-                var verification = _passwordHasher.VerifyHashedPassword(
-                    user, user.PasswordResetAnswerHash, model.RecoveryACreate);
-
-                if (verification == PasswordVerificationResult.Failed)
-                {
-                    await _userManager.AccessFailedAsync(user);
-                    model.Error = _localizer["ResetPasswordError"];
-                }
-                else
-                {
-                    await _userManager.ResetAccessFailedCountAsync(user);
-
-                    if (verification == PasswordVerificationResult.SuccessRehashNeeded)
-                        user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, model.RecoveryACreate);
-
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var reset = await _userManager.ResetPasswordAsync(user, token, model.PasswordCreate1Submission);
-
-                    if (!reset.Succeeded)
-                        model.Error = MapPasswordErrorMessage(reset, "ResetPasswordError");
-                    else
-                        model.SuccessInfo = _localizer["PasswordReset"];
-                }
-            }
+            model.Error = _localizer["InvalidForm"];
+            return View("ResetPassword", model);
         }
 
-        return await RenderIndexAsync(model);
+        var user = await _userManager.FindByIdAsync(model.ResetPasswordUserId);
+        if (user == null)
+        {
+            model.Error = _localizer["ResetPasswordError"];
+            return View("ResetPassword", model);
+        }
+
+        var reset = await _userManager.ResetPasswordAsync(user, model.ResetPasswordToken, model.PasswordCreate1Submission);
+        if (!reset.Succeeded)
+        {
+            model.Error = MapPasswordErrorMessage(reset, "ResetPasswordError");
+            return View("ResetPassword", model);
+        }
+
+        // un mot de passe reinitialise avec succes leve aussi un verrouillage en cours :
+        // c'est desormais la seule voie de recuperation, elle ne doit pas rester bloquee.
+        await _userManager.ResetAccessFailedCountAsync(user);
+
+        return await RenderIndexAsync(new AccountModel { SuccessInfo = _localizer["PasswordReset"] });
     }
 
     [HttpPost]
     [Authorization]
-    public async Task<IActionResult> ResetQAndA(AccountModel model)
+    public async Task<IActionResult> ChangeEmail(AccountModel model)
     {
         var user = await _userManager.FindByIdAsync(UserId.ToString());
         if (user == null)
             return RedirectToAction("ErrorIndex", "Home");
 
         if (string.IsNullOrWhiteSpace(model.PasswordSubmission)
-            || string.IsNullOrWhiteSpace(model.RecoveryQCreate)
-            || string.IsNullOrWhiteSpace(model.RecoveryACreate))
+            || string.IsNullOrWhiteSpace(model.NewEmailSubmission)
+            || string.IsNullOrWhiteSpace(model.NewEmailConfirmSubmission))
             model.Error = _localizer["InvalidForm"];
         else if (!await _userManager.CheckPasswordAsync(user, model.PasswordSubmission))
             model.Error = _localizer["InvalidPassword"];
+        else if (!string.Equals(model.NewEmailSubmission.Trim(), model.NewEmailConfirmSubmission.Trim(), StringComparison.Ordinal))
+            model.Error = _localizer["NotMatchingEmail"];
+        else if (!IsValidEmailFormat(model.NewEmailSubmission))
+            model.Error = _localizer["InvalidEmail"];
+        else if (IsBlockedEmailDomain(model.NewEmailSubmission))
+            model.Error = _localizer["EmailDomainBlocked"];
         else
         {
-            user.PasswordResetQuestion = model.RecoveryQCreate;
-            user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, model.RecoveryACreate);
+            var newEmail = model.NewEmailSubmission.Trim();
+            var existing = await _userRepository.GetUserByEmailHashIncludingDisabledAsync(_emailProtector.Hash(newEmail));
 
-            await _userManager.UpdateAsync(user);
+            if (existing != null && existing.Id != user.Id)
+                model.Error = _localizer["EmailAlreadyUsed"];
+            else
+            {
+                // l'ancienne adresse reste pleinement active tant que le lien n'est pas
+                // suivi : rien n'est modifie en base ni en session avant confirmation
+                // (le token auto-encode la nouvelle adresse, cf. ChangeEmailAsync).
+                var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+                var link = Url.Action("ConfirmEmailChange", "Account",
+                    new { userId = user.Id, newEmail, token }, Request.Scheme)!;
 
-            model.SuccessInfo = _localizer["QandAUpdated"];
+                if (_emailOptions.SendingEnabled)
+                    await _emailSender.SendAsync(newEmail, _localizer["ConfirmEmailChangeSubject"], BuildLinkEmailBody(_localizer["ConfirmEmailChangeBody"], link));
+                else
+                    _logger.LogInformation("[Email non envoye - developpement] Lien de changement d'email pour {UserId} : {Link}", user.Id, link);
+
+                model.SuccessInfo = _localizer["EmailChangeRequested"];
+            }
+        }
+
+        return await RenderIndexAsync(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmailChange(ulong userId, string newEmail, string token)
+    {
+        var model = new AccountModel();
+
+        var user = userId == 0 ? null : await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null || string.IsNullOrWhiteSpace(newEmail) || string.IsNullOrWhiteSpace(token))
+            model.Error = _localizer["EmailConfirmationFailed"];
+        else
+        {
+            var change = await _userManager.ChangeEmailAsync(user, newEmail, token);
+            if (change.Succeeded)
+                model.SuccessInfo = _localizer["EmailChanged"];
+            else
+                model.Error = _localizer["EmailConfirmationFailed"];
         }
 
         return await RenderIndexAsync(model);
@@ -228,6 +316,7 @@ public class AccountController : KikoleBaseController
 
         if (string.IsNullOrWhiteSpace(model.LoginCreateSubmission)
             || string.IsNullOrWhiteSpace(model.PasswordCreate1Submission)
+            || string.IsNullOrWhiteSpace(model.EmailCreateSubmission)
             || (inviteRequired && string.IsNullOrWhiteSpace(model.RegistrationId)))
             model.Error = _localizer["InvalidForm"];
         else if (inviteRequired && !Guid.TryParse(model.RegistrationId, out registrationId))
@@ -236,6 +325,10 @@ public class AccountController : KikoleBaseController
             model.Error = _localizer["NotMatchingPassword"];
         else if (model.LoginCreateSubmission.Length < 3)
             model.Error = _localizer["TooShortLogin"];
+        else if (!IsValidEmailFormat(model.EmailCreateSubmission))
+            model.Error = _localizer["InvalidEmail"];
+        else if (IsBlockedEmailDomain(model.EmailCreateSubmission))
+            model.Error = _localizer["EmailDomainBlocked"];
         else
         {
             var clientIp = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -248,10 +341,17 @@ public class AccountController : KikoleBaseController
 
             var existingUser = isRateLimited ? null : await _userManager.FindByNameAsync(model.LoginCreateSubmission);
 
+            var emailHash = _emailProtector.Hash(model.EmailCreateSubmission);
+            var existingEmail = isRateLimited || existingUser != null
+                ? null
+                : await _userRepository.GetUserByEmailHashIncludingDisabledAsync(emailHash);
+
             if (isRateLimited)
                 model.Error = _localizer["TooManyAccountsFromThisIp"];
             else if (existingUser != null)
                 model.Error = _localizer["AlreadyExistsAccount"];
+            else if (existingEmail != null)
+                model.Error = _localizer["EmailAlreadyUsed"];
             else
             {
                 // hors invitation, rien a verifier avant de creer le compte
@@ -272,14 +372,12 @@ public class AccountController : KikoleBaseController
                     {
                         Login = model.LoginCreateSubmission,
                         Password = model.PasswordCreate1Submission,
-                        PasswordResetQuestion = model.RecoveryQCreate,
-                        PasswordResetAnswer = model.RecoveryACreate?.Trim(),
+                        Email = model.EmailCreateSubmission.Trim(),
                         Ip = clientIp,
                         SponsorUserId = sponsorUserId
                     };
 
-                    var (user, rawPasswordResetAnswer) = request.ToApplicationUser();
-                    user.PasswordResetAnswerHash = _passwordHasher.HashPassword(user, rawPasswordResetAnswer);
+                    var user = request.ToApplicationUser();
 
                     var creation = await _userManager.CreateAsync(user, request.Password);
 
@@ -294,6 +392,21 @@ public class AccountController : KikoleBaseController
                         if (sponsorUserId.HasValue)
                             await _badgeService
                                 .PrepareSponsorshipBadgesAsync(sponsorUserId.Value, ViewHelper.GetLanguage());
+
+                        if (_emailOptions.SendingEnabled)
+                        {
+                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            var link = Url.Action("ConfirmEmail", "Account",
+                                new { userId = user.Id, token }, Request.Scheme)!;
+                            await _emailSender.SendAsync(user.Email!, _localizer["ConfirmEmailSubject"], BuildLinkEmailBody(_localizer["ConfirmEmailBody"], link));
+                        }
+                        else
+                        {
+                            // developpement local : pas d'envoi reel, le compte est
+                            // directement considere confirme (auto-inscription).
+                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            await _userManager.ConfirmEmailAsync(user, token);
+                        }
 
                         return await LogIn(new AccountModel
                         {
@@ -356,6 +469,9 @@ public class AccountController : KikoleBaseController
         return sponsor.Id;
     }
 
+    private string BuildLinkEmailBody(string introduction, string link)
+        => $"<p>{introduction}</p><p><a href=\"{link}\">{link}</a></p><p>{_localizer["LinkValidityNotice", _emailOptions.TokenLifetimeHours]}</p>";
+
     /// <summary>
     /// Rend la vue Index en refletant l'etat de connexion reel (plutot que de le recopier
     /// a la main a la fin de chaque action, ce qui oublie facilement un cas d'erreur).
@@ -367,20 +483,25 @@ public class AccountController : KikoleBaseController
         model.IsAuthenticated = UserId > 0;
         model.Login = UserLogin;
 
-        if (UserId > 0 && _registrationOptions.SponsorshipEnabled)
+        if (UserId > 0)
         {
             var me = await _userManager.FindByIdAsync(UserId.ToString());
-            if (me?.SponsorUserId.HasValue == true)
-            {
-                var sponsor = await _userRepository.GetUserByIdIncludingDisabledAsync(me.SponsorUserId.Value);
-                model.SponsorLogin = sponsor?.Login;
-            }
+            model.Email = me?.Email;
 
-            var godchildren = await _userRepository.GetGodchildrenAsync(UserId);
-            model.Godchildren = godchildren
-                .Select(g => (g.Login, g.IsDisabled))
-                .OrderBy(g => g.Login)
-                .ToList();
+            if (_registrationOptions.SponsorshipEnabled)
+            {
+                if (me?.SponsorUserId.HasValue == true)
+                {
+                    var sponsor = await _userRepository.GetUserByIdIncludingDisabledAsync(me.SponsorUserId.Value);
+                    model.SponsorLogin = sponsor?.Login;
+                }
+
+                var godchildren = await _userRepository.GetGodchildrenAsync(UserId);
+                model.Godchildren = godchildren
+                    .Select(g => (g.Login, g.IsDisabled))
+                    .OrderBy(g => g.Login)
+                    .ToList();
+            }
         }
 
         return View("Index", model);

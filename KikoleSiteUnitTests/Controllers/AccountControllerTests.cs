@@ -15,7 +15,9 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
@@ -44,8 +46,14 @@ public class AccountControllerTests
     private readonly Mock<IStringLocalizer<AccountController>> _localizer = new();
     private readonly Mock<UserManager<ApplicationUser>> _userManager = IdentityMocks.MockUserManager();
     private readonly Mock<SignInManager<ApplicationUser>> _signInManager;
-    private readonly Mock<IPasswordHasher<ApplicationUser>> _passwordHasher = new();
+    private readonly Mock<IEmailProtector> _emailProtector = new();
+    private readonly Mock<IEmailSender> _emailSender = new();
+    private readonly Mock<ILogger<AccountController>> _logger = new();
     private readonly RegistrationOptions _registrationOptions = new() { SponsorshipEnabled = true };
+    // SendingEnabled a false par defaut (comme en local) : la plupart des tests n'ont donc
+    // pas a mocker l'envoi, seuls ceux qui portent explicitement sur l'envoi reel le
+    // reactivent via BuildController.
+    private readonly EmailOptions _emailOptions = new() { FromAddress = "no-reply@kikole.test", SendingEnabled = false };
     private readonly AccountController _controller;
 
     public AccountControllerTests()
@@ -53,6 +61,10 @@ public class AccountControllerTests
         _signInManager = IdentityMocks.MockSignInManager(_userManager);
 
         _localizer.Setup(l => l[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
+
+        // empreinte deterministe et lisible dans les tests, sans dependre du vrai
+        // algorithme de hachage (hors sujet ici, couvert par EmailProtectorTests)
+        _emailProtector.Setup(_ => _.Hash(It.IsAny<string>())).Returns<string>(e => $"hash:{e.ToLowerInvariant()}");
 
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
         httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
@@ -63,29 +75,16 @@ public class AccountControllerTests
         // "silencieux" ci-dessus
         _userRepository.Setup(_ => _.GetGodchildrenAsync(It.IsAny<ulong>())).ReturnsAsync(new List<UserDto>());
 
-        _controller = new AccountController(
-            _localizer.Object,
-            _userManager.Object,
-            _signInManager.Object,
-            _passwordHasher.Object,
-            new SanitizingLookupNormalizer(),
-            new OptionsWrapper<RegistrationOptions>(_registrationOptions),
-            _userRepository.Object,
-            _internationalService.Object,
-            _clock.Object,
-            _gameCalendar.Object,
-            _playerService.Object,
-            _badgeService.Object,
-            httpContextAccessor.Object)
-        {
-            ControllerContext = new ControllerContext { HttpContext = _httpContext }
-        };
+        _controller = BuildController(_registrationOptions, _emailOptions);
     }
 
     /// <summary>Instance dediee pour les tests qui ont besoin d'une config differente de
-    /// celle par defaut (<see cref="_registrationOptions"/> est immuable une fois passee
-    /// a <see cref="_controller"/>, cf. <c>init</c> sur <see cref="RegistrationOptions"/>).</summary>
+    /// celle par defaut (<see cref="_registrationOptions"/>/<see cref="_emailOptions"/> sont
+    /// immuables une fois passees a <see cref="_controller"/>, cf. <c>init</c>).</summary>
     private AccountController BuildController(RegistrationOptions options)
+        => BuildController(options, _emailOptions);
+
+    private AccountController BuildController(RegistrationOptions registrationOptions, EmailOptions emailOptions)
     {
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
         httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
@@ -94,9 +93,12 @@ public class AccountControllerTests
             _localizer.Object,
             _userManager.Object,
             _signInManager.Object,
-            _passwordHasher.Object,
             new SanitizingLookupNormalizer(),
-            new OptionsWrapper<RegistrationOptions>(options),
+            _emailProtector.Object,
+            _emailSender.Object,
+            _logger.Object,
+            new OptionsWrapper<RegistrationOptions>(registrationOptions),
+            new OptionsWrapper<EmailOptions>(emailOptions),
             _userRepository.Object,
             _internationalService.Object,
             _clock.Object,
@@ -105,8 +107,21 @@ public class AccountControllerTests
             _badgeService.Object,
             httpContextAccessor.Object)
         {
-            ControllerContext = new ControllerContext { HttpContext = _httpContext }
+            ControllerContext = new ControllerContext { HttpContext = _httpContext },
+            Url = FakeUrlHelper()
         };
+    }
+
+    /// <summary>
+    /// Les controleurs instancies a la main (hors pipeline MVC) n'ont pas de <c>Url</c>
+    /// fonctionnel par defaut (HttpContext.RequestServices est vide dans ces tests) : les
+    /// actions qui construisent un lien (Url.Action, pour les emails) en ont besoin.
+    /// </summary>
+    private static IUrlHelper FakeUrlHelper()
+    {
+        var urlHelper = new Mock<IUrlHelper>();
+        urlHelper.Setup(u => u.Action(It.IsAny<UrlActionContext>())).Returns("https://kikole.test/fake-link");
+        return urlHelper.Object;
     }
 
     private static ApplicationUser BuildUser(ulong id = 1, string login = "joueur1")
@@ -115,8 +130,8 @@ public class AccountControllerTests
         {
             Id = id,
             UserName = login,
-            PasswordResetQuestion = "une question ?",
-            PasswordResetAnswerHash = "hash-reponse"
+            Email = $"{login}@kikole.test",
+            EmailConfirmed = true
         };
     }
 
@@ -195,182 +210,271 @@ public class AccountControllerTests
         model.Error.Should().Be("AccountLockedOut");
     }
 
-    // ------------------------------------------------------------- GetLoginQuestion
-
     [Fact]
-    public async Task GetLoginQuestion_UnknownUser_SetsUserDoesNotExistError()
-    {
-        _userManager.Setup(_ => _.FindByNameAsync("fantome")).ReturnsAsync((ApplicationUser?)null);
-
-        var result = await _controller.GetLoginQuestion(new AccountModel { LoginRecoverySubmission = "fantome" });
-
-        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.Error.Should().Be("UserDoesNotExist");
-    }
-
-    [Fact]
-    public async Task GetLoginQuestion_KnownUser_ExposesTheRecoveryQuestion()
+    public async Task LogIn_EmailNotConfirmed_SetsEmailNotConfirmedError()
     {
         var user = BuildUser();
         _userManager.Setup(_ => _.FindByNameAsync("joueur1")).ReturnsAsync(user);
+        _signInManager
+            .Setup(_ => _.PasswordSignInAsync(user, "x", true, true))
+            .ReturnsAsync(SignInResult.NotAllowed);
 
-        var result = await _controller.GetLoginQuestion(new AccountModel { LoginRecoverySubmission = "joueur1" });
+        var result = await _controller.LogIn(new AccountModel { LoginSubmission = "joueur1", PasswordSubmission = "x" });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.QuestionRecovery.Should().Be("une question ?");
+        model.Error.Should().Be("EmailNotConfirmed");
     }
 
     [Fact]
-    public async Task GetLoginQuestion_AdministratorAccount_BehavesLikeAnyOtherAccount()
+    public async Task LogIn_ByEmail_WhenLoginDoesNotMatchButEmailDoes_Succeeds()
     {
-        // "compte inconnu" ici contredirait "existe deja" a la creation et designerait l'admin
-        var admin = BuildUser();
-        admin.UserType = UserTypes.Administrator;
-        _userManager.Setup(_ => _.FindByNameAsync("admin")).ReturnsAsync(admin);
+        // le champ de connexion accepte le login OU l'email : le login echoue d'abord,
+        // puis l'email est essaye
+        var user = BuildUser();
+        _userManager.Setup(_ => _.FindByNameAsync("joueur1@kikole.test")).ReturnsAsync((ApplicationUser?)null);
+        _userManager.Setup(_ => _.FindByEmailAsync("joueur1@kikole.test")).ReturnsAsync(user);
+        _signInManager
+            .Setup(_ => _.PasswordSignInAsync(user, "bonmdp", true, true))
+            .ReturnsAsync(SignInResult.Success);
 
-        var result = await _controller.GetLoginQuestion(new AccountModel { LoginRecoverySubmission = "admin" });
+        var result = await _controller.LogIn(new AccountModel { LoginSubmission = "joueur1@kikole.test", PasswordSubmission = "bonmdp" });
+
+        result.Should().BeOfType<RedirectToActionResult>();
+    }
+
+    // ------------------------------------------------------------- ConfirmEmail
+
+    [Fact]
+    public async Task ConfirmEmail_MissingToken_SetsError()
+    {
+        var result = await _controller.ConfirmEmail("1", "");
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.QuestionRecovery.Should().Be("une question ?");
+        model.Error.Should().Be("EmailConfirmationFailed");
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_Success_SetsSuccessInfo()
+    {
+        var user = BuildUser();
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.ConfirmEmailAsync(user, "token")).ReturnsAsync(IdentityResult.Success);
+
+        var result = await _controller.ConfirmEmail("1", "token");
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.SuccessInfo.Should().Be("EmailConfirmed");
         model.Error.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_InvalidToken_SetsError()
+    {
+        var user = BuildUser();
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.ConfirmEmailAsync(user, "mauvais")).ReturnsAsync(IdentityResult.Failed());
+
+        var result = await _controller.ConfirmEmail("1", "mauvais");
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("EmailConfirmationFailed");
+    }
+
+    // ------------------------------------------------------------- RequestPasswordReset
+
+    [Fact]
+    public async Task RequestPasswordReset_UnknownEmail_StillReturnsTheGenericMessage()
+    {
+        _userManager.Setup(_ => _.FindByEmailAsync("fantome@kikole.test")).ReturnsAsync((ApplicationUser?)null);
+
+        var result = await _controller.RequestPasswordReset(new AccountModel { PasswordResetEmailSubmission = "fantome@kikole.test" });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.SuccessInfo.Should().Be("PasswordResetRequested");
+        model.Error.Should().BeNull();
+        _userManager.Verify(_ => _.GeneratePasswordResetTokenAsync(It.IsAny<ApplicationUser>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RequestPasswordReset_KnownEmail_GeneratesATokenAndReturnsTheSameGenericMessage()
+    {
+        var user = BuildUser();
+        _userManager.Setup(_ => _.FindByEmailAsync("joueur1@kikole.test")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("token");
+
+        var result = await _controller.RequestPasswordReset(new AccountModel { PasswordResetEmailSubmission = "joueur1@kikole.test" });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.SuccessInfo.Should().Be("PasswordResetRequested");
+        _userManager.Verify(_ => _.GeneratePasswordResetTokenAsync(user), Times.Once);
+        // SendingEnabled=false par defaut dans ces tests : le lien est journalise, pas envoye
+        _emailSender.Verify(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RequestPasswordReset_AdministratorAccount_DoesNotGenerateAToken()
+    {
+        // meme message que pour un compte inconnu ou standard : ne doit jamais permettre
+        // de reperer un administrateur par ce biais
+        var admin = BuildUser();
+        admin.UserType = UserTypes.Administrator;
+        _userManager.Setup(_ => _.FindByEmailAsync("joueur1@kikole.test")).ReturnsAsync(admin);
+
+        var result = await _controller.RequestPasswordReset(new AccountModel { PasswordResetEmailSubmission = "joueur1@kikole.test" });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.SuccessInfo.Should().Be("PasswordResetRequested");
+        _userManager.Verify(_ => _.GeneratePasswordResetTokenAsync(It.IsAny<ApplicationUser>()), Times.Never);
     }
 
     // ------------------------------------------------------------- ResetPassword
 
     [Fact]
-    public async Task ResetPassword_AdministratorAccount_IsRefusedLikeAWrongAnswer()
+    public void ResetPasswordGet_MissingToken_RedirectsToError()
     {
-        var admin = BuildUser();
-        admin.UserType = UserTypes.Administrator;
-        _userManager.Setup(_ => _.FindByNameAsync("admin")).ReturnsAsync(admin);
-        _userManager.Setup(_ => _.IsLockedOutAsync(admin)).ReturnsAsync(false);
+        var result = _controller.ResetPassword(5, "");
+
+        result.Should().BeOfType<RedirectToActionResult>()
+            .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "ErrorIndex" && r.ControllerName == "Home");
+    }
+
+    [Fact]
+    public async Task ResetPasswordPost_MismatchedPasswords_SetsInvalidFormError()
+    {
+        var result = await _controller.ResetPassword(new AccountModel
+        {
+            ResetPasswordUserId = "1",
+            ResetPasswordToken = "token",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "AutreChose1234"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("InvalidForm");
+    }
+
+    [Fact]
+    public async Task ResetPasswordPost_UnknownUser_SetsResetPasswordError()
+    {
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync((ApplicationUser?)null);
 
         var result = await _controller.ResetPassword(new AccountModel
         {
-            LoginRecoverySubmission = "admin",
-            RecoveryACreate = "reponse",
+            ResetPasswordUserId = "1",
+            ResetPasswordToken = "token",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234"
         });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
         model.Error.Should().Be("ResetPasswordError");
-        model.SuccessInfo.Should().BeNull();
-        _userManager.Verify(_ => _.GeneratePasswordResetTokenAsync(It.IsAny<ApplicationUser>()), Times.Never);
-        _userManager.Verify(_ => _.ResetPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        _userManager.Verify(_ => _.AccessFailedAsync(admin), Times.Once);
     }
 
     [Fact]
-    public async Task ResetPassword_UnknownUser_SetsResetPasswordError()
-    {
-        _userManager.Setup(_ => _.FindByNameAsync("fantome")).ReturnsAsync((ApplicationUser?)null);
-
-        var result = await _controller.ResetPassword(new AccountModel
-        {
-            LoginRecoverySubmission = "fantome",
-            RecoveryACreate = "reponse",
-            PasswordCreate1Submission = "NouveauMdp1234",
-            PasswordCreate2Submission = "NouveauMdp1234"
-        });
-
-        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.Error.Should().Be("ResetPasswordError");
-    }
-
-    [Fact]
-    public async Task ResetPassword_Success_SetsSuccessInfo()
+    public async Task ResetPasswordPost_Success_ClearsLockoutAndRendersTheLoginViewWithSuccessInfo()
     {
         var user = BuildUser();
-        _userManager.Setup(_ => _.FindByNameAsync("joueur1")).ReturnsAsync(user);
-        _userManager.Setup(_ => _.IsLockedOutAsync(user)).ReturnsAsync(false);
-        _passwordHasher
-            .Setup(_ => _.VerifyHashedPassword(user, user.PasswordResetAnswerHash, "reponse"))
-            .Returns(PasswordVerificationResult.Success);
-        _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("token");
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
         _userManager
             .Setup(_ => _.ResetPasswordAsync(user, "token", "NouveauMdp1234"))
             .ReturnsAsync(IdentityResult.Success);
 
         var result = await _controller.ResetPassword(new AccountModel
         {
-            LoginRecoverySubmission = "joueur1",
-            RecoveryACreate = "reponse",
+            ResetPasswordUserId = "1",
+            ResetPasswordToken = "token",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234"
         });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
         model.SuccessInfo.Should().Be("PasswordReset");
-        model.Error.Should().BeNull();
+        _userManager.Verify(_ => _.ResetAccessFailedCountAsync(user), Times.Once);
     }
 
-    [Fact]
-    public async Task ResetPassword_WrongSecurityAnswer_RecordsAccessFailedAndSetsError()
-    {
-        var user = BuildUser();
-        _userManager.Setup(_ => _.FindByNameAsync("joueur1")).ReturnsAsync(user);
-        _userManager.Setup(_ => _.IsLockedOutAsync(user)).ReturnsAsync(false);
-        _passwordHasher
-            .Setup(_ => _.VerifyHashedPassword(user, user.PasswordResetAnswerHash, "mauvaise"))
-            .Returns(PasswordVerificationResult.Failed);
-
-        var result = await _controller.ResetPassword(new AccountModel
-        {
-            LoginRecoverySubmission = "joueur1",
-            RecoveryACreate = "mauvaise",
-            PasswordCreate1Submission = "NouveauMdp1234",
-            PasswordCreate2Submission = "NouveauMdp1234"
-        });
-
-        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.Error.Should().Be("ResetPasswordError");
-        _userManager.Verify(_ => _.AccessFailedAsync(user), Times.Once);
-    }
-
-    // ------------------------------------------------------------- ResetQAndA
+    // ------------------------------------------------------------- ChangeEmail
 
     [Fact]
-    public async Task ResetQAndA_WrongCurrentPassword_SetsInvalidPasswordError()
+    public async Task ChangeEmail_WrongCurrentPassword_SetsInvalidPasswordError()
     {
         SetCurrentUser(1);
         var user = BuildUser();
         _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
         _userManager.Setup(_ => _.CheckPasswordAsync(user, "mauvais")).ReturnsAsync(false);
 
-        var result = await _controller.ResetQAndA(new AccountModel
+        var result = await _controller.ChangeEmail(new AccountModel
         {
             PasswordSubmission = "mauvais",
-            RecoveryQCreate = "question",
-            RecoveryACreate = "reponse"
+            NewEmailSubmission = "nouveau@kikole.test",
+            NewEmailConfirmSubmission = "nouveau@kikole.test"
         });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
         model.Error.Should().Be("InvalidPassword");
-        _userManager.Verify(_ => _.UpdateAsync(It.IsAny<ApplicationUser>()), Times.Never);
     }
 
     [Fact]
-    public async Task ResetQAndA_Success_UpdatesTheUserAndSetsSuccessInfo()
+    public async Task ChangeEmail_MismatchedConfirmation_SetsNotMatchingEmailError()
     {
         SetCurrentUser(1);
         var user = BuildUser();
         _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
         _userManager.Setup(_ => _.CheckPasswordAsync(user, "bonmdp")).ReturnsAsync(true);
-        _passwordHasher.Setup(_ => _.HashPassword(user, "nouvelle-reponse")).Returns("nouveau-hash");
-        _userManager.Setup(_ => _.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
 
-        var result = await _controller.ResetQAndA(new AccountModel
+        var result = await _controller.ChangeEmail(new AccountModel
         {
             PasswordSubmission = "bonmdp",
-            RecoveryQCreate = "nouvelle question",
-            RecoveryACreate = "nouvelle-reponse"
+            NewEmailSubmission = "nouveau@kikole.test",
+            NewEmailConfirmSubmission = "autre@kikole.test"
         });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
-        model.SuccessInfo.Should().Be("QandAUpdated");
-        user.PasswordResetQuestion.Should().Be("nouvelle question");
-        user.PasswordResetAnswerHash.Should().Be("nouveau-hash");
+        model.Error.Should().Be("NotMatchingEmail");
+    }
+
+    [Fact]
+    public async Task ChangeEmail_AlreadyUsedByAnotherAccount_SetsError()
+    {
+        SetCurrentUser(1);
+        var user = BuildUser();
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.CheckPasswordAsync(user, "bonmdp")).ReturnsAsync(true);
+        _userRepository
+            .Setup(_ => _.GetUserByEmailHashIncludingDisabledAsync("hash:nouveau@kikole.test"))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(2).Build());
+
+        var result = await _controller.ChangeEmail(new AccountModel
+        {
+            PasswordSubmission = "bonmdp",
+            NewEmailSubmission = "nouveau@kikole.test",
+            NewEmailConfirmSubmission = "nouveau@kikole.test"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("EmailAlreadyUsed");
+    }
+
+    [Fact]
+    public async Task ChangeEmail_Success_GeneratesATokenAndSetsSuccessInfo()
+    {
+        SetCurrentUser(1);
+        var user = BuildUser();
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.CheckPasswordAsync(user, "bonmdp")).ReturnsAsync(true);
+        _userManager.Setup(_ => _.GenerateChangeEmailTokenAsync(user, "nouveau@kikole.test")).ReturnsAsync("token");
+
+        var result = await _controller.ChangeEmail(new AccountModel
+        {
+            PasswordSubmission = "bonmdp",
+            NewEmailSubmission = "nouveau@kikole.test",
+            NewEmailConfirmSubmission = "nouveau@kikole.test"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.SuccessInfo.Should().Be("EmailChangeRequested");
+        _userManager.Verify(_ => _.GenerateChangeEmailTokenAsync(user, "nouveau@kikole.test"), Times.Once);
+        // l'ancienne adresse reste seule active tant que le lien n'est pas suivi
+        user.Email.Should().Be("joueur1@kikole.test");
     }
 
     // ------------------------------------------------------------- Create
@@ -382,7 +486,8 @@ public class AccountControllerTests
         {
             LoginCreateSubmission = "ab",
             PasswordCreate1Submission = "NouveauMdp1234",
-            PasswordCreate2Submission = "NouveauMdp1234"
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test"
         });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
@@ -398,11 +503,69 @@ public class AccountControllerTests
         {
             LoginCreateSubmission = "joueur1",
             PasswordCreate1Submission = "NouveauMdp1234",
-            PasswordCreate2Submission = "NouveauMdp1234"
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test"
         });
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
         model.Error.Should().Be("AlreadyExistsAccount");
+    }
+
+    [Fact]
+    public async Task Create_InvalidEmailFormat_SetsInvalidEmailError()
+    {
+        var result = await _controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "pas-un-email"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("InvalidEmail");
+        _userManager.Verify(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Create_BlockedEmailDomain_SetsEmailDomainBlockedError()
+    {
+        var controller = BuildController(_registrationOptions with
+        {
+            BlockedEmailDomains = new[] { "yopmail.com" }
+        });
+
+        var result = await controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@YopMail.com"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("EmailDomainBlocked");
+    }
+
+    [Fact]
+    public async Task Create_EmailAlreadyUsed_SetsEmailAlreadyUsedError()
+    {
+        _userManager.Setup(_ => _.FindByNameAsync("nouveau")).ReturnsAsync((ApplicationUser?)null);
+        _userRepository
+            .Setup(_ => _.GetUserByEmailHashIncludingDisabledAsync("hash:nouveau@kikole.test"))
+            .ReturnsAsync(UserDtoBuilder.Valid().Build());
+
+        var result = await _controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test"
+        });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("EmailAlreadyUsed");
+        _userManager.Verify(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -427,13 +590,40 @@ public class AccountControllerTests
         {
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
-            PasswordCreate2Submission = "NouveauMdp1234"
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test"
         });
 
         result.Should().BeOfType<RedirectToActionResult>()
             .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "Index" && r.ControllerName == "Home");
         _userManager.Verify(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234"), Times.Once);
         _userRepository.Verify(_ => _.CreateLoginHistoryAsync(9, It.IsAny<string?>()), Times.Once);
+        // developpement local (SendingEnabled=false) : le compte est auto-confirme, jamais envoye
+        _emailSender.Verify(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Create_WhenSendingIsEnabled_SendsAConfirmationEmailInsteadOfAutoConfirming()
+    {
+        var controller = BuildController(_registrationOptions, _emailOptions with { SendingEnabled = true });
+
+        _userManager.Setup(_ => _.FindByNameAsync("nouveau")).ReturnsAsync((ApplicationUser?)null);
+        _userManager
+            .Setup(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234"))
+            .ReturnsAsync(IdentityResult.Success)
+            .Callback<ApplicationUser, string>((u, _) => u.Id = 9);
+        _userManager.Setup(_ => _.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>())).ReturnsAsync("token");
+
+        await controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test"
+        });
+
+        _emailSender.Verify(_ => _.SendAsync("nouveau@kikole.test", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        _userManager.Verify(_ => _.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
     }
 
     // ------------------------------------------------------------- Create (parrainage)
@@ -463,6 +653,7 @@ public class AccountControllerTests
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test",
             SponsorLoginSubmission = "parrain1"
         });
 
@@ -481,6 +672,7 @@ public class AccountControllerTests
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test",
             SponsorLoginSubmission = "inconnu"
         });
 
@@ -501,6 +693,7 @@ public class AccountControllerTests
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test",
             SponsorLoginSubmission = "parrain1"
         });
 
@@ -527,6 +720,7 @@ public class AccountControllerTests
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test",
             SponsorLoginSubmission = "NOUVEAU"
         });
 
@@ -547,6 +741,7 @@ public class AccountControllerTests
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
             PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test",
             SponsorLoginSubmission = "parrain1"
         });
 

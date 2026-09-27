@@ -86,12 +86,14 @@ builder.Services
 // presente, pas dans ce chantier).
 builder.Services
     .Configure<RegistrationOptions>(builder.Configuration.GetSection("Registration"))
-    .Configure<ForwardedProxyOptions>(builder.Configuration.GetSection("ForwardedProxy"));
+    .Configure<ForwardedProxyOptions>(builder.Configuration.GetSection("ForwardedProxy"))
+    .Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
 
 // authentification : Identity avec un store Dapper maison (KikoleSite/Identity), pas
-// EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Ni email (aucun canal
-// de contact avec les joueurs hors formulaire libre), ni 2FA : la recuperation reste une
-// question de securite, geree a la main dans AccountController par-dessus IPasswordHasher.
+// EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Inscription par email,
+// confirmee par lien (RequireConfirmedEmail) ; recuperation de mot de passe par email
+// egalement (jeton auto-encode via GeneratePasswordResetTokenAsync), plus de question
+// secrete. Ni 2FA, ni telephone.
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
@@ -109,11 +111,33 @@ builder.Services
 
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
+        // tant que l'adresse n'est pas confirmee, la connexion echoue (SignInResult.IsNotAllowed) :
+        // c'est ce seul indicateur qui bloque un compte fraichement cree et pas encore confirme.
+        options.SignIn.RequireConfirmedEmail = true;
     })
     .AddUserStore<DapperUserStore>()
     .AddClaimsPrincipalFactory<UserTypeClaimsPrincipalFactory>()
     .AddDefaultTokenProviders()
     .AddSignInManager();
+
+// duree de vie partagee des liens de confirmation d'inscription, de changement d'adresse
+// et de reinitialisation de mot de passe (tous les trois passent par le token provider par
+// defaut d'Identity, deja enregistre par AddDefaultTokenProviders ci-dessus).
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    var tokenLifetimeHours = builder.Configuration.GetValue("Email:TokenLifetimeHours", 24);
+    options.TokenLifespan = TimeSpan.FromHours(tokenLifetimeHours);
+});
+
+builder.Services.AddSingleton<IEmailProtector, EmailProtector>();
+
+// en local, le lien est ecrit dans les logs plutot qu'envoye (cf. EmailOptions.SendingEnabled,
+// desactive dans appsettings.Development.json) : pas besoin d'une vraie boite mail pour tester.
+if (builder.Configuration.GetValue("Email:SendingEnabled", true))
+    builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+else
+    builder.Services.AddSingleton<IEmailSender, LoggingEmailSender>();
 
 // verifie les mots de passe contre les fuites connues (Have I Been Pwned, k-anonymity) ;
 // s'ajoute au validateur de longueur d'Identity, ne le remplace pas (IPasswordValidator

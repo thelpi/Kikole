@@ -12,21 +12,24 @@ namespace KikoleSite.Identity;
 /// Store Identity adosse a <see cref="IUserRepository"/> (Dapper/MySqlConnector), pour
 /// rester sur le seul acces aux donnees du projet plutot que d'introduire EF Core.
 ///
-/// Seules les interfaces reellement utilisees sont implementees : ni email, ni telephone,
-/// ni 2FA, ni roles/claims/logins externes (aucun de ces mecanismes n'est employe ici, le
-/// niveau utilisateur passe par une claim <see cref="UserTypes"/> geree ailleurs).
+/// Seules les interfaces reellement utilisees sont implementees : ni telephone, ni 2FA,
+/// ni roles/claims/logins externes (aucun de ces mecanismes n'est employe ici, le niveau
+/// utilisateur passe par une claim <see cref="UserTypes"/> geree ailleurs).
 /// </summary>
 public class DapperUserStore :
     IUserStore<ApplicationUser>,
     IUserPasswordStore<ApplicationUser>,
     IUserLockoutStore<ApplicationUser>,
-    IUserSecurityStampStore<ApplicationUser>
+    IUserSecurityStampStore<ApplicationUser>,
+    IUserEmailStore<ApplicationUser>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IEmailProtector _emailProtector;
 
-    public DapperUserStore(IUserRepository userRepository)
+    public DapperUserStore(IUserRepository userRepository, IEmailProtector emailProtector)
     {
         _userRepository = userRepository;
+        _emailProtector = emailProtector;
     }
 
     // ------------------------------------------------------------------ IUserStore
@@ -146,6 +149,42 @@ public class DapperUserStore :
     public Task<string?> GetSecurityStampAsync(ApplicationUser user, CancellationToken cancellationToken)
         => Task.FromResult(user.SecurityStamp);
 
+    // ------------------------------------------------------------------ IUserEmailStore
+
+    public Task SetEmailAsync(ApplicationUser user, string? email, CancellationToken cancellationToken)
+    {
+        user.Email = email;
+        return Task.CompletedTask;
+    }
+
+    public Task<string?> GetEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
+        => Task.FromResult(user.Email);
+
+    public Task<bool> GetEmailConfirmedAsync(ApplicationUser user, CancellationToken cancellationToken)
+        => Task.FromResult(user.EmailConfirmed);
+
+    public Task SetEmailConfirmedAsync(ApplicationUser user, bool confirmed, CancellationToken cancellationToken)
+    {
+        user.EmailConfirmed = confirmed;
+        return Task.CompletedTask;
+    }
+
+    public async Task<ApplicationUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+    {
+        var hash = _emailProtector.Hash(normalizedEmail);
+        var dto = await _userRepository.GetUserByEmailHashAsync(hash);
+        return dto == null ? null : ToUser(dto);
+    }
+
+    public Task<string?> GetNormalizedEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
+        => Task.FromResult(user.NormalizedEmail);
+
+    public Task SetNormalizedEmailAsync(ApplicationUser user, string? normalizedEmail, CancellationToken cancellationToken)
+    {
+        user.NormalizedEmail = normalizedEmail;
+        return Task.CompletedTask;
+    }
+
     // ------------------------------------------------------------------
 
     public void Dispose()
@@ -153,16 +192,19 @@ public class DapperUserStore :
         // rien a liberer : IUserRepository gere son propre cycle de vie de connexion.
     }
 
-    private static UserDto ToDto(ApplicationUser user, ulong id)
+    private UserDto ToDto(ApplicationUser user, ulong id)
     {
+        var email = user.Email ?? string.Empty;
+
         return new UserDto
         {
             Id = id,
             Login = user.UserName ?? string.Empty,
             NormalizedLogin = user.NormalizedUserName ?? string.Empty,
             Password = user.PasswordHash ?? string.Empty,
-            PasswordResetQuestion = user.PasswordResetQuestion,
-            PasswordResetAnswer = user.PasswordResetAnswerHash,
+            EmailEncrypted = _emailProtector.Encrypt(email),
+            EmailHash = _emailProtector.Hash(email),
+            EmailConfirmed = user.EmailConfirmed,
             LanguageId = user.LanguageId,
             UserTypeId = (ulong)user.UserType,
             Ip = user.Ip,
@@ -176,7 +218,7 @@ public class DapperUserStore :
         };
     }
 
-    private static ApplicationUser ToUser(UserDto dto)
+    private ApplicationUser ToUser(UserDto dto)
     {
         return new ApplicationUser
         {
@@ -184,8 +226,8 @@ public class DapperUserStore :
             UserName = dto.Login,
             NormalizedUserName = dto.NormalizedLogin,
             PasswordHash = dto.Password,
-            PasswordResetQuestion = dto.PasswordResetQuestion,
-            PasswordResetAnswerHash = dto.PasswordResetAnswer,
+            Email = _emailProtector.Decrypt(dto.EmailEncrypted),
+            EmailConfirmed = dto.EmailConfirmed,
             LanguageId = dto.LanguageId,
             UserType = (UserTypes)dto.UserTypeId,
             Ip = dto.Ip,

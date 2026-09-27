@@ -120,8 +120,11 @@
   <data name="ChangePassword" xml:space="preserve">
     <value>Changer de mot de passe</value>
   </data>
-  <data name="ChangeQAndA" xml:space="preserve">
-    <value>Changer la question et réponse de récupération</value>
+  <data name="ChangeEmail" xml:space="preserve">
+    <value>Changer d'adresse email</value>
+  </data>
+  <data name="ConfirmNewEmail" xml:space="preserve">
+    <value>Confirmez la nouvelle adresse :</value>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Créer le compte</value>
@@ -129,14 +132,20 @@
   <data name="CreateAccount" xml:space="preserve">
     <value>Créer un compte</value>
   </data>
+  <data name="CurrentEmail" xml:space="preserve">
+    <value>Adresse email actuelle :</value>
+  </data>
   <data name="CurrentPwd" xml:space="preserve">
     <value>Mot de passe actuel :</value>
   </data>
+  <data name="EmailToRecover" xml:space="preserve">
+    <value>Votre adresse email :</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Mot de passe oublié</value>
+  </data>
   <data name="FreeRegistrationClosed" xml:space="preserve">
     <value>Inscription désormais sur invitation</value>
-  </data>
-  <data name="GetPwdByQuestion" xml:space="preserve">
-    <value>Récupérer le mot de passe avec la question secrète</value>
   </data>
   <data name="LoggedAs" xml:space="preserve">
     <value>Vous êtes connecté en tant que :</value>
@@ -147,29 +156,23 @@
   <data name="LogInTitle" xml:space="preserve">
     <value>Se connecter</value>
   </data>
-  <data name="LoginRecover" xml:space="preserve">
-    <value>Identifiant à récupérer</value>
+  <data name="LoginOrEmail" xml:space="preserve">
+    <value>Login / Email :</value>
   </data>
   <data name="LogOut" xml:space="preserve">
     <value>Se déconnecter</value>
   </data>
+  <data name="NewEmail" xml:space="preserve">
+    <value>Nouvelle adresse email :</value>
+  </data>
   <data name="NewPwd" xml:space="preserve">
     <value>Nouveau mot de passe :</value>
   </data>
-  <data name="NewRecAnswer" xml:space="preserve">
-    <value>Nouvelle réponse de récupération :</value>
-  </data>
-  <data name="NewRecQuestion" xml:space="preserve">
-    <value>Nouvelle question de récupération :</value>
-  </data>
-  <data name="RecAnswer" xml:space="preserve">
-    <value>Réponse de récupération :</value>
-  </data>
-  <data name="RecQuestion" xml:space="preserve">
-    <value>Question de récupération :</value>
-  </data>
   <data name="RepeatPwd" xml:space="preserve">
     <value>Répétez le mot de passe :</value>
+  </data>
+  <data name="SetEmail" xml:space="preserve">
+    <value>Adresse email :</value>
   </data>
   <data name="SetLogin" xml:space="preserve">
     <value>Identifiant :</value>
@@ -191,9 +194,6 @@
   </data>
   <data name="YourGodchildren" xml:space="preserve">
     <value>Vos filleuls :</value>
-  </data>
-  <data name="TipRecovery" xml:space="preserve">
-    <value>Les champs ci-dessous sont optionnels, mais si vous perdez votre mot de passe, la réponse à cette question peut vous sauver !</value>
   </data>
   <data name="TipRegistrationId" xml:space="preserve">
     <value>Vous ne pouvez pas vous inscrire sans ce code (au format XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)</value>

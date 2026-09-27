@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.28" />
+    <PackageReference Include="MailKit" Version="4.18.0" />
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <!-- Microsoft.AspNetCore.HttpOverrides fait partie du framework partagé : plus de PackageReference -->
     <!-- System.Text.Encoding.CodePages fait partie du framework partagé depuis .NET 10 -->

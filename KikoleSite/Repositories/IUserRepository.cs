@@ -18,6 +18,16 @@ public interface IUserRepository
 
     Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin);
 
+    /// <summary>Utilisateur par empreinte d'email (compte actif uniquement), pour la connexion par email.</summary>
+    Task<UserDto?> GetUserByEmailHashAsync(string emailHash);
+
+    /// <summary>
+    /// Utilisateur par empreinte d'email, y compris s'il est desactive (contrairement a
+    /// <see cref="GetUserByEmailHashAsync"/>) : sert au controle d'unicite, qui doit
+    /// couvrir les comptes desactives.
+    /// </summary>
+    Task<UserDto?> GetUserByEmailHashIncludingDisabledAsync(string emailHash);
+
     Task<UserDto?> GetUserByIdAsync(ulong userId);
 
     Task<IReadOnlyCollection<UserDto>> GetUsersByIdsAsync(IReadOnlyCollection<ulong> userIds);

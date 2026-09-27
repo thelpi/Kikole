@@ -19,8 +19,8 @@ internal sealed class UserRequestBuilder
     }
 
     /// <summary>
-    /// Le strict necessaire d'une inscription : identifiants seuls, sans question de
-    /// recuperation ni adresse IP, qui sont facultatives cote formulaire.
+    /// Le strict necessaire d'une inscription : identifiants et email, sans adresse IP,
+    /// facultative cote formulaire.
     /// </summary>
     internal static UserRequestBuilder Valid()
     {
@@ -28,8 +28,7 @@ internal sealed class UserRequestBuilder
         {
             Login = "joueur",
             Password = "p",
-            PasswordResetQuestion = null,
-            PasswordResetAnswer = null,
+            Email = "joueur@kikole.test",
             Ip = null
         });
     }
@@ -38,11 +37,7 @@ internal sealed class UserRequestBuilder
 
     internal UserRequestBuilder WithPassword(string password) { _request = _request with { Password = password }; return this; }
 
-    internal UserRequestBuilder WithRecovery(string? question, string? answer)
-    {
-        _request = _request with { PasswordResetQuestion = question, PasswordResetAnswer = answer };
-        return this;
-    }
+    internal UserRequestBuilder WithEmail(string email) { _request = _request with { Email = email }; return this; }
 
     internal UserRequestBuilder WithLanguage(Languages? language) { _request = _request with { Language = language }; return this; }
 

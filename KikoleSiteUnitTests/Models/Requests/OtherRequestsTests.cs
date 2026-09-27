@@ -177,41 +177,24 @@ public class UserRequestTests
     {
         // le login est stocke sanitise, et la recherche l'est aussi : c'est ce qui
         // rend la connexion insensible a la casse et aux accents
-        var (user, _) = UserRequestBuilder.Valid().WithLogin("  Réné  ").Build().ToApplicationUser();
+        var user = UserRequestBuilder.Valid().WithLogin("  Réné  ").Build().ToApplicationUser();
 
         user.UserName.Should().Be("rene");
     }
 
     [Fact]
-    public void ToApplicationUser_SanitizesTheRecoveryAnswerButNotTheQuestion()
+    public void ToApplicationUser_CarriesTheEmailThroughUnconfirmed()
     {
-        // le hachage n'est plus fait ici (il depend d'IPasswordHasher, injecte cote
-        // controleur) : ToApplicationUser ne fait que preparer la reponse en clair.
-        var (user, rawAnswer) = UserRequestBuilder.Valid()
-            .WithRecovery("Ma question ?", "Ma Réponse")
-            .Build()
-            .ToApplicationUser();
+        var user = UserRequestBuilder.Valid().WithEmail("Rene@Example.com").Build().ToApplicationUser();
 
-        rawAnswer.Should().Be("ma reponse");
-        user.PasswordResetQuestion.Should().Be("Ma question ?");
-    }
-
-    [Fact]
-    public void ToApplicationUser_WhenRecoveryIsNotProvided_GeneratesUnguessableValues()
-    {
-        var (user, rawAnswer) = UserRequestBuilder.Valid().Build().ToApplicationUser();
-
-        // pas de mock a verifier ici (un GUID, pas une dependance injectee) : on verifie
-        // juste que question et reponse sont bien deux valeurs distinctes et non vides.
-        user.PasswordResetQuestion.Should().NotBeNullOrWhiteSpace();
-        rawAnswer.Should().NotBeNullOrWhiteSpace();
-        rawAnswer.Should().NotBe(user.PasswordResetQuestion);
+        user.Email.Should().Be("Rene@Example.com");
+        user.EmailConfirmed.Should().BeFalse();
     }
 
     [Fact]
     public void ToApplicationUser_DefaultsToEnglishAndStandardUser()
     {
-        var (user, _) = UserRequestBuilder.Valid().Build().ToApplicationUser();
+        var user = UserRequestBuilder.Valid().Build().ToApplicationUser();
 
         user.LanguageId.Should().Be((ulong)Languages.en);
         user.UserType.Should().Be(UserTypes.StandardUser);
@@ -221,7 +204,7 @@ public class UserRequestTests
     public void ToApplicationUser_NeverGrantsAdministratorRights()
     {
         // garde-fou : la creation de compte ne doit jamais pouvoir produire un admin
-        var (user, _) = UserRequestBuilder.Valid().WithLanguage(Languages.fr).Build()
+        var user = UserRequestBuilder.Valid().WithLanguage(Languages.fr).Build()
             .ToApplicationUser();
 
         user.UserType.Should().NotBe(UserTypes.Administrator);
@@ -231,7 +214,7 @@ public class UserRequestTests
     [Fact]
     public void ToApplicationUser_CarriesTheIpThrough()
     {
-        var (user, _) = UserRequestBuilder.Valid().WithIp("::1").Build()
+        var user = UserRequestBuilder.Valid().WithIp("::1").Build()
             .ToApplicationUser();
 
         user.Ip.Should().Be("::1");

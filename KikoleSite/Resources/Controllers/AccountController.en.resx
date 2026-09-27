@@ -126,8 +126,47 @@
   <data name="AuthenticationFailed" xml:space="preserve">
     <value>Authentication failed: invalid token</value>
   </data>
+  <data name="ConfirmEmailBody" xml:space="preserve">
+    <value>Thanks for registering on Kikolé. Click the link below to confirm your email address:</value>
+  </data>
+  <data name="ConfirmEmailChangeBody" xml:space="preserve">
+    <value>Click the link below to confirm your new email address:</value>
+  </data>
+  <data name="ConfirmEmailChangeSubject" xml:space="preserve">
+    <value>[Kikolé] Confirm your new email address</value>
+  </data>
+  <data name="ConfirmEmailSubject" xml:space="preserve">
+    <value>Welcome to Kikolé! Confirm your email address</value>
+  </data>
+  <data name="EmailAlreadyUsed" xml:space="preserve">
+    <value>This email address is already in use</value>
+  </data>
+  <data name="EmailChangeRequested" xml:space="preserve">
+    <value>A confirmation email has been sent to the new address</value>
+  </data>
+  <data name="EmailChanged" xml:space="preserve">
+    <value>Your email address has been updated</value>
+  </data>
+  <data name="EmailConfirmationFailed" xml:space="preserve">
+    <value>The confirmation link is invalid or has expired</value>
+  </data>
+  <data name="EmailConfirmed" xml:space="preserve">
+    <value>Your email address is confirmed, you can now sign in</value>
+  </data>
+  <data name="EmailDomainBlocked" xml:space="preserve">
+    <value>Email addresses from this provider aren't accepted</value>
+  </data>
+  <data name="EmailNotConfirmed" xml:space="preserve">
+    <value>Confirm your email address before signing in (check your spam folder)</value>
+  </data>
   <data name="InvalidCredentials" xml:space="preserve">
     <value>Invalid login or password</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Invalid email address</value>
+  </data>
+  <data name="LinkValidityNotice" xml:space="preserve">
+    <value>This link is valid for {0} hours.</value>
   </data>
   <data name="InvalidForm" xml:space="preserve">
     <value>Invalid form values</value>
@@ -137,9 +176,6 @@
   </data>
   <data name="InvalidPassword" xml:space="preserve">
     <value>Invalid password</value>
-  </data>
-  <data name="InvalidQOrA" xml:space="preserve">
-    <value>Invalid question or answer</value>
   </data>
   <data name="InvalidRegistrationGuidFormat" xml:space="preserve">
     <value>The registration code has an invalid format</value>
@@ -153,6 +189,9 @@
   <data name="InvalidUser" xml:space="preserve">
     <value>Invalid user</value>
   </data>
+  <data name="NotMatchingEmail" xml:space="preserve">
+    <value>Email addresses don't match</value>
+  </data>
   <data name="NotMatchingPassword" xml:space="preserve">
     <value>Passwords are not the same</value>
   </data>
@@ -165,11 +204,17 @@
   <data name="PasswordReset" xml:space="preserve">
     <value>Password has been reset</value>
   </data>
-  <data name="QandAUpdated" xml:space="preserve">
-    <value>Question and answer updated</value>
+  <data name="PasswordResetRequested" xml:space="preserve">
+    <value>If this address is associated with an account, an email with instructions has just been sent to it</value>
+  </data>
+  <data name="ResetPasswordBody" xml:space="preserve">
+    <value>A password reset was requested for this account. Click the link below to choose a new password:</value>
   </data>
   <data name="ResetPasswordError" xml:space="preserve">
     <value>Error while reseting the password</value>
+  </data>
+  <data name="ResetPasswordSubject" xml:space="preserve">
+    <value>Reset your password</value>
   </data>
   <data name="TooManyAccountsFromThisIp" xml:space="preserve">
     <value>Too many accounts have already been created from this IP address today</value>

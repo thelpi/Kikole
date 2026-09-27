@@ -27,8 +27,9 @@ public class UserRepository : BaseRepository, IUserRepository
                 ("login", user.Login),
                 ("normalized_login", user.NormalizedLogin),
                 ("password", user.Password),
-                ("password_reset_question", user.PasswordResetQuestion),
-                ("password_reset_answer", user.PasswordResetAnswer),
+                ("email_encrypted", user.EmailEncrypted),
+                ("email_hash", user.EmailHash),
+                ("email_confirmed", user.EmailConfirmed ? 1 : 0),
                 ("language_id", user.LanguageId),
                 ("user_type_id", user.UserTypeId),
                 ("ip", user.Ip),
@@ -49,8 +50,9 @@ public class UserRepository : BaseRepository, IUserRepository
                 "SET login = @login, " +
                 "    normalized_login = @normalizedLogin, " +
                 "    password = @password, " +
-                "    password_reset_question = @passwordResetQuestion, " +
-                "    password_reset_answer = @passwordResetAnswer, " +
+                "    email_encrypted = @emailEncrypted, " +
+                "    email_hash = @emailHash, " +
+                "    email_confirmed = @emailConfirmed, " +
                 "    language_id = @languageId, " +
                 "    user_type_id = @userTypeId, " +
                 "    ip = @ip, " +
@@ -67,8 +69,9 @@ public class UserRepository : BaseRepository, IUserRepository
                     login = user.Login,
                     normalizedLogin = user.NormalizedLogin,
                     password = user.Password,
-                    passwordResetQuestion = user.PasswordResetQuestion,
-                    passwordResetAnswer = user.PasswordResetAnswer,
+                    emailEncrypted = user.EmailEncrypted,
+                    emailHash = user.EmailHash,
+                    emailConfirmed = user.EmailConfirmed ? 1 : 0,
                     languageId = user.LanguageId,
                     userTypeId = user.UserTypeId,
                     ip = user.Ip,
@@ -94,6 +97,19 @@ public class UserRepository : BaseRepository, IUserRepository
                 "users",
                 ("normalized_login", normalizedLogin),
                 ("is_disabled", 0));
+    }
+
+    public async Task<UserDto?> GetUserByEmailHashAsync(string emailHash)
+    {
+        return await GetDtoAsync<UserDto>(
+                "users",
+                ("email_hash", emailHash),
+                ("is_disabled", 0));
+    }
+
+    public async Task<UserDto?> GetUserByEmailHashIncludingDisabledAsync(string emailHash)
+    {
+        return await GetDtoAsync<UserDto>("users", ("email_hash", emailHash));
     }
 
     public async Task<UserDto?> GetUserByIdAsync(ulong userId)

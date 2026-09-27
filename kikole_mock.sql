@@ -64,10 +64,15 @@ ALTER TABLE users AUTO_INCREMENT = 1;
 
 -- ---------------------------------------------------------------- utilisateurs
 
-INSERT INTO users (id, login, normalized_login, password, password_reset_question, password_reset_answer, language_id, user_type_id, is_disabled, concurrency_stamp, security_stamp, ip, creation_date) VALUES
-(1, 'admin',   'ADMIN',   '0834071d6bb6ffc7e16b4d6f620c181b4d5b654294eeb94931220c8679e009a1', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 3, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:00:00'),
-(2, 'joueur1', 'JOUEUR1', 'd855fce1f2803c3a3406f05d2bad9db4df589a5fdf047dcedc7bc8bc29e898ba', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:05:00'),
-(3, 'joueur2', 'JOUEUR2', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 1, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:10:00');
+-- email_encrypted/email_hash precalcules avec la cle de user-secret locale
+-- "EmailEncryptionKey" = "KikoleDevEmailKey2026" (meme principe que "EncryptionKey" =
+-- "KikoleDevSalt2026" pour les mots de passe ci-dessus) : ne fonctionnent que si ce
+-- secret est bien celui configure en local, sinon la connexion par email de ces comptes
+-- de demonstration echouera (la connexion par identifiant n'est pas affectee).
+INSERT INTO users (id, login, normalized_login, password, email_encrypted, email_hash, email_confirmed, language_id, user_type_id, is_disabled, concurrency_stamp, security_stamp, ip, creation_date) VALUES
+(1, 'admin',   'ADMIN',   '0834071d6bb6ffc7e16b4d6f620c181b4d5b654294eeb94931220c8679e009a1', 'JPoJ00AIxU3YOqBDD47/MEMYEPLscT6tSwBB1qgWHbqGyar9h7BXVVBl3a98', '096aded95520f99a58ecb39b1b53507421464ad2171bac68d90de05f37e584e0', 1, 2, 3, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:00:00'),
+(2, 'joueur1', 'JOUEUR1', 'd855fce1f2803c3a3406f05d2bad9db4df589a5fdf047dcedc7bc8bc29e898ba', 'oqHNFcdVc8PX1l+wrt+yUYLgyzKif9xaUofZbrywOfqhWDibIussV60BJBQlGmo=', '6e6ee8ef82512199647175d5c7ea7f9d75cefc07d00dea054391e0dad5fa0ff5', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:05:00'),
+(3, 'joueur2', 'JOUEUR2', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', '9L/azw+825JCHU/BRPCtt3nblqmz9kEmyIf3OJlgp4DduVNDEbUMZ6N1V7lDB1Q=', '8254001b863c5eebd3ceed427c9dc363644687898d2ee696bafc290e11918e5b', 1, 1, 1, 0, UUID(), UUID(), '127.0.0.1', '2026-09-01 09:10:00');
 
 -- un GUID libre pour tester le parcours d'inscription
 INSERT INTO registration_guids (id, user_id, creation_date) VALUES
@@ -216,15 +221,15 @@ SELECT mock_days.i + 2, 2, 1, mock_pool.easy_fr FROM mock_days JOIN mock_pool ON
 -- Chaque victoire est doublee d'une proposition "nom" gagnante, pour que les tentatives
 -- de la fiche joueur restent coherentes avec le classement.
 
-INSERT INTO users (id, login, normalized_login, password, password_reset_question, password_reset_answer, language_id, user_type_id, is_disabled, concurrency_stamp, security_stamp, ip, creation_date) VALUES
-(4,  'lea',    'LEA',    '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:00:00')),
-(5,  'hugo',   'HUGO',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:05:00')),
-(6,  'emma',   'EMMA',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:10:00')),
-(7,  'lucas',  'LUCAS',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:15:00')),
-(8,  'chloe',  'CHLOE',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:20:00')),
-(9,  'nathan', 'NATHAN', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 1, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:25:00')),
-(10, 'manon',  'MANON',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:30:00')),
-(11, 'theo',   'THEO',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'Nom du jeu ?', '0791737f1531a34755485d99a84118c00d1954cf328de370d8da0320b290d509', 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:35:00'));
+INSERT INTO users (id, login, normalized_login, password, email_encrypted, email_hash, email_confirmed, language_id, user_type_id, is_disabled, concurrency_stamp, security_stamp, ip, creation_date) VALUES
+(4,  'lea',    'LEA',    '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'xPrTejzJ67kPInDXg/aUNx96vJubxgilCyskUudg8qd6nF/GVFlMS/QGSQ==', '86b9136823e7ff553ef5df5787f343b29fa3fd3381c4f0e00e6b649543440c22', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:00:00')),
+(5,  'hugo',   'HUGO',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', '7oMIYyOWaA//oeoseztrDG38EQgbC7FL6OUX6K8lfJH6jOL80ypvHv0YEzE=', 'c83b718b74d0e6f22c8bd2314d9adb14bcf2f4bf938ff1e586b78f41c40ea1ab', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:05:00')),
+(6,  'emma',   'EMMA',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'fc1Kn0O3En1IV2o+MJDW1/NSXPSI80yBUBL3iS/nnS3Z5aHKX4wMLK1rX/A=', 'ecd6499d7f748c0403788e63acedd6bb6492a0023a56e27933a69608f728a5c4', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:10:00')),
+(7,  'lucas',  'LUCAS',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'o2xZ/8Hc9x9KvMGmuDUOBlS51x6of0dpFXL3w3chCIUlcCXWGpkx2CrWXmsi', 'bfdacb10a0979908d1876466eaec22ce0429ce8beeec1c66817ea868ab48cf9b', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:15:00')),
+(8,  'chloe',  'CHLOE',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'nKJFYgDk24eFMLKmisrKms9uykahMzb+0+KY88sdMjDugIc78Lfr4ta/gPue', 'bd360e467d896e435373fc5afbc31f77754002ab277c1ac00611dcd15b3b42b8', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:20:00')),
+(9,  'nathan', 'NATHAN', '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'aofonfoVviCabYtbPGNUdSsX9CFwYF+Abn/AZLUiIVyasrIhbiCNDsANUgk6OQ==', '3e7d4ada9a527e8e8530d81fa7a5af53913f348430ec841fc2d5fd25cf13dca5', 1, 1, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:25:00')),
+(10, 'manon',  'MANON',  '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'tNaCL0L46CeoC+MBxr6HalUDEtc+pI0LCOsLOk5B95B61jsPiKBXnfMMTloM', 'c599dd57081f2d0855ee179052b01476cee90332c1b68d0508a3ccdb902876aa', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:30:00')),
+(11, 'theo',   'THEO',   '2ed58959eef5c40f2bef10b524f1ddab9d7367fe215fa5ac968d332767c46150', 'ClFq/XiQp7ZIrzv4p1cKvK/393BRL/Y6FtSXqPp7hktJ5VLN9AF4hCqdbEs=', '37f8631fdaf08a431b72febd369d1b89fbeeb27571ac8d049eaa9adcc29a410c', 1, 2, 1, 0, UUID(), UUID(), '127.0.0.1', TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '10:35:00'));
 
 DROP TABLE IF EXISTS mock_wins;
 CREATE TABLE mock_wins (

@@ -29,7 +29,7 @@ public class LegacyCompatiblePasswordHasherTests
 
     private static ApplicationUser CreateUser()
     {
-        return new ApplicationUser { PasswordResetQuestion = "q", PasswordResetAnswerHash = string.Empty };
+        return new ApplicationUser();
     }
 
     private static string LegacyHash(string value)

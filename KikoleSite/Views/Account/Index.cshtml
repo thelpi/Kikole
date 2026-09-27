@@ -20,6 +20,10 @@
                     <label>@localizer["LoggedAs"]</label>
                     <div class="form-static accent">@Model.Login</div>
                 </div>
+                <div class="form-field">
+                    <label>@localizer["CurrentEmail"]</label>
+                    <div class="form-static">@Model.Email</div>
+                </div>
                 <div class="actions">
                     <button type="submit">@localizer["LogOut"]</button>
                 </div>
@@ -48,19 +52,19 @@
         </div>
 
         <div class="form-card">
-            <h3>@localizer["ChangeQAndA"]</h3>
-            <form method="post" action="/Account/ResetQAndA">
+            <h3>@localizer["ChangeEmail"]</h3>
+            <form method="post" action="/Account/ChangeEmail">
                 <div class="form-field">
                     <label>@localizer["CurrentPwd"]</label>
                     @Html.PasswordFor(m => m.PasswordSubmission, new { @class = "blank" })
                 </div>
                 <div class="form-field">
-                    <label>@localizer["NewRecQuestion"]</label>
-                    @Html.TextBoxFor(m => m.RecoveryQCreate, new { @class = "blank" })
+                    <label>@localizer["NewEmail"]</label>
+                    @Html.TextBoxFor(m => m.NewEmailSubmission, new { @class = "blank" })
                 </div>
                 <div class="form-field">
-                    <label>@localizer["NewRecAnswer"]</label>
-                    @Html.PasswordFor(m => m.RecoveryACreate, new { @class = "blank" })
+                    <label>@localizer["ConfirmNewEmail"]</label>
+                    @Html.TextBoxFor(m => m.NewEmailConfirmSubmission, new { @class = "blank" })
                 </div>
                 <div class="actions">
                     <button type="submit">@localizer["Update"]</button>
@@ -107,7 +111,7 @@
             <h3>@localizer["LogInTitle"]</h3>
             <form method="post" action="/Account/LogIn">
                 <div class="form-field">
-                    <label>@localizer["SetLogin"]</label>
+                    <label>@localizer["LoginOrEmail"]</label>
                     @Html.TextBoxFor(m => m.LoginSubmission, new { @class = "blank" })
                 </div>
                 <div class="form-field">
@@ -137,6 +141,10 @@
                     @Html.TextBoxFor(m => m.LoginCreateSubmission, new { @class = "blank" })
                 </div>
                 <div class="form-field">
+                    <label>@localizer["SetEmail"]</label>
+                    @Html.TextBoxFor(m => m.EmailCreateSubmission, new { @class = "blank", type = "email" })
+                </div>
+                <div class="form-field">
                     <label>@localizer["SetPwd"]</label>
                     @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @class = "blank" })
                 </div>
@@ -151,15 +159,6 @@
                         @Html.TextBoxFor(m => m.SponsorLoginSubmission, new { @class = "blank" })
                     </div>
                 }
-                <p class="form-hint section-break">@localizer["TipRecovery"]</p>
-                <div class="form-field">
-                    <label>@localizer["RecQuestion"]</label>
-                    @Html.TextBoxFor(m => m.RecoveryQCreate, new { @class = "blank" })
-                </div>
-                <div class="form-field">
-                    <label>@localizer["RecAnswer"]</label>
-                    @Html.PasswordFor(m => m.RecoveryACreate, new { @class = "blank" })
-                </div>
                 <div class="actions">
                     <button type="submit">@localizer["Create"]</button>
                 </div>
@@ -167,45 +166,15 @@
         </div>
 
         <div class="form-card">
-            <h3>@localizer["GetPwdByQuestion"]</h3>
-            <form method="post" action="@(string.IsNullOrWhiteSpace(Model.QuestionRecovery) ? "/Account/GetLoginQuestion" : "/Account/ResetPassword")">
-                @if (string.IsNullOrWhiteSpace(Model.QuestionRecovery))
-                {
-                    <div class="form-field">
-                        <label>@localizer["LoginRecover"]</label>
-                        @Html.TextBoxFor(m => m.LoginRecoverySubmission, new { @class = "blank" })
-                    </div>
-                    @* soumission volontairement invisible : cette premiere etape ne se
-                       valide qu'a la touche Entree, pas via un bouton visible. *@
-                    <button type="submit" style="visibility: hidden">@localizer["Update"]</button>
-                }
-                else
-                {
-                    <div class="form-field">
-                        <label>@localizer["LoginRecover"]</label>
-                        <div class="form-static">@Model.LoginRecoverySubmission</div>
-                        @Html.HiddenFor(m => m.LoginRecoverySubmission)
-                    </div>
-                    <div class="form-field">
-                        <label>@localizer["RecQuestion"]</label>
-                        <div class="form-static">@Model.QuestionRecovery</div>
-                    </div>
-                    <div class="form-field">
-                        <label>@localizer["RecAnswer"]</label>
-                        @Html.PasswordFor(m => m.RecoveryACreate, new { @class = "blank" })
-                    </div>
-                    <div class="form-field">
-                        <label>@localizer["NewPwd"]</label>
-                        @Html.PasswordFor(m => m.PasswordCreate1Submission, new { @class = "blank" })
-                    </div>
-                    <div class="form-field">
-                        <label>@localizer["RepeatPwd"]</label>
-                        @Html.PasswordFor(m => m.PasswordCreate2Submission, new { @class = "blank" })
-                    </div>
-                    <div class="actions">
-                        <button type="submit">@localizer["Update"]</button>
-                    </div>
-                }
+            <h3>@localizer["ForgotPassword"]</h3>
+            <form method="post" action="/Account/RequestPasswordReset">
+                <div class="form-field">
+                    <label>@localizer["EmailToRecover"]</label>
+                    @Html.TextBoxFor(m => m.PasswordResetEmailSubmission, new { @class = "blank", type = "email" })
+                </div>
+                <div class="actions">
+                    <button type="submit">@localizer["Update"]</button>
+                </div>
             </form>
         </div>
     }
