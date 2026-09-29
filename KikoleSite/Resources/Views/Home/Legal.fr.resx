@@ -61,7 +61,49 @@
   <data name="LegalTitle" xml:space="preserve">
     <value>Mentions légales</value>
   </data>
-  <data name="LegalPlaceholder" xml:space="preserve">
-    <value>Cette page sera complétée prochainement (mentions légales, politique de confidentialité, cookies).</value>
+  <data name="PublisherTitle" xml:space="preserve">
+    <value>Éditeur et hébergement</value>
+  </data>
+  <data name="PublisherBody" xml:space="preserve">
+    <value>&lt;p&gt;&lt;strong&gt;Éditeur du site&lt;/strong&gt;&lt;br/&gt;Le site « Kikolé ? » est édité à titre personnel et non commercial par Charles Nicollas. Pour toute question, voir la rubrique Contact en pied de page.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Directeur de la publication&lt;/strong&gt;&lt;br/&gt;Charles Nicollas.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Hébergement&lt;/strong&gt;&lt;br/&gt;Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — téléphone 1007 — ovhcloud.com.&lt;/p&gt;</value>
+  </data>
+  <data name="LiabilityTitle" xml:space="preserve">
+    <value>Propriété intellectuelle et responsabilité</value>
+  </data>
+  <data name="LiabilityBody" xml:space="preserve">
+    <value>&lt;p&gt;Le contenu du site (textes, base de données de joueurs, code, mise en forme) est la propriété de son éditeur, sauf mention contraire. Toute reproduction sans autorisation est interdite.&lt;/p&gt;
+&lt;p&gt;Malgré le soin apporté à la réalisation de ce site, l'éditeur ne garantit pas l'absence d'erreurs ou d'interruptions de service et ne saurait être tenu responsable des dommages directs ou indirects résultant de l'accès ou de l'utilisation du site.&lt;/p&gt;</value>
+  </data>
+  <data name="PrivacyTitle" xml:space="preserve">
+    <value>Protection des données personnelles (RGPD)</value>
+  </data>
+  <data name="PrivacyBody" xml:space="preserve">
+    <value>&lt;p&gt;&lt;strong&gt;Responsable du traitement&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, éditeur du site (voir Contact en pied de page).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Données collectées&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Un identifiant (login) choisi à l'inscription.&lt;/li&gt;
+&lt;li&gt;Une adresse email, stockée chiffrée en base et utilisée uniquement pour la confirmation d'inscription, la réinitialisation du mot de passe et le changement d'adresse.&lt;/li&gt;
+&lt;li&gt;Un mot de passe, jamais stocké en clair (haché).&lt;/li&gt;
+&lt;li&gt;L'adresse IP au moment de l'inscription, à des fins de lutte contre la fraude et la création de comptes multiples.&lt;/li&gt;
+&lt;li&gt;L'historique de jeu (propositions, scores, badges).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Finalités&lt;/strong&gt;&lt;br/&gt;Ces données sont utilisées exclusivement pour le fonctionnement du jeu (comptes, classements, badges) et la sécurité du service (lutte anti-fraude, réinitialisation de mot de passe). Elles ne sont ni vendues, ni partagées avec des tiers, ni utilisées à des fins publicitaires.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Base légale&lt;/strong&gt;&lt;br/&gt;Exécution du contrat (fourniture du service) pour les données de compte, intérêt légitime pour la lutte anti-fraude.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Durée de conservation&lt;/strong&gt;&lt;br/&gt;Les données sont conservées tant que le compte existe. La suppression du compte entraîne la suppression des données associées.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Vos droits&lt;/strong&gt;&lt;br/&gt;Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition et de portabilité de vos données. Vous pouvez exercer ces droits via la rubrique Contact en pied de page.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sécurité&lt;/strong&gt;&lt;br/&gt;L'adresse email est chiffrée en base de données, les mots de passe sont hachés (jamais stockés en clair), et l'accès au compte passe par une connexion authentifiée.&lt;/p&gt;</value>
+  </data>
+  <data name="CookiesTitle" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="CookiesBody" xml:space="preserve">
+    <value>&lt;p&gt;Le site utilise uniquement des cookies strictement nécessaires à son fonctionnement :&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;un cookie d'authentification, pour vous garder connecté ;&lt;/li&gt;
+&lt;li&gt;un cookie de préférence de langue.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Aucun cookie de mesure d'audience, de publicité ou de suivi n'est utilisé. Conformément à la réglementation, ces cookies strictement nécessaires ne requièrent pas de consentement préalable.&lt;/p&gt;</value>
   </data>
 </root>

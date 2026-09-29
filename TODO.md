@@ -272,7 +272,8 @@ Branche de travail : `remaster-v2`.
         posé par l'utilisateur lui-même (ou vérifié avec lui), pas seulement par l'agent.
       - Mentions légales (RGPD/CNIL) liées à la collecte d'une adresse email —
         explicitement reportées par l'utilisateur ("on assumera les conséquences
-        légales plus tard, quand on fera le footer"). Seul point encore ouvert.
+        légales plus tard, quand on fera le footer"). **Traité (2026-09-29)**, voir
+        « Revoir complètement le footer » plus bas.
 
 ---
 
@@ -1813,15 +1814,19 @@ Branche de travail : `remaster-v2`.
       fil (pastille de la ligne disparaît), répond ; retour `joueur1` : pastille sur
       "Contact", fil à jour, pastille disparaît après lecture. Icône "Contact" confirmée
       absente du menu admin (desktop et tiroir mobile) tout du long.
-- [ ] **Revoir complètement le footer.** Réduit à la mention de copyright après avoir
-      retiré "Proposer un kikolé !"/"Contact" (redondants avec le nouveau menu, cf.
-      ci-dessus) et "Vous aimez le vélo ?" (lien personnel, retiré à la demande) — il ne
-      reste presque plus rien dedans, l'occasion de repenser ce qui doit vraiment y vivre
-      plutôt que de le laisser à l'état de résidu. À traiter avec les mentions légales
-      (identité de l'éditeur et de l'hébergeur, obligation LCEN) et l'information sur les
-      données personnelles (IP conservées : `users.ip`, historique de connexion, limitation
-      par IP) — le site collecte déjà des données personnelles sans email, donc le RGPD
-      s'applique déjà ; choix confirmé de rester **sans email** (2026-09-26).
+- [x] ~~Revoir complètement le footer.~~ **Fait (2026-09-29).** Nouveau footer avec 5
+      liens dans l'ordre demandé par l'utilisateur : mentions légales, contact (`mailto:`
+      vers l'adresse d'expéditeur déjà configurée pour les emails), Panono, Mon petit
+      tricycle, GitHub (`site-footer-links` dans `_Layout.cshtml`). Nouvelle page
+      `Home/Legal.cshtml` (route dédiée, pas de page séparée pour les cookies — une seule
+      page combinée comme confirmé par l'utilisateur) avec 4 sections rédigées en FR/EN
+      (`Legal.fr.resx`/`Legal.en.resx`) : éditeur et hébergement (identité réelle de
+      l'utilisateur, Charles Nicollas, sans adresse ; hébergeur OVH SAS repris de la page
+      légale de Panono, hébergeur d'un ami), propriété intellectuelle et responsabilité,
+      protection des données personnelles (RGPD — couvre bien l'IP conservée à
+      l'inscription, l'historique de connexion et désormais l'email chiffré, cf. item
+      email ci-dessus dont le choix "sans email" a depuis été inversé), cookies (aucun
+      cookie non essentiel, donc pas de bandeau de consentement nécessaire).
 - [ ] **Refonte du texte de la page d'accueil** (introduction + règles). Demandé
       (2026-09-26) : réorganiser le contenu (présentation / règles) et le rédiger ; le
       texte est à écrire par l'utilisateur avant la mise en page. Aujourd'hui la page non

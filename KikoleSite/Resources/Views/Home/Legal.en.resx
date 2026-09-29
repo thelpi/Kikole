@@ -61,7 +61,49 @@
   <data name="LegalTitle" xml:space="preserve">
     <value>Legal notice</value>
   </data>
-  <data name="LegalPlaceholder" xml:space="preserve">
-    <value>This page will be completed soon (legal notice, privacy policy, cookies).</value>
+  <data name="PublisherTitle" xml:space="preserve">
+    <value>Publisher and hosting</value>
+  </data>
+  <data name="PublisherBody" xml:space="preserve">
+    <value>&lt;p&gt;&lt;strong&gt;Site publisher&lt;/strong&gt;&lt;br/&gt;The "Kikolé ?" website is published on a personal, non-commercial basis by Charles Nicollas. For any question, see the Contact link in the footer.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Publication director&lt;/strong&gt;&lt;br/&gt;Charles Nicollas.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Hosting&lt;/strong&gt;&lt;br/&gt;Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — phone 1007 — ovhcloud.com.&lt;/p&gt;</value>
+  </data>
+  <data name="LiabilityTitle" xml:space="preserve">
+    <value>Intellectual property and liability</value>
+  </data>
+  <data name="LiabilityBody" xml:space="preserve">
+    <value>&lt;p&gt;The site's content (text, player database, code, design) is the property of its publisher, unless stated otherwise. Any reproduction without authorization is prohibited.&lt;/p&gt;
+&lt;p&gt;Despite the care taken in building this site, the publisher does not guarantee the absence of errors or service interruptions and cannot be held liable for any direct or indirect damages resulting from accessing or using the site.&lt;/p&gt;</value>
+  </data>
+  <data name="PrivacyTitle" xml:space="preserve">
+    <value>Personal data protection (GDPR)</value>
+  </data>
+  <data name="PrivacyBody" xml:space="preserve">
+    <value>&lt;p&gt;&lt;strong&gt;Data controller&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, site publisher (see Contact in the footer).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Data collected&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A login chosen at registration.&lt;/li&gt;
+&lt;li&gt;An email address, stored encrypted and used only for registration confirmation, password resets and email changes.&lt;/li&gt;
+&lt;li&gt;A password, never stored in plain text (hashed).&lt;/li&gt;
+&lt;li&gt;The IP address at registration, for fraud and multi-account prevention.&lt;/li&gt;
+&lt;li&gt;Game history (guesses, scores, badges).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Purposes&lt;/strong&gt;&lt;br/&gt;This data is used exclusively for the game to function (accounts, leaderboards, badges) and for service security (fraud prevention, password resets). It is never sold, shared with third parties, or used for advertising.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Legal basis&lt;/strong&gt;&lt;br/&gt;Performance of a contract (providing the service) for account data, legitimate interest for fraud prevention.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Retention period&lt;/strong&gt;&lt;br/&gt;Data is kept for as long as the account exists. Deleting the account deletes the associated data.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Your rights&lt;/strong&gt;&lt;br/&gt;Under the GDPR, you have the right to access, rectify, erase, object to, and port your data. You can exercise these rights via the Contact link in the footer.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Security&lt;/strong&gt;&lt;br/&gt;The email address is encrypted in the database, passwords are hashed (never stored in plain text), and account access requires authentication.&lt;/p&gt;</value>
+  </data>
+  <data name="CookiesTitle" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="CookiesBody" xml:space="preserve">
+    <value>&lt;p&gt;The site only uses cookies strictly necessary for it to function:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;an authentication cookie, to keep you signed in;&lt;/li&gt;
+&lt;li&gt;a language preference cookie.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;No analytics, advertising or tracking cookies are used. In accordance with regulations, these strictly necessary cookies do not require prior consent.&lt;/p&gt;</value>
   </data>
 </root>
