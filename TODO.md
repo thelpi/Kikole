@@ -1827,20 +1827,39 @@ Branche de travail : `remaster-v2`.
       l'inscription, l'historique de connexion et désormais l'email chiffré, cf. item
       email ci-dessus dont le choix "sans email" a depuis été inversé), cookies (aucun
       cookie non essentiel, donc pas de bandeau de consentement nécessaire).
-- [ ] **Refonte du texte de la page d'accueil** (introduction + règles). Demandé
-      (2026-09-26) : réorganiser le contenu (présentation / règles) et le rédiger ; le
-      texte est à écrire par l'utilisateur avant la mise en page. Aujourd'hui la page non
-      connectée empile annonce, règles (`Views/Home/Partial/Rules.cshtml`, gros bloc de
-      puces et sections « À propos de la nationalité / des clubs ») et bandeau de connexion,
-      et les règles sont répétées sous le jeu une fois connecté.
-- [ ] **Ressources externes chargées chez des tiers.** Chaque visiteur envoie son adresse IP
-      à Google Fonts (`fonts.googleapis.com`, IBM Plex Sans/Mono, Bebas Neue),
-      `code.jquery.com` (jQuery, jQuery UI + thème smoothness), Google Charts
-      (`gstatic.com/charts`, page admin Stats) et au CDN Bootstrap (`stackpath`, hors
-      Development). Point de vigilance RGPD (décision allemande de 2022 sur Google Fonts) :
-      les héberger dans `wwwroot` règle le problème et supprime une dépendance réseau.
-      Chantier lié à « Migrer jQuery et jQuery UI » et « Supprimer Bootstrap » ci-dessous (même fichier `_Layout.cshtml`)
-      et au footer / mentions légales ci-dessus ; à cadrer ensemble.
+- [x] ~~Ressources externes chargées chez des tiers.~~ **Fait (2026-09-29)**, sauf Google
+      Charts (exception assumée, voir plus bas). Bootstrap et son CDN ont disparu avec sa
+      suppression (item ci-dessus) ; restaient Google Fonts et `code.jquery.com`.
+      - **jQuery + jQuery UI** : téléchargés (3.7.1 / 1.13.3, JS + thème smoothness + ses
+        images de sprite `ui-icons_*`/`ui-bg_*`, nécessaires — `.ui-icon` des flèches du
+        datepicker les utilise toujours malgré la surcharge du thème) dans
+        `wwwroot/lib/jquery`/`wwwroot/lib/jquery-ui`. `_Layout.cshtml` bascule sur ces
+        fichiers locaux, avec la même logique dev/prod (non minifié en Development, minifié
+        sinon) déjà utilisée pour Bootstrap avant sa suppression.
+      - **Google Fonts** (Bebas Neue, IBM Plex Sans/Mono) : 22 fichiers `.woff2`
+        téléchargés (`wwwroot/fonts/`) et nouveau `wwwroot/css/fonts.css` avec les
+        `@font-face` correspondants, chargé depuis `_Layout.cshtml` à la place du
+        `<link>` googleapis. **Limité aux sous-ensembles latin + latin-ext** (site FR/EN
+        uniquement, pas de cyrillique/grec/vietnamien) plutôt que les ~60 fichiers que
+        Google sert par défaut toutes langues confondues. **Piège rencontré** : une requête
+        combinée `ital,wght@0,400;0,500;0,600;0,700;1,400` sur IBM Plex Sans a renvoyé des
+        URLs de fichier identiques pour les poids 400/500/600/700 (a priori un
+        comportement dégradé de l'API Google sur ce format de requête multi-valeurs) —
+        détecté en comparant les URLs, contourné en récupérant chaque poids/style via une
+        requête séparée (`wght@700` seul, etc.), qui donne bien des fichiers distincts.
+      - **Google Charts** (page admin Stats, 3 graphiques) : **laissé en CDN**, décision
+        explicite de l'utilisateur — Google ne fournit pas de version auto-hébergeable
+        officielle de cette librairie ; la solution complète impliquerait de migrer vers
+        une autre librairie de graphiques (Chart.js ou équivalent), chantier séparé et plus
+        gros, pas engagé ici. Exposition jugée limitée (page admin seule).
+      - **Vérifié en direct** (base jetable `kikole_pod`, détruite après coup) : plus aucun
+        appel réseau vers `fonts.googleapis.com`/`fonts.gstatic.com`/`code.jquery.com`
+        (uniquement `gstatic.com/charts`, l'exception assumée) ; polices bien chargées et
+        appliquées (`document.fonts`, `Bebas Neue`/`IBM Plex Sans` confirmés `loaded`) ;
+        autocomplétion, datepicker (icônes prev/next du sprite local comprises) et
+        Google Charts sur la page Stats tous fonctionnels ; aucune erreur console.
+        `dotnet build` propre, `dotnet test` : 740 tests unitaires verts (suite non
+        concernée, relancée par précaution).
 - [x] ~~Petits textes (10 à 11,5 px)~~ — **décision : on les conserve** (2026-09-26).
       Étiquettes d'indice, aides sous les champs, coûts, en-têtes de tableau restent à leur
       taille actuelle, malgré l'avis contraire donné à l'utilisateur (malvoyant) qui avait
