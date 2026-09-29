@@ -387,6 +387,30 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
     dailyDate.onchange = function () {
         loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
     };
+
+    /* navigation arriere (bouton "precedent" du navigateur) : certains navigateurs
+       restaurent la valeur affichee d'un champ de formulaire independamment du contenu
+       de la page, qui lui reste celui fige au rendu serveur d'origine - le filtre
+       affiche et le tableau visible peuvent alors ne plus correspondre (onchange ne se
+       declenche pas pour une restauration programmatique). On resynchronise des que ca
+       arrive. */
+    if (isControlValueStale(sortType) || isControlValueStale(fromDate) || isControlValueStale(toDate)) {
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
+    }
+    if (isControlValueStale(dailySortType) || isControlValueStale(dailyDate)) {
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
+    }
+};
+
+/* compare la valeur actuelle d'un champ a celle rendue par le serveur (attribut HTML
+   d'origine, jamais modifie par le navigateur lui-meme) : differentes si un retour
+   arriere a restaure une valeur posterieure au rendu de la page. */
+var isControlValueStale = function (control) {
+    if (control.tagName === 'SELECT') {
+        var renderedOption = control.querySelector('option[selected]');
+        return !!renderedOption && renderedOption.value !== control.value;
+    }
+    return control.getAttribute('value') !== control.value;
 };
 
 /* cellule "utilisateur" partagee par les lignes de tableau regenerees en AJAX

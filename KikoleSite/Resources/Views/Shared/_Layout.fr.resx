@@ -126,6 +126,15 @@
   <data name="ContactAdmin" xml:space="preserve">
     <value>Contact</value>
   </data>
+  <data name="FooterAboutUs" xml:space="preserve">
+    <value>Qui sommes-nous ?</value>
+  </data>
+  <data name="FooterContact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="FooterLegalNotice" xml:space="preserve">
+    <value>Mentions légales</value>
+  </data>
   <data name="Home" xml:space="preserve">
     <value>Accueil</value>
   </data>

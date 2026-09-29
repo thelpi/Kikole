@@ -50,6 +50,16 @@ body {
   text-align: center;
 }
 
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  margin-bottom: 10px;
+}
+
+.site-footer-links a:hover { color: var(--accent); }
+
 /* ---------------------------------------------------------- navigation globale
    Chrome de _Layout.cshtml, presente sur toutes les pages (pas seulement sous
    .kikole-board) : remplace l'ancienne navbar Bootstrap fixe. */

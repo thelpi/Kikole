@@ -1,5 +1,6 @@
 ﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @inject KikoleSite.Services.IDiscussionService discussionService
+@inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.EmailOptions> emailOptions
 @{
     Context.Request.Cookies.TryGetValue(
         Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
@@ -58,7 +59,7 @@
     </environment>
     <link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="Stylesheet">
     <!-- apres jquery-ui.css : .ui-autocomplete doit gagner la cascade sur le theme "smoothness" -->
-    <link rel="stylesheet" href="~/css/kikole-board.css?v=30" />
+    <link rel="stylesheet" href="~/css/kikole-board.css?v=31" />
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
@@ -254,6 +255,13 @@
         @RenderBody()
         <hr />
         <footer>
+            <div class="site-footer-links">
+                <a asp-area="" asp-controller="Home" asp-action="Legal">@localizer["FooterLegalNotice"]</a>
+                <a href="mailto:@emailOptions.Value.FromAddress">@localizer["FooterContact"]</a>
+                <a href="https://panono.fr/" target="_blank" rel="noopener noreferrer">Panono</a>
+                <a href="https://monpetittricycle.fr/" target="_blank" rel="noopener noreferrer">Mon petit tricycle</a>
+                <a href="https://github.com/thelpi" target="_blank" rel="noopener noreferrer">@localizer["FooterAboutUs"]</a>
+            </div>
             <div>
                 &copy; @System.DateTime.Now.ToString("yyyy") - @localizer["SiteName"]
             </div>

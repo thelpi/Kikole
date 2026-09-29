@@ -118,6 +118,12 @@ public class HomeController : KikoleBaseController
     }
 
     [HttpGet]
+    public IActionResult Legal()
+    {
+        return View();
+    }
+
+    [HttpGet]
     public IActionResult SwitchLang([FromQuery] string redirect)
     {
         HttpContext.Request.Cookies.TryGetValue(
