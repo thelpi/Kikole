@@ -6,6 +6,7 @@ using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
@@ -91,6 +92,36 @@ public class LeaderboardController : KikoleBaseController
                 date, sortType, null);
 
         return Json(dailyBoard);
+    }
+
+    /// <summary>
+    /// Achete l'acces au classement du jour depuis la page classement elle-meme (bouton
+    /// "Decouvrez le classement" affiche quand le tableau du jour est masque) - meme
+    /// mecanique que le bouton "Acces au classement du jour" de la page d'accueil
+    /// (proposition de type <see cref="ProposalTypes.Leaderboard"/>, cout fixe), pour
+    /// eviter d'avoir a retourner sur l'accueil. Idempotent : une deuxieme tentative le
+    /// meme jour ne recree pas la proposition ni ne rededuit de points
+    /// (<see cref="ProposalRequest.MatchAny"/>, verifie dans <see cref="IProposalService.ManageProposalResponseAsync"/>).
+    /// </summary>
+    [HttpPost("unlock-daily-leaderboard")]
+    [Authorization]
+    public async Task<JsonResult> UnlockDailyLeaderboardAsync()
+    {
+        var pInfo = await _playerService.GetPlayerOfTheDayFullInfoAsync(_clock.Today);
+        var countryContinents = await _internationalService.GetCountryContinentsAsync();
+
+        var request = new ProposalRequest
+        {
+            DaysBeforeNow = 0,
+            ProposalDateTime = _clock.Now,
+            Ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+            ProposalType = ProposalTypes.Leaderboard,
+            Value = "GetLeaderboard"
+        };
+
+        await _proposalService.ManageProposalResponseAsync(request, UserId, pInfo, countryContinents);
+
+        return Json(new { success = true });
     }
 
     [HttpGet]

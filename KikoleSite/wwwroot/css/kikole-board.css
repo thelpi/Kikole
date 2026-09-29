@@ -1239,6 +1239,17 @@ body { padding-top: 0; }
   flex-wrap: wrap;
 }
 
+/* bouton "Decouvrez le classement" sous le message "resultats masques" (Leaderboard/Index) :
+   un peu plus d'air qu'un .actions ordinaire, qui suit d'habitude un titre de section plutot
+   qu'une simple ligne de texte juste au-dessus */
+.kikole-board .daily-unlock-actions { margin-top: 10px; }
+
+/* cellule "resultats masques" : centree plutot qu'alignee a gauche comme le reste du
+   tableau - se lit comme un etat vide avec appel a l'action (pattern usuel), pas comme
+   une ligne de donnees ordinaire */
+.kikole-board .hidden-board-cell { text-align: center; }
+.kikole-board .hidden-board-cell .daily-unlock-actions { justify-content: center; }
+
 .kikole-board .actions button,
 .kikole-board .actions a,
 .kikole-board .confirm-modal-actions button {

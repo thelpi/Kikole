@@ -94,7 +94,15 @@
                     else
                     {
                         <tr class="even">
-                            <td colspan="4" class="tabData">@localizer["HiddenDayboard"]</td>
+                            <td colspan="4" class="tabData hidden-board-cell">
+                                <div>@localizer["HiddenDayboard"]</div>
+                                @if (Model.CurrentUserId != 0)
+                                {
+                                    <div class="actions daily-unlock-actions">
+                                        <button type="button" id="unlockDailyLeaderboardBtn">@localizer["DiscoverLeaderboard"] <span class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points @localizer["Points"]</span></button>
+                                    </div>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -260,6 +268,8 @@
             @Html.Raw(Json.Serialize(localizer["NotYetTime"].Value)),
             @Html.Raw(Json.Serialize(localizer["NotYetPoints"].Value)),
             @Html.Raw(Json.Serialize(localizer["HiddenDayboard"].Value)),
-            @Model.CurrentUserId);
+            @Model.CurrentUserId,
+            @Html.Raw(Json.Serialize(localizer["DiscoverLeaderboard"].Value)),
+            @Html.Raw(Json.Serialize("-" + KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points + " " + localizer["Points"].Value)));
     });
 </script>

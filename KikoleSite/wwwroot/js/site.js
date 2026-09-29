@@ -358,7 +358,7 @@ var loadKikolesStats = function (sort, desc) {
     });
 };
 
-var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId) {
+var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText) {
     paginateTable(document.getElementById('globalLeaderboardTable'));
     paginateTable(document.getElementById('dailyLeaderboardTable'));
     paginateTableByGroup(document.getElementById('monthlyPodiumTable'));
@@ -382,11 +382,20 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
     var dailySortType = document.getElementById('DaySortType');
     var dailyDate = document.getElementById('LeaderboardDay');
     dailySortType.onchange = function () {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
     };
     dailyDate.onchange = function () {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
     };
+
+    /* bouton "Decouvrez le classement" affiche quand le tableau du jour est masque
+       (rendu cote serveur au premier chargement, recree en JS a chaque rafraichissement
+       du tableau tant qu'il reste masque, cf. loadDailyLeaderboard) : delegue sur
+       document plutot que lie directement, pour continuer a fonctionner apres que le
+       bouton a ete recree. */
+    $(document).off('click.unlockDailyLeaderboard').on('click.unlockDailyLeaderboard', '#unlockDailyLeaderboardBtn', function () {
+        buyDailyLeaderboardAccess(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
+    });
 
     /* navigation arriere (bouton "precedent" du navigateur) : certains navigateurs
        restaurent la valeur affichee d'un champ de formulaire independamment du contenu
@@ -398,7 +407,7 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
         loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
     }
     if (isControlValueStale(dailySortType) || isControlValueStale(dailyDate)) {
-        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId);
+        loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
     }
 };
 
@@ -621,7 +630,7 @@ var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableT
     });
 };
 
-var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId) {
+var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText) {
     if (!date) {
         return;
     }
@@ -717,14 +726,53 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
                 var newRow = newtbody.insertRow();
                 newRow.classList.add('even');
                 var newCell = newRow.insertCell();
-                var newText = document.createTextNode(hiddenBoardText);
-                newCell.appendChild(newText);
                 newCell.classList.add('tabData');
+                newCell.classList.add('hidden-board-cell');
                 newCell.colSpan = 4;
+
+                var messageDiv = document.createElement('div');
+                messageDiv.appendChild(document.createTextNode(hiddenBoardText));
+                newCell.appendChild(messageDiv);
+
+                if (currentUserId) {
+                    var actionsDiv = document.createElement('div');
+                    actionsDiv.classList.add('actions');
+                    actionsDiv.classList.add('daily-unlock-actions');
+
+                    var unlockButton = document.createElement('button');
+                    unlockButton.type = 'button';
+                    unlockButton.id = 'unlockDailyLeaderboardBtn';
+                    unlockButton.appendChild(document.createTextNode(discoverLeaderboardText + ' '));
+
+                    var costSpan = document.createElement('span');
+                    costSpan.classList.add('cost');
+                    costSpan.appendChild(document.createTextNode(leaderboardCostText));
+                    unlockButton.appendChild(costSpan);
+
+                    actionsDiv.appendChild(unlockButton);
+                    newCell.appendChild(actionsDiv);
+                }
             }
             
             table.replaceChild(newtbody, tbodyRef);
             paginateTable(table);
+        },
+        error: function (data) {
+            alert('Call error: ' + JSON.stringify(data));
+        }
+    });
+};
+
+/* achat du classement du jour depuis la page classement elle-meme (bouton "Decouvrez le
+   classement" sous le message "resultats masques") : meme action que le bouton "Acces au
+   classement du jour" de la page d'accueil, cote serveur - la page ne change pas, seul le
+   tableau quotidien est rafraichi une fois l'achat effectue. */
+var buyDailyLeaderboardAccess = function (sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText) {
+    $.ajax({
+        url: '/unlock-daily-leaderboard',
+        type: 'POST',
+        success: function () {
+            loadDailyLeaderboard(sortType, date, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
         },
         error: function (data) {
             alert('Call error: ' + JSON.stringify(data));

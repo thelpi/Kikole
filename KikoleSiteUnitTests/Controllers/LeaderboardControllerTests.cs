@@ -10,6 +10,7 @@ using KikoleSite.Identity;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using FluentAssertions;
@@ -298,6 +299,37 @@ public class LeaderboardControllerTests
         var dayboard = result.Value.Should().BeOfType<Dayboard>().Subject;
         dayboard.Hidden.Should().BeTrue();
         _leaderService.Verify(_ => _.GetDayboardAsync(It.IsAny<DateTime>(), It.IsAny<DayLeaderSorts>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
+    }
+
+    // ------------------------------------------------------------- UnlockDailyLeaderboardAsync
+
+    [Fact]
+    public async Task UnlockDailyLeaderboardAsync_HappyPath_SubmitsALeaderboardProposalForTodayAndReturnsSuccess()
+    {
+        const ulong userId = 1;
+        SetUser(userId);
+
+        var playerFull = PlayerFullDtoBuilder.Valid().Build();
+        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Today)).ReturnsAsync(playerFull);
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+
+        var response = BuildResponse(
+            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Leaderboard).WithValue("GetLeaderboard").WithSuccessfulFlag(1).Build(),
+            playerFull);
+        _proposalService
+            .Setup(_ => _.ManageProposalResponseAsync(It.IsAny<ProposalRequest>(), userId, playerFull, TestCountryContinents.Map))
+            .ReturnsAsync((response, Array.Empty<ProposalDto>(), (LeaderDto?)null));
+
+        var result = await _controller.UnlockDailyLeaderboardAsync();
+
+        result.Value.Should().BeEquivalentTo(new { success = true });
+        // toujours le jour courant (DaysBeforeNow = 0), jamais le jour consulte par ailleurs
+        // sur la page - "acheter" le classement ne s'applique qu'au jour du jeu en cours
+        _proposalService.Verify(_ => _.ManageProposalResponseAsync(
+            It.Is<ProposalRequest>(r => r.DaysBeforeNow == 0
+                && r.ProposalType == ProposalTypes.Leaderboard
+                && r.Value == "GetLeaderboard"),
+            userId, playerFull, TestCountryContinents.Map), Times.Once);
     }
 
     // ------------------------------------------------------------- Index (userId = 0)
