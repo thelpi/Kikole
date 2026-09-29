@@ -33,9 +33,19 @@
    Hors .kikole-board : le footer (copyright) et le <hr/> de _Layout.cshtml sont des
    freres de RenderBody(), pas des enfants de .kikole-board. */
 
+/* base typographique + box-sizing : reprise a la main de ce que fournissait Bootstrap
+   silencieusement avant sa suppression (2026-09-29) - seul ce que le site en utilisait
+   reellement (aucun composant Bootstrap, juste ce reset). */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.42857143;
 }
 
 .body-content > hr {
@@ -58,7 +68,10 @@ body {
   margin-bottom: 10px;
 }
 
-.site-footer-links a:hover { color: var(--accent); }
+/* couleur explicite (jusqu'ici fournie silencieusement par le `a { color }` global de
+   Bootstrap, retire le 2026-09-29) - alignee sur la convention deja en place ailleurs
+   sur le site pour les liens de contenu (.form-card a, .hint a...). */
+.site-footer-links a { color: var(--accent); }
 
 /* ---------------------------------------------------------- navigation globale
    Chrome de _Layout.cshtml, presente sur toutes les pages (pas seulement sous

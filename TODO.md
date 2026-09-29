@@ -1870,23 +1870,30 @@ Branche de travail : `remaster-v2`.
       par ce chantier, relancée par précaution). **Non fait, périmètre exclu par l'utilisateur
       pour cette passe** : SRI/fallback local sur le CDN jQuery, et Bootstrap (« on verra
       Bootstrap séparément ») — reste à faire, cf. item suivant.
-- [ ] **Supprimer Bootstrap.** Constat : **aucun composant ni classe Bootstrap n'est utilisé
-      dans les vues** (recherche de `data-toggle`, `modal`, `tooltip`, `btn-`, `navbar`,
-      `col-*`, `glyphicon`, etc. : rien) ; il ne reste que `container body-content`
-      (`_Layout.cshtml`) et sa remise à zéro CSS. Son JavaScript (`bootstrap.js`) est chargé
-      pour rien, donc ses failles XSS de composants (tooltip/popover/carousel, dont
-      CVE-2024-6531, sans correctif : Bootstrap 3 est en fin de vie) ne s'exécutent jamais.
-      Autre défaut : CDN en **3.4.1** mais fallback local en **3.3.7** (`wwwroot/lib/bootstrap
-      /.bower.json`), deux versions différentes selon le chemin. À faire : (1) **avant tout,
-      relever ce que le CSS Bootstrap apporte silencieusement** — `.container` (largeur,
-      marges), `box-sizing`, et surtout la base typographique de `body` (taille et
-      `line-height`, 1.42857) dont dépend probablement la mise en page de tout le site ;
-      (2) reporter l'essentiel dans `kikole-board.css` (une dizaine de lignes) ; (3) retirer
-      les `<link>` Bootstrap (Development et CDN), les `<script>` et le fallback de
-      `_Layout.cshtml`, puis supprimer `wwwroot/lib/bootstrap` ; (4) retester toutes les
-      pages en desktop et mobile (risque principal : régressions d'interlignes ou de
-      largeur). Règle une partie de l'item « Ressources externes » (un CDN de moins) et
-      supprime définitivement la question d'un passage à Bootstrap 5.- [x] **Fusionné `Statistics/KikolesStats` dans `Statistics/Stats`**, en 3ème bloc
+- [x] ~~Supprimer Bootstrap.~~ **Fait (2026-09-29).** Confirmé avant suppression : toujours
+      aucun composant/classe Bootstrap utilisé dans les vues (nouvelle recherche incluant
+      `input-group`/`panel-`/`table-striped`/etc. en plus de la liste d'origine : rien), et
+      aucun plugin JS (`.modal(`, `.tooltip(`...) appelé depuis `site.js`. `_Layout.cshtml` :
+      retrait des deux `<link>` (Development + CDN/fallback) et des deux `<script>`
+      (Development + min), classe `container` retirée de la div englobante (`body-content`
+      seule suffit, `.container` n'avait aucune règle CSS propre au projet). Ce que Bootstrap
+      fournissait silencieusement a été relevé et reporté dans `kikole-board.css` : reset
+      `*, *::before, *::after { box-sizing: border-box; }` global, et `font-family`/
+      `font-size: 14px`/`line-height: 1.42857143` sur `body`. **Régression trouvée et
+      corrigée en vérifiant en direct** (pas anticipée dans le plan d'origine) : les liens du
+      footer (`.site-footer-links a`) n'avaient jamais eu de couleur propre — ils héritaient
+      sans le savoir du `a { color: #337ab7 }` global de Bootstrap. Sans lui, ils retombaient
+      en bleu par défaut du navigateur. Corrigé en leur donnant la même couleur que tous les
+      autres liens de contenu du site (`var(--accent)`, déjà la convention partout ailleurs :
+      `.form-card a`, `.hint a`, etc.) plutôt que d'introduire une nouvelle règle globale
+      `a {}`. **Vérifié en direct** (base jetable `kikole_pod`, détruite après coup) :
+      couleur de tous les liens passée en revue sur Accueil/Mentions légales/Classement/
+      Compte (plus aucun bleu par défaut, uniquement les couleurs du thème), capture d'écran
+      desktop et mobile sans régression d'interligne ni de largeur, aucune erreur console.
+      Nettoyé : `wwwroot/lib/bootstrap` supprimé entièrement. `dotnet build` propre,
+      `dotnet test` : 740 tests unitaires verts (suite non concernée, relancée par
+      précaution). Règle une partie de l'item « Ressources externes » suivant (un CDN de
+      moins, restent Google Fonts/CDN jQuery/Google Charts).- [x] **Fusionné `Statistics/KikolesStats` dans `Statistics/Stats`**, en 3ème bloc
       "collapsible" au même titre que "Répartition des joueurs par critère" et "Nombre
       d'utilisateurs actifs" — la page séparée reliée par un simple lien (`KikolesStatsLink`)
       disparaît. `KikolesStats.cshtml` supprimée, action `KikolesStats()` retirée du
