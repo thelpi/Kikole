@@ -195,6 +195,9 @@
   <data name="TypePlayerName" xml:space="preserve">
     <value>Type the player's name here:</value>
   </data>
+  <data name="PlayerNameRequired" xml:space="preserve">
+    <value>Please enter a name before submitting.</value>
+  </data>
   <data name="UseWikiTitle" xml:space="preserve">
     <value>tip: type the title of the player's English Wiki page</value>
   </data>

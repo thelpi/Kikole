@@ -241,10 +241,10 @@
             var hasActions = showClueButton || showLeaderboardButton;
             <div class="final">
                 <div class="field">@localizer["TypePlayerName"]</div>
-                <form method="post" action="/" style="margin:0">
+                <form method="post" action="/" style="margin:0" id="playerNameForm">
                     @Html.HiddenFor(m => m.CurrentDay)
                     <div class="final-input">
-                        <input type="text" name="PlayerNameSubmission" value="@Model.PlayerNameSubmission" placeholder="Zinédine Zidane, Kylian Mbappé…" />
+                        <input type="text" name="PlayerNameSubmission" id="playerNameInput" value="@Model.PlayerNameSubmission" placeholder="Zinédine Zidane, Kylian Mbappé…" aria-describedby="playerNameError" />
                         <div class="final-actions">
                             <button type="submit" name="submit-Name" class="final-submit">Valider</button>
                             @if (Model.CurrentDay > 0)
@@ -259,6 +259,7 @@
                             }
                         </div>
                     </div>
+                    <div class="final-error" id="playerNameError" role="alert" hidden>@localizer["PlayerNameRequired"]</div>
                 </form>
                 @if (Model.IncorrectNames?.Count > 0)
                 {

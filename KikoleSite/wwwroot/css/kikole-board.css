@@ -1177,6 +1177,18 @@ body { padding-top: 0; }
   border-color: var(--accent);
 }
 
+.kikole-board .final-input input.invalid {
+  border-color: var(--warn);
+  box-shadow: 0 0 0 3px var(--warn-soft);
+}
+
+.kikole-board .final-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--warn);
+}
+
 .kikole-board .final-actions {
   display: flex;
   flex: none;

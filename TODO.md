@@ -1849,32 +1849,27 @@ Branche de travail : `remaster-v2`.
       de passe par question secrète ne protège que les administrateurs
       (`AccountController.IsRecoveryForbidden`, refus indiscernable d'une mauvaise réponse) ;
       les power users restent traités comme des comptes ordinaires.
-- [ ] **Migrer jQuery et jQuery UI** (chantier distinct de la suppression de Bootstrap, cf.
-      item suivant). Chargés en prod uniquement en CDN, sans fallback ni SRI (`_Layout.cshtml`) :
-      jQuery **1.12.4** (2016, ligne 1.x abandonnée) et jQuery UI **1.12.1**. Failles connues
-      (numéros de CVE cités de mémoire, à confirmer par un scan OWASP Dependency-Check ou
-      retire.js) : jQuery 1.12.4 — XSS AJAX inter-domaines (CVE-2015-9251), pollution de
-      prototype `$.extend` (CVE-2019-11358), XSS `.html()`/`.append()` (CVE-2020-11022/11023),
-      toutes corrigées en 3.5 ; jQuery UI 1.12.1 — XSS datepicker `altField`/options `*Text`
-      et `.position()` (CVE-2021-41182/41183/41184, corrigées en 1.13.0) et `checkboxradio`
-      (CVE-2022-31160, corrigée en 1.13.2). **Exploitabilité faible aujourd'hui** : aucune API
-      concernée n'est utilisée (recherche de `.html(`, `.append(`, `innerHTML`, `_renderItem`,
-      `altField` dans `site.js` et les vues : aucune occurrence, les données JSON des
-      classements passent par `createTextNode`), mais un futur `.html()` sur un login ou un nom
-      de club serait exploitable. **Cible : jQuery 3.7.1 + jQuery UI 1.13.3** (Bootstrap 3.4.1
-      accepte jQuery 3). Périmètre réel modeste : `$.ajax`, `.on`, `.click`, autocomplétion
-      (clubs, pays, continents, années), datepickers (accueil + classements) — aucune API
-      supprimée entre jQuery 1 et 3 n'est utilisée (`.size()`, `.load()`, `.bind`, `.live`...
-      recherchés, rien trouvé). Trois étapes : (1) passer les deux `<script>` + le thème
-      jQuery UI dans `_Layout.cshtml`, avec le plugin jQuery Migrate le temps d'un premier
-      passage pour repérer les usages obsolètes, puis le retirer ; (2) retester autocomplétion,
-      datepickers (les surcharges de `kikole-board.css` visent les classes `ui-state-*`, qui
-      restent en 1.13), menu déroulant maison, classements AJAX, popin de victoire, pages
-      admin ; (3) idéalement en même temps que l'hébergement local + SRI (item « Ressources
-      externes »). Estimation : 1 à 2 h. À nettoyer au passage : `wwwroot/lib/jquery` (3.3.1,
-      lui aussi vulnérable), `jquery-validation` et `jquery-validation-unobtrusive`, présents
-      sur disque et servis en statique mais jamais chargés par `_Layout.cshtml` (résidus du
-      scaffold ASP.NET MVC d'origine).
+- [x] ~~Migrer jQuery et jQuery UI~~ **Fait (2026-09-29).** `_Layout.cshtml` bascule sur
+      jQuery **3.7.1** + jQuery UI **1.13.3** (thème smoothness inclus) en CDN, comme ciblé
+      ci-dessous — passage direct sans jQuery Migrate intermédiaire : l'audit statique
+      préalable (recherche de `.html(`, `.append(` sur une chaîne, `.size()`, `.load()`,
+      `.bind`, `.live`, `_renderItem`, `altField` dans `site.js`) n'avait trouvé aucune API
+      dépréciée/supprimée entre jQuery 1 et 3, confirmé exact après coup. **Vérifié en
+      direct** (base jetable `kikole_pod`, détruite après coup ; serveur isolé sur le port
+      5050, arrêté après coup) : autocomplétion club/continent/pays (widget initialisé,
+      appel AJAX correct, menu peuplé et sélection fonctionnelle jusqu'à la soumission
+      auto de la proposition), datepicker (jour d'accueil et classements, ouverture,
+      sélection, déclenchement manuel de l'évènement `change` pour les classements),
+      menu déroulant maison (`select.blank`/`.dd`), rechargement AJAX des tableaux de
+      classement (quotidien et général, tri + plage de dates), œil "afficher le mot de
+      passe" — aucune erreur console sur l'ensemble de la passe, 0 régression. **Nettoyé
+      au passage** : `wwwroot/lib/jquery` (3.3.1), `jquery-validation` et
+      `jquery-validation-unobtrusive` supprimés (résidus du scaffold ASP.NET MVC d'origine,
+      jamais chargés par `_Layout.cshtml`, confirmé par recherche globale avant suppression).
+      `dotnet build` propre, `dotnet test` : 740 tests unitaires verts (suite non concernée
+      par ce chantier, relancée par précaution). **Non fait, périmètre exclu par l'utilisateur
+      pour cette passe** : SRI/fallback local sur le CDN jQuery, et Bootstrap (« on verra
+      Bootstrap séparément ») — reste à faire, cf. item suivant.
 - [ ] **Supprimer Bootstrap.** Constat : **aucun composant ni classe Bootstrap n'est utilisé
       dans les vues** (recherche de `data-toggle`, `modal`, `tooltip`, `btn-`, `navbar`,
       `col-*`, `glyphicon`, etc. : rien) ; il ne reste que `container body-content`

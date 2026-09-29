@@ -105,6 +105,31 @@ var confirmGiveUp = function () {
     form.requestSubmit(document.getElementById('giveUpTrigger'));
 };
 
+/* validation cote client du nom de joueur (Home/Index.cshtml) : le serveur refusait deja
+   une valeur vide (HomeController.IsValidInput), mais seulement apres un aller-retour
+   complet. Bloque ici la soumission avant meme la requete, sans toucher au "Devoiler"
+   (autre formulaire, cible via form="giveUpForm"). */
+$(function () {
+    var $form = $("#playerNameForm");
+    if ($form.length === 0) return;
+    var $input = $("#playerNameInput");
+    var $error = $("#playerNameError");
+
+    $form.on("submit", function (e) {
+        if ($input.val().trim() === "") {
+            e.preventDefault();
+            $input.addClass("invalid").attr("aria-invalid", "true");
+            $error.prop("hidden", false);
+            $input.trigger("focus");
+        }
+    });
+
+    $input.on("input", function () {
+        $input.removeClass("invalid").removeAttr("aria-invalid");
+        $error.prop("hidden", true);
+    });
+});
+
 /* popup de victoire (Home/Index.cshtml) : deja rendue ouverte cote serveur quand
    HomeModel.JustWon est vrai (une seule fois, sur la reponse qui fait vraiment
    gagner - jamais sur une simple re-consultation d'un jour deja trouve). Pas de
