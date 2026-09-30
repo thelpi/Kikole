@@ -611,6 +611,25 @@ body { padding-top: 0; }
 
 .kikole-board .form-hint a { color: var(--accent); }
 
+/* upload de media d'indice (site.js, injecte apres chaque .clue-field) */
+.kikole-board .clue-upload-input {
+  display: block;
+  margin-top: 6px;
+  max-width: 320px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.kikole-board .clue-upload-status {
+  display: block;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.kikole-board .clue-upload-status.success { color: var(--accent); }
+.kikole-board .clue-upload-status.error { color: var(--warn); }
+
 .kikole-board .auth-notice p {
   font-size: 13px;
   line-height: 1.6;
@@ -794,14 +813,29 @@ body { padding-top: 0; }
 
 .kikole-board .clue p { margin: 0; color: var(--text); line-height: 1.5; }
 
-/* indice image : pas de ligne de base a aligner, le libelle reste en haut */
-.kikole-board .clue:has(.clue-image) { align-items: flex-start; }
+/* indice image/audio/video : pas de ligne de base a aligner, le libelle reste en haut */
+.kikole-board .clue:has(.clue-image, .clue-audio, .clue-video) { align-items: flex-start; }
 
 /* indice d'epoque heberge en image (ex. i.imgur.com/xxx.png) plutot qu'en texte */
 .kikole-board .clue-image {
   display: block;
   max-width: 220px;
   max-height: 140px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* indice audio/video uploade dans wwwroot (AdminController.UploadClueMedia) */
+.kikole-board .clue-audio {
+  display: block;
+  max-width: 260px;
+  height: 34px;
+}
+
+.kikole-board .clue-video {
+  display: block;
+  max-width: 260px;
+  max-height: 160px;
   border: 1px solid var(--border);
   border-radius: 8px;
 }

@@ -1264,6 +1264,49 @@ $(function () {
     });
 });
 
+/* upload des medias d'indice (Admin/Index.cshtml, Admin/PlayerEdit.cshtml) : chaque champ
+   texte de clue/easy clue (".clue-field") recoit un input file adjacent - au choix d'un
+   fichier, upload immediat via AdminController.UploadClueMedia, puis le chemin renvoye
+   remplace la valeur du champ texte (la saisie manuelle d'une URL reste possible en
+   parallele, rien n'empeche de taper directement dans le champ). */
+$(function () {
+    var $fields = $(".clue-field");
+    if ($fields.length === 0) return;
+
+    $fields.each(function () {
+        var $text = $(this);
+        var $status = $('<span class="clue-upload-status"></span>');
+        var $file = $('<input type="file" class="clue-upload-input" accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.mp3,.mp4" />');
+
+        $text.after($status).after($file);
+
+        $file.on("change", function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+
+            $status.text("Envoi en cours...").removeClass("error success");
+
+            var formData = new FormData();
+            formData.append("file", file);
+
+            $.ajax({
+                url: "/Admin/UploadClueMedia",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $text.val(data.path);
+                    $status.text("Envoye : " + data.path).addClass("success");
+                },
+                error: function () {
+                    $status.text("Echec de l'envoi (format ou taille refuses).").addClass("error");
+                }
+            });
+        });
+    });
+});
+
 Date.prototype.ddmmyyyy = function () {
     var mm = this.getMonth() + 1; // getMonth() is zero-based
     var dd = this.getDate();

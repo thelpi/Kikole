@@ -123,6 +123,14 @@
                     {
                         <img class="clue-image" src="@Model.Clue" alt="@localizer["DayClue"]" />
                     }
+                    else if (Model.Clue.IsAudioUrl())
+                    {
+                        <audio class="clue-audio" controls src="@Model.Clue"></audio>
+                    }
+                    else if (Model.Clue.IsVideoUrl())
+                    {
+                        <video class="clue-video" controls src="@Model.Clue"></video>
+                    }
                     else
                     {
                         <p>@Html.Raw(Model.Clue)</p>
@@ -133,6 +141,14 @@
                     @if (Model.EasyClue.IsImageUrl())
                     {
                         <img class="clue-image" src="@Model.EasyClue" alt="@localizer["EasyDayClue"]" />
+                    }
+                    else if (Model.EasyClue.IsAudioUrl())
+                    {
+                        <audio class="clue-audio" controls src="@Model.EasyClue"></audio>
+                    }
+                    else if (Model.EasyClue.IsVideoUrl())
+                    {
+                        <video class="clue-video" controls src="@Model.EasyClue"></video>
                     }
                     else
                     {
@@ -215,6 +231,14 @@
                     {
                         <img class="clue-image" src="@Model.Clue" alt="@localizer["DayClue"]" />
                     }
+                    else if (Model.Clue.IsAudioUrl())
+                    {
+                        <audio class="clue-audio" controls src="@Model.Clue"></audio>
+                    }
+                    else if (Model.Clue.IsVideoUrl())
+                    {
+                        <video class="clue-video" controls src="@Model.Clue"></video>
+                    }
                     else
                     {
                         <p>@Html.Raw(Model.Clue)</p>
@@ -227,6 +251,14 @@
                         @if (Model.EasyClue.IsImageUrl())
                         {
                             <img class="clue-image" src="@Model.EasyClue" alt="@localizer["EasyDayClue"]" />
+                        }
+                        else if (Model.EasyClue.IsAudioUrl())
+                        {
+                            <audio class="clue-audio" controls src="@Model.EasyClue"></audio>
+                        }
+                        else if (Model.EasyClue.IsVideoUrl())
+                        {
+                            <video class="clue-video" controls src="@Model.EasyClue"></video>
                         }
                         else
                         {

@@ -868,19 +868,54 @@ Branche de travail : `remaster-v2`.
       `InternationalService` existant (déjà le point d'entrée pour pays/continents) sans
       ajouter de couche — même précédent que `Message`/`Discussion`, qui ne méritent pas
       de service dédié.
-- [ ] **Indices audio/mp3 et vidéo/mp4** (2026-09-27, question théorique de l'utilisateur,
-      pas encore implémenté). `Model.Clue`/`EasyClue` sont déjà du texte libre pouvant être
-      une URL détectée par `ViewHelper.IsImageUrl()` (URL http(s) + extension) pour basculer
-      sur un `<img>` au lieu du texte brut (`Views/Home/Index.cshtml`) — même principe à
-      étendre avec `IsAudioUrl()`/`IsVideoUrl()` (extensions `.mp3`/`.mp4`) rendant
-      `<audio controls>`/`<video controls>` (pas d'autoplay avec son de toute façon, bloqué
-      par les navigateurs — `controls` donne le bouton play nécessaire sans effort
-      supplémentaire).
-      **Décision de l'utilisateur sur l'hébergement** : solution locale `wwwroot` pour tous
-      les médias d'indice, y compris les images — changement d'avis explicite par rapport à
-      l'existant (les images d'indice actuelles sont hébergées ailleurs, ex. imgur, juste
-      référencées par URL). Implique, le jour où ce chantier démarre, de revoir aussi le
-      circuit des images déjà en place (pas seulement ajouter audio/vidéo à côté).
+- [x] ~~Indices audio/mp3 et vidéo/mp4, tous les médias d'indice locaux~~ **Fait
+      (2026-09-29).** Deux arbitrages tranchés par l'utilisateur avant de démarrer : (1) vrai
+      formulaire d'upload plutôt qu'un dépôt manuel du fichier sur le serveur, (2) mp3/mp4
+      uniquement (pas de wav/ogg/webm). Constat préalable qui a simplifié le chantier :
+      **aucune migration nécessaire** — 0 des 306 joueurs de la vraie base locale ne référence
+      un média externe (`clue`/`easy_clue` tous en texte) ; les ~390 kikolés 2023 avec de
+      vrais indices Vocaroo/YouTube/imgur (`Restauration/indices_fr_2023.txt`) ne sont pas
+      importés dans le jeu actuel et restent hors périmètre (rattachés à la restauration de
+      la base de prod, chantier séparé).
+      - `ViewHelper.IsImageUrl()` généralisée (plus seulement URL absolue http/https) via une
+        nouvelle méthode privée commune `HasMediaExtension`, qui accepte aussi un chemin
+        racine local (`/media/...`) — nécessaire puisque les fichiers uploadés vivent
+        désormais sur le même domaine, pas question de coder en dur le nom de domaine courant
+        dans la valeur stockée. Garde-fou : un chemin commençant par `//` (URL
+        protocol-relative vers un autre domaine) n'est jamais traité comme local. Nouvelles
+        `IsAudioUrl()`/`IsVideoUrl()` (`.mp3`/`.mp4`) sur le même modèle.
+      - `Home/Index.cshtml` : les 4 emplacements déjà couverts par `IsImageUrl()` (Clue/
+        EasyClue × états trouvé/en cours) étendus avec deux branches `else if`
+        (`<audio class="clue-audio" controls>`/`<video class="clue-video" controls>`), pas
+        d'autoplay avec son de toute façon bloqué par les navigateurs. Styles dédiés dans
+        `kikole-board.css`, `.clue:has(...)` étendu pour couvrir aussi audio/vidéo.
+      - **Upload** : nouvelle action `AdminController.UploadClueMedia` (`[Authorization
+        (UserTypes.PowerUser)]`, accessible aux deux formulaires concernés), extensions
+        acceptées `.png/.jpg/.jpeg/.gif/.webp/.bmp/.svg/.mp3/.mp4`, plafond **15 Mo**, nom de
+        fichier régénéré en GUID (jamais le nom fourni par le client), stocké dans
+        `wwwroot/media/clues/` (créé à la volée). Retourne le chemin en JSON, consommé par
+        `site.js` : chaque champ `.clue-field` (les 6 de `Admin/Index.cshtml` — branches
+        admin et PowerUser — et les 4 de `Admin/PlayerEdit.cshtml`) reçoit un `<input
+        type="file">` adjacent ; au choix d'un fichier, upload immédiat en AJAX puis le champ
+        texte est rempli avec le chemin renvoyé (la saisie manuelle d'une URL reste possible
+        en parallèle, rien n'est retiré). Pas de jeton anti-CSRF : cohérent avec le reste de
+        l'app, qui n'en utilise nulle part (`$.ajax` partout, `/unlock-daily-leaderboard`,
+        autocomplétions...).
+      - Testé : `ViewHelperTests` (IsImageUrl étendu au chemin local + rejet du
+        protocol-relative, `IsAudioUrl`/`IsVideoUrl` complets), `AdminControllerTests` (+9 :
+        extensions acceptées avec vérification du fichier réellement écrit sur disque et de
+        son contenu, extensions refusées, fichier absent/vide/trop volumineux — sans
+        allouer un vrai flux de 15 Mo, `IFormFile.Length` étant independant de la taille
+        réelle du flux sous-jacent). Nouveau `IWebHostEnvironment` injecté dans
+        `AdminController` (mocké dans les tests avec un `WebRootPath` jetable, nettoyé après
+        coup via `IDisposable`). `dotnet test` : 763 tests unitaires verts.
+      - **Vérifié en direct** (base jetable `kikole_pod`, détruite après coup) : upload d'une
+        image et d'un mp3 (fichiers factices avec en-tête plausible) via le formulaire
+        `PlayerEdit` du joueur du jour, confirmé écrits sur disque, champ texte auto-rempli,
+        sauvegarde en base confirmée, rendu correct en `<img>`/`<audio controls>` sur le
+        plateau (testé en anglais - la clue française du kikolé, non modifiée, continuait
+        logiquement de s'afficher en français). Fichiers de test et base jetable supprimés
+        après coup.
 
 ---
 

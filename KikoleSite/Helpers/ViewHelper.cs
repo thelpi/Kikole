@@ -17,20 +17,40 @@ public static class ViewHelper
 
     private static readonly string[] ImageExtensions =
         [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+    private static readonly string[] AudioExtensions = [".mp3"];
+    private static readonly string[] VideoExtensions = [".mp4"];
 
     // certains indices sont d'anciennes captures d'ecran hebergees en ligne (ex.
     // https://i.imgur.com/YwR1hdd.png) plutot que du texte : on les detecte pour les
     // rendre en <img> au lieu d'afficher l'URL brute telle quelle
-    public static bool IsImageUrl(this string? value)
+    public static bool IsImageUrl(this string? value) => value.HasMediaExtension(ImageExtensions);
+
+    // indices audio/video uploades par l'admin (AdminController.UploadClueMedia), rendus
+    // en <audio controls>/<video controls> plutot qu'en texte brut ou en lien cliquable
+    public static bool IsAudioUrl(this string? value) => value.HasMediaExtension(AudioExtensions);
+
+    public static bool IsVideoUrl(this string? value) => value.HasMediaExtension(VideoExtensions);
+
+    private static bool HasMediaExtension(this string? value, string[] extensions)
     {
-        if (string.IsNullOrWhiteSpace(value)
-            || !Uri.TryCreate(value.Trim(), UriKind.Absolute, out var uri)
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        value = value.Trim();
+
+        // fichier uploade dans wwwroot (chemin racine "/media/...") plutot qu'une URL
+        // absolue - jamais "//" au debut, qui serait une URL protocol-relative vers un
+        // autre domaine
+        if (value.StartsWith('/') && !value.StartsWith("//"))
+            return extensions.Any(ext => value.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
         {
             return false;
         }
 
-        return ImageExtensions.Any(ext => uri.AbsolutePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+        return extensions.Any(ext => uri.AbsolutePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
 
     public static string ToNaString(this object? data)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -27,7 +29,7 @@ namespace KikoleSiteUnitTests.Controllers;
 /// <c>countries</c>/<c>continents</c> vont etre parallelises (cf. TODO). Jusqu'ici hors
 /// perimetre, comme le reste du controleur (cf. TODO).
 /// </summary>
-public class AdminControllerTests
+public class AdminControllerTests : IDisposable
 {
     private static readonly DateTime Today = TestCalendar.FirstDate.AddDays(30);
 
@@ -42,6 +44,8 @@ public class AdminControllerTests
     private readonly Mock<ILeaderService> _leaderService = new();
     private readonly Mock<IDiscussionService> _discussionService = new();
     private readonly Mock<IStringLocalizer<AdminController>> _localizer = new();
+    private readonly Mock<IWebHostEnvironment> _webHostEnvironment = new();
+    private readonly string _webRootPath = Path.Combine(Path.GetTempPath(), "kikole-tests-" + Guid.NewGuid());
     private readonly AdminController _controller;
 
     public AdminControllerTests()
@@ -49,6 +53,7 @@ public class AdminControllerTests
         _clock.Setup(_ => _.Today).Returns(Today);
         _clock.Setup(_ => _.Now).Returns(Today);
         _localizer.Setup(l => l[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
+        _webHostEnvironment.Setup(_ => _.WebRootPath).Returns(_webRootPath);
 
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
         httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
@@ -64,13 +69,23 @@ public class AdminControllerTests
             _badgeService.Object,
             _leaderService.Object,
             _discussionService.Object,
-            httpContextAccessor.Object)
+            httpContextAccessor.Object,
+            _webHostEnvironment.Object)
         {
             ControllerContext = new ControllerContext { HttpContext = _httpContext }
         };
 
         var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.Administrator).ToString()) };
         _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+    }
+
+    // le repertoire jetable qui accueille les uploads (UploadClueMedia) pendant les
+    // tests n'a rien a voir avec le vrai wwwroot ; nettoye a chaque test pour ne pas
+    // laisser trainer de fichiers dans le repertoire temp de la machine
+    public void Dispose()
+    {
+        if (Directory.Exists(_webRootPath))
+            Directory.Delete(_webRootPath, recursive: true);
     }
 
     [Fact]
@@ -301,6 +316,79 @@ public class AdminControllerTests
             1), Times.Once);
         result.Should().BeOfType<RedirectToActionResult>()
             .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "Index" && r.ControllerName == "Admin");
+    }
+
+    // ------------------------------------------------------------- UploadClueMedia
+
+    private static IFormFile BuildFormFile(string fileName, long length, byte[]? content = null)
+    {
+        content ??= new byte[Math.Min(length, 16)];
+        var stream = new MemoryStream(content);
+        return new FormFile(stream, 0, length, "file", fileName);
+    }
+
+    [Theory]
+    [InlineData("indice.png")]
+    [InlineData("indice.MP3")]
+    [InlineData("indice.mp4")]
+    public async Task UploadClueMedia_AllowedExtension_SavesTheFileAndReturnsItsRootRelativePath(string fileName)
+    {
+        var content = new byte[] { 1, 2, 3, 4 };
+        var file = BuildFormFile(fileName, content.Length, content);
+
+        var result = await _controller.UploadClueMedia(file);
+
+        var json = result.Should().BeOfType<JsonResult>().Subject;
+        var path = json.Value!.GetType().GetProperty("path")!.GetValue(json.Value) as string;
+        path.Should().NotBeNullOrWhiteSpace();
+        path.Should().MatchRegex(@"^/media/clues/[0-9a-f-]+\." + fileName.Split('.')[1].ToLowerInvariant() + "$");
+
+        var savedFilePath = Path.Combine(_webRootPath, path!.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+        File.Exists(savedFilePath).Should().BeTrue();
+        File.ReadAllBytes(savedFilePath).Should().BeEquivalentTo(content);
+    }
+
+    [Theory]
+    [InlineData("indice.exe")]
+    [InlineData("indice.txt")]
+    [InlineData("indice")]
+    public async Task UploadClueMedia_DisallowedExtension_ReturnsBadRequest(string fileName)
+    {
+        var file = BuildFormFile(fileName, 4);
+
+        var result = await _controller.UploadClueMedia(file);
+
+        result.Should().BeOfType<BadRequestResult>();
+    }
+
+    [Fact]
+    public async Task UploadClueMedia_NoFile_ReturnsBadRequest()
+    {
+        var result = await _controller.UploadClueMedia(null);
+
+        result.Should().BeOfType<BadRequestResult>();
+    }
+
+    [Fact]
+    public async Task UploadClueMedia_EmptyFile_ReturnsBadRequest()
+    {
+        var file = BuildFormFile("indice.png", 0);
+
+        var result = await _controller.UploadClueMedia(file);
+
+        result.Should().BeOfType<BadRequestResult>();
+    }
+
+    [Fact]
+    public async Task UploadClueMedia_FileTooLarge_ReturnsBadRequest()
+    {
+        // Length declare volontairement au-dela du plafond (15 Mo) sans allouer un
+        // vrai flux de cette taille : le controleur rejette avant toute lecture du flux
+        var file = BuildFormFile("indice.mp4", (15 * 1024 * 1024) + 1);
+
+        var result = await _controller.UploadClueMedia(file);
+
+        result.Should().BeOfType<BadRequestResult>();
     }
 
     // ------------------------------------------------------------- Club

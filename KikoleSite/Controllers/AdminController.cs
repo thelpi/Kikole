@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Controllers.Attributes;
@@ -10,6 +11,7 @@ using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,10 +21,18 @@ namespace KikoleSite.Controllers;
 
 public class AdminController : KikoleBaseController
 {
+    // formats acceptes pour un indice (image deja geree ailleurs, + audio/video
+    // uploades localement, cf. UploadClueMedia) et plafond de taille (indices courts :
+    // quelques secondes de son, une dizaine de secondes de video)
+    private static readonly string[] AllowedClueMediaExtensions =
+        [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".mp3", ".mp4"];
+    private const long MaxClueMediaFileSizeBytes = 15 * 1024 * 1024;
+
     private readonly IStringLocalizer<AdminController> _localizer;
     private readonly IDiscussionService _discussionService;
     private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
     public AdminController(IStringLocalizer<AdminController> localizer,
         IUserRepository userRepository,
@@ -34,7 +44,8 @@ public class AdminController : KikoleBaseController
         IBadgeService badgeService,
         ILeaderService leaderService,
         IDiscussionService discussionService,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IWebHostEnvironment webHostEnvironment)
         : base(userRepository,
             internationalService,
             clock,
@@ -47,6 +58,7 @@ public class AdminController : KikoleBaseController
         _discussionService = discussionService;
         _leaderService = leaderService;
         _messageRepository = messageRepository;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     [HttpGet]
@@ -446,6 +458,37 @@ public class AdminController : KikoleBaseController
                 .CreatePlayerAsync(req, UserId);
             return RedirectToAction("Index", "Admin", new { withOkMessage = true });
         }
+    }
+
+    // upload d'un media d'indice (image/audio/video), utilise par le formulaire de
+    // creation (Index) et d'edition (PlayerEdit) : le fichier est stocke dans wwwroot,
+    // le chemin renvoye remplace la valeur du champ texte correspondant (site.js)
+    [HttpPost]
+    [Authorization(UserTypes.PowerUser)]
+    public async Task<IActionResult> UploadClueMedia(IFormFile? file)
+    {
+        if (file == null || file.Length == 0 || file.Length > MaxClueMediaFileSizeBytes)
+            return BadRequest();
+
+        var extension = Path.GetExtension(file.FileName);
+        if (string.IsNullOrWhiteSpace(extension)
+            || !AllowedClueMediaExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+        {
+            return BadRequest();
+        }
+
+        var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "media", "clues");
+        Directory.CreateDirectory(folderPath);
+
+        var fileName = $"{Guid.NewGuid()}{extension.ToLowerInvariant()}";
+        var fullPath = Path.Combine(folderPath, fileName);
+
+        using (var stream = System.IO.File.Create(fullPath))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        return Json(new { path = $"/media/clues/{fileName}" });
     }
 
     [HttpGet]

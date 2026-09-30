@@ -261,12 +261,13 @@ public class ViewHelperTests
         }
     }
 
-    // ------------------------------------------------------------- indices en image
+    // ------------------------------------------------------------- indices en image/audio/video
 
     [Theory]
     [InlineData("https://i.imgur.com/YwR1hdd.png")]
     [InlineData("http://example.com/photo.JPG")]
     [InlineData("https://example.com/path/pic.webp?token=abc")]
+    [InlineData("/media/clues/2f6b1e2e-cafe-4a5e-9c1a-abcdefabcdef.png")]
     public void IsImageUrl_DetectsCommonImageExtensions(string url)
     {
         url.IsImageUrl().Should().BeTrue();
@@ -280,9 +281,46 @@ public class ViewHelperTests
     [InlineData("https://example.com/no-extension")]
     [InlineData("not-a-url.png")]
     [InlineData("ftp://example.com/photo.png")]
+    [InlineData("//evil.com/photo.png")]
     public void IsImageUrl_RejectsPlainTextAndNonHttpValues(string? value)
     {
         value.IsImageUrl().Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("https://example.com/indice.mp3")]
+    [InlineData("/media/clues/2f6b1e2e-cafe-4a5e-9c1a-abcdefabcdef.MP3")]
+    public void IsAudioUrl_DetectsMp3(string url)
+    {
+        url.IsAudioUrl().Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Un indice texte.")]
+    [InlineData("https://example.com/indice.mp4")]
+    [InlineData("//evil.com/indice.mp3")]
+    public void IsAudioUrl_RejectsEverythingElse(string? value)
+    {
+        value.IsAudioUrl().Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("https://example.com/indice.mp4")]
+    [InlineData("/media/clues/2f6b1e2e-cafe-4a5e-9c1a-abcdefabcdef.MP4")]
+    public void IsVideoUrl_DetectsMp4(string url)
+    {
+        url.IsVideoUrl().Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Un indice texte.")]
+    [InlineData("https://example.com/indice.mp3")]
+    [InlineData("//evil.com/indice.mp4")]
+    public void IsVideoUrl_RejectsEverythingElse(string? value)
+    {
+        value.IsVideoUrl().Should().BeFalse();
     }
 
     // ------------------------------------------------------------- selection de langue

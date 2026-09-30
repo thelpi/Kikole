@@ -20,6 +20,19 @@
 --   question de recuperation : reponse "kikole" pour tous
 --
 -- Joueurs du jour : generes de FirstDate a aujourd'hui + 6 mois (voir plus bas).
+--
+-- Indices media locaux (wwwroot/media/clues/, cf. AdminController.UploadClueMedia) : un
+-- exemple de chaque type pour verifier le rendu <img>/<audio controls>/<video controls>
+-- (Home/Index.cshtml). Image generee a la main (cercle vert sur fond sombre, memes
+-- couleurs que kikole-board.css) ; audio = "Beep of a Cash Register #1" (bigsoundbank.com,
+-- CC0) ; video = extrait de 10s de Big Buck Bunny (Blender Foundation, CC BY 3.0), via le
+-- paquet npm "sample-files" (cseitz/sample-files). Le clue facile de chacun de ces trois
+-- kikolés reste du texte, volontairement, pour illustrer aussi le cas mixte.
+-- Fixes sur des jours a decalage constant depuis @first_date (ids 3/4, cf. plus bas) plutot
+-- que dans le pool tournant : un index du pool retombe forcement sur "aujourd'hui" ou le
+-- futur selon la date de rejeu du script, ce qui empeche de tester le jour courant
+-- normalement. @first_date etant toujours "aujourd'hui - 4 mois", ces jours restent
+-- toujours dans le passe quel que soit le moment ou le script est rejoue.
 
 SET NAMES utf8mb4;
 USE kikole;
@@ -111,19 +124,19 @@ SET @last_date = DATE_ADD(CURDATE(), INTERVAL 6 MONTH);
 SET @pool_size = 8;
 SET SESSION cte_max_recursion_depth = 10000;
 
--- journee cachee (FirstDate - 1)
+-- journee cachee (FirstDate - 1) - clue en image locale (cf. note plus haut)
 INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator) VALUES
 (1, 'Andrea Pirlo', 'pirlo;andrea pirlo', 1979, 111, DATE_SUB(@first_date, INTERVAL 1 DAY),
- 'A deep-lying playmaker, famous for his free kicks.', 'He won the 2006 World Cup with Italy.',
+ '/media/clues/mock-clue-image.png', 'He won the 2006 World Cup with Italy.',
  3, NULL, 1, '2026-09-01 09:00:00', NULL, 0);
 
 INSERT INTO player_clubs (player_id, club_id, history_position, is_loan) VALUES
 (1, 89, 1, 0), (1, 93, 2, 0), (1, 85, 3, 0), (1, 94, 4, 0);
 
 INSERT INTO player_clue_translations (player_id, language_id, is_easy, clue) VALUES
-(1, 1, 0, 'A deep-lying playmaker, famous for his free kicks.'),
+(1, 1, 0, '/media/clues/mock-clue-image.png'),
 (1, 1, 1, 'He won the 2006 World Cup with Italy.'),
-(1, 2, 0, 'Meneur de jeu reculé, spécialiste des coups francs.'),
+(1, 2, 0, '/media/clues/mock-clue-image.png'),
 (1, 2, 1, 'Champion du monde 2006 avec l''Italie.');
 
 -- ---------------------------------------------------------------- pool de joueurs
@@ -205,6 +218,14 @@ UNION ALL
 SELECT mock_days.i + 2, 2, 0, mock_pool.clue_fr FROM mock_days JOIN mock_pool ON mock_pool.p = MOD(mock_days.i, @pool_size)
 UNION ALL
 SELECT mock_days.i + 2, 2, 1, mock_pool.easy_fr FROM mock_days JOIN mock_pool ON mock_pool.p = MOD(mock_days.i, @pool_size);
+
+-- indices media (suite) : ids 3/4 = @first_date + 1/+2 jour, toujours dans le passe quelle
+-- que soit la date de rejeu (cf. note en tete de fichier) - le clue facile de chacun reste
+-- celui du pool, volontairement, pour illustrer le cas mixte.
+UPDATE players SET clue = '/media/clues/mock-clue-audio.mp3' WHERE id = 3;
+UPDATE players SET clue = '/media/clues/mock-clue-video.mp4' WHERE id = 4;
+UPDATE player_clue_translations SET clue = '/media/clues/mock-clue-audio.mp3' WHERE player_id = 3 AND is_easy = 0;
+UPDATE player_clue_translations SET clue = '/media/clues/mock-clue-video.mp4' WHERE player_id = 4 AND is_easy = 0;
 
 -- ---------------------------------------------------------------- joueurs fictifs + historique
 --
