@@ -9,6 +9,7 @@ using KikoleSite.Controllers;
 using KikoleSite.Identity;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using KikoleSite.ViewModels;
@@ -127,6 +128,86 @@ public class AdminControllerTests : IDisposable
 
         result.Should().BeOfType<RedirectToActionResult>()
             .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "PlayerSubmission" && r.ControllerName == "Admin");
+    }
+
+    private void SetupOnePendingSubmission()
+    {
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" } });
+        _internationalService.Setup(_ => _.GetContinentsAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Continents.Europe, "Europe" } });
+        var playerFull = PlayerFullDtoBuilder.Valid().Build();
+        var creator = UserDtoBuilder.Valid().WithId(playerFull.Player.CreationUserId).WithLogin("createur").Build();
+        var submittedPlayer = new Player(playerFull, new[] { creator }, TestCountryContinents.Map);
+        _playerService.Setup(_ => _.GetPlayerSubmissionsAsync(TestCountryContinents.Map)).ReturnsAsync(new[] { submittedPlayer });
+    }
+
+    [Fact]
+    public async Task AcceptPlayer_WithAFutureDate_ForcesIt()
+    {
+        SetupOnePendingSubmission();
+        _playerService.Setup(_ => _.ValidatePlayerSubmissionAsync(It.IsAny<PlayerSubmissionValidationRequest>()))
+            .ReturnsAsync((PlayerSubmissionErrors.NoError, 42UL, (IReadOnlyCollection<Badges>)Array.Empty<Badges>()));
+
+        var model = new PlayerSubmissionsModel
+        {
+            SelectedId = 1,
+            ClueOverwriteFr = "indice",
+            EasyClueOverwriteFr = "facile",
+            PublicationDate = Today.AddDays(5).ToString("yyyy-MM-dd")
+        };
+
+        var result = await _controller.AcceptPlayer(model);
+
+        _playerService.Verify(_ => _.ValidatePlayerSubmissionAsync(
+            It.Is<PlayerSubmissionValidationRequest>(r => r.PublicationDate == Today.AddDays(5))), Times.Once);
+        result.Should().BeOfType<RedirectToActionResult>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task AcceptPlayer_WithATodayOrPastDate_IsRejected(int daysFromToday)
+    {
+        SetupOnePendingSubmission();
+
+        var model = new PlayerSubmissionsModel
+        {
+            SelectedId = 1,
+            ClueOverwriteFr = "indice",
+            EasyClueOverwriteFr = "facile",
+            PublicationDate = Today.AddDays(daysFromToday).ToString("yyyy-MM-dd")
+        };
+
+        var result = await _controller.AcceptPlayer(model);
+
+        var resultModel = ((ViewResult)result).Model.Should().BeOfType<PlayerSubmissionsModel>().Subject;
+        resultModel.ErrorMessage.Should().Be("InvalidPublicationDate");
+        _playerService.Verify(_ => _.ValidatePlayerSubmissionAsync(It.IsAny<PlayerSubmissionValidationRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RefusePlayer_IgnoresAnyPublicationDate()
+    {
+        // le champ n'a de sens qu'a l'acceptation ; le presence d'une valeur ne doit pas
+        // faire echouer un refus
+        SetupOnePendingSubmission();
+        _playerService.Setup(_ => _.ValidatePlayerSubmissionAsync(It.IsAny<PlayerSubmissionValidationRequest>()))
+            .ReturnsAsync((PlayerSubmissionErrors.NoError, 42UL, (IReadOnlyCollection<Badges>)Array.Empty<Badges>()));
+
+        var model = new PlayerSubmissionsModel
+        {
+            SelectedId = 1,
+            RefusalReason = "doublon",
+            PublicationDate = Today.ToString("yyyy-MM-dd")
+        };
+
+        var result = await _controller.RefusePlayer(model);
+
+        result.Should().BeOfType<RedirectToActionResult>();
+        _playerService.Verify(_ => _.ValidatePlayerSubmissionAsync(
+            It.Is<PlayerSubmissionValidationRequest>(r => r.PublicationDate == null)), Times.Once);
     }
 
     // ------------------------------------------------------------- Actions (annonces/outils)
@@ -318,6 +399,77 @@ public class AdminControllerTests : IDisposable
             .Which.Should().Match<RedirectToActionResult>(r => r.ActionName == "Index" && r.ControllerName == "Admin");
     }
 
+    private static PlayerCreationModel MinimalPlayerCreationModel(string? publicationDate = null) => new()
+    {
+        Name = "Zinédine Zidane",
+        AlternativeName0 = "zizou",
+        YearOfBirth = "1972",
+        ClueEn = "clue",
+        EasyClueEn = "easy clue",
+        Country = ((ulong)Countries.FRA).ToString(),
+        Position = ((ulong)Positions.Midfielder).ToString(),
+        Club0Id = "7",
+        PublicationDate = publicationDate
+    };
+
+    [Fact]
+    public async Task PlayerCreationPost_AsAdministratorWithAFutureDate_ForcesIt()
+    {
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" } });
+        _internationalService.Setup(_ => _.GetClubsAsync())
+            .ReturnsAsync(new[] { new Club(ClubDtoBuilder.Valid().WithId(7).Build(), []) });
+
+        var model = MinimalPlayerCreationModel(Today.AddDays(5).ToString("yyyy-MM-dd"));
+
+        var result = await _controller.Index(model);
+
+        _playerService.Verify(_ => _.CreatePlayerAsync(
+            It.Is<KikoleSite.Models.Requests.PlayerRequest>(r => r.PublicationDate == Today.AddDays(5)),
+            1), Times.Once);
+        result.Should().BeOfType<RedirectToActionResult>();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task PlayerCreationPost_AsAdministratorWithATodayOrPastDate_IsRejected(int daysFromToday)
+    {
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" } });
+        _internationalService.Setup(_ => _.GetClubsAsync())
+            .ReturnsAsync(new[] { new Club(ClubDtoBuilder.Valid().WithId(7).Build(), []) });
+
+        var model = MinimalPlayerCreationModel(Today.AddDays(daysFromToday).ToString("yyyy-MM-dd"));
+
+        var result = await _controller.Index(model);
+
+        var resultModel = ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Subject;
+        resultModel.ErrorMessage.Should().Be("InvalidPublicationDate");
+        _playerService.Verify(_ => _.CreatePlayerAsync(It.IsAny<KikoleSite.Models.Requests.PlayerRequest>(), It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_AsPowerUserWithADateInThePayload_TheDateIsIgnored()
+    {
+        // le champ n'existe pas dans le formulaire PowerUser, mais on se protege aussi
+        // cote serveur d'une requete bricolee
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.PowerUser).ToString()) };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" } });
+        _internationalService.Setup(_ => _.GetClubsAsync())
+            .ReturnsAsync(new[] { new Club(ClubDtoBuilder.Valid().WithId(7).Build(), []) });
+
+        var model = MinimalPlayerCreationModel(Today.AddDays(5).ToString("yyyy-MM-dd"));
+
+        await _controller.Index(model);
+
+        _playerService.Verify(_ => _.CreatePlayerAsync(
+            It.Is<KikoleSite.Models.Requests.PlayerRequest>(r => r.PublicationDate == null),
+            1), Times.Once);
+    }
+
     // ------------------------------------------------------------- UploadClueMedia
 
     private static IFormFile BuildFormFile(string fileName, long length, byte[]? content = null)
@@ -389,6 +541,38 @@ public class AdminControllerTests : IDisposable
         var result = await _controller.UploadClueMedia(file);
 
         result.Should().BeOfType<BadRequestResult>();
+    }
+
+    [Theory]
+    [InlineData("indice.mp3")]
+    [InlineData("indice.MP4")]
+    public async Task UploadClueMedia_AudioOrVideoAsPowerUser_ReturnsForbidden(string fileName)
+    {
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.PowerUser).ToString()) };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+        var file = BuildFormFile(fileName, 4);
+
+        var result = await _controller.UploadClueMedia(file);
+
+        // pas Forbid() : sous l'authentification par cookie, ce ForbidResult serait
+        // intercepte et transforme en redirection (302) plutot qu'un vrai 403 - verifie
+        // en direct, cf. commentaire dans AdminController.UploadClueMedia
+        result.Should().BeOfType<StatusCodeResult>()
+            .Which.StatusCode.Should().Be(403);
+        File.Exists(Path.Combine(_webRootPath, "media", "clues")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UploadClueMedia_ImageAsPowerUser_StillAllowed()
+    {
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.PowerUser).ToString()) };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+        var content = new byte[] { 1, 2, 3 };
+        var file = BuildFormFile("indice.png", content.Length, content);
+
+        var result = await _controller.UploadClueMedia(file);
+
+        result.Should().BeOfType<JsonResult>();
     }
 
     // ------------------------------------------------------------- Club

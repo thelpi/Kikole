@@ -110,6 +110,12 @@ internal sealed class PlayerSubmissionValidationRequestBuilder
         return this;
     }
 
+    internal PlayerSubmissionValidationRequestBuilder WithPublicationDate(System.DateTime? date)
+    {
+        _request = _request with { PublicationDate = date };
+        return this;
+    }
+
     internal PlayerSubmissionValidationRequestBuilder WithEnglishClues(string? clue, string? easyClue)
     {
         _request = _request with { ClueEditEn = clue, EasyClueEditEn = easyClue };

@@ -24,4 +24,11 @@ public class PlayerSubmissionsModel
     public string? EasyClueOverwriteFr { get; set; }
 
     public string? RefusalReason { get; set; }
+
+    /// <summary>
+    /// Force la date de publication au lieu du "bout de chaine" habituel (uniquement pris
+    /// en compte cote controleur pour une acceptation). Format "yyyy-MM-dd" (input HTML
+    /// <c>type="date"</c>).
+    /// </summary>
+    public string? PublicationDate { get; set; }
 }

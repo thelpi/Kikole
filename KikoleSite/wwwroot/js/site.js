@@ -1273,10 +1273,14 @@ $(function () {
     var $fields = $(".clue-field");
     if ($fields.length === 0) return;
 
+    var imageAccept = ".png,.jpg,.jpeg,.gif,.webp,.bmp,.svg";
+    var allAccept = imageAccept + ",.mp3,.mp4";
+
     $fields.each(function () {
         var $text = $(this);
+        var isImageOnly = $text.attr("data-media") === "image";
         var $status = $('<span class="clue-upload-status"></span>');
-        var $file = $('<input type="file" class="clue-upload-input" accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.mp3,.mp4" />');
+        var $file = $('<input type="file" class="clue-upload-input" />').attr("accept", isImageOnly ? imageAccept : allAccept);
 
         $text.after($status).after($file);
 
@@ -1299,8 +1303,11 @@ $(function () {
                     $text.val(data.path);
                     $status.text("Envoye : " + data.path).addClass("success");
                 },
-                error: function () {
-                    $status.text("Echec de l'envoi (format ou taille refuses).").addClass("error");
+                error: function (xhr) {
+                    var message = xhr.status === 403
+                        ? "Audio/video reserves aux administrateurs."
+                        : "Echec de l'envoi (format ou taille refuses).";
+                    $status.text(message).addClass("error");
                 }
             });
         });

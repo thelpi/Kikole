@@ -26,6 +26,9 @@ public class AdminController : KikoleBaseController
     // quelques secondes de son, une dizaine de secondes de video)
     private static readonly string[] AllowedClueMediaExtensions =
         [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".mp3", ".mp4"];
+    // sous-ensemble reserve aux administrateurs (cf. UploadClueMedia) - un PowerUser reste
+    // limite au texte, aux liens et aux images
+    private static readonly string[] AudioVideoExtensions = [".mp3", ".mp4"];
     private const long MaxClueMediaFileSizeBytes = 15 * 1024 * 1024;
 
     private readonly IStringLocalizer<AdminController> _localizer;
@@ -225,8 +228,18 @@ public class AdminController : KikoleBaseController
         if (redirect != null)
             return redirect;
 
+        // action deja reservee aux administrateurs ([Authorization(UserTypes.Administrator)]
+        // sur AcceptPlayer/RefusePlayer) : pas de garde-fou de palier supplementaire ici
+        DateTime? forcedPublicationDate = null;
+        if (isAccepted && !TryParseForcedPublicationDate(model.PublicationDate, out forcedPublicationDate))
+        {
+            model.ErrorMessage = _localizer["InvalidPublicationDate"];
+            return View("PlayerSubmission", model);
+        }
+
         var request = new PlayerSubmissionValidationRequest
         {
+            PublicationDate = forcedPublicationDate,
             ClueEditLanguages = new Dictionary<Languages, string?>
             {
                 { Languages.fr, model.ClueOverwriteFr }
@@ -281,6 +294,27 @@ public class AdminController : KikoleBaseController
         return model.Players.Count == 0
             ? RedirectToAction("PlayerSubmission", "Admin")
             : null;
+    }
+
+    /// <summary>
+    /// Parse une date de publication forcee, reservee aux administrateurs (creation
+    /// directe via <see cref="Index(PlayerCreationModel)"/> ou acceptation d'une
+    /// soumission via <see cref="RespondToSubmissionAsync"/>) : doit etre strictement
+    /// dans le futur, jamais aujourd'hui ni le passe (deja joues - le service ne decale
+    /// jamais que des jours futurs). Champ vide = rien a forcer, ce n'est pas une erreur.
+    /// </summary>
+    private bool TryParseForcedPublicationDate(string? rawValue, out DateTime? publicationDate)
+    {
+        publicationDate = null;
+
+        if (string.IsNullOrWhiteSpace(rawValue))
+            return true;
+
+        if (!DateTime.TryParse(rawValue, out var parsedDate) || parsedDate.Date <= _clock.Today)
+            return false;
+
+        publicationDate = parsedDate.Date;
+        return true;
     }
 
     [HttpGet]
@@ -421,9 +455,21 @@ public class AdminController : KikoleBaseController
 
         var isAdmin = IsTypeOfUser(UserTypes.Administrator);
 
+        // reserve aux administrateurs : force la date de publication au lieu du "bout de
+        // chaine" habituel ; un PowerUser n'a de toute facon pas ce champ dans son
+        // formulaire, mais on l'ignore explicitement aussi cote serveur par securite
+        DateTime? forcedPublicationDate = null;
+        if (isAdmin && !TryParseForcedPublicationDate(model.PublicationDate, out forcedPublicationDate))
+        {
+            model.ErrorMessage = _localizer["InvalidPublicationDate"];
+            SetPositionsOnModel(model);
+            return View(model);
+        }
+
         var req = new PlayerRequest
         {
             SetLatestPublicationDate = isAdmin,
+            PublicationDate = forcedPublicationDate,
             AllowedNames = names,
             Clubs = clubs,
             ClueEn = model.ClueEn,
@@ -475,6 +521,19 @@ public class AdminController : KikoleBaseController
             || !AllowedClueMediaExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
         {
             return BadRequest();
+        }
+
+        // l'audio/la video sont reserves aux administrateurs : un PowerUser ne peut fournir
+        // que du texte, des liens et des images (cf. AllowedClueMediaExtensions).
+        // StatusCode(403) plutot que Forbid() : sous l'authentification par cookie,
+        // Forbid() est intercepte et transforme en redirection (302) vers la page
+        // "acces refuse" au lieu d'un vrai 403 - un fetch/$.ajax suit la redirection et
+        // voit un succes (200) plutot qu'une erreur, ce qui a ete confirme en verifiant
+        // en direct (aucun fichier ecrit malgre un statut 200 rapporte par fetch).
+        if (AudioVideoExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)
+            && !IsTypeOfUser(UserTypes.Administrator))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
         }
 
         var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "media", "clues");

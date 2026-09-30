@@ -198,6 +198,12 @@
   <data name="EasyClueFr" xml:space="preserve">
     <value>French easy clue</value>
   </data>
+  <data name="ForcePublicationDate" xml:space="preserve">
+    <value>Force a publication date (optional)</value>
+  </data>
+  <data name="ForcePublicationDateHint" xml:space="preserve">
+    <value>Administrators only. The date must be in the future. If it is already taken, that day and every following day are shifted by one day.</value>
+  </data>
   <data name="IsLoan" xml:space="preserve">
     <value>Loan?</value>
   </data>

@@ -84,7 +84,9 @@ public class PlayerService : IPlayerService
         // la date est resolue ici plutot qu'ecrite dans la requete : un service n'a pas
         // a modifier l'objet qu'on lui passe
         var publicationDate = request.PublicationDate;
-        if (!publicationDate.HasValue && request.SetLatestPublicationDate)
+        if (publicationDate.HasValue)
+            await ShiftFuturePlayersFromAsync(publicationDate.Value);
+        else if (request.SetLatestPublicationDate)
             publicationDate = await GetNextDateAsync();
 
         var playerId = await _playerRepository
@@ -165,13 +167,22 @@ public class PlayerService : IPlayerService
             ? currentEasyClue
             : request.EasyClueEditEn.Trim();
 
-        var latestDate = await GetNextDateAsync();
+        DateTime publicationDate;
+        if (request.PublicationDate.HasValue)
+        {
+            publicationDate = request.PublicationDate.Value;
+            await ShiftFuturePlayersFromAsync(publicationDate);
+        }
+        else
+        {
+            publicationDate = await GetNextDateAsync();
+        }
 
         await UpdateCluesInternalAsync(
                 request.PlayerId, clueEn, easyClueEn, request.ClueEditLanguages, request.EasyClueEditLanguages);
 
         await _playerRepository
-            .ValidatePlayerProposalAsync(request.PlayerId, latestDate);
+            .ValidatePlayerProposalAsync(request.PlayerId, publicationDate);
     }
 
     /// <inheritdoc />
@@ -318,6 +329,42 @@ public class PlayerService : IPlayerService
             .GetLatestPlayerDateAsync();
 
         return latestDate.AddDays(1).Date;
+    }
+
+    /// <summary>
+    /// Libere <paramref name="fromDate"/> pour un nouveau joueur en decalant d'un jour
+    /// chaque joueur deja programme, en partant de cette date et tant que les jours
+    /// suivants sont occupes sans interruption. S'arrete des le premier jour libre
+    /// rencontre : ce trou absorbe la cascade, rien au-dela n'a besoin de bouger (un tel
+    /// trou peut exister si une date forcee precedente a saute plusieurs jours d'un coup).
+    /// Traite ensuite du plus lointain au plus proche pour ne jamais ecrire sur une date
+    /// pas encore liberee. Uniquement pertinent pour une date forcee dans le futur
+    /// (jamais aujourd'hui ni le passe, deja joues) : validite verifiee en amont, cote
+    /// controleur.
+    /// </summary>
+    private async Task ShiftFuturePlayersFromAsync(DateTime fromDate)
+    {
+        var candidates = (await _playerRepository
+            .GetPlayersOfTheDayAsync(fromDate.Date, null))
+            .OrderBy(p => p.PublicationDate)
+            .ToList();
+
+        var toShift = new List<PlayerDto>();
+        var expectedDate = fromDate.Date;
+        foreach (var player in candidates)
+        {
+            if (player.PublicationDate!.Value.Date != expectedDate)
+                break;
+
+            toShift.Add(player);
+            expectedDate = expectedDate.AddDays(1);
+        }
+
+        foreach (var player in toShift.OrderByDescending(p => p.PublicationDate))
+        {
+            await _playerRepository
+                .ChangePlayerPublicationDateAsync(player.Id, player.PublicationDate!.Value.AddDays(1));
+        }
     }
 
     private async Task InsertLanguageCluesAsync(IReadOnlyDictionary<Languages, string?>? clues,

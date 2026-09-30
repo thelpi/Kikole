@@ -198,6 +198,12 @@
   <data name="EasyClueFr" xml:space="preserve">
     <value>Indice facile en français</value>
   </data>
+  <data name="ForcePublicationDate" xml:space="preserve">
+    <value>Forcer une date de publication (facultatif)</value>
+  </data>
+  <data name="ForcePublicationDateHint" xml:space="preserve">
+    <value>Réservé aux administrateurs. La date doit être dans le futur. Si elle est déjà occupée, ce jour et tous les suivants sont décalés d'un jour.</value>
+  </data>
   <data name="IsLoan" xml:space="preserve">
     <value>Prêt ?</value>
   </data>

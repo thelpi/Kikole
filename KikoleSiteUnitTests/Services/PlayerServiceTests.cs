@@ -86,6 +86,8 @@ public class PlayerServiceTests
     public async Task CreatePlayerAsync_AnExplicitDateWins()
     {
         var request = Request() with { SetLatestPublicationDate = true, PublicationDate = FirstDate.AddDays(10) };
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(10), null))
+            .ReturnsAsync(new List<PlayerDto>());
         _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
         await _service.CreatePlayerAsync(request, 42);
@@ -94,6 +96,82 @@ public class PlayerServiceTests
         _playerRepository.Verify(
             _ => _.CreatePlayerAsync(It.Is<PlayerDto>(d => d.PublicationDate == FirstDate.AddDays(10))),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task CreatePlayerAsync_ExplicitDateWithNothingScheduledYet_NoShiftHappens()
+    {
+        var request = Request() with { PublicationDate = FirstDate.AddDays(10) };
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(10), null))
+            .ReturnsAsync(new List<PlayerDto>());
+        _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
+
+        await _service.CreatePlayerAsync(request, 42);
+
+        _playerRepository.Verify(
+            _ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreatePlayerAsync_ExplicitDateAlreadyOccupied_ShiftsItAndEveryFollowingDayByOne()
+    {
+        // le decalage doit se faire du plus lointain au plus proche, pour ne jamais
+        // ecrire sur une date pas encore liberee
+        var request = Request() with { PublicationDate = FirstDate.AddDays(10) };
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(10), null))
+            .ReturnsAsync(new List<PlayerDto>
+            {
+                PlayerDtoBuilder.Valid().WithId(1).WithPublicationDate(FirstDate.AddDays(10)).Build(),
+                PlayerDtoBuilder.Valid().WithId(2).WithPublicationDate(FirstDate.AddDays(11)).Build(),
+                PlayerDtoBuilder.Valid().WithId(3).WithPublicationDate(FirstDate.AddDays(12)).Build()
+            });
+        _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
+
+        var shiftedInOrder = new List<(ulong id, DateTime date)>();
+        _playerRepository
+            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
+            .Callback<ulong, DateTime>((id, d) => shiftedInOrder.Add((id, d)))
+            .Returns(Task.CompletedTask);
+
+        await _service.CreatePlayerAsync(request, 42);
+
+        shiftedInOrder.Should().BeEquivalentTo(new[]
+        {
+            (3UL, FirstDate.AddDays(13)),
+            (2UL, FirstDate.AddDays(12)),
+            (1UL, FirstDate.AddDays(11))
+        }, o => o.WithStrictOrdering());
+    }
+
+    [Fact]
+    public async Task CreatePlayerAsync_ExplicitDateWithAGapFurtherOut_StopsTheCascadeAtTheGap()
+    {
+        // jours 10 et 11 occupes, 12 libre (trou), puis 13 et 14 occupes de nouveau : le
+        // trou absorbe la cascade, les joueurs de 13/14 n'ont pas a bouger
+        var request = Request() with { PublicationDate = FirstDate.AddDays(10) };
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(10), null))
+            .ReturnsAsync(new List<PlayerDto>
+            {
+                PlayerDtoBuilder.Valid().WithId(1).WithPublicationDate(FirstDate.AddDays(10)).Build(),
+                PlayerDtoBuilder.Valid().WithId(2).WithPublicationDate(FirstDate.AddDays(11)).Build(),
+                PlayerDtoBuilder.Valid().WithId(3).WithPublicationDate(FirstDate.AddDays(13)).Build(),
+                PlayerDtoBuilder.Valid().WithId(4).WithPublicationDate(FirstDate.AddDays(14)).Build()
+            });
+        _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
+
+        var shiftedInOrder = new List<(ulong id, DateTime date)>();
+        _playerRepository
+            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
+            .Callback<ulong, DateTime>((id, d) => shiftedInOrder.Add((id, d)))
+            .Returns(Task.CompletedTask);
+
+        await _service.CreatePlayerAsync(request, 42);
+
+        shiftedInOrder.Should().BeEquivalentTo(new[]
+        {
+            (2UL, FirstDate.AddDays(12)),
+            (1UL, FirstDate.AddDays(11))
+        }, o => o.WithStrictOrdering());
     }
 
     [Fact]
@@ -285,6 +363,46 @@ public class PlayerServiceTests
         badges.Should().Contain(Badges.DoItYourself);
         _playerRepository.Verify(
             _ => _.ValidatePlayerProposalAsync(1, FirstDate.AddDays(3)), Times.Once);
+    }
+
+    [Fact]
+    public async Task ValidatePlayerSubmissionAsync_WithAForcedDate_UsesItInsteadOfTheNextSlot()
+    {
+        SetupPendingPlayer(1);
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(20), null))
+            .ReturnsAsync(new List<PlayerDto>());
+        var request = PlayerSubmissionValidationRequestBuilder.Valid()
+            .Accepted("indice", "facile")
+            .WithPublicationDate(FirstDate.AddDays(20))
+            .Build();
+
+        await _service.ValidatePlayerSubmissionAsync(request);
+
+        _playerRepository.Verify(_ => _.GetLatestPlayerDateAsync(), Times.Never);
+        _playerRepository.Verify(
+            _ => _.ValidatePlayerProposalAsync(1, FirstDate.AddDays(20)), Times.Once);
+    }
+
+    [Fact]
+    public async Task ValidatePlayerSubmissionAsync_WithAForcedDateAlreadyOccupied_ShiftsTheOccupantForward()
+    {
+        SetupPendingPlayer(1);
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(20), null))
+            .ReturnsAsync(new List<PlayerDto>
+            {
+                PlayerDtoBuilder.Valid().WithId(99).WithPublicationDate(FirstDate.AddDays(20)).Build()
+            });
+        var request = PlayerSubmissionValidationRequestBuilder.Valid()
+            .Accepted("indice", "facile")
+            .WithPublicationDate(FirstDate.AddDays(20))
+            .Build();
+
+        await _service.ValidatePlayerSubmissionAsync(request);
+
+        _playerRepository.Verify(
+            _ => _.ChangePlayerPublicationDateAsync(99, FirstDate.AddDays(21)), Times.Once);
+        _playerRepository.Verify(
+            _ => _.ValidatePlayerProposalAsync(1, FirstDate.AddDays(20)), Times.Once);
     }
 
     [Fact]

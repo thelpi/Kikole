@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Localization;
@@ -10,6 +11,14 @@ public record PlayerSubmissionValidationRequest
     public ulong PlayerId { get; init; }
 
     public bool IsAccepted { get; init; }
+
+    /// <summary>
+    /// Reserve aux administrateurs (verifie en amont dans le controleur, pas ici) : force
+    /// la date de publication au lieu du "bout de chaine" habituel
+    /// (<see cref="Services.PlayerService.AcceptSubmittedPlayerAsync"/>). Si la date est
+    /// deja occupee, elle et tous les jours suivants sont decales d'un jour.
+    /// </summary>
+    public DateTime? PublicationDate { get; init; }
 
     public required IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; init; }
 

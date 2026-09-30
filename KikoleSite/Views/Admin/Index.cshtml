@@ -71,12 +71,18 @@
                     <label>@localizer["EasyClueFr"]</label>
                     <input type="text" name="EasyClueFr" class="blank clue-field" />
                 </div>
+
+                <div class="form-field">
+                    <label>@localizer["ForcePublicationDate"]</label>
+                    <input type="date" name="PublicationDate" class="blank" />
+                    <div class="form-hint">@localizer["ForcePublicationDateHint"]</div>
+                </div>
             }
             else
             {
                 <div class="form-field">
                     <label>@localizer["Clue"]</label>
-                    <input type="text" name="ClueEn" class="blank clue-field" />
+                    <input type="text" name="ClueEn" class="blank clue-field" data-media="image" />
                     <div class="form-hint">
                         @localizer["AcceptedLanguages"]<br />
                         @localizer["AdminOverrideClue"]
@@ -85,7 +91,7 @@
 
                 <div class="form-field">
                     <label>@localizer["EasyClue"]</label>
-                    <input type="text" name="EasyClueEn" class="blank clue-field" />
+                    <input type="text" name="EasyClueEn" class="blank clue-field" data-media="image" />
                     <div class="form-hint">
                         @localizer["AcceptedLanguages"]<br />
                         @localizer["AdminOverrideClue"]

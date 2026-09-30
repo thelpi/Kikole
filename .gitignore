@@ -266,3 +266,9 @@ __pycache__/
 
 # journaux d'erreurs locaux (LogsFilePathFormat)
 ErrorLogs/
+
+# medias d'indice uploades (AdminController.UploadClueMedia) : contenu de prod, jamais
+# destine a git (deploiement poste -> serveur, jamais l'inverse) - seuls les exemples de
+# la fixture kikole_mock.sql restent versionnes
+KikoleSite/wwwroot/media/clues/*
+!KikoleSite/wwwroot/media/clues/mock-clue-*

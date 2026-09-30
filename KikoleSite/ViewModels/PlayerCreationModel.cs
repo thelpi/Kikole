@@ -115,4 +115,10 @@ public class PlayerCreationModel
 
     public bool HideCreator { get; set; }
 
+    /// <summary>
+    /// Reserve aux administrateurs (verifie cote controleur) : force la date de
+    /// publication au lieu du "bout de chaine" habituel. Format "yyyy-MM-dd" (input HTML
+    /// <c>type="date"</c>).
+    /// </summary>
+    public string? PublicationDate { get; set; }
 }

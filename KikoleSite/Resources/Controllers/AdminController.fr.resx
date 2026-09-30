@@ -201,6 +201,12 @@
   <data name="InvalidPublicationDate" xml:space="preserve">
     <value>Date de publication invalide</value>
   </data>
+  <data name="ForcePublicationDate" xml:space="preserve">
+    <value>Forcer une date de publication (facultatif)</value>
+  </data>
+  <data name="ForcePublicationDateHint" xml:space="preserve">
+    <value>Réservé aux administrateurs. La date doit être dans le futur. Si elle est déjà occupée, ce jour et tous les suivants sont décalés d'un jour.</value>
+  </data>
   <data name="InvalidMessage" xml:space="preserve">
     <value>Le message est vide.</value>
   </data>
