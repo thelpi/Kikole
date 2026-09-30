@@ -347,20 +347,10 @@ public class PlayerService : IPlayerService
         var candidates = (await _playerRepository
             .GetPlayersOfTheDayAsync(fromDate.Date, null))
             .OrderBy(p => p.PublicationDate)
+            .TakeWhile((p, i) => p.PublicationDate == fromDate.Date.AddDays(i))
             .ToList();
 
-        var toShift = new List<PlayerDto>();
-        var expectedDate = fromDate.Date;
-        foreach (var player in candidates)
-        {
-            if (player.PublicationDate!.Value.Date != expectedDate)
-                break;
-
-            toShift.Add(player);
-            expectedDate = expectedDate.AddDays(1);
-        }
-
-        foreach (var player in toShift.OrderByDescending(p => p.PublicationDate))
+        foreach (var player in candidates.OrderByDescending(p => p.PublicationDate))
         {
             await _playerRepository
                 .ChangePlayerPublicationDateAsync(player.Id, player.PublicationDate!.Value.AddDays(1));
