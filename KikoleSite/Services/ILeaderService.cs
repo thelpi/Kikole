@@ -18,7 +18,7 @@ public interface ILeaderService
     /// <param name="endDate">Ending date.</param>
     /// <param name="leaderSort">Sort type.</param>
     /// <returns>Leaderboard.</returns>
-    Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort);
+    Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateOnly startDate, DateOnly endDate, LeaderSorts leaderSort);
 
     /// <summary>
     /// Gets the board for a single day.
@@ -27,7 +27,7 @@ public interface ILeaderService
     /// <param name="sort">Sort for leaders.</param>
     /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent du joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Day board.</returns>
-    Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort, IReadOnlyDictionary<ulong, ulong> countryContinents);
+    Task<Dayboard> GetDayboardAsync(DateOnly day, DayLeaderSorts sort, IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Get user statistics.

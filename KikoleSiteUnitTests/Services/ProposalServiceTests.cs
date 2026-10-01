@@ -55,7 +55,7 @@ public class ProposalServiceTests
         return new ProposalDto { ProposalTypeId = (ulong)type,
             Value = value,
             Successful = (byte)(successful ? 1 : 0),
-            ProposalDate = new DateTime(2026, 9, 2),
+            ProposalDate = new DateOnly(2026, 9, 2),
             CreationDate = new DateTime(2026, 9, 2, 18, 0, 0).AddMinutes(minutesOffset) };
     }
 
@@ -169,7 +169,7 @@ public class ProposalServiceTests
 /// </summary>
 public class ProposalServiceGrantTests
 {
-    private static readonly DateTime Day = TestCalendar.FirstDate;
+    private static readonly DateOnly Day = TestCalendar.FirstDate;
     private const ulong UserId = 7;
 
     private readonly Mock<IProposalRepository> _proposalRepository = new();
@@ -184,13 +184,13 @@ public class ProposalServiceGrantTests
         localizer.Setup(_ => _[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
 
         _leaderRepository
-            .Setup(_ => _.GetUserLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<ulong>()))
+            .Setup(_ => _.GetUserLeadersAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>(), It.IsAny<bool>(), It.IsAny<ulong>()))
             .ReturnsAsync(new List<LeaderDto>());
         _proposalRepository
-            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<ulong>()))
+            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateOnly>(), It.IsAny<ulong>()))
             .ReturnsAsync(new List<ProposalDto>());
         _playerHandler
-            .Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()))
+            .Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateOnly>()))
             .ReturnsAsync(new PlayerFullDto
             {
                 Player = PlayerDtoBuilder.Valid().WithId(1).WithCreator(99).Build(),
@@ -243,7 +243,7 @@ public class ProposalServiceGrantTests
 
         grant.Should().Be(DayGrantTypes.Admin);
         _playerHandler.Verify(
-            _ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()), Times.Never);
+            _ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateOnly>()), Times.Never);
     }
 
     [Fact]

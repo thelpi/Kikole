@@ -32,14 +32,14 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
                 new { badgeId });
     }
 
-    public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateTime date)
+    public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateOnly date)
     {
         return await ExecuteReaderAsync<UserBadgeDto>(
                 "SELECT * FROM user_badges " +
                 "WHERE badge_id = @badgeId " +
                 "AND get_date = @date " +
                 $"AND user_id IN ({SubSqlValidUsers})",
-                new { badgeId, date = date.Date });
+                new { badgeId, date });
     }
 
     public async Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId)
@@ -57,7 +57,7 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
         await ExecuteInsertAsync(
                 "user_badges",
                 ("badge_id", userBadge.BadgeId),
-                ("get_date", userBadge.GetDate.Date),
+                ("get_date", userBadge.GetDate),
                 ("user_id", userBadge.UserId));
     }
 

@@ -19,15 +19,15 @@ public interface IGameCalendar
     /// Elle n'est pas proposée le jour même, mais se débloque quand le joueur a trouvé
     /// ou créé toutes les journées depuis <see cref="FirstDate"/>.
     /// </remarks>
-    DateTime HiddenDate { get; }
+    DateOnly HiddenDate { get; }
 
     /// <summary>
     /// La première journée jouable, soit le lendemain de <see cref="HiddenDate"/>.
     /// </summary>
-    DateTime FirstDate { get; }
+    DateOnly FirstDate { get; }
 
     /// <summary>
     /// Le premier jour du mois de <see cref="FirstDate"/>, origine du palmarès mensuel.
     /// </summary>
-    DateTime FirstMonth { get; }
+    DateOnly FirstMonth { get; }
 }

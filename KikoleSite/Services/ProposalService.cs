@@ -51,7 +51,7 @@ public class ProposalService : IProposalService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId,
+    public async Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateOnly proposalDate, ulong userId,
         IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var datas = await _proposalRepository
@@ -97,7 +97,7 @@ public class ProposalService : IProposalService
                 {
                     Points = (ushort)response.TotalPoints,
                     ProposalDate = request.PlayerSubmissionDate,
-                    Time = (_clock.Now - request.PlayerSubmissionDate).ToRoundMinutes(),
+                    Time = (_clock.Now - request.PlayerSubmissionDate.ToDateTime(TimeOnly.MinValue)).ToRoundMinutes(),
                     UserId = userId,
                     CreationDate = _clock.Now
                 };
@@ -111,7 +111,7 @@ public class ProposalService : IProposalService
     }
 
     /// <inheritdoc />
-    public async Task<DayGrantTypes> GetGrantAccessForDayAsync(ulong userId, DateTime date)
+    public async Task<DayGrantTypes> GetGrantAccessForDayAsync(ulong userId, DateOnly date)
     {
         if (userId == 0)
             return DayGrantTypes.None;
@@ -126,19 +126,19 @@ public class ProposalService : IProposalService
             return DayGrantTypes.Admin;
 
         var p = await _playerHandler
-            .GetPlayerOfTheDayFullInfoAsync(date.Date);
+            .GetPlayerOfTheDayFullInfoAsync(date);
 
         if (p.Player.CreationUserId == userId)
             return DayGrantTypes.Creator;
 
         var leaders = await _leaderRepository
-            .GetUserLeadersAsync(date.Date, date.Date, true, userId);
+            .GetUserLeadersAsync(date, date, true, userId);
 
         if (leaders.Count > 0)
             return DayGrantTypes.Found;
 
         var proposals = await _proposalRepository
-            .GetProposalsAsync(date.Date, userId);
+            .GetProposalsAsync(date, userId);
 
         if (proposals.Any(_ => _.Successful > 0 && _.ProposalTypeId == (ulong)ProposalTypes.Name))
             return DayGrantTypes.Found;

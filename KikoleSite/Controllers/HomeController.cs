@@ -224,7 +224,7 @@ public class HomeController : KikoleBaseController
 
         // independants l'un de l'autre : partent en // plutot qu'en sequence
         var pInfoTask = _playerService
-            .GetPlayerOfTheDayFullInfoAsync(_clock.Today.AddDays(-daysBefore));
+            .GetPlayerOfTheDayFullInfoAsync(_clock.Today.AddDays(-(int)daysBefore));
 
         var countryContinentsTask = _internationalService.GetCountryContinentsAsync();
 
@@ -443,8 +443,9 @@ public class HomeController : KikoleBaseController
                 var winningProposal = proposals.FirstOrDefault(p => p.IsWin);
                 if (winningProposal != null)
                 {
-                    model.FoundOnTime = winningProposal.Date.Date == proposalDate.Date;
-                    model.FoundDate = winningProposal.Date.Date;
+                    var winningProposalDate = DateOnly.FromDateTime(winningProposal.Date);
+                    model.FoundOnTime = winningProposalDate == proposalDate;
+                    model.FoundDate = winningProposalDate;
                 }
             }
         }

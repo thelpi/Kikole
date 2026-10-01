@@ -29,7 +29,7 @@ public class PlayerHandler : IPlayerHandler
     }
 
     /// <inheritdoc />
-    public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date)
+    public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateOnly date)
     {
         var p = await _playerRepository
             .GetPlayerOfTheDayAsync(date)

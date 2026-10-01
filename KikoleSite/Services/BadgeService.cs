@@ -372,12 +372,12 @@ public class BadgeService : IBadgeService
             if (i == 30)
             {
                 await InsertBadgeIfNotAlreadyAsync(
-                        request.ProposalDateTime, userId, (ulong)Badges.Dedicated, collectedBadges, allBadges);
+                        DateOnly.FromDateTime(request.ProposalDateTime), userId, (ulong)Badges.Dedicated, collectedBadges, allBadges);
             }
         }
 
         return await GetUserBadgesAsync(
-                collectedBadges, request.ProposalDateTime, allBadges, language);
+                collectedBadges, DateOnly.FromDateTime(request.ProposalDateTime), allBadges, language);
     }
 
     /// <inheritdoc />
@@ -392,7 +392,7 @@ public class BadgeService : IBadgeService
         await PrepareSponsorshipBadgesInternalAsync(sponsorUserId, allBadges, collectedBadges);
 
         return await GetUserBadgesAsync(
-                collectedBadges, _clock.Now, allBadges, language);
+                collectedBadges, _clock.Today, allBadges, language);
     }
 
     /// <summary>
@@ -415,13 +415,13 @@ public class BadgeService : IBadgeService
         if (godchildren.Count >= 1)
         {
             await InsertBadgeIfNotAlreadyAsync(
-                    godchildren[0].CreationDate, sponsorUserId, (ulong)Badges.DonCorleone, collectedBadges, allBadges);
+                    DateOnly.FromDateTime(godchildren[0].CreationDate), sponsorUserId, (ulong)Badges.DonCorleone, collectedBadges, allBadges);
         }
 
         if (godchildren.Count >= 5)
         {
             await InsertBadgeIfNotAlreadyAsync(
-                    godchildren[4].CreationDate, sponsorUserId, (ulong)Badges.TheFamousFive, collectedBadges, allBadges);
+                    DateOnly.FromDateTime(godchildren[4].CreationDate), sponsorUserId, (ulong)Badges.TheFamousFive, collectedBadges, allBadges);
         }
     }
 
@@ -434,7 +434,7 @@ public class BadgeService : IBadgeService
         var collectedBadges = new List<ulong>();
 
         await InsertBadgeIfNotAlreadyAsync(
-                _clock.Now, userId, (ulong)badge, collectedBadges, allBadges);
+                _clock.Today, userId, (ulong)badge, collectedBadges, allBadges);
 
         return collectedBadges.Count > 0;
     }
@@ -482,7 +482,7 @@ public class BadgeService : IBadgeService
 
         if (!foundToday)
         {
-            dtos = dtos.Where(_ => _.GetDate.Date < _clock.Today).ToList();
+            dtos = dtos.Where(_ => _.GetDate < _clock.Today).ToList();
         }
 
         var badgesFull = new List<UserBadge>();
@@ -646,7 +646,7 @@ public class BadgeService : IBadgeService
         // le joueur cache (HiddenDate, la veille de FirstDate) n'est jamais trouve "a
         // temps" (IsCurrentDay compare a une date qui n'existe plus) : verifie ici, hors
         // du bloc IsCurrentDay ci-dessus, sans quoi la condition ne se declencherait jamais
-        if (leader.ProposalDate.Date == _gameCalendar.HiddenDate.Date)
+        if (leader.ProposalDate == _gameCalendar.HiddenDate)
         {
             await InsertBadgeIfNotAlreadyAsync(
                     leader.ProposalDate, leader.UserId, (ulong)Badges.TheEnd, collectedBadges, allBadges);
@@ -763,7 +763,7 @@ public class BadgeService : IBadgeService
     }
 
     private async Task InsertBadgeIfNotAlreadyAsync(
-        DateTime proposalDate,
+        DateOnly proposalDate,
         ulong userId,
         ulong badge,
         List<ulong> collectedBadges,
@@ -777,12 +777,12 @@ public class BadgeService : IBadgeService
             var badgeMatch = allBadges.Single(b => b.Id == badge);
 
             // badge can apply only after the creation date of the badge
-            if (badgeMatch.CreationDate.Date <= proposalDate.Date)
+            if (DateOnly.FromDateTime(badgeMatch.CreationDate) <= proposalDate)
             {
                 await _badgeRepository
                     .InsertUserBadgeAsync(new UserBadgeDto
                     {
-                        GetDate = proposalDate.Date,
+                        GetDate = proposalDate,
                         BadgeId = badge,
                         UserId = userId
                     });
@@ -794,7 +794,7 @@ public class BadgeService : IBadgeService
 
     private async Task<IReadOnlyCollection<UserBadge>> GetUserBadgesAsync(
         List<ulong> collectedBadges,
-        DateTime proposalDate,
+        DateOnly proposalDate,
         IReadOnlyCollection<BadgeDto> allBadges,
         Languages language)
     {
@@ -814,7 +814,7 @@ public class BadgeService : IBadgeService
     private async Task<UserBadge> GetUserBadgeAsync(
         ulong badge,
         IReadOnlyCollection<BadgeDto> badgesDto,
-        DateTime proposalDate,
+        DateOnly proposalDate,
         Languages language)
     {
         var b = await GetBadgeAsync(
@@ -842,12 +842,12 @@ public class BadgeService : IBadgeService
     }
 
     private async Task<IReadOnlyCollection<LeaderDto>> GetLeadersHistoryAsync(
-        DateTime date,
-        DateTime firstDate)
+        DateOnly date,
+        DateOnly firstDate)
     {
         var leadersHistory = new List<LeaderDto>();
 
-        while (date.Date >= firstDate.Date)
+        while (date >= firstDate)
         {
             var leadersBefore = await _leaderRepository
                 .GetLeadersAtDateAsync(date, false);

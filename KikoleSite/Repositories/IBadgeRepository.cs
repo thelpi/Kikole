@@ -15,7 +15,7 @@ public interface IBadgeRepository
 
     Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadgeAsync(ulong badgeId);
 
-    Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateTime date);
+    Task<IReadOnlyCollection<UserBadgeDto>> GetUsersOfTheDayWithBadgeAsync(ulong badgeId, DateOnly date);
 
     Task<bool> CheckUserHasBadgeAsync(ulong userId, ulong badgeId);
 

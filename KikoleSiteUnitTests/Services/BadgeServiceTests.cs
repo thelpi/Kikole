@@ -19,14 +19,14 @@ namespace KikoleSiteUnitTests.Services;
 
 public class BadgeServiceTests
 {
-    private static readonly DateTime Day = TestCalendar.FirstDate;
+    private static readonly DateOnly Day = TestCalendar.FirstDate;
 
     /// <summary>
     /// Jour de gain utilise par les badges "en serie" (bases sur une fenetre glissante de
     /// plusieurs jours consecutifs) : suffisamment apres <see cref="TestCalendar.FirstDate"/>
     /// pour laisser de la place a une serie de 30 jours (LegendTier, la plus longue).
     /// </summary>
-    private static readonly DateTime WinDay = TestCalendar.FirstDate.AddDays(40);
+    private static readonly DateOnly WinDay = TestCalendar.FirstDate.AddDays(40);
 
     private const ulong UserId = 7;
 
@@ -46,30 +46,30 @@ public class BadgeServiceTests
     public BadgeServiceTests()
     {
         _clock.Setup(_ => _.Today).Returns(Day);
-        _clock.Setup(_ => _.Now).Returns(Day);
+        _clock.Setup(_ => _.Now).Returns(Day.ToDateTime(TimeOnly.MinValue));
 
         // tous les badges existent et sont anterieurs a la journee testee
         _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
             .ReturnsAsync(Enum.GetValues(typeof(Badges)).Cast<Badges>()
-                .Select(b => BadgeDtoBuilder.Valid().WithId((ulong)b).WithName(b.ToString()).WithDescription(b.ToString()).WithCreationDate(Day.AddYears(-1)).Build()).ToList());
+                .Select(b => BadgeDtoBuilder.Valid().WithId((ulong)b).WithName(b.ToString()).WithDescription(b.ToString()).WithCreationDate(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue)).Build()).ToList());
 
         _badgeRepository.Setup(_ => _.CheckUserHasBadgeAsync(It.IsAny<ulong>(), It.IsAny<ulong>()))
             .ReturnsAsync(false);
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(It.IsAny<ulong>()))
             .ReturnsAsync(new List<UserBadgeDto>());
-        _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
+        _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()))
             .ReturnsAsync(new List<UserBadgeDto>());
         _badgeRepository.Setup(_ => _.InsertUserBadgeAsync(It.IsAny<UserBadgeDto>()))
             .Callback<UserBadgeDto>(d => _inserted.Add(d))
             .Returns(Task.CompletedTask);
 
-        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(It.IsAny<DateTime>(), It.IsAny<bool>()))
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(It.IsAny<DateOnly>(), It.IsAny<bool>()))
             .ReturnsAsync(new List<LeaderDto>());
-        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(new List<PlayerDto>());
         // par defaut aucune proposition recente (badge Phoenix) : les tests qui n'en ont
         // pas besoin n'ont pas a le mocker explicitement, comme pour les deux setups ci-dessus
-        _proposalRepository.Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>()))
+        _proposalRepository.Setup(_ => _.GetProposalsAsync(It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), It.IsAny<ulong>()))
             .ReturnsAsync(new List<ProposalDto>());
         // par defaut personne n'a de filleul (badges de parrainage) : comme ci-dessus,
         // seuls les tests qui en ont besoin surchargent ce mock
@@ -130,12 +130,12 @@ public class BadgeServiceTests
     /// <summary>Trouve le jour meme (IsCurrentDay), avec un score et une heure donnes.</summary>
     private static LeaderDto Leader(ushort points, int minutes, bool sameDay = true)
     {
-        return LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.AddMinutes(minutes) : Day.AddDays(3)).Build();
+        return LeaderDtoBuilder.Valid().WithUserId(UserId).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.ToDateTime(TimeOnly.MinValue).AddMinutes(minutes) : Day.AddDays(3).ToDateTime(TimeOnly.MinValue)).Build();
     }
 
     private static ProposalDto Proposal(ProposalTypes type, bool successful)
     {
-        return ProposalDtoBuilder.Valid().WithUser(UserId).WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithValue("x").WithProposalDate(Day).WithCreationDate(Day.AddMinutes(1)).Build();
+        return ProposalDtoBuilder.Valid().WithUser(UserId).WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithValue("x").WithProposalDate(Day).WithCreationDate(Day.ToDateTime(TimeOnly.MinValue).AddMinutes(1)).Build();
     }
 
     private async Task Run(LeaderDto leader, PlayerDto player, params ProposalDto[] proposals)
@@ -175,7 +175,7 @@ public class BadgeServiceTests
     private async Task RunWithPastFinds(PlayerDto todayPlayer, IReadOnlyList<PlayerDto> pastFinds)
     {
         var winDay = Day.AddDays(pastFinds.Count + 1);
-        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(winDay).WithCreationDate(winDay.AddMinutes(60)).WithPoints(1000).WithTime(60).Build();
+        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(winDay).WithCreationDate(winDay.ToDateTime(TimeOnly.MinValue).AddMinutes(60)).WithPoints(1000).WithTime(60).Build();
         var player = todayPlayer with { PublicationDate = winDay };
 
         SetupPlayerFull(player);
@@ -189,14 +189,14 @@ public class BadgeServiceTests
             _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(pastDate, It.IsAny<bool>()))
                 .ReturnsAsync(new List<LeaderDto>
                 {
-                    LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(pastDate).WithCreationDate(pastDate).Build()
+                    LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(pastDate).WithCreationDate(pastDate.ToDateTime(TimeOnly.MinValue)).Build()
                 });
         }
 
         var pastFindsWithDates = pastFinds
             .Select((p, i) => p with { PublicationDate = winDay.AddDays(-(i + 1)) })
             .ToList();
-        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(pastFindsWithDates.Append(player).ToList());
 
         await _service.PrepareNewLeaderBadgesAsync(leader, player, [], Languages.en);
@@ -378,7 +378,7 @@ public class BadgeServiceTests
                     Name = b.ToString(),
                     Description = b.ToString(),
                     // cree demain : aucune journee passee ne peut l'obtenir
-                    CreationDate = Day.AddDays(1) }).ToList());
+                    CreationDate = Day.AddDays(1).ToDateTime(TimeOnly.MinValue) }).ToList());
 
         await Run(Leader(1000, 60), Player());
 
@@ -492,7 +492,7 @@ public class BadgeServiceTests
     [Fact]
     public async Task AllCategoriesUnderAMinuteGrantsOneMinuteChrono()
     {
-        var winTime = Day.AddMinutes(60);
+        var winTime = Day.ToDateTime(TimeOnly.MinValue).AddMinutes(60);
 
         await RunChrono(ChronoProposals(winTime, secondsBeforeWin: 45));
 
@@ -502,7 +502,7 @@ public class BadgeServiceTests
     [Fact]
     public async Task MoreThanAMinuteDoesNotGrantOneMinuteChrono()
     {
-        var winTime = Day.AddMinutes(60);
+        var winTime = Day.ToDateTime(TimeOnly.MinValue).AddMinutes(60);
 
         await RunChrono(ChronoProposals(winTime, secondsBeforeWin: 90));
 
@@ -512,7 +512,7 @@ public class BadgeServiceTests
     [Fact]
     public async Task AMissingCategoryDoesNotGrantOneMinuteChrono()
     {
-        var winTime = Day.AddMinutes(60);
+        var winTime = Day.ToDateTime(TimeOnly.MinValue).AddMinutes(60);
         var proposals = ChronoProposals(winTime, secondsBeforeWin: 45)
             .Where(p => (ProposalTypes)p.ProposalTypeId != ProposalTypes.Position)
             .ToList();
@@ -525,7 +525,7 @@ public class BadgeServiceTests
     [Fact]
     public async Task RequestingTheClueDoesNotGrantOneMinuteChrono()
     {
-        var winTime = Day.AddMinutes(60);
+        var winTime = Day.ToDateTime(TimeOnly.MinValue).AddMinutes(60);
 
         await RunChrono(ChronoProposals(winTime, secondsBeforeWin: 45, includeClueRequest: true));
 
@@ -535,7 +535,7 @@ public class BadgeServiceTests
     [Fact]
     public async Task FewerClubProposalsThanCareerLengthDoesNotGrantOneMinuteChrono()
     {
-        var winTime = Day.AddMinutes(60);
+        var winTime = Day.ToDateTime(TimeOnly.MinValue).AddMinutes(60);
 
         // carriere de 5 clubs (RunChrono par defaut) mais seulement 4 clubs proposes
         await RunChrono(ChronoProposals(winTime, secondsBeforeWin: 45, clubsCount: 4));
@@ -551,7 +551,7 @@ public class BadgeServiceTests
         {
             Value = "x",
             ProposalType = ProposalTypes.Club,
-            ProposalDateTime = Day,
+            ProposalDateTime = Day.ToDateTime(TimeOnly.MinValue),
             DaysBeforeNow = 0
         };
     }
@@ -615,12 +615,12 @@ public class BadgeServiceTests
 
     // ------------------------------------------------------------- visibilite (GetUserBadgesAsync)
 
-    private void SetupHiddenBadge(DateTime obtainedOn)
+    private void SetupHiddenBadge(DateOnly obtainedOn)
     {
         _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
             .ReturnsAsync(new List<BadgeDto>
             {
-                BadgeDtoBuilder.Valid().WithId((ulong)Badges.YourFirstSuccess).WithName("Secret").WithDescription("Secret").Hidden().WithCreationDate(Day.AddYears(-1)).Build()
+                BadgeDtoBuilder.Valid().WithId((ulong)Badges.YourFirstSuccess).WithName("Secret").WithDescription("Secret").Hidden().WithCreationDate(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue)).Build()
             });
         _badgeRepository.Setup(_ => _.GetUserBadgesAsync(UserId))
             .ReturnsAsync(new List<UserBadgeDto>
@@ -681,7 +681,7 @@ public class BadgeServiceTests
         _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
             .ReturnsAsync(new List<BadgeDto>
             {
-                BadgeDtoBuilder.Valid().WithId((ulong)Badges.YourFirstSuccess).WithCreationDate(Day.AddYears(-1)).Build()
+                BadgeDtoBuilder.Valid().WithId((ulong)Badges.YourFirstSuccess).WithCreationDate(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue)).Build()
             });
         _badgeRepository.Setup(_ => _.GetUserBadgesAsync(UserId))
             .ReturnsAsync(new List<UserBadgeDto>
@@ -836,7 +836,7 @@ public class BadgeServiceTests
 
         ShouldNotHaveGranted(Badges.OverTheTopPart1);
         _badgeRepository.Verify(
-            _ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, It.IsAny<DateTime>()),
+            _ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, It.IsAny<DateOnly>()),
             Times.Never,
             "pas la peine de verifier une reattribution si on n'est meme pas parmi les meilleurs");
     }
@@ -885,7 +885,7 @@ public class BadgeServiceTests
     /// trouver : ignores par l'algorithme (ni requis, ni casse la serie), contrairement a
     /// un jour sans aucune activite qui, lui, l'interrompt.
     /// </summary>
-    private async Task RunStreak(IReadOnlyList<LeaderDto> days, IReadOnlyList<DateTime>? createdInsteadOfWonDays = null)
+    private async Task RunStreak(IReadOnlyList<LeaderDto> days, IReadOnlyList<DateOnly>? createdInsteadOfWonDays = null)
     {
         var todayLeader = days[0];
         var player = Player() with { PublicationDate = todayLeader.ProposalDate };
@@ -900,7 +900,7 @@ public class BadgeServiceTests
         var createdPlayers = (createdInsteadOfWonDays ?? [])
             .Select(d => Player() with { CreationUserId = UserId, PublicationDate = d })
             .ToList();
-        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(createdPlayers);
 
         await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en);
@@ -1085,9 +1085,9 @@ public class BadgeServiceTests
 
     // ------------------------------------------------------------- Phoenix
 
-    private static ProposalDto ProposalOn(DateTime date, ProposalTypes type, bool successful = false)
+    private static ProposalDto ProposalOn(DateOnly date, ProposalTypes type, bool successful = false)
     {
-        return ProposalDtoBuilder.Valid().WithUser(UserId).WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithValue("x").WithProposalDate(date).WithCreationDate(date.AddMinutes(1)).Build();
+        return ProposalDtoBuilder.Valid().WithUser(UserId).WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithValue("x").WithProposalDate(date).WithCreationDate(date.ToDateTime(TimeOnly.MinValue).AddMinutes(1)).Build();
     }
 
     /// <summary>
@@ -1202,7 +1202,7 @@ public class BadgeServiceTests
 
         ShouldNotHaveGranted(Badges.Phoenix);
         _proposalRepository.Verify(
-            _ => _.GetProposalsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>()), Times.Never,
+            _ => _.GetProposalsAsync(It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), It.IsAny<ulong>()), Times.Never,
             "0 point disqualifie avant meme de regarder les 7 jours precedents");
     }
 
@@ -1213,7 +1213,7 @@ public class BadgeServiceTests
     {
         // le joueur cache n'est, par construction, jamais trouve "a temps" (sa date est
         // anterieure au lancement du jeu) : la creation est volontairement tres eloignee
-        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(TestCalendar.HiddenDate).WithCreationDate(TestCalendar.HiddenDate.AddDays(500)).WithPoints(1000).WithTime(60).Build();
+        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(TestCalendar.HiddenDate).WithCreationDate(TestCalendar.HiddenDate.AddDays(500).ToDateTime(TimeOnly.MinValue)).WithPoints(1000).WithTime(60).Build();
 
         await Run(leader, Player());
 
@@ -1239,7 +1239,7 @@ public class BadgeServiceTests
     public async Task FirstGodchildGrantsDonCorleone()
     {
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
-            .ReturnsAsync(new List<UserDto> { Godchild(1, Day) });
+            .ReturnsAsync(new List<UserDto> { Godchild(1, Day.ToDateTime(TimeOnly.MinValue)) });
 
         await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
 
@@ -1263,7 +1263,7 @@ public class BadgeServiceTests
     {
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
             .ReturnsAsync(Enumerable.Range(1, 5)
-                .Select(i => Godchild((ulong)i, Day.AddDays(i)))
+                .Select(i => Godchild((ulong)i, Day.AddDays(i).ToDateTime(TimeOnly.MinValue)))
                 .ToList());
 
         await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
@@ -1278,7 +1278,7 @@ public class BadgeServiceTests
         // un filleul desactive ne fait jamais perdre sa place dans le decompte
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
             .ReturnsAsync(Enumerable.Range(1, 5)
-                .Select(i => Godchild((ulong)i, Day.AddDays(i), disabled: i <= 4))
+                .Select(i => Godchild((ulong)i, Day.AddDays(i).ToDateTime(TimeOnly.MinValue), disabled: i <= 4))
                 .ToList());
 
         await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
@@ -1291,7 +1291,7 @@ public class BadgeServiceTests
     {
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
             .ReturnsAsync(Enumerable.Range(1, 4)
-                .Select(i => Godchild((ulong)i, Day.AddDays(i)))
+                .Select(i => Godchild((ulong)i, Day.AddDays(i).ToDateTime(TimeOnly.MinValue)))
                 .ToList());
 
         await _service.PrepareSponsorshipBadgesAsync(UserId, Languages.en);
@@ -1335,7 +1335,7 @@ public class BadgeServiceTests
         _userRepository.Setup(_ => _.GetSponsorUserIdsAsync())
             .ReturnsAsync(new List<ulong> { UserId });
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
-            .ReturnsAsync(new List<UserDto> { Godchild(1, Day) });
+            .ReturnsAsync(new List<UserDto> { Godchild(1, Day.ToDateTime(TimeOnly.MinValue)) });
 
         await _service.ResetBadgesAsync(Languages.en);
 
@@ -1351,7 +1351,7 @@ public class BadgeServiceTests
         _userRepository.Setup(_ => _.GetSponsorUserIdsAsync())
             .ReturnsAsync(new List<ulong> { UserId });
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
-            .ReturnsAsync(new List<UserDto> { Godchild(1, Day) });
+            .ReturnsAsync(new List<UserDto> { Godchild(1, Day.ToDateTime(TimeOnly.MinValue)) });
 
         await BuildService(sponsorshipEnabled: false).ResetBadgesAsync(Languages.en);
 

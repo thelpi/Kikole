@@ -145,7 +145,7 @@ public class StatisticService : IStatisticService
                     AveragePointsTotal = leaders.Any()
                         ? (int)leaders.Average(_ => _.Points)
                         : 0,
-                    DaysBefore = (int)(_clock.Now - p.PublicationDate!.Value).TotalDays
+                    DaysBefore = _clock.Today.DayNumber - p.PublicationDate!.Value.DayNumber
                 };
             });
 

@@ -18,7 +18,7 @@ public class HomeModel
     public ulong? MessageId { get; set; }
     public string? PlayerCreator { get; set; }
     public bool LeaderboardAvailable { get; set; }
-    public DateTime CurrentDate { get; set; }
+    public DateOnly CurrentDate { get; set; }
     public bool RegistrationInviteEnabled { get; set; }
 
     public bool DisplayHiddenPageAsHidden { get; set; }
@@ -73,7 +73,7 @@ public class HomeModel
     /// Date reelle de la proposition gagnante (peut differer de <see cref="DateOfDay"/>
     /// quand trouve en rattrapage). <c>Null</c> tant que non trouve.
     /// </summary>
-    public DateTime? FoundDate { get; set; }
+    public DateOnly? FoundDate { get; set; }
 
     public IReadOnlyList<string> IncorrectClubs { get; set; } = [];
     public IReadOnlyList<string> IncorrectCountries { get; set; } = [];
@@ -92,7 +92,7 @@ public class HomeModel
     // model binding d'un POST, avant que le controleur n'ait eu la main - a ce
     // moment CurrentDate vaut encore default(DateTime), et lui soustraire des jours
     // deborde des que CurrentDay != 0. Se degrader plutot que planter.
-    public DateTime DateOfDay => CurrentDate == default ? default : CurrentDate.AddDays(-CurrentDay);
+    public DateOnly DateOfDay => CurrentDate == default ? default : CurrentDate.AddDays(-CurrentDay);
 
     internal string? GetValueFromProposalType(ProposalTypes proposalType)
     {

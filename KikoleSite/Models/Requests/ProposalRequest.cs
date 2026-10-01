@@ -18,7 +18,7 @@ public record ProposalRequest
 
     internal bool IsTodayPlayer => DaysBeforeNow == 0;
 
-    internal DateTime PlayerSubmissionDate => ProposalDateTime.AddDays(-DaysBeforeNow).Date;
+    internal DateOnly PlayerSubmissionDate => DateOnly.FromDateTime(ProposalDateTime).AddDays(-(int)DaysBeforeNow);
 
     internal string? GetTip(PlayerDto player, IStringLocalizer resources)
     {

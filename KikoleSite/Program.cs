@@ -25,6 +25,12 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+// Dapper n'a pas de support natif de DateOnly (cf. commentaire sur DateOnlyTypeHandler) :
+// sans cet enregistrement, toute colonne DATE lue en DateOnly revient silencieusement a
+// default/null plutot que de lever une exception.
+var dateOnlyTypeHandler = new DateOnlyTypeHandler();
+Dapper.SqlMapper.AddTypeHandler(typeof(DateOnly), dateOnlyTypeHandler);
+Dapper.SqlMapper.AddTypeHandler(typeof(DateOnly?), dateOnlyTypeHandler);
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {

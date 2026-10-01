@@ -32,7 +32,7 @@ namespace KikoleSiteUnitTests.Controllers;
 /// </summary>
 public class AdminControllerTests : IDisposable
 {
-    private static readonly DateTime Today = TestCalendar.FirstDate.AddDays(30);
+    private static readonly DateOnly Today = TestCalendar.FirstDate.AddDays(30);
 
     private readonly DefaultHttpContext _httpContext = new();
     private readonly Mock<IUserRepository> _userRepository = new();
@@ -52,7 +52,7 @@ public class AdminControllerTests : IDisposable
     public AdminControllerTests()
     {
         _clock.Setup(_ => _.Today).Returns(Today);
-        _clock.Setup(_ => _.Now).Returns(Today);
+        _clock.Setup(_ => _.Now).Returns(Today.ToDateTime(TimeOnly.MinValue));
         _localizer.Setup(l => l[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
         _webHostEnvironment.Setup(_ => _.WebRootPath).Returns(_webRootPath);
 
@@ -215,14 +215,14 @@ public class AdminControllerTests : IDisposable
     [Fact]
     public async Task Actions_Get_RendersDefaultMessageDates()
     {
-        var tomorrowEnd = Today.AddDays(1).AddHours(23);
-        _clock.Setup(_ => _.NowSeconds).Returns(Today);
+        var tomorrowEnd = Today.AddDays(1).ToDateTime(TimeOnly.MinValue).AddHours(23);
+        _clock.Setup(_ => _.NowSeconds).Returns(Today.ToDateTime(TimeOnly.MinValue));
         _clock.Setup(_ => _.TomorrowEnd).Returns(tomorrowEnd);
 
         var result = await _controller.Actions();
 
         var model = ((ViewResult)result).Model.Should().BeOfType<AdminModel>().Subject;
-        model.MessageDateStart.Should().Be(Today);
+        model.MessageDateStart.Should().Be(Today.ToDateTime(TimeOnly.MinValue));
         model.MessageDateEnd.Should().Be(tomorrowEnd);
     }
 
@@ -256,8 +256,8 @@ public class AdminControllerTests : IDisposable
     [Fact]
     public async Task InsertMessage_Post_InsertsTheMessageAndSetsFeedback()
     {
-        var start = Today;
-        var end = Today.AddDays(1);
+        var start = Today.ToDateTime(TimeOnly.MinValue);
+        var end = Today.AddDays(1).ToDateTime(TimeOnly.MinValue);
 
         var result = await _controller.InsertMessage(new AdminModel
         {

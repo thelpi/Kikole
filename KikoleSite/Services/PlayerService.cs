@@ -61,7 +61,7 @@ public class PlayerService : IPlayerService
     }
 
     /// <inheritdoc />
-    public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date)
+    public async Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateOnly date)
     {
         return await _playerHandler
             .GetPlayerOfTheDayFullInfoAsync(date);
@@ -108,7 +108,7 @@ public class PlayerService : IPlayerService
     }
 
     /// <inheritdoc />
-    public async Task<string?> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language)
+    public async Task<string?> GetPlayerClueAsync(DateOnly proposalDate, bool isEasy, Languages language)
     {
         var player = await _playerRepository
             .GetPlayerOfTheDayAsync(proposalDate)
@@ -167,7 +167,7 @@ public class PlayerService : IPlayerService
             ? currentEasyClue
             : request.EasyClueEditEn.Trim();
 
-        DateTime publicationDate;
+        DateOnly publicationDate;
         if (request.PublicationDate.HasValue)
         {
             publicationDate = request.PublicationDate.Value;
@@ -188,10 +188,10 @@ public class PlayerService : IPlayerService
     /// <inheritdoc />
     public async Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(
         ulong userId,
-        DateTime proposalDate)
+        DateOnly proposalDate)
     {
         var player = await _playerRepository
-            .GetPlayerOfTheDayAsync(proposalDate.Date)
+            .GetPlayerOfTheDayAsync(proposalDate)
             ?? throw new InvalidOperationException($"Aucun joueur n'est programme pour le {proposalDate:yyyy-MM-dd}.");
 
         var creatorUser = await _userRepository
@@ -295,7 +295,7 @@ public class PlayerService : IPlayerService
     /// <inheritdoc />
     public async Task<bool> CanDisplayHiddenPlayerAsync(ulong userId)
     {
-        var countToFind = (_clock.Today - _gameCalendar.FirstDate).Days + 1;
+        var countToFind = _clock.Today.DayNumber - _gameCalendar.FirstDate.DayNumber + 1;
 
         // le jeu doit avoir assez de recul pour que "aucun jour manque depuis le debut"
         // signifie quelque chose ; sans ce plancher, ce serait trivial en debut de partie
@@ -323,12 +323,12 @@ public class PlayerService : IPlayerService
         return leaders.Count + createdCount == countToFind;
     }
 
-    private async Task<DateTime> GetNextDateAsync()
+    private async Task<DateOnly> GetNextDateAsync()
     {
         var latestDate = await _playerRepository
             .GetLatestPlayerDateAsync();
 
-        return latestDate.AddDays(1).Date;
+        return latestDate.AddDays(1);
     }
 
     /// <summary>
@@ -342,12 +342,12 @@ public class PlayerService : IPlayerService
     /// (jamais aujourd'hui ni le passe, deja joues) : validite verifiee en amont, cote
     /// controleur.
     /// </summary>
-    private async Task ShiftFuturePlayersFromAsync(DateTime fromDate)
+    private async Task ShiftFuturePlayersFromAsync(DateOnly fromDate)
     {
         var candidates = (await _playerRepository
-            .GetPlayersOfTheDayAsync(fromDate.Date, null))
+            .GetPlayersOfTheDayAsync(fromDate, null))
             .OrderBy(p => p.PublicationDate)
-            .TakeWhile((p, i) => p.PublicationDate == fromDate.Date.AddDays(i))
+            .TakeWhile((p, i) => p.PublicationDate == fromDate.AddDays(i))
             .ToList();
 
         foreach (var player in candidates.OrderByDescending(p => p.PublicationDate))

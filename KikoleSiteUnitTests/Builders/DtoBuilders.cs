@@ -39,7 +39,7 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithClue(string clue) { _dto = _dto with { Clue = clue }; return this; }
     internal PlayerDtoBuilder WithEasyClue(string clue) { _dto = _dto with { EasyClue = clue }; return this; }
     internal PlayerDtoBuilder WithHideCreatorFlag(byte flag) { _dto = _dto with { HideCreator = flag }; return this; }
-    internal PlayerDtoBuilder WithPublicationDate(DateTime? date) { _dto = _dto with { PublicationDate = date }; return this; }
+    internal PlayerDtoBuilder WithPublicationDate(DateOnly? date) { _dto = _dto with { PublicationDate = date }; return this; }
     internal PlayerDtoBuilder WithRejectDate(DateTime? date) { _dto = _dto with { RejectDate = date }; return this; }
     internal PlayerDtoBuilder WithCreator(ulong userId) { _dto = _dto with { CreationUserId = userId }; return this; }
     internal PlayerDtoBuilder WithBadge(ulong? badgeId) { _dto = _dto with { BadgeId = badgeId }; return this; }
@@ -139,20 +139,20 @@ internal sealed class LeaderDtoBuilder
     internal LeaderDtoBuilder WithUserId(ulong id) { _dto = _dto with { UserId = id }; return this; }
     internal LeaderDtoBuilder WithPoints(ushort points) { _dto = _dto with { Points = points }; return this; }
     internal LeaderDtoBuilder WithTime(int minutes) { _dto = _dto with { Time = minutes }; return this; }
-    internal LeaderDtoBuilder WithProposalDate(DateTime date) { _dto = _dto with { ProposalDate = date }; return this; }
+    internal LeaderDtoBuilder WithProposalDate(DateOnly date) { _dto = _dto with { ProposalDate = date }; return this; }
     internal LeaderDtoBuilder WithCreationDate(DateTime date) { _dto = _dto with { CreationDate = date }; return this; }
 
     /// <summary>Trouve le jour meme : la date de creation tombe dans la journee proposee.</summary>
-    internal LeaderDtoBuilder OnTheDay(DateTime day, int minutes)
+    internal LeaderDtoBuilder OnTheDay(DateOnly day, int minutes)
     {
-        _dto = _dto with { ProposalDate = day, Time = minutes, CreationDate = day.AddMinutes(minutes) };
+        _dto = _dto with { ProposalDate = day, Time = minutes, CreationDate = day.ToDateTime(TimeOnly.MinValue).AddMinutes(minutes) };
         return this;
     }
 
     /// <summary>Trouve en rattrapage : la date de creation est posterieure au jour propose.</summary>
-    internal LeaderDtoBuilder AsCatchUp(DateTime day, int daysLater = 2)
+    internal LeaderDtoBuilder AsCatchUp(DateOnly day, int daysLater = 2)
     {
-        _dto = _dto with { ProposalDate = day, CreationDate = day.AddDays(daysLater) };
+        _dto = _dto with { ProposalDate = day, CreationDate = day.ToDateTime(TimeOnly.MinValue).AddDays(daysLater) };
         return this;
     }
 
@@ -177,7 +177,7 @@ internal sealed class ProposalDtoBuilder
     internal ProposalDtoBuilder WithSuccessfulFlag(byte flag) { _dto = _dto with { Successful = flag }; return this; }
     internal ProposalDtoBuilder WithValue(string? value) { _dto = _dto with { Value = value }; return this; }
     internal ProposalDtoBuilder Successful(bool successful = true) { _dto = _dto with { Successful = (byte)(successful ? 1 : 0) }; return this; }
-    internal ProposalDtoBuilder WithProposalDate(DateTime date) { _dto = _dto with { ProposalDate = date }; return this; }
+    internal ProposalDtoBuilder WithProposalDate(DateOnly date) { _dto = _dto with { ProposalDate = date }; return this; }
     internal ProposalDtoBuilder WithCreationDate(DateTime date) { _dto = _dto with { CreationDate = date }; return this; }
     internal ProposalDtoBuilder WithIp(string? ip) { _dto = _dto with { Ip = ip }; return this; }
 

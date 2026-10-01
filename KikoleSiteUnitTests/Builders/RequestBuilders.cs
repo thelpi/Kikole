@@ -110,7 +110,7 @@ internal sealed class PlayerSubmissionValidationRequestBuilder
         return this;
     }
 
-    internal PlayerSubmissionValidationRequestBuilder WithPublicationDate(System.DateTime? date)
+    internal PlayerSubmissionValidationRequestBuilder WithPublicationDate(System.DateOnly? date)
     {
         _request = _request with { PublicationDate = date };
         return this;

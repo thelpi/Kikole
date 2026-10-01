@@ -424,7 +424,7 @@ public class ProposalResponseTests
 
         var badge = new Badge(
             BadgeDtoBuilder.Valid().WithId(1).WithName("Your first success").WithDescription("d").Build(), 1, null);
-        response.AddBadge(new UserBadge(badge, new DateTime(2026, 9, 2)));
+        response.AddBadge(new UserBadge(badge, new DateOnly(2026, 9, 2)));
 
         response.CollectedBadges.Should().HaveCount(1);
     }

@@ -18,7 +18,7 @@ public interface IPlayerService
     /// </summary>
     /// <param name="date">Proposed date.</param>
     /// <returns>Player with full info.</returns>
-    Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date);
+    Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateOnly date);
 
     /// <summary>
     /// Creates a full player.
@@ -35,7 +35,7 @@ public interface IPlayerService
     /// <param name="isEasy"><c>True</c> to get easy clue; otherwise normal clue.</param>
     /// <param name="language">The language.</param>
     /// <returns>Clue.</returns>
-    Task<string?> GetPlayerClueAsync(DateTime proposalDate, bool isEasy, Languages language);
+    Task<string?> GetPlayerClueAsync(DateOnly proposalDate, bool isEasy, Languages language);
 
     /// <summary>
     /// Accepts a player submission.
@@ -52,7 +52,7 @@ public interface IPlayerService
     /// <param name="userId">User identifier.</param>
     /// <param name="proposalDate">Date of the player.</param>
     /// <returns>Instance of <see cref="PlayerCreator"/>.</returns>
-    Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(ulong userId, DateTime proposalDate);
+    Task<PlayerCreator> GetPlayerOfTheDayFromUserPovAsync(ulong userId, DateOnly proposalDate);
 
     /// <summary>
     /// Gets pending player submissions.
@@ -103,3 +103,4 @@ public interface IPlayerService
     /// <returns><c>True</c> if displayable.</returns>
     Task<bool> CanDisplayHiddenPlayerAsync(ulong userId);
 }
+

@@ -5,7 +5,7 @@ namespace KikoleSite.ViewModels;
 
 public class SingleUserStatModel
 {
-    public DateTime Date { get; }
+    public DateOnly Date { get; }
 
     public string Answer { get; }
 
@@ -33,7 +33,7 @@ public class SingleUserStatModel
     {
         Answer = apiStat.Answer;
         Date = apiStat.Date;
-        DaysBefore = (int)(clock.Now - Date).TotalDays;
+        DaysBefore = clock.Today.DayNumber - Date.DayNumber;
         Points = apiStat.Points;
         PointsPosition = apiStat.PointsPosition;
         Time = apiStat.Time;

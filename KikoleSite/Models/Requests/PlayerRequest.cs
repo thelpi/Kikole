@@ -19,7 +19,7 @@ public record PlayerRequest
     /// <summary>Nation sportive disparue supplementaire, voir <see cref="PlayerDto.AlternativeCountryId"/>.</summary>
     public Countries? AlternativeCountry { get; init; }
 
-    public DateTime? PublicationDate { get; init; }
+    public DateOnly? PublicationDate { get; init; }
 
     public required IReadOnlyList<string> AllowedNames { get; init; }
 
@@ -42,7 +42,7 @@ public record PlayerRequest
 
     public bool HideCreator { get; init; }
 
-    internal string? IsValid(DateTime today, IStringLocalizer resources)
+    internal string? IsValid(DateOnly today, IStringLocalizer resources)
     {
         if (string.IsNullOrWhiteSpace(Name))
             return resources["InvalidName"];
@@ -68,7 +68,7 @@ public record PlayerRequest
         if (string.IsNullOrWhiteSpace(ClueEn) || string.IsNullOrWhiteSpace(EasyClueEn))
             return resources["InvalidClue"];
 
-        if (PublicationDate.HasValue && PublicationDate.Value.Date < today)
+        if (PublicationDate.HasValue && PublicationDate.Value < today)
             return resources["InvalidPublicationDate"];
 
         return null;
@@ -78,7 +78,7 @@ public record PlayerRequest
     /// La date de parution est passee en argument plutot que lue sur la requete :
     /// elle peut etre calculee par le service quand la requete n'en porte pas.
     /// </summary>
-    internal PlayerDto ToDto(ulong userId, DateTime? publicationDate)
+    internal PlayerDto ToDto(ulong userId, DateOnly? publicationDate)
     {
         return new PlayerDto
         {

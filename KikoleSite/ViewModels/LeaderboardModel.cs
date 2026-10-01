@@ -21,15 +21,15 @@ public class LeaderboardModel
 
     [DataType(DataType.Date, ErrorMessage = "Date only")]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-    public DateTime MinimalDate { get; set; }
+    public DateOnly MinimalDate { get; set; }
 
     [DataType(DataType.Date, ErrorMessage = "Date only")]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-    public DateTime MaximalDate { get; set; }
+    public DateOnly MaximalDate { get; set; }
 
     [DataType(DataType.Date, ErrorMessage = "Date only")]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-    public DateTime LeaderboardDay { get; set; }
+    public DateOnly LeaderboardDay { get; set; }
 
     public LeaderSorts SortType { get; set; }
 
@@ -42,7 +42,7 @@ public class LeaderboardModel
     /// <summary>Utilisateur connecte : permet de surligner sa propre ligne dans les tableaux.</summary>
     public ulong CurrentUserId { get; set; }
 
-    public IReadOnlyCollection<(DateTime date, (ulong userId, string login)[] podium)> MonthlyPodiums { get; set; } = [];
+    public IReadOnlyCollection<(DateOnly date, (ulong userId, string login)[] podium)> MonthlyPodiums { get; set; } = [];
 
     public IReadOnlyCollection<(ulong userId, string login, int first, int second, int third)> OverallPodium { get; set; } = [];
 }

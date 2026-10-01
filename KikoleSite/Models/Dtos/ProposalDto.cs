@@ -12,9 +12,9 @@ public record ProposalDto : BaseDto
 
     public byte Successful { get; init; }
 
-    public DateTime ProposalDate { get; init; }
+    public DateOnly ProposalDate { get; init; }
 
     public string? Ip { get; init; }
 
-    internal bool IsCurrentDay => ProposalDate == CreationDate.Date;
+    internal bool IsCurrentDay => ProposalDate == DateOnly.FromDateTime(CreationDate);
 }

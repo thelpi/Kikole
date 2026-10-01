@@ -120,11 +120,11 @@ public class HomeModelTests
     {
         var model = new HomeModel
         {
-            CurrentDate = new DateTime(2026, 9, 10),
+            CurrentDate = new DateOnly(2026, 9, 10),
             CurrentDay = 3
         };
 
-        model.DateOfDay.Should().Be(new DateTime(2026, 9, 7));
+        model.DateOfDay.Should().Be(new DateOnly(2026, 9, 7));
     }
 
     [Fact]

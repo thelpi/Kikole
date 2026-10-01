@@ -18,7 +18,7 @@ public class Dayboard
     /// </summary>
     public bool CanViewDetails { get; set; }
 
-    public DateTime Date { get; set; }
+    public DateOnly Date { get; set; }
     public DayLeaderSorts Sort { get; set; }
     public required IReadOnlyCollection<DayboardLeaderItem> Leaders { get; set; }
     public required IReadOnlyCollection<DayboardSearcherItem> Searchers { get; set; }

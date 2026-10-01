@@ -11,23 +11,23 @@ public interface IPlayerRepository
 
     Task CreatePlayerClubsAsync(PlayerClubDto playerClub);
 
-    Task<PlayerDto?> GetPlayerOfTheDayAsync(DateTime date);
+    Task<PlayerDto?> GetPlayerOfTheDayAsync(DateOnly date);
 
-    Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(DateTime? minimalDate, DateTime? maximalDate);
+    Task<IReadOnlyCollection<PlayerDto>> GetPlayersOfTheDayAsync(DateOnly? minimalDate, DateOnly? maximalDate);
 
     Task<PlayerDto?> GetPlayerByIdAsync(ulong id);
 
     Task<IReadOnlyList<PlayerClubDto>> GetPlayerClubsAsync(ulong playerId);
 
-    Task<DateTime> GetLatestPlayerDateAsync();
+    Task<DateOnly> GetLatestPlayerDateAsync();
 
-    Task<DateTime?> GetEarliestPlayerDateAsync();
+    Task<DateOnly?> GetEarliestPlayerDateAsync();
 
     Task UpdatePlayerCluesAsync(ulong playerId, string clueEn, string easyClueEn);
 
-    Task ValidatePlayerProposalAsync(ulong playerId, DateTime date);
+    Task ValidatePlayerProposalAsync(ulong playerId, DateOnly date);
 
-    Task ChangePlayerPublicationDateAsync(ulong playerId, DateTime date);
+    Task ChangePlayerPublicationDateAsync(ulong playerId, DateOnly date);
 
     Task InsertPlayerCluesByLanguageAsync(ulong playerId, byte isEasy, IReadOnlyDictionary<ulong, string> cluesByLanguage);
 

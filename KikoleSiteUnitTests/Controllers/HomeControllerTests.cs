@@ -38,7 +38,7 @@ namespace KikoleSiteUnitTests.Controllers;
 /// </summary>
 public class HomeControllerTests
 {
-    private static readonly DateTime Today = TestCalendar.FirstDate.AddDays(30);
+    private static readonly DateOnly Today = TestCalendar.FirstDate.AddDays(30);
     private static readonly Languages Lang = KikoleSite.Helpers.ViewHelper.GetLanguage();
 
     private readonly DefaultHttpContext _httpContext = new();
@@ -61,7 +61,7 @@ public class HomeControllerTests
         _signInManager = IdentityMocks.MockSignInManager(IdentityMocks.MockUserManager());
 
         _clock.Setup(_ => _.Today).Returns(Today);
-        _clock.Setup(_ => _.Now).Returns(Today);
+        _clock.Setup(_ => _.Now).Returns(Today.ToDateTime(TimeOnly.MinValue));
 
         _localizer.Setup(l => l[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
         _localizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()])
@@ -154,7 +154,7 @@ public class HomeControllerTests
         model.LoggedAs.Should().BeNull();
         model.Streak.Should().BeNull();
         model.PlayerName.Should().BeNullOrEmpty();
-        _playerService.Verify(_ => _.GetPlayerOfTheDayFromUserPovAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
+        _playerService.Verify(_ => _.GetPlayerOfTheDayFromUserPovAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()), Times.Never);
         _leaderService.Verify(_ => _.GetUserStreakAsync(It.IsAny<ulong>()), Times.Never);
     }
 
@@ -248,7 +248,7 @@ public class HomeControllerTests
         _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Today)).ReturnsAsync(playerFull);
 
         var winningProposal = BuildResponse(
-            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(1).WithCreationDate(Today).Build(),
+            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(1).WithCreationDate(Today.ToDateTime(TimeOnly.MinValue)).Build(),
             playerFull);
         _proposalService
             .Setup(_ => _.GetProposalsAsync(Today, 7, TestCountryContinents.Map))
@@ -307,7 +307,7 @@ public class HomeControllerTests
         var renderedModel = ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Subject;
         renderedModel.IsErrorMessageForced.Should().BeTrue();
         renderedModel.MessageToDisplay.Should().Be("InvalidRequest");
-        _playerService.Verify(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()), Times.Never);
+        _playerService.Verify(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateOnly>()), Times.Never);
     }
 
     [Fact]
@@ -427,7 +427,7 @@ public class HomeControllerTests
             ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(0).Build(), playerFull)
             .WithTotalPoints(0, false);
         var revealResponse = BuildResponse(
-            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(1).WithCreationDate(Today).Build(), playerFull);
+            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(1).WithCreationDate(Today.ToDateTime(TimeOnly.MinValue)).Build(), playerFull);
 
         var emptyProposals = (IReadOnlyCollection<ProposalDto>)Array.Empty<ProposalDto>();
         _proposalService

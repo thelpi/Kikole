@@ -21,13 +21,13 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 ("proposal_type_id", proposal.ProposalTypeId),
                 ("value", proposal.Value),
                 ("successful", proposal.Successful),
-                ("proposal_date", proposal.ProposalDate.Date),
+                ("proposal_date", proposal.ProposalDate),
                 ("ip", proposal.Ip),
                 ("creation_date", Clock.Now));
     }
 
     public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(
-        DateTime playerProposalDate, ulong userId)
+        DateOnly playerProposalDate, ulong userId)
     {
         return await GetProposalsInternalAsync(
                 "proposal_date = @real_proposal_date",
@@ -35,7 +35,7 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 userId);
     }
 
-    public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDateStart, DateTime playerProposalDateEnd, ulong userId)
+    public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateOnly playerProposalDateStart, DateOnly playerProposalDateEnd, ulong userId)
     {
         return await ExecuteReaderAsync<ProposalDto>(
                 $"SELECT * FROM proposals " +
@@ -45,12 +45,12 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 new
                 {
                     user_id = userId,
-                    proposal_date_end = playerProposalDateEnd.Date,
-                    proposal_date_start = playerProposalDateStart.Date,
+                    proposal_date_end = playerProposalDateEnd,
+                    proposal_date_start = playerProposalDateStart,
                 });
     }
 
-    public async Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateTime playerProposalDate)
+    public async Task<IReadOnlyCollection<ulong>> GetMissingUsersAsLeaderAsync(DateOnly playerProposalDate)
     {
         return await ExecuteReaderAsync<ulong>(
                 "SELECT DISTINCT user_id " +
@@ -66,7 +66,7 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 new
                 {
                     proposal_type_id = (ulong)ProposalTypes.Name,
-                    proposal_date = playerProposalDate.Date
+                    proposal_date = playerProposalDate
                 });
     }
 
@@ -78,7 +78,7 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 new { userId });
     }
 
-    public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateTime playerProposalDate, bool exact)
+    public async Task<IReadOnlyCollection<ProposalDto>> GetProposalsAsync(DateOnly playerProposalDate, bool exact)
     {
         return await ExecuteReaderAsync<ProposalDto>(
                 "SELECT * FROM proposals " +
@@ -87,11 +87,11 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 $"AND user_id IN ({SubSqlValidUsers})",
                 new
                 {
-                    proposal_date = playerProposalDate.Date
+                    proposal_date = playerProposalDate
                 });
     }
 
-    public async Task<int> GetDaysCountWithProposalAsync(DateTime startDate, DateTime endDate, ulong userId, bool exact)
+    public async Task<int> GetDaysCountWithProposalAsync(DateOnly startDate, DateOnly endDate, ulong userId, bool exact)
     {
         return await ExecuteScalarAsync(
                 "SELECT COUNT(DISTINCT proposal_date) " +
@@ -103,8 +103,8 @@ public class ProposalRepository : BaseRepository, IProposalRepository
                 new
                 {
                     userId,
-                    startDate = startDate.Date,
-                    endDate = endDate.Date
+                    startDate,
+                    endDate
                 },
                 0);
     }
@@ -119,14 +119,14 @@ public class ProposalRepository : BaseRepository, IProposalRepository
     }
 
     private async Task<IReadOnlyCollection<ProposalDto>> GetProposalsInternalAsync(
-        string where, DateTime proposalDate, ulong userId)
+        string where, DateOnly proposalDate, ulong userId)
     {
         return await ExecuteReaderAsync<ProposalDto>(
                 $"SELECT * FROM proposals WHERE user_id = @user_id AND {where}",
                 new
                 {
                     user_id = userId,
-                    real_proposal_date = proposalDate.Date
+                    real_proposal_date = proposalDate
                 });
     }
 }

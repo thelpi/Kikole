@@ -77,7 +77,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet("global-leaderboard-details")]
-    public async Task<JsonResult> GetGlobalLeaderboardDetailsAsync(LeaderSorts sortType, DateTime minimalDate, DateTime maximalDate)
+    public async Task<JsonResult> GetGlobalLeaderboardDetailsAsync(LeaderSorts sortType, DateOnly minimalDate, DateOnly maximalDate)
     {
         var (ld, _) = await GetLeaderboardAsync(
                 minimalDate, maximalDate, sortType, null);
@@ -86,7 +86,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     [HttpGet("daily-leaderboard-details")]
-    public async Task<JsonResult> GetDailyLeaderboardDetailsAsync(DayLeaderSorts sortType, DateTime date)
+    public async Task<JsonResult> GetDailyLeaderboardDetailsAsync(DayLeaderSorts sortType, DateOnly date)
     {
         var (dailyBoard, _) = await GetDailyboardAsync(
                 date, sortType, null);
@@ -128,9 +128,9 @@ public class LeaderboardController : KikoleBaseController
     [Authorization]
     public async Task<IActionResult> UserDay(ulong userId, string date)
     {
-        if (!DateTime.TryParse(date, out var actualDate)
-            || actualDate.Date > _clock.Today
-            || actualDate.Date < _gameCalendar.HiddenDate)
+        if (!DateOnly.TryParse(date, out var actualDate)
+            || actualDate > _clock.Today
+            || actualDate < _gameCalendar.HiddenDate)
         {
             return RedirectToAction("ErrorIndex", "Home");
         }
@@ -141,13 +141,13 @@ public class LeaderboardController : KikoleBaseController
             return RedirectToAction("ErrorIndex", "Home");
 
         var canSee = await _proposalService
-            .GetGrantAccessForDayAsync(UserId, actualDate.Date);
+            .GetGrantAccessForDayAsync(UserId, actualDate);
 
         if (canSee != DayGrantTypes.Creator && canSee != DayGrantTypes.Found && canSee != DayGrantTypes.Admin)
             return RedirectToAction("ErrorIndex", "Home");
 
         var player = await _playerService
-            .GetPlayerOfTheDayFullInfoAsync(actualDate.Date);
+            .GetPlayerOfTheDayFullInfoAsync(actualDate);
 
         if (player.Player.CreationUserId == userId)
             return RedirectToAction("ErrorIndex", "Home");
@@ -157,10 +157,10 @@ public class LeaderboardController : KikoleBaseController
         // toutes les gardes d'acces sont deja passees a ce stade : plus de travail a
         // eviter en cas de refus, db/proposals peuvent partir en // sans compromis
         var dbTask = _leaderService
-            .GetDayboardAsync(actualDate.Date, DayLeaderSorts.BestTime, countryContinents);
+            .GetDayboardAsync(actualDate, DayLeaderSorts.BestTime, countryContinents);
 
         var proposalsTask = _proposalService
-            .GetProposalsAsync(actualDate.Date, userId, countryContinents);
+            .GetProposalsAsync(actualDate, userId, countryContinents);
 
         var db = await dbTask;
 
@@ -186,11 +186,11 @@ public class LeaderboardController : KikoleBaseController
             ? proposals.Last().TotalPoints
             : ScoreCalculator.BasePoints;
 
-        var (previousDate, nextDate) = await GetNeighbourPlayedDaysAsync(userId, actualDate.Date);
+        var (previousDate, nextDate) = await GetNeighbourPlayedDaysAsync(userId, actualDate);
 
         var model = new UserDayModel
         {
-            ProposalDate = actualDate.Date,
+            ProposalDate = actualDate,
             PlayerName = player.Player.Name,
             UserLogin = user.Login,
             UserId = userId,
@@ -209,7 +209,7 @@ public class LeaderboardController : KikoleBaseController
     /// <see cref="UserDay"/>, sinon une flèche mènerait à une page d'erreur. Un jour où le
     /// joueur est créateur n'est pas un jour joué (aucune proposition), donc jamais proposé.
     /// </summary>
-    private async Task<(DateTime? Previous, DateTime? Next)> GetNeighbourPlayedDaysAsync(ulong userId, DateTime date)
+    private async Task<(DateOnly? Previous, DateOnly? Next)> GetNeighbourPlayedDaysAsync(ulong userId, DateOnly date)
     {
         var todayGrant = await _proposalService
             .GetGrantAccessForDayAsync(UserId, _clock.Today);
@@ -222,7 +222,7 @@ public class LeaderboardController : KikoleBaseController
 
         var playedDays = stats.Stats
             .Where(s => s.Attempt)
-            .Select(s => s.Date.Date)
+            .Select(s => s.Date)
             .Distinct()
             .ToList();
 
@@ -235,7 +235,7 @@ public class LeaderboardController : KikoleBaseController
         return (previous, next);
     }
 
-    private async Task<DateTime?> FirstViewableDayAsync(IEnumerable<DateTime> candidates)
+    private async Task<DateOnly?> FirstViewableDayAsync(IEnumerable<DateOnly> candidates)
     {
         foreach (var candidate in candidates)
         {
@@ -278,7 +278,7 @@ public class LeaderboardController : KikoleBaseController
             CurrentUserId = UserId,
             MonthlyPodiums = podiums.MonthlyPodiums
                 .Select(x => (
-                    new DateTime(x.Key.year, x.Key.month, 1),
+                    new DateOnly(x.Key.year, x.Key.month, 1),
                     new[]
                     {
                         (x.Value.first.Id, x.Value.first.Login),
@@ -293,7 +293,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     private async Task<(IReadOnlyCollection<Models.LeaderboardItem>, DayGrantTypes)> GetLeaderboardAsync(
-        DateTime minDate, DateTime maxDate, LeaderSorts sortType, DayGrantTypes? todayGrant)
+        DateOnly minDate, DateOnly maxDate, LeaderSorts sortType, DayGrantTypes? todayGrant)
     {
         var todayGrantEnsured = todayGrant ?? await _proposalService
             .GetGrantAccessForDayAsync(UserId, _clock.Today);
@@ -328,7 +328,7 @@ public class LeaderboardController : KikoleBaseController
     }
 
     private async Task<(Models.Dayboard, DayGrantTypes)> GetDailyboardAsync(
-        DateTime date, DayLeaderSorts sortType, DayGrantTypes? todayGrant)
+        DateOnly date, DayLeaderSorts sortType, DayGrantTypes? todayGrant)
     {
         // EnsureDateAsync ci-dessous recoit une valeur figee (DayGrantTypes.Found), pas
         // todayGrant : les deux sont donc independants et partent en //
@@ -375,19 +375,19 @@ public class LeaderboardController : KikoleBaseController
         return (dayboard, todayGrantEnsured);
     }
 
-    private async Task<DateTime> EnsureDateAsync(DateTime date, DayGrantTypes todayGrant)
+    private async Task<DateOnly> EnsureDateAsync(DateOnly date, DayGrantTypes todayGrant)
     {
-        if (date.Date > _clock.Today)
+        if (date > _clock.Today)
         {
             date = _clock.Today;
         }
 
-        if (todayGrant == DayGrantTypes.None && date.Date == _clock.Today)
+        if (todayGrant == DayGrantTypes.None && date == _clock.Today)
         {
             date = _clock.Yesterday;
         }
 
-        if (date.Date <= _gameCalendar.HiddenDate)
+        if (date <= _gameCalendar.HiddenDate)
         {
             date = _gameCalendar.HiddenDate;
             var displayHidden = await _playerService
@@ -396,6 +396,6 @@ public class LeaderboardController : KikoleBaseController
                 date = _gameCalendar.FirstDate;
         }
 
-        return date.Date;
+        return date;
     }
 }

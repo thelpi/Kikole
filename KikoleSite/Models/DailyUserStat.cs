@@ -7,7 +7,7 @@ namespace KikoleSite.Models;
 
 public class DailyUserStat
 {
-    public DateTime Date { get; }
+    public DateOnly Date { get; }
 
     public string Answer { get; }
 
@@ -27,7 +27,7 @@ public class DailyUserStat
 
     public bool SuccessDayOne { get; }
 
-    internal DailyUserStat(DateTime currentDate,
+    internal DailyUserStat(DateOnly currentDate,
         string playerName,
         int? points)
     {
@@ -37,7 +37,7 @@ public class DailyUserStat
     }
 
     internal DailyUserStat(ulong userId,
-        DateTime currentDate,
+        DateOnly currentDate,
         string playerName,
         bool attemptDayOne,
         bool attempt,

@@ -8,5 +8,5 @@ public record UserBadgeDto
 
     public ulong BadgeId { get; init; }
 
-    public DateTime GetDate { get; init; }
+    public DateOnly GetDate { get; init; }
 }

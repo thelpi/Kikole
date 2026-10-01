@@ -241,7 +241,7 @@ public class ProposalRequestTests
             ProposalDateTime = new DateTime(2026, 9, 2, 18, 30, 0)
         };
 
-        request.PlayerSubmissionDate.Should().Be(new DateTime(2026, 8, 30));
+        request.PlayerSubmissionDate.Should().Be(new DateOnly(2026, 8, 30));
     }
 
     [Fact]
@@ -262,7 +262,7 @@ public class ProposalRequestTests
         dto.ProposalTypeId.Should().Be((ulong)ProposalTypes.Name);
         dto.Successful.Should().Be(1);
         dto.Ip.Should().Be("::1");
-        dto.ProposalDate.Should().Be(new DateTime(2026, 9, 2));
+        dto.ProposalDate.Should().Be(new DateOnly(2026, 9, 2));
     }
 
     [Fact]

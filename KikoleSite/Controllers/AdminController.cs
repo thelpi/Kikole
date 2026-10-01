@@ -230,7 +230,7 @@ public class AdminController : KikoleBaseController
 
         // action deja reservee aux administrateurs ([Authorization(UserTypes.Administrator)]
         // sur AcceptPlayer/RefusePlayer) : pas de garde-fou de palier supplementaire ici
-        DateTime? forcedPublicationDate = null;
+        DateOnly? forcedPublicationDate = null;
         if (isAccepted && !TryParseForcedPublicationDate(model.PublicationDate, out forcedPublicationDate))
         {
             model.ErrorMessage = _localizer["InvalidPublicationDate"];
@@ -303,17 +303,17 @@ public class AdminController : KikoleBaseController
     /// dans le futur, jamais aujourd'hui ni le passe (deja joues - le service ne decale
     /// jamais que des jours futurs). Champ vide = rien a forcer, ce n'est pas une erreur.
     /// </summary>
-    private bool TryParseForcedPublicationDate(string? rawValue, out DateTime? publicationDate)
+    private bool TryParseForcedPublicationDate(string? rawValue, out DateOnly? publicationDate)
     {
         publicationDate = null;
 
         if (string.IsNullOrWhiteSpace(rawValue))
             return true;
 
-        if (!DateTime.TryParse(rawValue, out var parsedDate) || parsedDate.Date <= _clock.Today)
+        if (!DateOnly.TryParse(rawValue, out var parsedDate) || parsedDate <= _clock.Today)
             return false;
 
-        publicationDate = parsedDate.Date;
+        publicationDate = parsedDate;
         return true;
     }
 
@@ -458,7 +458,7 @@ public class AdminController : KikoleBaseController
         // reserve aux administrateurs : force la date de publication au lieu du "bout de
         // chaine" habituel ; un PowerUser n'a de toute facon pas ce champ dans son
         // formulaire, mais on l'ignore explicitement aussi cote serveur par securite
-        DateTime? forcedPublicationDate = null;
+        DateOnly? forcedPublicationDate = null;
         if (isAdmin && !TryParseForcedPublicationDate(model.PublicationDate, out forcedPublicationDate))
         {
             model.ErrorMessage = _localizer["InvalidPublicationDate"];

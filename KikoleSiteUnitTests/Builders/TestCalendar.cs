@@ -11,11 +11,11 @@ namespace KikoleSiteUnitTests;
 internal static class TestCalendar
 {
     /// <summary>La vraie date d'ouverture du jeu, choisie pour rester parlante.</summary>
-    internal static readonly DateTime FirstDate = new(2022, 3, 3);
+    internal static readonly DateOnly FirstDate = new(2022, 3, 3);
 
-    internal static readonly DateTime HiddenDate = FirstDate.AddDays(-1);
+    internal static readonly DateOnly HiddenDate = FirstDate.AddDays(-1);
 
-    internal static readonly DateTime FirstMonth = new(FirstDate.Year, FirstDate.Month, 1);
+    internal static readonly DateOnly FirstMonth = new(FirstDate.Year, FirstDate.Month, 1);
 
     internal static Mock<IGameCalendar> Mock()
     {

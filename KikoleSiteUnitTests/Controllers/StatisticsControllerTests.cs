@@ -120,7 +120,7 @@ public class StatisticsControllerTests
     {
         var stats = new List<PlayerStatistics>
         {
-            new() { Date = DateTime.Today, Name = "Zidane", Creator = "createur" }
+            new() { Date = DateOnly.FromDateTime(DateTime.Today), Name = "Zidane", Creator = "createur" }
         };
         _statisticService
             .Setup(_ => _.GetPlayersStatisticsAsync(1, "***", PlayerSorts.BestTime, true))

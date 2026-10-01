@@ -22,7 +22,7 @@ namespace KikoleSiteUnitTests.Services;
 /// </summary>
 public class LeaderServicePodiumsTests
 {
-    private static readonly DateTime FirstMonth = TestCalendar.FirstMonth;
+    private static readonly DateOnly FirstMonth = TestCalendar.FirstMonth;
 
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
@@ -40,10 +40,10 @@ public class LeaderServicePodiumsTests
 
         _proposalRepository
             .Setup(_ => _.GetDaysCountWithProposalAsync(
-                It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>(), It.IsAny<bool>()))
+                It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), It.IsAny<ulong>(), It.IsAny<bool>()))
             .ReturnsAsync(0);
         _playerRepository
-            .Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+            .Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(new List<PlayerDto>());
 
         _service = new LeaderService(
@@ -68,9 +68,9 @@ public class LeaderServicePodiumsTests
     private void SetupContenders(params (ulong id, string login, ushort points, int minutes)[] users)
     {
         _leaderRepository
-            .Setup(_ => _.GetLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<bool>()))
+            .Setup(_ => _.GetLeadersAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>(), It.IsAny<bool>()))
             .ReturnsAsync(users
-                .Select(u => LeaderDtoBuilder.Valid().WithUserId(u.id).WithPoints(u.points).WithTime(u.minutes).WithProposalDate(FirstMonth).WithCreationDate(FirstMonth.AddMinutes(u.minutes)).Build())
+                .Select(u => LeaderDtoBuilder.Valid().WithUserId(u.id).WithPoints(u.points).WithTime(u.minutes).WithProposalDate(FirstMonth).WithCreationDate(FirstMonth.ToDateTime(TimeOnly.MinValue).AddMinutes(u.minutes)).Build())
                 .ToList());
 
         List<UserDto> dtos = [.. users

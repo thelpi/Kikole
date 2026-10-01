@@ -12,7 +12,7 @@ namespace KikoleSiteUnitTests.Models.Requests;
 
 public class PlayerRequestTests
 {
-    private static readonly DateTime Today = new(2026, 9, 2);
+    private static readonly DateOnly Today = new(2026, 9, 2);
 
     private readonly IStringLocalizer _localizer;
 
@@ -194,14 +194,6 @@ public class PlayerRequestTests
     {
         // une soumission en attente de validation n'a pas encore de date
         var request = Valid() with { PublicationDate = null };
-
-        request.IsValid(Today, _localizer).Should().BeNull();
-    }
-
-    [Fact]
-    public void IsValid_IgnoresTheTimeOfDayOnThePublicationDate()
-    {
-        var request = Valid() with { PublicationDate = Today.AddHours(3) };
 
         request.IsValid(Today, _localizer).Should().BeNull();
     }

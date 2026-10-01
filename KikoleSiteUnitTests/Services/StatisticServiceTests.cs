@@ -21,7 +21,7 @@ namespace KikoleSiteUnitTests.Services;
 /// </summary>
 public class StatisticServiceTests
 {
-    private static readonly DateTime Today = new(2026, 9, 10);
+    private static readonly DateOnly Today = new(2026, 9, 10);
 
     private const ulong CreatorId = 10;
     private const string CreatorLogin = "createur";
@@ -40,7 +40,8 @@ public class StatisticServiceTests
 
     public StatisticServiceTests()
     {
-        _clock.Setup(_ => _.Now).Returns(Today);
+        _clock.Setup(_ => _.Today).Returns(Today);
+        _clock.Setup(_ => _.Now).Returns(Today.ToDateTime(TimeOnly.MinValue));
         _clock.Setup(_ => _.Yesterday).Returns(Today.AddDays(-1));
 
         _service = new StatisticService(
@@ -57,7 +58,7 @@ public class StatisticServiceTests
             .ReturnsAsync(UserDtoBuilder.Valid().WithId(CreatorId).WithLogin(CreatorLogin).Build());
     }
 
-    private static PlayerDto Player(DateTime publicationDate, ulong id = 1, string name = "Zinédine Zidane")
+    private static PlayerDto Player(DateOnly publicationDate, ulong id = 1, string name = "Zinédine Zidane")
         => PlayerDtoBuilder.Valid().WithId(id).WithName(name).WithCreator(CreatorId).WithPublicationDate(publicationDate).Build();
 
     private void SetupData(
@@ -141,15 +142,15 @@ public class StatisticServiceTests
         var proposals = new List<ProposalDto>
         {
             // essais du jour meme (creation le jour de la proposition)
-            ProposalDtoBuilder.Valid().WithUser(1).WithProposalDate(day).WithCreationDate(day).Build(),
-            ProposalDtoBuilder.Valid().WithUser(2).WithProposalDate(day).WithCreationDate(day).Build(),
+            ProposalDtoBuilder.Valid().WithUser(1).WithProposalDate(day).WithCreationDate(day.ToDateTime(TimeOnly.MinValue)).Build(),
+            ProposalDtoBuilder.Valid().WithUser(2).WithProposalDate(day).WithCreationDate(day.ToDateTime(TimeOnly.MinValue)).Build(),
             // rattrapage : cree 2 jours plus tard, ne compte plus comme "du jour"
-            ProposalDtoBuilder.Valid().WithUser(3).WithProposalDate(day).WithCreationDate(day.AddDays(2)).Build(),
+            ProposalDtoBuilder.Valid().WithUser(3).WithProposalDate(day).WithCreationDate(day.AddDays(2).ToDateTime(TimeOnly.MinValue)).Build(),
         };
         var leaders = new List<LeaderDto>
         {
-            LeaderDtoBuilder.Valid().WithUserId(1).WithProposalDate(day).WithCreationDate(day).WithTime(30).Build(),
-            LeaderDtoBuilder.Valid().WithUserId(3).WithProposalDate(day).WithCreationDate(day.AddDays(2)).WithTime(90).Build(),
+            LeaderDtoBuilder.Valid().WithUserId(1).WithProposalDate(day).WithCreationDate(day.ToDateTime(TimeOnly.MinValue)).WithTime(30).Build(),
+            LeaderDtoBuilder.Valid().WithUserId(3).WithProposalDate(day).WithCreationDate(day.AddDays(2).ToDateTime(TimeOnly.MinValue)).WithTime(90).Build(),
         };
         SetupData([Player(day)], proposals, leaders);
         SetupViewer(UserTypes.Administrator);
@@ -185,9 +186,9 @@ public class StatisticServiceTests
         var day = Today.AddDays(-2);
         var leaders = new List<LeaderDto>
         {
-            LeaderDtoBuilder.Valid().WithUserId(1).WithProposalDate(day).WithCreationDate(day).WithPoints(1000).Build(),
-            LeaderDtoBuilder.Valid().WithUserId(2).WithProposalDate(day).WithCreationDate(day).WithPoints(600).Build(),
-            LeaderDtoBuilder.Valid().WithUserId(3).WithProposalDate(day).WithCreationDate(day.AddDays(3)).WithPoints(100).Build(),
+            LeaderDtoBuilder.Valid().WithUserId(1).WithProposalDate(day).WithCreationDate(day.ToDateTime(TimeOnly.MinValue)).WithPoints(1000).Build(),
+            LeaderDtoBuilder.Valid().WithUserId(2).WithProposalDate(day).WithCreationDate(day.ToDateTime(TimeOnly.MinValue)).WithPoints(600).Build(),
+            LeaderDtoBuilder.Valid().WithUserId(3).WithProposalDate(day).WithCreationDate(day.AddDays(3).ToDateTime(TimeOnly.MinValue)).WithPoints(100).Build(),
         };
         SetupData([Player(day)], leaders: leaders);
         SetupViewer(UserTypes.Administrator);

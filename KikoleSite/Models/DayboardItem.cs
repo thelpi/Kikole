@@ -4,7 +4,7 @@ namespace KikoleSite.Models;
 
 public abstract class DayboardItem
 {
-    public DateTime Date { get; set; }
+    public DateOnly Date { get; set; }
     public ulong UserId { get; set; }
     public required string UserName { get; set; }
     public int Points { get; set; }

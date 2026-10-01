@@ -157,7 +157,7 @@ public class MappingModelsTests
     {
         var badge = new Badge(
             BadgeDtoBuilder.Valid().WithId(5).WithName("Wooden spoon").WithDescription("d").WithHiddenFlag(1).Build(), 3, null);
-        var date = new DateTime(2026, 9, 2);
+        var date = new DateOnly(2026, 9, 2);
 
         var userBadge = new UserBadge(badge, date);
 
@@ -231,12 +231,6 @@ public class ClockTests
     private readonly IClock _clock = new Clock();
 
     [Fact]
-    public void TodayHasNoTimeComponent()
-    {
-        _clock.Today.Should().Be(_clock.Today.Date);
-    }
-
-    [Fact]
     public void TomorrowAndYesterdayFrameToday()
     {
         _clock.Tomorrow.Should().Be(_clock.Today.AddDays(1));
@@ -246,7 +240,7 @@ public class ClockTests
     [Fact]
     public void TomorrowEndIsTheLastSecondOfTomorrow()
     {
-        _clock.TomorrowEnd.Should().Be(_clock.Tomorrow.AddDays(1).AddSeconds(-1));
+        _clock.TomorrowEnd.Should().Be(_clock.Tomorrow.AddDays(1).ToDateTime(TimeOnly.MinValue).AddSeconds(-1));
         _clock.TomorrowEnd.TimeOfDay.Should().Be(new TimeSpan(23, 59, 59));
     }
 

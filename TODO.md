@@ -1173,6 +1173,34 @@ Branche de travail : `remaster-v2`.
       ASCII évident, mais hors périmètre tant que les noms de joueurs sont saisis dans leur
       forme médiatique. Un test fige la couverture des plages qui comptent, pour que la
       décision reste visible si le besoin change.
+- [ ] **Évaluer la suppression de Dapper (2026-10-01).** Posé en aparté après le chantier
+      migration `DateOnly` (voir « Où on en est »), qui a mis en évidence un vrai défaut :
+      Dapper 2.1.28 n'a **aucun support natif de `DateOnly`** — une colonne `DATE` lue en
+      `DateOnly`/`DateOnly?` revenait **silencieusement** à `null`/`default`, sans la moindre
+      exception, et passer un `DateOnly` en paramètre levait une `NotSupportedException`.
+      Corrigé via `KikoleSite.Repositories.DateOnlyTypeHandler` (`SqlMapper.TypeHandler<DateOnly>`,
+      enregistré pour `DateOnly` **et** `DateOnly?` séparément — Dapper ne déduit pas l'un de
+      l'autre), posé dans `Program.cs` et dupliqué dans
+      `KikoleSiteIntegrationTests/Integration/DatabaseFixture.cs` (bootstrap Dapper distinct
+      de celui de l'appli). Bug trouvé parce que l'utilisateur a constaté en pratique que le
+      calendrier du jeu refusait de s'amorcer malgré un joueur en base — pas détecté par les
+      702 tests unitaires (mockés, ne passent jamais par le vrai Dapper) ni les tests
+      d'intégration existants (aucun ne couvrait `GetEarliestPlayerDateAsync`).
+      - **Constat sur l'usage réel de Dapper dans ce projet** (discussion théorique avec
+        l'utilisateur, ~1444 lignes / 78 appels sur 15 dépôts) : jamais de jointure SQL, de
+        `splitOn`/multi-mapping, ni de `QueryMultiple` — tout l'assemblage multi-table
+        (`PlayerFullDto`, etc.) se fait en C#, pas en SQL. `BaseRepository` a par ailleurs
+        déjà sa propre couche CRUD par-dessus Dapper (`GetBasicInsertSql`/`GetBasicSelectSql`/
+        `GetDynamicParameters`) : l'apport net de Dapper se réduit donc à `QueryAsync<T>`
+        pour le mapping ligne→DTO et le binding de paramètres par objet anonyme — réel, mais
+        plus étroit que l'argument de vente habituel d'un micro-ORM, et son style
+        conventionnel/non typé est précisément ce qui a permis au bug `DateOnly` de rester
+        invisible.
+      - **Pas de décision prise** : juste un repère pour une évaluation future, à chiffrer le
+        jour où ce chantier serait repris (coût de remplacer ~78 appels `QueryAsync`/
+        `ExecuteReaderAsync`/`GetDtoAsync` par du `MySqlDataReader` direct dans
+        `BaseRepository`, bénéfice en fiabilité/clarté, risque de régression vu l'absence de
+        tests d'intégration sur la plupart des dépôts).
 
 ---
 

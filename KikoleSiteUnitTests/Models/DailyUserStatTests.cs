@@ -13,12 +13,12 @@ namespace KikoleSiteUnitTests.Models;
 /// </summary>
 public class DailyUserStatTests
 {
-    private static readonly DateTime Day = new(2026, 9, 2);
+    private static readonly DateOnly Day = new(2026, 9, 2);
     private const ulong Me = 7;
 
     private static LeaderDto Leader(ulong userId, ushort points, int minutes, bool sameDay = true)
     {
-        return LeaderDtoBuilder.Valid().WithUserId(userId).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.AddMinutes(minutes) : Day.AddDays(2)).Build();
+        return LeaderDtoBuilder.Valid().WithUserId(userId).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.ToDateTime(TimeOnly.MinValue).AddMinutes(minutes) : Day.AddDays(2).ToDateTime(TimeOnly.MinValue)).Build();
     }
 
     private static DailyUserStat Stat(
@@ -132,12 +132,12 @@ public class DailyUserStatTests
 /// <summary>Agregats sur l'ensemble des journees d'un utilisateur.</summary>
 public class UserStatTests
 {
-    private static readonly DateTime Day = new(2026, 9, 2);
+    private static readonly DateOnly Day = new(2026, 9, 2);
     private const ulong Me = 7;
 
     private static DailyUserStat Played(ushort points, int minutes, bool sameDay = true)
     {
-        var mine = LeaderDtoBuilder.Valid().WithUserId(Me).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.AddMinutes(minutes) : Day.AddDays(2)).Build();
+        var mine = LeaderDtoBuilder.Valid().WithUserId(Me).WithPoints(points).WithTime(minutes).WithProposalDate(Day).WithCreationDate(sameDay ? Day.ToDateTime(TimeOnly.MinValue).AddMinutes(minutes) : Day.AddDays(2).ToDateTime(TimeOnly.MinValue)).Build();
 
         return new DailyUserStat(Me, Day, "Zidane", sameDay, true, new[] { mine }, mine);
     }
@@ -159,7 +159,7 @@ public class UserStatTests
 
     private static UserStat Build(params DailyUserStat[] stats)
     {
-        return new UserStat(stats, "joueur", Day.AddYears(-1));
+        return new UserStat(stats, "joueur", Day.AddYears(-1).ToDateTime(TimeOnly.MinValue));
     }
 
     [Fact]
@@ -232,7 +232,7 @@ public class UserStatTests
         var stat = Build(Played(800, 60));
 
         stat.Login.Should().Be("joueur");
-        stat.RegistrationDate.Should().Be(Day.AddYears(-1));
+        stat.RegistrationDate.Should().Be(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue));
         stat.Stats.Should().HaveCount(1);
     }
 }

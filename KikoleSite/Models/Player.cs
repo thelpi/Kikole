@@ -22,7 +22,7 @@ public class Player : PlayerCreator
 
     public Countries? AlternativeCountry { get; }
 
-    public DateTime? PublicationDate { get; }
+    public DateOnly? PublicationDate { get; }
 
     public string Clue { get; }
 

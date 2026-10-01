@@ -104,7 +104,7 @@ public class PlayerHandlerTests
     [Fact]
     public async Task GetPlayerOfTheDayFullInfoAsync_LooksUpTheDayThenAssembles()
     {
-        var date = new DateTime(2026, 9, 2);
+        var date = new DateOnly(2026, 9, 2);
 
         _playerRepository
             .Setup(_ => _.GetPlayerOfTheDayAsync(date))
@@ -124,10 +124,10 @@ public class PlayerHandlerTests
         // un joueur par jour est une invariante du jeu : son absence est une faute
         // d'administration, signalee par une exception qui nomme la date en cause
         _playerRepository
-            .Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateTime>()))
+            .Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateOnly>()))
             .ReturnsAsync((PlayerDto?)null);
 
-        Func<Task> act = () => _handler.GetPlayerOfTheDayFullInfoAsync(new DateTime(2026, 9, 2));
+        Func<Task> act = () => _handler.GetPlayerOfTheDayFullInfoAsync(new DateOnly(2026, 9, 2));
 
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*2026-09-02*");

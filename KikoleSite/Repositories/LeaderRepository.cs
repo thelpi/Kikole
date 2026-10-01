@@ -17,23 +17,23 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
         return await ExecuteInsertAsync(
                 "leaders",
                 ("user_id", request.UserId),
-                ("proposal_date", request.ProposalDate.Date),
+                ("proposal_date", request.ProposalDate),
                 ("points", request.Points),
                 ("time", request.Time),
                 ("creation_date", request.CreationDate));
     }
 
-    public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateTime date, bool onTimeOnly)
+    public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateOnly date, bool onTimeOnly)
     {
         return await ExecuteReaderAsync<LeaderDto>(
                 "SELECT * FROM leaders " +
                 "WHERE proposal_date = @date " +
                 $"AND {SubSqlOnTime(onTimeOnly)} " +
                 $"AND user_id IN ({SubSqlValidUsers})",
-                new { date.Date });
+                new { date });
     }
 
-    public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, bool onTimeOnly)
+    public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAsync(DateOnly? minimalDate, DateOnly? maximalDate, bool onTimeOnly)
     {
         return await ExecuteReaderAsync<LeaderDto>(
                 "SELECT * FROM leaders " +
@@ -43,12 +43,12 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
                 $"AND user_id IN ({SubSqlValidUsers})",
                 new
                 {
-                    minimal_date = minimalDate?.Date,
-                    maximal_date = maximalDate?.Date
+                    minimal_date = minimalDate,
+                    maximal_date = maximalDate
                 });
     }
 
-    public async Task<IReadOnlyCollection<LeaderDto>> GetUserLeadersAsync(DateTime? minimalDate, DateTime? maximalDate, bool onTimeOnly, ulong userId)
+    public async Task<IReadOnlyCollection<LeaderDto>> GetUserLeadersAsync(DateOnly? minimalDate, DateOnly? maximalDate, bool onTimeOnly, ulong userId)
     {
         return await ExecuteReaderAsync<LeaderDto>(
                 "SELECT * FROM leaders " +
@@ -58,8 +58,8 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
                 $"AND user_id = @userId ",
                 new
                 {
-                    minimal_date = minimalDate?.Date,
-                    maximal_date = maximalDate?.Date,
+                    minimal_date = minimalDate,
+                    maximal_date = maximalDate,
                     userId
                 });
     }

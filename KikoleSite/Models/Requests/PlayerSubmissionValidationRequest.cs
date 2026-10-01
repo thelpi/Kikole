@@ -18,7 +18,7 @@ public record PlayerSubmissionValidationRequest
     /// (<see cref="Services.PlayerService.AcceptSubmittedPlayerAsync"/>). Si la date est
     /// deja occupee, elle et tous les jours suivants sont decales d'un jour.
     /// </summary>
-    public DateTime? PublicationDate { get; init; }
+    public DateOnly? PublicationDate { get; init; }
 
     public required IReadOnlyDictionary<Languages, string?> ClueEditLanguages { get; init; }
 

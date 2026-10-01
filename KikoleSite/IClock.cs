@@ -13,24 +13,24 @@ public interface IClock
     DateTime Now { get; }
 
     /// <summary>
-    /// Current date at midnight.
+    /// Current date.
     /// </summary>
-    DateTime Today { get; }
+    DateOnly Today { get; }
 
     /// <summary>
-    /// Tomorrow at midnight.
+    /// Tomorrow.
     /// </summary>
-    DateTime Tomorrow { get; }
+    DateOnly Tomorrow { get; }
 
     /// <summary>
-    /// Yesterday at midnight.
+    /// Yesterday.
     /// </summary>
-    DateTime Yesterday { get; }
+    DateOnly Yesterday { get; }
 
     /// <summary>
     /// The first day of the current month.
     /// </summary>
-    DateTime FirstOfMonth { get; }
+    DateOnly FirstOfMonth { get; }
 
     /// <summary>
     /// Tomorrow at 23:59:59.

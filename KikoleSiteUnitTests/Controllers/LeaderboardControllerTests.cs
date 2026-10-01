@@ -30,7 +30,7 @@ namespace KikoleSiteUnitTests.Controllers;
 /// </summary>
 public class LeaderboardControllerTests
 {
-    private static readonly DateTime Today = TestCalendar.FirstDate.AddDays(30);
+    private static readonly DateOnly Today = TestCalendar.FirstDate.AddDays(30);
 
     private readonly DefaultHttpContext _httpContext = new();
     private readonly Mock<IUserRepository> _userRepository = new();
@@ -47,7 +47,7 @@ public class LeaderboardControllerTests
     {
         _clock.Setup(_ => _.Today).Returns(Today);
         _clock.Setup(_ => _.Yesterday).Returns(Today.AddDays(-1));
-        _clock.Setup(_ => _.FirstOfMonth).Returns(new DateTime(Today.Year, Today.Month, 1));
+        _clock.Setup(_ => _.FirstOfMonth).Returns(new DateOnly(Today.Year, Today.Month, 1));
 
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
         httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
@@ -137,13 +137,13 @@ public class LeaderboardControllerTests
             .ReturnsAsync(UserDtoBuilder.Valid().WithId(viewedUser).WithLogin("cible").WithType(UserTypes.StandardUser).Build());
 
         var playerFull = PlayerFullDtoBuilder.Valid().WithPlayer(PlayerDtoBuilder.Valid().WithCreator(99).Build()).Build();
-        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>())).ReturnsAsync(playerFull);
+        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateOnly>())).ReturnsAsync(playerFull);
         _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
         _leaderService
-            .Setup(_ => _.GetDayboardAsync(It.IsAny<DateTime>(), DayLeaderSorts.BestTime, TestCountryContinents.Map))
+            .Setup(_ => _.GetDayboardAsync(It.IsAny<DateOnly>(), DayLeaderSorts.BestTime, TestCountryContinents.Map))
             .ReturnsAsync(new Dayboard { Date = Today, Leaders = [], Searchers = [] });
         _proposalService
-            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateTime>(), viewedUser, TestCountryContinents.Map))
+            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateOnly>(), viewedUser, TestCountryContinents.Map))
             .ReturnsAsync(Array.Empty<ProposalResponse>());
 
         // le jour consulte (Today) et le jour "courant" sont toujours consultables
@@ -154,7 +154,7 @@ public class LeaderboardControllerTests
         var stats = new UserStat(
             days.Select(d => new DailyUserStat(viewedUser, Today.AddDays(d.dayOffset), "***", false, d.played, [], null)).ToList(),
             "cible",
-            Today.AddYears(-1));
+            Today.AddYears(-1).ToDateTime(TimeOnly.MinValue));
         _leaderService
             .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", true))
             .ReturnsAsync(stats);
@@ -248,7 +248,7 @@ public class LeaderboardControllerTests
         var result = await _controller.UserDay(2, Today.ToString("yyyy-MM-dd"));
 
         result.Should().BeOfType<RedirectToActionResult>();
-        _playerService.Verify(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateTime>()), Times.Never);
+        _playerService.Verify(_ => _.GetPlayerOfTheDayFullInfoAsync(It.IsAny<DateOnly>()), Times.Never);
     }
 
     [Fact]
@@ -298,7 +298,7 @@ public class LeaderboardControllerTests
 
         var dayboard = result.Value.Should().BeOfType<Dayboard>().Subject;
         dayboard.Hidden.Should().BeTrue();
-        _leaderService.Verify(_ => _.GetDayboardAsync(It.IsAny<DateTime>(), It.IsAny<DayLeaderSorts>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
+        _leaderService.Verify(_ => _.GetDayboardAsync(It.IsAny<DateOnly>(), It.IsAny<DayLeaderSorts>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
     }
 
     // ------------------------------------------------------------- UnlockDailyLeaderboardAsync
@@ -346,7 +346,7 @@ public class LeaderboardControllerTests
         _leaderService.Setup(_ => _.GetDayboardAsync(Today, DayLeaderSorts.BestTime, TestCountryContinents.Map)).ReturnsAsync(dayboard);
 
         _leaderService
-            .Setup(_ => _.GetLeaderboardAsync(new DateTime(Today.Year, Today.Month, 1), Today, LeaderSorts.TotalPoints))
+            .Setup(_ => _.GetLeaderboardAsync(new DateOnly(Today.Year, Today.Month, 1), Today, LeaderSorts.TotalPoints))
             .ReturnsAsync(new List<LeaderboardItem>());
 
         _leaderService.Setup(_ => _.GetPodiumsAsync()).ReturnsAsync(new Podiums
@@ -377,7 +377,7 @@ public class LeaderboardControllerTests
         var dayboard = new Dayboard { Date = Today, Leaders = [], Searchers = [] };
         _leaderService.Setup(_ => _.GetDayboardAsync(Today, DayLeaderSorts.BestTime, TestCountryContinents.Map)).ReturnsAsync(dayboard);
         _leaderService
-            .Setup(_ => _.GetLeaderboardAsync(new DateTime(Today.Year, Today.Month, 1), Today, LeaderSorts.TotalPoints))
+            .Setup(_ => _.GetLeaderboardAsync(new DateOnly(Today.Year, Today.Month, 1), Today, LeaderSorts.TotalPoints))
             .ReturnsAsync(new List<LeaderboardItem>());
         _leaderService.Setup(_ => _.GetPodiumsAsync()).ReturnsAsync(new Podiums
         {
@@ -403,7 +403,7 @@ public class LeaderboardControllerTests
         var stats = new UserStat(
             [new DailyUserStat(Today, "Zidane", 500)],
             "cible",
-            Today.AddYears(-1));
+            Today.AddYears(-1).ToDateTime(TimeOnly.MinValue));
         _leaderService
             .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", true))
             .ReturnsAsync(stats);
@@ -437,7 +437,7 @@ public class LeaderboardControllerTests
                 new DailyUserStat(Today.AddDays(-1), "Milieu", 200)
             ],
             "cible",
-            Today.AddYears(-1));
+            Today.AddYears(-1).ToDateTime(TimeOnly.MinValue));
         _leaderService
             .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", true))
             .ReturnsAsync(stats);

@@ -60,9 +60,9 @@ public class LeaderService : ILeaderService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateTime startDate, DateTime endDate, LeaderSorts leaderSort)
+    public async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateOnly startDate, DateOnly endDate, LeaderSorts leaderSort)
     {
-        if (startDate.Date > endDate.Date)
+        if (startDate > endDate)
         {
             var tmp = endDate;
             endDate = startDate;
@@ -93,7 +93,7 @@ public class LeaderService : ILeaderService
         return items;
     }
 
-    private async Task<List<LeaderboardItem>> ComputeLeaderboardItemsAsync(DateTime startDate, DateTime endDate, bool onTimeOnly)
+    private async Task<List<LeaderboardItem>> ComputeLeaderboardItemsAsync(DateOnly startDate, DateOnly endDate, bool onTimeOnly)
     {
         var leaders = await _leaderRepository
             .GetLeadersAsync(startDate, endDate, onTimeOnly);
@@ -183,7 +183,7 @@ public class LeaderService : ILeaderService
 
             var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
-            var isCreator = (currentDate.Date < stopDate || pDay.HideCreator == 0)
+            var isCreator = (currentDate < stopDate || pDay.HideCreator == 0)
                 && userId == pDay.CreationUserId;
 
             var pName = pDay.Name;
@@ -249,7 +249,7 @@ public class LeaderService : ILeaderService
                     {
                         Points = (ushort)points,
                         ProposalDate = playerOfTheDay.PublicationDate.Value,
-                        Time = (winningProposal.CreationDate - playerOfTheDay.PublicationDate.Value).ToRoundMinutes(),
+                        Time = (winningProposal.CreationDate - playerOfTheDay.PublicationDate.Value.ToDateTime(TimeOnly.MinValue)).ToRoundMinutes(),
                         UserId = userId,
                         CreationDate = winningProposal.CreationDate
                     });
@@ -258,11 +258,9 @@ public class LeaderService : ILeaderService
     }
 
     /// <inheritdoc />
-    public async Task<Dayboard> GetDayboardAsync(DateTime day, DayLeaderSorts sort,
+    public async Task<Dayboard> GetDayboardAsync(DateOnly day, DayLeaderSorts sort,
         IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
-        day = day.Date;
-
         var leaders = await _leaderRepository
             .GetLeadersAtDateAsync(day, false);
 
@@ -285,7 +283,7 @@ public class LeaderService : ILeaderService
         var leaderItems = leaders
             .Select(_ => new DayboardLeaderItem
             {
-                Date = _.CreationDate.Date,
+                Date = DateOnly.FromDateTime(_.CreationDate),
                 IsCreator = false,
                 Points = _.Points,
                 Time = new TimeSpan(0, _.Time, 0),
@@ -323,7 +321,7 @@ public class LeaderService : ILeaderService
         {
             var dsi = new DayboardSearcherItem
             {
-                Date = propUserGroup.Select(p => p.CreationDate).Min().Date,
+                Date = DateOnly.FromDateTime(propUserGroup.Select(p => p.CreationDate).Min()),
                 LastActivity = propUserGroup.Select(p => p.CreationDate).Max(),
                 UserId = propUserGroup.Key,
                 UserName = users[propUserGroup.Key].Login
@@ -358,7 +356,7 @@ public class LeaderService : ILeaderService
             var nextMonth = date.AddMonths(1);
 
             var ldItems = await ComputeLeaderboardItemsAsync(
-                    new DateTime(date.Year, date.Month, 1),
+                    new DateOnly(date.Year, date.Month, 1),
                     date == currentMonth ? _clock.Yesterday : nextMonth.AddDays(-1),
                     true);
 
@@ -402,12 +400,12 @@ public class LeaderService : ILeaderService
             .GetUserLeadersAsync(_gameCalendar.FirstDate, _clock.Today, true, userId);
 
         var foundDates = leaders
-            .Select(l => l.ProposalDate.Date)
+            .Select(l => l.ProposalDate)
             .ToHashSet();
 
         var best = 0;
         var run = 0;
-        var previousDate = default(DateTime?);
+        var previousDate = default(DateOnly?);
         foreach (var date in foundDates.OrderBy(d => d))
         {
             run = previousDate.HasValue && date == previousDate.Value.AddDays(1)

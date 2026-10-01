@@ -64,6 +64,9 @@ public static class ViewHelper
         if (data.GetType() == typeof(DateTime) || data.GetType() == typeof(DateTime?))
             return ((DateTime?)data).ToNaString();
 
+        if (data.GetType() == typeof(DateOnly) || data.GetType() == typeof(DateOnly?))
+            return ((DateOnly?)data).ToNaString();
+
         if (data.GetType() == typeof(bool))
             return ((bool)data).ToYesNo();
 
@@ -95,6 +98,16 @@ public static class ViewHelper
     }
 
     public static string ToNaString(this DateTime data)
+    {
+        return data.ToString(IsFrench() ? DateTimePatternFr : DateTimePatternEn);
+    }
+
+    internal static string ToNaString(this DateOnly? data)
+    {
+        return data?.ToNaString() ?? NA;
+    }
+
+    public static string ToNaString(this DateOnly data)
     {
         return data.ToString(IsFrench() ? DateTimePatternFr : DateTimePatternEn);
     }

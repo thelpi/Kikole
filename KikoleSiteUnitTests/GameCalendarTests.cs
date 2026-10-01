@@ -11,9 +11,9 @@ namespace KikoleSiteUnitTests;
 /// </summary>
 public class GameCalendarTests
 {
-    private static readonly DateTime Hidden = new(2022, 3, 2);
+    private static readonly DateOnly Hidden = new(2022, 3, 2);
 
-    private static GameCalendar Started(DateTime hiddenDate)
+    private static GameCalendar Started(DateOnly hiddenDate)
     {
         var calendar = new GameCalendar();
         calendar.Initialize(hiddenDate);
@@ -30,13 +30,7 @@ public class GameCalendarTests
     public void FirstMonth_IsTheFirstDayOfTheMonthOfFirstDate()
     {
         // la journee cachee du 31 janvier place la premiere journee en fevrier
-        Started(new DateTime(2022, 1, 31)).FirstMonth.Should().Be(new DateTime(2022, 2, 1));
-    }
-
-    [Fact]
-    public void TheTimeOfDayIsDropped()
-    {
-        Started(Hidden.AddHours(17).AddMinutes(42)).HiddenDate.Should().Be(Hidden);
+        Started(new DateOnly(2022, 1, 31)).FirstMonth.Should().Be(new DateOnly(2022, 2, 1));
     }
 
     [Fact]

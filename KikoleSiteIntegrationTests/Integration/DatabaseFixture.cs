@@ -33,6 +33,11 @@ public sealed class DatabaseFixture : IAsyncLifetime
         // pose une fois par process de test : Program.cs le fait pour l'appli, jamais
         // execute ici, et sans lui Dapper ne mappe aucune colonne snake_case (user_id -> ...).
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        // idem pour le TypeHandler DateOnly (cf. KikoleSite.Repositories.DateOnlyTypeHandler) :
+        // sans lui, toute colonne DATE lue en DateOnly revient silencieusement a default/null.
+        var dateOnlyTypeHandler = new KikoleSite.Repositories.DateOnlyTypeHandler();
+        Dapper.SqlMapper.AddTypeHandler(typeof(DateOnly), dateOnlyTypeHandler);
+        Dapper.SqlMapper.AddTypeHandler(typeof(DateOnly?), dateOnlyTypeHandler);
 
         Configuration = new ConfigurationBuilder()
             .AddUserSecrets<DatabaseFixture>()

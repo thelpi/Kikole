@@ -70,7 +70,7 @@ public class StatisticsController : KikoleBaseController
     public async Task<JsonResult> GetStatisticActiveUsers()
     {
         var datas = await _statisticService
-            .GetActiveUsersAsync(null, _clock.Yesterday);
+            .GetActiveUsersAsync(null, _clock.Yesterday.ToDateTime(TimeOnly.MinValue));
 
         return Json(new
         {

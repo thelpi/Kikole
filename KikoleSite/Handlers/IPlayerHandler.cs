@@ -14,7 +14,7 @@ public interface IPlayerHandler
     /// </summary>
     /// <param name="date">Proposed date.</param>
     /// <returns>Player with full info.</returns>
-    Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateTime date);
+    Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateOnly date);
 
     /// <summary>
     /// Gets the player with full info by its root data.

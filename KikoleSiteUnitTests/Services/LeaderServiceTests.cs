@@ -18,7 +18,7 @@ namespace KikoleSiteUnitTests.Services;
 
 public class LeaderServiceTests
 {
-    private static readonly DateTime Day = TestCalendar.FirstDate;
+    private static readonly DateOnly Day = TestCalendar.FirstDate;
 
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly Mock<ILeaderRepository> _leaderRepository = new();
@@ -33,7 +33,7 @@ public class LeaderServiceTests
     {
         _clock.Setup(_ => _.Today).Returns(Day);
         _clock.Setup(_ => _.Yesterday).Returns(Day.AddDays(-1));
-        _clock.Setup(_ => _.FirstOfMonth).Returns(new DateTime(Day.Year, Day.Month, 1));
+        _clock.Setup(_ => _.FirstOfMonth).Returns(new DateOnly(Day.Year, Day.Month, 1));
 
         var localizer = new Mock<IStringLocalizer<Translations>>();
         localizer.Setup(_ => _[It.IsAny<string>()])
@@ -41,7 +41,7 @@ public class LeaderServiceTests
 
         _proposalRepository
             .Setup(_ => _.GetDaysCountWithProposalAsync(
-                It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<ulong>(), It.IsAny<bool>()))
+                It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), It.IsAny<ulong>(), It.IsAny<bool>()))
             .ReturnsAsync(0);
 
         _service = new LeaderService(
@@ -67,9 +67,9 @@ public class LeaderServiceTests
             .ReturnsAsync((IReadOnlyCollection<ulong> ids) => dtos.Where(u => ids.Contains(u.Id)).ToList());
     }
 
-    private static LeaderDto Leader(ulong userId, ushort points, int minutes, DateTime? date = null)
+    private static LeaderDto Leader(ulong userId, ushort points, int minutes, DateOnly? date = null)
     {
-        return LeaderDtoBuilder.Valid().WithUserId(userId).WithPoints(points).WithTime(minutes).WithProposalDate(date ?? Day).WithCreationDate((date ?? Day).AddMinutes(minutes)).Build();
+        return LeaderDtoBuilder.Valid().WithUserId(userId).WithPoints(points).WithTime(minutes).WithProposalDate(date ?? Day).WithCreationDate((date ?? Day).ToDateTime(TimeOnly.MinValue).AddMinutes(minutes)).Build();
     }
 
     // ------------------------------------------------------------- GetLeaderboardAsync
@@ -77,10 +77,10 @@ public class LeaderServiceTests
     private void SetupLeaderboard(IEnumerable<LeaderDto> leaders, IEnumerable<PlayerDto> players)
     {
         _leaderRepository
-            .Setup(_ => _.GetLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<bool>()))
+            .Setup(_ => _.GetLeadersAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>(), It.IsAny<bool>()))
             .ReturnsAsync(leaders.ToList());
         _playerRepository
-            .Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+            .Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(players.ToList());
     }
 
@@ -110,7 +110,7 @@ public class LeaderServiceTests
         await _service.GetLeaderboardAsync(Day, Day, sort);
 
         _leaderRepository.Verify(
-            _ => _.GetLeadersAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), expectedOnTimeOnly),
+            _ => _.GetLeadersAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>(), expectedOnTimeOnly),
             Times.Once);
     }
 
@@ -242,7 +242,7 @@ public class LeaderServiceTests
 
     private static ProposalDto Proposal(ProposalTypes type, bool successful, int minutes)
     {
-        return ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(minutes)).Build();
+        return ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)type).WithSuccessfulFlag((byte)(successful ? 1 : 0)).WithProposalDate(Day).WithCreationDate(Day.ToDateTime(TimeOnly.MinValue).AddMinutes(minutes)).Build();
     }
 
     private void SetupMissingLeader(params ProposalDto[] proposals)
@@ -328,7 +328,7 @@ public class LeaderServiceTests
     [Fact]
     public async Task ComputeMissingLeadersAsync_RoundsTheElapsedMinutesUp()
     {
-        SetupMissingLeader(ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(61).AddSeconds(30)).Build());
+        SetupMissingLeader(ProposalDtoBuilder.Valid().WithProposalTypeId((ulong)ProposalTypes.Name).WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.ToDateTime(TimeOnly.MinValue).AddMinutes(61).AddSeconds(30)).Build());
 
         await _service.ComputeMissingLeadersAsync(TestCountryContinents.Map);
 
@@ -400,7 +400,7 @@ public class LeaderServiceTests
 
     // ------------------------------------------------------------- GetUserStreakAsync
 
-    private void SetupStreak(DateTime today, params DateTime[] foundDates)
+    private void SetupStreak(DateOnly today, params DateOnly[] foundDates)
     {
         _clock.Setup(_ => _.Today).Returns(today);
         _leaderRepository
@@ -521,7 +521,7 @@ public class LeaderServiceTests
             new[] { Leader(1, 800, 60) },
             new[]
             {
-                ProposalDtoBuilder.Valid().WithUser(2).WithProposalTypeId((ulong)ProposalTypes.Club).WithValue("Barcelone").WithSuccessfulFlag(0).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(20)).Build()
+                ProposalDtoBuilder.Valid().WithUser(2).WithProposalTypeId((ulong)ProposalTypes.Club).WithValue("Barcelone").WithSuccessfulFlag(0).WithProposalDate(Day).WithCreationDate(Day.ToDateTime(TimeOnly.MinValue).AddMinutes(20)).Build()
             },
             creatorId: 5);
 
@@ -541,7 +541,7 @@ public class LeaderServiceTests
             new[] { Leader(1, 800, 60) },
             new[]
             {
-                ProposalDtoBuilder.Valid().WithUser(1).WithProposalTypeId((ulong)ProposalTypes.Name).WithValue("Zidane").WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.AddMinutes(60)).Build()
+                ProposalDtoBuilder.Valid().WithUser(1).WithProposalTypeId((ulong)ProposalTypes.Name).WithValue("Zidane").WithSuccessfulFlag(1).WithProposalDate(Day).WithCreationDate(Day.ToDateTime(TimeOnly.MinValue).AddMinutes(60)).Build()
             },
             creatorId: 5);
 
@@ -557,7 +557,7 @@ public class LeaderServiceTests
         SetupDayboard(new List<LeaderDto>(), new List<ProposalDto>(), creatorId: 5);
 
         var result = await _service
-            .GetDayboardAsync(Day.AddHours(15), DayLeaderSorts.BestTime, TestCountryContinents.Map);
+            .GetDayboardAsync(Day, DayLeaderSorts.BestTime, TestCountryContinents.Map);
 
         result.Date.Should().Be(Day);
         result.Sort.Should().Be(DayLeaderSorts.BestTime);

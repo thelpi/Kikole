@@ -19,7 +19,7 @@ public class PlayerServiceTests
 {
     // les dates sont exprimees relativement a FirstDate pour que les tests
     // survivent au changement de cette constante
-    private static readonly DateTime FirstDate = TestCalendar.FirstDate;
+    private static readonly DateOnly FirstDate = TestCalendar.FirstDate;
 
     private readonly Mock<IPlayerHandler> _playerHandler = new();
     private readonly Mock<IPlayerRepository> _playerRepository = new();
@@ -109,7 +109,7 @@ public class PlayerServiceTests
         await _service.CreatePlayerAsync(request, 42);
 
         _playerRepository.Verify(
-            _ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
+            _ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()), Times.Never);
     }
 
     [Fact]
@@ -127,10 +127,10 @@ public class PlayerServiceTests
             });
         _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-        var shiftedInOrder = new List<(ulong id, DateTime date)>();
+        var shiftedInOrder = new List<(ulong id, DateOnly date)>();
         _playerRepository
-            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
-            .Callback<ulong, DateTime>((id, d) => shiftedInOrder.Add((id, d)))
+            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()))
+            .Callback<ulong, DateOnly>((id, d) => shiftedInOrder.Add((id, d)))
             .Returns(Task.CompletedTask);
 
         await _service.CreatePlayerAsync(request, 42);
@@ -159,10 +159,10 @@ public class PlayerServiceTests
             });
         _playerRepository.Setup(_ => _.CreatePlayerAsync(It.IsAny<PlayerDto>())).ReturnsAsync(9UL);
 
-        var shiftedInOrder = new List<(ulong id, DateTime date)>();
+        var shiftedInOrder = new List<(ulong id, DateOnly date)>();
         _playerRepository
-            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
-            .Callback<ulong, DateTime>((id, d) => shiftedInOrder.Add((id, d)))
+            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()))
+            .Callback<ulong, DateOnly>((id, d) => shiftedInOrder.Add((id, d)))
             .Returns(Task.CompletedTask);
 
         await _service.CreatePlayerAsync(request, 42);
@@ -275,7 +275,7 @@ public class PlayerServiceTests
     [Fact]
     public async Task GetPlayerClueAsync_WhenNoPlayerForThatDay_SaysWhichDayIsMissing()
     {
-        _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateTime>()))
+        _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(It.IsAny<DateOnly>()))
             .ReturnsAsync((PlayerDto?)null);
 
         Func<Task> act = () => _service.GetPlayerClueAsync(FirstDate, false, Languages.en);
@@ -327,7 +327,7 @@ public class PlayerServiceTests
     public async Task ValidatePlayerSubmissionAsync_WhenAlreadyRefused_IsRefusedAgain()
     {
         _playerRepository.Setup(_ => _.GetPlayerByIdAsync(1))
-            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithRejectDate(FirstDate).Build());
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithRejectDate(FirstDate.ToDateTime(TimeOnly.MinValue)).Build());
 
         var (error, _, _) = await _service
             .ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequestBuilder.Valid().Build());
@@ -470,7 +470,7 @@ public class PlayerServiceTests
         badges.Should().BeEmpty();
         _playerRepository.Verify(_ => _.RefusePlayerProposalAsync(1), Times.Once);
         _playerRepository.Verify(
-            _ => _.ValidatePlayerProposalAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
+            _ => _.ValidatePlayerProposalAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()), Times.Never);
     }
 
     // ------------------------------------------------------------- ReassignPlayersOfTheDayAsync
@@ -485,7 +485,7 @@ public class PlayerServiceTests
         await _service.ReassignPlayersOfTheDayAsync();
 
         _playerRepository.Verify(
-            _ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()), Times.Never);
+            _ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()), Times.Never);
     }
 
     [Fact]
@@ -498,10 +498,10 @@ public class PlayerServiceTests
                 PlayerDtoBuilder.Valid().WithId(1).Build(), PlayerDtoBuilder.Valid().WithId(2).Build(), PlayerDtoBuilder.Valid().WithId(3).Build()
             });
 
-        var assigned = new List<DateTime>();
+        var assigned = new List<DateOnly>();
         _playerRepository
-            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateTime>()))
-            .Callback<ulong, DateTime>((_, d) => assigned.Add(d))
+            .Setup(_ => _.ChangePlayerPublicationDateAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()))
+            .Callback<ulong, DateOnly>((_, d) => assigned.Add(d))
             .Returns(Task.CompletedTask);
 
         await _service.ReassignPlayersOfTheDayAsync();

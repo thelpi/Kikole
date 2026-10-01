@@ -15,7 +15,7 @@ namespace KikoleSiteUnitTests;
 /// </summary>
 public class GameCalendarLoaderTests
 {
-    private static readonly DateTime Earliest = new(2022, 3, 2);
+    private static readonly DateOnly Earliest = new(2022, 3, 2);
 
     private readonly Mock<IPlayerRepository> _playerRepository = new();
     private readonly GameCalendar _calendar = new();
@@ -26,7 +26,7 @@ public class GameCalendarLoaderTests
         _loader = new GameCalendarLoader(_playerRepository.Object, _calendar);
     }
 
-    private void EarliestPlayerIs(DateTime? date)
+    private void EarliestPlayerIs(DateOnly? date)
     {
         _playerRepository.Setup(_ => _.GetEarliestPlayerDateAsync()).ReturnsAsync(date);
     }

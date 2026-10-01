@@ -19,7 +19,7 @@ public record PlayerDto : BaseDto
     /// </summary>
     public ulong? AlternativeCountryId { get; init; }
 
-    public DateTime? PublicationDate { get; init; }
+    public DateOnly? PublicationDate { get; init; }
 
     public required string Clue { get; init; }
 

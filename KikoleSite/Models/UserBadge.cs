@@ -16,9 +16,9 @@ public class UserBadge
 
     public bool Hidden => _badge.Hidden;
 
-    public DateTime GetDate { get; }
+    public DateOnly GetDate { get; }
 
-    internal UserBadge(Badge badge, DateTime getDate)
+    internal UserBadge(Badge badge, DateOnly getDate)
     {
         _badge = badge;
         GetDate = getDate;

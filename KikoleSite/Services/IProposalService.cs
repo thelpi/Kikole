@@ -31,7 +31,7 @@ public interface IProposalService
     /// <param name="userId">User identifier.</param>
     /// <param name="countryContinents">Correspondance pays vers continent, pour deduire le continent du joueur (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Collection of proposals.</returns>
-    Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateTime proposalDate, ulong userId,
+    Task<IReadOnlyCollection<ProposalResponse>> GetProposalsAsync(DateOnly proposalDate, ulong userId,
         IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
@@ -40,5 +40,5 @@ public interface IProposalService
     /// <param name="userId">User identifier.</param>
     /// <param name="date">Day to check.</param>
     /// <returns>Grant type.</returns>
-    Task<DayGrantTypes> GetGrantAccessForDayAsync(ulong userId, DateTime date);
+    Task<DayGrantTypes> GetGrantAccessForDayAsync(ulong userId, DateOnly date);
 }
