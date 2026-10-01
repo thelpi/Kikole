@@ -200,6 +200,7 @@ internal sealed class BadgeDtoBuilder
     internal BadgeDtoBuilder WithDescription(string description) { _dto = _dto with { Description = description }; return this; }
     internal BadgeDtoBuilder Hidden(bool hidden = true) { _dto = _dto with { Hidden = (byte)(hidden ? 1 : 0) }; return this; }
     internal BadgeDtoBuilder WithHiddenFlag(byte flag) { _dto = _dto with { Hidden = flag }; return this; }
+    internal BadgeDtoBuilder Disabled(bool disabled = true) { _dto = _dto with { IsDisabled = disabled }; return this; }
     internal BadgeDtoBuilder WithCreationDate(DateTime date) { _dto = _dto with { CreationDate = date }; return this; }
 
     internal BadgeDto Build() => _dto;

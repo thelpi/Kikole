@@ -7,6 +7,9 @@ namespace KikoleSite.Repositories;
 
 public interface IBadgeRepository
 {
+    /// <summary>Ne renvoie jamais les badges desactives (<see cref="BadgeDto.IsDisabled"/>),
+    /// quel que soit <paramref name="includeHidden"/> : un badge desactive est virtuellement
+    /// supprime, un badge cache reste visible selon le contexte (proprietaire/admin).</summary>
     Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync(bool includeHidden);
 
     Task InsertUserBadgeAsync(UserBadgeDto userBadge);

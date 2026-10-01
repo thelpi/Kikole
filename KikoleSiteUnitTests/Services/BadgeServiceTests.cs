@@ -386,6 +386,24 @@ public class BadgeServiceTests
     }
 
     [Fact]
+    public async Task ADisabledBadgeIsNeverGrantedEvenIfItsConditionIsMet()
+    {
+        // suppression virtuelle : exclu par GetBadgesAsync comme en reel (BadgeRepository
+        // filtre is_disabled sans condition), donc jamais attribue meme si sa condition
+        // (YourFirstSuccess : "l => true") se declenche.
+        _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(Enum.GetValues(typeof(Badges)).Cast<Badges>()
+                .Where(b => b != Badges.YourFirstSuccess)
+                .Select(b => BadgeDtoBuilder.Valid().WithId((ulong)b).WithName(b.ToString()).WithDescription(b.ToString())
+                    .WithCreationDate(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue)).Build())
+                .ToList());
+
+        await Run(Leader(1000, 60), Player());
+
+        ShouldNotHaveGranted(Badges.YourFirstSuccess);
+    }
+
+    [Fact]
     public async Task EveryGrantedBadgeIsStampedWithTheProposalDateAndUser()
     {
         await Run(Leader(1000, 60), Player());
@@ -690,6 +708,25 @@ public class BadgeServiceTests
             });
 
         var result = await _service.GetUserBadgesAsync(UserId, UserId, Languages.en, foundToday: false);
+
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ABadgeDisabledAfterBeingObtainedDisappearsFromTheUsersBadges()
+    {
+        // le badge a ete desactive depuis : GetBadgesAsync (reel) ne le renvoie plus du
+        // tout, mais sa ligne user_badges, elle, n'est jamais effacee - suppression
+        // virtuelle, meme pour un badge deja obtenu par le proprietaire lui-meme.
+        _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<BadgeDto>());
+        _badgeRepository.Setup(_ => _.GetUserBadgesAsync(UserId))
+            .ReturnsAsync(new List<UserBadgeDto>
+            {
+                new() { UserId = UserId, BadgeId = (ulong)Badges.YourFirstSuccess, GetDate = Day.AddDays(-1) }
+            });
+
+        var result = await _service.GetUserBadgesAsync(UserId, UserId, Languages.en, foundToday: true);
 
         result.Should().BeEmpty();
     }

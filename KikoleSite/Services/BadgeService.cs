@@ -488,7 +488,11 @@ public class BadgeService : IBadgeService
         var badgesFull = new List<UserBadge>();
         foreach (var dto in dtos)
         {
-            var b = badges.Single(_ => _.Id == dto.BadgeId);
+            // absent de badges = desactive depuis l'obtention : suppression virtuelle,
+            // la ligne user_badges reste en base mais n'apparait plus ici.
+            var b = badges.SingleOrDefault(_ => _.Id == dto.BadgeId);
+            if (b == null)
+                continue;
 
             if (_clock.Today == dto.GetDate
                 && b.Hidden > 0
@@ -774,7 +778,11 @@ public class BadgeService : IBadgeService
 
         if (!hasBadge)
         {
-            var badgeMatch = allBadges.Single(b => b.Id == badge);
+            // absent de allBadges = desactive (GetBadgesAsync l'exclut toujours) : jamais
+            // attribue, meme si sa condition se declenche.
+            var badgeMatch = allBadges.SingleOrDefault(b => b.Id == badge);
+            if (badgeMatch == null)
+                return;
 
             // badge can apply only after the creation date of the badge
             if (DateOnly.FromDateTime(badgeMatch.CreationDate) <= proposalDate)

@@ -14,7 +14,9 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
 
     public async Task<IReadOnlyCollection<BadgeDto>> GetBadgesAsync(bool includeHidden)
     {
-        var parameters = new List<(string, object?)>();
+        // is_disabled exclu sans condition : contrairement a "hidden", il n'y a aucun
+        // contexte ou un badge desactive doit ressortir (suppression virtuelle).
+        var parameters = new List<(string, object?)> { ("is_disabled", 0) };
         if (!includeHidden)
             parameters.Add(("hidden", 0));
 
