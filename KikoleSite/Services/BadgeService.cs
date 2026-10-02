@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Configuration;
 using KikoleSite.Handlers;
+using KikoleSite.Helpers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
@@ -109,19 +110,55 @@ public class BadgeService : IBadgeService
             }
         };
 
+    // formation 4-4-2 + gardien : les places a remplir et leur nombre
+    private static readonly IReadOnlyDictionary<ulong, int> FourFourTwoSlots = new Dictionary<ulong, int>
+    {
+        { (ulong)Positions.Goalkeeper, 1 },
+        { (ulong)Positions.Defender, 4 },
+        { (ulong)Positions.Midfielder, 4 },
+        { (ulong)Positions.Forward, 2 }
+    };
+
+    private const int AroundTheWorldCountryCount = 20;
+
+    // un joueur peut occuper son poste principal OU son poste alternatif, jamais les deux
+    // a la fois (cf. AssignmentHelper) ; idem pour les nationalites
+    private static IEnumerable<ulong> PositionsOf(PlayerDto p)
+    {
+        yield return p.PositionId;
+        if (p.AlternativePositionId.HasValue)
+            yield return p.AlternativePositionId.Value;
+    }
+
+    private static IEnumerable<ulong> CountriesOf(PlayerDto p)
+    {
+        yield return p.CountryId;
+        if (p.AlternativeCountryId.HasValue)
+            yield return p.AlternativeCountryId.Value;
+    }
+
     private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, bool>> PlayersHistoryBasedBadgeCondition
         = new Dictionary<Badges, Func<IEnumerable<PlayerDto>, bool>>
         {
             {
+                // les 11 places doivent etre toutes remplies, chaque joueur n'en occupant qu'une
                 Badges.FourFourtwo,
-                ph => ph.Count(p => p.PositionId == (ulong)Positions.Goalkeeper) > 0
-                    && ph.Count(p => p.PositionId == (ulong)Positions.Defender) > 3
-                    && ph.Count(p => p.PositionId == (ulong)Positions.Midfielder) > 3
-                    && ph.Count(p => p.PositionId == (ulong)Positions.Forward) > 1
+                ph => AssignmentHelper.MaxAssignments(ph, PositionsOf, FourFourTwoSlots) == FourFourTwoSlots.Values.Sum()
             },
             {
+                // 20 pays differents, chaque joueur ne comptant que pour un seul de ses pays
+                // (principal ou secondaire, peu importe) : un pays n'est compte qu'une fois
                 Badges.AroundTheWorld,
-                ph => ph.Select(p => p.CountryId).Distinct().Count() >= 20
+                ph =>
+                {
+                    var players = ph.ToList();
+                    var countries = players
+                        .SelectMany(CountriesOf)
+                        .Distinct()
+                        .ToDictionary(c => c, _ => 1);
+
+                    return AssignmentHelper.MaxAssignments(players, CountriesOf, countries) >= AroundTheWorldCountryCount;
+                }
             }
         };
 

@@ -1169,6 +1169,26 @@ Branche de travail : `remaster-v2`.
         correcte et `null`/tiret sans badge, classement et égalités). Vérifié en direct
         (vraie base locale, via le navigateur) : bascule du tri, colonnes et dates
         correctement échangées, restauration correcte en revenant à un tri normal.
+- [x] **Badges et doubles postes/nationalités (2026-10-02).** `FourFourtwo` et
+      `AroundTheWorld` ignoraient `AlternativePositionId`/`AlternativeCountryId`. Nouveau
+      `Helpers/AssignmentHelper.MaxAssignments` (couplage maximum biparti, chemins
+      augmentants — polynomial, pas NP-complet) : chaque joueur n'occupe qu'**une** place
+      parmi celles qui lui sont admissibles, chaque place a une capacité.
+      - `FourFourtwo` : les 11 places (1/4/4/2) doivent toutes être remplies ; un joueur
+        milieu/attaquant ne comble qu'un seul des deux postes, jamais les deux.
+      - `AroundTheWorld` : 20 pays distincts, chaque joueur ne comptant que pour **un**
+        de ses pays (principal ou secondaire, au choix) — décision explicite de
+        l'utilisateur (pas l'union des deux nationalités).
+      - Testé (`AssignmentHelperTests`, +8, dont déplacement d'un occupant et chaînes de
+        réaffectation ; `BadgeServiceTests`, +4, dont le cas où un joueur double poste
+        ne peut pas servir deux manques à la fois).
+      - [ ] **Badge « chaque continent » à créer** : nom à trouver par l'utilisateur. Même
+        helper (un joueur = un continent parmi ceux de ses deux pays), mais `BadgeService`
+        n'a pas aujourd'hui le dictionnaire pays→continent (`IInternationalService
+        .GetCountryContinentsAsync`/`IInternationalRepository`) : dépendance à ajouter.
+        Question ouverte : « 5 continents » = 5 parmi les 6 existants (Europe, Afrique,
+        Asie, Amérique du Nord, Amérique du Sud, Océanie), n'importe lesquels, ou un
+        jeu imposé ?
 - [ ] **Présentation dans les modèles du domaine (2026-10-02).** Constat de l'utilisateur :
       `LeaderboardItem` contenait des propriétés prêtes à afficher (`BestTimeString`, puis
       `BadgePercentageString`/`AverageBadgeRarityString`), idem `DayboardLeaderItem

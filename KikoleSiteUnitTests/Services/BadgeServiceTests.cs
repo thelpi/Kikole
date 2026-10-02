@@ -453,6 +453,47 @@ public class BadgeServiceTests
     }
 
     [Fact]
+    public async Task AnAlternativePositionCanFillAMissingFourFourTwoSlot()
+    {
+        // 11 joueurs pile (le gain du jour est un milieu) : il manque un 2e attaquant, comble
+        // par un milieu de terrain dont le poste alternatif est attaquant
+        var pastFinds = new List<PlayerDto>
+        {
+            Player() with { PositionId = (ulong)Positions.Goalkeeper },
+            Player() with { PositionId = (ulong)Positions.Defender }, Player() with { PositionId = (ulong)Positions.Defender },
+            Player() with { PositionId = (ulong)Positions.Defender }, Player() with { PositionId = (ulong)Positions.Defender },
+            Player() with { PositionId = (ulong)Positions.Midfielder }, Player() with { PositionId = (ulong)Positions.Midfielder },
+            Player() with { PositionId = (ulong)Positions.Midfielder },
+            Player() with { PositionId = (ulong)Positions.Forward },
+            Player() with { PositionId = (ulong)Positions.Midfielder, AlternativePositionId = (ulong)Positions.Forward }
+        };
+
+        await RunWithPastFinds(Player(), pastFinds);
+
+        ShouldHaveGranted(Badges.FourFourtwo);
+    }
+
+    [Fact]
+    public async Task OnePlayerWithTwoPositionsNeverFillsTwoFourFourTwoSlots()
+    {
+        // 10 joueurs : le milieu/attaquant ne peut combler QUE l'un des deux manques
+        // (un 4e milieu OU un 2e attaquant), jamais les deux a la fois
+        var pastFinds = new List<PlayerDto>
+        {
+            Player() with { PositionId = (ulong)Positions.Goalkeeper },
+            Player() with { PositionId = (ulong)Positions.Defender }, Player() with { PositionId = (ulong)Positions.Defender },
+            Player() with { PositionId = (ulong)Positions.Defender }, Player() with { PositionId = (ulong)Positions.Defender },
+            Player() with { PositionId = (ulong)Positions.Midfielder }, Player() with { PositionId = (ulong)Positions.Midfielder },
+            Player() with { PositionId = (ulong)Positions.Forward },
+            Player() with { PositionId = (ulong)Positions.Midfielder, AlternativePositionId = (ulong)Positions.Forward }
+        };
+
+        await RunWithPastFinds(Player(), pastFinds);
+
+        ShouldNotHaveGranted(Badges.FourFourtwo);
+    }
+
+    [Fact]
     public async Task TwentyDistinctCountriesGrantsAroundTheWorld()
     {
         // le gain du jour compte deja la France : il en faut 19 de plus
@@ -470,6 +511,36 @@ public class BadgeServiceTests
     {
         var pastFinds = Enumerable.Range(1, 18)
             .Select(i => Player() with { CountryId = 2000 + (ulong)i })
+            .ToList();
+
+        await RunWithPastFinds(Player(), pastFinds);
+
+        ShouldNotHaveGranted(Badges.AroundTheWorld);
+    }
+
+    [Fact]
+    public async Task AnAlternativeCountryCanProvideTheTwentiethCountry()
+    {
+        // 20 joueurs (avec le gain du jour, FRA) : 18 pays principaux distincts, plus un
+        // 19e joueur dont le pays principal fait doublon (1018) mais dont le pays
+        // alternatif (1019) est nouveau
+        var pastFinds = Enumerable.Range(1, 18)
+            .Select(i => Player() with { CountryId = 1000 + (ulong)i })
+            .Append(Player() with { CountryId = 1018, AlternativeCountryId = 1019 })
+            .ToList();
+
+        await RunWithPastFinds(Player(), pastFinds);
+
+        ShouldHaveGranted(Badges.AroundTheWorld);
+    }
+
+    [Fact]
+    public async Task EachPlayerCountsForOneCountryOnly_EvenWithADualNationality()
+    {
+        // 11 joueurs (avec le gain du jour) mais 21 pays presents au total : un joueur ne
+        // vaut qu'un pays, donc 11 au maximum
+        var pastFinds = Enumerable.Range(1, 10)
+            .Select(i => Player() with { CountryId = 1000 + (ulong)i, AlternativeCountryId = 2000 + (ulong)i })
             .ToList();
 
         await RunWithPastFinds(Player(), pastFinds);
