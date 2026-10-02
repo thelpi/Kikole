@@ -41,6 +41,7 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithHideCreatorFlag(byte flag) { _dto = _dto with { HideCreator = flag }; return this; }
     internal PlayerDtoBuilder WithPublicationDate(DateOnly? date) { _dto = _dto with { PublicationDate = date }; return this; }
     internal PlayerDtoBuilder WithRejectDate(DateTime? date) { _dto = _dto with { RejectDate = date }; return this; }
+    internal PlayerDtoBuilder WithAcceptanceDate(DateTime? date) { _dto = _dto with { AcceptanceDate = date }; return this; }
     internal PlayerDtoBuilder WithCreator(ulong userId) { _dto = _dto with { CreationUserId = userId }; return this; }
     internal PlayerDtoBuilder WithBadge(ulong? badgeId) { _dto = _dto with { BadgeId = badgeId }; return this; }
     internal PlayerDtoBuilder WithHiddenCreator(bool hidden = true) { _dto = _dto with { HideCreator = (byte)(hidden ? 1 : 0) }; return this; }

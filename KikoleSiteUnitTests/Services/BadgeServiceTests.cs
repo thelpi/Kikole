@@ -1592,29 +1592,84 @@ public class BadgeServiceTests
     [Fact]
     public async Task ResetBadgesAsync_ClearsOnlyRecomputableBadges()
     {
-        // la date d'acceptation d'un kikole soumis n'est pas stockee : un recalcul ne pourrait
-        // que la deviner, ces deux-la ne sont donc jamais effaces
-        var nonRecomputable = new[]
-        {
-            Badges.DoItYourself, Badges.WeAreKikole
-        };
-
+        // plus aucun badge n'est exclu du recalcul : Dedicated, Do it yourself et We are
+        // kikole sont eux aussi efaces puis recalcules (cf. les tests ci-dessous)
         _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
             .ReturnsAsync(new List<PlayerDto>());
 
         await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
 
-        foreach (var badge in nonRecomputable)
+        foreach (var badge in new[] { Badges.YourFirstSuccess, Badges.Dedicated, Badges.DoItYourself, Badges.WeAreKikole })
         {
             _badgeRepository.Verify(
-                _ => _.ResetBadgeDatasAsync((ulong)badge), Times.Never,
-                $"{badge} est attribue manuellement et ne doit jamais etre efface");
+                _ => _.ResetBadgeDatasAsync((ulong)badge), Times.Once, $"{badge} doit etre efface puis recalcule");
         }
+    }
 
-        _badgeRepository.Verify(
-            _ => _.ResetBadgeDatasAsync((ulong)Badges.YourFirstSuccess), Times.Once);
-        _badgeRepository.Verify(
-            _ => _.ResetBadgeDatasAsync((ulong)Badges.Dedicated), Times.Once);
+    // ------------------------------------------------------------- ResetBadgesAsync : Do it yourself / We are kikole
+
+    private static readonly DateTime Accepted = new(2026, 9, 1, 14, 30, 0);
+
+    private void SetupAcceptedPlayers(UserDto creator, params DateTime?[] acceptanceDates)
+    {
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(null, null))
+            .ReturnsAsync(acceptanceDates
+                .Select(a => PlayerDtoBuilder.Valid().WithCreator(creator.Id).WithPublicationDate(Day).WithAcceptanceDate(a).Build())
+                .ToList());
+        _userRepository.Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync(new List<UserDto> { creator });
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_DoItYourselfAndWeAreKikole_AreDatedOnTheMatchingAcceptance()
+    {
+        // acceptations volontairement fournies dans le desordre : le tri se fait sur la date
+        var creator = UserDtoBuilder.Valid().WithId(UserId).WithType(UserTypes.PowerUser).Build();
+        SetupAcceptedPlayers(creator, Accepted.AddDays(20), Accepted, Accepted.AddDays(5));
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        _inserted.Should().ContainSingle(_ => _.BadgeId == (ulong)Badges.DoItYourself)
+            .Which.GetDate.Should().Be(DateOnly.FromDateTime(Accepted));
+        _inserted.Should().ContainSingle(_ => _.BadgeId == (ulong)Badges.WeAreKikole)
+            .Which.GetDate.Should().Be(DateOnly.FromDateTime(Accepted.AddDays(20)));
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_WeAreKikole_NeedsTheThresholdNumberOfAcceptedKikoles()
+    {
+        var creator = UserDtoBuilder.Valid().WithId(UserId).WithType(UserTypes.PowerUser).Build();
+        SetupAcceptedPlayers(creator, Accepted, Accepted.AddDays(1));
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        ShouldHaveGranted(Badges.DoItYourself);
+        ShouldNotHaveGranted(Badges.WeAreKikole);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_APlayerNeverAcceptedDoesNotCount()
+    {
+        // soumission en attente (ou legacy sans date) : pas de date d'acceptation, pas de badge
+        var creator = UserDtoBuilder.Valid().WithId(UserId).WithType(UserTypes.PowerUser).Build();
+        SetupAcceptedPlayers(creator, null, null, null);
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        ShouldNotHaveGranted(Badges.DoItYourself, Badges.WeAreKikole);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_AdministratorsNeverGetSubmissionBadges()
+    {
+        // un kikole cree directement par l'admin est "accepte" a sa creation, mais l'admin
+        // n'a jamais ces badges (comme en direct)
+        var admin = UserDtoBuilder.Valid().WithId(UserId).WithType(UserTypes.Administrator).Build();
+        SetupAcceptedPlayers(admin, Accepted, Accepted.AddDays(1), Accepted.AddDays(2));
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        ShouldNotHaveGranted(Badges.DoItYourself, Badges.WeAreKikole);
     }
 
     // ------------------------------------------------------------- ResetBadgesAsync : Dedicated

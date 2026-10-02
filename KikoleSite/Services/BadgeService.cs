@@ -63,12 +63,8 @@ public class BadgeService : IBadgeService
         _registrationOptions = registrationOptions.Value;
     }
 
-    private static readonly IReadOnlyCollection<Badges> NonRecomputableBadges
-        = new List<Badges>
-        {
-            Badges.DoItYourself,
-            Badges.WeAreKikole
-        };
+    /// <summary>Nombre de kikolés acceptés d'un créateur qui lui vaut le badge "We are kikolé".</summary>
+    internal const int WeAreKikoleSubmissionCount = 3;
 
     /// <summary>Longueur de la serie d'activite quotidienne de "Dedicated" (le jour courant compte).</summary>
     private const int DedicatedStreakDays = 30;
@@ -346,7 +342,7 @@ public class BadgeService : IBadgeService
         var allBadges = await _badgeRepository
             .GetBadgesAsync(true);
 
-        foreach (var badge in allBadges.Where(b => !NonRecomputableBadges.Contains((Badges)b.Id)))
+        foreach (var badge in allBadges)
         {
             await _badgeRepository
                 .ResetBadgeDatasAsync(badge.Id);
@@ -394,6 +390,8 @@ public class BadgeService : IBadgeService
         }
 
         await PrepareDedicatedBadgesInternalAsync(playersHistoryFull, allBadges);
+
+        await PrepareSubmissionBadgesInternalAsync(allBadges);
 
         if (_registrationOptions.SponsorshipEnabled)
         {
@@ -444,6 +442,41 @@ public class BadgeService : IBadgeService
             {
                 await InsertBadgeIfNotAlreadyAsync(
                         firstDay.Value, userId, (ulong)Badges.Dedicated, [], allBadges);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Recalcul global de "Do it yourself" (1er kikole accepte d'un createur) et "We are
+    /// kikole" (le Neme kikole accepte, cf. <see cref="WeAreKikoleSubmissionCount"/>) :
+    /// les kikoles acceptes d'un createur, tries par date d'acceptation
+    /// (<see cref="PlayerDto.AcceptanceDate"/>), datent le badge du jour de l'acceptation
+    /// correspondante, comme en direct. Les administrateurs n'ont jamais ces badges.
+    /// </summary>
+    private async Task PrepareSubmissionBadgesInternalAsync(IReadOnlyCollection<BadgeDto> allBadges)
+    {
+        var acceptedByCreator = (await _playerRepository.GetPlayersOfTheDayAsync(null, null))
+            .Where(p => p.AcceptanceDate.HasValue)
+            .GroupBy(p => p.CreationUserId)
+            .ToDictionary(g => g.Key, g => g.Select(p => p.AcceptanceDate!.Value).Order().ToList());
+
+        if (acceptedByCreator.Count == 0)
+            return;
+
+        var creators = await _userRepository.GetUsersByIdsAsync([.. acceptedByCreator.Keys]);
+
+        foreach (var creator in creators.Where(u => u.UserTypeId != (ulong)UserTypes.Administrator))
+        {
+            var acceptances = acceptedByCreator[creator.Id];
+
+            await InsertBadgeIfNotAlreadyAsync(
+                    DateOnly.FromDateTime(acceptances[0]), creator.Id, (ulong)Badges.DoItYourself, [], allBadges);
+
+            if (acceptances.Count >= WeAreKikoleSubmissionCount)
+            {
+                await InsertBadgeIfNotAlreadyAsync(
+                        DateOnly.FromDateTime(acceptances[WeAreKikoleSubmissionCount - 1]),
+                        creator.Id, (ulong)Badges.WeAreKikole, [], allBadges);
             }
         }
     }

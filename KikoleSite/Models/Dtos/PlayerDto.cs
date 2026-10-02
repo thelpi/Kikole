@@ -40,5 +40,13 @@ public record PlayerDto : BaseDto
 
     public DateTime? RejectDate { get; init; }
 
+    /// <summary>
+    /// Moment ou le kikole a ete accepte (soumission validee par l'administrateur). Egal a
+    /// <c>CreationDate</c> pour un kikole cree directement par l'administrateur. <c>Null</c>
+    /// tant qu'il n'est pas accepte. Sert a recalculer les badges "Do it yourself" et
+    /// "We are kikole".
+    /// </summary>
+    public DateTime? AcceptanceDate { get; init; }
+
     public byte HideCreator { get; init; }
 }

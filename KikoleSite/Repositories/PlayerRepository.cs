@@ -14,6 +14,8 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
 
     public async Task<ulong> CreatePlayerAsync(PlayerDto player)
     {
+        var now = Clock.Now;
+
         return await ExecuteInsertAsync(
                 "players",
                 ("name", player.Name),
@@ -22,7 +24,10 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 ("country_id", player.CountryId),
                 ("alternative_country_id", player.AlternativeCountryId),
                 ("publication_date", player.PublicationDate),
-                ("creation_date", Clock.Now),
+                ("creation_date", now),
+                // un kikole cree directement date (administrateur) est accepte d'office, a sa
+                // creation ; une soumission en attente (pas de date) ne l'est pas encore
+                ("acceptance_date", player.PublicationDate.HasValue ? now : null),
                 ("clue", player.Clue),
                 ("easy_clue", player.EasyClue),
                 ("position_id", player.PositionId),
@@ -107,12 +112,13 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         await ExecuteNonQueryAsync(
                 "UPDATE players " +
-                "SET publication_date = @date " +
+                "SET publication_date = @date, acceptance_date = @now " +
                 "WHERE id = @playerId",
                 new
                 {
                     playerId,
-                    date
+                    date,
+                    now = Clock.Now
                 });
     }
 

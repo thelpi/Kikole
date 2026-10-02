@@ -4513,6 +4513,10 @@ CREATE TABLE players (
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   reject_date datetime DEFAULT NULL,
+  -- date a laquelle le kikole a ete accepte (soumission validee par l'admin) ; egale a
+  -- creation_date pour un kikole cree directement par l'admin ; NULL tant qu'il n'est ni
+  -- accepte ni date. Sert a recalculer les badges "Do it yourself" / "We are kikole".
+  acceptance_date datetime DEFAULT NULL,
   hide_creator tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 

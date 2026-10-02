@@ -125,10 +125,10 @@ SET @pool_size = 8;
 SET SESSION cte_max_recursion_depth = 10000;
 
 -- journee cachee (FirstDate - 1) - clue en image locale (cf. note plus haut)
-INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator) VALUES
+INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, acceptance_date, hide_creator) VALUES
 (1, 'Andrea Pirlo', 'pirlo;andrea pirlo', 1979, 111, DATE_SUB(@first_date, INTERVAL 1 DAY),
  '/media/clues/mock-clue-image.png', 'He won the 2006 World Cup with Italy.',
- 3, NULL, 1, '2026-09-01 09:00:00', NULL, 0);
+ 3, NULL, 1, '2026-09-01 09:00:00', NULL, '2026-09-01 09:00:00', 0);
 
 INSERT INTO player_clubs (player_id, club_id, history_position, is_loan) VALUES
 (1, 89, 1, 0), (1, 93, 2, 0), (1, 85, 3, 0), (1, 94, 4, 0);
@@ -198,10 +198,10 @@ WITH RECURSIVE seq AS (
 )
 SELECT i, d FROM seq;
 
-INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, hide_creator)
+INSERT INTO players (id, name, allowed_names, year_of_birth, country_id, publication_date, clue, easy_clue, position_id, badge_id, creation_user_id, creation_date, reject_date, acceptance_date, hide_creator)
 SELECT mock_days.i + 2, mock_pool.name, mock_pool.allowed_names, mock_pool.year_of_birth, mock_pool.country_id,
        mock_days.d, mock_pool.clue_en, mock_pool.easy_en, mock_pool.position_id, NULL, 1,
-       TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '09:00:00'), NULL, 0
+       TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '09:00:00'), NULL, TIMESTAMP(DATE_SUB(@first_date, INTERVAL 1 DAY), '09:00:00'), 0
 FROM mock_days
 JOIN mock_pool ON mock_pool.p = MOD(mock_days.i, @pool_size);
 
