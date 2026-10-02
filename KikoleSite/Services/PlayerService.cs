@@ -25,6 +25,9 @@ public class PlayerService : IPlayerService
     /// </summary>
     private const int MinimumDaysBeforeHiddenPlayer = 30;
 
+    /// <summary>Nombre de kikolés acceptés d'un créateur qui lui vaut le badge "We are kikolé".</summary>
+    private const int WeAreKikoleSubmissionCount = 3;
+
     private readonly IPlayerHandler _playerHandler;
     private readonly IPlayerRepository _playerRepository;
     private readonly IUserRepository _userRepository;
@@ -256,7 +259,9 @@ public class PlayerService : IPlayerService
             var players = await _playerRepository
                 .GetPlayersByCreatorAsync(p.CreationUserId, true);
 
-            if (players.Count == 5)
+            // egalite stricte : le badge est accorde une seule fois, a la soumission qui fait
+            // atteindre le seuil (le joueur tout juste accepte est deja compte ici)
+            if (players.Count == WeAreKikoleSubmissionCount)
                 badges.Add(Badges.WeAreKikole);
 
             // TODO: notify (+ badge)

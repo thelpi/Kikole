@@ -406,9 +406,9 @@ public class PlayerServiceTests
     }
 
     [Fact]
-    public async Task ValidatePlayerSubmissionAsync_TheFifthAcceptedPlayerGrantsWeAreKikole()
+    public async Task ValidatePlayerSubmissionAsync_TheThirdAcceptedPlayerGrantsWeAreKikole()
     {
-        SetupPendingPlayer(5);
+        SetupPendingPlayer(3);
 
         var (_, _, badges) = await _service
             .ValidatePlayerSubmissionAsync(Acceptance());
@@ -417,12 +417,12 @@ public class PlayerServiceTests
     }
 
     [Theory]
+    [InlineData(2)]
     [InlineData(4)]
-    [InlineData(6)]
-    public async Task ValidatePlayerSubmissionAsync_WeAreKikoleIsGrantedOnlyOnTheExactFifth(int accepted)
+    public async Task ValidatePlayerSubmissionAsync_WeAreKikoleIsGrantedOnlyOnTheExactThird(int accepted)
     {
         // la comparaison est une egalite stricte : le badge est manque si le compteur
-        // saute 5, et n'est jamais redonne ensuite
+        // saute 3, et n'est jamais redonne ensuite
         SetupPendingPlayer(accepted);
 
         var (_, _, badges) = await _service

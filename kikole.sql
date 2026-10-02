@@ -33,7 +33,7 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (16, 'Four Four two', 'Find enough kikolés to create a 442 formation + goalkeeper', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (17, 'Around the world', 'Find kikolés from 20 countries', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (18, 'Wooden spoon', 'Find a kikolé without scoring points', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
-(19, 'We are kikolé', 'Submit 5 kikolés', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
+(19, 'We are kikolé', 'Submit 3 kikolés', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (20, 'Wikipedia screenshot', 'Find a kikolé solely with club submissions prior (at least one)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (21, 'Passport check', 'Find a kikolé without any club submission prior', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
 (22, 'Everything not lost', 'Find a kikolé without any correct submission prior (at least one incorrect)', 0, '2022-03-03 22:17:41', '2022-03-03 21:17:41'),
@@ -49,6 +49,13 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (32, 'Don Corleone', 'Sponsor your first godchild', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (34, 'Confederations Cup', 'Find kikolés from all six continents, one continent per kikolé (a player with two countries counts for only one continent)', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00');
+
+-- Badges desactives (suppression virtuelle, cf. badges.is_disabled) :
+--  - 30 Phoenix : regle a reprendre (risque de penaliser les joueurs assidus) ;
+--  - 32 Don Corleone et 33 The Famous Five : parrainage ferme a l'ouverture du site
+--    (Registration:SponsorshipEnabled = false). A l'activation du parrainage, repasser
+--    aussi ces deux-la a 0 : UPDATE badges SET is_disabled = 0 WHERE id IN (32, 33);
+UPDATE badges SET is_disabled = 1 WHERE id IN (30, 32, 33);
 
 CREATE TABLE badge_translations (
   badge_id bigint(20) UNSIGNED NOT NULL,
@@ -76,7 +83,7 @@ INSERT INTO badge_translations (badge_id, language_id, `name`, description) VALU
 (16, 2, 'Quatre-quatre-deux', 'Trouvez suffisamment de kikolés pour former une composition 442 + gardien de but'),
 (17, 2, 'Le tour du monde', 'Trouvez des kikolés de 20 pays différents'),
 (18, 2, 'Cuillère de bois', 'Trouvez un kikolé sans marquer de points'),
-(19, 2, 'Nous sommes kikolé', 'Proposez 5 kikolés'),
+(19, 2, 'Nous sommes kikolé', 'Proposez 3 kikolés'),
 (20, 2, 'Capture d\'écran Wikipédia', 'Trouvez un kikolé en ne soumettant que des clubs au préalable (au moins un)'),
 (21, 2, 'Contrôle des passeports', 'Trouvez un kikolé sans soumettre de clubs au préalable'),
 (22, 2, 'Tout n\'est pas perdu', 'Trouvez un kikolé en ne soumettant que des propositions incorrectes au préalable (au moins une)'),

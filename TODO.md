@@ -182,6 +182,17 @@ Branche de travail : `remaster-v2`.
         `record` à propriétés `init`, la config ne peut pas être mutée après coup sur
         l'instance déjà câblée dans le contrôleur/service de test). `dotnet build` propre,
         `dotnet test` : 702 tests unitaires verts.
+      - [ ] **Étape d'activation du parrainage (décidée 2026-10-02)** : le site ouvre sans
+        parrainage et sans utilisateurs préexistants autres que l'admin ; l'activation, si
+        elle a lieu, est supposée sans retour en arrière. Les badges `Don Corleone` (32) et
+        `The Famous Five` (33) sont donc **désactivés** (`badges.is_disabled = 1`, via
+        `kikole.sql` et la base locale) tant que le flag est fermé : ils sortent du
+        catalogue, du classement par badges (total atteignable = tous les badges actifs),
+        de l'attribution et du recalcul. **À l'activation : deux interrupteurs**, le flag
+        `Registration:SponsorshipEnabled` ET `UPDATE badges SET is_disabled = 0 WHERE id IN
+        (32, 33);` — en oublier un rend le parrainage silencieusement sans badge. (Solution
+        retenue plutôt qu'un couplage automatique au flag dans le code : plus de code pour
+        un basculement qui n'arrive qu'une fois.)
 - [x] **Inscription par email, abandon de la question secrète (2026-09-27)** — demandé
       explicitement par l'utilisateur ("on va faire l'inscription par adresse email"),
       arbitrages discutés puis "tu peux démarrer". Colonnes `password_reset_question`/
@@ -1067,6 +1078,12 @@ Branche de travail : `remaster-v2`.
         documentée dans le code : contrairement aux badges de série existants, les jours où
         l'utilisateur est le créateur du kikolé du jour ne sont pas traités à part — à
         revoir si le cas se présente en pratique.
+        - [ ] **Désactivé (2026-10-02, `is_disabled = 1`), règle à reprendre.** Doute
+          persistant de l'utilisateur : le badge risque d'ennuyer les joueurs assidus (par
+          construction, il demande 7 jours de tentatives sans victoire « propre », donc il
+          pénalise justement ceux qui trouvent presque tous les jours). Code, tests
+          (`BadgeServiceTests`) et ligne en base conservés tels quels ; réflexion à mener
+          sur comment le reprendre, puis repasser `is_disabled` à 0 (ou le supprimer).
       - Les deux ajoutés à `Badges.cs` (29, 30), `kikole.sql` (lignes `badges`/
         `badge_translations`, + seedées directement en base locale via un test
         d'intégration jetable, créé puis supprimé) et testés (`BadgeServiceTests.cs`, 7
