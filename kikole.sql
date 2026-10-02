@@ -47,7 +47,8 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (30, 'Phoenix', 'Find the kikolé with points and without the easy clue, after unsuccessful 7 days in a row', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (31, 'The end?', 'Reach the "end" of the game', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (32, 'Don Corleone', 'Sponsor your first godchild', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
-(33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00');
+(33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
+(34, 'Confederations Cup', 'Find kikolés from all six continents, one continent per kikolé (a player with two countries counts for only one continent)', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00');
 
 CREATE TABLE badge_translations (
   badge_id bigint(20) UNSIGNED NOT NULL,
@@ -89,7 +90,8 @@ INSERT INTO badge_translations (badge_id, language_id, `name`, description) VALU
 (30, 2, 'Phénix', 'Trouvez un kikolé avec des points et sans l\'indice facile, juste après 7 jours d\'affilée infructueux'),
 (31, 2, 'La fin', 'Atteignez la « fin » du jeu'),
 (32, 2, 'Don Corleone', 'Parrainez votre premier filleul'),
-(33, 2, 'Le Club des Cinq', 'Parrainez 5 filleuls');
+(33, 2, 'Le Club des Cinq', 'Parrainez 5 filleuls'),
+(34, 2, 'Coupe des confédérations', 'Trouvez des kikolés des six continents, un continent par kikolé (un joueur de deux nationalités ne compte que pour un seul continent)');
 
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,

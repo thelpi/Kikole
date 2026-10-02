@@ -19,12 +19,14 @@ public interface IBadgeService
     /// <param name="playerOfTheDay">The player found.</param>
     /// <param name="proposalsBeforeWin">Proposals made by the user BEFORE finding the player.</param>
     /// <param name="language">User language.</param>
+    /// <param name="countryContinents">Correspondance pays vers continent (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Collection of <see cref="UserBadge"/>.</returns>
     Task<IReadOnlyCollection<UserBadge>> PrepareNewLeaderBadgesAsync(
         LeaderDto leader,
         PlayerDto playerOfTheDay,
         IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
-        Languages language);
+        Languages language,
+        IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
     /// Prepares badges triggered by a user making a proposal.
@@ -79,6 +81,8 @@ public interface IBadgeService
     /// <summary>
     /// Resets and recomputes datas on every badge.
     /// </summary>
+    /// <param name="language">User language.</param>
+    /// <param name="countryContinents">Correspondance pays vers continent (voir <see cref="IInternationalService.GetCountryContinentsAsync"/>).</param>
     /// <returns>Nothing.</returns>
-    Task ResetBadgesAsync(Languages language);
+    Task ResetBadgesAsync(Languages language, IReadOnlyDictionary<ulong, ulong> countryContinents);
 }

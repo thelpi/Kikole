@@ -137,19 +137,24 @@ public class BadgeService : IBadgeService
             yield return p.AlternativeCountryId.Value;
     }
 
-    private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, bool>> PlayersHistoryBasedBadgeCondition
-        = new Dictionary<Badges, Func<IEnumerable<PlayerDto>, bool>>
+    // les six confederations FIFA = les six continents de la table continents
+    private const int ConfederationsCupContinentCount = 6;
+
+    // second argument : correspondance pays -> continent, ignore par les badges qui n'en
+    // ont pas besoin
+    private static readonly IReadOnlyDictionary<Badges, Func<IEnumerable<PlayerDto>, IReadOnlyDictionary<ulong, ulong>, bool>> PlayersHistoryBasedBadgeCondition
+        = new Dictionary<Badges, Func<IEnumerable<PlayerDto>, IReadOnlyDictionary<ulong, ulong>, bool>>
         {
             {
                 // les 11 places doivent etre toutes remplies, chaque joueur n'en occupant qu'une
                 Badges.FourFourtwo,
-                ph => AssignmentHelper.MaxAssignments(ph, PositionsOf, FourFourTwoSlots) == FourFourTwoSlots.Values.Sum()
+                (ph, _) => AssignmentHelper.MaxAssignments(ph, PositionsOf, FourFourTwoSlots) == FourFourTwoSlots.Values.Sum()
             },
             {
                 // 20 pays differents, chaque joueur ne comptant que pour un seul de ses pays
                 // (principal ou secondaire, peu importe) : un pays n'est compte qu'une fois
                 Badges.AroundTheWorld,
-                ph =>
+                (ph, ignoredCountryContinents) =>
                 {
                     var players = ph.ToList();
                     var countries = players
@@ -158,6 +163,24 @@ public class BadgeService : IBadgeService
                         .ToDictionary(c => c, _ => 1);
 
                     return AssignmentHelper.MaxAssignments(players, CountriesOf, countries) >= AroundTheWorldCountryCount;
+                }
+            },
+            {
+                // un kikole de chacun des six continents, chaque joueur ne comptant que pour
+                // un seul continent parmi ceux de ses deux pays (le continent se deduit du pays)
+                Badges.ConfederationsCup,
+                (ph, countryContinents) =>
+                {
+                    IEnumerable<ulong> ContinentsOf(PlayerDto p) => CountriesOf(p)
+                        .Where(countryContinents.ContainsKey)
+                        .Select(c => countryContinents[c])
+                        .Distinct();
+
+                    var continents = countryContinents.Values
+                        .Distinct()
+                        .ToDictionary(c => c, _ => 1);
+
+                    return AssignmentHelper.MaxAssignments(ph, ContinentsOf, continents) >= ConfederationsCupContinentCount;
                 }
             }
         };
@@ -293,7 +316,7 @@ public class BadgeService : IBadgeService
         };
 
     /// <inheritdoc />
-    public async Task ResetBadgesAsync(Languages language)
+    public async Task ResetBadgesAsync(Languages language, IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var allBadges = await _badgeRepository
             .GetBadgesAsync(true);
@@ -339,7 +362,7 @@ public class BadgeService : IBadgeService
                     .ToList();
 
                 await PrepareNewLeaderBadgesInternalAsync(
-                        leader, pDay, proposals, allBadges, leadersHistory, playersHistory, language);
+                        leader, pDay, proposals, allBadges, leadersHistory, playersHistory, language, countryContinents);
             }
 
             date = date.AddDays(1);
@@ -363,7 +386,8 @@ public class BadgeService : IBadgeService
         LeaderDto leader,
         PlayerDto playerOfTheDay,
         IReadOnlyCollection<ProposalDto> proposalsBeforeWin,
-        Languages language)
+        Languages language,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var allBadges = await _badgeRepository
             .GetBadgesAsync(true);
@@ -375,7 +399,7 @@ public class BadgeService : IBadgeService
             .GetPlayersOfTheDayAsync(_gameCalendar.FirstDate, leader.ProposalDate);
 
         return await PrepareNewLeaderBadgesInternalAsync(
-                leader, playerOfTheDay, proposalsBeforeWin, allBadges, leadersHistory, playersHistory, language);
+                leader, playerOfTheDay, proposalsBeforeWin, allBadges, leadersHistory, playersHistory, language, countryContinents);
     }
 
     /// <inheritdoc />
@@ -557,7 +581,8 @@ public class BadgeService : IBadgeService
         IReadOnlyCollection<BadgeDto> allBadges,
         IReadOnlyCollection<LeaderDto> leadersHistory,
         IReadOnlyCollection<PlayerDto> playersHistory,
-        Languages language)
+        Languages language,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         var collectedBadges = new List<ulong>();
 
@@ -671,7 +696,7 @@ public class BadgeService : IBadgeService
 
         foreach (var badge in PlayersHistoryBasedBadgeCondition.Keys)
         {
-            if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory))
+            if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory, countryContinents))
             {
                 await InsertBadgeIfNotAlreadyAsync(
                         leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -231,7 +231,7 @@ public class AdminControllerTests : IDisposable
     {
         var result = await _controller.RecomputeBadges();
 
-        _badgeService.Verify(_ => _.ResetBadgesAsync(It.IsAny<Languages>()), Times.Once);
+        _badgeService.Verify(_ => _.ResetBadgesAsync(It.IsAny<Languages>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Once);
         result.Should().BeOfType<ViewResult>();
     }
 

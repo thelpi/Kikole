@@ -297,7 +297,7 @@ public class HomeController : KikoleBaseController
             if (leader != null)
             {
                 var leaderBadges = await _badgeService
-                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, ViewHelper.GetLanguage());
+                    .PrepareNewLeaderBadgesAsync(leader, pInfo.Player, proposalsAlready, ViewHelper.GetLanguage(), countryContinents);
 
                 foreach (var b in leaderBadges)
                     response.AddBadge(b);

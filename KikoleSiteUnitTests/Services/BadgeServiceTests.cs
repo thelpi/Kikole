@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -149,7 +149,7 @@ public class BadgeServiceTests
             .ReturnsAsync(new List<LeaderDto> { leader });
 
         await _service
-            .PrepareNewLeaderBadgesAsync(leader, player, proposals.ToList(), Languages.en);
+            .PrepareNewLeaderBadgesAsync(leader, player, proposals.ToList(), Languages.en, TestCountryContinents.Map);
     }
 
     private void ShouldHaveGranted(params Badges[] badges)
@@ -172,7 +172,10 @@ public class BadgeServiceTests
     /// qui reste <c>FirstDate</c> — pour laisser de la place a un historique passe, sans
     /// quoi la fenetre [FirstDate, gain] ne contiendrait que le jour du gain lui-meme.
     /// </summary>
-    private async Task RunWithPastFinds(PlayerDto todayPlayer, IReadOnlyList<PlayerDto> pastFinds)
+    private async Task RunWithPastFinds(
+        PlayerDto todayPlayer,
+        IReadOnlyList<PlayerDto> pastFinds,
+        IReadOnlyDictionary<ulong, ulong>? countryContinents = null)
     {
         var winDay = Day.AddDays(pastFinds.Count + 1);
         var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(winDay).WithCreationDate(winDay.ToDateTime(TimeOnly.MinValue).AddMinutes(60)).WithPoints(1000).WithTime(60).Build();
@@ -199,7 +202,7 @@ public class BadgeServiceTests
         _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(pastFindsWithDates.Append(player).ToList());
 
-        await _service.PrepareNewLeaderBadgesAsync(leader, player, [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(leader, player, [], Languages.en, countryContinents ?? TestCountryContinents.Map);
     }
 
     // ------------------------------------------------------------- badges de score
@@ -548,6 +551,90 @@ public class BadgeServiceTests
         ShouldNotHaveGranted(Badges.AroundTheWorld);
     }
 
+    // ------------------------------------------------------------- Coupe des confederations
+
+    // le gain du jour est francais (Europe) ; un pays fictif par autre continent
+    private static readonly IReadOnlyDictionary<ulong, ulong> ConfederationsMap = new Dictionary<ulong, ulong>
+    {
+        { (ulong)Countries.FRA, (ulong)Continents.Europe },
+        { 9001, (ulong)Continents.Africa },
+        { 9002, (ulong)Continents.Asia },
+        { 9003, (ulong)Continents.NorthAmerica },
+        { 9004, (ulong)Continents.SouthAmerica },
+        { 9005, (ulong)Continents.Oceania }
+    };
+
+    private static PlayerDto FromCountry(ulong country, ulong? alternative = null)
+        => Player() with { CountryId = country, AlternativeCountryId = alternative };
+
+    [Fact]
+    public async Task APlayerFromEachOfTheSixContinentsGrantsTheConfederationsCup()
+    {
+        var pastFinds = new List<PlayerDto>
+        {
+            FromCountry(9001), FromCountry(9002), FromCountry(9003), FromCountry(9004), FromCountry(9005)
+        };
+
+        await RunWithPastFinds(Player(), pastFinds, ConfederationsMap);
+
+        ShouldHaveGranted(Badges.ConfederationsCup);
+    }
+
+    [Fact]
+    public async Task FiveContinentsOutOfSixDoNotGrantTheConfederationsCup()
+    {
+        // Oceanie manquante
+        var pastFinds = new List<PlayerDto>
+        {
+            FromCountry(9001), FromCountry(9002), FromCountry(9003), FromCountry(9004)
+        };
+
+        await RunWithPastFinds(Player(), pastFinds, ConfederationsMap);
+
+        ShouldNotHaveGranted(Badges.ConfederationsCup);
+    }
+
+    [Fact]
+    public async Task ASecondCountryCanProvideTheMissingContinent()
+    {
+        // 6 joueurs : le dernier est europeen (doublon) mais sa 2e nationalite est oceanienne
+        var pastFinds = new List<PlayerDto>
+        {
+            FromCountry(9001), FromCountry(9002), FromCountry(9003), FromCountry(9004),
+            FromCountry((ulong)Countries.FRA, alternative: 9005)
+        };
+
+        await RunWithPastFinds(Player(), pastFinds, ConfederationsMap);
+
+        ShouldHaveGranted(Badges.ConfederationsCup);
+    }
+
+    [Fact]
+    public async Task OnePlayerNeverCountsForTwoContinents()
+    {
+        // 5 joueurs seulement : le dernier est sud-americain OU oceanien, jamais les deux,
+        // donc 5 continents au maximum
+        var pastFinds = new List<PlayerDto>
+        {
+            FromCountry(9001), FromCountry(9002), FromCountry(9003), FromCountry(9004, alternative: 9005)
+        };
+
+        await RunWithPastFinds(Player(), pastFinds, ConfederationsMap);
+
+        ShouldNotHaveGranted(Badges.ConfederationsCup);
+    }
+
+    [Fact]
+    public async Task WithoutAnyCountryContinentMappingTheConfederationsCupIsNeverGranted()
+    {
+        // garde-fou : une correspondance vide ne doit jamais valoir "tous les continents"
+        var pastFinds = new List<PlayerDto> { FromCountry(9001), FromCountry(9002) };
+
+        await RunWithPastFinds(Player(), pastFinds, new Dictionary<ulong, ulong>());
+
+        ShouldNotHaveGranted(Badges.ConfederationsCup);
+    }
+
     // ------------------------------------------------------------- OneMinuteChrono
 
     private async Task RunChrono(IReadOnlyList<ProposalDto> proposals, int clubsCount = 5)
@@ -559,7 +646,7 @@ public class BadgeServiceTests
         _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(leader.ProposalDate, It.IsAny<bool>()))
             .ReturnsAsync(new List<LeaderDto> { leader });
 
-        await _service.PrepareNewLeaderBadgesAsync(leader, player, proposals, Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(leader, player, proposals, Languages.en, TestCountryContinents.Map);
     }
 
     private static List<ProposalDto> ChronoProposals(DateTime winTime, int secondsBeforeWin, int clubsCount = 5, bool includeClueRequest = false)
@@ -922,7 +1009,7 @@ public class BadgeServiceTests
         _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, Day))
             .ReturnsAsync(new List<UserBadgeDto> { new() { UserId = 999, BadgeId = (ulong)Badges.OverTheTopPart1, GetDate = Day } });
 
-        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en, TestCountryContinents.Map);
 
         ShouldNotHaveGranted(Badges.OverTheTopPart1);
         _badgeRepository.Verify(
@@ -940,7 +1027,7 @@ public class BadgeServiceTests
         _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, It.IsAny<bool>()))
             .ReturnsAsync(new List<LeaderDto> { leader, other });
 
-        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en, TestCountryContinents.Map);
 
         ShouldNotHaveGranted(Badges.OverTheTopPart1);
         _badgeRepository.Verify(
@@ -961,7 +1048,7 @@ public class BadgeServiceTests
         _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync((ulong)Badges.OverTheTopPart1, Day))
             .ReturnsAsync(new List<UserBadgeDto> { new() { UserId = 999, BadgeId = (ulong)Badges.OverTheTopPart1, GetDate = Day } });
 
-        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en, TestCountryContinents.Map);
 
         ShouldHaveGranted(Badges.OverTheTopPart1);
         _badgeRepository.Verify(
@@ -979,7 +1066,7 @@ public class BadgeServiceTests
         _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, It.IsAny<bool>()))
             .ReturnsAsync(new List<LeaderDto> { leader, other });
 
-        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(leader, Player(), [], Languages.en, TestCountryContinents.Map);
 
         ShouldHaveGranted(Badges.OverTheTopPart2);
     }
@@ -1011,7 +1098,7 @@ public class BadgeServiceTests
         _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(It.IsAny<DateOnly?>(), It.IsAny<DateOnly?>()))
             .ReturnsAsync(createdPlayers);
 
-        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en, TestCountryContinents.Map);
     }
 
     /// <summary>
@@ -1238,7 +1325,7 @@ public class BadgeServiceTests
             .Setup(_ => _.GetProposalsAsync(WinDay.AddDays(-7), WinDay.AddDays(-1), UserId))
             .ReturnsAsync(allRecentProposals);
 
-        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, winProposals.ToList(), Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, winProposals.ToList(), Languages.en, TestCountryContinents.Map);
     }
 
     [Fact]
@@ -1306,7 +1393,7 @@ public class BadgeServiceTests
         _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(WinDay, It.IsAny<bool>()))
             .ReturnsAsync(new List<LeaderDto> { todayLeader });
 
-        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en);
+        await _service.PrepareNewLeaderBadgesAsync(todayLeader, player, [], Languages.en, TestCountryContinents.Map);
 
         ShouldNotHaveGranted(Badges.Phoenix);
         _proposalRepository.Verify(
@@ -1421,7 +1508,7 @@ public class BadgeServiceTests
         _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
             .ReturnsAsync(new List<PlayerDto>());
 
-        await _service.ResetBadgesAsync(Languages.en);
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
 
         foreach (var badge in nonRecomputable)
         {
@@ -1445,7 +1532,7 @@ public class BadgeServiceTests
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
             .ReturnsAsync(new List<UserDto> { Godchild(1, Day.ToDateTime(TimeOnly.MinValue)) });
 
-        await _service.ResetBadgesAsync(Languages.en);
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
 
         ShouldHaveGranted(Badges.DonCorleone);
     }
@@ -1461,7 +1548,7 @@ public class BadgeServiceTests
         _userRepository.Setup(_ => _.GetGodchildrenAsync(UserId))
             .ReturnsAsync(new List<UserDto> { Godchild(1, Day.ToDateTime(TimeOnly.MinValue)) });
 
-        await BuildService(sponsorshipEnabled: false).ResetBadgesAsync(Languages.en);
+        await BuildService(sponsorshipEnabled: false).ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
 
         ShouldNotHaveGranted(Badges.DonCorleone);
         _userRepository.Verify(_ => _.GetSponsorUserIdsAsync(), Times.Never);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -348,7 +348,7 @@ public class HomeControllerTests
         var renderedModel = ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Subject;
         renderedModel.JustWon.Should().BeFalse();
         _badgeService.Verify(_ => _.PrepareNewLeaderBadgesAsync(
-            It.IsAny<LeaderDto>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyCollection<ProposalDto>>(), It.IsAny<Languages>()),
+            It.IsAny<LeaderDto>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyCollection<ProposalDto>>(), It.IsAny<Languages>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()),
             Times.Never);
         _badgeService.Verify(_ => _.PrepareNonLeaderBadgesAsync(7, It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), Lang), Times.Once);
 
@@ -389,7 +389,7 @@ public class HomeControllerTests
             .ReturnsAsync((response, proposalsAlready, leader));
 
         _badgeService
-            .Setup(_ => _.PrepareNewLeaderBadgesAsync(leader, playerFull.Player, proposalsAlready, Lang))
+            .Setup(_ => _.PrepareNewLeaderBadgesAsync(leader, playerFull.Player, proposalsAlready, Lang, TestCountryContinents.Map))
             .ReturnsAsync(Array.Empty<UserBadge>());
         _badgeService
             .Setup(_ => _.PrepareNonLeaderBadgesAsync(7, It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), Lang))
@@ -401,7 +401,7 @@ public class HomeControllerTests
 
         var renderedModel = ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Subject;
         renderedModel.JustWon.Should().BeTrue();
-        _badgeService.Verify(_ => _.PrepareNewLeaderBadgesAsync(leader, playerFull.Player, proposalsAlready, Lang), Times.Once);
+        _badgeService.Verify(_ => _.PrepareNewLeaderBadgesAsync(leader, playerFull.Player, proposalsAlready, Lang, TestCountryContinents.Map), Times.Once);
     }
 
     [Fact]
@@ -450,7 +450,7 @@ public class HomeControllerTests
         _badgeService.Verify(_ => _.PrepareNonLeaderBadgesAsync(
             It.IsAny<ulong>(), It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), It.IsAny<Languages>()), Times.Never);
         _badgeService.Verify(_ => _.PrepareNewLeaderBadgesAsync(
-            It.IsAny<LeaderDto>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyCollection<ProposalDto>>(), It.IsAny<Languages>()), Times.Never);
+            It.IsAny<LeaderDto>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyCollection<ProposalDto>>(), It.IsAny<Languages>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
     }
 
     // ------------------------------------------------------------- Contact

@@ -1182,13 +1182,17 @@ Branche de travail : `remaster-v2`.
       - Testé (`AssignmentHelperTests`, +8, dont déplacement d'un occupant et chaînes de
         réaffectation ; `BadgeServiceTests`, +4, dont le cas où un joueur double poste
         ne peut pas servir deux manques à la fois).
-      - [ ] **Badge « chaque continent » à créer** : nom à trouver par l'utilisateur. Même
-        helper (un joueur = un continent parmi ceux de ses deux pays), mais `BadgeService`
-        n'a pas aujourd'hui le dictionnaire pays→continent (`IInternationalService
-        .GetCountryContinentsAsync`/`IInternationalRepository`) : dépendance à ajouter.
-        Question ouverte : « 5 continents » = 5 parmi les 6 existants (Europe, Afrique,
-        Asie, Amérique du Nord, Amérique du Sud, Océanie), n'importe lesquels, ou un
-        jeu imposé ?
+      - [x] **Badge « Coupe des confédérations » (id 34, 2026-10-02)** : un kikolé de chacun
+        des **six** continents (= les six confédérations FIFA), un continent par joueur
+        parmi ceux de ses deux pays (le continent se déduit du pays). Même helper
+        d'affectation. Le dictionnaire pays→continent est passé en paramètre à
+        `IBadgeService.PrepareNewLeaderBadgesAsync`/`ResetBadgesAsync` (même convention que
+        `ProposalService`, pas de nouvelle dépendance de service) ; le seuil est une
+        constante (6) et non le nombre de continents du dictionnaire, pour qu'une
+        correspondance vide ne vaille jamais « tous les continents ». `Badges` enum,
+        `kikole.sql` (EN « Confederations Cup », FR « Coupe des confédérations », date de
+        création 2026-10-02 : pas d'attribution rétroactive avant), seedé dans la base
+        locale. Testé (+5 dans `BadgeServiceTests`).
 - [ ] **Présentation dans les modèles du domaine (2026-10-02).** Constat de l'utilisateur :
       `LeaderboardItem` contenait des propriétés prêtes à afficher (`BestTimeString`, puis
       `BadgePercentageString`/`AverageBadgeRarityString`), idem `DayboardLeaderItem

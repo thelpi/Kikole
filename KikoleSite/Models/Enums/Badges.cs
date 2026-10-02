@@ -34,5 +34,6 @@ public enum Badges
     Phoenix,
     TheEnd,
     DonCorleone,
-    TheFamousFive
+    TheFamousFive,
+    ConfederationsCup
 }

@@ -76,7 +76,7 @@ public class AdminController : KikoleBaseController
     public async Task<IActionResult> RecomputeBadges()
     {
         await _badgeService
-            .ResetBadgesAsync(ViewHelper.GetLanguage());
+            .ResetBadgesAsync(ViewHelper.GetLanguage(), await _internationalService.GetCountryContinentsAsync());
 
         return await RenderActionsAsync(new AdminModel());
     }
