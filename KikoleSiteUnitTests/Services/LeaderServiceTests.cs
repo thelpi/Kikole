@@ -25,6 +25,7 @@ public class LeaderServiceTests
     private readonly Mock<IUserRepository> _userRepository = new();
     private readonly Mock<IProposalRepository> _proposalRepository = new();
     private readonly Mock<IPlayerHandler> _playerHandler = new();
+    private readonly Mock<IBadgeRepository> _badgeRepository = new();
     private readonly Mock<IClock> _clock = new();
     private readonly Mock<IGameCalendar> _gameCalendar = TestCalendar.Mock();
     private readonly LeaderService _service;
@@ -52,7 +53,8 @@ public class LeaderServiceTests
             _clock.Object,
             _gameCalendar.Object,
             localizer.Object,
-            _playerHandler.Object);
+            _playerHandler.Object,
+            _badgeRepository.Object);
     }
 
     private void SetupUsers(params (ulong id, string login)[] users)
@@ -561,5 +563,201 @@ public class LeaderServiceTests
 
         result.Date.Should().Be(Day);
         result.Sort.Should().Be(DayLeaderSorts.BestTime);
+    }
+
+    // ------------------------------------------------------------- GetLeaderboardAsync (BadgePercentage)
+
+    private void SetupBadgePercentagePopulation(params (ulong id, string login)[] users)
+    {
+        SetupUsers(users);
+        _leaderRepository
+            .Setup(_ => _.GetLeadersAsync(null, null, false))
+            .ReturnsAsync(users.Select(u => LeaderDtoBuilder.Valid().WithUserId(u.id).Build()).ToList());
+        _playerRepository
+            .Setup(_ => _.GetPlayersOfTheDayAsync(null, null))
+            .ReturnsAsync(new List<PlayerDto>());
+    }
+
+    private void SetupActiveBadges(params ulong[] badgeIds)
+    {
+        _badgeRepository
+            .Setup(_ => _.GetBadgesAsync(true))
+            .ReturnsAsync(badgeIds.Select(id => BadgeDtoBuilder.Valid().WithId(id).Build()).ToList());
+    }
+
+    private void SetupUserBadges(params (ulong userId, ulong badgeId, DateOnly date)[] rows)
+    {
+        _badgeRepository
+            .Setup(_ => _.GetAllUserBadgesAsync())
+            .ReturnsAsync(rows.Select(r => new UserBadgeDto { UserId = r.userId, BadgeId = r.badgeId, GetDate = r.date }).ToList());
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_ComputesFoundMissingAndPercentage()
+    {
+        SetupBadgePercentagePopulation((1, "joueur"));
+        SetupActiveBadges(1, 2, 3, 4);
+        SetupUserBadges((1, 1, Day), (1, 2, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        var item = result.Single();
+        item.BadgesFound.Should().Be(2);
+        item.BadgesMissing.Should().Be(2);
+        item.BadgePercentage.Should().Be(50);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_IgnoresTheDateRangeArguments()
+    {
+        // cumule sur toute la partie : les dates passees par l'appelant (meme tres
+        // eloignees) n'ont aucun effet sur ce tri
+        SetupBadgePercentagePopulation((1, "joueur"));
+        SetupActiveBadges(1, 2);
+        SetupUserBadges((1, 1, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day.AddYears(5), Day.AddYears(5), LeaderSorts.BadgePercentage);
+
+        result.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_HiddenBadgesCountInTheTotalForEveryone()
+    {
+        SetupBadgePercentagePopulation((1, "joueur"));
+        _badgeRepository
+            .Setup(_ => _.GetBadgesAsync(true))
+            .ReturnsAsync(new List<BadgeDto>
+            {
+                BadgeDtoBuilder.Valid().WithId(1).Build(),
+                BadgeDtoBuilder.Valid().WithId(2).Hidden().Build()
+            });
+        SetupUserBadges((1, 1, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        var item = result.Single();
+        item.BadgesMissing.Should().Be(1); // le badge cache compte dans le total de tout le monde
+        item.BadgePercentage.Should().Be(50);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_DisabledBadgesAreExcludedFromTheTotal()
+    {
+        SetupBadgePercentagePopulation((1, "joueur"));
+        _badgeRepository
+            .Setup(_ => _.GetBadgesAsync(true))
+            .ReturnsAsync(new List<BadgeDto> { BadgeDtoBuilder.Valid().WithId(1).Build() });
+            // badge 2 desactive : absent de GetBadgesAsync(true), comme en reel
+        SetupUserBadges((1, 1, Day), (1, 2, Day)); // vieille ligne pour le badge 2, desormais desactive
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        var item = result.Single();
+        item.BadgesFound.Should().Be(1);
+        item.BadgesMissing.Should().Be(0);
+        item.BadgePercentage.Should().Be(100);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_UserWithNoBadgesHasNoAverageRarity()
+    {
+        SetupBadgePercentagePopulation((1, "joueur"));
+        SetupActiveBadges(1, 2);
+        SetupUserBadges();
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        var item = result.Single();
+        item.AverageBadgeRarity.Should().BeNull();
+        item.AverageBadgeRarityString.Should().Be("-");
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_RarerBadgeGivesAHigherAverageRarity()
+    {
+        // badge 1 : tout le monde l'a (rarete 0 %) ; badge 2 : a est le seul a l'avoir (100 %)
+        SetupBadgePercentagePopulation((1, "a"), (2, "b"));
+        SetupActiveBadges(1, 2);
+        SetupUserBadges((1, 1, Day), (2, 1, Day), (1, 2, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        result.Single(_ => _.UserId == 1).AverageBadgeRarity.Should().Be(50); // moyenne de (0 %, 100 %)
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_ASoleHolderGetsFullRarity()
+    {
+        // le detenteur lui-meme n'est pas compte parmi "les autres" : un badge unique vaut
+        // 100 %, pas 1 - 1/N
+        SetupBadgePercentagePopulation((1, "a"), (2, "b"), (3, "c"));
+        SetupActiveBadges(1, 2);
+        SetupUserBadges((1, 1, Day), (1, 2, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        result.Single(_ => _.UserId == 1).AverageBadgeRarity.Should().Be(100);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_TheOnlyPlayerOfThePopulationIsUnique()
+    {
+        // population d'un seul joueur : pas d'"autres" a comparer (evite 0/0), unique par defaut
+        SetupBadgePercentagePopulation((1, "seul"));
+        SetupActiveBadges(1);
+        SetupUserBadges((1, 1, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        result.Single().AverageBadgeRarity.Should().Be(100);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_RanksByPercentageThenByAverageRarity()
+    {
+        // a : badges 1+2, b : badges 1+3, c : badge 2 seul. Detenteurs : badge 1 = a,b ;
+        // badge 2 = a,c ; badge 3 = b seul. Rarete moyenne : a = 50 %, b = 75 %, c = 50 %.
+        SetupBadgePercentagePopulation((1, "a"), (2, "b"), (3, "c"));
+        SetupActiveBadges(1, 2, 3);
+        SetupUserBadges(
+            (1, 1, Day), (1, 2, Day),
+            (2, 1, Day), (2, 3, Day),
+            (3, 2, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        result.Single(_ => _.UserId == 2).Rank.Should().Be(1); // autant de badges que a, mais plus rares
+        result.Single(_ => _.UserId == 1).Rank.Should().Be(2);
+        result.Single(_ => _.UserId == 3).Rank.Should().Be(3); // moins de badges : jamais devant, meme rare
+        result.Select(_ => _.UserId).Should().ContainInOrder(2UL, 1UL, 3UL);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_SameBadgeCountAndSameRarityShareTheSameRank()
+    {
+        SetupBadgePercentagePopulation((1, "a"), (2, "b"));
+        SetupActiveBadges(1, 2);
+        SetupUserBadges(
+            (1, 1, Day), (1, 2, Day),
+            (2, 1, Day), (2, 2, Day));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        result.Should().OnlyContain(_ => _.Rank == 1);
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_BadgePercentage_ObtentionDateDoesNotInfluenceTheRank()
+    {
+        // meme badges, dates d'obtention tres differentes : la date n'est ni affichee ni un
+        // critere de depart, donc egalite parfaite
+        SetupBadgePercentagePopulation((1, "a"), (2, "b"));
+        SetupActiveBadges(1);
+        SetupUserBadges((1, 1, Day), (2, 1, Day.AddDays(200)));
+
+        var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
+
+        result.Should().OnlyContain(_ => _.Rank == 1);
     }
 }

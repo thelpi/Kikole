@@ -295,6 +295,16 @@ public class LeaderboardController : KikoleBaseController
     private async Task<(IReadOnlyCollection<Models.LeaderboardItem>, DayGrantTypes)> GetLeaderboardAsync(
         DateOnly minDate, DateOnly maxDate, LeaderSorts sortType, DayGrantTypes? todayGrant)
     {
+        // cumul sur toute la partie, aucune notion de periode ni de spoil du jour (le %
+        // de badges ne revele rien sur le kikole du jour) : ni la garde d'acces "today",
+        // ni le bornage de dates ci-dessous ne s'appliquent a ce tri.
+        if (sortType == LeaderSorts.BadgePercentage)
+        {
+            var badgeBoard = await _leaderService
+                .GetLeaderboardAsync(minDate, maxDate, sortType);
+            return (badgeBoard, todayGrant ?? DayGrantTypes.None);
+        }
+
         var todayGrantEnsured = todayGrant ?? await _proposalService
             .GetGrantAccessForDayAsync(UserId, _clock.Today);
 

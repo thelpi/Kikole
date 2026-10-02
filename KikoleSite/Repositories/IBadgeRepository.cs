@@ -24,6 +24,12 @@ public interface IBadgeRepository
 
     Task<IReadOnlyCollection<UserBadgeDto>> GetUserBadgesAsync(ulong userId);
 
+    /// <summary>Tous les badges de tous les utilisateurs, sans filtre (ni sur l'utilisateur,
+    /// ni sur le badge) : utilise par le classement "% de badges obtenus"
+    /// (<see cref="Services.LeaderService"/>), qui filtre ensuite lui-meme sur sa propre
+    /// population et sur les badges actifs.</summary>
+    Task<IReadOnlyCollection<UserBadgeDto>> GetAllUserBadgesAsync();
+
     Task ResetBadgeDatasAsync(ulong badgeId);
 
     Task<BadgeTranslationDto?> GetBadgeTranslationAsync(ulong badgeId, ulong languageId);

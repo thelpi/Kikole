@@ -126,6 +126,18 @@
   <data name="AttemptedHeader" xml:space="preserve">
     <value>Attempted</value>
   </data>
+  <data name="AverageRarityHeader" xml:space="preserve">
+    <value>Avg. rarity</value>
+  </data>
+  <data name="BadgePercentageHeader" xml:space="preserve">
+    <value>Badges %</value>
+  </data>
+  <data name="BadgesFoundHeader" xml:space="preserve">
+    <value>Badges found</value>
+  </data>
+  <data name="BadgesMissingHeader" xml:space="preserve">
+    <value>Badges missing</value>
+  </data>
   <data name="BestPlayersMonthCount" xml:space="preserve">
     <value>Best players of the month by kikolés found</value>
   </data>

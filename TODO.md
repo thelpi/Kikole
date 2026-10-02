@@ -1122,12 +1122,53 @@ Branche de travail : `remaster-v2`.
           FR corrects). Pas de test live d'un vrai déblocage (nécessiterait un historique
           réel de 30+ jours sans trou, pas simulable rapidement) — couvert par les tests
           unitaires à la place.
-- [ ] **Classement des participants par % de badges obtenus.** Demandé en aparté par
-      l'utilisateur pendant ce même chantier (2026-09-08). Rien commencé — probablement un
-      nouveau `LeaderSorts` (cf. `LeaderboardController`/`LeaderService.GetLeaderboardAsync`)
-      calculant, par utilisateur, `(badges obtenus / total des badges) %` ; à voir si les
-      badges cachés doivent compter dans le total ou être exclus du calcul pour tout le
-      monde sauf leur détenteur.
+- [x] **Classement des participants par % de badges obtenus** (demandé en aparté le
+      2026-09-08, implémenté le 2026-10-02). Nouveau tri `LeaderSorts.BadgePercentage` sur
+      le "Classement général", avec des colonnes entièrement différentes (Rang, Nom,
+      Badges trouvés, Badges non trouvés, %, Rareté moyenne) et sans dates (champs
+      désactivés/grisés côté client, ignorées côté serveur — ce tri est un cumul sur toute
+      la partie, pas sur une période).
+      - **Périmètre décidé avec l'utilisateur** : dénominateur = tous les badges actifs
+        (`is_disabled` exclu), **cachés inclus** et identiques pour tout le monde —
+        philosophie assumée : l'existence d'un badge caché n'est pas un secret, seuls son
+        nom et sa description le sont tant qu'on ne l'a pas (léger effet de bord accepté :
+        un utilisateur pointilleux peut recouper le total affiché ici avec ce qu'il compte
+        sur la page stats d'un tiers et en déduire qu'un badge caché existe, sans savoir
+        lequel). Population = tous les joueurs du classement général (quiconque a déjà
+        trouvé ou créé un kikolé), sans borne de date puisque ce tri n'en a pas.
+      - **Départage** : % descendant, puis rareté moyenne descendante (le plus rare
+        devant). Première version : date du dernier badge obtenu ; abandonnée après test
+        car cette date n'est pas affichée dans le tableau alors que la rareté l'est — le
+        départage doit être lisible par le joueur. La rareté est comparée **arrondie**,
+        comme affichée (deux lignes affichant la même valeur partagent le même rang, pas
+        de départage par une décimale invisible). Une vraie égalité (même nombre de badges
+        et même rareté affichée) reste une égalité avec le même rang — décision explicite
+        de l'utilisateur, pas de critère de repli arbitraire type `UserId`.
+      - **Rareté** d'un badge, du point de vue de son détenteur = proportion des **autres**
+        joueurs de la population qui ne l'ont pas : `1 - (détenteurs - 1) / (population - 1)`
+        (100 % = seul détenteur, 0 % = tout le monde l'a ; population d'un seul joueur =
+        100 %). Première version `1 - détenteurs / population`, corrigée après test : le
+        détenteur comptait dans le dénominateur, un badge unique plafonnait à `1 - 1/N`
+        (92 % pour N = 12). Rareté moyenne d'un utilisateur = moyenne simple sur ses badges
+        obtenus, tiret (`-`) si zéro badge (0/0 indéfini).
+      - Nouveau `IBadgeRepository.GetAllUserBadgesAsync()` (tout `user_badges`, sans
+        filtre) pour éviter un N+1 : `LeaderService` reçoit désormais `IBadgeRepository`
+        en dépendance (nouveau paramètre de ctor, tests mis à jour en conséquence).
+        `LeaderboardController.GetLeaderboardAsync` court-circuite la garde d'accès
+        "today"/le bornage de dates pour ce tri (sans objet : le % de badges ne révèle
+        rien sur le kikole du jour).
+      - Classement calculé via `CollectionHelper.SetPositions` sur une clé composite
+        `(badgesTrouvés, rareté arrondie)`, les deux en ordre descendant : un seul tri,
+        et l'égalité n'est détectée que si les deux composantes matchent.
+      - Vue/JS : une seule table (`globalLeaderboardTable`), l'en-tête et les lignes sont
+        entièrement reconstruits en JS selon le tri sélectionné (pas de table dupliquée) ;
+        l'en-tête "normal" est capturé une fois au chargement pour pouvoir être restauré
+        en quittant ce tri.
+      - Testé (`LeaderServiceTests.cs`, +8 : calcul found/missing/%, badges cachés comptés
+        pour tout le monde, badges désactivés exclus, dates ignorées, rareté moyenne
+        correcte et `null`/tiret sans badge, classement et égalités). Vérifié en direct
+        (vraie base locale, via le navigateur) : bascule du tri, colonnes et dates
+        correctement échangées, restauration correcte en revenant à un tri normal.
 - [x] **Noms de badges en français : mécanisme en place (2026-09-26), traductions à
       fournir.** Demandé par l'utilisateur : les badges ne devaient pas s'afficher en anglais
       en version française. `badge_translations` porte maintenant une colonne `name` en plus

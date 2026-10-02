@@ -383,7 +383,7 @@ var loadKikolesStats = function (sort, desc) {
     });
 };
 
-var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText) {
+var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText, badgesFoundHeader, badgesMissingHeader, badgePercentageHeader, averageRarityHeader) {
     paginateTable(document.getElementById('globalLeaderboardTable'));
     paginateTable(document.getElementById('dailyLeaderboardTable'));
     paginateTableByGroup(document.getElementById('monthlyPodiumTable'));
@@ -393,14 +393,38 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
     var sortType = document.getElementById('SortType');
     var fromDate = document.getElementById('MinimalDate');
     var toDate = document.getElementById('MaximalDate');
+
+    /* l'entete "normale" (Points/Temps min./Trouves/...) n'existe qu'une fois, rendue par
+       le serveur : on la capture avant de jamais la modifier, pour pouvoir la restaurer
+       quand on quitte le tri "% de badges" (seul tri dont les colonnes different). */
+    var globalLeaderboardTableEl = document.getElementById('globalLeaderboardTable');
+    globalLeaderboardTableEl.dataset.defaultHeaderHtml = globalLeaderboardTableEl.tHead.rows[0].innerHTML;
+
+    var badgeHeaders = {
+        found: badgesFoundHeader,
+        missing: badgesMissingHeader,
+        percentage: badgePercentageHeader,
+        rarity: averageRarityHeader
+    };
+
+    /* le % de badges est un cumul sur toute la partie, sans notion de periode : les
+       filtres de dates n'ont pas de sens pour ce tri, donc desactives plutot que
+       masques (la mise en page du formulaire reste stable). */
+    var syncGlobalLeaderboardDateFields = function () {
+        var isBadgeMode = sortType.value === 'BadgePercentage';
+        fromDate.disabled = isBadgeMode;
+        toDate.disabled = isBadgeMode;
+    };
+
     sortType.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
+        syncGlobalLeaderboardDateFields();
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId, badgeHeaders);
     };
     fromDate.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId, badgeHeaders);
     };
     toDate.onchange = function () {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId, badgeHeaders);
     };
 
     /* daily */
@@ -429,7 +453,8 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
        declenche pas pour une restauration programmatique). On resynchronise des que ca
        arrive. */
     if (isControlValueStale(sortType) || isControlValueStale(fromDate) || isControlValueStale(toDate)) {
-        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId);
+        syncGlobalLeaderboardDateFields();
+        loadGlobalLeaderboard(sortType.value, fromDate.value, toDate.value, noUserInTableText, currentUserId, badgeHeaders);
     }
     if (isControlValueStale(dailySortType) || isControlValueStale(dailyDate)) {
         loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
@@ -463,6 +488,15 @@ var appendUsernameCell = function (row, userId, userName, href, currentUserId) {
         newCell.classList.add('you');
         row.classList.add('you-row');
     }
+    return newCell;
+};
+
+/* cellule texte simple, factorisee pour les deux variantes de colonnes du classement
+   general (normale et "% de badges", cf. loadGlobalLeaderboard). */
+var appendTextCell = function (row, text) {
+    var newCell = row.insertCell();
+    newCell.appendChild(document.createTextNode(text));
+    newCell.classList.add('tabData');
     return newCell;
 };
 
@@ -585,66 +619,69 @@ $(function () {
     }
 });
 /* leaderboard loading */
-var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText, currentUserId) {
-    if (!dateMin || !dateMax) {
+
+/* le tri "% de badges" (cumul sur toute la partie, sans notion de periode) n'affiche pas
+   les memes colonnes que les autres : Rang/Joueur restent communs, le reste (Points/Temps
+   min./Trouves/Tentes/Proposes vs Badges trouves/manquants/%/Rarete moy.) est entierement
+   remplace, entete comprise (cf. badgeHeaders, capture dans initializeLeaderboards). */
+var loadGlobalLeaderboard = function (sortType, dateMin, dateMax, noUserInTableText, currentUserId, badgeHeaders) {
+    var isBadgeMode = sortType === 'BadgePercentage';
+    if (!isBadgeMode && (!dateMin || !dateMax)) {
         return;
     }
+    var url = '/global-leaderboard-details?sortType=' + sortType +
+        '&minimalDate=' + (dateMin || '1970-01-01') + '&maximalDate=' + (dateMax || '1970-01-01');
     $.ajax({
-        url: '/global-leaderboard-details?sortType=' + sortType + '&minimalDate=' + dateMin + '&maximalDate=' + dateMax,
+        url: url,
         type: "GET",
         dataType: "json",
         success: function (data) {
             var table = document.getElementById('globalLeaderboardTable');
             var tbodyRef = table.getElementsByTagName('tbody')[0];
             var newtbody = document.createElement('tbody');
+
+            var headRow = table.tHead.rows[0];
+            if (isBadgeMode) {
+                var posHtml = headRow.cells[0].outerHTML;
+                var usernameHtml = headRow.cells[1].outerHTML;
+                headRow.innerHTML = posHtml + usernameHtml +
+                    '<th class="tabDataHead">' + badgeHeaders.found + '</th>' +
+                    '<th class="tabDataHead">' + badgeHeaders.missing + '</th>' +
+                    '<th class="tabDataHead">' + badgeHeaders.percentage + '</th>' +
+                    '<th class="tabDataHead">' + badgeHeaders.rarity + '</th>';
+            } else {
+                headRow.innerHTML = table.dataset.defaultHeaderHtml;
+            }
+
+            var colSpan = isBadgeMode ? 6 : 7;
             var i = 0;
             data.forEach(e => {
                 var trClass = i % 2 == 0 ? "even" : "odd";
                 var newRow = newtbody.insertRow();
                 newRow.classList.add(trClass);
 
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(e.rank);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
-
+                appendTextCell(newRow, e.rank);
                 appendUsernameCell(newRow, e.userId, e.userName, '/Leaderboard?userId=' + e.userId, currentUserId);
 
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(e.points);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
-
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(e.bestTimeString);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
-
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(e.kikolesFound);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
-
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(e.kikolesAttempted);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
-
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(e.kikolesProposed);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
+                if (isBadgeMode) {
+                    appendTextCell(newRow, e.badgesFound);
+                    appendTextCell(newRow, e.badgesMissing);
+                    appendTextCell(newRow, e.badgePercentageString);
+                    appendTextCell(newRow, e.averageBadgeRarityString);
+                } else {
+                    appendTextCell(newRow, e.points);
+                    appendTextCell(newRow, e.bestTimeString);
+                    appendTextCell(newRow, e.kikolesFound);
+                    appendTextCell(newRow, e.kikolesAttempted);
+                    appendTextCell(newRow, e.kikolesProposed);
+                }
 
                 i++;
             });
             if (i == 0) {
                 var newRow = newtbody.insertRow();
                 newRow.classList.add('even');
-                var newCell = newRow.insertCell();
-                var newText = document.createTextNode(noUserInTableText);
-                newCell.appendChild(newText);
-                newCell.classList.add('tabData');
-                newCell.colSpan = 7;
+                appendTextCell(newRow, noUserInTableText).colSpan = colSpan;
             }
             table.replaceChild(newtbody, tbodyRef);
             paginateTable(table);

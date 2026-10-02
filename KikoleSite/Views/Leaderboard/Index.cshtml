@@ -270,6 +270,10 @@
             @Html.Raw(Json.Serialize(localizer["HiddenDayboard"].Value)),
             @Model.CurrentUserId,
             @Html.Raw(Json.Serialize(localizer["DiscoverLeaderboard"].Value)),
-            @Html.Raw(Json.Serialize("-" + KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points + " " + localizer["Points"].Value)));
+            @Html.Raw(Json.Serialize("-" + KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points + " " + localizer["Points"].Value)),
+            @Html.Raw(Json.Serialize(localizer["BadgesFoundHeader"].Value)),
+            @Html.Raw(Json.Serialize(localizer["BadgesMissingHeader"].Value)),
+            @Html.Raw(Json.Serialize(localizer["BadgePercentageHeader"].Value)),
+            @Html.Raw(Json.Serialize(localizer["AverageRarityHeader"].Value)));
     });
 </script>

@@ -160,6 +160,7 @@ public static class ViewHelper
             LeaderSorts.TotalPoints => IsFrench() ? "Points" : "Points",
             LeaderSorts.SuccessCountOverall => IsFrench() ? "Nombre de succès (inc. hors-délai)" : "Success count (inc. out of time)",
             LeaderSorts.TotalPointsOverall => IsFrench() ? "Points (inc. hors-délai)" : "Points (inc. out of time)",
+            LeaderSorts.BadgePercentage => IsFrench() ? "Pourcentage de badges" : "Badge percentage",
             _ => throw new NotImplementedException(),
         };
     }

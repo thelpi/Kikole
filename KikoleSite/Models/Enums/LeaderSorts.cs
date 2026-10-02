@@ -6,5 +6,6 @@ public enum LeaderSorts
     BestTime,
     TotalPoints,
     SuccessCountOverall,
-    TotalPointsOverall
+    TotalPointsOverall,
+    BadgePercentage
 }

@@ -77,6 +77,12 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
                 ("user_id", userId));
     }
 
+    public async Task<IReadOnlyCollection<UserBadgeDto>> GetAllUserBadgesAsync()
+    {
+        return await ExecuteReaderAsync<UserBadgeDto>(
+                "SELECT * FROM user_badges", null);
+    }
+
     public async Task ResetBadgeDatasAsync(ulong badgeId)
     {
         await ExecuteNonQueryAsync(

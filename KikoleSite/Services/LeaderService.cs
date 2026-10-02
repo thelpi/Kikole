@@ -24,6 +24,7 @@ public class LeaderService : ILeaderService
     private readonly ILeaderRepository _leaderRepository;
     private readonly IUserRepository _userRepository;
     private readonly IProposalRepository _proposalRepository;
+    private readonly IBadgeRepository _badgeRepository;
     private readonly IClock _clock;
     private readonly IGameCalendar _gameCalendar;
     private readonly IStringLocalizer<Translations> _resources;
@@ -40,6 +41,7 @@ public class LeaderService : ILeaderService
     /// <param name="playerHandler">Instance of <see cref="IPlayerHandler"/>.</param>
     /// <param name="clock">Clock service.</param>
     /// <param name="gameCalendar">Instance of <see cref="IGameCalendar"/>.</param>
+    /// <param name="badgeRepository">Instance of <see cref="IBadgeRepository"/>.</param>
     public LeaderService(IPlayerRepository playerRepository,
         ILeaderRepository leaderRepository,
         IUserRepository userRepository,
@@ -47,7 +49,8 @@ public class LeaderService : ILeaderService
         IClock clock,
         IGameCalendar gameCalendar,
         IStringLocalizer<Translations> resources,
-        IPlayerHandler playerHandler)
+        IPlayerHandler playerHandler,
+        IBadgeRepository badgeRepository)
     {
         _playerRepository = playerRepository;
         _leaderRepository = leaderRepository;
@@ -57,11 +60,18 @@ public class LeaderService : ILeaderService
         _gameCalendar = gameCalendar;
         _resources = resources;
         _playerHandler = playerHandler;
+        _badgeRepository = badgeRepository;
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyCollection<LeaderboardItem>> GetLeaderboardAsync(DateOnly startDate, DateOnly endDate, LeaderSorts leaderSort)
     {
+        // pas de notion de periode pour ce tri (cumul sur toute la partie) : startDate/
+        // endDate sont ignorees, l'appelant (LeaderboardController) n'a meme pas besoin de
+        // les faire varier pour ce cas.
+        if (leaderSort == LeaderSorts.BadgePercentage)
+            return await GetBadgePercentageLeaderboardAsync();
+
         if (startDate > endDate)
         {
             var tmp = endDate;
@@ -136,6 +146,86 @@ public class LeaderService : ILeaderService
         }
 
         return items;
+    }
+
+    /// <summary>
+    /// Classement par pourcentage de badges obtenus. Population = tous les joueurs du
+    /// classement general, sans borne de date (meme definition que
+    /// <see cref="ComputeLeaderboardItemsAsync"/>, mais sur l'integralite de l'historique,
+    /// puisque ce tri n'a pas de notion de periode). Le total de badges (denominateur) est
+    /// le meme pour tout le monde : tous les badges actifs, caches inclus, desactives
+    /// exclus - choix explicite de l'utilisateur, l'existence d'un badge cache n'est pas
+    /// un secret, seuls son nom et sa description le sont tant qu'on ne l'a pas.
+    /// </summary>
+    private async Task<IReadOnlyCollection<LeaderboardItem>> GetBadgePercentageLeaderboardAsync()
+    {
+        var leaders = await _leaderRepository.GetLeadersAsync(null, null, false);
+        var players = await _playerRepository.GetPlayersOfTheDayAsync(null, null);
+
+        var allUsersId = players
+            .Select(_ => _.CreationUserId)
+            .Concat(leaders.Select(_ => _.UserId))
+            .Distinct();
+
+        var users = await GetUsersFromIdsAsync(allUsersId);
+        if (users.Count == 0)
+            return [];
+
+        var activeBadges = await _badgeRepository.GetBadgesAsync(true);
+        var activeBadgeIds = activeBadges.Select(b => b.Id).ToHashSet();
+        var totalBadgeCount = activeBadgeIds.Count;
+
+        var userIds = users.Select(u => u.Id).ToHashSet();
+
+        var relevantUserBadges = (await _badgeRepository.GetAllUserBadgesAsync())
+            .Where(ub => userIds.Contains(ub.UserId) && activeBadgeIds.Contains(ub.BadgeId))
+            .ToList();
+
+        // rarete d'un badge, du point de vue de son detenteur = proportion des AUTRES
+        // joueurs qui ne l'ont pas : 0 = tout le monde l'a, 1 = il est seul a l'avoir.
+        // Toujours appelee pour un badge que l'utilisateur possede (holders >= 1).
+        var holdersPerBadge = relevantUserBadges
+            .GroupBy(ub => ub.BadgeId)
+            .ToDictionary(g => g.Key, g => g.Select(ub => ub.UserId).Distinct().Count());
+
+        double RarityOf(ulong badgeId)
+        {
+            // seul joueur de la population : personne d'autre a comparer, donc unique
+            if (users.Count == 1)
+                return 1d;
+
+            var otherHolders = holdersPerBadge.GetValueOrDefault(badgeId) - 1;
+            return 1d - (double)otherHolders / (users.Count - 1);
+        }
+
+        var items = new List<LeaderboardItem>(users.Count);
+        foreach (var user in users)
+        {
+            var ownedBadges = relevantUserBadges.Where(ub => ub.UserId == user.Id).ToList();
+
+            var found = ownedBadges.Count;
+
+            items.Add(new LeaderboardItem
+            {
+                UserId = user.Id,
+                UserName = user.Login,
+                BadgesFound = found,
+                BadgesMissing = totalBadgeCount - found,
+                BadgePercentage = totalBadgeCount == 0 ? 0 : (double)found / totalBadgeCount * 100d,
+                AverageBadgeRarity = found == 0 ? null : ownedBadges.Average(ub => RarityOf(ub.BadgeId)) * 100d
+            });
+        }
+
+        // % descendant puis rarete moyenne descendante (le plus rare devant) : deux colonnes
+        // visibles du tableau, donc le depart est lisible par le joueur. La rarete est
+        // comparee arrondie, comme affichee (BadgePercentageString/AverageBadgeRarityString) :
+        // deux lignes qui affichent la meme valeur partagent le meme rang, au lieu d'etre
+        // departagees par une decimale invisible. Sans badge, la rarete est nulle pour tous
+        // (ils sont tous a egalite de toute facon).
+        return items.SetPositions(
+            i => (i.BadgesFound, (int)Math.Round(i.AverageBadgeRarity ?? 0)),
+            true,
+            (i, r) => i.Rank = r);
     }
 
     /// <inheritdoc />

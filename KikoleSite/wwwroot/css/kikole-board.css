@@ -372,6 +372,14 @@ body { padding-top: 0; }
   border-color: var(--accent);
 }
 
+/* tri "% de badges" du classement general : les dates n'ont pas de sens (cumul sans
+   notion de periode), desactivees plutot que masquees. Opacite moderee, pas plus bas,
+   pour rester lisible. */
+.kikole-board .date-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .kikole-board .day-nav .date-field { width: 104px; }
 
 .kikole-board .masthead-score {
