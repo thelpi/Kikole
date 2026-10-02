@@ -1211,6 +1211,20 @@ Branche de travail : `remaster-v2`.
         (`players.BadgeId`, aucun n'en porte aujourd'hui). Testé (+5, dont un test qui
         épingle ce dernier choix). **Effet de bord** : un badge se déclenche donc seulement
         à une victoire à l'heure ; la date enregistrée reste celle du kikolé (`ProposalDate`).
+      - **Badges non recalculables (2026-10-02)** : il y en avait trois (`DoItYourself`,
+        `WeAreKikole`, `Dedicated`) — le recalcul global admin ne les effaçait ni ne les
+        régénérait. **`Dedicated` est désormais recalculable** : tout est dans les données
+        (propositions à l'heure via `GetProposalsActivityAsync`, kikolés créés et publiés
+        via l'historique des joueurs). La règle (un jour de proposition à l'heure précédé
+        de 29 jours actifs consécutifs) est factorisée dans `RespectsDedicatedCondition`,
+        partagée entre l'attribution en direct et le recalcul ; le badge est daté du
+        **premier** jour qui la remplit, comme en direct. Testé (+5 pour le recalcul, les 4
+        tests en direct inchangés). Non vérifié en direct sur la vraie base (le recalcul
+        global admin efface et recrée des lignes `user_badges`).
+        **`DoItYourself`/`WeAreKikole` restent non recalculables** : la date d'acceptation
+        d'un kikolé soumis n'est stockée nulle part (`players` n'a ni date d'acceptation ni
+        ordre fiable des acceptations) ; à trancher plus tard entre stocker une date
+        d'acceptation à partir de maintenant et une approximation par `creation_date`.
       - **Badge « OK Zoomer » (id 35, 2026-10-02)** : kikolé né en 2005 ou après, jour même
         (pendant « jeune » d'`Archaeology`/`WorldWarTwo`, dans `PlayerBasedBadgeCondition`).
         `Badges` enum, `kikole.sql`, base locale. Testé (théorie des années étendue, cas du

@@ -67,9 +67,29 @@ public class BadgeService : IBadgeService
         = new List<Badges>
         {
             Badges.DoItYourself,
-            Badges.WeAreKikole,
-            Badges.Dedicated
+            Badges.WeAreKikole
         };
+
+    /// <summary>Longueur de la serie d'activite quotidienne de "Dedicated" (le jour courant compte).</summary>
+    private const int DedicatedStreakDays = 30;
+
+    /// <summary>
+    /// Regle de "Dedicated" : un jour d'activite (proposition a l'heure) precede de
+    /// <see cref="DedicatedStreakDays"/> - 1 jours consecutifs eux aussi actifs (proposition
+    /// a l'heure, ou kikole cree et publie ce jour-la). Partagee entre l'attribution en direct
+    /// et le recalcul global pour qu'elles ne puissent pas diverger.
+    /// </summary>
+    private static bool RespectsDedicatedCondition(DateOnly day, Func<DateOnly, bool> wasActive)
+    {
+        for (var i = 1; i < DedicatedStreakDays; i++)
+        {
+            day = day.AddDays(-1);
+            if (!wasActive(day))
+                return false;
+        }
+
+        return true;
+    }
 
     private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>> LeadersBasedBadgeCondition
         = new Dictionary<Badges, Func<LeaderDto, IEnumerable<LeaderDto>, bool>>
@@ -373,6 +393,8 @@ public class BadgeService : IBadgeService
             date = date.AddDays(1);
         }
 
+        await PrepareDedicatedBadgesInternalAsync(playersHistoryFull, allBadges);
+
         if (_registrationOptions.SponsorshipEnabled)
         {
             var sponsorUserIds = await _userRepository
@@ -382,6 +404,46 @@ public class BadgeService : IBadgeService
             {
                 var collectedBadges = new List<ulong>();
                 await PrepareSponsorshipBadgesInternalAsync(sponsorUserId, allBadges, collectedBadges);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Recalcul global de "Dedicated" : pour chaque utilisateur, premier jour (avec au moins
+    /// une proposition a l'heure) qui remplit <see cref="RespectsDedicatedCondition"/> ; le
+    /// badge est date de ce jour, comme en direct. Aucune information perdue contrairement a
+    /// "Do it yourself"/"We are kikole" (dont la date d'acceptation n'est pas stockee).
+    /// </summary>
+    private async Task PrepareDedicatedBadgesInternalAsync(
+        IReadOnlyCollection<PlayerDto> publishedPlayers,
+        IReadOnlyCollection<BadgeDto> allBadges)
+    {
+        var onTimeDaysByUser = (await _proposalRepository.GetProposalsActivityAsync())
+            .Where(p => p.IsCurrentDay)
+            .GroupBy(p => p.UserId)
+            .ToDictionary(g => g.Key, g => g.Select(p => p.ProposalDate).ToHashSet());
+
+        var createdDaysByUser = publishedPlayers
+            .Where(p => p.PublicationDate.HasValue)
+            .GroupBy(p => p.CreationUserId)
+            .ToDictionary(g => g.Key, g => g.Select(p => p.PublicationDate!.Value).ToHashSet());
+
+        foreach (var (userId, proposalDays) in onTimeDaysByUser)
+        {
+            var createdDays = createdDaysByUser.GetValueOrDefault(userId) ?? [];
+
+            bool WasActive(DateOnly d) => proposalDays.Contains(d) || createdDays.Contains(d);
+
+            DateOnly? firstDay = proposalDays
+                .Order()
+                .Where(d => RespectsDedicatedCondition(d, WasActive))
+                .Select(d => (DateOnly?)d)
+                .FirstOrDefault();
+
+            if (firstDay.HasValue)
+            {
+                await InsertBadgeIfNotAlreadyAsync(
+                        firstDay.Value, userId, (ulong)Badges.Dedicated, [], allBadges);
             }
         }
     }
@@ -424,18 +486,9 @@ public class BadgeService : IBadgeService
             var playersCreated = await _playerRepository
                 .GetPlayersByCreatorAsync(userId, true);
 
-            var i = 1;
-            var date = _clock.Today;
-            while (i < 30)
-            {
-                date = date.AddDays(-1);
-                if (!proposals.Any(p => p.ProposalDate == date)
-                    && !playersCreated.Any(p => p.PublicationDate == date))
-                    break;
-                i++;
-            }
-
-            if (i == 30)
+            if (RespectsDedicatedCondition(
+                _clock.Today,
+                d => proposals.Any(p => p.ProposalDate == d) || playersCreated.Any(p => p.PublicationDate == d)))
             {
                 await InsertBadgeIfNotAlreadyAsync(
                         DateOnly.FromDateTime(request.ProposalDateTime), userId, (ulong)Badges.Dedicated, collectedBadges, allBadges);

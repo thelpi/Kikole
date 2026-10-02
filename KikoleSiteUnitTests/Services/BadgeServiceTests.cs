@@ -71,6 +71,9 @@ public class BadgeServiceTests
         // pas besoin n'ont pas a le mocker explicitement, comme pour les deux setups ci-dessus
         _proposalRepository.Setup(_ => _.GetProposalsAsync(It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), It.IsAny<ulong>()))
             .ReturnsAsync(new List<ProposalDto>());
+        // par defaut aucune activite (recalcul de "Dedicated")
+        _proposalRepository.Setup(_ => _.GetProposalsActivityAsync())
+            .ReturnsAsync(new List<ProposalDto>());
         // par defaut personne n'a de filleul (badges de parrainage) : comme ci-dessus,
         // seuls les tests qui en ont besoin surchargent ce mock
         _userRepository.Setup(_ => _.GetSponsorUserIdsAsync())
@@ -1589,9 +1592,11 @@ public class BadgeServiceTests
     [Fact]
     public async Task ResetBadgesAsync_ClearsOnlyRecomputableBadges()
     {
+        // la date d'acceptation d'un kikole soumis n'est pas stockee : un recalcul ne pourrait
+        // que la deviner, ces deux-la ne sont donc jamais effaces
         var nonRecomputable = new[]
         {
-            Badges.DoItYourself, Badges.WeAreKikole, Badges.Dedicated
+            Badges.DoItYourself, Badges.WeAreKikole
         };
 
         _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
@@ -1608,6 +1613,103 @@ public class BadgeServiceTests
 
         _badgeRepository.Verify(
             _ => _.ResetBadgeDatasAsync((ulong)Badges.YourFirstSuccess), Times.Once);
+        _badgeRepository.Verify(
+            _ => _.ResetBadgeDatasAsync((ulong)Badges.Dedicated), Times.Once);
+    }
+
+    // ------------------------------------------------------------- ResetBadgesAsync : Dedicated
+
+    private void SetupDedicatedHistory(
+        IEnumerable<(DateOnly day, int daysLate)> proposals,
+        IEnumerable<DateOnly>? createdPlayerDays = null)
+    {
+        // GetProposalsActivityAsync : une ligne par (utilisateur, jour de proposition, jour de creation)
+        _proposalRepository.Setup(_ => _.GetProposalsActivityAsync())
+            .ReturnsAsync(proposals
+                .Select(p => ProposalDtoBuilder.Valid()
+                    .WithUser(UserId)
+                    .WithProposalDate(p.day)
+                    .WithCreationDate(p.day.AddDays(p.daysLate).ToDateTime(TimeOnly.MinValue))
+                    .Build())
+                .ToList());
+
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day))
+            .ReturnsAsync((createdPlayerDays ?? [])
+                .Select(d => PlayerDtoBuilder.Valid().WithCreator(UserId).WithPublicationDate(d).Build())
+                .ToList());
+    }
+
+    private static IEnumerable<(DateOnly day, int daysLate)> OnTimeDays(DateOnly from, int count) =>
+        Enumerable.Range(0, count).Select(i => (from.AddDays(i), 0));
+
+    [Fact]
+    public async Task ResetBadgesAsync_Dedicated_IsDatedOnTheThirtiethConsecutiveDay()
+    {
+        // 40 jours d'affilee : le badge est date du 30e jour (le premier a remplir la
+        // condition), pas du dernier, comme en direct
+        SetupDedicatedHistory(OnTimeDays(Day.AddDays(-39), 40));
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        _inserted.Should().ContainSingle(_ => _.BadgeId == (ulong)Badges.Dedicated)
+            .Which.GetDate.Should().Be(Day.AddDays(-10));
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_Dedicated_AMissingDayBreaksTheStreak()
+    {
+        // 29 jours, un trou, puis 29 jours : jamais 30 d'affilee
+        SetupDedicatedHistory(
+            OnTimeDays(Day.AddDays(-59), 29).Concat(OnTimeDays(Day.AddDays(-29), 30).Skip(1)));
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        ShouldNotHaveGranted(Badges.Dedicated);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_Dedicated_AProposalMadeOnALaterDayDoesNotCount()
+    {
+        // 30 jours de propositions, mais celle du milieu est un rattrapage (creee 3 jours
+        // apres son jour) : seule une proposition a l'heure compte comme activite
+        var days = OnTimeDays(Day.AddDays(-29), 30)
+            .Select(p => p.day == Day.AddDays(-15) ? (p.day, 3) : p)
+            .ToList();
+        SetupDedicatedHistory(days);
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        ShouldNotHaveGranted(Badges.Dedicated);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_Dedicated_CreatedPublishedPlayersFillTheDaysBefore()
+    {
+        // propositions le jour J, le jour J-29 et les 4 jours avant J ; kikoles crees et
+        // publies sur tout l'intervalle intermediaire (J-28 a J-5)
+        var proposals = new[] { Day.AddDays(-29) }
+            .Concat(Enumerable.Range(0, 5).Select(i => Day.AddDays(-4 + i)))
+            .Select(d => (d, 0));
+        var created = Enumerable.Range(0, 24).Select(i => Day.AddDays(-28 + i));
+        SetupDedicatedHistory(proposals, created);
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        _inserted.Should().ContainSingle(_ => _.BadgeId == (ulong)Badges.Dedicated)
+            .Which.GetDate.Should().Be(Day);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_Dedicated_NeedsAProposalOnTheDayItself()
+    {
+        // 29 jours de propositions + un kikole cree le 30e : le jour declencheur doit etre
+        // un jour de proposition (c'est la proposition qui declenche le badge en direct)
+        var created = new[] { Day };
+        SetupDedicatedHistory(OnTimeDays(Day.AddDays(-29), 29), created);
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        ShouldNotHaveGranted(Badges.Dedicated);
     }
 
     [Fact]
