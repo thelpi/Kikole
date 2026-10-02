@@ -1169,6 +1169,28 @@ Branche de travail : `remaster-v2`.
         correcte et `null`/tiret sans badge, classement et égalités). Vérifié en direct
         (vraie base locale, via le navigateur) : bascule du tri, colonnes et dates
         correctement échangées, restauration correcte en revenant à un tri normal.
+- [ ] **Présentation dans les modèles du domaine (2026-10-02).** Constat de l'utilisateur :
+      `LeaderboardItem` contenait des propriétés prêtes à afficher (`BestTimeString`, puis
+      `BadgePercentageString`/`AverageBadgeRarityString`), idem `DayboardLeaderItem
+      .TimeString` ("easier than in JS") — les modèles étaient renvoyés tels quels en JSON,
+      donc modèle = contrat client, et le formatage dépendait de la culture ambiante
+      (`ToNaString` lit `CultureInfo.CurrentCulture`).
+      - [x] **Premier point fait** : `LeaderboardItem`/`DayboardLeaderItem` n'ont plus aucune
+        propriété d'affichage. Nouveaux ViewModels `LeaderboardRow` et `DayboardModel`
+        (+ `DayboardLeaderRow`), construits dans `LeaderboardController` (`From(...)`), qui
+        sont ce que la vue rend ET ce que le JSON renvoie à `site.js` — mêmes noms de
+        propriétés, donc le JS n'a pas changé. Formatage évalué à la construction. Testé
+        (`LeaderboardRowTests`, contrôleur adapté) et vérifié en direct (tableaux global et
+        quotidien reconstruits en AJAX ; rendu Razor initial seulement compilé, les deux
+        tableaux étant vides pour un anonyme à la date du jour).
+      - [ ] **Reste, volontairement pas traité** : textes localisés produits dans le domaine
+        — `ProposalResponse.Tip` (via `IStringLocalizer`), `ProposalRequest.GetTip`,
+        `ScoreCalculator`, et les `IsValid(IStringLocalizer)` de `Models/Requests/*`. Même
+        famille mais plus profond (message métier traduit, pas un simple format) : gain
+        moindre, remaniement plus large.
+      - Au passage, sans lien : `Dayboard.DayAttemps`/`TotalAttemps` ont une précédence
+        d'opérateurs douteuse (`a ?? 0 + b` se lit `a ?? (0 + b)`) ; non utilisées par la vue
+        ni le JS, à corriger ou supprimer.
 - [x] **Noms de badges en français : mécanisme en place (2026-09-26), traductions à
       fournir.** Demandé par l'utilisateur : les badges ne devaient pas s'afficher en anglais
       en version française. `badge_translations` porte maintenant une colonne `name` en plus

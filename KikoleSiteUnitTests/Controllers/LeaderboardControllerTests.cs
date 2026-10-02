@@ -285,7 +285,27 @@ public class LeaderboardControllerTests
 
         var result = await _controller.GetGlobalLeaderboardDetailsAsync(LeaderSorts.TotalPoints, TestCalendar.FirstDate, Today);
 
-        result.Value.Should().BeSameAs(items);
+        var row = result.Value.Should().BeAssignableTo<IReadOnlyCollection<KikoleSite.ViewModels.LeaderboardRow>>()
+            .Subject.Should().ContainSingle().Subject;
+        row.UserId.Should().Be(1);
+        row.UserName.Should().Be("joueur");
+        row.Points.Should().Be(100);
+    }
+
+    [Fact]
+    public async Task GetGlobalLeaderboardDetailsAsync_BadgePercentage_SkipsTheTodayGrantCheck()
+    {
+        // aucune garde "today" ni bornage de dates pour ce tri : aucun appel au grant
+        SetUser(1);
+        _leaderService
+            .Setup(_ => _.GetLeaderboardAsync(It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), LeaderSorts.BadgePercentage))
+            .ReturnsAsync(new List<LeaderboardItem> { new() { UserId = 1, UserName = "joueur", BadgesFound = 2 } });
+
+        var result = await _controller.GetGlobalLeaderboardDetailsAsync(LeaderSorts.BadgePercentage, Today, Today);
+
+        result.Value.Should().BeAssignableTo<IReadOnlyCollection<KikoleSite.ViewModels.LeaderboardRow>>()
+            .Subject.Should().ContainSingle().Which.BadgesFound.Should().Be(2);
+        _proposalService.Verify(_ => _.GetGrantAccessForDayAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()), Times.Never);
     }
 
     [Fact]
@@ -296,7 +316,7 @@ public class LeaderboardControllerTests
 
         var result = await _controller.GetDailyLeaderboardDetailsAsync(DayLeaderSorts.BestTime, Today);
 
-        var dayboard = result.Value.Should().BeOfType<Dayboard>().Subject;
+        var dayboard = result.Value.Should().BeOfType<KikoleSite.ViewModels.DayboardModel>().Subject;
         dayboard.Hidden.Should().BeTrue();
         _leaderService.Verify(_ => _.GetDayboardAsync(It.IsAny<DateOnly>(), It.IsAny<DayLeaderSorts>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
     }
@@ -358,7 +378,7 @@ public class LeaderboardControllerTests
         var result = await _controller.Index(userId: 0);
 
         var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.LeaderboardModel>().Subject;
-        model.Dayboard.Should().BeSameAs(dayboard);
+        model.Dayboard.Date.Should().Be(dayboard.Date);
         model.CurrentUserId.Should().Be(1);
     }
 
@@ -388,7 +408,7 @@ public class LeaderboardControllerTests
         var result = await _controller.Index(userId: 99);
 
         var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.LeaderboardModel>().Subject;
-        model.Dayboard.Should().BeSameAs(dayboard);
+        model.Dayboard.Date.Should().Be(dayboard.Date);
         _badgeService.Verify(_ => _.GetUserBadgesAsync(It.IsAny<ulong>(), It.IsAny<ulong>(), It.IsAny<Languages>(), It.IsAny<bool>()), Times.Never);
     }
 

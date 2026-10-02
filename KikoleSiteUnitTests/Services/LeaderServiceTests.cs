@@ -668,9 +668,7 @@ public class LeaderServiceTests
 
         var result = await _service.GetLeaderboardAsync(Day, Day, LeaderSorts.BadgePercentage);
 
-        var item = result.Single();
-        item.AverageBadgeRarity.Should().BeNull();
-        item.AverageBadgeRarityString.Should().Be("-");
+        result.Single().AverageBadgeRarity.Should().BeNull();
     }
 
     [Fact]

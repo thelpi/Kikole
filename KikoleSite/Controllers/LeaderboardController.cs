@@ -82,7 +82,7 @@ public class LeaderboardController : KikoleBaseController
         var (ld, _) = await GetLeaderboardAsync(
                 minimalDate, maximalDate, sortType, null);
 
-        return Json(ld);
+        return Json(ld.Select(LeaderboardRow.From).ToList());
     }
 
     [HttpGet("daily-leaderboard-details")]
@@ -91,7 +91,7 @@ public class LeaderboardController : KikoleBaseController
         var (dailyBoard, _) = await GetDailyboardAsync(
                 date, sortType, null);
 
-        return Json(dailyBoard);
+        return Json(DayboardModel.From(dailyBoard));
     }
 
     /// <summary>
@@ -273,8 +273,8 @@ public class LeaderboardController : KikoleBaseController
             SortType = LeaderSorts.TotalPoints,
             LeaderboardDay = _clock.Today,
             DaySortType = DayLeaderSorts.BestTime,
-            Dayboard = dailyBoard,
-            GlobalLeaderboard = globalLeaderboard,
+            Dayboard = DayboardModel.From(dailyBoard),
+            GlobalLeaderboard = globalLeaderboard.Select(LeaderboardRow.From).ToList(),
             CurrentUserId = UserId,
             MonthlyPodiums = podiums.MonthlyPodiums
                 .Select(x => (

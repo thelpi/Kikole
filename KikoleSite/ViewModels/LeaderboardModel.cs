@@ -35,9 +35,9 @@ public class LeaderboardModel
 
     public DayLeaderSorts DaySortType { get; set; }
 
-    public required Dayboard Dayboard { get; set; }
+    public required DayboardModel Dayboard { get; set; }
 
-    public IReadOnlyCollection<LeaderboardItem> GlobalLeaderboard { get; set; } = [];
+    public IReadOnlyCollection<LeaderboardRow> GlobalLeaderboard { get; set; } = [];
 
     /// <summary>Utilisateur connecte : permet de surligner sa propre ligne dans les tableaux.</summary>
     public ulong CurrentUserId { get; set; }
