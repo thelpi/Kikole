@@ -35,5 +35,6 @@ public enum Badges
     TheEnd,
     DonCorleone,
     TheFamousFive,
-    ConfederationsCup
+    ConfederationsCup,
+    OkZoomer
 }

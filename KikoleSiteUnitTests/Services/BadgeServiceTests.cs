@@ -172,13 +172,21 @@ public class BadgeServiceTests
     /// qui reste <c>FirstDate</c> — pour laisser de la place a un historique passe, sans
     /// quoi la fenetre [FirstDate, gain] ne contiendrait que le jour du gain lui-meme.
     /// </summary>
+    /// <param name="pastFindsOnTime">Faux : les kikoles de l'historique ont ete trouves en
+    /// rattrapage (3 jours apres leur jour).</param>
+    /// <param name="winOnTime">Faux : le gain du jour lui-meme est un rattrapage.</param>
     private async Task RunWithPastFinds(
         PlayerDto todayPlayer,
         IReadOnlyList<PlayerDto> pastFinds,
-        IReadOnlyDictionary<ulong, ulong>? countryContinents = null)
+        IReadOnlyDictionary<ulong, ulong>? countryContinents = null,
+        bool pastFindsOnTime = true,
+        bool winOnTime = true)
     {
         var winDay = Day.AddDays(pastFinds.Count + 1);
-        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(winDay).WithCreationDate(winDay.ToDateTime(TimeOnly.MinValue).AddMinutes(60)).WithPoints(1000).WithTime(60).Build();
+        var winCreation = winOnTime
+            ? winDay.ToDateTime(TimeOnly.MinValue).AddMinutes(60)
+            : winDay.AddDays(3).ToDateTime(TimeOnly.MinValue);
+        var leader = LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(winDay).WithCreationDate(winCreation).WithPoints(1000).WithTime(60).Build();
         var player = todayPlayer with { PublicationDate = winDay };
 
         SetupPlayerFull(player);
@@ -192,7 +200,7 @@ public class BadgeServiceTests
             _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(pastDate, It.IsAny<bool>()))
                 .ReturnsAsync(new List<LeaderDto>
                 {
-                    LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(pastDate).WithCreationDate(pastDate.ToDateTime(TimeOnly.MinValue)).Build()
+                    LeaderDtoBuilder.Valid().WithUserId(UserId).WithProposalDate(pastDate).WithCreationDate(pastDate.AddDays(pastFindsOnTime ? 0 : 3).ToDateTime(TimeOnly.MinValue)).Build()
                 });
         }
 
@@ -267,15 +275,19 @@ public class BadgeServiceTests
     // ------------------------------------------------------------- badges lies au joueur
 
     [Theory]
-    [InlineData((ushort)1969, true, false)]
-    [InlineData((ushort)1939, true, true)]
-    [InlineData((ushort)1970, false, false)]
-    public async Task BirthYearBadgesAreCumulative(ushort year, bool archaeology, bool worldWarTwo)
+    [InlineData((ushort)1969, true, false, false)]
+    [InlineData((ushort)1939, true, true, false)]
+    [InlineData((ushort)1970, false, false, false)]
+    [InlineData((ushort)2004, false, false, false)]
+    [InlineData((ushort)2005, false, false, true)]
+    [InlineData((ushort)2010, false, false, true)]
+    public async Task BirthYearBadgesAreCumulative(ushort year, bool archaeology, bool worldWarTwo, bool okZoomer)
     {
         await Run(Leader(1000, 60), Player(year));
 
         _inserted.Any(_ => _.BadgeId == (ulong)Badges.Archaeology).Should().Be(archaeology);
         _inserted.Any(_ => _.BadgeId == (ulong)Badges.WorldWarTwo).Should().Be(worldWarTwo);
+        _inserted.Any(_ => _.BadgeId == (ulong)Badges.OkZoomer).Should().Be(okZoomer);
     }
 
     [Fact]
@@ -351,12 +363,32 @@ public class BadgeServiceTests
     [Fact]
     public async Task FindingOnALaterDayForfeitsTheSameDayBadges()
     {
-        // seuls les badges lies au joueur restent accessibles en rattrapage
+        // trouver un kikole en rattrapage ne fait avancer aucun badge, y compris ceux lies
+        // au joueur (annee de naissance) : sinon on pourrait les farmer en rejouant tout
+        // l'historique apres coup
         await Run(Leader(1000, 60, sameDay: false), Player(1939));
 
         ShouldNotHaveGranted(
-            Badges.YourFirstSuccess, Badges.ItsOver900, Badges.ImFeelingLucky);
-        ShouldHaveGranted(Badges.Archaeology, Badges.WorldWarTwo);
+            Badges.YourFirstSuccess, Badges.ItsOver900, Badges.ImFeelingLucky,
+            Badges.Archaeology, Badges.WorldWarTwo);
+    }
+
+    [Fact]
+    public async Task FindingAYoungPlayerOnALaterDayDoesNotGrantOkZoomer()
+    {
+        await Run(Leader(1000, 60, sameDay: false), Player(2007));
+
+        ShouldNotHaveGranted(Badges.OkZoomer);
+    }
+
+    [Fact]
+    public async Task APlayerSpecialBadgeIsStillGrantedWhenFoundOnALaterDay()
+    {
+        // choix assume : le badge rattache a un kikole precis (players.BadgeId) reste
+        // accessible en rattrapage, contrairement aux badges bases sur l'annee ou l'historique
+        await Run(Leader(1000, 60, sameDay: false), Player(badgeId: (ulong)Badges.LegendTier));
+
+        ShouldHaveGranted(Badges.LegendTier);
     }
 
     [Fact]
@@ -453,6 +485,63 @@ public class BadgeServiceTests
         await RunWithPastFinds(Player(), pastFinds);
 
         ShouldNotHaveGranted(Badges.FourFourtwo);
+    }
+
+    // ------------------------------------------------------------- historique : a l'heure uniquement
+
+    private static List<PlayerDto> FullFormationPastFinds() =>
+    [
+        Player() with { PositionId = (ulong)Positions.Goalkeeper },
+        Player() with { PositionId = (ulong)Positions.Defender }, Player() with { PositionId = (ulong)Positions.Defender },
+        Player() with { PositionId = (ulong)Positions.Defender }, Player() with { PositionId = (ulong)Positions.Defender },
+        Player() with { PositionId = (ulong)Positions.Midfielder }, Player() with { PositionId = (ulong)Positions.Midfielder },
+        Player() with { PositionId = (ulong)Positions.Midfielder },
+        Player() with { PositionId = (ulong)Positions.Forward }, Player() with { PositionId = (ulong)Positions.Forward }
+    ];
+
+    [Fact]
+    public async Task FourFourTwoIgnoresPlayersFoundOnALaterDay()
+    {
+        // meme formation que le cas nominal, mais tous les kikoles de l'historique ont ete
+        // trouves en rattrapage : aucun ne compte
+        await RunWithPastFinds(Player(), FullFormationPastFinds(), pastFindsOnTime: false);
+
+        ShouldNotHaveGranted(Badges.FourFourtwo);
+    }
+
+    [Fact]
+    public async Task FourFourTwoIsNotEvaluatedWhenTheCurrentWinIsALaterDayOne()
+    {
+        // l'historique a l'heure est complet, mais le gain en cours est un rattrapage :
+        // le badge n'avance que sur une victoire a l'heure
+        await RunWithPastFinds(Player(), FullFormationPastFinds(), winOnTime: false);
+
+        ShouldNotHaveGranted(Badges.FourFourtwo);
+    }
+
+    [Fact]
+    public async Task AroundTheWorldIgnoresCountriesFoundOnALaterDay()
+    {
+        var pastFinds = Enumerable.Range(1, 19)
+            .Select(i => Player() with { CountryId = 1000 + (ulong)i })
+            .ToList();
+
+        await RunWithPastFinds(Player(), pastFinds, pastFindsOnTime: false);
+
+        ShouldNotHaveGranted(Badges.AroundTheWorld);
+    }
+
+    [Fact]
+    public async Task TheConfederationsCupIgnoresContinentsFoundOnALaterDay()
+    {
+        var pastFinds = new List<PlayerDto>
+        {
+            FromCountry(9001), FromCountry(9002), FromCountry(9003), FromCountry(9004), FromCountry(9005)
+        };
+
+        await RunWithPastFinds(Player(), pastFinds, ConfederationsMap, pastFindsOnTime: false);
+
+        ShouldNotHaveGranted(Badges.ConfederationsCup);
     }
 
     [Fact]

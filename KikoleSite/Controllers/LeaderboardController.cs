@@ -67,8 +67,14 @@ public class LeaderboardController : KikoleBaseController
 
         var language = ViewHelper.GetLanguage();
 
+        // les badges obtenus aujourd'hui par un autre joueur ne sont visibles que si on
+        // connait deja la reponse du jour (trouve, createur, admin) : PaidBoard (classement
+        // achete sans avoir trouve) ne suffit pas, un badge comme "OK Zoomer" ou
+        // "Archaeology" trahirait l'annee de naissance du kikole du jour
+        var knowsTodaysAnswer = todayGrant is DayGrantTypes.Found or DayGrantTypes.Creator or DayGrantTypes.Admin;
+
         var badges = await _badgeService
-             .GetUserBadgesAsync(userId, UserId, language, todayGrant != DayGrantTypes.None);
+             .GetUserBadgesAsync(userId, UserId, language, knowsTodaysAnswer);
 
         var allBadges = await _badgeService
             .GetAllBadgesAsync(language);

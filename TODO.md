@@ -1199,6 +1199,31 @@ Branche de travail : `remaster-v2`.
       - Testé (`AssignmentHelperTests`, +8, dont déplacement d'un occupant et chaînes de
         réaffectation ; `BadgeServiceTests`, +4, dont le cas où un joueur double poste
         ne peut pas servir deux manques à la fois).
+      - **Badges d'historique : à l'heure uniquement (2026-10-02).** Constat de
+        l'utilisateur : avant, `FourFourtwo`/`AroundTheWorld`/`Coupe des confédérations` et
+        `Archaeology`/`WorldWarTwo` s'obtenaient aussi avec des kikolés trouvés en
+        rattrapage — on pouvait s'inscrire après coup et farmer des badges en rejouant tout
+        l'historique. Désormais, dans `PrepareNewLeaderBadgesInternalAsync`, ces cinq badges
+        sont évalués **dans** le bloc `leader.IsCurrentDay`, et l'historique des joueurs
+        trouvés (`myPlayerHistory`) ne retient que les victoires à l'heure. Restent
+        obtenables en rattrapage, volontairement : `TheEnd` (le kikolé caché n'est jamais
+        « à l'heure » par construction) et un badge rattaché à un kikolé précis
+        (`players.BadgeId`, aucun n'en porte aujourd'hui). Testé (+5, dont un test qui
+        épingle ce dernier choix). **Effet de bord** : un badge se déclenche donc seulement
+        à une victoire à l'heure ; la date enregistrée reste celle du kikolé (`ProposalDate`).
+      - **Badge « OK Zoomer » (id 35, 2026-10-02)** : kikolé né en 2005 ou après, jour même
+        (pendant « jeune » d'`Archaeology`/`WorldWarTwo`, dans `PlayerBasedBadgeCondition`).
+        `Badges` enum, `kikole.sql`, base locale. Testé (théorie des années étendue, cas du
+        rattrapage).
+      - **Fuite corrigée en passant (2026-10-02)** : `LeaderboardController.Index` passait
+        `todayGrant != None` comme « a trouvé aujourd'hui » à `GetUserBadgesAsync`, donc un
+        joueur ayant seulement **acheté le classement** (`PaidBoard`) voyait les badges
+        du jour des autres, et un badge comme OK Zoomer/Archaeology trahit l'année de
+        naissance du kikolé du jour. Désormais seuls `Found`, `Creator` et `Admin` les
+        voient. Testé (théorie sur les cinq grants). **Pas touché, à décider** : l'appel
+        voisin `GetUserStatisticsAsync` garde `!= None` (la ligne du jour d'une fiche
+        stats reste visible avec `PaidBoard`, comme le classement du jour lui-même ; le
+        nom du kikolé y est de toute façon anonymisé sans `Found`/`Creator`/`Admin`).
       - [x] **Badge « Coupe des confédérations » (id 34, 2026-10-02)** : un kikolé de chacun
         des **six** continents (= les six confédérations FIFA), un continent par joueur
         parmi ceux de ses deux pays (le continent se déduit du pays). Même helper

@@ -107,6 +107,11 @@ public class BadgeService : IBadgeService
             {
                 Badges.WorldWarTwo,
                 p => p.YearOfBirth < 1940
+            },
+            {
+                // 2005 et apres (le pendant "jeune" d'Archaeology)
+                Badges.OkZoomer,
+                p => p.YearOfBirth > 2004
             }
         };
 
@@ -586,8 +591,11 @@ public class BadgeService : IBadgeService
     {
         var collectedBadges = new List<ulong>();
 
+        // kikoles que cet utilisateur a trouves A TEMPS uniquement : trouver de vieux kikoles
+        // en rattrapage ne fait avancer aucun badge (sinon, s'inscrire apres coup et rejouer
+        // tout l'historique suffirait a les obtenir)
         var myPlayerHistory = playersHistory
-            .Where(p => leadersHistory.Any(h => h.UserId == leader.UserId && h.ProposalDate == p.PublicationDate));
+            .Where(p => leadersHistory.Any(h => h.UserId == leader.UserId && h.IsCurrentDay && h.ProposalDate == p.PublicationDate));
 
         var myCreatedPlayers = playersHistory
             .Where(p => p.CreationUserId == leader.UserId);
@@ -683,23 +691,23 @@ public class BadgeService : IBadgeService
                             leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);
                 }
             }
-        }
 
-        foreach (var badge in PlayerBasedBadgeCondition.Keys)
-        {
-            if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
+            foreach (var badge in PlayerBasedBadgeCondition.Keys)
             {
-                await InsertBadgeIfNotAlreadyAsync(
-                         leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);
+                if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                             leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);
+                }
             }
-        }
 
-        foreach (var badge in PlayersHistoryBasedBadgeCondition.Keys)
-        {
-            if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory, countryContinents))
+            foreach (var badge in PlayersHistoryBasedBadgeCondition.Keys)
             {
-                await InsertBadgeIfNotAlreadyAsync(
-                        leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);
+                if (PlayersHistoryBasedBadgeCondition[badge](myPlayerHistory, countryContinents))
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                            leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);
+                }
             }
         }
 

@@ -442,6 +442,40 @@ public class LeaderboardControllerTests
         model.TotalPoints.Should().Be(500);
     }
 
+    [Theory]
+    [InlineData(DayGrantTypes.None, false)]
+    [InlineData(DayGrantTypes.PaidBoard, false)] // classement achete sans avoir trouve : pas la reponse
+    [InlineData(DayGrantTypes.Found, true)]
+    [InlineData(DayGrantTypes.Creator, true)]
+    [InlineData(DayGrantTypes.Admin, true)]
+    public async Task Index_WithKnownUserId_TodaysBadgesOfOthersAreOnlyRevealedToThoseWhoKnowTheAnswer(
+        DayGrantTypes grant, bool expectedToSeeTodaysBadges)
+    {
+        const ulong viewer = 1;
+        const ulong viewedUser = 2;
+        SetUser(viewer);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(viewer, Today)).ReturnsAsync(grant);
+
+        var stats = new UserStat(
+            [new DailyUserStat(Today, "Zidane", 500)],
+            "cible",
+            Today.AddYears(-1).ToDateTime(TimeOnly.MinValue));
+        _leaderService
+            .Setup(_ => _.GetUserStatisticsAsync(viewedUser, viewer, "***", It.IsAny<bool>()))
+            .ReturnsAsync(stats);
+
+        var language = ViewHelper.GetLanguage();
+        _badgeService
+            .Setup(_ => _.GetUserBadgesAsync(viewedUser, viewer, language, It.IsAny<bool>()))
+            .ReturnsAsync(Array.Empty<UserBadge>());
+        _badgeService.Setup(_ => _.GetAllBadgesAsync(language)).ReturnsAsync(Array.Empty<Badge>());
+
+        await _controller.Index(userId: viewedUser);
+
+        _badgeService.Verify(
+            _ => _.GetUserBadgesAsync(viewedUser, viewer, language, expectedToSeeTodaysBadges), Times.Once);
+    }
+
     [Fact]
     public async Task Index_WithKnownUserId_ListsTheDailyStatsMostRecentFirst()
     {

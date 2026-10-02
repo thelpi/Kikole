@@ -48,7 +48,8 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (31, 'The end?', 'Reach the "end" of the game', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (32, 'Don Corleone', 'Sponsor your first godchild', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
-(34, 'Confederations Cup', 'Find kikolés from all six continents, one continent per kikolé (a player with two countries counts for only one continent)', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00');
+(34, 'Confederations Cup', 'Find kikolés from all six continents, one continent per kikolé (a player with two countries counts for only one continent)', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00'),
+(35, 'OK Zoomer', 'Find a kikolé born in 2005 or later', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00');
 
 -- Badges desactives (suppression virtuelle, cf. badges.is_disabled) :
 --  - 30 Phoenix : regle a reprendre (risque de penaliser les joueurs assidus) ;
@@ -98,7 +99,8 @@ INSERT INTO badge_translations (badge_id, language_id, `name`, description) VALU
 (31, 2, 'La fin', 'Atteignez la « fin » du jeu'),
 (32, 2, 'Don Corleone', 'Parrainez votre premier filleul'),
 (33, 2, 'Le Club des Cinq', 'Parrainez 5 filleuls'),
-(34, 2, 'Coupe des confédérations', 'Trouvez des kikolés des six continents, un continent par kikolé (un joueur de deux nationalités ne compte que pour un seul continent)');
+(34, 2, 'Coupe des confédérations', 'Trouvez des kikolés des six continents, un continent par kikolé (un joueur de deux nationalités ne compte que pour un seul continent)'),
+(35, 2, 'OK Zoomer', 'Trouvez un kikolé né en 2005 ou après');
 
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,
