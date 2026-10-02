@@ -8,7 +8,7 @@ namespace KikoleSite.Services;
 
 public interface IStatisticService
 {
-    Task<PlayersDistribution> GetPlayersDistributionAsync(ulong userId, Languages language, int maxItemsRank);
+    Task<PlayersDistribution> GetPlayersDistributionAsync(Languages language, int maxItemsRank);
 
     Task<ActiveUsers> GetActiveUsersAsync(DateTime? startDate = null, DateTime? endDate = null);
 

@@ -41,19 +41,19 @@ public class StatisticService : IStatisticService
         _clock = clock;
     }
 
-    public async Task<PlayersDistribution> GetPlayersDistributionAsync(ulong userId, Languages language, int maxItemsRank)
+    public async Task<PlayersDistribution> GetPlayersDistributionAsync(Languages language, int maxItemsRank)
     {
         var countriesPld = await _statisticRepository
-            .GetPlayersDistributionByCountryAsync(userId);
+            .GetPlayersDistributionByCountryAsync();
 
         var decadesPld = await _statisticRepository
-            .GetPlayersDistributionByDecadeAsync(userId);
+            .GetPlayersDistributionByDecadeAsync();
 
         var clubsPld = await _statisticRepository
-            .GetPlayersDistributionByClubAsync(userId);
+            .GetPlayersDistributionByClubAsync();
 
         var positionsPld = await _statisticRepository
-            .GetPlayersDistributionByPositionAsync(userId);
+            .GetPlayersDistributionByPositionAsync();
 
         var countries = await _internationalRepository
             .GetCountriesAsync((ulong)language);

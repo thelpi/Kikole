@@ -50,7 +50,7 @@ public class StatisticsController : KikoleBaseController
     public async Task<JsonResult> GetStatisticPlayersDistribution()
     {
         var datas = await _statisticService
-            .GetPlayersDistributionAsync(UserId, ViewHelper.GetLanguage(), DistributionSizeLimit);
+            .GetPlayersDistributionAsync(ViewHelper.GetLanguage(), DistributionSizeLimit);
 
         return Json(new
         {

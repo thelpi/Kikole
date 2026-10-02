@@ -76,8 +76,8 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [ ] `badges.is_disabled` (+ badges 34, 35, `UPDATE` des ids 30, 32, 33)
   - [ ] `players.acceptance_date` (+ `UPDATE ... = creation_date` pour les joueurs publiés)
 - [ ] Textes localisés encore produits dans le domaine (`ProposalResponse.Tip`, `GetTip`, `ScoreCalculator`, `IsValid(IStringLocalizer)`)
-- [ ] `Dayboard.DayAttemps` / `TotalAttemps` : précédence d'opérateurs douteuse, non utilisées
-- [ ] Simplifier `StatisticRepository.UserPlayerLinkSql` (branches mortes)
+- [x] `Dayboard` : propriétés mortes de taux de réussite supprimées
+- [x] `StatisticRepository.UserPlayerLinkSql` supprimé (stats réservées à l'admin)
 - [ ] Évaluer la suppression de Dapper
 
 ## 4. Interface

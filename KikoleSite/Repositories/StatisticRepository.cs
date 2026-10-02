@@ -10,70 +10,53 @@ namespace KikoleSite.Repositories;
 
 public class StatisticRepository : BaseRepository, IStatisticRepository
 {
-    private static readonly string UserPlayerLinkSql =
-        "AND (" +
-        "   EXISTS (" +
-        "       SELECT 1 FROM users AS u " +
-        "       WHERE u.id = @userId " +
-        "           AND u.user_type_id = " + (ulong)UserTypes.Administrator +
-        "   ) OR EXISTS (" +
-        "       SELECT 1 FROM leaders AS ld " +
-        "       WHERE ld.proposal_date = p.publication_date " +
-        "           AND ld.user_id = @userId " +
-        "   ) OR p.creation_user_id = @userId " +
-        ") ";
-
     public StatisticRepository(IConfiguration configuration, IClock clock)
         : base(configuration, clock)
     { }
 
-    public async Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByClubAsync(ulong userId)
+    public async Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByClubAsync()
     {
         return await ExecuteReaderAsync<PlayersDistributionDto<ulong>>(
                 "SELECT l.club_id AS value, COUNT(*) AS count " +
                 "FROM players AS p " +
                 "   JOIN player_clubs AS l ON p.id = l.player_id " +
                 "WHERE p.publication_date IS NOT NULL " +
-                UserPlayerLinkSql +
                 "GROUP BY l.club_id " +
                 "ORDER BY COUNT(*) DESC",
-                new { userId });
+                null);
     }
 
-    public async Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByCountryAsync(ulong userId)
+    public async Task<IReadOnlyCollection<PlayersDistributionDto<ulong>>> GetPlayersDistributionByCountryAsync()
     {
         return await ExecuteReaderAsync<PlayersDistributionDto<ulong>>(
                 "SELECT country_id AS value, COUNT(*) AS count " +
-                "FROM players AS p " +
+                "FROM players " +
                 "WHERE publication_date IS NOT NULL " +
-                UserPlayerLinkSql +
                 "GROUP BY country_id " +
                 "ORDER BY COUNT(*) DESC",
-                new { userId });
+                null);
     }
 
-    public async Task<IReadOnlyCollection<PlayersDistributionDto<int>>> GetPlayersDistributionByDecadeAsync(ulong userId)
+    public async Task<IReadOnlyCollection<PlayersDistributionDto<int>>> GetPlayersDistributionByDecadeAsync()
     {
         return await ExecuteReaderAsync<PlayersDistributionDto<int>>(
                 "SELECT CONCAT(SUBSTRING(year_of_birth, 1, 3), '0') AS value, COUNT(*) AS count " +
-                "FROM players AS p " +
+                "FROM players " +
                 "WHERE publication_date IS NOT NULL " +
-                UserPlayerLinkSql +
                 "GROUP BY CONCAT(SUBSTRING(year_of_birth, 1, 3), '0') " +
                 "ORDER BY COUNT(*) DESC",
-                new { userId });
+                null);
     }
 
-    public async Task<IReadOnlyCollection<PlayersDistributionDto<int>>> GetPlayersDistributionByPositionAsync(ulong userId)
+    public async Task<IReadOnlyCollection<PlayersDistributionDto<int>>> GetPlayersDistributionByPositionAsync()
     {
         return await ExecuteReaderAsync<PlayersDistributionDto<int>>(
                 "SELECT position_id AS value, COUNT(*) AS count " +
-                "FROM players AS p " +
+                "FROM players " +
                 "WHERE publication_date IS NOT NULL " +
-                UserPlayerLinkSql +
                 "GROUP BY position_id " +
                 "ORDER BY COUNT(*) DESC",
-                new { userId });
+                null);
     }
 
     public async Task<IReadOnlyDictionary<(int y, int w), int>> GetWeeklyActiveUsersAsync(DateTime? startDate, DateTime? endDate)

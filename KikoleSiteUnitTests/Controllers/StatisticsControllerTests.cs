@@ -75,7 +75,7 @@ public class StatisticsControllerTests
         var club = new Club(ClubDtoBuilder.Valid().WithName("Real Madrid").Build(), []);
 
         _statisticService
-            .Setup(_ => _.GetPlayersDistributionAsync(1, It.IsAny<Languages>(), 25))
+            .Setup(_ => _.GetPlayersDistributionAsync(It.IsAny<Languages>(), 25))
             .ReturnsAsync(new PlayersDistribution
             {
                 TotalPlayersCount = 20,

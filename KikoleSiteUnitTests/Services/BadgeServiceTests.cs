@@ -175,6 +175,9 @@ public class BadgeServiceTests
     /// qui reste <c>FirstDate</c> — pour laisser de la place a un historique passe, sans
     /// quoi la fenetre [FirstDate, gain] ne contiendrait que le jour du gain lui-meme.
     /// </summary>
+    /// <param name="todayPlayer">Joueur du jour du gain.</param>
+    /// <param name="pastFinds">Joueurs deja trouves les jours d'avant.</param>
+    /// <param name="countryContinents">Pays vers continent (defaut : vide).</param>
     /// <param name="pastFindsOnTime">Faux : les kikoles de l'historique ont ete trouves en
     /// rattrapage (3 jours apres leur jour).</param>
     /// <param name="winOnTime">Faux : le gain du jour lui-meme est un rattrapage.</param>

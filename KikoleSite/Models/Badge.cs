@@ -14,6 +14,8 @@ public class Badge
 
     public bool Hidden { get; }
 
+    /// <param name="dto">Badge en base.</param>
+    /// <param name="usersCount">Nombre de joueurs détenant le badge.</param>
     /// <param name="translation">Nom et description dans la langue demandée ; à défaut (ou champ vide), ceux du badge (anglais).</param>
     internal Badge(BadgeDto dto, int usersCount, BadgeTranslationDto? translation)
     {
