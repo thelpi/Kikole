@@ -444,11 +444,11 @@ public class LeaderboardControllerTests
 
     [Theory]
     [InlineData(DayGrantTypes.None, false)]
-    [InlineData(DayGrantTypes.PaidBoard, false)] // classement achete sans avoir trouve : pas la reponse
+    [InlineData(DayGrantTypes.PaidBoard, true)]
     [InlineData(DayGrantTypes.Found, true)]
     [InlineData(DayGrantTypes.Creator, true)]
     [InlineData(DayGrantTypes.Admin, true)]
-    public async Task Index_WithKnownUserId_TodaysBadgesOfOthersAreOnlyRevealedToThoseWhoKnowTheAnswer(
+    public async Task Index_WithKnownUserId_TodaysBadgesOfOthersAreRevealedToAnyoneWithTodaysAccess(
         DayGrantTypes grant, bool expectedToSeeTodaysBadges)
     {
         const ulong viewer = 1;

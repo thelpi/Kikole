@@ -56,8 +56,12 @@ public class LeaderboardController : KikoleBaseController
         var todayGrant = await _proposalService
             .GetGrantAccessForDayAsync(UserId, _clock.Today);
 
+        // l'achat du classement donne aussi acces aux badges obtenus aujourd'hui par les
+        // autres (pari assume : un badge comme "OK Zoomer" peut trahir l'annee de naissance)
+        var canViewToday = todayGrant != DayGrantTypes.None;
+
         var stats = await _leaderService
-            .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName, todayGrant != DayGrantTypes.None);
+            .GetUserStatisticsAsync(userId, UserId, AnonymizedPlayerName, canViewToday);
 
         if (stats == null)
         {
@@ -67,14 +71,8 @@ public class LeaderboardController : KikoleBaseController
 
         var language = ViewHelper.GetLanguage();
 
-        // les badges obtenus aujourd'hui par un autre joueur ne sont visibles que si on
-        // connait deja la reponse du jour (trouve, createur, admin) : PaidBoard (classement
-        // achete sans avoir trouve) ne suffit pas, un badge comme "OK Zoomer" ou
-        // "Archaeology" trahirait l'annee de naissance du kikole du jour
-        var knowsTodaysAnswer = todayGrant is DayGrantTypes.Found or DayGrantTypes.Creator or DayGrantTypes.Admin;
-
         var badges = await _badgeService
-             .GetUserBadgesAsync(userId, UserId, language, knowsTodaysAnswer);
+             .GetUserBadgesAsync(userId, UserId, language, canViewToday);
 
         var allBadges = await _badgeService
             .GetAllBadgesAsync(language);

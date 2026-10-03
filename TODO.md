@@ -67,7 +67,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [x] Badges d'historique et d'année de naissance : kikolés trouvés à l'heure uniquement
   - [x] We are kikolé à 3 kikolés
   - [x] `badges.is_disabled` (suppression virtuelle) : Phoenix, Don Corleone, The Famous Five désactivés
-  - [x] Badges du jour des autres : visibles seulement si on connaît la réponse (fuite `PaidBoard` corrigée)
+  - [x] Badges du jour des autres : visibles dès qu'on a accès au jour (classement acheté compris)
   - [x] Recalcul global complet (Dedicated, Do it yourself, We are kikolé via `players.acceptance_date`)
 - [ ] Reprendre la règle de Phoenix, puis le réactiver
 - [ ] Idée de badge « Grand Chelem » à préciser
@@ -119,6 +119,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Un seul pays et un seul poste alternatifs (pas de liste)
 - Un joueur par jour : son absence lève une exception ; l'application refuse de démarrer sans joueur
 - Calendrier déduit de `MIN(publication_date)`
+- Acheter le classement du jour donne aussi accès aux badges du jour des autres (pari assumé)
 - Soumission d'un kikolé : 1 000 points forfaitaires
 - Un mois sans podium complet ne rapporte aucune médaille
 - Badges : un kikolé trouvé en rattrapage ne fait avancer aucun badge (sauf The End et badge rattaché à un joueur)
