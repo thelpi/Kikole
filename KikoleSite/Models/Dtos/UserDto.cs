@@ -26,6 +26,10 @@ public record UserDto : BaseDto
 
     public bool IsDisabled { get; init; }
 
+    public DateTime? DisabledDate { get; init; }
+
+    public string? DisabledReason { get; init; }
+
     public required string ConcurrencyStamp { get; init; }
 
     public required string SecurityStamp { get; init; }

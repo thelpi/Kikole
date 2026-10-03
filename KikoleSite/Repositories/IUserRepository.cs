@@ -16,6 +16,9 @@ public interface IUserRepository
 
     Task DeleteUserAsync(ulong userId);
 
+    /// <summary>Désactive un compte en gardant la date et la raison. Il n'existe volontairement pas d'opération inverse.</summary>
+    Task DisableUserAsync(ulong userId, string reason);
+
     Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin);
 
     /// <summary>Utilisateur par empreinte d'email (compte actif uniquement), pour la connexion par email.</summary>

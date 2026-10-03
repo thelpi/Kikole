@@ -34,6 +34,8 @@ public class UserRepository : BaseRepository, IUserRepository
                 ("user_type_id", user.UserTypeId),
                 ("ip", user.Ip),
                 ("is_disabled", user.IsDisabled ? 1 : 0),
+                ("disabled_date", user.DisabledDate),
+                ("disabled_reason", user.DisabledReason),
                 ("concurrency_stamp", user.ConcurrencyStamp),
                 ("security_stamp", user.SecurityStamp),
                 ("lockout_end", user.LockoutEnd),
@@ -56,7 +58,6 @@ public class UserRepository : BaseRepository, IUserRepository
                 "    language_id = @languageId, " +
                 "    user_type_id = @userTypeId, " +
                 "    ip = @ip, " +
-                "    is_disabled = @isDisabled, " +
                 "    concurrency_stamp = @concurrencyStamp, " +
                 "    security_stamp = @securityStamp, " +
                 "    lockout_end = @lockoutEnd, " +
@@ -75,7 +76,6 @@ public class UserRepository : BaseRepository, IUserRepository
                     languageId = user.LanguageId,
                     userTypeId = user.UserTypeId,
                     ip = user.Ip,
-                    isDisabled = user.IsDisabled ? 1 : 0,
                     concurrencyStamp = user.ConcurrencyStamp,
                     securityStamp = user.SecurityStamp,
                     lockoutEnd = user.LockoutEnd,
@@ -89,6 +89,15 @@ public class UserRepository : BaseRepository, IUserRepository
         await ExecuteNonQueryAsync(
                 "DELETE FROM users WHERE id = @userId",
                 new { userId });
+    }
+
+    public async Task DisableUserAsync(ulong userId, string reason)
+    {
+        await ExecuteNonQueryAsync(
+                "UPDATE users " +
+                "SET is_disabled = 1, disabled_date = @disabledDate, disabled_reason = @reason " +
+                "WHERE id = @userId AND is_disabled = 0",
+                new { userId, reason, disabledDate = Clock.Now });
     }
 
     public async Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin)

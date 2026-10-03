@@ -32,7 +32,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [ ] Plafond de clubs créés par un `PowerUser`
   - [ ] Plafond de kikolés proposés par un `PowerUser`
   - [ ] Changer le palier d'un utilisateur
-  - [ ] Désactiver un compte
+  - [ ] Désactiver un compte (`DisableUserAsync` prêt, écran à faire)
   - [ ] Forcer un mot de passe
   - (à regrouper dans un écran « gestion des utilisateurs »)
 
@@ -76,6 +76,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [ ] `badges.is_disabled` (+ badges 34, 35, `UPDATE` des ids 30, 32, 33)
   - [ ] `players.acceptance_date` (+ `UPDATE ... = creation_date` pour les joueurs publiés)
   - [ ] `clubs.importance` (+ `UPDATE` des niveaux 2 et 3, voir `kikole.sql`)
+  - [ ] `users.disabled_date`, `users.disabled_reason`
 - [ ] Textes localisés encore produits dans le domaine (`ProposalResponse.Tip`, `GetTip`, `ScoreCalculator`, `IsValid(IStringLocalizer)`)
 - [x] `Dayboard` : propriétés mortes de taux de réussite supprimées
 - [x] `StatisticRepository.UserPlayerLinkSql` supprimé (stats réservées à l'admin)
@@ -127,6 +128,8 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Un mois sans podium complet ne rapporte aucune médaille
 - Badges : un kikolé trouvé en rattrapage ne fait avancer aucun badge (sauf The End et badge rattaché à un joueur)
 - Badge désactivé (`is_disabled`) = supprimé virtuellement, lignes `user_badges` conservées
+- Compte désactivé : jamais réactivé (aucune opération inverse), date et raison conservées
+- Créateur désactivé : kikolé conservé, créateur anonymisé, hors classements
 - Rareté d'un badge = proportion des autres joueurs qui ne l'ont pas
 
 **Architecture**

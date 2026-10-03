@@ -4631,6 +4631,8 @@ CREATE TABLE users (
   user_type_id bigint(20) UNSIGNED NOT NULL,
   ip varchar(45) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
   is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  disabled_date datetime DEFAULT NULL,
+  disabled_reason varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   concurrency_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   security_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   lockout_end datetime DEFAULT NULL,
