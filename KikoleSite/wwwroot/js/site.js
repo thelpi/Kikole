@@ -1360,3 +1360,82 @@ Date.prototype.ddmmyyyy = function () {
         this.getFullYear()
     ].join('/');
 };
+
+/* page de gestion des utilisateurs (Admin/Users.cshtml) : une seule modale de
+   confirmation pour les trois actions ; data-input dit quel champ elle affiche
+   (reason, password ou none). Un champ masque est desactive pour ne pas etre poste. */
+var openUserActionModal = function (button) {
+    var data = button.dataset;
+    var form = document.getElementById('userActionForm');
+    form.action = data.action;
+    document.getElementById('userActionUserId').value = data.userId;
+    document.getElementById('userActionText').textContent = data.confirm;
+
+    var newType = document.getElementById('userActionNewType');
+    newType.value = data.newType || '';
+    newType.disabled = !data.newType;
+
+    ['reason', 'password'].forEach(function (name) {
+        var field = document.getElementById('userAction' + name.charAt(0).toUpperCase() + name.slice(1) + 'Field');
+        var shown = data.input === name;
+        field.hidden = !shown;
+        field.querySelectorAll('input, textarea').forEach(function (input) {
+            input.disabled = !shown;
+            input.value = '';
+            input.required = shown;
+            input.setCustomValidity('');
+            if (input.type === 'text') {
+                input.type = 'password';
+            }
+        });
+        field.querySelectorAll('.password-toggle').forEach(function (toggle) {
+            toggle.classList.remove('showing');
+        });
+    });
+
+    document.getElementById('userActionModal').classList.add('open');
+    var firstInput = form.querySelector('.form-field:not([hidden]) input, .form-field:not([hidden]) textarea');
+    if (firstInput) {
+        firstInput.focus();
+    }
+};
+
+var closeUserActionModal = function () {
+    document.getElementById('userActionModal').classList.remove('open');
+};
+
+$(function () {
+    var $modal = $("#userActionModal");
+    if ($modal.length === 0) return;
+
+    $(document).on("keydown", function (e) {
+        if (e.key === "Escape") {
+            closeUserActionModal();
+        }
+    });
+
+    // la confirmation doit reprendre le mot de passe : signale l'ecart avant l'envoi
+    var $password = $("#userActionPassword");
+    var $confirm = $("#userActionPasswordConfirm");
+    $password.add($confirm).on("input", function () {
+        $confirm[0].setCustomValidity($confirm.val() === $password.val() ? "" : $confirm.data("mismatch"));
+    });
+
+    var $login = $("#usersLogin");
+    $login.autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '/Admin/AutoCompleteUserLogins/',
+                data: { "prefix": request.term },
+                type: "POST",
+                success: response
+            });
+        },
+        select: function (e, i) {
+            $login.val(i.item.value);
+            $("#usersFilterForm").trigger("submit");
+            return false;
+        },
+        minLength: 1
+    });
+});

@@ -288,4 +288,34 @@
   <data name="UserDoesNotExist" xml:space="preserve">
     <value>Le compte n'existe pas</value>
   </data>
+  <data name="DisableReasonInvalid" xml:space="preserve">
+    <value>La raison de la désactivation est obligatoire (500 caractères maximum).</value>
+  </data>
+  <data name="PasswordCompromised" xml:space="preserve">
+    <value>Ce mot de passe a été trouvé dans une fuite de données connue.</value>
+  </data>
+  <data name="PasswordForced" xml:space="preserve">
+    <value>Le mot de passe de {0} a été remplacé.</value>
+  </data>
+  <data name="PasswordRejected" xml:space="preserve">
+    <value>Le mot de passe a été refusé.</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Le nouveau mot de passe est obligatoire.</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>Le mot de passe est trop court (10 caractères minimum).</value>
+  </data>
+  <data name="UserDisabled" xml:space="preserve">
+    <value>Le compte {0} a été désactivé.</value>
+  </data>
+  <data name="UserNotManageable" xml:space="preserve">
+    <value>Action impossible : ce compte est introuvable, déjà désactivé, administrateur, ou déjà dans cet état.</value>
+  </data>
+  <data name="UserTypeChanged" xml:space="preserve">
+    <value>Le type du compte {0} a été modifié.</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Les deux mots de passe sont différents.</value>
+  </data>
 </root>

@@ -288,4 +288,34 @@
   <data name="UserDoesNotExist" xml:space="preserve">
     <value>The user doesn't exist</value>
   </data>
+  <data name="DisableReasonInvalid" xml:space="preserve">
+    <value>The reason for disabling is required (500 characters max).</value>
+  </data>
+  <data name="PasswordCompromised" xml:space="preserve">
+    <value>This password has appeared in a known data breach.</value>
+  </data>
+  <data name="PasswordForced" xml:space="preserve">
+    <value>The password of {0} has been replaced.</value>
+  </data>
+  <data name="PasswordRejected" xml:space="preserve">
+    <value>The password was rejected.</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>The new password is required.</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>The password is too short (10 characters min.).</value>
+  </data>
+  <data name="UserDisabled" xml:space="preserve">
+    <value>The account {0} has been disabled.</value>
+  </data>
+  <data name="UserNotManageable" xml:space="preserve">
+    <value>Action impossible: this account is not found, already disabled, an administrator, or already in that state.</value>
+  </data>
+  <data name="UserTypeChanged" xml:space="preserve">
+    <value>The type of the account {0} has been changed.</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>The two passwords are different.</value>
+  </data>
 </root>

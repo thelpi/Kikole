@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +16,7 @@ using KikoleSite.ViewModels;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Moq;
@@ -46,6 +47,8 @@ public class AdminControllerTests : IDisposable
     private readonly Mock<IDiscussionService> _discussionService = new();
     private readonly Mock<IStringLocalizer<AdminController>> _localizer = new();
     private readonly Mock<IWebHostEnvironment> _webHostEnvironment = new();
+    private readonly Mock<UserManager<ApplicationUser>> _userManager = IdentityMocks.MockUserManager();
+    private readonly Mock<IEmailProtector> _emailProtector = new();
     private readonly string _webRootPath = Path.Combine(Path.GetTempPath(), "kikole-tests-" + Guid.NewGuid());
     private readonly AdminController _controller;
 
@@ -54,6 +57,12 @@ public class AdminControllerTests : IDisposable
         _clock.Setup(_ => _.Today).Returns(Today);
         _clock.Setup(_ => _.Now).Returns(Today.ToDateTime(TimeOnly.MinValue));
         _localizer.Setup(l => l[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
+        _localizer.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()])
+            .Returns<string, object[]>((k, args) => new LocalizedString(k, k + ":" + string.Join(",", args)));
+        _emailProtector.Setup(_ => _.Decrypt(It.IsAny<string>())).Returns<string>(c => "plain-" + c);
+        _userRepository
+            .Setup(_ => _.SearchUsersAsync(It.IsAny<string?>(), It.IsAny<UserStatusFilter>(), It.IsAny<UserTypes?>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<int>()))
+            .ReturnsAsync(((IReadOnlyList<KikoleSite.Models.Dtos.UserDto>)new List<KikoleSite.Models.Dtos.UserDto>(), 0));
         _webHostEnvironment.Setup(_ => _.WebRootPath).Returns(_webRootPath);
 
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -71,7 +80,9 @@ public class AdminControllerTests : IDisposable
             _leaderService.Object,
             _discussionService.Object,
             httpContextAccessor.Object,
-            _webHostEnvironment.Object)
+            _webHostEnvironment.Object,
+            _userManager.Object,
+            _emailProtector.Object)
         {
             ControllerContext = new ControllerContext { HttpContext = _httpContext }
         };
@@ -695,5 +706,191 @@ public class AdminControllerTests : IDisposable
 
         var model = ((ViewResult)result).Model.Should().BeOfType<PlayerEditModel>().Subject;
         model.Success.Should().BeTrue();
+    }
+
+    // ------------------------------------------------------------- gestion des utilisateurs
+
+    private static UsersModel UsersViewModel(IActionResult result)
+    {
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Users");
+        return view.Model.Should().BeOfType<UsersModel>().Subject;
+    }
+
+    private void SetupUser(ulong id, UserTypes type = UserTypes.StandardUser, string login = "joueur")
+    {
+        _userRepository.Setup(_ => _.GetUserByIdAsync(id))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(id).WithLogin(login).WithType(type).Build());
+    }
+
+    [Fact]
+    public async Task Users_ListsRowsWithDecryptedEmails()
+    {
+        var users = new List<KikoleSite.Models.Dtos.UserDto>
+        {
+            UserDtoBuilder.Valid().WithId(5).WithLogin("lea").WithEmailEncrypted("chiffre").Build()
+        };
+        _userRepository
+            .Setup(_ => _.SearchUsersAsync("le", UserStatusFilter.Enabled, null, true, 1, UsersModel.PageSize))
+            .ReturnsAsync(((IReadOnlyList<KikoleSite.Models.Dtos.UserDto>)users, 1));
+
+        var result = await _controller.Users(new UserListQuery { Login = "le", Status = UserStatusFilter.Enabled, Desc = true });
+
+        var model = UsersViewModel(result);
+        model.TotalCount.Should().Be(1);
+        model.Rows.Should().ContainSingle().Which.Email.Should().Be("plain-chiffre");
+    }
+
+    [Fact]
+    public async Task Users_FilteringOnAdministratorsIsIgnored()
+    {
+        _userRepository
+            .Setup(_ => _.SearchUsersAsync(null, UserStatusFilter.All, null, false, 1, UsersModel.PageSize))
+            .ReturnsAsync(((IReadOnlyList<KikoleSite.Models.Dtos.UserDto>)new List<KikoleSite.Models.Dtos.UserDto>(), 0));
+
+        var result = await _controller.Users(new UserListQuery { Type = UserTypes.Administrator });
+
+        UsersViewModel(result).Query.Type.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AutoCompleteUserLogins_WithABlankPrefix_ReturnsNothingWithoutQuerying()
+    {
+        var result = await _controller.AutoCompleteUserLogins("  ");
+
+        ((string[])result.Value!).Should().BeEmpty();
+        _userRepository.Verify(_ => _.SearchLoginsAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DisableUser_WithoutReason_DisablesNothing()
+    {
+        SetupUser(5);
+
+        var result = await _controller.DisableUser(new UserActionRequest { UserId = 5, Reason = "  " });
+
+        UsersViewModel(result).Error.Should().Be("DisableReasonInvalid");
+        _userRepository.Verify(_ => _.DisableUserAsync(It.IsAny<ulong>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DisableUser_OnAnAdministrator_IsRefused()
+    {
+        SetupUser(1, UserTypes.Administrator, "admin");
+
+        var result = await _controller.DisableUser(new UserActionRequest { UserId = 1, Reason = "test" });
+
+        UsersViewModel(result).Error.Should().Be("UserNotManageable");
+        _userRepository.Verify(_ => _.DisableUserAsync(It.IsAny<ulong>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DisableUser_OnAnAlreadyDisabledAccount_IsRefused()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdAsync(5)).ReturnsAsync((KikoleSite.Models.Dtos.UserDto?)null);
+
+        var result = await _controller.DisableUser(new UserActionRequest { UserId = 5, Reason = "test" });
+
+        UsersViewModel(result).Error.Should().Be("UserNotManageable");
+        _userRepository.Verify(_ => _.DisableUserAsync(It.IsAny<ulong>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DisableUser_Valid_DisablesWithTheTrimmedReason()
+    {
+        SetupUser(5, login: "lea");
+
+        var result = await _controller.DisableUser(new UserActionRequest { UserId = 5, Reason = "  multi-compte  " });
+
+        _userRepository.Verify(_ => _.DisableUserAsync(5, "multi-compte"), Times.Once);
+        UsersViewModel(result).Feedback.Should().Be("UserDisabled:lea");
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_OnAnAdministrator_IsRefused()
+    {
+        SetupUser(1, UserTypes.Administrator, "admin");
+
+        var result = await _controller.ForceUserPassword(new UserActionRequest { UserId = 1, NewPassword = "un-mot-de-passe-long", NewPasswordConfirm = "un-mot-de-passe-long" });
+
+        UsersViewModel(result).Error.Should().Be("UserNotManageable");
+        _userManager.Verify(_ => _.ResetPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_WhenTheConfirmationDiffers_ChangesNothing()
+    {
+        SetupUser(5);
+
+        var result = await _controller.ForceUserPassword(
+            new UserActionRequest { UserId = 5, NewPassword = "un-mot-de-passe-long", NewPasswordConfirm = "autre-mot-de-passe" });
+
+        UsersViewModel(result).Error.Should().Be("PasswordMismatch");
+        _userManager.Verify(_ => _.ResetPasswordAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_Valid_ReplacesThePassword()
+    {
+        SetupUser(5, login: "lea");
+        var user = new ApplicationUser { Id = 5, UserName = "lea" };
+        _userManager.Setup(_ => _.FindByIdAsync("5")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("jeton");
+        _userManager.Setup(_ => _.ResetPasswordAsync(user, "jeton", "un-mot-de-passe-long")).ReturnsAsync(IdentityResult.Success);
+
+        var result = await _controller.ForceUserPassword(new UserActionRequest { UserId = 5, NewPassword = "un-mot-de-passe-long", NewPasswordConfirm = "un-mot-de-passe-long" });
+
+        UsersViewModel(result).Feedback.Should().Be("PasswordForced:lea");
+        _userManager.Verify(_ => _.ResetAccessFailedCountAsync(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_WhenTheValidatorRejectsIt_ReportsTheReason()
+    {
+        SetupUser(5);
+        var user = new ApplicationUser { Id = 5, UserName = "lea" };
+        _userManager.Setup(_ => _.FindByIdAsync("5")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("jeton");
+        _userManager.Setup(_ => _.ResetPasswordAsync(user, "jeton", "court"))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = nameof(IdentityErrorDescriber.PasswordTooShort) }));
+
+        var result = await _controller.ForceUserPassword(new UserActionRequest { UserId = 5, NewPassword = "court", NewPasswordConfirm = "court" });
+
+        UsersViewModel(result).Error.Should().Be("PasswordTooShort");
+    }
+
+    [Theory]
+    [InlineData(UserTypes.Administrator)]
+    [InlineData(null)]
+    public async Task ChangeUserType_ToAnythingButStandardOrPower_IsRefused(UserTypes? newType)
+    {
+        SetupUser(5);
+
+        var result = await _controller.ChangeUserType(new UserActionRequest { UserId = 5, NewType = newType });
+
+        UsersViewModel(result).Error.Should().Be("UserNotManageable");
+        _userRepository.Verify(_ => _.ChangeUserTypeAsync(It.IsAny<ulong>(), It.IsAny<UserTypes>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ChangeUserType_ToTheCurrentType_IsRefused()
+    {
+        SetupUser(5, UserTypes.PowerUser);
+
+        var result = await _controller.ChangeUserType(new UserActionRequest { UserId = 5, NewType = UserTypes.PowerUser });
+
+        UsersViewModel(result).Error.Should().Be("UserNotManageable");
+        _userRepository.Verify(_ => _.ChangeUserTypeAsync(It.IsAny<ulong>(), It.IsAny<UserTypes>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ChangeUserType_Valid_ChangesTheType()
+    {
+        SetupUser(5, login: "lea");
+
+        var result = await _controller.ChangeUserType(new UserActionRequest { UserId = 5, NewType = UserTypes.PowerUser });
+
+        _userRepository.Verify(_ => _.ChangeUserTypeAsync(5, UserTypes.PowerUser), Times.Once);
+        UsersViewModel(result).Feedback.Should().Be("UserTypeChanged:lea");
     }
 }

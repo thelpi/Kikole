@@ -117,40 +117,112 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ActionAddMessage" xml:space="preserve">
-    <value>Ajouter</value>
+  <data name="BackToActions" xml:space="preserve">
+    <value>Retour aux actions d&apos;administration</value>
   </data>
-  <data name="AddGlobalMessage" xml:space="preserve">
-    <value>Faire une annonce</value>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
   </data>
-  <data name="AdminActions" xml:space="preserve">
-    <value>Actions d'administration</value>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirmer</value>
   </data>
-  <data name="CheckSubmittedPlayers" xml:space="preserve">
-    <value>Vérifier les joueurs proposés</value>
+  <data name="ConfirmDisable" xml:space="preserve">
+    <value>Désactiver le compte « {0} » ? Cette action est définitive : un compte désactivé ne peut pas être réactivé.</value>
   </data>
-  <data name="ViewDiscussions" xml:space="preserve">
-    <value>Voir les discussions</value>
+  <data name="ConfirmForcePassword" xml:space="preserve">
+    <value>Remplacer le mot de passe du compte « {0} » ? Ses sessions ouvertes seront fermées.</value>
   </data>
-  <data name="MessageDateEndLabel" xml:space="preserve">
-    <value>Affiché jusqu'au</value>
+  <data name="ConfirmToPower" xml:space="preserve">
+    <value>Passer le compte « {0} » en utilisateur avancé ?</value>
   </data>
-  <data name="MessageDateStartLabel" xml:space="preserve">
-    <value>Affiché à partir du</value>
+  <data name="ConfirmToStandard" xml:space="preserve">
+    <value>Passer le compte « {0} » en utilisateur normal ?</value>
   </data>
-  <data name="MessageLabel" xml:space="preserve">
-    <value>Message</value>
+  <data name="CreationHeader" xml:space="preserve">
+    <value>Création</value>
   </data>
-  <data name="ReassignPlayers" xml:space="preserve">
-    <value>Réassigner la date des joueurs</value>
+  <data name="Disable" xml:space="preserve">
+    <value>Désactiver</value>
   </data>
-  <data name="RecomputeBadges" xml:space="preserve">
-    <value>Recalculer les badges</value>
+  <data name="DisabledAccount" xml:space="preserve">
+    <value>Compte désactivé</value>
   </data>
-  <data name="RecomputeLeaders" xml:space="preserve">
-    <value>Calculer les leaders manquants</value>
+  <data name="Filter" xml:space="preserve">
+    <value>Filtrer</value>
+  </data>
+  <data name="ForcePassword" xml:space="preserve">
+    <value>Forcer le mot de passe</value>
+  </data>
+  <data name="IpHeader" xml:space="preserve">
+    <value>Adresse IP</value>
+  </data>
+  <data name="LoginLabel" xml:space="preserve">
+    <value>Login</value>
   </data>
   <data name="ManageUsers" xml:space="preserve">
-    <value>Gérer les utilisateurs</value>
+    <value>Gestion des utilisateurs</value>
+  </data>
+  <data name="NewPasswordLabel" xml:space="preserve">
+    <value>Nouveau mot de passe</value>
+  </data>
+  <data name="OrderLabel" xml:space="preserve">
+    <value>Tri par création</value>
+  </data>
+  <data name="OrderNewest" xml:space="preserve">
+    <value>Plus récents d&apos;abord</value>
+  </data>
+  <data name="OrderOldest" xml:space="preserve">
+    <value>Plus anciens d&apos;abord</value>
+  </data>
+  <data name="PagerNext" xml:space="preserve">
+    <value>Page suivante</value>
+  </data>
+  <data name="PagerPrevious" xml:space="preserve">
+    <value>Page précédente</value>
+  </data>
+  <data name="ReasonLabel" xml:space="preserve">
+    <value>Raison de la désactivation</value>
+  </data>
+  <data name="ResultsCount" xml:space="preserve">
+    <value>{0} utilisateur(s)</value>
+  </data>
+  <data name="StatusAll" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="StatusDisabled" xml:space="preserve">
+    <value>Désactivés</value>
+  </data>
+  <data name="StatusEnabled" xml:space="preserve">
+    <value>Actifs</value>
+  </data>
+  <data name="StatusLabel" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="ToPower" xml:space="preserve">
+    <value>Passer avancé</value>
+  </data>
+  <data name="ToStandard" xml:space="preserve">
+    <value>Passer normal</value>
+  </data>
+  <data name="TypeAll" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="TypeLabel" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="TypePower" xml:space="preserve">
+    <value>Avancé</value>
+  </data>
+  <data name="TypeStandard" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="ConfirmPasswordLabel" xml:space="preserve">
+    <value>Confirmez le mot de passe</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Les deux mots de passe sont différents</value>
+  </data>
+  <data name="ShowPassword" xml:space="preserve">
+    <value>Afficher/masquer le mot de passe</value>
   </data>
 </root>

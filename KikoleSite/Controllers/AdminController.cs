@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KikoleSite.Controllers.Attributes;
 using KikoleSite.Helpers;
+using KikoleSite.Identity;
 using KikoleSite.Models;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
@@ -13,6 +14,7 @@ using KikoleSite.Services;
 using KikoleSite.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
@@ -30,8 +32,12 @@ public class AdminController : KikoleBaseController
     // limite au texte, aux liens et aux images
     private static readonly string[] AudioVideoExtensions = [".mp3", ".mp4"];
     private const long MaxClueMediaFileSizeBytes = 15 * 1024 * 1024;
+    private const int MaxDisabledReasonLength = 500;
+    private const int LoginSuggestionsCount = 10;
 
     private readonly IStringLocalizer<AdminController> _localizer;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailProtector _emailProtector;
     private readonly IDiscussionService _discussionService;
     private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
@@ -48,7 +54,9 @@ public class AdminController : KikoleBaseController
         ILeaderService leaderService,
         IDiscussionService discussionService,
         IHttpContextAccessor httpContextAccessor,
-        IWebHostEnvironment webHostEnvironment)
+        IWebHostEnvironment webHostEnvironment,
+        UserManager<ApplicationUser> userManager,
+        IEmailProtector emailProtector)
         : base(userRepository,
             internationalService,
             clock,
@@ -62,6 +70,8 @@ public class AdminController : KikoleBaseController
         _leaderService = leaderService;
         _messageRepository = messageRepository;
         _webHostEnvironment = webHostEnvironment;
+        _userManager = userManager;
+        _emailProtector = emailProtector;
     }
 
     [HttpGet]
@@ -101,6 +111,82 @@ public class AdminController : KikoleBaseController
         return await RenderActionsAsync(new AdminModel());
     }
 
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Users(UserListQuery query)
+    {
+        return await RenderUsersAsync(query, null, null);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<JsonResult> AutoCompleteUserLogins(string prefix)
+    {
+        if (string.IsNullOrWhiteSpace(prefix))
+            return Json(Array.Empty<string>());
+
+        return Json(await _userRepository.SearchLoginsAsync(prefix, LoginSuggestionsCount));
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> DisableUser(UserActionRequest request)
+    {
+        var reason = request.Reason?.Trim();
+        if (string.IsNullOrEmpty(reason) || reason.Length > MaxDisabledReasonLength)
+            return await RenderUsersAsync(request, null, _localizer["DisableReasonInvalid"]);
+
+        var target = await GetManageableUserAsync(request.UserId);
+        if (target == null)
+            return await RenderUsersAsync(request, null, _localizer["UserNotManageable"]);
+
+        await _userRepository.DisableUserAsync(target.Id, reason);
+
+        return await RenderUsersAsync(request, _localizer["UserDisabled", target.Login], null);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> ForceUserPassword(UserActionRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
+            return await RenderUsersAsync(request, null, _localizer["PasswordRequired"]);
+
+        if (request.NewPassword != request.NewPasswordConfirm)
+            return await RenderUsersAsync(request, null, _localizer["PasswordMismatch"]);
+
+        var target = await GetManageableUserAsync(request.UserId);
+        var user = target == null ? null : await _userManager.FindByIdAsync(target.Id.ToString());
+        if (user == null)
+            return await RenderUsersAsync(request, null, _localizer["UserNotManageable"]);
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var reset = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+        if (!reset.Succeeded)
+            return await RenderUsersAsync(request, null, MapPasswordError(reset));
+
+        // le nouveau mot de passe leve aussi un verrouillage en cours (comme la reinitialisation par email)
+        await _userManager.ResetAccessFailedCountAsync(user);
+
+        return await RenderUsersAsync(request, _localizer["PasswordForced", user.UserName ?? string.Empty], null);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> ChangeUserType(UserActionRequest request)
+    {
+        if (request.NewType is not (UserTypes.StandardUser or UserTypes.PowerUser))
+            return await RenderUsersAsync(request, null, _localizer["UserNotManageable"]);
+
+        var target = await GetManageableUserAsync(request.UserId);
+        if (target == null || target.UserTypeId == (ulong)request.NewType)
+            return await RenderUsersAsync(request, null, _localizer["UserNotManageable"]);
+
+        await _userRepository.ChangeUserTypeAsync(target.Id, request.NewType.Value);
+
+        return await RenderUsersAsync(request, _localizer["UserTypeChanged", target.Login], null);
+    }
+
     [HttpPost]
     [Authorization(UserTypes.Administrator)]
     public async Task<IActionResult> InsertMessage(AdminModel model)
@@ -127,6 +213,60 @@ public class AdminController : KikoleBaseController
         model.MessageDateStart = _clock.NowSeconds;
         model.MessageDateEnd = _clock.TomorrowEnd;
         return Task.FromResult<IActionResult>(View("Actions", model));
+    }
+
+    // un compte actif et non administrateur : seuls ceux-la se gerent depuis la page des utilisateurs
+    private async Task<Models.Dtos.UserDto?> GetManageableUserAsync(ulong userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        return user == null || user.UserTypeId == (ulong)UserTypes.Administrator ? null : user;
+    }
+
+    private async Task<IActionResult> RenderUsersAsync(UserListQuery query, string? feedback, string? error)
+    {
+        // un administrateur n'est jamais listable : filtrer dessus ne donnerait que du vide
+        var type = query.Type == UserTypes.Administrator ? null : query.Type;
+        var page = Math.Max(1, query.Page);
+
+        var (users, total) = await _userRepository
+            .SearchUsersAsync(query.Login, query.Status, type, query.Desc, page, UsersModel.PageSize);
+
+        // la page demandee n'existe plus (liste raccourcie entre-temps) : derniere page
+        if (users.Count == 0 && total > 0)
+        {
+            page = (total + UsersModel.PageSize - 1) / UsersModel.PageSize;
+            (users, total) = await _userRepository
+                .SearchUsersAsync(query.Login, query.Status, type, query.Desc, page, UsersModel.PageSize);
+        }
+
+        var model = new UsersModel
+        {
+            Query = new UserListQuery
+            {
+                Login = query.Login,
+                Status = query.Status,
+                Type = type,
+                Desc = query.Desc,
+                Page = page
+            },
+            Rows = [.. users.Select(u => UserAdminRow.From(u, _emailProtector.Decrypt(u.EmailEncrypted)))],
+            TotalCount = total,
+            Feedback = feedback,
+            Error = error
+        };
+
+        return View("Users", model);
+    }
+
+    private string MapPasswordError(IdentityResult result)
+    {
+        if (result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.PasswordTooShort)))
+            return _localizer["PasswordTooShort"];
+
+        if (result.Errors.Any(e => e.Code == HibpPasswordValidator.PwnedPasswordErrorCode))
+            return _localizer["PasswordCompromised"];
+
+        return _localizer["PasswordRejected"];
     }
 
     [HttpGet]

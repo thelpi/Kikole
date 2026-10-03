@@ -2260,3 +2260,26 @@ body { padding-top: 0; }
 }
 
 .kikole-board .rules-card h2 + h3 { margin-top: 4px; }
+
+/* page de gestion des utilisateurs (Admin/Users.cshtml) */
+.kikole-board .user-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.kikole-board .user-actions button { padding: 6px 10px; font-size: 13px; white-space: nowrap; }
+.kikole-board #usersTable td { white-space: nowrap; }
+.kikole-board #usersTable tr.user-disabled td {
+  background: linear-gradient(180deg, #5a454d 0%, #3f323a 55%, #4d3c44 100%);
+  border-bottom: 1px solid #6d565f;
+}
+.kikole-board .user-email { margin-top: 2px; font-family: var(--font-sans); font-size: 12px; font-weight: 400; color: var(--text-muted); }
+.kikole-board .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.kikole-board .form-card a.pager-btn { color: var(--text); }
+.kikole-board .form-card a.pager-btn:hover { color: var(--accent); }
+.kikole-board .pager-btn[aria-disabled="true"] { opacity: 0.35; cursor: default; }
+.kikole-board .confirm-modal-box textarea,
+.kikole-board .confirm-modal-box input[type="password"] { width: 100%; box-sizing: border-box; }

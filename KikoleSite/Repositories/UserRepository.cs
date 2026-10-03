@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
 
 namespace KikoleSite.Repositories;
@@ -98,6 +99,83 @@ public class UserRepository : BaseRepository, IUserRepository
                 "SET is_disabled = 1, disabled_date = @disabledDate, disabled_reason = @reason " +
                 "WHERE id = @userId AND is_disabled = 0",
                 new { userId, reason, disabledDate = Clock.Now });
+    }
+
+    public async Task<(IReadOnlyList<UserDto> Users, int Total)> SearchUsersAsync(
+        string? login, UserStatusFilter status, UserTypes? type, bool descending, int page, int pageSize)
+    {
+        var conditions = new List<string> { "user_type_id != @adminType" };
+
+        if (!string.IsNullOrWhiteSpace(login))
+            conditions.Add("login LIKE @pattern ESCAPE '\\\\'");
+
+        if (status == UserStatusFilter.Enabled)
+            conditions.Add("is_disabled = 0");
+        else if (status == UserStatusFilter.Disabled)
+            conditions.Add("is_disabled = 1");
+
+        if (type.HasValue)
+            conditions.Add("user_type_id = @type");
+
+        var where = "WHERE " + string.Join(" AND ", conditions);
+        var direction = descending ? "DESC" : "ASC";
+        var parameters = new
+        {
+            adminType = (ulong)UserTypes.Administrator,
+            pattern = LikePattern(login),
+            type = (ulong?)type,
+            limit = pageSize,
+            offset = (page - 1) * pageSize
+        };
+
+        var total = await ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM users {where}", parameters);
+
+        var users = await ExecuteReaderAsync<UserDto>(
+                $"SELECT * FROM users {where} " +
+                $"ORDER BY creation_date {direction}, id {direction} " +
+                "LIMIT @limit OFFSET @offset",
+                parameters);
+
+        return (users, total);
+    }
+
+    public async Task<IReadOnlyList<string>> SearchLoginsAsync(string term, int max)
+    {
+        return await ExecuteReaderAsync<string>(
+                "SELECT login FROM users " +
+                "WHERE user_type_id != @adminType AND login LIKE @pattern ESCAPE '\\\\' " +
+                "ORDER BY login LIMIT @max",
+                new
+                {
+                    adminType = (ulong)UserTypes.Administrator,
+                    pattern = LikePattern(term),
+                    max
+                });
+    }
+
+    public async Task ChangeUserTypeAsync(ulong userId, UserTypes type)
+    {
+        if (type is not (UserTypes.StandardUser or UserTypes.PowerUser))
+            throw new ArgumentOutOfRangeException(nameof(type), type, "Seuls les paliers standard et avancé sont attribuables.");
+
+        await ExecuteNonQueryAsync(
+                "UPDATE users SET user_type_id = @type " +
+                "WHERE id = @userId AND is_disabled = 0 " +
+                "AND user_type_id IN (@standardType, @powerType)",
+                new
+                {
+                    userId,
+                    type = (ulong)type,
+                    standardType = (ulong)UserTypes.StandardUser,
+                    powerType = (ulong)UserTypes.PowerUser
+                });
+    }
+
+    private static string? LikePattern(string? term)
+    {
+        return string.IsNullOrWhiteSpace(term)
+            ? null
+            : "%" + term.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
     }
 
     public async Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin)

@@ -117,40 +117,112 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ActionAddMessage" xml:space="preserve">
-    <value>Ajouter</value>
+  <data name="BackToActions" xml:space="preserve">
+    <value>Back to administration actions</value>
   </data>
-  <data name="AddGlobalMessage" xml:space="preserve">
-    <value>Faire une annonce</value>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="AdminActions" xml:space="preserve">
-    <value>Actions d'administration</value>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
   </data>
-  <data name="CheckSubmittedPlayers" xml:space="preserve">
-    <value>Vérifier les joueurs proposés</value>
+  <data name="ConfirmDisable" xml:space="preserve">
+    <value>Disable the account &quot;{0}&quot;? This is permanent: a disabled account cannot be reactivated.</value>
   </data>
-  <data name="ViewDiscussions" xml:space="preserve">
-    <value>Voir les discussions</value>
+  <data name="ConfirmForcePassword" xml:space="preserve">
+    <value>Replace the password of the account &quot;{0}&quot;? Its open sessions will be closed.</value>
   </data>
-  <data name="MessageDateEndLabel" xml:space="preserve">
-    <value>Affiché jusqu'au</value>
+  <data name="ConfirmToPower" xml:space="preserve">
+    <value>Switch the account &quot;{0}&quot; to power user?</value>
   </data>
-  <data name="MessageDateStartLabel" xml:space="preserve">
-    <value>Affiché à partir du</value>
+  <data name="ConfirmToStandard" xml:space="preserve">
+    <value>Switch the account &quot;{0}&quot; to standard user?</value>
   </data>
-  <data name="MessageLabel" xml:space="preserve">
-    <value>Message</value>
+  <data name="CreationHeader" xml:space="preserve">
+    <value>Created</value>
   </data>
-  <data name="ReassignPlayers" xml:space="preserve">
-    <value>Réassigner la date des joueurs</value>
+  <data name="Disable" xml:space="preserve">
+    <value>Disable</value>
   </data>
-  <data name="RecomputeBadges" xml:space="preserve">
-    <value>Recalculer les badges</value>
+  <data name="DisabledAccount" xml:space="preserve">
+    <value>Disabled account</value>
   </data>
-  <data name="RecomputeLeaders" xml:space="preserve">
-    <value>Calculer les leaders manquants</value>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="ForcePassword" xml:space="preserve">
+    <value>Force password</value>
+  </data>
+  <data name="IpHeader" xml:space="preserve">
+    <value>IP address</value>
+  </data>
+  <data name="LoginLabel" xml:space="preserve">
+    <value>Login</value>
   </data>
   <data name="ManageUsers" xml:space="preserve">
-    <value>Gérer les utilisateurs</value>
+    <value>User management</value>
+  </data>
+  <data name="NewPasswordLabel" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="OrderLabel" xml:space="preserve">
+    <value>Sort by creation</value>
+  </data>
+  <data name="OrderNewest" xml:space="preserve">
+    <value>Newest first</value>
+  </data>
+  <data name="OrderOldest" xml:space="preserve">
+    <value>Oldest first</value>
+  </data>
+  <data name="PagerNext" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="PagerPrevious" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="ReasonLabel" xml:space="preserve">
+    <value>Reason for disabling</value>
+  </data>
+  <data name="ResultsCount" xml:space="preserve">
+    <value>{0} user(s)</value>
+  </data>
+  <data name="StatusAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="StatusDisabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="StatusEnabled" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="StatusLabel" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="ToPower" xml:space="preserve">
+    <value>Make power user</value>
+  </data>
+  <data name="ToStandard" xml:space="preserve">
+    <value>Make standard</value>
+  </data>
+  <data name="TypeAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="TypeLabel" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="TypePower" xml:space="preserve">
+    <value>Power user</value>
+  </data>
+  <data name="TypeStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="ConfirmPasswordLabel" xml:space="preserve">
+    <value>Confirm the password</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>The two passwords are different</value>
+  </data>
+  <data name="ShowPassword" xml:space="preserve">
+    <value>Show/hide password</value>
   </data>
 </root>

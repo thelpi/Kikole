@@ -31,10 +31,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - [ ] Outillage admin des comptes
   - [ ] Plafond de clubs créés par un `PowerUser`
   - [ ] Plafond de kikolés proposés par un `PowerUser`
-  - [ ] Changer le palier d'un utilisateur
-  - [ ] Désactiver un compte (`DisableUserAsync` prêt, écran à faire)
-  - [ ] Forcer un mot de passe
-  - (à regrouper dans un écran « gestion des utilisateurs »)
+  - [x] Page `/Admin/Users` : liste, filtres, changer le palier, forcer un mot de passe, désactiver
 
 ## 2. Modèle de données et contenu
 
@@ -130,6 +127,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Badge désactivé (`is_disabled`) = supprimé virtuellement, lignes `user_badges` conservées
 - Compte désactivé : jamais réactivé (aucune opération inverse), date et raison conservées
 - Créateur désactivé : kikolé conservé, créateur anonymisé, hors classements
+- Gestion des utilisateurs : administrateurs exclus de la liste, des filtres et des actions ; pas de passage en administrateur
 - Rareté d'un badge = proportion des autres joueurs qui ne l'ont pas
 
 **Architecture**

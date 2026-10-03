@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
+using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Repositories;
 
@@ -18,6 +19,20 @@ public interface IUserRepository
 
     /// <summary>Désactive un compte en gardant la date et la raison. Il n'existe volontairement pas d'opération inverse.</summary>
     Task DisableUserAsync(ulong userId, string reason);
+
+    /// <summary>
+    /// Page d'utilisateurs pour l'administration (désactivés inclus, administrateurs exclus),
+    /// triés par date de création, avec le total des résultats avant pagination.
+    /// <paramref name="login"/> est cherché par « contient ».
+    /// </summary>
+    Task<(IReadOnlyList<UserDto> Users, int Total)> SearchUsersAsync(
+        string? login, UserStatusFilter status, UserTypes? type, bool descending, int page, int pageSize);
+
+    /// <summary>Logins contenant <paramref name="term"/> (désactivés inclus, administrateurs exclus), limités à <paramref name="max"/>.</summary>
+    Task<IReadOnlyList<string>> SearchLoginsAsync(string term, int max);
+
+    /// <summary>Passe un compte actif entre palier standard et palier avancé ; sans effet sur un administrateur ou un compte désactivé.</summary>
+    Task ChangeUserTypeAsync(ulong userId, UserTypes type);
 
     Task<UserDto?> GetUserByNormalizedLoginAsync(string normalizedLogin);
 

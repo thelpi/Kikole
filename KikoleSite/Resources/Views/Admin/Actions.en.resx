@@ -150,4 +150,7 @@
   <data name="RecomputeLeaders" xml:space="preserve">
     <value>Compute missing leaders</value>
   </data>
+  <data name="ManageUsers" xml:space="preserve">
+    <value>Manage users</value>
+  </data>
 </root>

@@ -1,0 +1,190 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@using KikoleSite.Models.Enums
+@model UsersModel
+
+@{
+    var q = Model.Query;
+    string PageUrl(int page) => Url.Action("Users", "Admin", new { login = q.Login, status = q.Status, type = q.Type, desc = q.Desc, page })!;
+}
+
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+    {
+        <div class="banner success">@Model.Feedback</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="banner error">@Model.Error</div>
+    }
+
+    <div class="form-card">
+        <h3>@localizer["ManageUsers"]</h3>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Actions">@localizer["BackToActions"]</a></div>
+        <form method="get" action="/Admin/Users" id="usersFilterForm" style="margin-top:14px">
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="usersLogin">@localizer["LoginLabel"]</label>
+                    <input type="text" id="usersLogin" name="login" class="blank" value="@q.Login" autocomplete="off" />
+                </div>
+                <div class="form-field">
+                    <label for="usersStatus">@localizer["StatusLabel"]</label>
+                    <select id="usersStatus" name="status" class="blank">
+                        <option value="@UserStatusFilter.All" selected="@(q.Status == UserStatusFilter.All)">@localizer["StatusAll"]</option>
+                        <option value="@UserStatusFilter.Enabled" selected="@(q.Status == UserStatusFilter.Enabled)">@localizer["StatusEnabled"]</option>
+                        <option value="@UserStatusFilter.Disabled" selected="@(q.Status == UserStatusFilter.Disabled)">@localizer["StatusDisabled"]</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="usersType">@localizer["TypeLabel"]</label>
+                    <select id="usersType" name="type" class="blank">
+                        <option value="" selected="@(!q.Type.HasValue)">@localizer["TypeAll"]</option>
+                        <option value="@((int)UserTypes.StandardUser)" selected="@(q.Type == UserTypes.StandardUser)">@localizer["TypeStandard"]</option>
+                        <option value="@((int)UserTypes.PowerUser)" selected="@(q.Type == UserTypes.PowerUser)">@localizer["TypePower"]</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="usersOrder">@localizer["OrderLabel"]</label>
+                    <select id="usersOrder" name="desc" class="blank">
+                        <option value="false" selected="@(!q.Desc)">@localizer["OrderOldest"]</option>
+                        <option value="true" selected="@(q.Desc)">@localizer["OrderNewest"]</option>
+                    </select>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit">@localizer["Filter"]</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-card">
+        <p>@string.Format(localizer["ResultsCount"].Value, Model.TotalCount)</p>
+        <div class="table-wrap">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th class="tabDataHead redtext">@localizer["LoginLabel"]</th>
+                        <th class="tabDataHead">@localizer["CreationHeader"]</th>
+                        <th class="tabDataHead">@localizer["IpHeader"]</th>
+                        <th class="tabDataHead">@localizer["TypeLabel"]</th>
+                        <th class="tabDataHead"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var i = 0; }
+                    @foreach (var row in Model.Rows)
+                    {
+                        var isPower = row.UserType == UserTypes.PowerUser;
+                        <tr class="@(i++ % 2 == 0 ? "even" : "odd")@(row.IsDisabled ? " user-disabled" : "")">
+                            <td class="tabData redtext">
+                                @row.Login
+                                @if (row.IsDisabled)
+                                {
+                                    <span class="sr-only">(@localizer["DisabledAccount"])</span>
+                                }
+                                <div class="user-email">@row.Email</div>
+                            </td>
+                            <td class="tabData">@row.CreationDate.ToString("yyyy-MM-dd")</td>
+                            <td class="tabData">@row.Ip</td>
+                            <td class="tabData">@(isPower ? localizer["TypePower"] : localizer["TypeStandard"])</td>
+                            <td class="tabData">
+                                @if (!row.IsDisabled)
+                                {
+                                    <div class="user-actions">
+                                        <button type="button" class="secondary"
+                                                data-action="/Admin/ChangeUserType" data-user-id="@row.Id" data-input="none"
+                                                data-new-type="@((int)(isPower ? UserTypes.StandardUser : UserTypes.PowerUser))"
+                                                data-confirm="@string.Format((isPower ? localizer["ConfirmToStandard"] : localizer["ConfirmToPower"]).Value, row.Login)"
+                                                onclick="openUserActionModal(this)">@(isPower ? localizer["ToStandard"] : localizer["ToPower"])</button>
+                                        <button type="button" class="secondary"
+                                                data-action="/Admin/ForceUserPassword" data-user-id="@row.Id" data-input="password"
+                                                data-confirm="@string.Format(localizer["ConfirmForcePassword"].Value, row.Login)"
+                                                onclick="openUserActionModal(this)">@localizer["ForcePassword"]</button>
+                                        <button type="button" class="secondary"
+                                                data-action="/Admin/DisableUser" data-user-id="@row.Id" data-input="reason"
+                                                data-confirm="@string.Format(localizer["ConfirmDisable"].Value, row.Login)"
+                                                onclick="openUserActionModal(this)">@localizer["Disable"]</button>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            var chevron = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"{0}\"/></svg>";
+            <div class="pager">
+                @if (q.Page > 1)
+                {
+                    <a class="pager-btn" href="@PageUrl(q.Page - 1)" title="@localizer["PagerPrevious"]" aria-label="@localizer["PagerPrevious"]">@Html.Raw(string.Format(chevron, "M15 6l-6 6 6 6"))</a>
+                }
+                else
+                {
+                    <span class="pager-btn" aria-disabled="true">@Html.Raw(string.Format(chevron, "M15 6l-6 6 6 6"))</span>
+                }
+                <span class="pager-range">@q.Page / @Model.TotalPages</span>
+                @if (q.Page < Model.TotalPages)
+                {
+                    <a class="pager-btn" href="@PageUrl(q.Page + 1)" title="@localizer["PagerNext"]" aria-label="@localizer["PagerNext"]">@Html.Raw(string.Format(chevron, "M9 6l6 6-6 6"))</a>
+                }
+                else
+                {
+                    <span class="pager-btn" aria-disabled="true">@Html.Raw(string.Format(chevron, "M9 6l6 6-6 6"))</span>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="confirm-modal" id="userActionModal">
+        <div class="confirm-modal-box">
+            <form method="post" id="userActionForm">
+                <input type="hidden" name="userId" id="userActionUserId" />
+                <input type="hidden" name="newType" id="userActionNewType" disabled />
+                <input type="hidden" name="login" value="@q.Login" />
+                <input type="hidden" name="status" value="@q.Status" />
+                <input type="hidden" name="type" value="@(q.Type.HasValue ? ((int)q.Type.Value).ToString() : "")" />
+                <input type="hidden" name="desc" value="@(q.Desc ? "true" : "false")" />
+                <input type="hidden" name="page" value="@q.Page" />
+                <p id="userActionText"></p>
+                <div class="form-field" id="userActionReasonField" hidden>
+                    <label for="userActionReason">@localizer["ReasonLabel"]</label>
+                    <textarea id="userActionReason" name="reason" class="blank" maxlength="500" rows="3" disabled></textarea>
+                </div>
+                <div id="userActionPasswordField" hidden>
+                    <div class="form-field">
+                        <label for="userActionPassword">@localizer["NewPasswordLabel"]</label>
+                        <div class="password-wrap">
+                            <input type="password" id="userActionPassword" name="newPassword" class="blank" autocomplete="new-password" disabled />
+                            <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                                <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                    <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="userActionPasswordConfirm">@localizer["ConfirmPasswordLabel"]</label>
+                        <div class="password-wrap">
+                            <input type="password" id="userActionPasswordConfirm" name="newPasswordConfirm" class="blank" autocomplete="new-password" data-mismatch="@localizer["PasswordMismatch"]" disabled />
+                            <button type="button" class="password-toggle" aria-label="@localizer["ShowPassword"]">
+                                <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                    <line class="icon-eye-slash" x1="3" y1="3" x2="21" y2="21" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="confirm-modal-actions">
+                    <button type="button" class="secondary" onclick="closeUserActionModal()">@localizer["Cancel"]</button>
+                    <button type="submit">@localizer["Confirm"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
