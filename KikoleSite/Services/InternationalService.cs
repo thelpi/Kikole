@@ -60,7 +60,8 @@ public class InternationalService : IInternationalService
 
         var loaded = clubs
             .Select(c => new Club(c, translationsByClub[c.Id]))
-            .OrderBy(c => c.Name)
+            .OrderByDescending(c => c.Importance)
+            .ThenBy(c => c.Name)
             .ToList();
 
         _clubs = loaded;

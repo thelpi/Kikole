@@ -75,9 +75,11 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [ ] `badge_translations.name` (+ `UPDATE` depuis `badges.name`)
   - [ ] `badges.is_disabled` (+ badges 34, 35, `UPDATE` des ids 30, 32, 33)
   - [ ] `players.acceptance_date` (+ `UPDATE ... = creation_date` pour les joueurs publiés)
+  - [ ] `clubs.importance` (+ `UPDATE` des niveaux 2 et 3, voir `kikole.sql`)
 - [ ] Textes localisés encore produits dans le domaine (`ProposalResponse.Tip`, `GetTip`, `ScoreCalculator`, `IsValid(IStringLocalizer)`)
 - [x] `Dayboard` : propriétés mortes de taux de réussite supprimées
 - [x] `StatisticRepository.UserPlayerLinkSql` supprimé (stats réservées à l'admin)
+- [x] Autocomplétion des clubs : triée par `importance` (3 / 2 / 1), alias affiché entre parenthèses
 - [ ] Évaluer la suppression de Dapper
 
 ## 4. Interface
@@ -114,6 +116,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Le continent se déduit du pays, jamais stocké
 - Clés étrangères en `RESTRICT` par défaut (l'application ne supprime rien)
 - Clubs traduits par langue, `priority = 0` = nom canonique
+- `clubs.importance` : 1 par défaut, ajusté en base à la main
 
 **Règles de jeu**
 - Un seul pays et un seul poste alternatifs (pas de liste)

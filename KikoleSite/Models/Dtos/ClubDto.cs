@@ -5,4 +5,6 @@ public record ClubDto : BaseDto
     public required string Name { get; init; }
 
     public ulong CountryId { get; init; }
+
+    public byte Importance { get; init; } = 1;
 }

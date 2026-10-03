@@ -14,6 +14,9 @@ public class Club
 
     public ulong CountryId { get; }
 
+    /// <summary>De 1 (défaut) à 3 : sert au tri de l'autocomplétion.</summary>
+    public byte Importance { get; }
+
     /// <summary>Noms par langue, triés par priorité croissante : l'indice 0 est le nom canonique.</summary>
     public IReadOnlyDictionary<Languages, IReadOnlyList<string>> NamesByLanguage { get; }
 
@@ -22,6 +25,7 @@ public class Club
         Id = dto.Id;
         Name = dto.Name;
         CountryId = dto.CountryId;
+        Importance = dto.Importance;
         NamesByLanguage = translations
             .OrderBy(t => t.Priority)
             .GroupBy(t => (Languages)t.LanguageId)

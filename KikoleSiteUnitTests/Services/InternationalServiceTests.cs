@@ -63,6 +63,22 @@ public class InternationalServiceTests
     }
 
     [Fact]
+    public async Task GetClubsAsync_PutsMoreImportantClubsFirstThenOrdersByName()
+    {
+        _clubRepository.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new List<ClubDto>
+        {
+            ClubDtoBuilder.Valid().WithId(1).WithName("AS Cannes").Build(),
+            ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build() with { Importance = 3 },
+            ClubDtoBuilder.Valid().WithId(3).WithName("FC Nantes").Build() with { Importance = 2 },
+            ClubDtoBuilder.Valid().WithId(4).WithName("AC Milan").Build() with { Importance = 3 }
+        });
+
+        var clubs = await _service.GetClubsAsync();
+
+        clubs.Select(c => c.Name).Should().Equal("AC Milan", "Real Madrid", "FC Nantes", "AS Cannes");
+    }
+
+    [Fact]
     public async Task GetClubsAsync_ReadsTheRepositoryOnlyOnce()
     {
         await _service.GetClubsAsync();
