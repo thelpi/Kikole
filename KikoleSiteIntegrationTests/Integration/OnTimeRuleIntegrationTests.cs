@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -29,7 +30,8 @@ public class OnTimeRuleIntegrationTests
     {
         var leaderRepository = new LeaderRepository(_fixture.Configuration, _fixture.Clock);
 
-        var day = _fixture.Clock.Today.AddDays(-10);
+        // jour fixe, anterieur a toutes les donnees de kikole_mock.sql (qui sont relatives a aujourd'hui)
+        var day = new DateOnly(2020, 1, 1);
 
         // joueur1 (id 2) a trouve le jour meme ; joueur2 (id 3) a trouve en rattrapage,
         // plusieurs jours plus tard.

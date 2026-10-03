@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -180,6 +180,20 @@ public class HomeController : KikoleBaseController
                     return View(model);
                 }
             }
+        }
+
+        // avant l'ouverture du jeu (ou apres le dernier joueur planifie) : la page reste
+        // accessible, avec l'annonce, plutot que de planter
+        if (!await _playerService.HasPlayerOfTheDayAsync(model.DateOfDay))
+        {
+            model.NoPlayerScheduled = true;
+            if (!string.IsNullOrWhiteSpace(errorMessageForced))
+            {
+                model.IsErrorMessageForced = true;
+                model.MessageToDisplay = errorMessageForced;
+            }
+
+            return View("Index", model);
         }
 
         return await SetAndGetViewModelAsync(

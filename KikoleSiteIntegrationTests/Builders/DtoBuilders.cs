@@ -60,7 +60,7 @@ internal sealed class UserDtoBuilder
         NormalizedLogin = "JOUEUR",
         Password = "hash",
         EmailEncrypted = "email-chiffre",
-        EmailHash = "email-hash",
+        EmailHash = "email-hash-" + Guid.NewGuid().ToString("N"),
         EmailConfirmed = true,
         LanguageId = (ulong)Languages.fr,
         UserTypeId = (ulong)UserTypes.StandardUser,

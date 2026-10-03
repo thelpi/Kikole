@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -37,7 +38,8 @@ public class SubSqlValidUsersIntegrationTests
                 .WithDisabled()
                 .Build());
 
-        var day = _fixture.Clock.Today;
+        // jour fixe, anterieur a toutes les donnees de kikole_mock.sql (qui sont relatives a aujourd'hui)
+        var day = new DateOnly(2020, 2, 1);
 
         await leaderRepository.CreateLeaderAsync(LeaderDtoBuilder.Valid().WithUser(1).OnTheDay(day, 5).Build());
         await leaderRepository.CreateLeaderAsync(LeaderDtoBuilder.Valid().WithUser(2).OnTheDay(day, 6).Build());

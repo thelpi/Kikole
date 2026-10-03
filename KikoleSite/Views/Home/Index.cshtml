@@ -1,4 +1,4 @@
-﻿@using KikoleSite.Helpers
+@using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @inject KikoleSite.IGameCalendar gameCalendar
 @model HomeModel
@@ -10,6 +10,12 @@
     @if (Model.DisplayHiddenPageAsHidden)
     {
         <div class="banner error">@localizer["AlmostThere"]</div>
+    }
+    else if (Model.NoPlayerScheduled)
+    {
+        await Html.RenderPartialAsync("Partial/Announcement", Model);
+        <div class="banner info">@localizer["NoPlayerScheduled"]</div>
+        await Html.RenderPartialAsync("Partial/Rules");
     }
     else if (string.IsNullOrWhiteSpace(Model.LoggedAs))
     {

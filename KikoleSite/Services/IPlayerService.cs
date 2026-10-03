@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models;
@@ -19,6 +19,9 @@ public interface IPlayerService
     /// <param name="date">Proposed date.</param>
     /// <returns>Player with full info.</returns>
     Task<PlayerFullDto> GetPlayerOfTheDayFullInfoAsync(DateOnly date);
+
+    /// <summary>Indique si un joueur est programmé à la date donnée (avant l'ouverture du jeu, ou après le dernier planifié, il n'y en a pas).</summary>
+    Task<bool> HasPlayerOfTheDayAsync(DateOnly date);
 
     /// <summary>
     /// Creates a full player.

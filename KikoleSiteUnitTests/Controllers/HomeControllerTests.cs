@@ -68,6 +68,7 @@ public class HomeControllerTests
             .Returns<string, object[]>((k, args) => new LocalizedString(k, k));
 
         _messageRepository.Setup(_ => _.GetMessageAsync(It.IsAny<DateTime>())).ReturnsAsync((MessageDto?)null);
+        _playerService.Setup(_ => _.HasPlayerOfTheDayAsync(It.IsAny<DateOnly>())).ReturnsAsync(true);
 
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
         httpContextAccessor.Setup(_ => _.HttpContext).Returns(_httpContext);
@@ -156,6 +157,19 @@ public class HomeControllerTests
         model.PlayerName.Should().BeNullOrEmpty();
         _playerService.Verify(_ => _.GetPlayerOfTheDayFromUserPovAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()), Times.Never);
         _leaderService.Verify(_ => _.GetUserStreakAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task IndexGet_WhenNoPlayerIsScheduled_RendersTheHomeWithoutLookingForClues()
+    {
+        _playerService.Setup(_ => _.HasPlayerOfTheDayAsync(Today)).ReturnsAsync(false);
+
+        var result = await _controller.Index(day: null, errorMessageForced: null!);
+
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Index");
+        view.Model.Should().BeOfType<HomeModel>().Which.NoPlayerScheduled.Should().BeTrue();
+        _playerService.Verify(_ => _.GetPlayerClueAsync(It.IsAny<DateOnly>(), It.IsAny<bool>(), It.IsAny<Languages>()), Times.Never);
     }
 
     [Fact]

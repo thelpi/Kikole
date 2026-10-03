@@ -99,6 +99,12 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 
 - [ ] Dépôt auto-portant pour une démo sans WAMP (MySQL « no-install » + script de bootstrap)
 
+## 6. Mise en production
+
+- [ ] Serveur réglé sur `Europe/Paris` (`Clock` utilise l'heure locale, ex. `TZ=Europe/Paris`)
+- [ ] Passer son compte en administrateur en base avant l'ouverture
+- [ ] Procédure de suppression physique de compte à faire
+
 ## Base de production 2023
 
 - [x] Contenu textuel extrait dans `Restauration/`

@@ -291,4 +291,7 @@
   <data name="BestStreakLabelOne" xml:space="preserve">
     <value>Record : {0} jour</value>
   </data>
+  <data name="NoPlayerScheduled" xml:space="preserve">
+    <value>Le jeu n&apos;a pas encore commencé : le premier kikolé arrive très bientôt. Vous pouvez dès maintenant créer votre compte (menu Connexion).</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using KikoleSite.Models;
@@ -22,6 +22,7 @@ public class HomeModel
     public bool RegistrationInviteEnabled { get; set; }
 
     public bool DisplayHiddenPageAsHidden { get; set; }
+    public bool NoPlayerScheduled { get; set; }
     public IReadOnlyCollection<UserBadge> Badges { get; set; } = [];
     public int Points { get; set; }
     public string? MessageToDisplay { get; set; }

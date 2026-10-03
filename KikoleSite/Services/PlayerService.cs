@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -65,6 +65,12 @@ public class PlayerService : IPlayerService
     {
         return await _playerHandler
             .GetPlayerOfTheDayFullInfoAsync(date);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> HasPlayerOfTheDayAsync(DateOnly date)
+    {
+        return await _playerRepository.GetPlayerOfTheDayAsync(date) != null;
     }
 
     /// <inheritdoc />
