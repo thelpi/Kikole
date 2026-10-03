@@ -110,9 +110,9 @@ public class StatisticService : IStatisticService
         foreach (var creatorUserId in creatorUsersId)
         {
             var creatorUser = await _userRepository
-                .GetUserByIdAsync(creatorUserId)
+                .GetUserByIdIncludingDisabledAsync(creatorUserId)
                 ?? throw new InvalidOperationException($"Le createur {creatorUserId} est introuvable.");
-            usersCache.Add(creatorUserId, creatorUser.Login);
+            usersCache.Add(creatorUserId, creatorUser.IsDisabled ? anonymizedName : creatorUser.Login);
         }
 
         var allProposals = await _proposalRepository

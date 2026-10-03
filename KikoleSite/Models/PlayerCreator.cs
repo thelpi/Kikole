@@ -29,7 +29,7 @@ public class PlayerCreator
         AllowedNames = player.CreationUserId == requestUser.Id || requestUser.UserTypeId == (ulong)UserTypes.Administrator
             ? player.AllowedNames.Disjoin()
             : null;
-        CanDisplayCreator = player.HideCreator == 0;
+        CanDisplayCreator = player.HideCreator == 0 && !creatorUser.IsDisabled;
     }
 
     protected PlayerCreator(UserDto u, PlayerDto p)

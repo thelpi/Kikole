@@ -589,7 +589,7 @@ public class PlayerServiceTests
     {
         _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(FirstDate))
             .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane").WithCreator(42).Build());
-        _userRepository.Setup(_ => _.GetUserByIdAsync(42))
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(42))
             .ReturnsAsync(UserDtoBuilder.Valid().WithId(42).WithLogin("createur").WithUserTypeId((ulong)UserTypes.PowerUser).Build());
         _userRepository.Setup(_ => _.GetUserByIdAsync(7))
             .ReturnsAsync(UserDtoBuilder.Valid().WithId(7).WithLogin("joueur").WithUserTypeId((ulong)UserTypes.StandardUser).Build());
@@ -600,6 +600,22 @@ public class PlayerServiceTests
         result.PlayerId.Should().Be(1);
         result.Login.Should().Be("createur");
         result.Name.Should().BeNull();  // le demandeur n'est ni createur ni admin
+    }
+
+    [Fact]
+    public async Task GetPlayerOfTheDayFromUserPovAsync_ADisabledCreatorIsNotDisplayed()
+    {
+        _playerRepository.Setup(_ => _.GetPlayerOfTheDayAsync(FirstDate))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(1).WithCreator(42).Build());
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(42))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(42).WithLogin("createur").WithUserTypeId((ulong)UserTypes.PowerUser).WithDisabled().Build());
+        _userRepository.Setup(_ => _.GetUserByIdAsync(7))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(7).WithLogin("joueur").Build());
+
+        var result = await _service
+            .GetPlayerOfTheDayFromUserPovAsync(7, FirstDate);
+
+        result.CanDisplayCreator.Should().BeFalse();
     }
 
     [Fact]
@@ -717,7 +733,7 @@ public class PlayerServiceTests
 
         foreach (var creatorId in submissions.Select(s => s.creatorId).Distinct())
         {
-            _userRepository.Setup(_ => _.GetUserByIdAsync(creatorId))
+            _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(creatorId))
                 .ReturnsAsync(UserDtoBuilder.Valid().WithId(creatorId).WithLogin("createur" + creatorId).Build());
         }
 
@@ -761,6 +777,6 @@ public class PlayerServiceTests
         var result = await _service.GetPlayerSubmissionsAsync(TestCountryContinents.Map);
 
         result.Should().HaveCount(3);
-        _userRepository.Verify(_ => _.GetUserByIdAsync(42), Times.Once);
+        _userRepository.Verify(_ => _.GetUserByIdIncludingDisabledAsync(42), Times.Once);
     }
 }

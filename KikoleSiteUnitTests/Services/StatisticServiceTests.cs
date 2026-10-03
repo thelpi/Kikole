@@ -54,7 +54,7 @@ public class StatisticServiceTests
             _proposalRepository.Object,
             _clock.Object);
 
-        _userRepository.Setup(_ => _.GetUserByIdAsync(CreatorId))
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(CreatorId))
             .ReturnsAsync(UserDtoBuilder.Valid().WithId(CreatorId).WithLogin(CreatorLogin).Build());
     }
 
@@ -108,12 +108,25 @@ public class StatisticServiceTests
     }
 
     [Fact]
+    public async Task ADisabledCreator_IsShownUnderTheAnonymizedName()
+    {
+        SetupData([Player(Today.AddDays(-3))]);
+        SetupViewer(UserTypes.Administrator);
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(CreatorId))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(CreatorId).WithLogin(CreatorLogin).WithDisabled().Build());
+
+        var result = await _service.GetPlayersStatisticsAsync(ViewerId, AnonymizedName, PlayerSorts.PublicationDate, false);
+
+        result.Should().ContainSingle().Which.Creator.Should().Be(AnonymizedName);
+    }
+
+    [Fact]
     public async Task TheCreatorHimself_SeesTheRealNameEvenWithoutHavingFoundIt()
     {
         var day = Today.AddDays(-3);
         SetupData([Player(day)]);
         // le createur regarde ses propres soumissions : re-setup un profil standard sous son id
-        _userRepository.Setup(_ => _.GetUserByIdAsync(CreatorId))
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(CreatorId))
             .ReturnsAsync(UserDtoBuilder.Valid().WithId(CreatorId).WithLogin(CreatorLogin).WithType(UserTypes.StandardUser).Build());
 
         var result = await _service.GetPlayersStatisticsAsync(CreatorId, AnonymizedName, PlayerSorts.PublicationDate, false);
@@ -231,7 +244,7 @@ public class StatisticServiceTests
         var player = PlayerDtoBuilder.Valid().WithId(1).WithCreator(missingCreatorId).WithPublicationDate(day).Build();
         SetupData([player]);
         SetupViewer(UserTypes.Administrator);
-        _userRepository.Setup(_ => _.GetUserByIdAsync(missingCreatorId))
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(missingCreatorId))
             .ReturnsAsync((UserDto?)null);
 
         Func<Task> act = () => _service.GetPlayersStatisticsAsync(ViewerId, AnonymizedName, PlayerSorts.PublicationDate, false);

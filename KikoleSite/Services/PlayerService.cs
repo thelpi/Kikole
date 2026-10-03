@@ -195,7 +195,7 @@ public class PlayerService : IPlayerService
             ?? throw new InvalidOperationException($"Aucun joueur n'est programme pour le {proposalDate:yyyy-MM-dd}.");
 
         var creatorUser = await _userRepository
-            .GetUserByIdAsync(player.CreationUserId)
+            .GetUserByIdIncludingDisabledAsync(player.CreationUserId)
             ?? throw new InvalidOperationException($"Le createur {player.CreationUserId} du joueur du jour est introuvable.");
 
         var requestUser = await _userRepository
@@ -215,7 +215,7 @@ public class PlayerService : IPlayerService
         foreach (var usrId in dtos.Select(dto => dto.CreationUserId).Distinct())
         {
             var user = await _userRepository
-                .GetUserByIdAsync(usrId)
+                .GetUserByIdIncludingDisabledAsync(usrId)
                 ?? throw new InvalidOperationException($"Le createur {usrId} d'une soumission en attente est introuvable.");
             users.Add(usrId, user);
         }

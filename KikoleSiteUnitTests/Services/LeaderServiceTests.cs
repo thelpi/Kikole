@@ -65,7 +65,20 @@ public class LeaderServiceTests
         // le depot filtre par id demande : le mock doit faire pareil, sinon un test qui
         // enregistre 3 utilisateurs mais n'en reclame que 2 en verrait quand meme 3.
         _userRepository
-            .Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .Setup(_ => _.GetUsersByIdsIncludingDisabledAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .ReturnsAsync((IReadOnlyCollection<ulong> ids) => dtos.Where(u => ids.Contains(u.Id)).ToList());
+    }
+
+    private void SetupDisabledCreator(ulong creatorId)
+    {
+        List<UserDto> dtos =
+        [
+            UserDtoBuilder.Valid().WithId(1).WithLogin("trouveur").Build(),
+            UserDtoBuilder.Valid().WithId(creatorId).WithLogin("createur").WithDisabled().Build()
+        ];
+
+        _userRepository
+            .Setup(_ => _.GetUsersByIdsIncludingDisabledAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
             .ReturnsAsync((IReadOnlyCollection<ulong> ids) => dtos.Where(u => ids.Contains(u.Id)).ToList());
     }
 
@@ -151,6 +164,20 @@ public class LeaderServiceTests
     }
 
     [Fact]
+    public async Task GetLeaderboardAsync_ADisabledCreatorIsExcluded()
+    {
+        SetupDisabledCreator(creatorId: 5);
+        SetupLeaderboard(
+            new[] { Leader(1, 800, 60) },
+            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithPublicationDate(Day).Build() });
+
+        var result = await _service
+            .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
+
+        result.Single().UserName.Should().Be("trouveur");
+    }
+
+    [Fact]
     public async Task GetLeaderboardAsync_SomeoneWhoNeverFoundAnythingGetsTheWorstPossibleTime()
     {
         SetupUsers((5, "createur"));
@@ -208,7 +235,7 @@ public class LeaderServiceTests
     public async Task GetLeaderboardAsync_AdministratorsAreExcluded()
     {
         _userRepository
-            .Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .Setup(_ => _.GetUsersByIdsIncludingDisabledAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
             .ReturnsAsync(new List<UserDto>
             {
                 UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithUserTypeId((ulong)UserTypes.Administrator).Build()
@@ -513,6 +540,17 @@ public class LeaderServiceTests
 
         result.Leaders.Single(_ => _.IsCreator).Rank.Should().Be(1);
         result.Leaders.Single(_ => !_.IsCreator).Rank.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetDayboardAsync_ADisabledCreatorIsLeftOffTheBoard()
+    {
+        SetupDisabledCreator(creatorId: 5);
+        SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5);
+
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
+
+        result.Leaders.Should().ContainSingle().Which.UserName.Should().Be("trouveur");
     }
 
     [Fact]

@@ -129,6 +129,16 @@ public class UserRepository : BaseRepository, IUserRepository
                 new { userIds });
     }
 
+    public async Task<IReadOnlyCollection<UserDto>> GetUsersByIdsIncludingDisabledAsync(IReadOnlyCollection<ulong> userIds)
+    {
+        if (userIds.Count == 0)
+            return [];
+
+        return await ExecuteReaderAsync<UserDto>(
+                "SELECT * FROM users WHERE id IN @userIds",
+                new { userIds });
+    }
+
     public async Task<UserDto?> GetUserByIdIncludingDisabledAsync(ulong userId)
     {
         return await GetDtoAsync<UserDto>("users", ("id", userId));

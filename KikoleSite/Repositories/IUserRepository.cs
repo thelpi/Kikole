@@ -32,6 +32,9 @@ public interface IUserRepository
 
     Task<IReadOnlyCollection<UserDto>> GetUsersByIdsAsync(IReadOnlyCollection<ulong> userIds);
 
+    /// <summary>Comme <see cref="GetUsersByIdsAsync"/>, mais les comptes désactivés sont renvoyés aussi.</summary>
+    Task<IReadOnlyCollection<UserDto>> GetUsersByIdsIncludingDisabledAsync(IReadOnlyCollection<ulong> userIds);
+
     /// <summary>
     /// Utilisateur par identifiant, y compris s'il est désactivé (contrairement à
     /// <see cref="GetUserByIdAsync"/>) : sert à afficher le parrain d'un compte même si

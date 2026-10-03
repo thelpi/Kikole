@@ -79,7 +79,7 @@ public class LeaderServicePodiumsTests
             .Select(u => UserDtoBuilder.Valid().WithId(u.id).WithLogin(u.login).WithUserTypeId((ulong)UserTypes.StandardUser).Build())];
 
         _userRepository
-            .Setup(_ => _.GetUsersByIdsAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
+            .Setup(_ => _.GetUsersByIdsIncludingDisabledAsync(It.IsAny<IReadOnlyCollection<ulong>>()))
             .ReturnsAsync((IReadOnlyCollection<ulong> ids) => dtos.Where(u => ids.Contains(u.Id)).ToList());
     }
 

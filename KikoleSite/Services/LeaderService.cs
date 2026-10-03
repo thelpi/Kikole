@@ -562,8 +562,10 @@ public class LeaderService : ILeaderService
         if (ids.Count == 0)
             return [];
 
+        // les comptes desactives (ex : createur d'un kikole) sont retrouves puis ecartes ;
+        // seul un identifiant absent de la base est une incoherence
         var users = await _userRepository
-            .GetUsersByIdsAsync(ids);
+            .GetUsersByIdsIncludingDisabledAsync(ids);
 
         if (users.Count != ids.Count)
         {
@@ -572,7 +574,7 @@ public class LeaderService : ILeaderService
             throw new InvalidOperationException($"Utilisateur(s) introuvable(s) : {string.Join(", ", missingIds)}.");
         }
 
-        return [.. users.Where(u => u.UserTypeId != (ulong)UserTypes.Administrator)];
+        return [.. users.Where(u => !u.IsDisabled && u.UserTypeId != (ulong)UserTypes.Administrator)];
     }
 
 }
