@@ -37,6 +37,24 @@ public class MappingModelsTests
         club.NamesByLanguage[Languages.fr].Should().BeEquivalentTo(new[] { "Juventus Turin", "Juve" }, o => o.WithStrictOrdering());
     }
 
+    [Theory]
+    [InlineData("avignon", "AC Arles-Avignon")]
+    [InlineData("arlésien", "Athletic Club Arlésien")]
+    [InlineData("arles", "Athletic Club Arlésien")]
+    [InlineData("xyz", null)]
+    [InlineData("", null)]
+    public void Club_GetMatchingName_ReturnsTheFirstNameContainingTheTermByPriority(string term, string? expected)
+    {
+        var translations = new[]
+        {
+            ClubTranslationDtoBuilder.Valid().WithClubId(68).WithLanguage(Languages.fr).WithPriority(0).WithName("Athletic Club Arlésien").Build(),
+            ClubTranslationDtoBuilder.Valid().WithClubId(68).WithLanguage(Languages.fr).WithPriority(1).WithName("AC Arles-Avignon").Build()
+        };
+        var club = new Club(ClubDtoBuilder.Valid().WithId(68).WithName("Athletic Club Arlésien").Build(), translations);
+
+        club.GetMatchingName(Languages.fr, term).Should().Be(expected);
+    }
+
     // ------------------------------------------------------------- PlayerClub
 
     [Fact]

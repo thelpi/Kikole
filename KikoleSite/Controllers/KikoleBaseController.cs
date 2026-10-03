@@ -66,15 +66,27 @@ public abstract class KikoleBaseController : Controller
     {
         var language = ViewHelper.GetLanguage();
 
-        var clubs = (await GetClubsAsync())
-            .Where(c => c.MatchesSearch(language, prefix));
-
         // le code pays leve l'ambiguite entre deux clubs homonymes de pays differents
         // (l'unicite en base est sur (name, country_id), pas name seul) ; le code ISO a
         // 2 lettres est deja le nom de l'enum, pas besoin d'aller chercher son libelle
-        return Json(clubs.Select(c => new KeyValuePair<ulong, string>(
-            c.Id, $"{c.GetCanonicalName(language)} - {(Countries)c.CountryId}")));
+        var clubs = (await GetClubsAsync())
+            .Select(c => (Club: c, Match: c.GetMatchingName(language, prefix)))
+            .Where(_ => _.Match != null)
+            .Select(_ =>
+            {
+                var canonical = _.Club.GetCanonicalName(language);
+                var country = (Countries)_.Club.CountryId;
+                return new ClubSuggestion(
+                    _.Club.Id,
+                    $"{canonical} - {country}",
+                    _.Match == canonical ? $"{canonical} - {country}" : $"{_.Match} ({canonical}) - {country}");
+            });
+
+        return Json(clubs);
     }
+
+    /// <summary>Le libellé affiché dans la liste peut être un nom historique ; le champ reçoit toujours le nom canonique.</summary>
+    private record ClubSuggestion(ulong Key, string Value, string Display);
 
     [HttpPost]
     public async Task<JsonResult> AutoCompleteContinents(string prefix)

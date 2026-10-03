@@ -953,8 +953,9 @@ var autocompleteClubs = function (nameFieldId, idFieldId, submit) {
                 success: function (data) {
                     response($.map(data, function (item) {
                         return {
-                            label: item.value,
-                            value: item.key
+                            label: item.display,
+                            value: item.key,
+                            canonical: item.value
                         };
                     }))
                 }
@@ -962,7 +963,7 @@ var autocompleteClubs = function (nameFieldId, idFieldId, submit) {
         },
         select: function (e, i) {
             $(idFieldId).val(i.item.value);
-            $(nameFieldId).val(i.item.label);
+            $(nameFieldId).val(i.item.canonical);
             if (submit && $("#submitClub").length > 0) {
                 $("#submitClub").click();
             }

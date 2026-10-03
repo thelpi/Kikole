@@ -33,11 +33,12 @@ public class Club
         return NamesByLanguage[language][0];
     }
 
-    public bool MatchesSearch(Languages language, string searchTerm)
+    /// <summary>Premier nom (par priorité, donc le canonique d'abord) contenant le terme ; null si aucun.</summary>
+    public string? GetMatchingName(Languages language, string searchTerm)
     {
         var term = searchTerm.SanitizeForSearch();
-        return term.Length > 0
-            && NamesByLanguage.TryGetValue(language, out var names)
-            && names.Any(n => n.SanitizeForSearch().Contains(term));
+        return term.Length > 0 && NamesByLanguage.TryGetValue(language, out var names)
+            ? names.FirstOrDefault(n => n.SanitizeForSearch().Contains(term))
+            : null;
     }
 }
