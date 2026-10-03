@@ -125,7 +125,7 @@
 &lt;p&gt;Example: Édouard Mendy didn't play for Olympique de Marseille (reserve team), nor for Le Havre (youth).&lt;/p&gt;
 &lt;p&gt;Whether a club counts as amateur can be ambiguous, however: "FC Libourne" is accepted for Valbuena, given its relative importance in his career.&lt;/p&gt;
 &lt;p&gt;Loans are included in the career, and explicitly indicated when that is the case.&lt;/p&gt;
-&lt;p&gt;The autocompletion is exhaustive. This means that if you search for a particular club and it doesn't appear, then the player of the day has not played for that club.&lt;/p&gt;</value>
+&lt;p&gt;A club that changed its name during its history appears only once (e.g. "AC Arles-Avignon" becomes "Athletic Club Arlésien"). When clubs merge, the behaviour varies (e.g. "Évian Thonon Gaillard FC" is a single entry, without the merged clubs that preceded it).&lt;/p&gt;</value>
   </data>
   <data name="AboutCountry" xml:space="preserve">
     <value>Players' nationality</value>

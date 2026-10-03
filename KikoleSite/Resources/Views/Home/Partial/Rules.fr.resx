@@ -125,7 +125,7 @@
 &lt;p&gt;Exemple : Édouard Mendy n'a pas joué à l'Olympique de Marseille (réserve), ni au Havre (junior).&lt;/p&gt;
 &lt;p&gt;L'amateurisme d'un club peut toutefois être ambigu : « FC Libourne » sera accepté pour Valbuena, vu sa relative importance pour ce joueur.&lt;/p&gt;
 &lt;p&gt;Les prêts sont inclus dans la carrière, et explicitement indiqués quand c'est le cas.&lt;/p&gt;
-&lt;p&gt;L'autocomplétion est exhaustive. Cela signifie que si vous cherchez un club en particulier et qu'il n'apparaît pas, alors le joueur du jour n'a pas joué dans ce club.&lt;/p&gt;</value>
+&lt;p&gt;Un club ayant changé de nom au cours de son histoire n'est présent qu'une fois (ex : « AC Arles-Avignon » devient « Athletic Club Arlésien »). Dans le cas de fusions entre clubs, le comportement est variable (ex : « Évian Thonon Gaillard FC » est une entrée unique, sans les clubs fusionnés qui l'ont précédé).&lt;/p&gt;</value>
   </data>
   <data name="AboutCountry" xml:space="preserve">
     <value>Nationalité des joueurs</value>
