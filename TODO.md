@@ -103,7 +103,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 
 - [ ] Serveur réglé sur `Europe/Paris` (`Clock` utilise l'heure locale, ex. `TZ=Europe/Paris`)
 - [ ] Passer son compte en administrateur en base avant l'ouverture
-- [ ] Procédure de suppression physique de compte à faire
+- [x] Suppression physique de compte (page `/Admin/Users`, login à retaper, une transaction)
 - [ ] Redirection 301 `kikole.fr` → `www.kikole.fr` côté hébergeur (adresse canonique : `Seo:CanonicalBaseUrl`)
 - [x] Référencement : titres, descriptions, canonical, noindex par défaut, `robots.txt`, sitemap, balises de partage, JSON-LD
 - [ ] Search Console et Bing Webmaster : déclarer le site et le sitemap (vérification DNS)
@@ -141,6 +141,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Créateur désactivé : kikolé conservé, créateur anonymisé, hors classements
 - Aucun traceur d'audience : pas de bandeau de consentement ; cookies strictement nécessaires uniquement
 - Adresses IP conservées 12 mois, purge quotidienne
+- Suppression d'un compte : kikolés publiés ou validés repris par le premier administrateur, les autres supprimés
 - Gestion des utilisateurs : administrateurs exclus de la liste, des filtres et des actions ; pas de passage en administrateur
 - Rareté d'un badge = proportion des autres joueurs qui ne l'ont pas
 

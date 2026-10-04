@@ -318,4 +318,13 @@
   <data name="PasswordMismatch" xml:space="preserve">
     <value>Les deux mots de passe sont différents.</value>
   </data>
+  <data name="LoginConfirmationMismatch" xml:space="preserve">
+    <value>Le login saisi ne correspond pas au compte : rien n&apos;a été supprimé.</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>Le compte {0} a été supprimé définitivement.</value>
+  </data>
+  <data name="UserNotDeletable" xml:space="preserve">
+    <value>Suppression impossible : compte introuvable ou administrateur.</value>
+  </data>
 </root>

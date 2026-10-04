@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 
 namespace KikoleSite.Controllers;
 
@@ -38,6 +39,7 @@ public class AdminController : KikoleBaseController
     private readonly IStringLocalizer<AdminController> _localizer;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailProtector _emailProtector;
+    private readonly ILogger<AdminController> _logger;
     private readonly IDiscussionService _discussionService;
     private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
@@ -56,7 +58,8 @@ public class AdminController : KikoleBaseController
         IHttpContextAccessor httpContextAccessor,
         IWebHostEnvironment webHostEnvironment,
         UserManager<ApplicationUser> userManager,
-        IEmailProtector emailProtector)
+        IEmailProtector emailProtector,
+        ILogger<AdminController> logger)
         : base(userRepository,
             internationalService,
             clock,
@@ -72,6 +75,7 @@ public class AdminController : KikoleBaseController
         _webHostEnvironment = webHostEnvironment;
         _userManager = userManager;
         _emailProtector = emailProtector;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -185,6 +189,26 @@ public class AdminController : KikoleBaseController
         await _userRepository.ChangeUserTypeAsync(target.Id, request.NewType.Value);
 
         return await RenderUsersAsync(request, _localizer["UserTypeChanged", target.Login], null);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> DeleteUser(UserActionRequest request)
+    {
+        var target = await _userRepository.GetUserByIdIncludingDisabledAsync(request.UserId);
+        if (target == null || target.UserTypeId == (ulong)UserTypes.Administrator)
+            return await RenderUsersAsync(request, null, _localizer["UserNotDeletable"]);
+
+        if (!string.Equals(request.LoginConfirmation?.Trim(), target.Login, StringComparison.OrdinalIgnoreCase))
+            return await RenderUsersAsync(request, null, _localizer["LoginConfirmationMismatch"]);
+
+        if (!await _userRepository.DeleteUserWithAllDataAsync(target.Id))
+            return await RenderUsersAsync(request, null, _localizer["UserNotDeletable"]);
+
+        // identifiants seuls : ni login ni email ne doivent survivre dans les journaux
+        _logger.LogInformation("Compte {DeletedUserId} supprimé par l'administrateur {AdminUserId}.", target.Id, UserId);
+
+        return await RenderUsersAsync(request, _localizer["UserDeleted", target.Login], null);
     }
 
     [HttpPost]

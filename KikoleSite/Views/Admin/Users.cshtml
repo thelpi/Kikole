@@ -87,9 +87,9 @@
                             <td class="tabData">@row.Ip</td>
                             <td class="tabData">@(isPower ? localizer["TypePower"] : localizer["TypeStandard"])</td>
                             <td class="tabData">
-                                @if (!row.IsDisabled)
-                                {
-                                    <div class="user-actions">
+                                <div class="user-actions">
+                                    @if (!row.IsDisabled)
+                                    {
                                         <button type="button" class="secondary"
                                                 data-action="/Admin/ChangeUserType" data-user-id="@row.Id" data-input="none"
                                                 data-new-type="@((int)(isPower ? UserTypes.StandardUser : UserTypes.PowerUser))"
@@ -103,8 +103,12 @@
                                                 data-action="/Admin/DisableUser" data-user-id="@row.Id" data-input="reason"
                                                 data-confirm="@string.Format(localizer["ConfirmDisable"].Value, row.Login)"
                                                 onclick="openUserActionModal(this)">@localizer["Disable"]</button>
-                                    </div>
-                                }
+                                    }
+                                    <button type="button" class="danger"
+                                            data-action="/Admin/DeleteUser" data-user-id="@row.Id" data-input="login" data-login="@row.Login"
+                                            data-confirm="@string.Format(localizer["ConfirmDelete"].Value, row.Login)"
+                                            onclick="openUserActionModal(this)">@localizer["Delete"]</button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -151,6 +155,10 @@
                 <div class="form-field" id="userActionReasonField" hidden>
                     <label for="userActionReason">@localizer["ReasonLabel"]</label>
                     <textarea id="userActionReason" name="reason" class="blank" maxlength="500" rows="3" disabled></textarea>
+                </div>
+                <div class="form-field" id="userActionLoginField" hidden>
+                    <label for="userActionLoginConfirm">@localizer["LoginConfirmLabel"]</label>
+                    <input type="text" id="userActionLoginConfirm" name="loginConfirmation" class="blank" autocomplete="off" data-mismatch="@localizer["LoginConfirmMismatch"]" disabled />
                 </div>
                 <div id="userActionPasswordField" hidden>
                     <div class="form-field">

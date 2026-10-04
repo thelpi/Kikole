@@ -225,4 +225,16 @@
   <data name="ShowPassword" xml:space="preserve">
     <value>Show/hide password</value>
   </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Permanently delete the account &quot;{0}&quot;? Its data, game history and messages are erased. Its published or validated kikolés are kept (taken over by the administrator), pending or refused ones are deleted. This cannot be undone.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="LoginConfirmLabel" xml:space="preserve">
+    <value>Retype the account login to confirm</value>
+  </data>
+  <data name="LoginConfirmMismatch" xml:space="preserve">
+    <value>The login typed is different</value>
+  </data>
 </root>

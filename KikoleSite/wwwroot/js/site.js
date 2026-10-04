@@ -1375,7 +1375,7 @@ var openUserActionModal = function (button) {
     newType.value = data.newType || '';
     newType.disabled = !data.newType;
 
-    ['reason', 'password'].forEach(function (name) {
+    ['reason', 'password', 'login'].forEach(function (name) {
         var field = document.getElementById('userAction' + name.charAt(0).toUpperCase() + name.slice(1) + 'Field');
         var shown = data.input === name;
         field.hidden = !shown;
@@ -1384,7 +1384,7 @@ var openUserActionModal = function (button) {
             input.value = '';
             input.required = shown;
             input.setCustomValidity('');
-            if (input.type === 'text') {
+            if (name === 'password' && input.type === 'text') {
                 input.type = 'password';
             }
         });
@@ -1393,6 +1393,7 @@ var openUserActionModal = function (button) {
         });
     });
 
+    form.dataset.expectedLogin = data.login || '';
     document.getElementById('userActionModal').classList.add('open');
     var firstInput = form.querySelector('.form-field:not([hidden]) input, .form-field:not([hidden]) textarea');
     if (firstInput) {
@@ -1421,6 +1422,12 @@ $(function () {
         $confirm[0].setCustomValidity($confirm.val() === $password.val() ? "" : $confirm.data("mismatch"));
     });
 
+    // la suppression exige de retaper le login du compte
+    var $loginConfirm = $("#userActionLoginConfirm");
+    $loginConfirm.on("input", function () {
+        var expected = ($("#userActionForm").data("expectedLogin") || "").toString().toLowerCase();
+        $loginConfirm[0].setCustomValidity($loginConfirm.val().trim().toLowerCase() === expected ? "" : $loginConfirm.data("mismatch"));
+    });
     var $login = $("#usersLogin");
     $login.autocomplete({
         source: function (request, response) {

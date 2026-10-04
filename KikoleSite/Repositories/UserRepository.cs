@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dapper;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using Microsoft.Extensions.Configuration;
@@ -103,6 +104,71 @@ public class UserRepository : BaseRepository, IUserRepository
                 new { cutoff });
     }
 
+    public async Task<bool> DeleteUserWithAllDataAsync(ulong userId)
+    {
+        var adminType = (ulong)UserTypes.Administrator;
+
+        // contrôles hors transaction : rien n'est ouvert tant que les conditions ne sont pas réunies
+        var userType = await ExecuteScalarAsync<ulong?>(
+            "SELECT user_type_id FROM users WHERE id = @userId",
+            new { userId });
+
+        if (userType == null || userType == adminType)
+            return false;
+
+        var adminId = await ExecuteScalarAsync<ulong?>(
+                "SELECT id FROM users WHERE user_type_id = @adminType ORDER BY id LIMIT 1",
+                new { adminType })
+            ?? throw new InvalidOperationException("Aucun administrateur pour reprendre les kikolés du compte supprimé.");
+
+        try
+        {
+            return await ExecuteInTransactionAsync(async (connection, transaction) =>
+            {
+                var parameters = new { userId, adminId, adminType };
+
+                // kikolés publiés ou validés : conservés, repris par l'administrateur ; les autres
+                // (en attente, refusés) sont supprimés avec leurs clubs et leurs indices
+                var statements = new[]
+                {
+                    "UPDATE players SET creation_user_id = @adminId " +
+                        "WHERE creation_user_id = @userId AND (publication_date IS NOT NULL OR acceptance_date IS NOT NULL)",
+                    "DELETE FROM player_clue_translations WHERE player_id IN (SELECT id FROM players WHERE creation_user_id = @userId)",
+                    "DELETE FROM player_clubs WHERE player_id IN (SELECT id FROM players WHERE creation_user_id = @userId)",
+                    "DELETE FROM players WHERE creation_user_id = @userId",
+                    "DELETE FROM leaders WHERE user_id = @userId",
+                    "DELETE FROM proposals WHERE user_id = @userId",
+                    "DELETE FROM user_badges WHERE user_id = @userId",
+                    "DELETE FROM login_history WHERE user_id = @userId",
+                    "DELETE FROM registration_guids WHERE user_id = @userId",
+                    "DELETE FROM discussion_messages WHERE discussion_id IN (SELECT id FROM discussions WHERE user_id = @userId)",
+                    "DELETE FROM discussions WHERE user_id = @userId",
+                    "UPDATE users SET sponsor_user_id = NULL WHERE sponsor_user_id = @userId"
+                };
+
+                foreach (var statement in statements)
+                    await connection.ExecuteAsync(statement, parameters, transaction);
+
+                // garde finale, atomique avec le reste : si le compte a disparu entre-temps (double
+                // envoi) ou est devenu administrateur, tout est annulé
+                var deleted = await connection.ExecuteAsync(
+                    "DELETE FROM users WHERE id = @userId AND user_type_id <> @adminType",
+                    parameters,
+                    transaction);
+
+                if (deleted == 0)
+                    throw new AccountNotDeletableException();
+
+                return true;
+            });
+        }
+        catch (AccountNotDeletableException)
+        {
+            return false;
+        }
+    }
+
+    private sealed class AccountNotDeletableException : Exception;
     public async Task DisableUserAsync(ulong userId, string reason)
     {
         await ExecuteNonQueryAsync(

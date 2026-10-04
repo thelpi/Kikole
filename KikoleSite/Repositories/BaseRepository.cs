@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -55,6 +55,30 @@ public abstract class BaseRepository
                 commandType: CommandType.Text);
 
         return results.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Exécute <paramref name="work"/> sur une seule connexion, dans une transaction validée
+    /// à la fin et annulée à la moindre exception. Réservé aux rares opérations qui doivent
+    /// être atomiques sur plusieurs tables.
+    /// </summary>
+    protected async Task<T> ExecuteInTransactionAsync<T>(Func<MySqlConnection, MySqlTransaction, Task<T>> work)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+
+        try
+        {
+            var result = await work(connection, transaction);
+            await transaction.CommitAsync();
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     protected async Task ExecuteNonQueryAsync(string sql, object? parameters)

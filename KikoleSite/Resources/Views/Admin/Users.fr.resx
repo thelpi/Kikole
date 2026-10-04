@@ -225,4 +225,16 @@
   <data name="ShowPassword" xml:space="preserve">
     <value>Afficher/masquer le mot de passe</value>
   </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Supprimer définitivement le compte « {0} » ? Ses données, son historique de jeu et ses messages sont effacés. Ses kikolés publiés ou validés sont conservés (repris par l&apos;administrateur), ceux en attente ou refusés sont supprimés. Cette action est irréversible.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="LoginConfirmLabel" xml:space="preserve">
+    <value>Retapez le login du compte pour confirmer</value>
+  </data>
+  <data name="LoginConfirmMismatch" xml:space="preserve">
+    <value>Le login saisi est différent</value>
+  </data>
 </root>

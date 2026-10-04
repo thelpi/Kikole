@@ -13,5 +13,7 @@ public class UserActionRequest : UserListQuery
 
     public string? NewPasswordConfirm { get; set; }
 
+    public string? LoginConfirmation { get; set; }
+
     public UserTypes? NewType { get; set; }
 }

@@ -318,4 +318,13 @@
   <data name="PasswordMismatch" xml:space="preserve">
     <value>The two passwords are different.</value>
   </data>
+  <data name="LoginConfirmationMismatch" xml:space="preserve">
+    <value>The login typed does not match the account: nothing was deleted.</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>The account {0} has been permanently deleted.</value>
+  </data>
+  <data name="UserNotDeletable" xml:space="preserve">
+    <value>Deletion impossible: account not found or administrator.</value>
+  </data>
 </root>

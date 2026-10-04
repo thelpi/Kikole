@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -82,7 +83,8 @@ public class AdminControllerTests : IDisposable
             httpContextAccessor.Object,
             _webHostEnvironment.Object,
             _userManager.Object,
-            _emailProtector.Object)
+            _emailProtector.Object,
+            NullLogger<AdminController>.Instance)
         {
             ControllerContext = new ControllerContext { HttpContext = _httpContext }
         };
@@ -892,5 +894,67 @@ public class AdminControllerTests : IDisposable
 
         _userRepository.Verify(_ => _.ChangeUserTypeAsync(5, UserTypes.PowerUser), Times.Once);
         UsersViewModel(result).Feedback.Should().Be("UserTypeChanged:lea");
+    }
+
+    [Fact]
+    public async Task DeleteUser_WithAnotherLogin_DeletesNothing()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(5))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(5).WithLogin("lea").Build());
+
+        var result = await _controller.DeleteUser(new UserActionRequest { UserId = 5, LoginConfirmation = "hugo" });
+
+        UsersViewModel(result).Error.Should().Be("LoginConfirmationMismatch");
+        _userRepository.Verify(_ => _.DeleteUserWithAllDataAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteUser_OnAnAdministrator_IsRefused()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(1))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithType(UserTypes.Administrator).Build());
+
+        var result = await _controller.DeleteUser(new UserActionRequest { UserId = 1, LoginConfirmation = "admin" });
+
+        UsersViewModel(result).Error.Should().Be("UserNotDeletable");
+        _userRepository.Verify(_ => _.DeleteUserWithAllDataAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteUser_OnAnUnknownAccount_IsRefused()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(9)).ReturnsAsync((KikoleSite.Models.Dtos.UserDto?)null);
+
+        var result = await _controller.DeleteUser(new UserActionRequest { UserId = 9, LoginConfirmation = "x" });
+
+        UsersViewModel(result).Error.Should().Be("UserNotDeletable");
+        _userRepository.Verify(_ => _.DeleteUserWithAllDataAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("lea")]
+    [InlineData("  LEA ")]
+    public async Task DeleteUser_WithTheRetypedLogin_DeletesTheAccount(string confirmation)
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(5))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(5).WithLogin("lea").WithDisabled().Build());
+        _userRepository.Setup(_ => _.DeleteUserWithAllDataAsync(5)).ReturnsAsync(true);
+
+        var result = await _controller.DeleteUser(new UserActionRequest { UserId = 5, LoginConfirmation = confirmation });
+
+        _userRepository.Verify(_ => _.DeleteUserWithAllDataAsync(5), Times.Once);
+        UsersViewModel(result).Feedback.Should().Be("UserDeleted:lea");
+    }
+
+    [Fact]
+    public async Task DeleteUser_WhenTheRepositoryRefuses_ReportsIt()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(5))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(5).WithLogin("lea").Build());
+        _userRepository.Setup(_ => _.DeleteUserWithAllDataAsync(5)).ReturnsAsync(false);
+
+        var result = await _controller.DeleteUser(new UserActionRequest { UserId = 5, LoginConfirmation = "lea" });
+
+        UsersViewModel(result).Error.Should().Be("UserNotDeletable");
     }
 }

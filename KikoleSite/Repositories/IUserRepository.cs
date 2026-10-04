@@ -20,6 +20,15 @@ public interface IUserRepository
     /// <summary>Supprime l'historique de connexion et efface l'IP d'inscription des comptes créés avant <paramref name="cutoff"/> (durée de conservation des IP).</summary>
     Task PurgeIpAddressesAsync(DateTime cutoff);
 
+    /// <summary>
+    /// Supprime définitivement un compte non administrateur et ses données, en une seule transaction :
+    /// historique de jeu, badges, connexions, discussions, invitation utilisée, kikolés en attente ou
+    /// refusés. Les kikolés publiés ou validés sont rattachés au premier administrateur, le parrain
+    /// des filleuls est effacé. Renvoie <c>false</c> (sans rien modifier) si le compte n'existe pas
+    /// ou est administrateur.
+    /// </summary>
+    Task<bool> DeleteUserWithAllDataAsync(ulong userId);
+
     /// <summary>Désactive un compte en gardant la date et la raison. Il n'existe volontairement pas d'opération inverse.</summary>
     Task DisableUserAsync(ulong userId, string reason);
 

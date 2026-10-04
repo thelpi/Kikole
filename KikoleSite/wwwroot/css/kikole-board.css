@@ -2302,3 +2302,5 @@ body { padding-top: 0; }
 .kikole-board .share-btn:hover { background: var(--accent); color: var(--accent-ink); }
 .kikole-board .share-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .kikole-board .share-feedback { color: var(--accent); font-weight: 600; font-size: 14px; }
+.kikole-board .user-actions button.danger { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--warn); }
+.kikole-board .user-actions button.danger:hover { background: var(--warn); color: var(--accent-ink); }
