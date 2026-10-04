@@ -1,6 +1,7 @@
-﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @inject KikoleSite.Services.IDiscussionService discussionService
 @inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.EmailOptions> emailOptions
+@inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.SeoOptions> seoOptions
 @{
     Context.Request.Cookies.TryGetValue(
         Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName,
@@ -37,14 +38,59 @@
         hasUnreadMessages = await discussionService.HasUnreadMessagesForAdminAsync();
     else if (isLoggedIn)
         hasUnreadMessages = await discussionService.HasUnreadMessagesForUserAsync(currentUserId);
+
+    // referencement : titre et description par page (ViewData), URL canonique sans parametre,
+    // et noindex par defaut hors des pages publiques listees dans SeoPages
+    var baseUrl = seoOptions.Value.CanonicalBaseUrl.TrimEnd('/');
+    var pageTitle = ViewData["Title"] as string ?? localizer["DefaultTitle"].Value;
+    var pageDescription = ViewData["Description"] as string ?? localizer["DefaultDescription"].Value;
+    var requestPath = Context.Request.Path.Value ?? "/";
+    var isIndexable = KikoleSite.Helpers.SeoPages.IsIndexable(requestPath, Context.Request.QueryString.HasValue);
+    var canonicalUrl = baseUrl + (requestPath.Length > 1 ? requestPath.TrimEnd('/') : requestPath);
+    var isHomePage = isIndexable && requestPath == "/";
 }
 <!DOCTYPE html>
-<html>
+<html lang="@(isEnglish ? "en" : "fr")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kikole?</title>
-
+    <title>@pageTitle</title>
+    <meta name="description" content="@pageDescription" />
+    @if (isIndexable)
+    {
+        <link rel="canonical" href="@canonicalUrl" />
+    }
+    else
+    {
+        <meta name="robots" content="noindex, nofollow" />
+    }
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="@localizer["SiteName"]" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@pageDescription" />
+    <meta property="og:url" content="@canonicalUrl" />
+    <meta property="og:image" content="@baseUrl/images/og-image.png" />
+    <meta property="og:locale" content="@(isEnglish ? "en_GB" : "fr_FR")" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@pageTitle" />
+    <meta name="twitter:description" content="@pageDescription" />
+    <meta name="twitter:image" content="@baseUrl/images/og-image.png" />
+    @if (isHomePage)
+    {
+        var jsonLd = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+        {
+            ["@context"] = "https://schema.org",
+            ["@type"] = "WebApplication",
+            ["name"] = localizer["SiteName"].Value,
+            ["url"] = baseUrl + "/",
+            ["description"] = pageDescription,
+            ["applicationCategory"] = "GameApplication",
+            ["inLanguage"] = isEnglish ? "en" : "fr",
+            ["operatingSystem"] = "Any",
+            ["offers"] = new Dictionary<string, object> { ["@type"] = "Offer", ["price"] = "0", ["priceCurrency"] = "EUR" }
+        });
+        <script type="application/ld+json">@Html.Raw(jsonLd)</script>
+    }
     <link rel="stylesheet" href="~/css/site.css?v=1" />
     <link rel="stylesheet" href="~/css/fonts.css?v=1" />
     <environment include="Development">

@@ -1,4 +1,8 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@{
+    ViewData["Title"] = localizer["PageTitle"].Value;
+    ViewData["Description"] = localizer["PageDescription"].Value;
+}
 
 <div class="kikole-board">
     <div class="form-card">

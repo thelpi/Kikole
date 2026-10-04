@@ -104,6 +104,9 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - [ ] Serveur réglé sur `Europe/Paris` (`Clock` utilise l'heure locale, ex. `TZ=Europe/Paris`)
 - [ ] Passer son compte en administrateur en base avant l'ouverture
 - [ ] Procédure de suppression physique de compte à faire
+- [ ] Redirection 301 `kikole.fr` → `www.kikole.fr` côté hébergeur (adresse canonique : `Seo:CanonicalBaseUrl`)
+- [x] Référencement : titres, descriptions, canonical, noindex par défaut, `robots.txt`, sitemap, balises de partage, JSON-LD
+- [ ] Search Console et Bing Webmaster : déclarer le site et le sitemap
 
 ## Base de production 2023
 

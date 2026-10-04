@@ -159,4 +159,10 @@
   <data name="SubmitKikole" xml:space="preserve">
     <value>Submit a kikolé!</value>
   </data>
+  <data name="DefaultTitle" xml:space="preserve">
+    <value>Kikolé ?</value>
+  </data>
+  <data name="DefaultDescription" xml:space="preserve">
+    <value>A new mystery footballer every day: guess them from their birth year, position, nationality and club career.</value>
+  </data>
 </root>

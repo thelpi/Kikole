@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -105,5 +105,11 @@
 &lt;li&gt;a language preference cookie.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;No analytics, advertising or tracking cookies are used. In accordance with regulations, these strictly necessary cookies do not require prior consent.&lt;/p&gt;</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Legal notice – Kikolé ?</value>
+  </data>
+  <data name="PageDescription" xml:space="preserve">
+    <value>Legal notice, personal data protection (GDPR) and cookies of the Kikolé ? website.</value>
   </data>
 </root>

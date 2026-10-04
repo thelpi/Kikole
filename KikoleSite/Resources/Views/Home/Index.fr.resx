@@ -294,4 +294,10 @@
   <data name="NoPlayerScheduled" xml:space="preserve">
     <value>Le jeu n&apos;a pas encore commencé : le premier kikolé arrive très bientôt. Vous pouvez dès maintenant créer votre compte (menu Connexion).</value>
   </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Kikolé ? – Jeu quotidien : devinez le footballeur du jour</value>
+  </data>
+  <data name="PageDescription" xml:space="preserve">
+    <value>Chaque jour, un footballeur mystère : devinez-le grâce à son année de naissance, son poste, sa nationalité et sa carrière en club. Classements, badges et séries.</value>
+  </data>
 </root>

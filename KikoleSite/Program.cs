@@ -96,7 +96,8 @@ builder.Services
 builder.Services
     .Configure<RegistrationOptions>(builder.Configuration.GetSection("Registration"))
     .Configure<ForwardedProxyOptions>(builder.Configuration.GetSection("ForwardedProxy"))
-    .Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+    .Configure<EmailOptions>(builder.Configuration.GetSection("Email"))
+    .Configure<SeoOptions>(builder.Configuration.GetSection("Seo"));
 
 // authentification : Identity avec un store Dapper maison (KikoleSite/Identity), pas
 // EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Inscription par email,

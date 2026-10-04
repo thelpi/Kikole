@@ -258,4 +258,10 @@
   <data name="PagerNextYear" xml:space="preserve">
     <value>Next year</value>
   </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Leaderboard – Kikolé ?</value>
+  </data>
+  <data name="PageDescription" xml:space="preserve">
+    <value>The Kikolé ? leaderboard: points, best times, monthly podiums and ranking by badges.</value>
+  </data>
 </root>
