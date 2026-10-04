@@ -1,6 +1,7 @@
 @using KikoleSite.Helpers
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @inject KikoleSite.IGameCalendar gameCalendar
+@inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.SiteOptions> siteOptions
 @model HomeModel
 @{
     ViewData["Title"] = localizer["PageTitle"].Value;
@@ -118,7 +119,7 @@
                 @if (Model.CurrentDay == 0)
                 {
                     <h1>@localizer["PlayerIs"] <span class="player-name">@Model.PlayerName</span></h1>
-                    @if (Model.IsFound && Model.FoundOnTime == true)
+                    @if (siteOptions.Value.ShareResultEnabled && Model.IsFound && Model.FoundOnTime == true)
                     {
                         await Html.RenderPartialAsync("Partial/ShareButton", Model);
                     }
@@ -227,7 +228,10 @@
                             <div class="value">@Model.Points</div>
                         </div>
                         @{ await Html.RenderPartialAsync("Partial/Badges", Model.Badges); }
-                        @{ await Html.RenderPartialAsync("Partial/ShareButton", Model); }
+                        @if (siteOptions.Value.ShareResultEnabled)
+                        {
+                            await Html.RenderPartialAsync("Partial/ShareButton", Model);
+                        }
                         <p class="win-modal-hint">@localizer["ClickToContinue"]</p>
                     </div>
                 </div>

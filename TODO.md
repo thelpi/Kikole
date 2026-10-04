@@ -108,7 +108,8 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - [x] Référencement : titres, descriptions, canonical, noindex par défaut, `robots.txt`, sitemap, balises de partage, JSON-LD
 - [ ] Search Console et Bing Webmaster : déclarer le site et le sitemap (vérification DNS)
 - [x] Adresse email de contact publique dans les mentions légales (`admin@kikole.fr`)
-- [x] Bouton de partage du résultat (texte sans spoiler, aucun service externe)
+- [x] Bouton de partage du résultat, désactivé par défaut (`Site:ShareResultEnabled`)
+- [ ] Retravailler le bouton de partage avant de l'activer
 - [x] Mentions légales alignées sur les traitements réels ; IP effacées après 12 mois (`Retention:IpMonths`)
 
 ## Base de production 2023
