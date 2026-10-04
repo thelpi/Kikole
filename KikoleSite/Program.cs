@@ -79,6 +79,7 @@ builder.Services
     .AddSingleton<GameCalendar>()
     .AddSingleton<IGameCalendar>(sp => sp.GetRequiredService<GameCalendar>())
     .AddHostedService<GameCalendarLoader>()
+    .AddHostedService<IpRetentionService>()
     // helpers
     .AddSingleton<IClock, Clock>()
     // seedable dans les tests (new Random(seed)) : PlayerService en a besoin pour un
@@ -97,7 +98,9 @@ builder.Services
     .Configure<RegistrationOptions>(builder.Configuration.GetSection("Registration"))
     .Configure<ForwardedProxyOptions>(builder.Configuration.GetSection("ForwardedProxy"))
     .Configure<EmailOptions>(builder.Configuration.GetSection("Email"))
-    .Configure<SeoOptions>(builder.Configuration.GetSection("Seo"));
+    .Configure<SeoOptions>(builder.Configuration.GetSection("Seo"))
+    .Configure<SiteOptions>(builder.Configuration.GetSection("Site"))
+    .Configure<RetentionOptions>(builder.Configuration.GetSection("Retention"));
 
 // authentification : Identity avec un store Dapper maison (KikoleSite/Identity), pas
 // EF Core — le projet n'a jamais eu qu'un seul acces aux donnees. Inscription par email,

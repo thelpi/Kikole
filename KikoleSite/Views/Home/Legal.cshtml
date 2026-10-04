@@ -1,4 +1,5 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.SiteOptions> siteOptions
 @{
     ViewData["Title"] = localizer["PageTitle"].Value;
     ViewData["Description"] = localizer["PageDescription"].Value;
@@ -8,7 +9,7 @@
     <div class="form-card">
         <h2>@localizer["LegalTitle"]</h2>
         <h3>@localizer["PublisherTitle"]</h3>
-        @localizer["PublisherBody"]
+        @Html.Raw(string.Format(localizer["PublisherBody"].Value, System.Net.WebUtility.HtmlEncode(siteOptions.Value.ContactEmail)))
     </div>
 
     <div class="form-card">
@@ -18,7 +19,7 @@
 
     <div class="form-card">
         <h3>@localizer["PrivacyTitle"]</h3>
-        @localizer["PrivacyBody"]
+        @Html.Raw(string.Format(localizer["PrivacyBody"].Value, System.Net.WebUtility.HtmlEncode(siteOptions.Value.ContactEmail)))
     </div>
 
     <div class="form-card">

@@ -65,7 +65,7 @@
     <value>Publisher and hosting</value>
   </data>
   <data name="PublisherBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Site publisher&lt;/strong&gt;&lt;br/&gt;The "Kikolé ?" website is published on a personal, non-commercial basis by Charles Nicollas. For any question, see the Contact link in the footer.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Site publisher&lt;/strong&gt;&lt;br/&gt;The "Kikolé ?" website is published on a personal, non-commercial basis by Charles Nicollas. For any question: &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Publication director&lt;/strong&gt;&lt;br/&gt;Charles Nicollas.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Hosting&lt;/strong&gt;&lt;br/&gt;Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — phone 1007 — ovhcloud.com.&lt;/p&gt;</value>
   </data>
@@ -80,31 +80,36 @@
     <value>Personal data protection (GDPR)</value>
   </data>
   <data name="PrivacyBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Data controller&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, site publisher (see Contact in the footer).&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Data controller&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, publisher of the site (&lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Data collected&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;A login chosen at registration.&lt;/li&gt;
-&lt;li&gt;An email address, stored encrypted and used only for registration confirmation, password resets and email changes.&lt;/li&gt;
-&lt;li&gt;A password, never stored in plain text (hashed).&lt;/li&gt;
-&lt;li&gt;The IP address at registration, for fraud and multi-account prevention.&lt;/li&gt;
-&lt;li&gt;Game history (guesses, scores, badges).&lt;/li&gt;
+&lt;li&gt;A login chosen at registration, visible to other players in the leaderboards.&lt;/li&gt;
+&lt;li&gt;An email address, stored encrypted in the database and used only for registration confirmation, password reset and address change.&lt;/li&gt;
+&lt;li&gt;A password, never stored in clear text (hashed).&lt;/li&gt;
+&lt;li&gt;IP addresses: the one used at registration, the one of each login and the one of each game guess, for security purposes and to fight fraud and multiple accounts.&lt;/li&gt;
+&lt;li&gt;Your game history (guesses, scores, badges, current streak).&lt;/li&gt;
+&lt;li&gt;Messages you send through the site's messaging and, where applicable, the players you submit (your login may appear as the submitter of the player of the day).&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Purposes&lt;/strong&gt;&lt;br/&gt;This data is used exclusively for the game to function (accounts, leaderboards, badges) and for service security (fraud prevention, password resets). It is never sold, shared with third parties, or used for advertising.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Legal basis&lt;/strong&gt;&lt;br/&gt;Performance of a contract (providing the service) for account data, legitimate interest for fraud prevention.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Retention period&lt;/strong&gt;&lt;br/&gt;Data is kept for as long as the account exists. Deleting the account deletes the associated data.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Your rights&lt;/strong&gt;&lt;br/&gt;Under the GDPR, you have the right to access, rectify, erase, object to, and port your data. You can exercise these rights via the Contact link in the footer.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Security&lt;/strong&gt;&lt;br/&gt;The email address is encrypted in the database, passwords are hashed (never stored in plain text), and account access requires authentication.&lt;/p&gt;</value>
+&lt;p&gt;&lt;strong&gt;Purposes&lt;/strong&gt;&lt;br/&gt;This data is used solely to run the game (accounts, leaderboards, badges) and to keep the service secure (fraud prevention, password reset). It is neither sold, nor handed over, nor used for advertising.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Legal basis&lt;/strong&gt;&lt;br/&gt;Performance of the contract (providing the service) for account data, legitimate interest for security and fraud prevention (IP addresses).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Recipients and processors&lt;/strong&gt;&lt;br/&gt;Only the publisher accesses the data. It is processed by technical providers: the site host (OVH), an email delivery provider (registration confirmation, password reset) and the &quot;Have I Been Pwned&quot; service, queried when you choose a password to check it has not been leaked: only the first 5 characters of a fingerprint of the password are sent, never the password itself nor your identity. This last service may be located outside the European Union.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Retention&lt;/strong&gt;&lt;br/&gt;Account and game data is kept as long as the account exists. IP addresses are automatically erased after 12 months. Deleting the account, on request, deletes the associated data.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Your rights&lt;/strong&gt;&lt;br/&gt;Under the GDPR, you have the right to access, rectify, erase, object to and port your data. You can exercise these rights by email at &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;, or through the site's messaging from your account. You may also lodge a complaint with the CNIL (cnil.fr).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Security&lt;/strong&gt;&lt;br/&gt;The email address is encrypted in the database, passwords are hashed (never stored in clear text), and account access goes through an authenticated login.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Minimum age&lt;/strong&gt;&lt;br/&gt;The service is intended for people aged 15 or over.&lt;/p&gt;</value>
   </data>
   <data name="CookiesTitle" xml:space="preserve">
     <value>Cookies</value>
   </data>
   <data name="CookiesBody" xml:space="preserve">
-    <value>&lt;p&gt;The site only uses cookies strictly necessary for it to function:&lt;/p&gt;
+    <value>&lt;p&gt;The site only uses cookies and local storage that are strictly necessary for it to work or that store preferences you choose:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;an authentication cookie, to keep you signed in;&lt;/li&gt;
-&lt;li&gt;a language preference cookie.&lt;/li&gt;
+&lt;li&gt;a security cookie protecting against fraudulent form submissions;&lt;/li&gt;
+&lt;li&gt;a language preference cookie;&lt;/li&gt;
+&lt;li&gt;a cookie and local storage remembering the announcements you have hidden or collapsed.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;No analytics, advertising or tracking cookies are used. In accordance with regulations, these strictly necessary cookies do not require prior consent.&lt;/p&gt;</value>
+&lt;p&gt;No audience measurement, advertising or tracking cookie is used. As these are strictly necessary or tied to a choice you make, they do not require prior consent.&lt;/p&gt;</value>
   </data>
   <data name="PageTitle" xml:space="preserve">
     <value>Legal notice – Kikolé ?</value>

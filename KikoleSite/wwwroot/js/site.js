@@ -1439,3 +1439,61 @@ $(function () {
         minLength: 1
     });
 });
+
+/* bouton "Partager mon resultat" (Home/Partial/ShareButton.cshtml) : texte sans spoiler
+   (points, serie) + lien du site. Partage natif sur mobile, copie dans le presse-papiers
+   ailleurs ; aucun service externe, donc aucun traceur. */
+$(function () {
+    var feedbackTimer = null;
+
+    var copyWithSelection = function (value) {
+        var area = document.createElement('textarea');
+        area.value = value;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        var copied = false;
+        try {
+            copied = document.execCommand('copy');
+        } catch (err) { /* non disponible */ }
+        document.body.removeChild(area);
+        return copied;
+    };
+
+    // API moderne si possible, sinon copie par selection ; dernier recours : le texte est
+    // affiche dans une boite de dialogue pour etre copie a la main
+    var copyToClipboard = function (value) {
+        var fallback = function () {
+            if (!copyWithSelection(value)) {
+                window.prompt('', value);
+            }
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(value).catch(fallback);
+        }
+        fallback();
+        return Promise.resolve();
+    };
+
+    $(document).on("click", ".share-btn", function (e) {
+        e.stopPropagation();
+        var $btn = $(this);
+        var text = $btn.data("shareText");
+        var url = $btn.data("shareUrl");
+        var $feedback = $btn.siblings(".share-feedback");
+
+        var isTouch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        if (navigator.share && isTouch) {
+            navigator.share({ text: text, url: url }).catch(function () { /* partage annule */ });
+            return;
+        }
+
+        copyToClipboard(text + " " + url).then(function () {
+            $feedback.text($btn.data("copiedLabel"));
+            clearTimeout(feedbackTimer);
+            feedbackTimer = setTimeout(function () { $feedback.text(""); }, 2500);
+        });
+    });
+});

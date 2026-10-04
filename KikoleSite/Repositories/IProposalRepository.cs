@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
@@ -24,4 +24,7 @@ public interface IProposalRepository
     Task<int> GetDaysCountWithProposalAsync(DateOnly startDate, DateOnly endDate, ulong userId, bool exact);
 
     Task<IReadOnlyCollection<ProposalDto>> GetProposalsActivityAsync();
+
+    /// <summary>Efface l'IP des propositions antérieures à <paramref name="cutoff"/> (durée de conservation des IP).</summary>
+    Task ClearIpAddressesAsync(DateTime cutoff);
 }

@@ -92,6 +92,17 @@ public class UserRepository : BaseRepository, IUserRepository
                 new { userId });
     }
 
+    public async Task PurgeIpAddressesAsync(DateTime cutoff)
+    {
+        await ExecuteNonQueryAsync(
+                "DELETE FROM login_history WHERE creation_date < @cutoff",
+                new { cutoff });
+
+        await ExecuteNonQueryAsync(
+                "UPDATE users SET ip = NULL WHERE creation_date < @cutoff AND ip IS NOT NULL",
+                new { cutoff });
+    }
+
     public async Task DisableUserAsync(ulong userId, string reason)
     {
         await ExecuteNonQueryAsync(

@@ -118,6 +118,10 @@
                 @if (Model.CurrentDay == 0)
                 {
                     <h1>@localizer["PlayerIs"] <span class="player-name">@Model.PlayerName</span></h1>
+                    @if (Model.IsFound && Model.FoundOnTime == true)
+                    {
+                        await Html.RenderPartialAsync("Partial/ShareButton", Model);
+                    }
                 }
                 else
                 {
@@ -223,6 +227,7 @@
                             <div class="value">@Model.Points</div>
                         </div>
                         @{ await Html.RenderPartialAsync("Partial/Badges", Model.Badges); }
+                        @{ await Html.RenderPartialAsync("Partial/ShareButton", Model); }
                         <p class="win-modal-hint">@localizer["ClickToContinue"]</p>
                     </div>
                 </div>

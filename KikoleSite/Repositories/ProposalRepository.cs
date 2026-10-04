@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
@@ -12,6 +12,13 @@ public class ProposalRepository : BaseRepository, IProposalRepository
     public ProposalRepository(IConfiguration configuration, IClock clock)
         : base(configuration, clock)
     { }
+
+    public async Task ClearIpAddressesAsync(DateTime cutoff)
+    {
+        await ExecuteNonQueryAsync(
+                "UPDATE proposals SET ip = NULL WHERE creation_date < @cutoff AND ip IS NOT NULL",
+                new { cutoff });
+    }
 
     public async Task<ulong> CreateProposalAsync(ProposalDto proposal)
     {

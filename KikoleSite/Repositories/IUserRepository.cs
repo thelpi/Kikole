@@ -17,6 +17,9 @@ public interface IUserRepository
 
     Task DeleteUserAsync(ulong userId);
 
+    /// <summary>Supprime l'historique de connexion et efface l'IP d'inscription des comptes créés avant <paramref name="cutoff"/> (durée de conservation des IP).</summary>
+    Task PurgeIpAddressesAsync(DateTime cutoff);
+
     /// <summary>Désactive un compte en gardant la date et la raison. Il n'existe volontairement pas d'opération inverse.</summary>
     Task DisableUserAsync(ulong userId, string reason);
 

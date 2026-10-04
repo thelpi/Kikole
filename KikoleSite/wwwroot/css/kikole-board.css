@@ -2283,3 +2283,22 @@ body { padding-top: 0; }
 .kikole-board .pager-btn[aria-disabled="true"] { opacity: 0.35; cursor: default; }
 .kikole-board .confirm-modal-box textarea,
 .kikole-board .confirm-modal-box input[type="password"] { width: 100%; box-sizing: border-box; }
+
+/* bouton "Partager mon resultat" (Home/Partial/ShareButton.cshtml) */
+.kikole-board .share { display: flex; align-items: center; gap: 12px; margin: 10px 0 4px; flex-wrap: wrap; }
+.kikole-board .share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+.kikole-board .share-btn svg { width: 18px; height: 18px; }
+.kikole-board .share-btn:hover { background: var(--accent); color: var(--accent-ink); }
+.kikole-board .share-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kikole-board .share-feedback { color: var(--accent); font-weight: 600; font-size: 14px; }

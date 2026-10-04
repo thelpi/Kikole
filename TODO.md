@@ -106,7 +106,10 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - [ ] Procédure de suppression physique de compte à faire
 - [ ] Redirection 301 `kikole.fr` → `www.kikole.fr` côté hébergeur (adresse canonique : `Seo:CanonicalBaseUrl`)
 - [x] Référencement : titres, descriptions, canonical, noindex par défaut, `robots.txt`, sitemap, balises de partage, JSON-LD
-- [ ] Search Console et Bing Webmaster : déclarer le site et le sitemap
+- [ ] Search Console et Bing Webmaster : déclarer le site et le sitemap (vérification DNS)
+- [x] Adresse email de contact publique dans les mentions légales (`admin@kikole.fr`)
+- [x] Bouton de partage du résultat (texte sans spoiler, aucun service externe)
+- [x] Mentions légales alignées sur les traitements réels ; IP effacées après 12 mois (`Retention:IpMonths`)
 
 ## Base de production 2023
 
@@ -136,6 +139,8 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Badge désactivé (`is_disabled`) = supprimé virtuellement, lignes `user_badges` conservées
 - Compte désactivé : jamais réactivé (aucune opération inverse), date et raison conservées
 - Créateur désactivé : kikolé conservé, créateur anonymisé, hors classements
+- Aucun traceur d'audience : pas de bandeau de consentement ; cookies strictement nécessaires uniquement
+- Adresses IP conservées 12 mois, purge quotidienne
 - Gestion des utilisateurs : administrateurs exclus de la liste, des filtres et des actions ; pas de passage en administrateur
 - Rareté d'un badge = proportion des autres joueurs qui ne l'ont pas
 

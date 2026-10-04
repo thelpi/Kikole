@@ -204,4 +204,7 @@
   <data name="Update" xml:space="preserve">
     <value>Mettre à jour</value>
   </data>
+  <data name="PrivacyNotice" xml:space="preserve">
+    <value>En créant un compte, vous reconnaissez avoir pris connaissance des &lt;a href=&quot;/Home/Legal&quot;&gt;mentions légales et de la politique de confidentialité&lt;/a&gt; : vos données (login, email, adresses IP) y sont décrites. Le service est réservé aux personnes de 15 ans et plus.</value>
+  </data>
 </root>

@@ -65,7 +65,7 @@
     <value>Éditeur et hébergement</value>
   </data>
   <data name="PublisherBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Éditeur du site&lt;/strong&gt;&lt;br/&gt;Le site « Kikolé ? » est édité à titre personnel et non commercial par Charles Nicollas. Pour toute question, voir la rubrique Contact en pied de page.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Éditeur du site&lt;/strong&gt;&lt;br/&gt;Le site « Kikolé ? » est édité à titre personnel et non commercial par Charles Nicollas. Pour toute question : &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Directeur de la publication&lt;/strong&gt;&lt;br/&gt;Charles Nicollas.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Hébergement&lt;/strong&gt;&lt;br/&gt;Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — téléphone 1007 — ovhcloud.com.&lt;/p&gt;</value>
   </data>
@@ -80,31 +80,36 @@
     <value>Protection des données personnelles (RGPD)</value>
   </data>
   <data name="PrivacyBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Responsable du traitement&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, éditeur du site (voir Contact en pied de page).&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Responsable du traitement&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, éditeur du site (&lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Données collectées&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Un identifiant (login) choisi à l'inscription.&lt;/li&gt;
-&lt;li&gt;Une adresse email, stockée chiffrée en base et utilisée uniquement pour la confirmation d'inscription, la réinitialisation du mot de passe et le changement d'adresse.&lt;/li&gt;
+&lt;li&gt;Un identifiant (login) choisi à l&apos;inscription, visible des autres joueurs dans les classements.&lt;/li&gt;
+&lt;li&gt;Une adresse email, stockée chiffrée en base et utilisée uniquement pour la confirmation d&apos;inscription, la réinitialisation du mot de passe et le changement d&apos;adresse.&lt;/li&gt;
 &lt;li&gt;Un mot de passe, jamais stocké en clair (haché).&lt;/li&gt;
-&lt;li&gt;L'adresse IP au moment de l'inscription, à des fins de lutte contre la fraude et la création de comptes multiples.&lt;/li&gt;
-&lt;li&gt;L'historique de jeu (propositions, scores, badges).&lt;/li&gt;
+&lt;li&gt;Des adresses IP : celle de l&apos;inscription, celle de chaque connexion et celle de chaque proposition de jeu, à des fins de sécurité et de lutte contre la fraude et la création de comptes multiples.&lt;/li&gt;
+&lt;li&gt;L&apos;historique de jeu (propositions, scores, badges, série en cours).&lt;/li&gt;
+&lt;li&gt;Les messages que vous envoyez via la messagerie du site et, le cas échéant, les joueurs que vous proposez (votre identifiant peut apparaître comme proposeur du joueur du jour).&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Finalités&lt;/strong&gt;&lt;br/&gt;Ces données sont utilisées exclusivement pour le fonctionnement du jeu (comptes, classements, badges) et la sécurité du service (lutte anti-fraude, réinitialisation de mot de passe). Elles ne sont ni vendues, ni partagées avec des tiers, ni utilisées à des fins publicitaires.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Base légale&lt;/strong&gt;&lt;br/&gt;Exécution du contrat (fourniture du service) pour les données de compte, intérêt légitime pour la lutte anti-fraude.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Durée de conservation&lt;/strong&gt;&lt;br/&gt;Les données sont conservées tant que le compte existe. La suppression du compte entraîne la suppression des données associées.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Vos droits&lt;/strong&gt;&lt;br/&gt;Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition et de portabilité de vos données. Vous pouvez exercer ces droits via la rubrique Contact en pied de page.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Sécurité&lt;/strong&gt;&lt;br/&gt;L'adresse email est chiffrée en base de données, les mots de passe sont hachés (jamais stockés en clair), et l'accès au compte passe par une connexion authentifiée.&lt;/p&gt;</value>
+&lt;p&gt;&lt;strong&gt;Finalités&lt;/strong&gt;&lt;br/&gt;Ces données sont utilisées exclusivement pour le fonctionnement du jeu (comptes, classements, badges) et la sécurité du service (lutte anti-fraude, réinitialisation de mot de passe). Elles ne sont ni vendues, ni cédées, ni utilisées à des fins publicitaires.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Base légale&lt;/strong&gt;&lt;br/&gt;Exécution du contrat (fourniture du service) pour les données de compte, intérêt légitime pour la sécurité et la lutte anti-fraude (adresses IP).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Destinataires et sous-traitants&lt;/strong&gt;&lt;br/&gt;Seul l&apos;éditeur accède aux données. Elles sont traitées par des prestataires techniques : l&apos;hébergeur du site (OVH), un prestataire d&apos;envoi d&apos;emails (confirmation d&apos;inscription, réinitialisation du mot de passe) et le service « Have I Been Pwned », interrogé lors du choix d&apos;un mot de passe pour vérifier qu&apos;il n&apos;a pas fuité : seuls les 5 premiers caractères d&apos;une empreinte du mot de passe lui sont transmis, jamais le mot de passe lui-même ni votre identité. Ce dernier service peut être situé hors de l&apos;Union européenne.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Durée de conservation&lt;/strong&gt;&lt;br/&gt;Les données de compte et de jeu sont conservées tant que le compte existe. Les adresses IP sont effacées automatiquement au bout de 12 mois. La suppression du compte, sur demande, entraîne la suppression des données associées.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Vos droits&lt;/strong&gt;&lt;br/&gt;Conformément au RGPD, vous disposez d&apos;un droit d&apos;accès, de rectification, d&apos;effacement, d&apos;opposition et de portabilité de vos données. Vous pouvez exercer ces droits par email à &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;, ou via la messagerie du site depuis votre compte. Vous pouvez également introduire une réclamation auprès de la CNIL (cnil.fr).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sécurité&lt;/strong&gt;&lt;br/&gt;L&apos;adresse email est chiffrée en base de données, les mots de passe sont hachés (jamais stockés en clair), et l&apos;accès au compte passe par une connexion authentifiée.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Âge minimum&lt;/strong&gt;&lt;br/&gt;Le service est destiné aux personnes âgées d&apos;au moins 15 ans.&lt;/p&gt;</value>
   </data>
   <data name="CookiesTitle" xml:space="preserve">
     <value>Cookies</value>
   </data>
   <data name="CookiesBody" xml:space="preserve">
-    <value>&lt;p&gt;Le site utilise uniquement des cookies strictement nécessaires à son fonctionnement :&lt;/p&gt;
+    <value>&lt;p&gt;Le site utilise uniquement des cookies et stockages locaux strictement nécessaires à son fonctionnement ou à des préférences que vous choisissez :&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;un cookie d'authentification, pour vous garder connecté ;&lt;/li&gt;
-&lt;li&gt;un cookie de préférence de langue.&lt;/li&gt;
+&lt;li&gt;un cookie d&apos;authentification, pour vous garder connecté ;&lt;/li&gt;
+&lt;li&gt;un cookie de sécurité contre les envois de formulaires frauduleux ;&lt;/li&gt;
+&lt;li&gt;un cookie de préférence de langue ;&lt;/li&gt;
+&lt;li&gt;un cookie et un stockage local mémorisant les annonces que vous avez masquées ou repliées.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Aucun cookie de mesure d'audience, de publicité ou de suivi n'est utilisé. Conformément à la réglementation, ces cookies strictement nécessaires ne requièrent pas de consentement préalable.&lt;/p&gt;</value>
+&lt;p&gt;Aucun cookie de mesure d&apos;audience, de publicité ou de suivi n&apos;est utilisé. Ces traceurs étant strictement nécessaires ou liés à un choix de votre part, ils ne requièrent pas de consentement préalable.&lt;/p&gt;</value>
   </data>
   <data name="PageTitle" xml:space="preserve">
     <value>Mentions légales – Kikolé ?</value>

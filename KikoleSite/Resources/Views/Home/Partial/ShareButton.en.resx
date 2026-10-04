@@ -116,95 +116,16 @@
   </resheader>
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="ChangePassword" xml:space="preserve">
-    <value>Change password</value>
+  </resheader>  <data name="Copied" xml:space="preserve">
+    <value>Copied!</value>
   </data>
-  <data name="ChangeEmail" xml:space="preserve">
-    <value>Change email address</value>
+  <data name="ShareResult" xml:space="preserve">
+    <value>Share my result</value>
   </data>
-  <data name="ConfirmNewEmail" xml:space="preserve">
-    <value>Confirm the new address:</value>
+  <data name="ShareText" xml:space="preserve">
+    <value>⚽ Kikolé ? – I found the player of the day: {0} points!</value>
   </data>
-  <data name="Create" xml:space="preserve">
-    <value>Create</value>
-  </data>
-  <data name="CreateAccount" xml:space="preserve">
-    <value>Create an account</value>
-  </data>
-  <data name="CurrentEmail" xml:space="preserve">
-    <value>Current email address:</value>
-  </data>
-  <data name="CurrentPwd" xml:space="preserve">
-    <value>Current password:</value>
-  </data>
-  <data name="EmailToRecover" xml:space="preserve">
-    <value>Your email address:</value>
-  </data>
-  <data name="ForgotPassword" xml:space="preserve">
-    <value>Forgot password</value>
-  </data>
-  <data name="FreeRegistrationClosed" xml:space="preserve">
-    <value>Registration on invitation for now</value>
-  </data>
-  <data name="LoggedAs" xml:space="preserve">
-    <value>You're logged as:</value>
-  </data>
-  <data name="LogIn" xml:space="preserve">
-    <value>Login</value>
-  </data>
-  <data name="LogInTitle" xml:space="preserve">
-    <value>Log in</value>
-  </data>
-  <data name="LoginOrEmail" xml:space="preserve">
-    <value>Login / Email:</value>
-  </data>
-  <data name="LogOut" xml:space="preserve">
-    <value>Log out</value>
-  </data>
-  <data name="NewEmail" xml:space="preserve">
-    <value>New email address:</value>
-  </data>
-  <data name="NewPwd" xml:space="preserve">
-    <value>New password:</value>
-  </data>
-  <data name="RepeatPwd" xml:space="preserve">
-    <value>Repeat password:</value>
-  </data>
-  <data name="SetEmail" xml:space="preserve">
-    <value>Email:</value>
-  </data>
-  <data name="ShowPassword" xml:space="preserve">
-    <value>Show/hide password</value>
-  </data>
-  <data name="SetLogin" xml:space="preserve">
-    <value>Login:</value>
-  </data>
-  <data name="SetPwd" xml:space="preserve">
-    <value>Password:</value>
-  </data>
-  <data name="SetRegistrationId" xml:space="preserve">
-    <value>Registration id:</value>
-  </data>
-  <data name="SponsorLogin" xml:space="preserve">
-    <value>Your sponsor's login (optional):</value>
-  </data>
-  <data name="Sponsorship" xml:space="preserve">
-    <value>Sponsorship</value>
-  </data>
-  <data name="YourSponsor" xml:space="preserve">
-    <value>Your sponsor:</value>
-  </data>
-  <data name="YourGodchildren" xml:space="preserve">
-    <value>Your godchildren:</value>
-  </data>
-  <data name="TipRegistrationId" xml:space="preserve">
-    <value>You can't register without this id (formatted as XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)</value>
-  </data>
-  <data name="Update" xml:space="preserve">
-    <value>Update</value>
-  </data>
-  <data name="PrivacyNotice" xml:space="preserve">
-    <value>By creating an account, you acknowledge that you have read the &lt;a href=&quot;/Home/Legal&quot;&gt;legal notice and privacy policy&lt;/a&gt;, which describe your data (login, email, IP addresses). The service is for people aged 15 or over.</value>
+  <data name="ShareTextWithStreak" xml:space="preserve">
+    <value>⚽ Kikolé ? – I found the player of the day: {0} points, {1}-day streak!</value>
   </data>
 </root>
