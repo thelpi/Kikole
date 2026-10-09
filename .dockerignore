@@ -1,0 +1,11 @@
+# le Dockerfile ne copie que KikoleSite/ : le reste n'a rien a faire dans le contexte de build
+.git
+.github
+.vs
+.claude
+**/bin/
+**/obj/
+Restauration/
+KikoleSiteUnitTests/
+KikoleSiteIntegrationTests/
+*.sql
