@@ -285,6 +285,35 @@ public class HomeControllerTests
     // ------------------------------------------------------------- Index (POST)
 
     [Fact]
+    public async Task IndexGet_WhenTodayIsTheHiddenDay_ShowsTheNotStartedPageInsteadOfThePlayer()
+    {
+        _clock.Setup(_ => _.Today).Returns(TestCalendar.HiddenDate);
+
+        var result = await _controller.Index(day: null, errorMessageForced: null!);
+
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Index");
+        view.Model.Should().BeOfType<HomeModel>().Which.NoPlayerScheduled.Should().BeTrue();
+        _playerService.Verify(_ => _.GetPlayerClueAsync(It.IsAny<DateOnly>(), It.IsAny<bool>(), It.IsAny<Languages>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(0)] // le jour meme
+    [InlineData(1)] // en rattrapage, le lendemain
+    public async Task IndexPost_OnTheHiddenDay_RecordsNothingAndRedirects(int daysBefore)
+    {
+        _clock.Setup(_ => _.Today).Returns(TestCalendar.HiddenDate.AddDays(daysBefore));
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        SetFormKeys("submit-Continent");
+
+        var result = await _controller.Index(new HomeModel { CurrentDay = daysBefore, ContinentNameSubmission = "Europe" });
+
+        result.Should().BeOfType<RedirectResult>().Which.Url.Should().Be("/");
+        _proposalService.Verify(_ => _.ManageProposalResponseAsync(
+            It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), It.IsAny<ulong>(), It.IsAny<PlayerFullDto>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()),
+            Times.Never);
+    }
+    [Fact]
     public async Task IndexPost_NullModel_RedirectsToRoot()
     {
         var result = await _controller.Index((HomeModel)null!);

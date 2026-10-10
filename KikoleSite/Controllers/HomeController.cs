@@ -183,8 +183,10 @@ public class HomeController : KikoleBaseController
         }
 
         // avant l'ouverture du jeu (ou apres le dernier joueur planifie) : la page reste
-        // accessible, avec l'annonce, plutot que de planter
-        if (!await _playerService.HasPlayerOfTheDayAsync(model.DateOfDay))
+        // accessible, avec l'annonce, plutot que de planter. Le jour de la journee cachee, le
+        // joueur existe mais n'est jamais jouable : meme page que « pas encore ouvert »
+        if ((model.DateOfDay == _gameCalendar.HiddenDate && model.DateOfDay == _clock.Today)
+            || !await _playerService.HasPlayerOfTheDayAsync(model.DateOfDay))
         {
             model.NoPlayerScheduled = true;
             if (!string.IsNullOrWhiteSpace(errorMessageForced))
@@ -235,6 +237,13 @@ public class HomeController : KikoleBaseController
         }
 
         var daysBefore = (uint)model.CurrentDay;
+
+        // le joueur de la journee cachee ne se joue jamais, ni le jour meme ni en rattrapage :
+        // seule la serie parfaite (ou la consultation reservee) le revele, cf. CanDisplayHiddenPlayerAsync
+        if (_clock.Today.AddDays(-(int)daysBefore) == _gameCalendar.HiddenDate)
+        {
+            return Redirect("/");
+        }
 
         // independants l'un de l'autre : partent en // plutot qu'en sequence
         var pInfoTask = _playerService
