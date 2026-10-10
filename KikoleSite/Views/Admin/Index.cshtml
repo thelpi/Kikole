@@ -16,15 +16,16 @@
         <form method="post" action="/Admin">
             <div class="form-field">
                 <label>@localizer["Name"]</label>
-                <input type="text" name="Name" class="blank" />
+                <input type="text" name="Name" class="blank" value="@Model.Name" />
             </div>
 
             <div class="form-field">
                 <label>@localizer["AlternativeNames"]</label>
+                @{ var altNames = new[] { Model.AlternativeName0, Model.AlternativeName1, Model.AlternativeName2, Model.AlternativeName3, Model.AlternativeName4 }; }
                 @for (var i = 0; i < 5; i++)
                 {
                     var name = $"AlternativeName{i}";
-                    <input type="text" name="@name" class="blank" style="margin-bottom:6px" />
+                    <input type="text" name="@name" class="blank" style="margin-bottom:6px" value="@altNames[i]" />
                 }
                 <div class="form-hint">
                     @localizer["AltNameTip1"]<br />
@@ -34,19 +35,19 @@
 
             <div class="form-field">
                 <label>@localizer["YearOfBirth"]</label>
-                <input type="text" id="birthYearValue" name="YearOfBirth" class="blank" style="max-width:100px" />
+                <input type="text" id="birthYearValue" name="YearOfBirth" class="blank" style="max-width:100px" value="@Model.YearOfBirth" />
             </div>
 
             <div class="form-field">
                 <label>@localizer["Nationality"]</label>
-                <input type="text" id="countryName" name="CountryNameSubmissionValue" class="blank" />
-                <input type="hidden" id="countryId" name="Country" />
+                <input type="text" id="countryName" name="CountryName" class="blank" value="@Model.CountryName" />
+                <input type="hidden" id="countryId" name="Country" value="@Model.Country" />
             </div>
 
             <div class="form-field">
                 <label>@localizer["AlternativeNationality"]</label>
-                <input type="text" id="alternativeCountryName" name="AlternativeCountryNameSubmissionValue" class="blank" />
-                <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" />
+                <input type="text" id="alternativeCountryName" name="AlternativeCountryName" class="blank" value="@Model.AlternativeCountryName" />
+                <input type="hidden" id="alternativeCountryId" name="AlternativeCountry" value="@Model.AlternativeCountry" />
                 <div class="form-hint spaced">@localizer["TipAboutAlternativeNationality"]</div>
             </div>
 
@@ -54,27 +55,27 @@
             {
                 <div class="form-field">
                     <label>@localizer["ClueEn"]</label>
-                    <input type="text" name="ClueEn" class="blank clue-field" />
+                    <input type="text" name="ClueEn" class="blank clue-field" value="@Model.ClueEn" />
                 </div>
 
                 <div class="form-field">
                     <label>@localizer["ClueFr"]</label>
-                    <input type="text" name="ClueFr" class="blank clue-field" />
+                    <input type="text" name="ClueFr" class="blank clue-field" value="@Model.ClueFr" />
                 </div>
 
                 <div class="form-field">
                     <label>@localizer["EasyClueEn"]</label>
-                    <input type="text" name="EasyClueEn" class="blank clue-field" />
+                    <input type="text" name="EasyClueEn" class="blank clue-field" value="@Model.EasyClueEn" />
                 </div>
 
                 <div class="form-field">
                     <label>@localizer["EasyClueFr"]</label>
-                    <input type="text" name="EasyClueFr" class="blank clue-field" />
+                    <input type="text" name="EasyClueFr" class="blank clue-field" value="@Model.EasyClueFr" />
                 </div>
 
                 <div class="form-field">
                     <label>@localizer["ForcePublicationDate"]</label>
-                    <input type="date" name="PublicationDate" class="blank" />
+                    <input type="date" name="PublicationDate" class="blank" value="@Model.PublicationDate" />
                     <div class="form-hint">@localizer["ForcePublicationDateHint"]</div>
                 </div>
             }
@@ -82,7 +83,7 @@
             {
                 <div class="form-field">
                     <label>@localizer["Clue"]</label>
-                    <input type="text" name="ClueEn" class="blank clue-field" data-media="image" />
+                    <input type="text" name="ClueEn" class="blank clue-field" data-media="image" value="@Model.ClueEn" />
                     <div class="form-hint">
                         @localizer["AcceptedLanguages"]<br />
                         @localizer["AdminOverrideClue"]
@@ -91,7 +92,7 @@
 
                 <div class="form-field">
                     <label>@localizer["EasyClue"]</label>
-                    <input type="text" name="EasyClueEn" class="blank clue-field" data-media="image" />
+                    <input type="text" name="EasyClueEn" class="blank clue-field" data-media="image" value="@Model.EasyClueEn" />
                     <div class="form-hint">
                         @localizer["AcceptedLanguages"]<br />
                         @localizer["AdminOverrideClue"]
@@ -113,14 +114,18 @@
             <div class="form-field">
                 <label>@localizer["ClubsCareer"]</label>
                 <div class="form-hint">@localizer["ClubsTip1"]</div>
+                @{
+                    var clubIds = new[] { Model.Club0Id, Model.Club1Id, Model.Club2Id, Model.Club3Id, Model.Club4Id, Model.Club5Id, Model.Club6Id, Model.Club7Id, Model.Club8Id, Model.Club9Id, Model.Club10Id, Model.Club11Id, Model.Club12Id, Model.Club13Id, Model.Club14Id };
+                    var clubNames = new[] { Model.Club0Name, Model.Club1Name, Model.Club2Name, Model.Club3Name, Model.Club4Name, Model.Club5Name, Model.Club6Name, Model.Club7Name, Model.Club8Name, Model.Club9Name, Model.Club10Name, Model.Club11Name, Model.Club12Name, Model.Club13Name, Model.Club14Name };
+                }
                 @for (var i = 0; i < 15; i++)
                 {
                     var name = $"Club{i}";
                     var idName = $"Club{i}Id";
                     var loanChk = $"IsLoan{i}";
                     <div class="check-line club-line-input">
-                        <input type="text" id="@name" name="@(name)Value" class="blank" />
-                        <input type="hidden" id="@idName" name="@idName" />
+                        <input type="text" id="@name" name="@(name)Name" class="blank" value="@clubNames[i]" />
+                        <input type="hidden" id="@idName" name="@idName" value="@clubIds[i]" />
                         <label class="check-label" for="@loanChk">@localizer["IsLoan"]</label>
                         @Html.CheckBox(loanChk)
                     </div>

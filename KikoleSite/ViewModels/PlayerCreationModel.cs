@@ -37,6 +37,40 @@ public class PlayerCreationModel
 
     public string? AlternativeCountry { get; set; }
 
+    public string? CountryName { get; set; }
+
+    public string? AlternativeCountryName { get; set; }
+
+    public string? Club0Name { get; set; }
+
+    public string? Club1Name { get; set; }
+
+    public string? Club2Name { get; set; }
+
+    public string? Club3Name { get; set; }
+
+    public string? Club4Name { get; set; }
+
+    public string? Club5Name { get; set; }
+
+    public string? Club6Name { get; set; }
+
+    public string? Club7Name { get; set; }
+
+    public string? Club8Name { get; set; }
+
+    public string? Club9Name { get; set; }
+
+    public string? Club10Name { get; set; }
+
+    public string? Club11Name { get; set; }
+
+    public string? Club12Name { get; set; }
+
+    public string? Club13Name { get; set; }
+
+    public string? Club14Name { get; set; }
+
     public string? Club0Id { get; set; }
 
     public string? Club1Id { get; set; }
