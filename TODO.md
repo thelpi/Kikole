@@ -105,6 +105,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - [ ] Passer son compte en administrateur en base avant l'ouverture
 - [x] Suppression physique de compte (page `/Admin/Users`, login à retaper, une transaction)
 - [ ] Redirection 301 `kikole.fr` → `www.kikole.fr` côté hébergeur (adresse canonique : `Seo:CanonicalBaseUrl`)
+- [ ] Tenter de racheter `kikole.com` (libération estimée vers le 22 octobre 2026), puis le rediriger en 301 vers le `.fr`
 - [x] Référencement : titres, descriptions, canonical, noindex par défaut, `robots.txt`, sitemap, balises de partage, JSON-LD
 - [ ] Search Console et Bing Webmaster : déclarer le site et le sitemap (vérification DNS)
 - [x] Adresse email de contact publique dans les mentions légales (`admin@kikole.fr`)
