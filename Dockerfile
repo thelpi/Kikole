@@ -17,6 +17,9 @@ WORKDIR /app
 # 8080 et non 80 : le port par defaut des images .NET depuis la 8, et celui que le
 # serveur attend
 ENV ASPNETCORE_HTTP_PORTS=8080
+# l'application lit l'heure locale (Clock.Now) : en UTC, le jour de jeu changerait a 1h ou 2h
+# du matin, heure de Paris. L'image Debian de Microsoft embarque tzdata.
+ENV TZ=Europe/Paris
 # cles Data Protection (cf. Program.cs) : ce repertoire est un volume sur le serveur, sans
 # quoi chaque deploiement deconnecterait tout le monde
 ENV DataProtection__KeysPath=/app/keys

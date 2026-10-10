@@ -71,6 +71,9 @@ jobs:
     name: Mise en ligne
     needs: image
     runs-on: ubuntu-latest
+    # permet de restreindre les secrets de deploiement a `master` et d'exiger une approbation
+    # avant chaque mise en ligne (Settings > Environments > production)
+    environment: production
     # deux mises en ligne ne se chevauchent jamais. Un nouveau push annule ce run et coupe
     # la connexion, pas le script du serveur : il va au bout, retour arriere compris
     concurrency:

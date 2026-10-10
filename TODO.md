@@ -101,7 +101,10 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 
 ## 6. Mise en production
 
-- [ ] Serveur réglé sur `Europe/Paris` (`Clock` utilise l'heure locale, ex. `TZ=Europe/Paris`)
+- [x] Fuseau `Europe/Paris` dans l'image Docker (`Clock` utilise l'heure locale) ; erreurs journalisées sur la console
+- [ ] Variables d'environnement de production : base, `EncryptionKey`, `EmailEncryptionKey`, `Email__Smtp*`, `ForwardedProxy__*`, `Registration__MaxCreationsPerIpPerDay` (999 dans `appsettings.json`)
+- [ ] Déploiement : environnement GitHub `production` (restreint à `master`, approbation), secrets posés par le propriétaire
+- [ ] Avant le premier déploiement : un kikolé au moins en base, médias d'indice copiés dans le volume ; migrer le schéma avant tout push qui le change
 - [ ] Passer son compte en administrateur en base avant l'ouverture
 - [x] Suppression physique de compte (page `/Admin/Users`, login à retaper, une transaction)
 - [ ] Redirection 301 `kikole.fr` → `www.kikole.fr` côté hébergeur (adresse canonique : `Seo:CanonicalBaseUrl`)
