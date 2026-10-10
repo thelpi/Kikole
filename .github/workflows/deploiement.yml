@@ -90,8 +90,9 @@ jobs:
           SHA: ${{ github.sha }}
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$CLE" > ~/.ssh/deploiement
+          # tr : un secret colle depuis Windows peut contenir des fins de ligne CRLF, que ssh refuse
+          printf '%s\n' "$CLE" | tr -d '\r' > ~/.ssh/deploiement
           chmod 600 ~/.ssh/deploiement
-          printf '%s\n' "$HOTES" > ~/.ssh/known_hosts
+          printf '%s\n' "$HOTES" | tr -d '\r' > ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploiement -o IdentitiesOnly=yes -o BatchMode=yes \
             deploiement@vps-27f6ff06.vps.ovh.net "deployer kikole $SHA"
