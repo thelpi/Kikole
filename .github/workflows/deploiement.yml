@@ -1,0 +1,98 @@
+name: Deploiement
+
+# A chaque push sur master : tests unitaires, image publiee sur GHCR, puis mise en ligne
+# sur le serveur. Une PR ne lance que les tests.
+#
+# Les tests d'integration n'y sont pas : ils exigent une vraie base MySQL (DatabaseFixture).
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+# un nouveau push annule le run precedent encore en cours - sauf la mise en ligne elle-meme,
+# qui a son propre groupe plus bas
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests unitaires
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Tests
+        run: dotnet test KikoleSiteUnitTests/KikoleSiteUnitTests.csproj
+
+  image:
+    name: Image
+    needs: tests
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    # le jeton du depot suffit pour publier sur GHCR : aucun identifiant a stocker
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Connexion a GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # deux tags : le SHA, qu'epingle le serveur et qui rend le retour arriere possible,
+      # et `latest` pour la lisibilite - le serveur ne deploie jamais `latest`
+      - name: Construction et publication
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/thelpi/kikole:${{ github.sha }}
+            ghcr.io/thelpi/kikole:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploiement:
+    name: Mise en ligne
+    needs: image
+    runs-on: ubuntu-latest
+    # permet de restreindre les secrets de deploiement a `master` et d'exiger une approbation
+    # avant chaque mise en ligne (Settings > Environments > production)
+    environment: production
+    # deux mises en ligne ne se chevauchent jamais. Un nouveau push annule ce run et coupe
+    # la connexion, pas le script du serveur : il va au bout, retour arriere compris
+    concurrency:
+      group: deploiement-kikole
+      cancel-in-progress: false
+    steps:
+      # la cle ne sait faire qu'une chose : `deployer kikole <sha>` (commande forcee cote
+      # serveur). Si la nouvelle version ne repond pas, le serveur revient seul a la
+      # precedente et ce job echoue.
+      - name: Mise en ligne
+        env:
+          CLE: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOTES: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          SHA: ${{ github.sha }}
+        run: |
+          install -m 700 -d ~/.ssh
+          # tr : un secret colle depuis Windows peut contenir des fins de ligne CRLF, que ssh refuse
+          printf '%s\n' "$CLE" | tr -d '\r' > ~/.ssh/deploiement
+          chmod 600 ~/.ssh/deploiement
+          printf '%s\n' "$HOTES" | tr -d '\r' > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploiement -o IdentitiesOnly=yes -o BatchMode=yes \
+            deploiement@vps-27f6ff06.vps.ovh.net "deployer kikole $SHA"
