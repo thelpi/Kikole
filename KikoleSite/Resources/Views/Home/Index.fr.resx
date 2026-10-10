@@ -292,7 +292,7 @@
     <value>Record : {0} jour</value>
   </data>
   <data name="NoPlayerScheduled" xml:space="preserve">
-    <value>Le jeu n&apos;a pas encore commencé : le premier kikolé arrive très bientôt. Vous pouvez dès maintenant créer votre compte (menu Connexion).</value>
+    <value>Le jeu n&apos;a pas encore commencé : le premier kikolé sera proposé le 12/10/2026. Vous pouvez dès maintenant créer votre compte (menu Connexion).</value>
   </data>
   <data name="PageTitle" xml:space="preserve">
     <value>Kikolé ? – Jeu quotidien : devinez le footballeur du jour</value>

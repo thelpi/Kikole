@@ -292,7 +292,7 @@
     <value>Best streak: {0} day</value>
   </data>
   <data name="NoPlayerScheduled" xml:space="preserve">
-    <value>The game has not started yet: the first kikolé is coming very soon. You can already create your account (Login menu).</value>
+    <value>The game has not started yet: the first kikolé will be available on October 12, 2026. You can already create your account (Login menu).</value>
   </data>
   <data name="PageTitle" xml:space="preserve">
     <value>Kikolé ? – Daily football player guessing game</value>
