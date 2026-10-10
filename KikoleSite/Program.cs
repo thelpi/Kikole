@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using KikoleSite;
 using KikoleSite.Configuration;
@@ -12,6 +13,7 @@ using KikoleSite.Repositories;
 using KikoleSite.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -142,6 +144,21 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
     var tokenLifetimeHours = builder.Configuration.GetValue("Email:TokenLifetimeHours", 24);
     options.TokenLifespan = TimeSpan.FromHours(tokenLifetimeHours);
 });
+
+// cles Data Protection : elles chiffrent le cookie d'authentification et les liens de
+// confirmation / reinitialisation envoyes par email. Sans chemin persistant, elles vivent
+// dans le conteneur et disparaissent a chaque deploiement : tout le monde est deconnecte
+// et les liens deja envoyes deviennent invalides, sans aucune erreur. Le chemin n'est
+// renseigne qu'en production (Dockerfile, volume sur le serveur) : en local, le
+// comportement par defaut est conserve.
+var dataProtectionKeysPath = builder.Configuration.GetValue<string>("DataProtection:KeysPath");
+if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
+{
+    builder.Services
+        .AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
+        .SetApplicationName("Kikole");
+}
 
 builder.Services.AddSingleton<IEmailProtector, EmailProtector>();
 
