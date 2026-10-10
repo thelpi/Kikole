@@ -163,6 +163,8 @@ if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
 
 builder.Services.AddExceptionHandler<ErrorJournalExceptionHandler>();
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddSingleton<IEmailProtector, EmailProtector>();
 
 // en local, le lien est ecrit dans les logs plutot qu'envoye (cf. EmailOptions.SendingEnabled,

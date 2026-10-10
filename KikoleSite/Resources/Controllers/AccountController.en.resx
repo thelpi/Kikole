@@ -237,4 +237,16 @@
   <data name="UserDoesNotExist" xml:space="preserve">
     <value>The user doesn't exist</value>
   </data>
+  <data name="ConfirmationEmailAlreadyConfirmed" xml:space="preserve">
+    <value>Your address is already confirmed: you can log in.</value>
+  </data>
+  <data name="ConfirmationEmailNotSent" xml:space="preserve">
+    <value>Your account was created, but the confirmation email could not be sent. Try again in a few minutes with &quot;Resend the confirmation email&quot; (enter your login and password).</value>
+  </data>
+  <data name="ConfirmationEmailResent" xml:space="preserve">
+    <value>The confirmation email has been sent again. Also check your spam folder.</value>
+  </data>
+  <data name="ConfirmationEmailThrottled" xml:space="preserve">
+    <value>A confirmation email was just sent. Please wait a few minutes before asking for another one.</value>
+  </data>
 </root>

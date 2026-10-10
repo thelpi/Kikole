@@ -15,6 +15,7 @@ using KikoleSite.ViewModels.Emails;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -33,6 +34,11 @@ public class AccountController : KikoleBaseController
     private readonly ILogger<AccountController> _logger;
     private readonly RegistrationOptions _registrationOptions;
     private readonly EmailOptions _emailOptions;
+    private readonly IMemoryCache _memoryCache;
+    private readonly IErrorJournal _errorJournal;
+
+    // delai minimal entre deux renvois de l'email de confirmation pour un meme compte
+    private static readonly TimeSpan ResendConfirmationDelay = TimeSpan.FromMinutes(5);
 
     public AccountController(IStringLocalizer<AccountController> localizer,
         UserManager<ApplicationUser> userManager,
@@ -50,7 +56,9 @@ public class AccountController : KikoleBaseController
         IGameCalendar gameCalendar,
         IPlayerService playerService,
         IBadgeService badgeService,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IMemoryCache memoryCache,
+        IErrorJournal errorJournal)
         : base(userRepository,
             internationalService,
             clock,
@@ -69,6 +77,8 @@ public class AccountController : KikoleBaseController
         _logger = logger;
         _registrationOptions = registrationOptions.Value;
         _emailOptions = emailOptions.Value;
+        _memoryCache = memoryCache;
+        _errorJournal = errorJournal;
     }
 
     [HttpGet]
@@ -405,11 +415,13 @@ public class AccountController : KikoleBaseController
 
                         if (_emailOptions.SendingEnabled)
                         {
-                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                            var link = Url.Action("ConfirmEmail", "Account",
-                                new { userId = user.Id, token }, Request.Scheme)!;
-                            var body = await RenderLinkEmailAsync(_localizer["ConfirmEmailBody"], link);
-                            await _emailSender.SendAsync(user.Email!, _localizer["ConfirmEmailSubject"], body);
+                            // le compte existe deja : un echec d'envoi ne doit pas laisser la personne
+                            // devant une erreur sans issue (elle peut redemander l'email)
+                            if (!await TrySendConfirmationEmailAsync(user))
+                            {
+                                model.Error = _localizer["ConfirmationEmailNotSent"];
+                                return await RenderIndexAsync(model);
+                            }
                         }
                         else
                         {
@@ -430,6 +442,75 @@ public class AccountController : KikoleBaseController
         }
 
         return await RenderIndexAsync(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResendConfirmation(AccountModel model)
+    {
+        if (string.IsNullOrWhiteSpace(model.LoginSubmission)
+            || string.IsNullOrWhiteSpace(model.PasswordSubmission))
+        {
+            model.Error = _localizer["InvalidForm"];
+            return await RenderIndexAsync(model);
+        }
+
+        var user = await _userManager.FindByNameAsync(model.LoginSubmission)
+            ?? await _userManager.FindByEmailAsync(model.LoginSubmission);
+
+        // memes identifiants et memes verrouillages que la connexion : sans le mot de passe,
+        // l'action permettrait d'inonder la boite d'un tiers. CheckPasswordSignInAsync ne convient
+        // pas : il refuse d'emblee un compte non confirme, sans verifier le mot de passe
+        if (user != null && await _userManager.IsLockedOutAsync(user))
+            model.Error = _localizer["AccountLockedOut"];
+        else if (user == null || !await _userManager.CheckPasswordAsync(user, model.PasswordSubmission))
+        {
+            if (user != null)
+                await _userManager.AccessFailedAsync(user);
+
+            model.Error = _localizer["InvalidCredentials"];
+        }
+        else if (await ResetFailuresAndCheckConfirmedAsync(user))
+            model.SuccessInfo = _localizer["ConfirmationEmailAlreadyConfirmed"];
+        else if (_memoryCache.TryGetValue(ResendConfirmationCacheKey(user.Id), out _))
+            model.Error = _localizer["ConfirmationEmailThrottled"];
+        else if (await TrySendConfirmationEmailAsync(user))
+        {
+            _memoryCache.Set(ResendConfirmationCacheKey(user.Id), true, ResendConfirmationDelay);
+            model.SuccessInfo = _localizer["ConfirmationEmailResent"];
+        }
+        else
+            model.Error = _localizer["ConfirmationEmailNotSent"];
+
+        return await RenderIndexAsync(model);
+    }
+
+    private static string ResendConfirmationCacheKey(ulong userId) => $"resend-confirmation:{userId}";
+
+    // mot de passe correct : les echecs precedents ne comptent plus ; renvoie vrai si l'adresse est deja confirmee
+    private async Task<bool> ResetFailuresAndCheckConfirmedAsync(ApplicationUser user)
+    {
+        await _userManager.ResetAccessFailedCountAsync(user);
+        return user.EmailConfirmed;
+    }
+
+    /// <summary>Envoie le lien de confirmation ; renvoie <c>false</c> (et note l'erreur dans les journaux) si l'envoi échoue.</summary>
+    private async Task<bool> TrySendConfirmationEmailAsync(ApplicationUser user)
+    {
+        try
+        {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var link = Url.Action("ConfirmEmail", "Account",
+                new { userId = user.Id, token }, Request.Scheme)!;
+            var body = await RenderLinkEmailAsync(_localizer["ConfirmEmailBody"], link);
+            await _emailSender.SendAsync(user.Email!, _localizer["ConfirmEmailSubject"], body);
+            return true;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Échec de l'envoi de l'email de confirmation au compte {UserId}.", user.Id);
+            _errorJournal.Add(exception, Request.Method, Request.Path);
+            return false;
+        }
     }
 
     [HttpPost]

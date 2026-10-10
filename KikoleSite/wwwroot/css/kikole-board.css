@@ -2311,3 +2311,7 @@ body { padding-top: 0; }
 .kikole-board .error-entry-type { font-weight: 700; color: var(--warn); word-break: break-word; }
 .kikole-board .error-entry summary { cursor: pointer; color: var(--accent); }
 .kikole-board .error-entry pre { margin: 8px 0 0; padding: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-family: var(--font-mono); font-size: 12px; background: var(--surface-2); border-radius: 8px; }
+
+/* bouton secondaire d'un groupe d'actions (ex. « Renvoyer l'email de confirmation ») */
+.kikole-board .actions button.secondary { background: transparent; border: 1px solid var(--border-strong); color: var(--text-muted); }
+.kikole-board .actions button.secondary:hover { background: var(--surface-3); color: var(--text); }

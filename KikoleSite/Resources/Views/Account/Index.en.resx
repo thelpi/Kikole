@@ -207,4 +207,10 @@
   <data name="PrivacyNotice" xml:space="preserve">
     <value>By creating an account, you acknowledge that you have read the &lt;a href=&quot;/Home/Legal&quot;&gt;legal notice and privacy policy&lt;/a&gt;, which describe your data (login, email, IP addresses). The service is for people aged 15 or over.</value>
   </data>
+  <data name="ResendConfirmation" xml:space="preserve">
+    <value>Resend the confirmation email</value>
+  </data>
+  <data name="ResendConfirmationHint" xml:space="preserve">
+    <value>Confirmation email not received? Enter your login and password, then use &quot;Resend the confirmation email&quot;.</value>
+  </data>
 </root>

@@ -50,6 +50,8 @@ public class AccountControllerTests
     private readonly Mock<IEmailSender> _emailSender = new();
     private readonly Mock<IRazorViewRenderer> _emailRenderer = new();
     private readonly Mock<ILogger<AccountController>> _logger = new();
+    private readonly Mock<IErrorJournal> _errorJournal = new();
+    private readonly Microsoft.Extensions.Caching.Memory.MemoryCache _memoryCache = new(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions());
     private readonly RegistrationOptions _registrationOptions = new() { SponsorshipEnabled = true };
     // SendingEnabled a false par defaut (comme en local) : la plupart des tests n'ont donc
     // pas a mocker l'envoi, seuls ceux qui portent explicitement sur l'envoi reel le
@@ -107,7 +109,9 @@ public class AccountControllerTests
             _gameCalendar.Object,
             _playerService.Object,
             _badgeService.Object,
-            httpContextAccessor.Object)
+            httpContextAccessor.Object,
+            _memoryCache,
+            _errorJournal.Object)
         {
             ControllerContext = new ControllerContext { HttpContext = _httpContext },
             Url = FakeUrlHelper()
@@ -626,6 +630,147 @@ public class AccountControllerTests
 
         _emailSender.Verify(_ => _.SendAsync("nouveau@kikole.test", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         _userManager.Verify(_ => _.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Create_WhenTheConfirmationEmailCannotBeSent_KeepsTheAccountAndExplains()
+    {
+        var controller = BuildController(_registrationOptions, _emailOptions with { SendingEnabled = true });
+
+        _userManager.Setup(_ => _.FindByNameAsync("nouveau")).ReturnsAsync((ApplicationUser?)null);
+        _userManager
+            .Setup(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234"))
+            .ReturnsAsync(IdentityResult.Success)
+            .Callback<ApplicationUser, string>((u, _) => u.Id = 9);
+        _userManager.Setup(_ => _.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>())).ReturnsAsync("token");
+        _emailSender
+            .Setup(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ThrowsAsync(new InvalidOperationException("smtp indisponible"));
+
+        var result = await controller.Create(new AccountModel
+        {
+            LoginCreateSubmission = "nouveau",
+            PasswordCreate1Submission = "NouveauMdp1234",
+            PasswordCreate2Submission = "NouveauMdp1234",
+            EmailCreateSubmission = "nouveau@kikole.test"
+        });
+
+        ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Which.Error.Should().Be("ConfirmationEmailNotSent");
+        _userManager.Verify(_ => _.CreateAsync(It.IsAny<ApplicationUser>(), "NouveauMdp1234"), Times.Once);
+        _errorJournal.Verify(_ => _.Add(It.IsAny<InvalidOperationException>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
+    }
+
+    // ------------------------------------------------------------- ResendConfirmation
+
+    private AccountController ControllerWithSending() =>
+        BuildController(_registrationOptions, _emailOptions with { SendingEnabled = true });
+
+    private ApplicationUser UnconfirmedUser(ulong id = 5)
+    {
+        var user = BuildUser(id, "joueur5");
+        user.EmailConfirmed = false;
+        _userManager.Setup(_ => _.FindByNameAsync("joueur5")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.GenerateEmailConfirmationTokenAsync(user)).ReturnsAsync("token");
+        return user;
+    }
+
+    private static AccountModel Credentials(string login = "joueur5", string? password = "MotDePasse1234") =>
+        new() { LoginSubmission = login, PasswordSubmission = password };
+
+    private static AccountModel ModelOf(IActionResult result) =>
+        ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+
+    [Fact]
+    public async Task ResendConfirmation_WithoutAPassword_IsRefused()
+    {
+        var result = await ControllerWithSending().ResendConfirmation(Credentials(password: " "));
+
+        ModelOf(result).Error.Should().Be("InvalidForm");
+        _emailSender.Verify(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WithWrongCredentials_SendsNothing()
+    {
+        var user = UnconfirmedUser();
+        _userManager.Setup(_ => _.CheckPasswordAsync(user, "MotDePasse1234")).ReturnsAsync(false);
+
+        var result = await ControllerWithSending().ResendConfirmation(Credentials());
+
+        ModelOf(result).Error.Should().Be("InvalidCredentials");
+        _emailSender.Verify(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _userManager.Verify(_ => _.AccessFailedAsync(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_ForAnUnknownAccount_AnswersLikeWrongCredentials()
+    {
+        _userManager.Setup(_ => _.FindByNameAsync("inconnu")).ReturnsAsync((ApplicationUser?)null);
+        _userManager.Setup(_ => _.FindByEmailAsync("inconnu")).ReturnsAsync((ApplicationUser?)null);
+
+        var result = await ControllerWithSending().ResendConfirmation(Credentials(login: "inconnu"));
+
+        ModelOf(result).Error.Should().Be("InvalidCredentials");
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WhenTheAccountIsLockedOut_SendsNothing()
+    {
+        var user = UnconfirmedUser();
+        _userManager.Setup(_ => _.IsLockedOutAsync(user)).ReturnsAsync(true);
+
+        var result = await ControllerWithSending().ResendConfirmation(Credentials());
+
+        ModelOf(result).Error.Should().Be("AccountLockedOut");
+        _emailSender.Verify(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WhenAlreadyConfirmed_SendsNothing()
+    {
+        var user = UnconfirmedUser();
+        user.EmailConfirmed = true;
+        _userManager.Setup(_ => _.CheckPasswordAsync(user, "MotDePasse1234")).ReturnsAsync(true);
+
+        var result = await ControllerWithSending().ResendConfirmation(Credentials());
+
+        ModelOf(result).SuccessInfo.Should().Be("ConfirmationEmailAlreadyConfirmed");
+        _emailSender.Verify(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_SendsOnceThenMakesYouWait()
+    {
+        var user = UnconfirmedUser();
+        _userManager.Setup(_ => _.CheckPasswordAsync(user, "MotDePasse1234")).ReturnsAsync(true);
+        var controller = ControllerWithSending();
+
+        // le ViewData du controleur est partage : on lit chaque modele juste apres son appel
+        var first = ModelOf(await controller.ResendConfirmation(Credentials()));
+        var second = ModelOf(await controller.ResendConfirmation(Credentials()));
+
+        first.SuccessInfo.Should().Be("ConfirmationEmailResent");
+        second.Error.Should().Be("ConfirmationEmailThrottled");
+        _emailSender.Verify(_ => _.SendAsync(user.Email!, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ResendConfirmation_WhenSendingFails_ReportsItAndAllowsAnotherTry()
+    {
+        var user = UnconfirmedUser();
+        _userManager.Setup(_ => _.CheckPasswordAsync(user, "MotDePasse1234")).ReturnsAsync(true);
+        _emailSender
+            .SetupSequence(_ => _.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ThrowsAsync(new InvalidOperationException("smtp indisponible"))
+            .Returns(Task.CompletedTask);
+        var controller = ControllerWithSending();
+
+        var first = ModelOf(await controller.ResendConfirmation(Credentials()));
+        var second = ModelOf(await controller.ResendConfirmation(Credentials()));
+
+        first.Error.Should().Be("ConfirmationEmailNotSent");
+        second.SuccessInfo.Should().Be("ConfirmationEmailResent");
+        _errorJournal.Verify(_ => _.Add(It.IsAny<InvalidOperationException>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
     }
 
     // ------------------------------------------------------------- Create (parrainage)
