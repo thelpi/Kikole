@@ -1,0 +1,27 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model IReadOnlyList<KikoleSite.Services.ErrorJournalEntry>
+
+<div class="kikole-board">
+    <div class="form-card">
+        <h3>@localizer["ErrorsTitle"]</h3>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Actions">@localizer["BackToActions"]</a></div>
+        <p>@localizer["ErrorsHelp"]</p>
+        <p>@string.Format(localizer["ErrorsCount"].Value, Model.Count)</p>
+    </div>
+
+    @foreach (var entry in Model)
+    {
+        <div class="form-card error-entry">
+            <div class="error-entry-head">
+                <span class="error-entry-date">@entry.Date.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                <span class="error-entry-request">@entry.Method @entry.Path</span>
+            </div>
+            <div class="error-entry-type">@entry.ExceptionType</div>
+            <div>@entry.Message</div>
+            <details>
+                <summary>@localizer["ErrorDetails"]</summary>
+                <pre>@entry.Details</pre>
+            </details>
+        </div>
+    }
+</div>

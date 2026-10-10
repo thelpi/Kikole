@@ -84,6 +84,7 @@ builder.Services
     .AddHostedService<IpRetentionService>()
     // helpers
     .AddSingleton<IClock, Clock>()
+    .AddSingleton<IErrorJournal, ErrorJournal>()
     // seedable dans les tests (new Random(seed)) : PlayerService en a besoin pour un
     // melange deterministe, contrairement a Random.Shared qui n'est pas configurable.
     .AddSingleton(new Random())
@@ -159,6 +160,8 @@ if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
         .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
         .SetApplicationName("Kikole");
 }
+
+builder.Services.AddExceptionHandler<ErrorJournalExceptionHandler>();
 
 builder.Services.AddSingleton<IEmailProtector, EmailProtector>();
 

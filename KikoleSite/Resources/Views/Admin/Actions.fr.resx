@@ -153,4 +153,7 @@
   <data name="ManageUsers" xml:space="preserve">
     <value>Gérer les utilisateurs</value>
   </data>
+  <data name="ViewErrors" xml:space="preserve">
+    <value>Voir le journal des erreurs</value>
+  </data>
 </root>

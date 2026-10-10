@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using KikoleSite;
 using KikoleSite.Controllers.Filters;
+using KikoleSite.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -34,7 +35,8 @@ public class ErrorFilterTests
     {
         var logger = new CapturingLogger();
         var clock = new Mock<IClock>();
-        var filter = new ErrorFilter(new ConfigurationBuilder().Build(), clock.Object, logger);
+        var journal = new Mock<IErrorJournal>();
+        var filter = new ErrorFilter(new ConfigurationBuilder().Build(), clock.Object, logger, journal.Object);
         var boom = new InvalidOperationException("boom");
         var context = new ExceptionContext(
             new ActionContext(new DefaultHttpContext(), new RouteData(), new ActionDescriptor()),
@@ -46,6 +48,7 @@ public class ErrorFilterTests
         filter.OnException(context);
 
         logger.Entries.Should().ContainSingle().Which.Should().Be((LogLevel.Error, (Exception?)boom));
+        journal.Verify(_ => _.Add(boom, It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
         context.ExceptionHandled.Should().BeTrue();
         context.Result.Should().BeOfType<ViewResult>().Which.ViewName.Should().Be("~/Views/Shared/Error.cshtml");
     }

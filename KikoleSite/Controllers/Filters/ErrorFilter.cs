@@ -1,4 +1,5 @@
 using System.IO;
+using KikoleSite.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
@@ -10,12 +11,15 @@ public class ErrorFilter : IExceptionFilter
 {
     private readonly IClock _clock;
     private readonly ILogger<ErrorFilter> _logger;
+    private readonly IErrorJournal _journal;
     private readonly string? _logsFilePathFormat;
 
     public ErrorFilter(IConfiguration configuration,
         IClock clock,
-        ILogger<ErrorFilter> logger)
+        ILogger<ErrorFilter> logger,
+        IErrorJournal journal)
     {
+        _journal = journal;
         _logsFilePathFormat = configuration.GetValue<string>("LogsFilePathFormat");
         _clock = clock;
         _logger = logger;
@@ -26,6 +30,7 @@ public class ErrorFilter : IExceptionFilter
         // marquer l'exception comme traitee la rend invisible pour le reste du pipeline : sans cette
         // ligne, un conteneur (sans chemin de fichier configure) ne laisserait aucune trace
         _logger.LogError(context.Exception, "Exception non gérée sur {Path}", context.HttpContext.Request.Path);
+        _journal.Add(context.Exception, context.HttpContext.Request.Method, context.HttpContext.Request.Path);
 
         // le chemin des logs est optionnel : absent, on se contente d'afficher l'erreur
         if (_logsFilePathFormat != null)

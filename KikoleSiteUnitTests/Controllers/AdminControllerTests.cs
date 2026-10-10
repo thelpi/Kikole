@@ -50,6 +50,7 @@ public class AdminControllerTests : IDisposable
     private readonly Mock<IWebHostEnvironment> _webHostEnvironment = new();
     private readonly Mock<UserManager<ApplicationUser>> _userManager = IdentityMocks.MockUserManager();
     private readonly Mock<IEmailProtector> _emailProtector = new();
+    private readonly Mock<IErrorJournal> _errorJournal = new();
     private readonly string _webRootPath = Path.Combine(Path.GetTempPath(), "kikole-tests-" + Guid.NewGuid());
     private readonly AdminController _controller;
 
@@ -84,7 +85,8 @@ public class AdminControllerTests : IDisposable
             _webHostEnvironment.Object,
             _userManager.Object,
             _emailProtector.Object,
-            NullLogger<AdminController>.Instance)
+            NullLogger<AdminController>.Instance,
+            _errorJournal.Object)
         {
             ControllerContext = new ControllerContext { HttpContext = _httpContext }
         };
@@ -708,6 +710,20 @@ public class AdminControllerTests : IDisposable
 
         var model = ((ViewResult)result).Model.Should().BeOfType<PlayerEditModel>().Subject;
         model.Success.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Errors_ShowsTheLatestJournalEntries()
+    {
+        var entries = new List<ErrorJournalEntry>
+        {
+            new(new DateTime(2026, 10, 11, 9, 0, 0), "POST", "/Account/Create", "System.ArgumentException", "boom", "details")
+        };
+        _errorJournal.Setup(_ => _.GetLatest()).Returns(entries);
+
+        var result = _controller.Errors();
+
+        result.Should().BeOfType<ViewResult>().Which.Model.Should().BeSameAs(entries);
     }
 
     // ------------------------------------------------------------- gestion des utilisateurs

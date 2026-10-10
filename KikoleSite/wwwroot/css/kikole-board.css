@@ -2304,3 +2304,10 @@ body { padding-top: 0; }
 .kikole-board .share-feedback { color: var(--accent); font-weight: 600; font-size: 14px; }
 .kikole-board .user-actions button.danger { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--warn); }
 .kikole-board .user-actions button.danger:hover { background: var(--warn); color: var(--accent-ink); }
+
+/* journal des erreurs (Admin/Errors.cshtml) */
+.kikole-board .error-entry { display: grid; gap: 6px; }
+.kikole-board .error-entry-head { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
+.kikole-board .error-entry-type { font-weight: 700; color: var(--warn); word-break: break-word; }
+.kikole-board .error-entry summary { cursor: pointer; color: var(--accent); }
+.kikole-board .error-entry pre { margin: 8px 0 0; padding: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-family: var(--font-mono); font-size: 12px; background: var(--surface-2); border-radius: 8px; }

@@ -116,44 +116,19 @@
   </resheader>
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="ActionAddMessage" xml:space="preserve">
-    <value>Add</value>
+  </resheader>  <data name="BackToActions" xml:space="preserve">
+    <value>Back to administration actions</value>
   </data>
-  <data name="AddGlobalMessage" xml:space="preserve">
-    <value>Make an announcement</value>
+  <data name="ErrorDetails" xml:space="preserve">
+    <value>Details (stack trace)</value>
   </data>
-  <data name="AdminActions" xml:space="preserve">
-    <value>Administrative actions</value>
+  <data name="ErrorsCount" xml:space="preserve">
+    <value>{0} error(s) kept</value>
   </data>
-  <data name="CheckSubmittedPlayers" xml:space="preserve">
-    <value>Check submitted players</value>
+  <data name="ErrorsHelp" xml:space="preserve">
+    <value>The latest unhandled errors of the site, most recent first. They are kept in memory (100 at most) and are lost when the site restarts.</value>
   </data>
-  <data name="ViewDiscussions" xml:space="preserve">
-    <value>View discussions</value>
-  </data>
-  <data name="MessageDateEndLabel" xml:space="preserve">
-    <value>Shown until</value>
-  </data>
-  <data name="MessageDateStartLabel" xml:space="preserve">
-    <value>Shown from</value>
-  </data>
-  <data name="MessageLabel" xml:space="preserve">
-    <value>Message</value>
-  </data>
-  <data name="ReassignPlayers" xml:space="preserve">
-    <value>Reassign players' dates</value>
-  </data>
-  <data name="RecomputeBadges" xml:space="preserve">
-    <value>Recompute badges</value>
-  </data>
-  <data name="RecomputeLeaders" xml:space="preserve">
-    <value>Compute missing leaders</value>
-  </data>
-  <data name="ManageUsers" xml:space="preserve">
-    <value>Manage users</value>
-  </data>
-  <data name="ViewErrors" xml:space="preserve">
-    <value>View the error journal</value>
+  <data name="ErrorsTitle" xml:space="preserve">
+    <value>Error journal</value>
   </data>
 </root>

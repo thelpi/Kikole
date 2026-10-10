@@ -40,6 +40,7 @@ public class AdminController : KikoleBaseController
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailProtector _emailProtector;
     private readonly ILogger<AdminController> _logger;
+    private readonly IErrorJournal _errorJournal;
     private readonly IDiscussionService _discussionService;
     private readonly ILeaderService _leaderService;
     private readonly IMessageRepository _messageRepository;
@@ -59,7 +60,8 @@ public class AdminController : KikoleBaseController
         IWebHostEnvironment webHostEnvironment,
         UserManager<ApplicationUser> userManager,
         IEmailProtector emailProtector,
-        ILogger<AdminController> logger)
+        ILogger<AdminController> logger,
+        IErrorJournal errorJournal)
         : base(userRepository,
             internationalService,
             clock,
@@ -76,6 +78,7 @@ public class AdminController : KikoleBaseController
         _userManager = userManager;
         _emailProtector = emailProtector;
         _logger = logger;
+        _errorJournal = errorJournal;
     }
 
     [HttpGet]
@@ -113,6 +116,13 @@ public class AdminController : KikoleBaseController
             .ReassignPlayersOfTheDayAsync();
 
         return await RenderActionsAsync(new AdminModel());
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public IActionResult Errors()
+    {
+        return View(_errorJournal.GetLatest());
     }
 
     [HttpGet]
