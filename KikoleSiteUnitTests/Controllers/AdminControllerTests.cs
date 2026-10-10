@@ -678,59 +678,168 @@ public class AdminControllerTests : IDisposable
         model.InfoMessage.Should().Be("ClubOk");
     }
 
-    // ------------------------------------------------------------- PlayerEdit
+    // ------------------------------------------------------------- UpcomingPlayers / PlayerEdit
+
+    private static PlayerEditData EditableData(KikoleSite.Models.Dtos.PlayerDto? player = null)
+    {
+        return new PlayerEditData(
+            player ?? PlayerDtoBuilder.Valid()
+                .WithId(7).WithName("Zinédine Zidane").WithAllowedNames("zizou;zidane;zinedine zidane")
+                .WithAlternativeCountryId((ulong)Countries.ESP).WithAlternativePositionId((ulong)Positions.Forward)
+                .WithClues("clue en", "easy en").WithHiddenCreator()
+                .WithPublicationDate(Today.AddDays(3)).Build(),
+            [
+                new KikoleSite.Models.Dtos.PlayerClubDto { PlayerId = 7, ClubId = 8, HistoryPosition = 1, IsLoan = 0 },
+                new KikoleSite.Models.Dtos.PlayerClubDto { PlayerId = 7, ClubId = 9, HistoryPosition = 2, IsLoan = 1 }
+            ],
+            "indice fr",
+            "facile fr");
+    }
+
+    private void SetupEditReferentials()
+    {
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" }, { (ulong)Countries.ESP, "Espagne" } });
+        _internationalService.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new[]
+        {
+            ClubWithName(8, "Juventus"),
+            ClubWithName(9, "Real Madrid")
+        });
+    }
+
+    private static Club ClubWithName(ulong id, string name)
+    {
+        return new Club(
+            ClubDtoBuilder.Valid().WithId(id).Build(),
+            [
+                new KikoleSite.Models.Dtos.ClubTranslationDto { ClubId = id, LanguageId = (ulong)Languages.en, Priority = 0, Name = name },
+                new KikoleSite.Models.Dtos.ClubTranslationDto { ClubId = id, LanguageId = (ulong)Languages.fr, Priority = 0, Name = name }
+            ]);
+    }
 
     [Fact]
-    public async Task PlayerEditGet_PopulatesCluesFromBothLanguages()
+    public async Task UpcomingPlayers_ListsEveryEditablePlayer()
     {
-        _playerService
-            .Setup(_ => _.GetPlayerCluesAsync(7, It.IsAny<IReadOnlyCollection<Languages>>()))
-            .ReturnsAsync(new Dictionary<Languages, (string?, string?)>
-            {
-                { Languages.en, ("clue en", "easy en") },
-                { Languages.fr, ("clue fr", "easy fr") }
-            });
+        _playerService.Setup(_ => _.GetEditablePlayersAsync()).ReturnsAsync(new[]
+        {
+            PlayerDtoBuilder.Valid().WithId(3).WithName("Planifie").WithPublicationDate(Today.AddDays(2)).Build(),
+            PlayerDtoBuilder.Valid().WithId(4).WithName("En attente").Build()
+        });
+
+        var result = await _controller.UpcomingPlayers(saved: true);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<UpcomingPlayersModel>().Subject;
+        model.Saved.Should().BeTrue();
+        model.Players.Should().Equal(
+            new UpcomingPlayerRow(3, "Planifie", Today.AddDays(2)),
+            new UpcomingPlayerRow(4, "En attente", null));
+    }
+
+    [Fact]
+    public async Task PlayerEditGet_OnAPlayerThatIsNoLongerEditable_RedirectsToTheList()
+    {
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync((PlayerEditData?)null);
 
         var result = await _controller.PlayerEdit(playerId: 7);
 
-        var model = ((ViewResult)result).Model.Should().BeOfType<PlayerEditModel>().Subject;
+        result.Should().BeOfType<RedirectToActionResult>().Which.ActionName.Should().Be("UpcomingPlayers");
+    }
+
+    [Fact]
+    public async Task PlayerEditGet_PrefillsTheCreationFormWithTheStoredPlayer()
+    {
+        SetupEditReferentials();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData());
+
+        var result = await _controller.PlayerEdit(playerId: 7);
+
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Index");
+        var model = view.Model.Should().BeOfType<PlayerCreationModel>().Subject;
+        model.PlayerId.Should().Be(7);
+        model.DisplayPlayerSubmissionLink.Should().BeTrue();
+        model.Name.Should().Be("Zinédine Zidane");
+        model.AlternativeName0.Should().Be("zizou");
+        model.AlternativeName1.Should().Be("zidane");
+        model.AlternativeName2.Should().BeNull();
+        model.YearOfBirth.Should().Be("1972");
+        model.Country.Should().Be(((ulong)Countries.FRA).ToString());
+        model.CountryName.Should().Be("France");
+        model.AlternativeCountry.Should().Be(((ulong)Countries.ESP).ToString());
+        model.AlternativeCountryName.Should().Be("Espagne");
+        model.Position.Should().Be(((ulong)Positions.Midfielder).ToString());
+        model.AlternativePosition.Should().Be(((ulong)Positions.Forward).ToString());
         model.ClueEn.Should().Be("clue en");
-        model.ClueFr.Should().Be("clue fr");
+        model.EasyClueEn.Should().Be("easy en");
+        model.ClueFr.Should().Be("indice fr");
+        model.EasyClueFr.Should().Be("facile fr");
+        model.HideCreator.Should().BeTrue();
+        model.Club0Id.Should().Be("8");
+        model.Club0Name.Should().Be("Juventus");
+        model.IsLoan0.Should().BeFalse();
+        model.Club1Id.Should().Be("9");
+        model.Club1Name.Should().Be("Real Madrid");
+        model.IsLoan1.Should().BeTrue();
+        model.Club2Id.Should().BeNull();
     }
 
     [Fact]
-    public async Task PlayerEditPost_MissingClue_DoesNotUpdate()
+    public async Task PlayerEditPost_WithoutPlayerId_RedirectsToTheList()
     {
-        var result = await _controller.PlayerEdit(new PlayerEditModel { PlayerId = 7 });
+        var result = await _controller.PlayerEdit(new PlayerCreationModel());
 
-        var model = ((ViewResult)result).Model.Should().BeOfType<PlayerEditModel>().Subject;
-        model.Success.Should().NotBe(true);
-        _playerService.Verify(_ => _.UpdatePlayerCluesAsync(
-            It.IsAny<ulong>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IReadOnlyDictionary<Languages, string?>>(), It.IsAny<IReadOnlyDictionary<Languages, string?>>()),
-            Times.Never);
+        result.Should().BeOfType<RedirectToActionResult>().Which.ActionName.Should().Be("UpcomingPlayers");
+        _playerService.Verify(_ => _.UpdatePlayerAsync(It.IsAny<ulong>(), It.IsAny<PlayerRequest>()), Times.Never);
     }
 
     [Fact]
-    public async Task PlayerEditPost_ValidSubmission_UpdatesTheClues()
+    public async Task PlayerEditPost_WithAValidationError_KeepsTheEditForm()
     {
-        var result = await _controller.PlayerEdit(new PlayerEditModel
-        {
-            PlayerId = 7,
-            ClueEn = "clue en",
-            ClueFr = "clue fr",
-            EasyClueEn = "easy en",
-            EasyClueFr = "easy fr"
-        });
+        var result = await _controller.PlayerEdit(new PlayerCreationModel { PlayerId = 7 });
 
-        _playerService.Verify(_ => _.UpdatePlayerCluesAsync(7, "clue en", "easy en",
-            It.Is<IReadOnlyDictionary<Languages, string?>>(d => d[Languages.fr] == "clue fr"),
-            It.Is<IReadOnlyDictionary<Languages, string?>>(d => d[Languages.fr] == "easy fr")),
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Index");
+        var model = view.Model.Should().BeOfType<PlayerCreationModel>().Subject;
+        model.ErrorMessage.Should().Be("MandatName");
+        model.PlayerId.Should().Be(7);
+        model.DisplayPlayerSubmissionLink.Should().BeTrue();
+        _playerService.Verify(_ => _.UpdatePlayerAsync(It.IsAny<ulong>(), It.IsAny<PlayerRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task PlayerEditPost_ValidSubmission_UpdatesWithoutTouchingThePublicationDate()
+    {
+        SetupEditReferentials();
+        _playerService.Setup(_ => _.UpdatePlayerAsync(7, It.IsAny<PlayerRequest>())).ReturnsAsync(true);
+        var model = MinimalPlayerCreationModel(Today.AddDays(5).ToString("yyyy-MM-dd"));
+        model.PlayerId = 7;
+        model.Club0Id = "8";
+
+        var result = await _controller.PlayerEdit(model);
+
+        _playerService.Verify(_ => _.UpdatePlayerAsync(7,
+            It.Is<PlayerRequest>(r => r.Name == "Zinédine Zidane" && r.PublicationDate == null && !r.SetLatestPublicationDate)),
             Times.Once);
-
-        var model = ((ViewResult)result).Model.Should().BeOfType<PlayerEditModel>().Subject;
-        model.Success.Should().BeTrue();
+        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirect.ActionName.Should().Be("UpcomingPlayers");
+        redirect.RouteValues!["saved"].Should().Be(true);
     }
 
+    [Fact]
+    public async Task PlayerEditPost_WhenThePlayerIsNoLongerEditable_ShowsAnErrorAndKeepsTheForm()
+    {
+        SetupEditReferentials();
+        _playerService.Setup(_ => _.UpdatePlayerAsync(7, It.IsAny<PlayerRequest>())).ReturnsAsync(false);
+        var model = MinimalPlayerCreationModel();
+        model.PlayerId = 7;
+        model.Club0Id = "8";
+
+        var result = await _controller.PlayerEdit(model);
+
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Index");
+        view.Model.Should().BeOfType<PlayerCreationModel>().Which.ErrorMessage.Should().Be("PlayerNotEditable");
+    }
     [Fact]
     public void Errors_ShowsTheLatestJournalEntries()
     {

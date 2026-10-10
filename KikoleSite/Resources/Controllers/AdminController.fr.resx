@@ -327,4 +327,7 @@
   <data name="UserNotDeletable" xml:space="preserve">
     <value>Suppression impossible : compte introuvable ou administrateur.</value>
   </data>
+  <data name="PlayerNotEditable" xml:space="preserve">
+    <value>Ce kikolé n&apos;est plus modifiable (déjà joué, refusé ou introuvable).</value>
+  </data>
 </root>

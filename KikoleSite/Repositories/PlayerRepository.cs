@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dapper;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -172,6 +173,73 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 "OR @type = 0 " +
                 ")",
                 new { userId, type = (accepted.HasValue ? (accepted.Value ? 1 : 2) : 0) });
+    }
+
+    public async Task<bool> UpdatePlayerAsync(
+        ulong playerId,
+        PlayerDto player,
+        IReadOnlyList<PlayerClubDto> clubs,
+        IReadOnlyDictionary<ulong, string> clues,
+        IReadOnlyDictionary<ulong, string> easyClues)
+    {
+        return await ExecuteInTransactionAsync(async (connection, transaction) =>
+        {
+            // garde atomique : seul un kikole en attente ou programme apres aujourd'hui est modifiable
+            var updated = await connection.ExecuteAsync(
+                "UPDATE players SET name = @Name, allowed_names = @AllowedNames, year_of_birth = @YearOfBirth, " +
+                "country_id = @CountryId, alternative_country_id = @AlternativeCountryId, " +
+                "clue = @Clue, easy_clue = @EasyClue, position_id = @PositionId, " +
+                "alternative_position_id = @AlternativePositionId, hide_creator = @HideCreator " +
+                "WHERE id = @playerId AND reject_date IS NULL " +
+                "AND (publication_date IS NULL OR publication_date > @today)",
+                new
+                {
+                    playerId,
+                    today = Clock.Today,
+                    player.Name,
+                    player.AllowedNames,
+                    player.YearOfBirth,
+                    player.CountryId,
+                    player.AlternativeCountryId,
+                    player.Clue,
+                    player.EasyClue,
+                    player.PositionId,
+                    player.AlternativePositionId,
+                    player.HideCreator
+                },
+                transaction);
+
+            if (updated == 0)
+                return false;
+
+            await connection.ExecuteAsync("DELETE FROM player_clubs WHERE player_id = @playerId", new { playerId }, transaction);
+            foreach (var club in clubs)
+            {
+                await connection.ExecuteAsync(
+                    "INSERT INTO player_clubs (player_id, club_id, history_position, is_loan) " +
+                    "VALUES (@PlayerId, @ClubId, @HistoryPosition, @IsLoan)",
+                    club,
+                    transaction);
+            }
+
+            await connection.ExecuteAsync("DELETE FROM player_clue_translations WHERE player_id = @playerId", new { playerId }, transaction);
+            foreach (var (languageId, clue) in clues)
+            {
+                await connection.ExecuteAsync(
+                    "INSERT INTO player_clue_translations (player_id, language_id, is_easy, clue) VALUES (@playerId, @languageId, 0, @clue)",
+                    new { playerId, languageId, clue },
+                    transaction);
+            }
+            foreach (var (languageId, clue) in easyClues)
+            {
+                await connection.ExecuteAsync(
+                    "INSERT INTO player_clue_translations (player_id, language_id, is_easy, clue) VALUES (@playerId, @languageId, 1, @clue)",
+                    new { playerId, languageId, clue },
+                    transaction);
+            }
+
+            return true;
+        });
     }
 
     public async Task ChangePlayerPublicationDateAsync(ulong playerId, DateOnly date)

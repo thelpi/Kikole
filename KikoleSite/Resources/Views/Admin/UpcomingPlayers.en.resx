@@ -116,47 +116,31 @@
   </resheader>
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="ActionAddMessage" xml:space="preserve">
-    <value>Add</value>
+  </resheader>  <data name="UpcomingTitle" xml:space="preserve">
+    <value>Upcoming kikolés</value>
   </data>
-  <data name="AddGlobalMessage" xml:space="preserve">
-    <value>Make an announcement</value>
+  <data name="UpcomingHelp" xml:space="preserve">
+    <value>Kikolés scheduled after today and pending submissions. A kikolé that has already been played can no longer be edited.</value>
   </data>
-  <data name="AdminActions" xml:space="preserve">
-    <value>Administrative actions</value>
+  <data name="NoPlayers" xml:space="preserve">
+    <value>No upcoming kikolé.</value>
   </data>
-  <data name="CheckSubmittedPlayers" xml:space="preserve">
-    <value>Check submitted players</value>
+  <data name="DateHeader" xml:space="preserve">
+    <value>Publication</value>
   </data>
-  <data name="ViewDiscussions" xml:space="preserve">
-    <value>View discussions</value>
+  <data name="NameHeader" xml:space="preserve">
+    <value>Player</value>
   </data>
-  <data name="MessageDateEndLabel" xml:space="preserve">
-    <value>Shown until</value>
+  <data name="Pending" xml:space="preserve">
+    <value>Pending</value>
   </data>
-  <data name="MessageDateStartLabel" xml:space="preserve">
-    <value>Shown from</value>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
   </data>
-  <data name="MessageLabel" xml:space="preserve">
-    <value>Message</value>
+  <data name="Saved" xml:space="preserve">
+    <value>Changes saved.</value>
   </data>
-  <data name="ReassignPlayers" xml:space="preserve">
-    <value>Reassign players' dates</value>
-  </data>
-  <data name="RecomputeBadges" xml:space="preserve">
-    <value>Recompute badges</value>
-  </data>
-  <data name="RecomputeLeaders" xml:space="preserve">
-    <value>Compute missing leaders</value>
-  </data>
-  <data name="ManageUsers" xml:space="preserve">
-    <value>Manage users</value>
-  </data>
-  <data name="ViewErrors" xml:space="preserve">
-    <value>View the error journal</value>
-  </data>
-  <data name="UpcomingPlayers" xml:space="preserve">
-    <value>Edit upcoming kikolés</value>
+  <data name="BackToActions" xml:space="preserve">
+    <value>Back to actions</value>
   </data>
 </root>

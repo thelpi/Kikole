@@ -686,41 +686,114 @@ public class PlayerServiceTests
         clues.Should().BeEmpty();
     }
 
-    // ------------------------------------------------------------- UpdatePlayerCluesAsync
+    // ------------------------------------------------------------- edition d'un kikole
 
     [Fact]
-    public async Task UpdatePlayerCluesAsync_WritesTheEnglishRowAndTheTranslations()
+    public async Task GetEditablePlayersAsync_ReturnsTheScheduledPlayersByDateThenThePendingOnes()
     {
-        await _service.UpdatePlayerCluesAsync(
-            1,
-            "new clue",
-            "new easy clue",
-            new Dictionary<Languages, string?> { { Languages.fr, "  nouvel indice  " } },
-            new Dictionary<Languages, string?> { { Languages.fr, "nouvel indice facile" } });
+        var later = PlayerDtoBuilder.Valid().WithId(1).WithPublicationDate(FirstDate.AddDays(5)).Build();
+        var sooner = PlayerDtoBuilder.Valid().WithId(2).WithPublicationDate(FirstDate.AddDays(2)).Build();
+        var pending = PlayerDtoBuilder.Valid().WithId(3).Build();
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(1), null))
+            .ReturnsAsync(new[] { later, sooner });
+        _playerRepository.Setup(_ => _.GetPendingValidationPlayersAsync()).ReturnsAsync(new[] { pending });
 
-        _playerRepository.Verify(
-            _ => _.UpdatePlayerCluesAsync(1, "new clue", "new easy clue"), Times.Once);
-        _playerRepository.Verify(
-            _ => _.InsertPlayerCluesByLanguageAsync(1, 0,
-                It.Is<IReadOnlyDictionary<ulong, string>>(d => d[(ulong)Languages.fr] == "nouvel indice")),
-            Times.Once);
-        _playerRepository.Verify(
-            _ => _.InsertPlayerCluesByLanguageAsync(1, 1, It.IsAny<IReadOnlyDictionary<ulong, string>>()),
+        var players = await _service.GetEditablePlayersAsync();
+
+        players.Select(p => p.Id).Should().Equal(2UL, 1UL, 3UL);
+    }
+
+    [Fact]
+    public async Task GetEditablePlayerAsync_ForAScheduledPlayer_ReturnsItWithItsClubsInCareerOrder()
+    {
+        var player = PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate.AddDays(1)).Build();
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7)).ReturnsAsync(player);
+        _playerRepository.Setup(_ => _.GetPlayerClubsAsync(7)).ReturnsAsync(new[]
+        {
+            new PlayerClubDto { PlayerId = 7, ClubId = 2, HistoryPosition = 2 },
+            new PlayerClubDto { PlayerId = 7, ClubId = 1, HistoryPosition = 1 }
+        });
+        _playerRepository.Setup(_ => _.GetClueAsync(7, 0, (ulong)Languages.fr)).ReturnsAsync("indice");
+        _playerRepository.Setup(_ => _.GetClueAsync(7, 1, (ulong)Languages.fr)).ReturnsAsync("facile");
+
+        var data = await _service.GetEditablePlayerAsync(7);
+
+        data.Should().NotBeNull();
+        data!.Player.Should().Be(player);
+        data.Clubs.Select(c => c.ClubId).Should().Equal(1UL, 2UL);
+        data.ClueFr.Should().Be("indice");
+        data.EasyClueFr.Should().Be("facile");
+    }
+
+    [Fact]
+    public async Task GetEditablePlayerAsync_ForAPendingSubmission_IsAllowed()
+    {
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7)).ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).Build());
+        _playerRepository.Setup(_ => _.GetPlayerClubsAsync(7)).ReturnsAsync(new List<PlayerClubDto>());
+
+        (await _service.GetEditablePlayerAsync(7)).Should().NotBeNull();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-3)]
+    public async Task GetEditablePlayerAsync_ForAPlayerPublishedTodayOrBefore_IsRefused(int daysFromToday)
+    {
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate.AddDays(daysFromToday)).Build());
+
+        (await _service.GetEditablePlayerAsync(7)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetEditablePlayerAsync_ForARefusedSubmissionOrAnUnknownPlayer_IsRefused()
+    {
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithRejectDate(new DateTime(2026, 1, 1)).Build());
+
+        (await _service.GetEditablePlayerAsync(7)).Should().BeNull();
+        (await _service.GetEditablePlayerAsync(8)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task UpdatePlayerAsync_KeepsTheCreatorAndThePublicationDateAndTrimsTheTranslations()
+    {
+        var existing = PlayerDtoBuilder.Valid().WithId(7).WithCreator(99).WithPublicationDate(FirstDate.AddDays(4)).Build();
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7)).ReturnsAsync(existing);
+        _playerRepository
+            .Setup(_ => _.UpdatePlayerAsync(7, It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyList<PlayerClubDto>>(),
+                It.IsAny<IReadOnlyDictionary<ulong, string>>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()))
+            .ReturnsAsync(true);
+        var request = Request() with
+        {
+            ClueLanguages = new Dictionary<Languages, string?> { { Languages.fr, "  indice  " } },
+            EasyClueLanguages = new Dictionary<Languages, string?> { { Languages.fr, " " } }
+        };
+
+        var updated = await _service.UpdatePlayerAsync(7, request);
+
+        updated.Should().BeTrue();
+        _playerRepository.Verify(_ => _.UpdatePlayerAsync(
+            7,
+            It.Is<PlayerDto>(d => d.CreationUserId == 99 && d.PublicationDate == FirstDate.AddDays(4) && d.Name == "Zinédine Zidane"),
+            It.Is<IReadOnlyList<PlayerClubDto>>(c => c.Count == 2 && c.All(x => x.PlayerId == 7)),
+            It.Is<IReadOnlyDictionary<ulong, string>>(d => d.Count == 1 && d[(ulong)Languages.fr] == "indice"),
+            It.Is<IReadOnlyDictionary<ulong, string>>(d => d.Count == 0)),
             Times.Once);
     }
 
     [Fact]
-    public async Task UpdatePlayerCluesAsync_WithoutTranslations_OnlyTouchesThePlayerRow()
+    public async Task UpdatePlayerAsync_OnAPlayerPublishedToday_WritesNothing()
     {
-        await _service.UpdatePlayerCluesAsync(1, "clue", "easy clue", null, null);
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate).Build());
 
-        _playerRepository.Verify(_ => _.UpdatePlayerCluesAsync(1, "clue", "easy clue"), Times.Once);
-        _playerRepository.Verify(
-            _ => _.InsertPlayerCluesByLanguageAsync(
-                It.IsAny<ulong>(), It.IsAny<byte>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()),
-            Times.Never);
+        (await _service.UpdatePlayerAsync(7, Request())).Should().BeFalse();
+
+        _playerRepository.Verify(_ => _.UpdatePlayerAsync(
+            It.IsAny<ulong>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyList<PlayerClubDto>>(),
+            It.IsAny<IReadOnlyDictionary<ulong, string>>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()), Times.Never);
     }
-
     // ------------------------------------------------------------- GetPlayerSubmissionsAsync
 
     private void SetupPendingSubmissions(params (ulong playerId, ulong creatorId)[] submissions)

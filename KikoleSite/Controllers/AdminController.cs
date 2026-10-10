@@ -507,34 +507,43 @@ public class AdminController : KikoleBaseController
     [Authorization(UserTypes.PowerUser)]
     public async Task<IActionResult> Index(PlayerCreationModel model)
     {
-        model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
+        var isAdmin = IsTypeOfUser(UserTypes.Administrator);
+        model.DisplayPlayerSubmissionLink = isAdmin;
 
-        if (string.IsNullOrWhiteSpace(model.Name))
+        var (request, error) = await BuildPlayerRequestAsync(model, isAdmin, true);
+        if (request == null)
         {
-            model.ErrorMessage = _localizer["MandatName"];
+            model.ErrorMessage = error;
             SetPositionsOnModel(model);
             return View(model);
+        }
+
+        await _playerService
+            .CreatePlayerAsync(request, UserId);
+        return RedirectToAction("Index", "Admin", new { withOkMessage = true });
+    }
+
+    private async Task<(PlayerRequest? Request, string? Error)> BuildPlayerRequestAsync(
+        PlayerCreationModel model, bool isAdmin, bool withPublicationDate)
+    {
+        if (string.IsNullOrWhiteSpace(model.Name))
+        {
+            return (null, _localizer["MandatName"].Value);
         }
 
         if (model.YearOfBirth == null || !ushort.TryParse(model.YearOfBirth, out var yearValue))
         {
-            model.ErrorMessage = _localizer["InvalidYear"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["InvalidYear"].Value);
         }
 
         if (string.IsNullOrWhiteSpace(model.ClueEn))
         {
-            model.ErrorMessage = _localizer["MandatClue"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["MandatClue"].Value);
         }
 
         if (string.IsNullOrWhiteSpace(model.EasyClueEn))
         {
-            model.ErrorMessage = _localizer["MandatClue"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["MandatClue"].Value);
         }
 
         var countries = await GetCountriesAsync();
@@ -543,9 +552,7 @@ public class AdminController : KikoleBaseController
             || !ulong.TryParse(model.Country, out var countryId)
             || !countries.Any(c => countryId == c.Key))
         {
-            model.ErrorMessage = _localizer["InvalidCountry"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["InvalidCountry"].Value);
         }
 
         // facultatif : uniquement pour un joueur ayant represente une nation sportive
@@ -556,9 +563,7 @@ public class AdminController : KikoleBaseController
             if (!ulong.TryParse(model.AlternativeCountry, out var parsedAlternativeCountryId)
                 || !countries.Any(c => parsedAlternativeCountryId == c.Key))
             {
-                model.ErrorMessage = _localizer["InvalidCountry"];
-                SetPositionsOnModel(model);
-                return View(model);
+                return (null, _localizer["InvalidCountry"].Value);
             }
             alternativeCountryId = parsedAlternativeCountryId;
         }
@@ -567,9 +572,7 @@ public class AdminController : KikoleBaseController
             || !ulong.TryParse(model.Position, out var positionId)
             || !GetPositions().Any(p => p.Key == positionId))
         {
-            model.ErrorMessage = _localizer["InvalidPosition"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["InvalidPosition"].Value);
         }
 
         // facultatif : uniquement si le joueur occupe plausiblement deux postes differents
@@ -580,9 +583,7 @@ public class AdminController : KikoleBaseController
             if (!ulong.TryParse(model.AlternativePosition, out var parsedAlternativePositionId)
                 || !GetPositions().Any(p => p.Key == parsedAlternativePositionId))
             {
-                model.ErrorMessage = _localizer["InvalidPosition"];
-                SetPositionsOnModel(model);
-                return View(model);
+                return (null, _localizer["InvalidPosition"].Value);
             }
             alternativePositionId = parsedAlternativePositionId;
         }
@@ -624,27 +625,21 @@ public class AdminController : KikoleBaseController
 
         if (clubs.Count == 0)
         {
-            model.ErrorMessage = _localizer["OneClubMin"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["OneClubMin"].Value);
         }
-
-        var isAdmin = IsTypeOfUser(UserTypes.Administrator);
 
         // reserve aux administrateurs : force la date de publication au lieu du "bout de
         // chaine" habituel ; un PowerUser n'a de toute facon pas ce champ dans son
         // formulaire, mais on l'ignore explicitement aussi cote serveur par securite
         DateOnly? forcedPublicationDate = null;
-        if (isAdmin && !TryParseForcedPublicationDate(model.PublicationDate, out forcedPublicationDate))
+        if (isAdmin && withPublicationDate && !TryParseForcedPublicationDate(model.PublicationDate, out forcedPublicationDate))
         {
-            model.ErrorMessage = _localizer["InvalidPublicationDate"];
-            SetPositionsOnModel(model);
-            return View(model);
+            return (null, _localizer["InvalidPublicationDate"].Value);
         }
 
         var req = new PlayerRequest
         {
-            SetLatestPublicationDate = isAdmin,
+            SetLatestPublicationDate = isAdmin && withPublicationDate,
             PublicationDate = forcedPublicationDate,
             AllowedNames = names,
             Clubs = clubs,
@@ -668,20 +663,10 @@ public class AdminController : KikoleBaseController
         };
 
         var validityRequest = req.IsValid(_clock.Today, _localizer);
-        if (!string.IsNullOrWhiteSpace(validityRequest))
-        {
-            model.ErrorMessage = string.Format(_localizer["InvalidRequest"], validityRequest);
-            SetPositionsOnModel(model);
-            return View(model);
-        }
-        else
-        {
-            await _playerService
-                .CreatePlayerAsync(req, UserId);
-            return RedirectToAction("Index", "Admin", new { withOkMessage = true });
-        }
+        return string.IsNullOrWhiteSpace(validityRequest)
+            ? (req, null)
+            : (null, string.Format(_localizer["InvalidRequest"], validityRequest));
     }
-
     // upload d'un media d'indice (image/audio/video), utilise par le formulaire de
     // creation (Index) et d'edition (PlayerEdit) : le fichier est stocke dans wwwroot,
     // le chemin renvoye remplace la valeur du champ texte correspondant (site.js)
@@ -814,51 +799,108 @@ public class AdminController : KikoleBaseController
 
     [HttpGet]
     [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> UpcomingPlayers(bool saved)
+    {
+        var players = await _playerService.GetEditablePlayersAsync();
+
+        return View(new UpcomingPlayersModel
+        {
+            Saved = saved,
+            Players = players
+                .Select(p => new UpcomingPlayerRow(p.Id, p.Name, p.PublicationDate))
+                .ToList()
+        });
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
     public async Task<IActionResult> PlayerEdit(ulong playerId)
     {
-        var clues = await _playerService
-            .GetPlayerCluesAsync(playerId, new List<Languages> { Languages.en, Languages.fr });
+        var data = await _playerService.GetEditablePlayerAsync(playerId);
+        if (data == null)
+            return RedirectToAction("UpcomingPlayers");
 
-        var model = new PlayerEditModel
-        {
-            PlayerId = playerId,
-            ClueEn = clues[Languages.en].clue,
-            ClueFr = clues[Languages.fr].clue,
-            EasyClueEn = clues[Languages.en].easyclue,
-            EasyClueFr = clues[Languages.fr].easyclue
-        };
-
-        return View("PlayerEdit", model);
+        var model = await BuildEditModelAsync(data);
+        SetPositionsOnModel(model);
+        return View("Index", model);
     }
 
     [HttpPost]
     [Authorization(UserTypes.Administrator)]
-    public async Task<IActionResult> PlayerEdit(PlayerEditModel model)
+    public async Task<IActionResult> PlayerEdit(PlayerCreationModel model)
     {
-        if (string.IsNullOrWhiteSpace(model.ClueEn)
-            || string.IsNullOrWhiteSpace(model.ClueFr)
-            || string.IsNullOrWhiteSpace(model.EasyClueEn)
-            || string.IsNullOrWhiteSpace(model.EasyClueFr)
-            || model.PlayerId == 0)
+        if (!model.PlayerId.HasValue)
+            return RedirectToAction("UpcomingPlayers");
+
+        model.DisplayPlayerSubmissionLink = true;
+
+        var (request, error) = await BuildPlayerRequestAsync(model, true, false);
+        if (request != null)
         {
-            model.Message = "Données de formulaire invalides";
-            return View("PlayerEdit", model);
+            if (await _playerService.UpdatePlayerAsync(model.PlayerId.Value, request))
+                return RedirectToAction("UpcomingPlayers", new { saved = true });
+
+            error = _localizer["PlayerNotEditable"].Value;
         }
 
-        await _playerService
-            .UpdatePlayerCluesAsync(
-                model.PlayerId,
-                model.ClueEn,
-                model.EasyClueEn,
-                new Dictionary<Languages, string?> { { Languages.fr, model.ClueFr } },
-                new Dictionary<Languages, string?> { { Languages.fr, model.EasyClueFr } });
-
-        model.Success = true;
-        model.Message = null;
-
-        return View("PlayerEdit", model);
+        model.ErrorMessage = error;
+        SetPositionsOnModel(model);
+        return View("Index", model);
     }
 
+    private async Task<PlayerCreationModel> BuildEditModelAsync(PlayerEditData data)
+    {
+        var player = data.Player;
+        var countries = await GetCountriesAsync();
+        var clubsReferential = await GetClubsAsync();
+        var language = ViewHelper.GetLanguage();
+
+        var model = new PlayerCreationModel
+        {
+            PlayerId = player.Id,
+            DisplayPlayerSubmissionLink = true,
+            Name = player.Name,
+            YearOfBirth = player.YearOfBirth.ToString(),
+            Country = player.CountryId.ToString(),
+            CountryName = countries.GetValueOrDefault(player.CountryId),
+            AlternativeCountry = player.AlternativeCountryId?.ToString(),
+            AlternativeCountryName = player.AlternativeCountryId.HasValue ? countries.GetValueOrDefault(player.AlternativeCountryId.Value) : null,
+            Position = player.PositionId.ToString(),
+            AlternativePosition = player.AlternativePositionId?.ToString(),
+            ClueEn = player.Clue,
+            EasyClueEn = player.EasyClue,
+            ClueFr = data.ClueFr,
+            EasyClueFr = data.EasyClueFr,
+            HideCreator = player.HideCreator == 1
+        };
+
+        // les noms acceptes sont stockes normalises : on ne retrouve que cette forme
+        var sanitizedName = player.Name.Sanitize();
+        var alternativeNames = player.AllowedNames.Disjoin()
+            .Where(n => n.Length > 0 && n != sanitizedName)
+            .Take(10)
+            .ToList();
+        for (var i = 0; i < alternativeNames.Count; i++)
+            SetIndexedProperty(model, "AlternativeName", i, string.Empty, alternativeNames[i]);
+
+        for (var i = 0; i < data.Clubs.Count && i < 15; i++)
+        {
+            var playerClub = data.Clubs[i];
+            var club = clubsReferential.FirstOrDefault(c => c.Id == playerClub.ClubId);
+            SetIndexedProperty(model, "Club", i, "Id", playerClub.ClubId.ToString());
+            SetIndexedProperty(model, "Club", i, "Name", club?.GetCanonicalName(language));
+            SetIndexedProperty(model, "IsLoan", i, string.Empty, playerClub.IsLoan == 1);
+        }
+
+        return model;
+    }
+
+    private static void SetIndexedProperty(PlayerCreationModel model, string prefix, int index, string suffix, object? value)
+    {
+        typeof(PlayerCreationModel)
+            .GetProperty($"{prefix}{index}{suffix}")!
+            .SetValue(model, value);
+    }
     private async Task<List<PlayerSubmissionModel>> GetPlayerSubmissionsList()
     {
         // countries/continents sont independants de pls (et l'un de l'autre) : partent

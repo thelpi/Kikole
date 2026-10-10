@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models;
@@ -79,17 +79,19 @@ public interface IPlayerService
     Task ReassignPlayersOfTheDayAsync();
 
     /// <summary>
-    /// Updates all clues in every langugage for a player.
+    /// Kikoles qu'un administrateur peut encore corriger : programmes apres aujourd'hui,
+    /// par date croissante, puis les soumissions en attente.
     /// </summary>
-    /// <param name="playerId">Player identifier.</param>
-    /// <param name="clue">Standard clue, in english.</param>
-    /// <param name="easyClue">Easy clue, in english.</param>
-    /// <param name="clueLanguages">Standard clue, in another languages.</param>
-    /// <param name="easyClueLanguages">Easy clue, in another languages.</param>
-    /// <returns>Nothing.</returns>
-    Task UpdatePlayerCluesAsync(ulong playerId, string clue, string easyClue,
-        IReadOnlyDictionary<Languages, string?>? clueLanguages,
-        IReadOnlyDictionary<Languages, string?>? easyClueLanguages);
+    Task<IReadOnlyList<PlayerDto>> GetEditablePlayersAsync();
+
+    /// <summary>Fiche complete d'un kikole modifiable ; <c>null</c> s'il est introuvable ou n'est plus modifiable.</summary>
+    Task<PlayerEditData?> GetEditablePlayerAsync(ulong playerId);
+
+    /// <summary>
+    /// Remplace la fiche (hors date de publication et createur) d'un kikole modifiable.
+    /// </summary>
+    /// <returns><c>False</c> si le kikole est introuvable ou n'est plus modifiable.</returns>
+    Task<bool> UpdatePlayerAsync(ulong playerId, PlayerRequest request);
 
     /// <summary>
     /// Ges both clues in every language specified for of a player.

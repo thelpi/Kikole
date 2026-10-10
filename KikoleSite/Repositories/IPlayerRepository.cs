@@ -38,4 +38,11 @@ public interface IPlayerRepository
     Task<string?> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
 
     Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
+
+    Task<bool> UpdatePlayerAsync(
+        ulong playerId,
+        PlayerDto player,
+        IReadOnlyList<PlayerClubDto> clubs,
+        IReadOnlyDictionary<ulong, string> clues,
+        IReadOnlyDictionary<ulong, string> easyClues);
 }

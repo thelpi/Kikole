@@ -214,4 +214,13 @@
     <value>&lt;p&gt;If your kikolé is accepted by the moderator, it'll be scheduled for the next available day.&lt;/p&gt;
 &lt;p&gt;On this day, you won't be able to play but you'll win &lt;strong class="greentext"&gt;{0} points&lt;/strong&gt;.&lt;/p&gt;</value>
   </data>
+  <data name="EditPlayerTitle" xml:space="preserve">
+    <value>Edit a kikolé</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="BackToUpcomingPlayers" xml:space="preserve">
+    <value>Back to upcoming kikolés</value>
+  </data>
 </root>

@@ -327,4 +327,7 @@
   <data name="UserNotDeletable" xml:space="preserve">
     <value>Deletion impossible: account not found or administrator.</value>
   </data>
+  <data name="PlayerNotEditable" xml:space="preserve">
+    <value>This kikolé can no longer be edited (already played, refused or not found).</value>
+  </data>
 </root>

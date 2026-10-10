@@ -12,8 +12,16 @@
     }
 
     <div class="form-card">
-        <h3>@localizer["SubmitPlayerTitle"]</h3>
-        <form method="post" action="/Admin">
+        <h3>@localizer[Model.PlayerId.HasValue ? "EditPlayerTitle" : "SubmitPlayerTitle"]</h3>
+        @if (Model.PlayerId.HasValue)
+        {
+            <div class="small-link"><a asp-controller="Admin" asp-action="UpcomingPlayers">@localizer["BackToUpcomingPlayers"]</a></div>
+        }
+        <form method="post" action="@(Model.PlayerId.HasValue ? "/Admin/PlayerEdit" : "/Admin")">
+            @if (Model.PlayerId.HasValue)
+            {
+                <input type="hidden" name="PlayerId" value="@Model.PlayerId" />
+            }
             <div class="form-field">
                 <label>@localizer["Name"]</label>
                 <input type="text" name="Name" class="blank" value="@Model.Name" />
@@ -21,8 +29,8 @@
 
             <div class="form-field">
                 <label>@localizer["AlternativeNames"]</label>
-                @{ var altNames = new[] { Model.AlternativeName0, Model.AlternativeName1, Model.AlternativeName2, Model.AlternativeName3, Model.AlternativeName4 }; }
-                @for (var i = 0; i < 5; i++)
+                @{ var altNames = new[] { Model.AlternativeName0, Model.AlternativeName1, Model.AlternativeName2, Model.AlternativeName3, Model.AlternativeName4, Model.AlternativeName5, Model.AlternativeName6, Model.AlternativeName7, Model.AlternativeName8, Model.AlternativeName9 }; }
+                @for (var i = 0; i < Math.Max(5, Array.FindLastIndex(altNames, n => !string.IsNullOrWhiteSpace(n)) + 1); i++)
                 {
                     var name = $"AlternativeName{i}";
                     <input type="text" name="@name" class="blank" style="margin-bottom:6px" value="@altNames[i]" />
@@ -73,11 +81,14 @@
                     <input type="text" name="EasyClueFr" class="blank clue-field" value="@Model.EasyClueFr" />
                 </div>
 
-                <div class="form-field">
-                    <label>@localizer["ForcePublicationDate"]</label>
-                    <input type="date" name="PublicationDate" class="blank" value="@Model.PublicationDate" />
-                    <div class="form-hint">@localizer["ForcePublicationDateHint"]</div>
-                </div>
+                @if (!Model.PlayerId.HasValue)
+                {
+                    <div class="form-field">
+                        <label>@localizer["ForcePublicationDate"]</label>
+                        <input type="date" name="PublicationDate" class="blank" value="@Model.PublicationDate" />
+                        <div class="form-hint">@localizer["ForcePublicationDateHint"]</div>
+                    </div>
+                }
             }
             else
             {
@@ -143,10 +154,13 @@
             </div>
 
             <div class="actions">
-                <button type="submit" name="submit-club">@localizer["SubmitPlayerGo"]</button>
+                <button type="submit" name="submit-club">@localizer[Model.PlayerId.HasValue ? "SaveChanges" : "SubmitPlayerGo"]</button>
             </div>
 
-            <p class="form-hint" style="margin-top:14px">@Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ScoreCalculator.SubmissionPoints))</p>
+            @if (!Model.PlayerId.HasValue)
+            {
+                <p class="form-hint" style="margin-top:14px">@Html.Raw(string.Format(localizer["NewChartLaius"].Value, KikoleSite.Models.ScoreCalculator.SubmissionPoints))</p>
+            }
         </form>
     </div>
 </div>

@@ -1,0 +1,45 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model UpcomingPlayersModel
+
+<div class="kikole-board">
+    @if (Model.Saved)
+    {
+        <div class="banner success">@localizer["Saved"]</div>
+    }
+
+    <div class="form-card">
+        <h3>@localizer["UpcomingTitle"]</h3>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Actions">@localizer["BackToActions"]</a></div>
+        <p>@localizer["UpcomingHelp"]</p>
+
+        @if (Model.Players.Count == 0)
+        {
+            <p>@localizer["NoPlayers"]</p>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table id="upcomingPlayersTable">
+                    <thead>
+                        <tr>
+                            <th class="tabDataHead">@localizer["DateHeader"]</th>
+                            <th class="tabDataHead redtext">@localizer["NameHeader"]</th>
+                            <th class="tabDataHead"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var i = 0; }
+                        @foreach (var player in Model.Players)
+                        {
+                            <tr class="@(i++ % 2 == 0 ? "even" : "odd")">
+                                <td class="tabData">@(player.PublicationDate?.ToString("yyyy-MM-dd") ?? localizer["Pending"].Value)</td>
+                                <td class="tabData redtext">@player.Name</td>
+                                <td class="tabData"><a asp-controller="Admin" asp-action="PlayerEdit" asp-route-playerId="@player.Id">@localizer["Edit"]</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

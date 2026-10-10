@@ -156,4 +156,7 @@
   <data name="ViewErrors" xml:space="preserve">
     <value>Voir le journal des erreurs</value>
   </data>
+  <data name="UpcomingPlayers" xml:space="preserve">
+    <value>Modifier les kikolés à venir</value>
+  </data>
 </root>

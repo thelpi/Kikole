@@ -5,6 +5,9 @@ namespace KikoleSite.ViewModels;
 
 public class PlayerCreationModel
 {
+    /// <summary>Renseigne en edition d'une fiche existante ; <c>null</c> a la creation.</summary>
+    public ulong? PlayerId { get; set; }
+
     public string? ErrorMessage { get; set; }
 
     public string? InfoMessage { get; set; }

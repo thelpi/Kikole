@@ -74,14 +74,57 @@ public class PlayerService : IPlayerService
     }
 
     /// <inheritdoc />
-    public async Task UpdatePlayerCluesAsync(ulong playerId,
-        string clue,
-        string easyClue,
-        IReadOnlyDictionary<Languages, string?>? clueLanguages,
-        IReadOnlyDictionary<Languages, string?>? easyClueLanguages)
+    public async Task<IReadOnlyList<PlayerDto>> GetEditablePlayersAsync()
     {
-        await UpdateCluesInternalAsync(
-                playerId, clue, easyClue, clueLanguages, easyClueLanguages);
+        var scheduled = await _playerRepository
+            .GetPlayersOfTheDayAsync(_clock.Tomorrow, null);
+
+        var pending = await _playerRepository
+            .GetPendingValidationPlayersAsync();
+
+        return scheduled
+            .OrderBy(p => p.PublicationDate)
+            .Concat(pending.OrderBy(p => p.CreationDate))
+            .ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<PlayerEditData?> GetEditablePlayerAsync(ulong playerId)
+    {
+        var player = await _playerRepository
+            .GetPlayerByIdAsync(playerId);
+
+        if (player == null || !IsEditable(player))
+            return null;
+
+        var clubs = await _playerRepository
+            .GetPlayerClubsAsync(playerId);
+
+        var clueFr = await _playerRepository
+            .GetClueAsync(playerId, 0, (ulong)Languages.fr);
+
+        var easyClueFr = await _playerRepository
+            .GetClueAsync(playerId, 1, (ulong)Languages.fr);
+
+        return new PlayerEditData(player, clubs.OrderBy(c => c.HistoryPosition).ToList(), clueFr, easyClueFr);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> UpdatePlayerAsync(ulong playerId, PlayerRequest request)
+    {
+        var existing = await _playerRepository
+            .GetPlayerByIdAsync(playerId);
+
+        if (existing == null || !IsEditable(existing))
+            return false;
+
+        return await _playerRepository
+            .UpdatePlayerAsync(
+                playerId,
+                request.ToDto(existing.CreationUserId, existing.PublicationDate),
+                request.ToPlayerClubDtos(playerId),
+                ToTranslations(request.ClueLanguages),
+                ToTranslations(request.EasyClueLanguages));
     }
 
     /// <inheritdoc />
@@ -329,6 +372,21 @@ public class PlayerService : IPlayerService
         var createdCount = createdPlayers.Count(_ => _.PublicationDate <= _clock.Today);
 
         return leaders.Count + createdCount == countToFind;
+    }
+
+    // en attente de validation, ou programme apres aujourd'hui : personne n'a encore joue ce kikole
+    private bool IsEditable(PlayerDto player)
+    {
+        return !player.RejectDate.HasValue
+            && (!player.PublicationDate.HasValue || player.PublicationDate.Value > _clock.Today);
+    }
+
+    private static Dictionary<ulong, string> ToTranslations(IReadOnlyDictionary<Languages, string?>? clues)
+    {
+        return clues?
+            .Where(_ => !string.IsNullOrWhiteSpace(_.Value))
+            .ToDictionary(_ => (ulong)_.Key, _ => _.Value!.Trim())
+            ?? [];
     }
 
     private async Task<DateOnly> GetNextDateAsync()
