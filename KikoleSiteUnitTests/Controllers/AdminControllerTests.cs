@@ -386,6 +386,25 @@ public class AdminControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task PlayerCreationPost_AsAdministratorWithAValidationError_KeepsTheAdministratorForm()
+    {
+        var result = await _controller.Index(new PlayerCreationModel());
+
+        ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Which.DisplayPlayerSubmissionLink.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_AsPowerUserWithAValidationError_KeepsThePowerUserForm()
+    {
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.PowerUser).ToString()) };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+
+        var result = await _controller.Index(new PlayerCreationModel());
+
+        ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Which.DisplayPlayerSubmissionLink.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task PlayerCreationPost_ValidMinimalSubmission_CreatesThePlayer()
     {
         _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))

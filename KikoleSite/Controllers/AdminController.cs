@@ -507,6 +507,8 @@ public class AdminController : KikoleBaseController
     [Authorization(UserTypes.PowerUser)]
     public async Task<IActionResult> Index(PlayerCreationModel model)
     {
+        model.DisplayPlayerSubmissionLink = IsTypeOfUser(UserTypes.Administrator);
+
         if (string.IsNullOrWhiteSpace(model.Name))
         {
             model.ErrorMessage = _localizer["MandatName"];
