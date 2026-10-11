@@ -1,5 +1,20 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@using KikoleSite.Helpers
 @model PlayerCreationModel
+
+@{
+    var mediaClues = Model.PlayerId.HasValue
+        ? new[]
+        {
+            (Label: localizer["ClueEn"].Value, Value: Model.ClueEn),
+            (Label: localizer["ClueFr"].Value, Value: Model.ClueFr),
+            (Label: localizer["EasyClueEn"].Value, Value: Model.EasyClueEn),
+            (Label: localizer["EasyClueFr"].Value, Value: Model.EasyClueFr)
+        }
+            .Where(c => c.Value.IsImageUrl() || c.Value.IsAudioUrl() || c.Value.IsVideoUrl())
+            .ToList()
+        : [];
+}
 
 <div class="kikole-board">
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
@@ -9,6 +24,31 @@
     else if (!string.IsNullOrWhiteSpace(Model.InfoMessage))
     {
         <div class="banner success">@Model.InfoMessage</div>
+    }
+
+    @if (mediaClues.Count > 0)
+    {
+        <div class="form-card">
+            <h3>@localizer["CluesPreview"]</h3>
+            @foreach (var clue in mediaClues)
+            {
+                <div class="clue">
+                    <span class="tag">@clue.Label</span>
+                    @if (clue.Value.IsImageUrl())
+                    {
+                        <img class="clue-image" src="@clue.Value" alt="@clue.Label" />
+                    }
+                    else if (clue.Value.IsAudioUrl())
+                    {
+                        <audio class="clue-audio" controls src="@clue.Value"></audio>
+                    }
+                    else
+                    {
+                        <video class="clue-video" controls src="@clue.Value"></video>
+                    }
+                </div>
+            }
+        </div>
     }
 
     <div class="form-card">

@@ -37,11 +37,11 @@
             <div class="form-row">
                 <div class="form-field">
                     <label>@localizer["MessageDateStartLabel"]</label>
-                    @Html.EditorFor(m => m.MessageDateStart)
+                    @Html.TextBoxFor(m => m.MessageDateStart, "{0:yyyy-MM-ddTHH:mm:ss}", new { type = "datetime-local", step = "1" })
                 </div>
                 <div class="form-field">
                     <label>@localizer["MessageDateEndLabel"]</label>
-                    @Html.EditorFor(m => m.MessageDateEnd)
+                    @Html.TextBoxFor(m => m.MessageDateEnd, "{0:yyyy-MM-ddTHH:mm:ss}", new { type = "datetime-local", step = "1" })
                 </div>
             </div>
             <div class="actions">

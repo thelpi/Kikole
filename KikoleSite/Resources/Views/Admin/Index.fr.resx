@@ -223,4 +223,7 @@
   <data name="BackToUpcomingPlayers" xml:space="preserve">
     <value>Retour aux kikolés à venir</value>
   </data>
+  <data name="CluesPreview" xml:space="preserve">
+    <value>Prévisualisation des indices</value>
+  </data>
 </root>
