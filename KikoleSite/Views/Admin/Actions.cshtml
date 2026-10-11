@@ -12,6 +12,7 @@
         <div class="small-link"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
         <div class="small-link"><a asp-controller="Admin" asp-action="Discussions">@localizer["ViewDiscussions"]</a></div>
         <div class="small-link"><a asp-controller="Admin" asp-action="UpcomingPlayers">@localizer["UpcomingPlayers"]</a></div>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Announcements">@localizer["ManageAnnouncements"]</a></div>
         <div class="small-link"><a asp-controller="Admin" asp-action="Users">@localizer["ManageUsers"]</a></div>
         <div class="small-link"><a asp-controller="Admin" asp-action="Errors">@localizer["ViewErrors"]</a></div>
         <div class="actions" style="margin-top:14px">
@@ -25,28 +26,5 @@
                 <button type="submit">@localizer["ReassignPlayers"]</button>
             </form>
         </div>
-    </div>
-
-    <div class="form-card">
-        <h3>@localizer["AddGlobalMessage"]</h3>
-        <form method="post" action="/Admin/InsertMessage">
-            <div class="form-field">
-                <label>@localizer["MessageLabel"]</label>
-                @Html.TextBoxFor(m => m.Message, new { @class = "blank" })
-            </div>
-            <div class="form-row">
-                <div class="form-field">
-                    <label>@localizer["MessageDateStartLabel"]</label>
-                    @Html.TextBoxFor(m => m.MessageDateStart, "{0:yyyy-MM-ddTHH:mm:ss}", new { type = "datetime-local", step = "1" })
-                </div>
-                <div class="form-field">
-                    <label>@localizer["MessageDateEndLabel"]</label>
-                    @Html.TextBoxFor(m => m.MessageDateEnd, "{0:yyyy-MM-ddTHH:mm:ss}", new { type = "datetime-local", step = "1" })
-                </div>
-            </div>
-            <div class="actions">
-                <button type="submit">@localizer["ActionAddMessage"]</button>
-            </div>
-        </form>
     </div>
 </div>

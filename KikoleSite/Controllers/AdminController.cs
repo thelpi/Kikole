@@ -221,34 +221,117 @@ public class AdminController : KikoleBaseController
         return await RenderUsersAsync(request, _localizer["UserDeleted", target.Login], null);
     }
 
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Announcements(string? done)
+    {
+        var now = _clock.Now;
+        var messages = await _messageRepository.GetMessagesAsync();
+        var displayed = await _messageRepository.GetMessageAsync(now);
+
+        return View(new AnnouncementsModel
+        {
+            Feedback = done switch
+            {
+                "saved" => _localizer["AnnouncementSaved"].Value,
+                "deleted" => _localizer["AnnouncementDeleted"].Value,
+                _ => null
+            },
+            Rows = messages
+                .Select(m => new AnnouncementRow(m.Id, m.Message, m.DisplayFrom, m.DisplayTo, GetAnnouncementStatus(m, now, displayed?.Id)))
+                .ToList()
+        });
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Announcement(ulong id)
+    {
+        if (id == 0)
+        {
+            // default : from now without ms to tomorrow 23:59:59
+            return View(new AnnouncementModel { DisplayFrom = _clock.NowSeconds, DisplayTo = _clock.TomorrowEnd });
+        }
+
+        var message = await _messageRepository.GetMessageByIdAsync(id);
+        if (message == null)
+            return RedirectToAction("Announcements");
+
+        return View(new AnnouncementModel
+        {
+            Id = message.Id,
+            Message = message.Message,
+            DisplayFrom = message.DisplayFrom,
+            DisplayTo = message.DisplayTo
+        });
+    }
+
     [HttpPost]
     [Authorization(UserTypes.Administrator)]
-    public async Task<IActionResult> InsertMessage(AdminModel model)
+    public async Task<IActionResult> Announcement(AnnouncementModel model)
     {
-        await _messageRepository
-            .InsertMessageAsync(new Models.Dtos.MessageDto
-            {
-                DisplayTo = model.MessageDateEnd,
-                DisplayFrom = model.MessageDateStart,
-                CreationDate = _clock.Now,
-                Message = model.Message ?? string.Empty
-            });
+        if (string.IsNullOrWhiteSpace(model.Message))
+        {
+            model.ErrorMessage = _localizer["AnnouncementMessageMandatory"];
+            return View(model);
+        }
 
-        return await RenderActionsAsync(new AdminModel { ActionFeedback = "Annonce créée" });
+        if (model.DisplayFrom.HasValue && model.DisplayTo.HasValue && model.DisplayTo <= model.DisplayFrom)
+        {
+            model.ErrorMessage = _localizer["AnnouncementDatesInvalid"];
+            return View(model);
+        }
+
+        var message = new Models.Dtos.MessageDto
+        {
+            Id = model.Id,
+            Message = model.Message.Trim(),
+            DisplayFrom = model.DisplayFrom,
+            DisplayTo = model.DisplayTo,
+            CreationDate = _clock.Now
+        };
+
+        if (model.Id == 0)
+        {
+            await _messageRepository.InsertMessageAsync(message);
+        }
+        else
+        {
+            if (await _messageRepository.GetMessageByIdAsync(model.Id) == null)
+                return RedirectToAction("Announcements");
+
+            await _messageRepository.UpdateMessageAsync(message);
+        }
+
+        return RedirectToAction("Announcements", new { done = "saved" });
     }
 
-    /// <summary>
-    /// Rend la vue Actions avec ses valeurs par defaut (dates du formulaire de message) :
-    /// appele par le GET et par chacune des actions POST ci-dessus.
-    /// </summary>
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> DeleteAnnouncement(ulong id)
+    {
+        await _messageRepository.DeleteMessageAsync(id);
+
+        return RedirectToAction("Announcements", new { done = "deleted" });
+    }
+
+    // meme regle de selection que MessageRepository.GetMessageAsync : parmi les annonces
+    // actives, une seule est affichee (celle que la requete retient)
+    internal static AnnouncementStatus GetAnnouncementStatus(Models.Dtos.MessageDto message, DateTime now, ulong? displayedId)
+    {
+        if (message.DisplayFrom > now)
+            return AnnouncementStatus.Scheduled;
+
+        if (message.DisplayTo <= now)
+            return AnnouncementStatus.Expired;
+
+        return message.Id == displayedId ? AnnouncementStatus.Displayed : AnnouncementStatus.Superseded;
+    }
+
     private Task<IActionResult> RenderActionsAsync(AdminModel model)
     {
-        // default : from now without ms to tomorrow 23:59:59
-        model.MessageDateStart = _clock.NowSeconds;
-        model.MessageDateEnd = _clock.TomorrowEnd;
         return Task.FromResult<IActionResult>(View("Actions", model));
     }
-
     // un compte actif et non administrateur : seuls ceux-la se gerent depuis la page des utilisateurs
     private async Task<Models.Dtos.UserDto?> GetManageableUserAsync(ulong userId)
     {

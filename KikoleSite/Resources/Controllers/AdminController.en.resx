@@ -330,4 +330,16 @@
   <data name="PlayerNotEditable" xml:space="preserve">
     <value>This kikolé can no longer be edited (already played, refused or not found).</value>
   </data>
+  <data name="AnnouncementSaved" xml:space="preserve">
+    <value>Announcement saved.</value>
+  </data>
+  <data name="AnnouncementDeleted" xml:space="preserve">
+    <value>Announcement deleted.</value>
+  </data>
+  <data name="AnnouncementMessageMandatory" xml:space="preserve">
+    <value>The message is required.</value>
+  </data>
+  <data name="AnnouncementDatesInvalid" xml:space="preserve">
+    <value>The end date must be after the start date.</value>
+  </data>
 </root>

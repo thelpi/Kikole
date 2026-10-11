@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ActionAddMessage" xml:space="preserve">
-    <value>Ajouter</value>
-  </data>
-  <data name="AddGlobalMessage" xml:space="preserve">
-    <value>Faire une annonce</value>
-  </data>
   <data name="AdminActions" xml:space="preserve">
     <value>Actions d'administration</value>
   </data>
@@ -131,15 +125,6 @@
   </data>
   <data name="ViewDiscussions" xml:space="preserve">
     <value>Voir les discussions</value>
-  </data>
-  <data name="MessageDateEndLabel" xml:space="preserve">
-    <value>Affiché jusqu'au</value>
-  </data>
-  <data name="MessageDateStartLabel" xml:space="preserve">
-    <value>Affiché à partir du</value>
-  </data>
-  <data name="MessageLabel" xml:space="preserve">
-    <value>Message</value>
   </data>
   <data name="ReassignPlayers" xml:space="preserve">
     <value>Réassigner la date des joueurs</value>
@@ -158,5 +143,8 @@
   </data>
   <data name="UpcomingPlayers" xml:space="preserve">
     <value>Modifier les kikolés à venir</value>
+  </data>
+  <data name="ManageAnnouncements" xml:space="preserve">
+    <value>Gérer les annonces</value>
   </data>
 </root>

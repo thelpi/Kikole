@@ -1,0 +1,58 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model AnnouncementsModel
+
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+    {
+        <div class="banner success">@Model.Feedback</div>
+    }
+
+    <div class="form-card">
+        <h3>@localizer["AnnouncementsTitle"]</h3>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Actions">@localizer["BackToActions"]</a></div>
+        <p>@localizer["AnnouncementsHelp"]</p>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Announcement" asp-route-id="0">@localizer["NewAnnouncement"]</a></div>
+
+        @if (Model.Rows.Count == 0)
+        {
+            <p>@localizer["NoAnnouncements"]</p>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table id="announcementsTable">
+                    <thead>
+                        <tr>
+                            <th class="tabDataHead redtext">@localizer["MessageHeader"]</th>
+                            <th class="tabDataHead">@localizer["FromHeader"]</th>
+                            <th class="tabDataHead">@localizer["ToHeader"]</th>
+                            <th class="tabDataHead">@localizer["StatusHeader"]</th>
+                            <th class="tabDataHead"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var i = 0; }
+                        @foreach (var row in Model.Rows)
+                        {
+                            <tr class="@(i++ % 2 == 0 ? "even" : "odd")">
+                                <td class="tabData redtext">@row.Message</td>
+                                <td class="tabData">@(row.DisplayFrom?.ToString("yyyy-MM-dd HH:mm:ss") ?? localizer["NoStart"].Value)</td>
+                                <td class="tabData">@(row.DisplayTo?.ToString("yyyy-MM-dd HH:mm:ss") ?? localizer["NoEnd"].Value)</td>
+                                <td class="tabData">@localizer["Status" + row.Status]</td>
+                                <td class="tabData">
+                                    <div class="user-actions">
+                                        <a asp-controller="Admin" asp-action="Announcement" asp-route-id="@row.Id">@localizer["Edit"]</a>
+                                        <form method="post" action="/Admin/DeleteAnnouncement" data-confirm="@localizer["ConfirmDelete"]" onsubmit="return confirm(this.dataset.confirm)">
+                                            <input type="hidden" name="id" value="@row.Id" />
+                                            <button type="submit" class="danger">@localizer["Delete"]</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

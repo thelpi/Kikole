@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,38 @@ public class MessageRepository : BaseRepository, IMessageRepository
                 {
                     date
                 });
+    }
+
+    public async Task<IReadOnlyList<MessageDto>> GetMessagesAsync()
+    {
+        return await ExecuteReaderAsync<MessageDto>(
+                "SELECT * FROM messages ORDER BY creation_date DESC, id DESC",
+                null);
+    }
+
+    public async Task<MessageDto?> GetMessageByIdAsync(ulong id)
+    {
+        return await GetDtoAsync<MessageDto>("messages", ("id", id));
+    }
+
+    public async Task UpdateMessageAsync(MessageDto message)
+    {
+        await ExecuteNonQueryAsync(
+                "UPDATE messages " +
+                "SET message = @message, display_from = @displayFrom, display_to = @displayTo " +
+                "WHERE id = @id",
+                new
+                {
+                    id = message.Id,
+                    message = message.Message,
+                    displayFrom = message.DisplayFrom,
+                    displayTo = message.DisplayTo
+                });
+    }
+
+    public async Task DeleteMessageAsync(ulong id)
+    {
+        await ExecuteNonQueryAsync("DELETE FROM messages WHERE id = @id", new { id });
     }
 
     public async Task InsertMessageAsync(MessageDto message)

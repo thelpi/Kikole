@@ -33,6 +33,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [ ] Plafond de kikolés proposés par un `PowerUser`
   - [x] Page `/Admin/Users` : liste, filtres, changer le palier, forcer un mot de passe, désactiver
   - [x] Page `/Admin/UpcomingPlayers` : modifier un kikolé à venir ou en attente
+  - [x] Page `/Admin/Announcements` : lister, créer, modifier, supprimer les annonces
 
 ## 2. Modèle de données et contenu
 
@@ -150,6 +151,7 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
 - Suppression d'un compte : kikolés publiés ou validés repris par le premier administrateur, les autres supprimés
 - Gestion des utilisateurs : administrateurs exclus de la liste, des filtres et des actions ; pas de passage en administrateur
 - Édition d'un kikolé : seulement en attente ou programmé après aujourd'hui ; date, créateur non modifiables
+- Annonces : une seule affichée à la fois (la plus récemment démarrée) ; id conservé à la modification
 - Rareté d'un badge = proportion des autres joueurs qui ne l'ont pas
 
 **Architecture**

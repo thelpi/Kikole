@@ -1,0 +1,36 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model AnnouncementModel
+
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="banner error">@Model.ErrorMessage</div>
+    }
+
+    <div class="form-card">
+        <h3>@localizer[Model.Id == 0 ? "NewAnnouncement" : "EditAnnouncement"]</h3>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Announcements">@localizer["BackToAnnouncements"]</a></div>
+        <form method="post" action="/Admin/Announcement">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <div class="form-field">
+                <label for="announcementMessage">@localizer["MessageLabel"]</label>
+                <input type="text" id="announcementMessage" name="Message" class="blank" value="@Model.Message" />
+                <div class="form-hint">@localizer["MessageHint"]</div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="announcementFrom">@localizer["FromLabel"]</label>
+                    @Html.TextBoxFor(m => m.DisplayFrom, "{0:yyyy-MM-ddTHH:mm:ss}", new { @class = "blank", id = "announcementFrom", type = "datetime-local", step = "1" })
+                </div>
+                <div class="form-field">
+                    <label for="announcementTo">@localizer["ToLabel"]</label>
+                    @Html.TextBoxFor(m => m.DisplayTo, "{0:yyyy-MM-ddTHH:mm:ss}", new { @class = "blank", id = "announcementTo", type = "datetime-local", step = "1" })
+                </div>
+            </div>
+            <div class="form-hint">@localizer["DatesHint"]</div>
+            <div class="actions">
+                <button type="submit">@localizer["Save"]</button>
+            </div>
+        </form>
+    </div>
+</div>

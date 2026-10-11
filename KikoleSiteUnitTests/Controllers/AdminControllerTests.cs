@@ -228,19 +228,14 @@ public class AdminControllerTests : IDisposable
     // ------------------------------------------------------------- Actions (annonces/outils)
 
     [Fact]
-    public async Task Actions_Get_RendersDefaultMessageDates()
+    public async Task Actions_Get_RendersTheActionsPage()
     {
-        var tomorrowEnd = Today.AddDays(1).ToDateTime(TimeOnly.MinValue).AddHours(23);
-        _clock.Setup(_ => _.NowSeconds).Returns(Today.ToDateTime(TimeOnly.MinValue));
-        _clock.Setup(_ => _.TomorrowEnd).Returns(tomorrowEnd);
-
         var result = await _controller.Actions();
 
-        var model = ((ViewResult)result).Model.Should().BeOfType<AdminModel>().Subject;
-        model.MessageDateStart.Should().Be(Today.ToDateTime(TimeOnly.MinValue));
-        model.MessageDateEnd.Should().Be(tomorrowEnd);
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Actions");
+        view.Model.Should().BeOfType<AdminModel>();
     }
-
     [Fact]
     public async Task RecomputeBadges_Post_ResetsBadges()
     {
@@ -268,26 +263,170 @@ public class AdminControllerTests : IDisposable
         _playerService.Verify(_ => _.ReassignPlayersOfTheDayAsync(), Times.Once);
     }
 
+    // ------------------------------------------------------------- Annonces
+
+    private static KikoleSite.Models.Dtos.MessageDto Announcement(ulong id, DateTime? from, DateTime? to, string message = "annonce")
+        => new() { Id = id, Message = message, DisplayFrom = from, DisplayTo = to };
+
     [Fact]
-    public async Task InsertMessage_Post_InsertsTheMessageAndSetsFeedback()
+    public async Task Announcements_Get_ListsEveryAnnouncementWithItsStatus()
     {
-        var start = Today.ToDateTime(TimeOnly.MinValue);
-        var end = Today.AddDays(1).ToDateTime(TimeOnly.MinValue);
-
-        var result = await _controller.InsertMessage(new AdminModel
+        var now = Today.ToDateTime(TimeOnly.MinValue).AddHours(12);
+        _clock.Setup(_ => _.Now).Returns(now);
+        var displayed = Announcement(1, now.AddHours(-1), null);
+        _messageRepository.Setup(_ => _.GetMessagesAsync()).ReturnsAsync(new[]
         {
-            Message = "une annonce",
-            MessageDateStart = start,
-            MessageDateEnd = end
+            displayed,
+            Announcement(2, now.AddHours(-5), null),
+            Announcement(3, now.AddDays(1), null),
+            Announcement(4, now.AddDays(-2), now.AddHours(-1))
         });
+        _messageRepository.Setup(_ => _.GetMessageAsync(now)).ReturnsAsync(displayed);
 
-        _messageRepository.Verify(_ => _.InsertMessageAsync(It.Is<KikoleSite.Models.Dtos.MessageDto>(
-            m => m.Message == "une annonce" && m.DisplayFrom == start && m.DisplayTo == end)), Times.Once);
+        var result = await _controller.Announcements(done: null);
 
-        var model = ((ViewResult)result).Model.Should().BeOfType<AdminModel>().Subject;
-        model.ActionFeedback.Should().Be("Annonce créée");
+        var model = ((ViewResult)result).Model.Should().BeOfType<AnnouncementsModel>().Subject;
+        model.Feedback.Should().BeNull();
+        model.Rows.Select(r => (r.Id, r.Status)).Should().Equal(
+            (1UL, AnnouncementStatus.Displayed),
+            (2UL, AnnouncementStatus.Superseded),
+            (3UL, AnnouncementStatus.Scheduled),
+            (4UL, AnnouncementStatus.Expired));
     }
 
+    [Theory]
+    [InlineData("saved", "AnnouncementSaved")]
+    [InlineData("deleted", "AnnouncementDeleted")]
+    public async Task Announcements_Get_AfterAnAction_ShowsTheFeedback(string done, string expected)
+    {
+        _messageRepository.Setup(_ => _.GetMessagesAsync()).ReturnsAsync(new List<KikoleSite.Models.Dtos.MessageDto>());
+
+        var result = await _controller.Announcements(done);
+
+        ((ViewResult)result).Model.Should().BeOfType<AnnouncementsModel>().Which.Feedback.Should().Be(expected);
+    }
+
+    [Fact]
+    public void GetAnnouncementStatus_FollowsTheSelectionRuleOfTheSite()
+    {
+        var now = Today.ToDateTime(TimeOnly.MinValue);
+
+        AdminController.GetAnnouncementStatus(Announcement(1, null, null), now, 1).Should().Be(AnnouncementStatus.Displayed);
+        AdminController.GetAnnouncementStatus(Announcement(1, null, null), now, 2).Should().Be(AnnouncementStatus.Superseded);
+        AdminController.GetAnnouncementStatus(Announcement(1, now, null), now, 2).Should().Be(AnnouncementStatus.Superseded);
+        AdminController.GetAnnouncementStatus(Announcement(1, now.AddSeconds(1), null), now, null).Should().Be(AnnouncementStatus.Scheduled);
+        AdminController.GetAnnouncementStatus(Announcement(1, null, now), now, null).Should().Be(AnnouncementStatus.Expired);
+        AdminController.GetAnnouncementStatus(Announcement(1, null, now.AddSeconds(1)), now, 1).Should().Be(AnnouncementStatus.Displayed);
+    }
+
+    [Fact]
+    public async Task AnnouncementGet_ForANewAnnouncement_ProposesTheDefaultDates()
+    {
+        var tomorrowEnd = Today.AddDays(1).ToDateTime(TimeOnly.MinValue).AddHours(23);
+        _clock.Setup(_ => _.NowSeconds).Returns(Today.ToDateTime(TimeOnly.MinValue));
+        _clock.Setup(_ => _.TomorrowEnd).Returns(tomorrowEnd);
+
+        var result = await _controller.Announcement(id: 0);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AnnouncementModel>().Subject;
+        model.Id.Should().Be(0);
+        model.DisplayFrom.Should().Be(Today.ToDateTime(TimeOnly.MinValue));
+        model.DisplayTo.Should().Be(tomorrowEnd);
+    }
+
+    [Fact]
+    public async Task AnnouncementGet_ForAnExistingAnnouncement_PrefillsTheForm()
+    {
+        var from = Today.ToDateTime(TimeOnly.MinValue);
+        _messageRepository.Setup(_ => _.GetMessageByIdAsync(5)).ReturnsAsync(Announcement(5, from, null, "bonjour"));
+
+        var result = await _controller.Announcement(id: 5);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AnnouncementModel>().Subject;
+        (model.Id, model.Message, model.DisplayFrom, model.DisplayTo).Should().Be((5UL, "bonjour", (DateTime?)from, (DateTime?)null));
+    }
+
+    [Fact]
+    public async Task AnnouncementGet_ForAnUnknownAnnouncement_RedirectsToTheList()
+    {
+        _messageRepository.Setup(_ => _.GetMessageByIdAsync(9)).ReturnsAsync((KikoleSite.Models.Dtos.MessageDto?)null);
+
+        var result = await _controller.Announcement(id: 9);
+
+        result.Should().BeOfType<RedirectToActionResult>().Which.ActionName.Should().Be("Announcements");
+    }
+
+    [Theory]
+    [InlineData(null, "AnnouncementMessageMandatory")]
+    [InlineData("   ", "AnnouncementMessageMandatory")]
+    public async Task AnnouncementPost_WithoutMessage_ShowsAnErrorAndWritesNothing(string? message, string expected)
+    {
+        var result = await _controller.Announcement(new AnnouncementModel { Message = message });
+
+        ((ViewResult)result).Model.Should().BeOfType<AnnouncementModel>().Which.ErrorMessage.Should().Be(expected);
+        _messageRepository.Verify(_ => _.InsertMessageAsync(It.IsAny<KikoleSite.Models.Dtos.MessageDto>()), Times.Never);
+        _messageRepository.Verify(_ => _.UpdateMessageAsync(It.IsAny<KikoleSite.Models.Dtos.MessageDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AnnouncementPost_WithAnEndNotAfterTheStart_ShowsAnErrorAndWritesNothing()
+    {
+        var from = Today.ToDateTime(TimeOnly.MinValue);
+
+        var result = await _controller.Announcement(new AnnouncementModel { Message = "x", DisplayFrom = from, DisplayTo = from });
+
+        ((ViewResult)result).Model.Should().BeOfType<AnnouncementModel>().Which.ErrorMessage.Should().Be("AnnouncementDatesInvalid");
+        _messageRepository.Verify(_ => _.InsertMessageAsync(It.IsAny<KikoleSite.Models.Dtos.MessageDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AnnouncementPost_ForANewAnnouncement_InsertsItWithoutRequiringDates()
+    {
+        var result = await _controller.Announcement(new AnnouncementModel { Message = "  une annonce  " });
+
+        _messageRepository.Verify(_ => _.InsertMessageAsync(It.Is<KikoleSite.Models.Dtos.MessageDto>(
+            m => m.Message == "une annonce" && m.DisplayFrom == null && m.DisplayTo == null && m.CreationDate == Today.ToDateTime(TimeOnly.MinValue))), Times.Once);
+        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirect.ActionName.Should().Be("Announcements");
+        redirect.RouteValues!["done"].Should().Be("saved");
+    }
+
+    [Fact]
+    public async Task AnnouncementPost_ForAnExistingAnnouncement_UpdatesIt()
+    {
+        var from = Today.ToDateTime(TimeOnly.MinValue);
+        var to = from.AddDays(2);
+        _messageRepository.Setup(_ => _.GetMessageByIdAsync(5)).ReturnsAsync(Announcement(5, null, null));
+
+        var result = await _controller.Announcement(new AnnouncementModel { Id = 5, Message = "corrigée", DisplayFrom = from, DisplayTo = to });
+
+        _messageRepository.Verify(_ => _.UpdateMessageAsync(It.Is<KikoleSite.Models.Dtos.MessageDto>(
+            m => m.Id == 5 && m.Message == "corrigée" && m.DisplayFrom == from && m.DisplayTo == to)), Times.Once);
+        _messageRepository.Verify(_ => _.InsertMessageAsync(It.IsAny<KikoleSite.Models.Dtos.MessageDto>()), Times.Never);
+        result.Should().BeOfType<RedirectToActionResult>().Which.RouteValues!["done"].Should().Be("saved");
+    }
+
+    [Fact]
+    public async Task AnnouncementPost_ForAnAnnouncementThatNoLongerExists_UpdatesNothing()
+    {
+        _messageRepository.Setup(_ => _.GetMessageByIdAsync(5)).ReturnsAsync((KikoleSite.Models.Dtos.MessageDto?)null);
+
+        var result = await _controller.Announcement(new AnnouncementModel { Id = 5, Message = "x" });
+
+        _messageRepository.Verify(_ => _.UpdateMessageAsync(It.IsAny<KikoleSite.Models.Dtos.MessageDto>()), Times.Never);
+        result.Should().BeOfType<RedirectToActionResult>().Which.RouteValues.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task DeleteAnnouncement_Post_DeletesItAndRedirectsWithFeedback()
+    {
+        var result = await _controller.DeleteAnnouncement(5);
+
+        _messageRepository.Verify(_ => _.DeleteMessageAsync(5), Times.Once);
+        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirect.ActionName.Should().Be("Announcements");
+        redirect.RouteValues!["done"].Should().Be("deleted");
+    }
     // ------------------------------------------------------------- Discussions / Discussion
 
     [Fact]
