@@ -102,6 +102,7 @@ public class LeaderboardControllerTests
         _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Today)).ReturnsAsync(playerFull);
 
         _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        SetUpReferentials();
 
         var dayboard = new Dayboard
         {
@@ -125,7 +126,71 @@ public class LeaderboardControllerTests
         var model = ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.UserDayModel>().Subject;
         model.UserLogin.Should().Be("cible");
         model.UserScore.Should().Be(750);
-        model.ProposalDetails.Should().ContainSingle();
+        model.ProposalDetails.Should().ContainSingle().Which.Value.Should().Be("Europe (libellé)");
+    }
+
+    private void SetUpReferentials()
+    {
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France (libellé)" } });
+        _internationalService.Setup(_ => _.GetContinentsAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Continents.Europe, "Europe (libellé)" } });
+        _internationalService.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new List<Club>());
+    }
+
+    private static Club ClubNamed(ulong id, string english, string? french)
+    {
+        var translations = new List<ClubTranslationDto>
+        {
+            new() { ClubId = id, LanguageId = (ulong)Languages.en, Priority = 0, Name = english }
+        };
+        if (french != null)
+            translations.Add(new ClubTranslationDto { ClubId = id, LanguageId = (ulong)Languages.fr, Priority = 0, Name = french });
+
+        return new Club(ClubDtoBuilder.Valid().WithId(id).WithName("Nom brut").Build(), translations);
+    }
+
+    private static string? Format(ProposalTypes type, string value, params Club[] clubs)
+    {
+        var player = PlayerFullDtoBuilder.Valid().Build();
+        var proposal = BuildResponse(ProposalDtoBuilder.Valid().OfType(type).WithSuccessfulFlag(0).WithValue(value).Build(), player);
+
+        return LeaderboardController.FormatProposalValue(
+            proposal,
+            new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" } },
+            new Dictionary<ulong, string> { { (ulong)Continents.SouthAmerica, "Amérique du Sud" } },
+            new Dictionary<ulong, string> { { (ulong)Positions.Midfielder, "Milieu" } },
+            clubs,
+            Languages.fr);
+    }
+
+    [Fact]
+    public void FormatProposalValue_Club_ShowsTheNameInTheVisitorLanguage()
+    {
+        Format(ProposalTypes.Club, "7", ClubNamed(7, "Marseille", "Olympique de Marseille")).Should().Be("Olympique de Marseille");
+    }
+
+    [Fact]
+    public void FormatProposalValue_Club_FallsBackToTheClubNameThenToTheRawValue()
+    {
+        Format(ProposalTypes.Club, "7", ClubNamed(7, "Marseille", null)).Should().Be("Nom brut");
+        Format(ProposalTypes.Club, "8", ClubNamed(7, "Marseille", "OM")).Should().Be("8");
+        Format(ProposalTypes.Club, "pas un id").Should().Be("pas un id");
+    }
+
+    [Fact]
+    public void FormatProposalValue_CountryContinentAndPosition_ShowTheLocalizedLabel()
+    {
+        Format(ProposalTypes.Country, ((ulong)Countries.FRA).ToString()).Should().Be("France");
+        Format(ProposalTypes.Continent, ((ulong)Continents.SouthAmerica).ToString()).Should().Be("Amérique du Sud");
+        Format(ProposalTypes.Position, ((ulong)Positions.Midfielder).ToString()).Should().Be("Milieu");
+    }
+
+    [Fact]
+    public void FormatProposalValue_NameAndYear_AreShownAsTyped()
+    {
+        Format(ProposalTypes.Name, "zizou").Should().Be("zizou");
+        Format(ProposalTypes.Year, "1972").Should().Be("1972");
     }
 
     private void SetUpUserDayNeighbours(ulong viewer, ulong viewedUser, params (int dayOffset, bool played, DayGrantTypes grant)[] days)

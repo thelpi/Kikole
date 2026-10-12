@@ -166,9 +166,19 @@ public class LeaderboardController : KikoleBaseController
         var proposalsTask = _proposalService
             .GetProposalsAsync(actualDate, userId, countryContinents);
 
+        var countriesTask = GetCountriesAsync();
+        var continentsTask = GetContinentsAsync();
+        var clubsTask = GetClubsAsync();
+
         var db = await dbTask;
 
         var proposals = await proposalsTask;
+
+        var countries = await countriesTask;
+        var continents = await continentsTask;
+        var clubs = await clubsTask;
+        var positions = GetPositions();
+        var language = ViewHelper.GetLanguage();
 
         var items = new List<UserDayItemModel>(proposals.Count);
         foreach (var proposal in proposals)
@@ -180,7 +190,7 @@ public class LeaderboardController : KikoleBaseController
                 PointsRemaining = proposal.TotalPoints,
                 Success = proposal.Successful,
                 Type = proposal.ProposalType,
-                Value = proposal.RawValue
+                Value = FormatProposalValue(proposal, countries, continents, positions, clubs, language)
             });
         }
 
@@ -205,6 +215,50 @@ public class LeaderboardController : KikoleBaseController
         };
 
         return View("UserDay", model);
+    }
+
+    // la valeur stockee est un identifiant (club) ou un nom technique (code FIFA, enum) :
+    // on affiche le libelle de la langue du visiteur, a defaut la valeur brute
+    internal static string? FormatProposalValue(
+        ProposalResponse proposal,
+        IReadOnlyDictionary<ulong, string> countries,
+        IReadOnlyDictionary<ulong, string> continents,
+        IReadOnlyDictionary<ulong, string> positions,
+        IReadOnlyCollection<Club> clubs,
+        Languages language)
+    {
+        var raw = proposal.RawValue;
+
+        switch (proposal.ProposalType)
+        {
+            case ProposalTypes.Club:
+                var club = ulong.TryParse(raw, out var clubId)
+                    ? clubs.FirstOrDefault(c => c.Id == clubId)
+                    : null;
+                if (club == null)
+                    return raw;
+                return club.NamesByLanguage.TryGetValue(language, out var names) && names.Count > 0
+                    ? names[0]
+                    : club.Name;
+
+            case ProposalTypes.Country:
+                return Enum.TryParse<Countries>(raw, out var country) && countries.TryGetValue((ulong)country, out var countryName)
+                    ? countryName
+                    : raw;
+
+            case ProposalTypes.Continent:
+                return Enum.TryParse<Continents>(raw, out var continent) && continents.TryGetValue((ulong)continent, out var continentName)
+                    ? continentName
+                    : raw;
+
+            case ProposalTypes.Position:
+                return Enum.TryParse<Positions>(raw, out var position) && positions.TryGetValue((ulong)position, out var positionName)
+                    ? positionName
+                    : raw;
+
+            default:
+                return raw;
+        }
     }
 
     /// <summary>
