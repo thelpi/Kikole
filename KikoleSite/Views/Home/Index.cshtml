@@ -469,7 +469,7 @@
             <!-- year -->
             <form method="post" action="/" class="dossier-row @(string.IsNullOrWhiteSpace(Model.BirthYear) ? "locked" : "solved")">
                 @Html.HiddenFor(m => m.CurrentDay)
-                <div class="field">@localizer["BirthYearTitle"]</div>
+                <div class="field">@localizer["BirthYearTitle"]@if (string.IsNullOrWhiteSpace(Model.BirthYear)) { <span class="hint">@localizer["TipAboutYear"]</span> }</div>
                 @if (string.IsNullOrWhiteSpace(Model.BirthYear))
                 {
                     <div>

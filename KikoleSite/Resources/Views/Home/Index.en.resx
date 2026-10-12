@@ -300,4 +300,7 @@
   <data name="PageDescription" xml:space="preserve">
     <value>A new mystery footballer every day: guess them from their birth year, position, nationality and club career. Leaderboards, badges and streaks.</value>
   </data>
+  <data name="TipAboutYear" xml:space="preserve">
+    <value>a wrong guess will tell if younger or older</value>
+  </data>
 </root>
