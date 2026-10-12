@@ -587,4 +587,30 @@ public class HomeControllerTests
         var setCookie = Uri.UnescapeDataString(_httpContext.Response.Headers["Set-Cookie"].ToString());
         setCookie.Should().Contain("uic=en");
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("https://evil.example/")]
+    [InlineData("//evil.example/")]
+    [InlineData("/\\evil.example/")]
+    [InlineData("leaderboard")]
+    public void SwitchLang_WithoutAUsableLocalPath_RedirectsToTheHomePageAndStillSwitches(string? redirect)
+    {
+        var result = _controller.SwitchLang(redirect);
+
+        result.Should().BeOfType<RedirectResult>().Which.Url.Should().Be("/");
+        Uri.UnescapeDataString(_httpContext.Response.Headers["Set-Cookie"].ToString()).Should().Contain("uic=en");
+    }
+
+    [Theory]
+    [InlineData("/")]
+    [InlineData("/Home/Legal")]
+    [InlineData("/?day=3")]
+    public void SwitchLang_WithALocalPath_RedirectsThere(string redirect)
+    {
+        var result = _controller.SwitchLang(redirect);
+
+        result.Should().BeOfType<RedirectResult>().Which.Url.Should().Be(redirect);
+    }
 }

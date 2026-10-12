@@ -124,7 +124,7 @@ public class HomeController : KikoleBaseController
     }
 
     [HttpGet]
-    public IActionResult SwitchLang([FromQuery] string redirect)
+    public IActionResult SwitchLang([FromQuery] string? redirect)
     {
         HttpContext.Request.Cookies.TryGetValue(
             CookieRequestCultureProvider.DefaultCookieName,
@@ -145,7 +145,15 @@ public class HomeController : KikoleBaseController
                 }
         );
 
-        return Redirect(redirect);
+        return Redirect(IsLocalPath(redirect) ? redirect! : "/");
+    }
+
+    // chemin du site uniquement : ni vide, ni URL absolue, ni "//hote" ni "/\hote" (redirection ouverte)
+    private static bool IsLocalPath(string? path)
+    {
+        return !string.IsNullOrEmpty(path)
+            && path[0] == '/'
+            && (path.Length == 1 || (path[1] != '/' && path[1] != '\\'));
     }
 
     [HttpGet]

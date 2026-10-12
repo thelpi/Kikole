@@ -18,7 +18,7 @@ public class SeoControllerTests
 
         result.ContentType.Should().StartWith("text/plain");
         result.Content.Should().Contain("Sitemap: https://www.kikole.fr/sitemap.xml");
-        result.Content.Should().Contain("Disallow: /Admin").And.Contain("Disallow: /Account");
+        result.Content.Should().Contain("Disallow: /Admin").And.Contain("Disallow: /Account").And.Contain("Disallow: /Home/SwitchLang");
     }
 
     [Fact]

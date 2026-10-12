@@ -26,6 +26,7 @@ public class SeoController : Controller
             .AppendLine("Disallow: /Account")
             .AppendLine("Disallow: /Home/Contact")
             .AppendLine("Disallow: /Home/ErrorIndex")
+            .AppendLine("Disallow: /Home/SwitchLang")
             .AppendLine("Disallow: /*?")
             .AppendLine()
             .AppendLine($"Sitemap: {_baseUrl}/sitemap.xml")
