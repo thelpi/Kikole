@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using KikoleSite;
 using KikoleSite.Handlers;
+using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
 using KikoleSite.Models.Requests;
@@ -793,6 +794,87 @@ public class PlayerServiceTests
         _playerRepository.Verify(_ => _.UpdatePlayerAsync(
             It.IsAny<ulong>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyList<PlayerClubDto>>(),
             It.IsAny<IReadOnlyDictionary<ulong, string>>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()), Times.Never);
+    }
+    // ------------------------------------------------------------- ordre de publication
+
+    private static PlayerDto Scheduled(ulong id, int daysFromToday)
+        => PlayerDtoBuilder.Valid().WithId(id).WithPublicationDate(FirstDate.AddDays(daysFromToday)).Build();
+
+    private void SetUpScheduled(params PlayerDto[] players)
+    {
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(1), null)).ReturnsAsync(players);
+        _playerRepository
+            .Setup(_ => _.ReassignPublicationDatesAsync(It.IsAny<IReadOnlyList<(ulong PlayerId, DateOnly Date)>>()))
+            .ReturnsAsync(true);
+    }
+
+    private static string SnapshotOf(params PlayerDto[] players) => ScheduleSnapshot.From(players);
+
+    [Fact]
+    public async Task GetScheduledPlayersAsync_ReturnsThePlayersByIncreasingDate()
+    {
+        SetUpScheduled(Scheduled(1, 9), Scheduled(2, 2), Scheduled(3, 5));
+
+        var players = await _service.GetScheduledPlayersAsync();
+
+        players.Select(p => p.Id).Should().Equal(2UL, 3UL, 1UL);
+    }
+
+    [Fact]
+    public async Task ReorderScheduledPlayersAsync_AssignsTheDatesFromTomorrowWithoutGaps()
+    {
+        var (a, b, c) = (Scheduled(1, 2), Scheduled(2, 5), Scheduled(3, 9));
+        SetUpScheduled(a, b, c);
+
+        var result = await _service.ReorderScheduledPlayersAsync([3, 1, 2], SnapshotOf(a, b, c));
+
+        result.Should().Be(ScheduleReorderResult.Saved);
+        var tomorrow = FirstDate.AddDays(1);
+        var expected = new[] { (PlayerId: 3UL, Date: tomorrow), (PlayerId: 1UL, Date: tomorrow.AddDays(1)), (PlayerId: 2UL, Date: tomorrow.AddDays(2)) };
+        _playerRepository.Verify(_ => _.ReassignPublicationDatesAsync(
+            It.Is<IReadOnlyList<(ulong PlayerId, DateOnly Date)>>(x => x.SequenceEqual(expected))),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task ReorderScheduledPlayersAsync_WhenTheListChangedSinceThePageWasOpened_WritesNothing()
+    {
+        var (a, b) = (Scheduled(1, 2), Scheduled(2, 5));
+        var staleSnapshot = SnapshotOf(a, b);
+        SetUpScheduled(a, Scheduled(2, 6));
+
+        var result = await _service.ReorderScheduledPlayersAsync([2, 1], staleSnapshot);
+
+        result.Should().Be(ScheduleReorderResult.OutOfDate);
+        _playerRepository.Verify(_ => _.ReassignPublicationDatesAsync(It.IsAny<IReadOnlyList<(ulong PlayerId, DateOnly Date)>>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(new ulong[] { 1 })]
+    [InlineData(new ulong[] { 1, 2, 3 })]
+    [InlineData(new ulong[] { 1, 1 })]
+    [InlineData(new ulong[] { 1, 9 })]
+    public async Task ReorderScheduledPlayersAsync_WhenTheIdsAreNotExactlyTheScheduledPlayers_WritesNothing(ulong[] ids)
+    {
+        var (a, b) = (Scheduled(1, 2), Scheduled(2, 5));
+        SetUpScheduled(a, b);
+
+        var result = await _service.ReorderScheduledPlayersAsync(ids, SnapshotOf(a, b));
+
+        result.Should().Be(ScheduleReorderResult.OutOfDate);
+        _playerRepository.Verify(_ => _.ReassignPublicationDatesAsync(It.IsAny<IReadOnlyList<(ulong PlayerId, DateOnly Date)>>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ReorderScheduledPlayersAsync_WhenTheRepositoryRefuses_ReportsOutOfDate()
+    {
+        var (a, b) = (Scheduled(1, 2), Scheduled(2, 5));
+        SetUpScheduled(a, b);
+        _playerRepository
+            .Setup(_ => _.ReassignPublicationDatesAsync(It.IsAny<IReadOnlyList<(ulong PlayerId, DateOnly Date)>>()))
+            .ReturnsAsync(false);
+
+        (await _service.ReorderScheduledPlayersAsync([2, 1], SnapshotOf(a, b))).Should().Be(ScheduleReorderResult.OutOfDate);
     }
     // ------------------------------------------------------------- GetPlayerSubmissionsAsync
 

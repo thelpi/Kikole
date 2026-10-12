@@ -223,6 +223,42 @@ public class AdminController : KikoleBaseController
 
     [HttpGet]
     [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Planning(string? done)
+    {
+        var model = await BuildPlanningModelAsync();
+        if (done == "saved")
+            model.Feedback = _localizer["PlanningSaved"];
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> Planning(PlanningSaveModel save)
+    {
+        var result = await _playerService.ReorderScheduledPlayersAsync(save.Ids, save.Snapshot ?? string.Empty);
+        if (result == ScheduleReorderResult.Saved)
+            return RedirectToAction("Planning", new { done = "saved" });
+
+        var model = await BuildPlanningModelAsync();
+        model.Error = _localizer["PlanningOutOfDate"];
+        return View(model);
+    }
+
+    private async Task<PlanningModel> BuildPlanningModelAsync()
+    {
+        var players = await _playerService.GetScheduledPlayersAsync();
+
+        return new PlanningModel
+        {
+            FirstDate = _clock.Tomorrow,
+            Snapshot = ScheduleSnapshot.From(players),
+            Players = players.Select(p => new PlanningRow(p.Id, p.Name)).ToList()
+        };
+    }
+
+    [HttpGet]
+    [Authorization(UserTypes.Administrator)]
     public async Task<IActionResult> Announcements(string? done)
     {
         var now = _clock.Now;

@@ -84,6 +84,16 @@ public interface IPlayerService
     /// </summary>
     Task<IReadOnlyList<PlayerDto>> GetEditablePlayersAsync();
 
+    /// <summary>Kikoles programmes apres aujourd'hui, par date croissante.</summary>
+    Task<IReadOnlyList<PlayerDto>> GetScheduledPlayersAsync();
+
+    /// <summary>
+    /// Reaffecte les dates des kikoles programmes : le premier de <paramref name="orderedPlayerIds"/>
+    /// passe a demain, les suivants jour apres jour sans trou. Refuse (<see cref="ScheduleReorderResult.OutOfDate"/>)
+    /// si la liste a change depuis l'empreinte <paramref name="snapshot"/>.
+    /// </summary>
+    Task<ScheduleReorderResult> ReorderScheduledPlayersAsync(IReadOnlyList<ulong> orderedPlayerIds, string snapshot);
+
     /// <summary>Fiche complete d'un kikole modifiable ; <c>null</c> s'il est introuvable ou n'est plus modifiable.</summary>
     Task<PlayerEditData?> GetEditablePlayerAsync(ulong playerId);
 

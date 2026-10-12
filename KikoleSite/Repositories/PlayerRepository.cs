@@ -175,6 +175,36 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 new { userId, type = (accepted.HasValue ? (accepted.Value ? 1 : 2) : 0) });
     }
 
+    public async Task<bool> ReassignPublicationDatesAsync(IReadOnlyList<(ulong PlayerId, DateOnly Date)> assignments)
+    {
+        try
+        {
+            return await ExecuteInTransactionAsync(async (connection, transaction) =>
+            {
+                foreach (var (playerId, date) in assignments)
+                {
+                    // seul un kikole programme apres aujourd'hui est deplacable ; sinon tout est annule
+                    var updated = await connection.ExecuteAsync(
+                        "UPDATE players SET publication_date = @date " +
+                        "WHERE id = @playerId AND publication_date > @today",
+                        new { playerId, date, today = Clock.Today },
+                        transaction);
+
+                    if (updated != 1)
+                        throw new PlayerNotReschedulableException();
+                }
+
+                return true;
+            });
+        }
+        catch (PlayerNotReschedulableException)
+        {
+            return false;
+        }
+    }
+
+    private sealed class PlayerNotReschedulableException : Exception;
+
     public async Task<bool> UpdatePlayerAsync(
         ulong playerId,
         PlayerDto player,

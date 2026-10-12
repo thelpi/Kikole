@@ -263,6 +263,70 @@ public class AdminControllerTests : IDisposable
         _playerService.Verify(_ => _.ReassignPlayersOfTheDayAsync(), Times.Once);
     }
 
+    // ------------------------------------------------------------- Ordre de publication
+
+    private void SetUpScheduledPlayers(params KikoleSite.Models.Dtos.PlayerDto[] players)
+    {
+        _clock.Setup(_ => _.Tomorrow).Returns(Today.AddDays(1));
+        _playerService.Setup(_ => _.GetScheduledPlayersAsync()).ReturnsAsync(players);
+    }
+
+    private static KikoleSite.Models.Dtos.PlayerDto ScheduledPlayer(ulong id, string name, int daysFromToday)
+        => PlayerDtoBuilder.Valid().WithId(id).WithName(name).WithPublicationDate(Today.AddDays(daysFromToday)).Build();
+
+    [Fact]
+    public async Task Planning_Get_ListsTheScheduledPlayersInOrderWithTheSnapshot()
+    {
+        var (a, b) = (ScheduledPlayer(1, "Premier", 1), ScheduledPlayer(2, "Second", 2));
+        SetUpScheduledPlayers(a, b);
+
+        var result = await _controller.Planning(done: null);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<PlanningModel>().Subject;
+        model.Players.Should().Equal(new PlanningRow(1, "Premier"), new PlanningRow(2, "Second"));
+        model.FirstDate.Should().Be(Today.AddDays(1));
+        model.Snapshot.Should().Be(ScheduleSnapshot.From([a, b]));
+        model.Feedback.Should().BeNull();
+        model.Error.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Planning_Get_AfterASave_ShowsTheFeedback()
+    {
+        SetUpScheduledPlayers();
+
+        var result = await _controller.Planning(done: "saved");
+
+        ((ViewResult)result).Model.Should().BeOfType<PlanningModel>().Which.Feedback.Should().Be("PlanningSaved");
+    }
+
+    [Fact]
+    public async Task PlanningPost_WhenSaved_RedirectsWithFeedback()
+    {
+        _playerService.Setup(_ => _.ReorderScheduledPlayersAsync(It.IsAny<IReadOnlyList<ulong>>(), "snap")).ReturnsAsync(ScheduleReorderResult.Saved);
+
+        var result = await _controller.Planning(new PlanningSaveModel { Ids = [2, 1], Snapshot = "snap" });
+
+        _playerService.Verify(_ => _.ReorderScheduledPlayersAsync(It.Is<IReadOnlyList<ulong>>(i => i.SequenceEqual(new ulong[] { 2, 1 })), "snap"), Times.Once);
+        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirect.ActionName.Should().Be("Planning");
+        redirect.RouteValues!["done"].Should().Be("saved");
+    }
+
+    [Fact]
+    public async Task PlanningPost_WhenOutOfDate_ReloadsTheListWithAnError()
+    {
+        var a = ScheduledPlayer(1, "Premier", 1);
+        SetUpScheduledPlayers(a);
+        _playerService.Setup(_ => _.ReorderScheduledPlayersAsync(It.IsAny<IReadOnlyList<ulong>>(), It.IsAny<string>())).ReturnsAsync(ScheduleReorderResult.OutOfDate);
+
+        var result = await _controller.Planning(new PlanningSaveModel { Ids = [1], Snapshot = "old" });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<PlanningModel>().Subject;
+        model.Error.Should().Be("PlanningOutOfDate");
+        model.Players.Should().ContainSingle().Which.Name.Should().Be("Premier");
+        model.Snapshot.Should().Be(ScheduleSnapshot.From([a]));
+    }
     // ------------------------------------------------------------- Annonces
 
     private static KikoleSite.Models.Dtos.MessageDto Announcement(ulong id, DateTime? from, DateTime? to, string message = "annonce")

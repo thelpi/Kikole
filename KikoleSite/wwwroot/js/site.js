@@ -1504,3 +1504,93 @@ $(function () {
         });
     });
 });
+
+/* page d'ordre de publication (Admin/Planning.cshtml) : glisser-deposer par la poignee
+   (souris et tactile, evenements pointeur) ou fleches monter/descendre pour le clavier ;
+   l'envoi passe par une modale de confirmation. L'ordre des lignes dans le DOM est l'ordre
+   poste (un champ cache "Ids" par ligne). */
+$(function () {
+    var body = document.getElementById('planningBody');
+    if (!body) return;
+
+    var move = function (row, direction) {
+        var target = direction < 0 ? row.previousElementSibling : row.nextElementSibling;
+        if (!target) return;
+        if (direction < 0) {
+            body.insertBefore(row, target);
+        } else {
+            body.insertBefore(target, row);
+        }
+    };
+
+    body.addEventListener('click', function (e) {
+        var button = e.target.closest('.planning-move');
+        if (!button) return;
+        move(button.closest('tr'), parseInt(button.dataset.direction, 10));
+        button.focus();
+    });
+
+    var dragged = null;
+    body.addEventListener('pointerdown', function (e) {
+        var handle = e.target.closest('.planning-handle');
+        if (!handle) return;
+        dragged = handle.closest('tr');
+        dragged.classList.add('dragging');
+        try {
+            handle.setPointerCapture(e.pointerId);
+        } catch (err) { /* pointeur deja inactif : le glisser continue sans capture */ }
+        e.preventDefault();
+    });
+    body.addEventListener('pointermove', function (e) {
+        if (!dragged) return;
+        var over = document.elementFromPoint(e.clientX, e.clientY);
+        var row = over ? over.closest('#planningBody tr') : null;
+        if (row && row !== dragged) {
+            var rect = row.getBoundingClientRect();
+            var after = e.clientY > rect.top + rect.height / 2;
+            body.insertBefore(dragged, after ? row.nextElementSibling : row);
+        }
+        if (e.clientY < 60) {
+            window.scrollBy(0, -12);
+        } else if (e.clientY > window.innerHeight - 60) {
+            window.scrollBy(0, 12);
+        }
+    });
+    var drop = function () {
+        if (!dragged) return;
+        dragged.classList.remove('dragging');
+        dragged = null;
+    };
+    body.addEventListener('pointerup', drop);
+    body.addEventListener('pointercancel', drop);
+
+    var modal = document.getElementById('planningModal');
+    var text = document.getElementById('planningModalText');
+    var saveButton = document.getElementById('planningSave');
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var format = function (d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    var closeModal = function () {
+        modal.classList.remove('open');
+        saveButton.focus();
+    };
+
+    saveButton.addEventListener('click', function () {
+        var count = body.children.length;
+        var first = new Date(text.dataset.first + 'T00:00:00');
+        var last = new Date(first);
+        last.setDate(last.getDate() + count - 1);
+        text.textContent = text.dataset.template
+            .replace('{0}', count)
+            .replace('{1}', format(first))
+            .replace('{2}', format(last));
+        modal.classList.add('open');
+        modal.querySelector('button[type="submit"]').focus();
+    });
+    document.getElementById('planningCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+});

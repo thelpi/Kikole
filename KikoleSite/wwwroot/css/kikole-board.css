@@ -2315,3 +2315,35 @@ body { padding-top: 0; }
 /* bouton secondaire d'un groupe d'actions (ex. « Renvoyer l'email de confirmation ») */
 .kikole-board .actions button.secondary { background: transparent; border: 1px solid var(--border-strong); color: var(--text-muted); }
 .kikole-board .actions button.secondary:hover { background: var(--surface-3); color: var(--text); }
+
+/* page d'ordre de publication (Admin/Planning.cshtml) : une colonne, numerotation par
+   compteur CSS (1 = demain), poignee de glisser-deposer et fleches */
+.kikole-board #planningBody { counter-reset: planning; }
+.kikole-board #planningBody tr { counter-increment: planning; }
+.kikole-board #planningBody tr.dragging { background: var(--surface-3); outline: 2px solid var(--accent); }
+.kikole-board .planning-line { display: flex; align-items: center; gap: 12px; }
+.kikole-board .planning-line::before {
+  content: counter(planning);
+  min-width: 2.2ch;
+  text-align: right;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.kikole-board .planning-name { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+.kikole-board .planning-moves { display: flex; gap: 6px; }
+.kikole-board .planning-line button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 8px;
+  font-size: 16px;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+.kikole-board .planning-line button:hover { background: var(--surface-3); }
+.kikole-board .planning-handle { cursor: grab; touch-action: none; letter-spacing: -0.15em; }
+.kikole-board tr.dragging .planning-handle { cursor: grabbing; }
+.kikole-board #planningBody { user-select: none; }

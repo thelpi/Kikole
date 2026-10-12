@@ -342,4 +342,10 @@
   <data name="AnnouncementDatesInvalid" xml:space="preserve">
     <value>La date de fin doit être après la date de début.</value>
   </data>
+  <data name="PlanningSaved" xml:space="preserve">
+    <value>Ordre de publication enregistré.</value>
+  </data>
+  <data name="PlanningOutOfDate" xml:space="preserve">
+    <value>La liste a changé depuis l&apos;ouverture de la page (nouveau kikolé, date modifiée ou changement de jour) : l&apos;ordre n&apos;a pas été enregistré. La liste a été rechargée, refaites votre ordre.</value>
+  </data>
 </root>

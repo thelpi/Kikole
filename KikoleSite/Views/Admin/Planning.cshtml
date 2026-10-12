@@ -1,0 +1,70 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model PlanningModel
+
+<div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+    {
+        <div class="banner success">@Model.Feedback</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="banner error">@Model.Error</div>
+    }
+
+    <div class="form-card">
+        <h3>@localizer["PlanningTitle"]</h3>
+        <div class="small-link"><a asp-controller="Admin" asp-action="Actions">@localizer["BackToActions"]</a></div>
+        <p>@localizer["PlanningHelp"]</p>
+
+        @if (Model.Players.Count == 0)
+        {
+            <p>@localizer["NoScheduledPlayers"]</p>
+        }
+        else
+        {
+            <form method="post" action="/Admin/Planning" id="planningForm">
+                <input type="hidden" name="Snapshot" value="@Model.Snapshot" />
+                <div class="table-wrap">
+                    <table id="planningTable">
+                        <thead>
+                            <tr>
+                                <th class="tabDataHead redtext">@localizer["PlayerHeader"]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planningBody">
+                            @foreach (var player in Model.Players)
+                            {
+                                <tr data-id="@player.Id">
+                                    <td class="tabData"><div class="planning-line">
+                                        <input type="hidden" name="Ids" value="@player.Id" />
+                                        <button type="button" class="planning-handle" aria-label="@localizer["DragHandle"]" title="@localizer["DragHandle"]">&#8942;&#8942;</button>
+                                        <span class="planning-name">@player.Name</span>
+                                        <span class="planning-moves">
+                                            <button type="button" class="planning-move" data-direction="-1" aria-label="@localizer["MoveUp"]" title="@localizer["MoveUp"]">&#9650;</button>
+                                            <button type="button" class="planning-move" data-direction="1" aria-label="@localizer["MoveDown"]" title="@localizer["MoveDown"]">&#9660;</button>
+                                        </span>
+                                    </div></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="actions">
+                    <button type="button" id="planningSave">@localizer["Save"]</button>
+                </div>
+            </form>
+        }
+    </div>
+
+    <div class="confirm-modal" id="planningModal" role="dialog" aria-modal="true" aria-labelledby="planningModalText">
+        <div class="confirm-modal-box">
+            <p id="planningModalText"
+               data-template="@localizer["ConfirmText"].Value"
+               data-first="@Model.FirstDate.ToString("yyyy-MM-dd")"></p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="secondary" id="planningCancel">@localizer["Cancel"]</button>
+                <button type="submit" form="planningForm">@localizer["Confirm"]</button>
+            </div>
+        </div>
+    </div>
+</div>

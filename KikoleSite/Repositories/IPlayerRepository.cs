@@ -39,6 +39,8 @@ public interface IPlayerRepository
 
     Task<IReadOnlyCollection<PlayerDto>> GetPlayersByCreatorAsync(ulong userId, bool? accepted);
 
+    Task<bool> ReassignPublicationDatesAsync(IReadOnlyList<(ulong PlayerId, DateOnly Date)> assignments);
+
     Task<bool> UpdatePlayerAsync(
         ulong playerId,
         PlayerDto player,

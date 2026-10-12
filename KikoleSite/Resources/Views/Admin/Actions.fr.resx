@@ -147,4 +147,7 @@
   <data name="ManageAnnouncements" xml:space="preserve">
     <value>Gérer les annonces</value>
   </data>
+  <data name="ManagePlanning" xml:space="preserve">
+    <value>Réordonner les kikolés à venir</value>
+  </data>
 </root>

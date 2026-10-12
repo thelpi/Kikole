@@ -89,6 +89,39 @@ public class PlayerService : IPlayerService
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<PlayerDto>> GetScheduledPlayersAsync()
+    {
+        var scheduled = await _playerRepository
+            .GetPlayersOfTheDayAsync(_clock.Tomorrow, null);
+
+        return scheduled
+            .OrderBy(p => p.PublicationDate)
+            .ThenBy(p => p.Id)
+            .ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<ScheduleReorderResult> ReorderScheduledPlayersAsync(IReadOnlyList<ulong> orderedPlayerIds, string snapshot)
+    {
+        var current = await GetScheduledPlayersAsync();
+
+        if (ScheduleSnapshot.From(current) != snapshot
+            || !orderedPlayerIds.Order().SequenceEqual(current.Select(p => p.Id).Order()))
+        {
+            return ScheduleReorderResult.OutOfDate;
+        }
+
+        var tomorrow = _clock.Tomorrow;
+        var assignments = orderedPlayerIds
+            .Select((id, i) => (id, tomorrow.AddDays(i)))
+            .ToList();
+
+        return await _playerRepository.ReassignPublicationDatesAsync(assignments)
+            ? ScheduleReorderResult.Saved
+            : ScheduleReorderResult.OutOfDate;
+    }
+
+    /// <inheritdoc />
     public async Task<PlayerEditData?> GetEditablePlayerAsync(ulong playerId)
     {
         var player = await _playerRepository
