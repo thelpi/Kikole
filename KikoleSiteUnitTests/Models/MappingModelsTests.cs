@@ -129,6 +129,26 @@ public class MappingModelsTests
     }
 
     [Theory]
+    [InlineData(1, BadgeTiers.Common)]
+    [InlineData(2, BadgeTiers.Rare)]
+    [InlineData(3, BadgeTiers.Epic)]
+    [InlineData(4, BadgeTiers.Legendary)]
+    [InlineData(0, BadgeTiers.Common)]
+    [InlineData(9, BadgeTiers.Common)]
+    public void Badge_MapsTheTierAndFallsBackToCommonWhenUnknown(byte tier, BadgeTiers expected)
+    {
+        var badge = new Badge(BadgeDtoBuilder.Valid().WithTier(tier).Build(), 0, null);
+
+        badge.Tier.Should().Be(expected);
+        new UserBadge(badge, new DateOnly(2026, 1, 1)).Tier.Should().Be(expected);
+    }
+
+    [Fact]
+    public void BadgeDto_DefaultsToTheCommonTier()
+    {
+        BadgeDtoBuilder.Valid().Build().Tier.Should().Be((byte)BadgeTiers.Common);
+    }
+    [Theory]
     [InlineData((byte)0, false)]
     [InlineData((byte)1, true)]
     [InlineData((byte)2, true)]

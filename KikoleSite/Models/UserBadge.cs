@@ -1,4 +1,5 @@
 ﻿using System;
+using KikoleSite.Models.Enums;
 
 namespace KikoleSite.Models;
 
@@ -15,6 +16,8 @@ public class UserBadge
     public int Users => _badge.Users;
 
     public bool Hidden => _badge.Hidden;
+
+    public BadgeTiers Tier => _badge.Tier;
 
     public DateOnly GetDate { get; }
 

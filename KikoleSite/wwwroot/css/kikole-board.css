@@ -2156,24 +2156,80 @@ body { padding-top: 0; }
   font-weight: 700;
 }
 /* ---------------------------------------------------------- badges "metal" (2026-09-26)
-   Badge obtenu = plaque de metal sombre a bordure epaisse (3px) en degrade d'or terni :
-   le fond est un degrade bronze/noir (padding-box), la bordure un degrade or clair -> or
-   sombre (border-box), plus un reflet diagonal et un liseré interieur. Le texte reste
-   clair sur fond sombre (contraste eleve). Badge secret : meme plaque, bord plus vif et
-   halo. Badge manquant : inchange (pointilles, aucun metal - on ne l'a pas gagne). */
+   Badge obtenu = plaque de metal sombre a bordure epaisse (3px) en degrade metallique :
+   le fond est un degrade sombre (padding-box), la bordure un degrade clair -> sombre
+   (border-box), plus un reflet diagonal et un liseré interieur. Le texte reste clair sur
+   fond sombre (contraste eleve). La couleur du metal vient de la rarete du badge
+   (.tier-common / -rare / -epic / -legendary, cf. BadgeTiers) via les variables --b-* ;
+   sans classe de rarete, c'est le commun (or terni). Badge secret : meme plaque avec un
+   halo. Badge manquant : plaque eteinte (voir plus bas), sans couleur de rarete. */
 
 .kikole-board .badge-card {
+  /* commun : or terni */
+  --b-plate-1: #342e21; --b-plate-2: #1f1c15; --b-plate-3: #2a251b; --b-plate-4: #191711;
+  --b-edge-1: #bfa05a; --b-edge-2: #6f5b2b; --b-edge-3: #a8873f; --b-edge-4: #52401a; --b-edge-5: #967a35;
+  --b-light: rgba(255, 230, 160, 0.16);
+  --b-shine: rgba(255, 236, 170, 0.08);
+  --b-icon: #cfae5e;
+  --b-name: #eadfbf;
+  --b-link: #e0cb8c;
+  --b-line: rgba(207, 174, 94, 0.42);
+  --b-date: #dcc480;
+  --b-date-border: rgba(207, 174, 94, 0.62);
+  --b-glow: rgba(0, 0, 0, 0);
+
   position: relative;
   overflow: hidden;
   border: 3px solid transparent;
   border-radius: 12px;
   background:
-    linear-gradient(155deg, #3b3320 0%, #221e14 38%, #2e2718 62%, #1b1810 100%) padding-box,
-    linear-gradient(135deg, #d8b356 0%, #7b5d1d 27%, #c39b3f 52%, #5b4413 78%, #b18831 100%) border-box;
+    linear-gradient(155deg, var(--b-plate-1) 0%, var(--b-plate-2) 38%, var(--b-plate-3) 62%, var(--b-plate-4) 100%) padding-box,
+    linear-gradient(135deg, var(--b-edge-1) 0%, var(--b-edge-2) 27%, var(--b-edge-3) 52%, var(--b-edge-4) 78%, var(--b-edge-5) 100%) border-box;
   box-shadow:
-    inset 0 1px 0 rgba(255, 228, 150, 0.22),
+    inset 0 1px 0 var(--b-light),
     inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+    0 0 14px var(--b-glow),
     0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.kikole-board .badge-card.tier-rare {
+  --b-plate-1: #1d2a40; --b-plate-2: #131c2d; --b-plate-3: #19243a; --b-plate-4: #0f1623;
+  --b-edge-1: #6fb0ff; --b-edge-2: #2a5aa0; --b-edge-3: #5a9be8; --b-edge-4: #1f4478; --b-edge-5: #4a86d0;
+  --b-light: rgba(170, 210, 255, 0.22);
+  --b-shine: rgba(170, 210, 255, 0.12);
+  --b-icon: #6fb4ff;
+  --b-name: #dcecff;
+  --b-link: #a9d0ff;
+  --b-line: rgba(111, 180, 255, 0.45);
+  --b-date: #9cc8ff;
+  --b-date-border: rgba(111, 180, 255, 0.7);
+}
+
+.kikole-board .badge-card.tier-epic {
+  --b-plate-1: #2e1f45; --b-plate-2: #1e1330; --b-plate-3: #281a3d; --b-plate-4: #170f26;
+  --b-edge-1: #b784ff; --b-edge-2: #5e3a9a; --b-edge-3: #a46df0; --b-edge-4: #482a7c; --b-edge-5: #9560de;
+  --b-light: rgba(220, 190, 255, 0.22);
+  --b-shine: rgba(220, 190, 255, 0.12);
+  --b-icon: #c196ff;
+  --b-name: #efe2ff;
+  --b-link: #d6baff;
+  --b-line: rgba(193, 150, 255, 0.45);
+  --b-date: #cfa9ff;
+  --b-date-border: rgba(193, 150, 255, 0.7);
+}
+
+.kikole-board .badge-card.tier-legendary {
+  --b-plate-1: #574705; --b-plate-2: #30270a; --b-plate-3: #413506; --b-plate-4: #231c03;
+  --b-edge-1: #fff08a; --b-edge-2: #d9a800; --b-edge-3: #ffd91a; --b-edge-4: #a67c00; --b-edge-5: #ffe14d;
+  --b-light: rgba(255, 245, 170, 0.42);
+  --b-shine: rgba(255, 250, 190, 0.22);
+  --b-icon: #ffe14d;
+  --b-name: #fffbe0;
+  --b-link: #fff0a0;
+  --b-line: rgba(255, 225, 77, 0.65);
+  --b-date: #ffeb7a;
+  --b-date-border: rgba(255, 225, 77, 0.9);
+  --b-glow: rgba(255, 214, 10, 0.6);
 }
 
 .kikole-board .badge-card::after {
@@ -2181,39 +2237,50 @@ body { padding-top: 0; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 28%, rgba(255, 236, 170, 0.11) 46%, transparent 62%);
+  background: linear-gradient(115deg, transparent 28%, var(--b-shine) 46%, transparent 62%);
+}
+
+/* legendaire : le reflet traverse la plaque de gauche a droite, puis marque une pause
+   (la bande n'occupe que le milieu d'une image 3 fois plus large, qu'on fait glisser) */
+.kikole-board .badge-card.tier-legendary:not(.missing)::after {
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 252, 205, 0.5) 50%, transparent 60%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  animation: badge-shine 4s ease-in-out infinite;
+}
+
+@keyframes badge-shine {
+  0% { background-position: 100% 0; }
+  50%, 100% { background-position: 0% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kikole-board .badge-card.tier-legendary:not(.missing)::after {
+    animation: none;
+    background: linear-gradient(115deg, transparent 28%, var(--b-shine) 46%, transparent 62%);
+  }
 }
 
 .kikole-board .badge-card .badge-icon {
-  color: #e6bf58;
+  color: var(--b-icon);
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
 }
 
-.kikole-board .badge-card .badge-name { color: #f8ebc0; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6); }
+.kikole-board .badge-card .badge-name { color: var(--b-name); text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6); }
 
-.kikole-board .badge-card .badge-desc summary { border-bottom-color: rgba(230, 191, 88, 0.45); }
-.kikole-board .badge-card .badge-desc summary:hover { color: #f3d98a; }
-.kikole-board .badge-card .badge-desc summary:hover::before { border-color: #f3d98a; color: #f3d98a; }
+.kikole-board .badge-card .badge-desc summary { border-bottom-color: var(--b-line); }
+.kikole-board .badge-card .badge-desc summary:hover { color: var(--b-link); }
+.kikole-board .badge-card .badge-desc summary:hover::before { border-color: var(--b-link); color: var(--b-link); }
 
 .kikole-board .badge-card .badge-date {
-  color: #f0cf78;
-  border-color: rgba(230, 191, 88, 0.7);
+  color: var(--b-date);
+  border-color: var(--b-date-border);
   background: rgba(0, 0, 0, 0.25);
 }
 
-.kikole-board .badge-card .badge-holders b { color: #f8ebc0; }
+.kikole-board .badge-card .badge-holders b { color: var(--b-name); }
 
-.kikole-board .badge-card.secret {
-  background:
-    linear-gradient(155deg, #4a3d1e 0%, #2a2213 40%, #37301a 62%, #1f1b0f 100%) padding-box,
-    linear-gradient(135deg, #f0d27c 0%, #9a7622 27%, #e2bd55 52%, #7a5c19 78%, #d3a63d 100%) border-box;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 232, 160, 0.3),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.55),
-    0 0 14px rgba(232, 180, 76, 0.32),
-    0 4px 10px rgba(0, 0, 0, 0.5);
-}
-
+.kikole-board .badge-card.secret { --b-glow: rgba(232, 180, 76, 0.4); }
 .kikole-board .badge-card.missing {
   border: 2px dashed var(--border-strong);
   background: transparent;

@@ -250,6 +250,24 @@ public static class ViewHelper
         };
     }
 
+    internal static string GetLabel(this BadgeTiers tier)
+    {
+        return tier switch
+        {
+            BadgeTiers.Common => IsFrench() ? "Commun" : "Common",
+            BadgeTiers.Rare => "Rare",
+            BadgeTiers.Epic => IsFrench() ? "Épique" : "Epic",
+            BadgeTiers.Legendary => IsFrench() ? "Légendaire" : "Legendary",
+            _ => throw new NotImplementedException(),
+        };
+    }
+
+    // classe CSS de la plaque du badge (couleur de rarete)
+    internal static string GetCssClass(this BadgeTiers tier)
+    {
+        return $"tier-{tier.ToString().ToLowerInvariant()}";
+    }
+
     internal static Languages GetLanguage()
     {
         return CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "fr"

@@ -70,6 +70,10 @@ Reprise du projet abandonné en mai 2023. `[x]` traité, `[ ]` à faire.
   - [x] Badges du jour des autres : visibles dès qu'on a accès au jour (classement acheté compris)
   - [x] Recalcul global complet (Dedicated, Do it yourself, We are kikolé via `players.acceptance_date`)
 - [ ] Reprendre la règle de Phoenix, puis le réactiver
+- [ ] Rareté des badges (`badges.tier`, 1 à 4 : couleur de la plaque)
+  - [x] Code (enum, modèle, vues, styles) et colonne locale
+  - [x] Niveau de chaque badge renseigné (base locale et `kikole.sql`)
+  - [ ] Migration production : `ALTER TABLE badges ADD tier` + `UPDATE`
 - [ ] Idée de badge « Grand Chelem » à préciser
 - [ ] Migrations à rejouer sur toute base existante (pas sur une base créée depuis `kikole.sql`)
   - [ ] `badge_translations.name` (+ `UPDATE` depuis `badges.name`)

@@ -9,6 +9,8 @@ CREATE TABLE badges (
   name varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   description text COLLATE utf8mb4_unicode_ci NOT NULL,
   hidden tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  -- rarete : 1 commun, 2 rare, 3 epique, 4 legendaire (couleur de la plaque du badge)
+  tier tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
   is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -50,6 +52,11 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (34, 'Confederations Cup', 'Find kikolés from all six continents, one continent per kikolé (a player with two countries counts for only one continent)', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00'),
 (35, 'OK Zoomer', 'Find a kikolé born in 2005 or later', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00');
+
+-- rarete des badges : 1 commun (defaut), 2 rare, 3 epique, 4 legendaire
+UPDATE badges SET tier = 2 WHERE id IN (6, 7, 10, 15, 16, 22, 23, 26, 27, 32, 34);
+UPDATE badges SET tier = 3 WHERE id IN (11, 14, 17, 19, 24, 30);
+UPDATE badges SET tier = 4 WHERE id IN (12, 25, 28, 31, 33);
 
 -- Badges desactives (suppression virtuelle, cf. badges.is_disabled) :
 --  - 30 Phoenix : regle a reprendre (risque de penaliser les joueurs assidus) ;

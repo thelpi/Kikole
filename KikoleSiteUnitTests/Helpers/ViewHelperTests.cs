@@ -367,4 +367,34 @@ public class ViewHelperTests
             CultureInfo.CurrentCulture = previous;
         }
     }
+    // ------------------------------------------------------------- rarete des badges
+
+    [Fact]
+    public void BadgeTiers_GetLabel_FollowsTheCulture()
+    {
+        using (Culture.French())
+        {
+            BadgeTiers.Common.GetLabel().Should().Be("Commun");
+            BadgeTiers.Rare.GetLabel().Should().Be("Rare");
+            BadgeTiers.Epic.GetLabel().Should().Be("Épique");
+            BadgeTiers.Legendary.GetLabel().Should().Be("Légendaire");
+        }
+
+        using (Culture.English())
+        {
+            BadgeTiers.Common.GetLabel().Should().Be("Common");
+            BadgeTiers.Epic.GetLabel().Should().Be("Epic");
+            BadgeTiers.Legendary.GetLabel().Should().Be("Legendary");
+        }
+    }
+
+    [Theory]
+    [InlineData(BadgeTiers.Common, "tier-common")]
+    [InlineData(BadgeTiers.Rare, "tier-rare")]
+    [InlineData(BadgeTiers.Epic, "tier-epic")]
+    [InlineData(BadgeTiers.Legendary, "tier-legendary")]
+    public void BadgeTiers_GetCssClass_MatchesTheStylesheet(BadgeTiers tier, string expected)
+    {
+        tier.GetCssClass().Should().Be(expected);
+    }
 }
