@@ -129,6 +129,35 @@ public class LeaderboardControllerTests
         model.ProposalDetails.Should().ContainSingle().Which.Value.Should().Be("Europe (libellé)");
     }
 
+    [Fact]
+    public async Task UserDay_WhenOneParallelCallFails_WaitsForTheOthersBeforeReportingTheError()
+    {
+        const ulong viewer = 1;
+        const ulong viewedUser = 2;
+        SetUser(viewer);
+        _userRepository.Setup(_ => _.GetUserByIdAsync(viewedUser))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(viewedUser).WithLogin("cible").WithType(UserTypes.StandardUser).Build());
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(viewer, Today)).ReturnsAsync(DayGrantTypes.Admin);
+        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Today))
+            .ReturnsAsync(PlayerFullDtoBuilder.Valid().WithPlayer(PlayerDtoBuilder.Valid().WithCreator(99).Build()).Build());
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        SetUpReferentials();
+
+        _leaderService.Setup(_ => _.GetDayboardAsync(Today, DayLeaderSorts.BestTime, TestCountryContinents.Map))
+            .ThrowsAsync(new InvalidOperationException("dayboard"));
+        var slowProposals = new TaskCompletionSource<IReadOnlyCollection<ProposalResponse>>();
+        _proposalService.Setup(_ => _.GetProposalsAsync(Today, viewedUser, TestCountryContinents.Map))
+            .Returns(slowProposals.Task);
+
+        var call = _controller.UserDay(viewedUser, Today.ToString("yyyy-MM-dd"));
+
+        await Task.Delay(100);
+        call.IsCompleted.Should().BeFalse("la methode ne doit pas rendre la main tant qu'un appel lance en parallele tourne encore");
+
+        slowProposals.SetResult([]);
+
+        await FluentActions.Awaiting(() => call).Should().ThrowAsync<InvalidOperationException>().WithMessage("dayboard");
+    }
     private void SetUpReferentials()
     {
         _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))

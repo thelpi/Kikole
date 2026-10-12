@@ -170,6 +170,8 @@ public class LeaderboardController : KikoleBaseController
         var continentsTask = GetContinentsAsync();
         var clubsTask = GetClubsAsync();
 
+        await Task.WhenAll(dbTask, proposalsTask, countriesTask, continentsTask, clubsTask);
+
         var db = await dbTask;
 
         var proposals = await proposalsTask;
@@ -314,15 +316,24 @@ public class LeaderboardController : KikoleBaseController
     {
         // le classement general depend de "foundToday" (issu du dayboard) : seul le
         // dayboard et les podiums, independants l'un de l'autre, peuvent partir en //
-        var dayboardTask = GetDailyboardAsync(_clock.Today, DayLeaderSorts.BestTime, null);
+        var boardsTask = GetBoardsAsync();
         var podiumsTask = _leaderService.GetPodiumsAsync();
 
-        var (dailyBoard, foundToday) = await dayboardTask;
+        await Task.WhenAll(boardsTask, podiumsTask);
 
-        var (globalLeaderboard, _) = await GetLeaderboardAsync(
-                _clock.FirstOfMonth, _clock.Today, LeaderSorts.TotalPoints, foundToday);
+        var (dailyBoard, globalLeaderboard) = await boardsTask;
 
         var podiums = await podiumsTask;
+
+        async Task<(Models.Dayboard, IReadOnlyCollection<Models.LeaderboardItem>)> GetBoardsAsync()
+        {
+            var (daily, foundToday) = await GetDailyboardAsync(_clock.Today, DayLeaderSorts.BestTime, null);
+
+            var (global, _) = await GetLeaderboardAsync(
+                    _clock.FirstOfMonth, _clock.Today, LeaderSorts.TotalPoints, foundToday);
+
+            return (daily, global);
+        }
 
         return new LeaderboardModel
         {
@@ -379,6 +390,8 @@ public class LeaderboardController : KikoleBaseController
         var minDateTask = EnsureDateAsync(minDate, todayGrantEnsured);
         var maxDateTask = EnsureDateAsync(maxDate, todayGrantEnsured);
 
+        await Task.WhenAll(minDateTask, maxDateTask);
+
         minDate = await minDateTask;
         maxDate = await maxDateTask;
 
@@ -405,6 +418,8 @@ public class LeaderboardController : KikoleBaseController
             : _proposalService.GetGrantAccessForDayAsync(UserId, _clock.Today);
 
         var dateTask = EnsureDateAsync(date, DayGrantTypes.Found); // any DayGrantTypes but "None"
+
+        await Task.WhenAll(todayGrantTask, dateTask);
 
         var todayGrantEnsured = await todayGrantTask;
 

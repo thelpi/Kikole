@@ -259,6 +259,8 @@ public class HomeController : KikoleBaseController
 
         var countryContinentsTask = _internationalService.GetCountryContinentsAsync();
 
+        await Task.WhenAll(pInfoTask, countryContinentsTask);
+
         var pInfo = await pInfoTask;
 
         var countryContinents = await countryContinentsTask;
@@ -427,6 +429,8 @@ public class HomeController : KikoleBaseController
             ? _leaderService.GetUserStreakAsync(UserId)
             : null;
 
+        await Task.WhenAll(new Task?[] { playerCreatorTask, clueTask, easyClueTask, streakTask }.OfType<Task>());
+
         var playerCreator = playerCreatorTask == null ? null : await playerCreatorTask;
 
         var clue = await clueTask;
@@ -456,6 +460,8 @@ public class HomeController : KikoleBaseController
                 var continentsTask = GetContinentsAsync();
 
                 var clubsTask = _internationalService.GetClubsAsync();
+
+                await Task.WhenAll(proposalsTask, countriesTask, continentsTask, clubsTask);
 
                 var proposals = await proposalsTask;
 

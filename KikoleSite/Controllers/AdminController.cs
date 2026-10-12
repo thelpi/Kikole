@@ -992,11 +992,20 @@ public class AdminController : KikoleBaseController
 
         var continentsTask = GetContinentsAsync();
 
-        var pls = await _playerService.GetPlayerSubmissionsAsync(await _internationalService.GetCountryContinentsAsync());
+        var plsTask = GetSubmissionsAsync();
+
+        await Task.WhenAll(countriesTask, continentsTask, plsTask);
+
+        var pls = await plsTask;
 
         var countries = await countriesTask;
 
         var continents = await continentsTask;
+
+        async Task<IReadOnlyCollection<Player>> GetSubmissionsAsync()
+        {
+            return await _playerService.GetPlayerSubmissionsAsync(await _internationalService.GetCountryContinentsAsync());
+        }
 
         return pls
             .Select(p => new PlayerSubmissionModel
