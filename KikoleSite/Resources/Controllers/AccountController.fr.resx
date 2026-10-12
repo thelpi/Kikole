@@ -333,4 +333,7 @@
   <data name="ConfirmationEmailThrottled" xml:space="preserve">
     <value>Un email de confirmation vient d&apos;être envoyé. Patientez quelques minutes avant d&apos;en redemander un.</value>
   </data>
+  <data name="AccountCreatedConfirmEmail" xml:space="preserve">
+    <value>Votre compte est créé. Un email de confirmation vient de vous être envoyé : cliquez sur le lien qu&apos;il contient pour activer votre compte (vérifiez vos courriers indésirables).</value>
+  </data>
 </root>

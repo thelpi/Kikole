@@ -620,7 +620,7 @@ public class AccountControllerTests
             .Callback<ApplicationUser, string>((u, _) => u.Id = 9);
         _userManager.Setup(_ => _.GenerateEmailConfirmationTokenAsync(It.IsAny<ApplicationUser>())).ReturnsAsync("token");
 
-        await controller.Create(new AccountModel
+        var result = await controller.Create(new AccountModel
         {
             LoginCreateSubmission = "nouveau",
             PasswordCreate1Submission = "NouveauMdp1234",
@@ -630,6 +630,12 @@ public class AccountControllerTests
 
         _emailSender.Verify(_ => _.SendAsync("nouveau@kikole.test", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         _userManager.Verify(_ => _.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+
+        // un message d'information (vert), pas l'erreur "email non confirme" d'une connexion refusee
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.SuccessInfo.Should().Be("AccountCreatedConfirmEmail");
+        model.Error.Should().BeNull();
+        _signInManager.Verify(_ => _.PasswordSignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never);
     }
 
     [Fact]

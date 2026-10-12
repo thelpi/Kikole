@@ -249,4 +249,7 @@
   <data name="ConfirmationEmailThrottled" xml:space="preserve">
     <value>A confirmation email was just sent. Please wait a few minutes before asking for another one.</value>
   </data>
+  <data name="AccountCreatedConfirmEmail" xml:space="preserve">
+    <value>Your account has been created. A confirmation email has just been sent to you: click the link it contains to activate your account (check your spam folder).</value>
+  </data>
 </root>

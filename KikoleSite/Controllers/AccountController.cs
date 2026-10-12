@@ -422,6 +422,13 @@ public class AccountController : KikoleBaseController
                                 model.Error = _localizer["ConfirmationEmailNotSent"];
                                 return await RenderIndexAsync(model);
                             }
+
+                            // pas de connexion automatique : elle serait refusee tant que l'email
+                            // n'est pas confirme, et afficherait ce refus comme une erreur
+                            return await RenderIndexAsync(new AccountModel
+                            {
+                                SuccessInfo = _localizer["AccountCreatedConfirmEmail"]
+                            });
                         }
                         else
                         {
