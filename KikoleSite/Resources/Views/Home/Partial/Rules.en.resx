@@ -154,7 +154,7 @@
     <value>An incorrect position proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
   </data>
   <data name="BadGuessYear" xml:space="preserve">
-    <value>An incorrect year proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points.</value>
+    <value>An incorrect year proposition costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; points, but tells you whether the player is younger or older.</value>
   </data>
   <data name="ClueGuess" xml:space="preserve">
     <value>Asking for a second clue costs &lt;span class="redtext" style="font-size: large"&gt;{0}&lt;/span&gt; % of points.</value>
