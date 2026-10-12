@@ -37,9 +37,14 @@ internal static class StringHelper
 
     internal static bool ContainsApproximately(this string source, string value)
     {
+        var cleanValue = value.Sanitize();
+
+        // rien d'exploitable apres normalisation (ex. un accent combinant seul)
+        if (cleanValue.Length == 0)
+            return false;
+
         return source.Disjoin().Any(_ =>
         {
-            var cleanValue = value.Sanitize();
             var score = _.GetLevenshteinDistance(cleanValue);
             return (score / (decimal)cleanValue.Length) < NameToleranceMax;
         });
@@ -67,6 +72,12 @@ internal static class StringHelper
         return string.Join(Separator, values.Select(Sanitize).Concat(new[] { sourceValue.Sanitize() }).Distinct());
     }
 
+    // faux pour une saisie non latine abimee par l'ancienne normalisation : il n'y reste que des '?' et des espaces
+    internal static bool HasReadableText(this string value)
+    {
+        return value.Any(c => c != '?' && !char.IsWhiteSpace(c));
+    }
+
     internal static bool IsValid(this IReadOnlyList<string>? values)
     {
         return values?.Count > 0
@@ -84,19 +95,48 @@ internal static class StringHelper
                 mapped.Append(c);
         }
 
-        var decomposed = mapped.ToString().Normalize(NormalizationForm.FormD);
+        // la decomposition de compatibilite replie aussi les formes pleine largeur
+        // (ex. "ＹＡＭＡＤＡ", frequentes avec un clavier japonais) et les ligatures
+        var decomposed = mapped.ToString().Normalize(NormalizationForm.FormKD);
 
         var stripped = new StringBuilder(decomposed.Length);
+        // seuls les accents des lettres latines sont retires : le signe d'un kana voise
+        // (が, ば...) ou une voyelle hebraique font partie de la lettre
         foreach (var c in decomposed)
         {
-            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                stripped.Append(c);
+            var isMark = CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark;
+            if (isMark && (stripped.Length == 0 || IsLatinLetter(stripped[^1])))
+                continue;
+
+            stripped.Append(c);
         }
 
         // le best-fit de la page de code rabat les lettres latines restantes sur leur
-        // equivalent ASCII (o, l, ae...), y compris celles sans decomposition Unicode
-        var tempBytes = BestFitEncoding.GetBytes(stripped.ToString());
-        return Encoding.UTF8.GetString(tempBytes);
+        // equivalent ASCII (o, l, ae...), y compris celles sans decomposition Unicode ;
+        // tout caractere qu'il ne sait pas rabattre (japonais, cyrillique, coreen...) est
+        // conserve tel quel plutot que remplace par '?'
+        var result = new StringBuilder(stripped.Length);
+        foreach (var c in stripped.ToString())
+        {
+            if (c < 128)
+            {
+                result.Append(c);
+                continue;
+            }
+
+            var bytes = BestFitEncoding.GetBytes(c.ToString());
+            result.Append(bytes.Length == 1 && bytes[0] < 128 && bytes[0] != (byte)'?' ? (char)bytes[0] : c);
+        }
+
+        // recompose notamment les syllabes coreennes eclatees par la normalisation precedente
+        return result.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    private static bool IsLatinLetter(char c)
+    {
+        return c is >= 'A' and <= 'Z' or >= 'a' and <= 'z'
+            or >= '\u00C0' and < '\u0250'
+            or >= '\u1E00' and <= '\u1EFF';
     }
 
     private static Encoding ResolveBestFitEncoding()

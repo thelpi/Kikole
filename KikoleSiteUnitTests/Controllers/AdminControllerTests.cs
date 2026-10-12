@@ -923,6 +923,20 @@ public class AdminControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task PlayerEditGet_DropsAliasesDamagedIntoQuestionMarks()
+    {
+        SetupEditReferentials();
+        var player = PlayerDtoBuilder.Valid().WithId(7).WithName("Yamada Taro").WithAllowedNames("????;?? ??;taro;yamada taro")
+            .WithPublicationDate(Today.AddDays(3)).Build();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData(player));
+
+        var result = await _controller.PlayerEdit(playerId: 7);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Subject;
+        model.AlternativeName0.Should().Be("taro");
+        model.AlternativeName1.Should().BeNull();
+    }
+    [Fact]
     public async Task PlayerEditPost_WithoutPlayerId_RedirectsToTheList()
     {
         var result = await _controller.PlayerEdit(new PlayerCreationModel());

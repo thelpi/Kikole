@@ -957,10 +957,11 @@ public class AdminController : KikoleBaseController
             HideCreator = player.HideCreator == 1
         };
 
-        // les noms acceptes sont stockes normalises : on ne retrouve que cette forme
+        // les noms acceptes sont stockes normalises : on ne retrouve que cette forme ; les alias
+        // non latins abimes par l'ancienne normalisation ("?? ??") ne sont pas repris
         var sanitizedName = player.Name.Sanitize();
         var alternativeNames = player.AllowedNames.Disjoin()
-            .Where(n => n.Length > 0 && n != sanitizedName)
+            .Where(n => n != sanitizedName && n.HasReadableText())
             .Take(10)
             .ToList();
         for (var i = 0; i < alternativeNames.Count; i++)

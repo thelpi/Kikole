@@ -221,4 +221,60 @@ public class StringHelperTests
     {
         value.IsEnumValue<Positions>().Should().Be(expected);
     }
+    // ------------------------------------------------------------- caracteres non latins
+
+    [Theory]
+    [InlineData("山田太郎", "山田太郎")]
+    [InlineData("Иван Петров", "иван петров")]
+    [InlineData("서울", "서울")]
+    [InlineData("ひらがなだ", "ひらがなだ")]
+    [InlineData("Yamada 山田", "yamada 山田")]
+    public void Sanitize_KeepsNonLatinTextInsteadOfReplacingItWithQuestionMarks(string input, string expected)
+    {
+        input.Sanitize().Should().Be(expected);
+    }
+
+    [Fact]
+    public void Sanitize_FoldsFullWidthLatinLetters()
+    {
+        "ＹＡＭＡＤＡ　Ｔａｒｏ".Sanitize().Should().Be("yamada taro");
+    }
+
+    [Fact]
+    public void SanitizeJoin_KeepsTheJapaneseAliasNextToTheLatinName()
+    {
+        new[] { "山田太郎" }.SanitizeJoin("Yamada Taro").Should().Be("山田太郎;yamada taro");
+    }
+
+    [Theory]
+    [InlineData("山田太郎", true)]
+    [InlineData("yamada taro", true)]
+    [InlineData("田中花子", false)]
+    [InlineData("Иван", false)]
+    [InlineData("????", false)]
+    public void ContainsApproximately_JapaneseAlias_OnlyMatchesTheSameName(string guess, bool expected)
+    {
+        "yamada taro;山田太郎".ContainsApproximately(guess).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("\u0301")]
+    [InlineData("   ")]
+    public void ContainsApproximately_WhenNothingIsLeftAfterNormalization_DoesNotMatchNorThrow(string guess)
+    {
+        "zidane;zinedine zidane".ContainsApproximately(guess).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("", false)]
+    [InlineData("????", false)]
+    [InlineData("?? ??", false)]
+    [InlineData("   ", false)]
+    [InlineData("zidane", true)]
+    [InlineData("山田太郎", true)]
+    [InlineData("?a?", true)]
+    public void HasReadableText_IsFalseForAliasesDamagedByTheLegacyNormalization(string value, bool expected)
+    {
+        value.HasReadableText().Should().Be(expected);
+    }
 }
