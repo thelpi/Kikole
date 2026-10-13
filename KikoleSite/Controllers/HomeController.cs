@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -148,6 +149,11 @@ public class HomeController : KikoleBaseController
         return Redirect(IsLocalPath(redirect) ? redirect! : "/");
     }
 
+    private string TodayStamp()
+    {
+        return _clock.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
     // chemin du site uniquement : ni vide, ni URL absolue, ni "//hote" ni "/\hote" (redirection ouverte)
     private static bool IsLocalPath(string? path)
     {
@@ -162,6 +168,7 @@ public class HomeController : KikoleBaseController
         var model = new HomeModel
         {
             CurrentDate = _clock.Today,
+            PageDate = TodayStamp(),
             Points = ScoreCalculator.BasePoints,
             RegistrationInviteEnabled = _registrationOptions.InviteEnabled
         };
@@ -223,6 +230,14 @@ public class HomeController : KikoleBaseController
         }
 
         model.CurrentDate = _clock.Today;
+
+        // page restee ouverte (ou formulaire rejoue) depuis un jour precedent : rien n'est enregistre
+        if (!string.IsNullOrEmpty(model.PageDate) && model.PageDate != TodayStamp())
+        {
+            return await Index(null, _localizer["StalePage"]);
+        }
+
+        model.PageDate = TodayStamp();
 
         var proposalType = ProposalTypes.Name;
         var value = string.Empty;

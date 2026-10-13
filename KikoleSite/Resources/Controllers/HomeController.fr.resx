@@ -135,4 +135,7 @@
   <data name="ValidGuess" xml:space="preserve">
     <value>Proposition {0} correcte.</value>
   </data>
+  <data name="StalePage" xml:space="preserve">
+    <value>Un nouveau joueur du jour est disponible : votre dernière action concernait le joueur précédent et n&apos;a pas été enregistrée.</value>
+  </data>
 </root>

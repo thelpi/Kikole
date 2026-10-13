@@ -135,4 +135,7 @@
   <data name="ValidGuess" xml:space="preserve">
     <value>Valid {0} guess.</value>
   </data>
+  <data name="StalePage" xml:space="preserve">
+    <value>A new player of the day is available: your last action was for the previous player and was not recorded.</value>
+  </data>
 </root>

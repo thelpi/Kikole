@@ -354,6 +354,59 @@ public class HomeControllerTests
     }
 
     [Fact]
+    public async Task IndexPost_FormRenderedOnAPreviousDay_RecordsNothingAndExplains()
+    {
+        SetUser(userId: null, login: null, userType: null);
+        SetupCountryContinents();
+        SetupClues();
+        SetFormKeys("submit-Name");
+
+        var model = new HomeModel { PlayerNameSubmission = "Mauvais joueur", PageDate = Today.AddDays(-1).ToString("yyyy-MM-dd") };
+
+        var result = await _controller.Index(model);
+
+        var renderedModel = ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Subject;
+        renderedModel.IsErrorMessageForced.Should().BeTrue();
+        renderedModel.MessageToDisplay.Should().Be("StalePage");
+        renderedModel.PageDate.Should().Be(Today.ToString("yyyy-MM-dd"));
+        _proposalService.Verify(_ => _.ManageProposalResponseAsync(
+            It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), It.IsAny<ulong>(), It.IsAny<PlayerFullDto>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()),
+            Times.Never);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("today")]
+    public async Task IndexPost_FormFromTheSameDayOrWithoutPageDate_IsProcessedNormally(string? pageDate)
+    {
+        SetUser(userId: null, login: null, userType: null);
+        SetupCountryContinents();
+        SetupClues();
+        SetFormKeys("submit-Continent");
+
+        var model = new HomeModel
+        {
+            ContinentNameSubmission = "PasUnContinent",
+            PageDate = pageDate == "today" ? Today.ToString("yyyy-MM-dd") : null
+        };
+
+        var result = await _controller.Index(model);
+
+        ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Which.MessageToDisplay.Should().Be("InvalidRequest");
+    }
+
+    [Fact]
+    public async Task IndexGet_StampsThePageWithTheDayItIsRenderedOn()
+    {
+        SetUser(userId: null, login: null, userType: null);
+        SetupCountryContinents();
+        SetupClues();
+
+        var result = await _controller.Index(null, null!);
+
+        ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Which.PageDate.Should().Be(Today.ToString("yyyy-MM-dd"));
+    }
+    [Fact]
     public async Task IndexPost_ValidNonWinningProposal_OnlyCallsNonLeaderBadges()
     {
         SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);

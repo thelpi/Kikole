@@ -44,6 +44,13 @@ public class HomeModel
     public IReadOnlyList<SelectListItem> Positions { get; set; } = [];
     public string? LoggedAs { get; set; }
     public int CurrentDay { get; set; }
+
+    /// <summary>
+    /// Jour reel ("yyyy-MM-dd") ou la page a ete rendue, reposte par chaque formulaire :
+    /// <see cref="CurrentDay"/> est relatif ("0" = aujourd'hui), un formulaire perime
+    /// s'appliquerait donc au joueur du nouveau jour.
+    /// </summary>
+    public string? PageDate { get; set; }
     public bool NoPreviousDay { get; set; }
     public bool IsCreator { get; set; }
 

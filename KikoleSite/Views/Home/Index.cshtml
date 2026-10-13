@@ -293,7 +293,7 @@
             <div class="final">
                 <div class="field">@localizer["TypePlayerName"]</div>
                 <form method="post" action="/" style="margin:0" id="playerNameForm">
-                    @Html.HiddenFor(m => m.CurrentDay)
+                    @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                     <div class="final-input">
                         <input type="text" name="PlayerNameSubmission" id="playerNameInput" value="@Model.PlayerNameSubmission" placeholder="Zinédine Zidane, Kylian Mbappé…" aria-describedby="playerNameError" />
                         <div class="final-actions">
@@ -326,7 +326,7 @@
             @if (Model.CurrentDay > 0)
             {
                 <form method="post" action="/" id="giveUpForm" style="margin:0">
-                    @Html.HiddenFor(m => m.CurrentDay)
+                    @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                 </form>
                 <div class="confirm-modal" id="giveUpModal">
                     <div class="confirm-modal-box">
@@ -345,14 +345,14 @@
                     @if (showClueButton)
                     {
                         <form method="post" action="/" style="margin:0">
-                            @Html.HiddenFor(m => m.CurrentDay)
+                            @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                             <button type="submit" name="submit-Clue">@localizer["NeedAnotherClue"] <span class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points% @localizer["PointsPercent"]</span></button>
                         </form>
                     }
                     @if (showLeaderboardButton)
                     {
                         <form method="post" action="/" style="margin:0">
-                            @Html.HiddenFor(m => m.CurrentDay)
+                            @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                             <button type="submit" name="submit-Leaderboard">@localizer["LeaderboardAccess"] <span class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Leaderboard].points @localizer["Points"]</span></button>
                         </form>
                     }
@@ -362,7 +362,7 @@
             <div class="rows">
                 <!-- clubs -->
                 <form method="post" action="/" class="dossier-row locked">
-                    @Html.HiddenFor(m => m.CurrentDay)
+                    @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                     <div class="field">@localizer["ClubsTitle"]<span class="hint">@localizer["ClubTipOne"]</span></div>
                     <div>
                         @if (Model.KnownPlayerClubs?.Count > 0)
@@ -404,7 +404,7 @@
                 </form>
                 <!-- continent -->
                 <form method="post" action="/" class="dossier-row @(string.IsNullOrWhiteSpace(Model.ContinentName) ? "locked" : "solved")">
-                    @Html.HiddenFor(m => m.CurrentDay)
+                    @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                     <div class="field">@localizer["ContinentTitle"]</div>
                     @if (string.IsNullOrWhiteSpace(Model.ContinentName))
                     {
@@ -436,7 +436,7 @@
                 </form>
             <!-- nationality -->
             <form method="post" action="/" class="dossier-row @(string.IsNullOrWhiteSpace(Model.CountryName) ? "locked" : "solved")">
-                @Html.HiddenFor(m => m.CurrentDay)
+                @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                 <div class="field">@localizer["NationalityTitle"]<span class="hint">@Html.Raw(localizer["TipAboutNationality"].Value)</span></div>
                 @if (string.IsNullOrWhiteSpace(Model.CountryName))
                 {
@@ -468,7 +468,7 @@
             </form>
             <!-- year -->
             <form method="post" action="/" class="dossier-row @(string.IsNullOrWhiteSpace(Model.BirthYear) ? "locked" : "solved")">
-                @Html.HiddenFor(m => m.CurrentDay)
+                @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                 <div class="field">@localizer["BirthYearTitle"]@if (string.IsNullOrWhiteSpace(Model.BirthYear)) { <span class="hint">@localizer["TipAboutYear"]</span> }</div>
                 @if (string.IsNullOrWhiteSpace(Model.BirthYear))
                 {
@@ -499,7 +499,7 @@
             </form>
             <!-- position -->
             <form method="post" action="/" class="dossier-row @(string.IsNullOrWhiteSpace(Model.Position) ? "locked" : "solved")">
-                @Html.HiddenFor(m => m.CurrentDay)
+                @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
                         <div class="field">@localizer["PositionTitle"]<span class="hint">@localizer["TipAboutPosition"]</span></div>
                 @if (string.IsNullOrWhiteSpace(Model.Position))
                 {
