@@ -150,16 +150,46 @@ public class StringHelperTests
         source.ContainsApproximately(value).Should().Be(expected);
     }
 
-    [Fact]
-    public void ContainsApproximately_ToleranceIsRelativeToInputLength()
+    [Theory]
+    // les faux positifs rapportes : des noms voisins ou plus courts qui passaient
+    [InlineData("luka modric;modric", "Rodri", false)]
+    [InlineData("pedro", "Pedri", false)]
+    [InlineData("ronaldo", "Ronaldinho", false)]
+    [InlineData("xavi;xavi hernandez", "Xabi", false)]
+    // une faute de frappe reste toleree des 6 lettres
+    [InlineData("luka modric;modric", "Modrik", true)]
+    [InlineData("luka modric;modric", "Modrc", true)]
+    [InlineData("luka modric;modric", "Luka Modrik", true)]
+    [InlineData("zidane", "Zidnae", true)]
+    // exact toujours accepte, accents et casse ignores
+    [InlineData("luka modric;modric", "Modrić", true)]
+    [InlineData("pele", "Pelé", true)]
+    // pas de faute toleree jusqu'a 5 lettres
+    [InlineData("pele", "pel", false)]
+    [InlineData("pedro", "pedr", false)]
+    public void ContainsApproximately_ToleratesAFewTyposButNotOtherNames(string source, string value, bool expected)
     {
-        // le seuil est un ratio (< 0.5), donc un mot court tolere moins d'erreurs
-        // qu'un mot long en valeur absolue
-        "pele".ContainsApproximately("pel").Should().BeTrue();      // 1/3  = 0.33
-        "pele".ContainsApproximately("po").Should().BeFalse();      // 3/2  = 1.50
+        source.ContainsApproximately(value).Should().Be(expected);
     }
 
-    // ------------------------------------------------------------- GetLevenshteinDistance
+    [Theory]
+    [InlineData(5, 0)]
+    [InlineData(6, 1)]
+    [InlineData(10, 1)]
+    [InlineData(11, 2)]
+    [InlineData(15, 2)]
+    [InlineData(16, 3)]
+    public void ContainsApproximately_AllowsOneMoreTypoPerFiveLetters(int length, int allowedTypos)
+    {
+        var name = new string('a', length);
+        var withAllowedTypos = new string('a', length - allowedTypos) + new string('b', allowedTypos);
+        var withOneMore = new string('a', length - allowedTypos - 1) + new string('b', allowedTypos + 1);
+
+        name.ContainsApproximately(withAllowedTypos).Should().BeTrue();
+        name.ContainsApproximately(withOneMore).Should().BeFalse();
+    }
+
+    // ------------------------------------------------------------- GetEditDistance
 
     [Theory]
     [InlineData("", "", 0)]
@@ -169,19 +199,20 @@ public class StringHelperTests
     [InlineData("abc", "abd", 1)]        // substitution
     [InlineData("abc", "ab", 1)]         // suppression
     [InlineData("abc", "abcd", 1)]       // insertion
+    [InlineData("abcd", "abdc", 1)]      // inversion de deux lettres adjacentes
     [InlineData("kitten", "sitting", 3)] // cas d'ecole
-    public void GetLevenshteinDistance_ComputesEditDistance(string s, string t, int expected)
+    [InlineData("modric", "rodri", 2)]
+    public void GetEditDistance_ComputesEditDistance(string s, string t, int expected)
     {
-        s.GetLevenshteinDistance(t).Should().Be(expected);
+        s.GetEditDistance(t).Should().Be(expected);
     }
 
     [Fact]
-    public void GetLevenshteinDistance_IsSymmetric()
+    public void GetEditDistance_IsSymmetric()
     {
-        "zidane".GetLevenshteinDistance("zidan")
-            .Should().Be("zidan".GetLevenshteinDistance("zidane"));
+        "zidane".GetEditDistance("zidan")
+            .Should().Be("zidan".GetEditDistance("zidane"));
     }
-
     // ------------------------------------------------------------- IsValid
 
     [Fact]

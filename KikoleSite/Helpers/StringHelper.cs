@@ -10,7 +10,6 @@ internal static class StringHelper
 {
     private const string Iso8859Code = "ISO-8859-8";
     private const char Separator = ';';
-    private const decimal NameToleranceMax = 0.5M;
 
     // la page de code n'est pas disponible tant que CodePagesEncodingProvider n'est pas
     // enregistre ; on le fait ici pour que le helper reste utilisable hors du host web
@@ -35,6 +34,9 @@ internal static class StringHelper
             { 'ſ', "s" },
         };
 
+    // une faute de frappe est tolérée dès 6 lettres, puis une de plus par tranche de 5 ; la
+    // tolérance suit la longueur du plus long des deux noms, jamais celle de la seule proposition
+    // (sinon "rodri" passerait pour "modric")
     internal static bool ContainsApproximately(this string source, string value)
     {
         var cleanValue = value.Sanitize();
@@ -43,13 +45,14 @@ internal static class StringHelper
         if (cleanValue.Length == 0)
             return false;
 
-        return source.Disjoin().Any(_ =>
-        {
-            var score = _.GetLevenshteinDistance(cleanValue);
-            return (score / (decimal)cleanValue.Length) < NameToleranceMax;
-        });
+        return source.Disjoin().Any(allowed =>
+            allowed.GetEditDistance(cleanValue) <= MaxTypos(Math.Max(allowed.Length, cleanValue.Length)));
     }
 
+    private static int MaxTypos(int length)
+    {
+        return (length - 1) / 5;
+    }
     internal static IReadOnlyList<string> Disjoin(this string value)
     {
         return value.Split(Separator).ToList();
@@ -145,42 +148,37 @@ internal static class StringHelper
         return Encoding.GetEncoding(Iso8859Code);
     }
 
-    internal static int GetLevenshteinDistance(this string s, string t)
+    // distance d'edition (insertion, suppression, substitution) ou l'inversion de deux
+    // lettres adjacentes compte pour une seule faute
+    internal static int GetEditDistance(this string s, string t)
     {
-        if (string.IsNullOrEmpty(s))
-        {
-            if (string.IsNullOrEmpty(t))
-                return 0;
-            return t.Length;
-        }
-
-        if (string.IsNullOrEmpty(t))
-        {
-            return s.Length;
-        }
-
         var n = s.Length;
         var m = t.Length;
-        var d = new int[n + 1, m + 1];
+        if (n == 0)
+            return m;
+        if (m == 0)
+            return n;
 
-        // initialize the top and right of the table to 0, 1, 2, ...
-        for (var i = 0; i <= n; d[i, 0] = i++) ;
-        for (var j = 1; j <= m; d[0, j] = j++) ;
+        var d = new int[n + 1, m + 1];
+        for (var i = 0; i <= n; i++)
+            d[i, 0] = i;
+        for (var j = 0; j <= m; j++)
+            d[0, j] = j;
 
         for (var i = 1; i <= n; i++)
         {
             for (var j = 1; j <= m; j++)
             {
-                var cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                var min1 = d[i - 1, j] + 1;
-                var min2 = d[i, j - 1] + 1;
-                var min3 = d[i - 1, j - 1] + cost;
-                d[i, j] = Math.Min(Math.Min(min1, min2), min3);
+                var cost = s[i - 1] == t[j - 1] ? 0 : 1;
+                d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + cost);
+
+                if (i > 1 && j > 1 && s[i - 1] == t[j - 2] && s[i - 2] == t[j - 1])
+                    d[i, j] = Math.Min(d[i, j], d[i - 2, j - 2] + 1);
             }
         }
+
         return d[n, m];
     }
-
     internal static bool IsEnumValue<T>(this string? value)
     {
         if (!typeof(T).IsEnum)
