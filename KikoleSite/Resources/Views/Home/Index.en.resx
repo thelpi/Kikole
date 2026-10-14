@@ -303,4 +303,10 @@
   <data name="TipAboutYear" xml:space="preserve">
     <value>a wrong guess will tell if younger or older</value>
   </data>
+  <data name="ClueConfirmation" xml:space="preserve">
+    <value>An extra clue costs {0}% of your points. Continue?</value>
+  </data>
+  <data name="ConfirmAction" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
 </root>

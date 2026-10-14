@@ -105,6 +105,34 @@ var confirmGiveUp = function () {
     form.requestSubmit(document.getElementById('giveUpTrigger'));
 };
 
+/* modale de confirmation du second indice (Home/Index.cshtml) : meme principe que "Give up",
+   le bouton declencheur reste un vrai type="submit" (name="submit-Clue" lu cote serveur) ;
+   l'indice coute une part des points, donc le focus part sur "Annuler". Echap ferme les deux. */
+var openClueModal = function (event) {
+    event.preventDefault();
+    document.getElementById('clueModal').classList.add('open');
+    document.getElementById('clueCancel').focus();
+    return false;
+};
+
+var closeClueModal = function () {
+    document.getElementById('clueModal').classList.remove('open');
+    document.getElementById('clueTrigger').focus();
+};
+
+var confirmClue = function () {
+    var form = document.getElementById('clueForm');
+    form.requestSubmit(document.getElementById('clueTrigger'));
+};
+
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var clueModal = document.getElementById('clueModal');
+    if (clueModal && clueModal.classList.contains('open')) closeClueModal();
+    var giveUpModal = document.getElementById('giveUpModal');
+    if (giveUpModal && giveUpModal.classList.contains('open')) closeGiveUpModal();
+});
+
 /* validation cote client du nom de joueur (Home/Index.cshtml) : le serveur refusait deja
    une valeur vide (HomeController.IsValidInput), mais seulement apres un aller-retour
    complet. Bloque ici la soumission avant meme la requete, sans toucher au "Devoiler"

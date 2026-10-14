@@ -344,10 +344,19 @@
                 <div class="actions">
                     @if (showClueButton)
                     {
-                        <form method="post" action="/" style="margin:0">
+                        <form method="post" action="/" style="margin:0" id="clueForm">
                             @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
-                            <button type="submit" name="submit-Clue">@localizer["NeedAnotherClue"] <span class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points% @localizer["PointsPercent"]</span></button>
+                            <button type="submit" name="submit-Clue" id="clueTrigger" onclick="return openClueModal(event)">@localizer["NeedAnotherClue"] <span class="cost">-@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points% @localizer["PointsPercent"]</span></button>
                         </form>
+                        <div class="confirm-modal" id="clueModal">
+                            <div class="confirm-modal-box">
+                                <p>@string.Format(localizer["ClueConfirmation"].Value, KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Clue].points)</p>
+                                <div class="confirm-modal-actions">
+                                    <button type="button" class="secondary" id="clueCancel" onclick="closeClueModal()">@localizer["CancelAction"]</button>
+                                    <button type="button" onclick="confirmClue()">@localizer["ConfirmAction"]</button>
+                                </div>
+                            </div>
+                        </div>
                     }
                     @if (showLeaderboardButton)
                     {

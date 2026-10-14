@@ -303,4 +303,10 @@
   <data name="TipAboutYear" xml:space="preserve">
     <value>une erreur indiquera si + jeune ou + vieux</value>
   </data>
+  <data name="ClueConfirmation" xml:space="preserve">
+    <value>Un indice supplémentaire coûte {0} % de vos points. Continuer ?</value>
+  </data>
+  <data name="ConfirmAction" xml:space="preserve">
+    <value>Confirmer</value>
+  </data>
 </root>
