@@ -558,6 +558,17 @@ var createPager = function (table) {
     return { pager: pager, prev: buttons[0], next: buttons[1], label: pager.querySelector('.pager-range') };
 };
 
+/* le tableau change de hauteur selon la page : sans correction, le defilement reste a l'ancienne
+   position et les fleches s'eloignent de l'ecran. On les garde au meme endroit visuellement. */
+var showKeepingPagerInPlace = function (pager, show) {
+    var before = pager.getBoundingClientRect().top;
+    show();
+    var shift = pager.getBoundingClientRect().top - before;
+    if (shift !== 0) {
+        window.scrollBy(0, shift);
+    }
+};
+
 /* alternance de couleurs recalculee sur les seules lignes visibles */
 var restripe = function (rows) {
     var zebra = 0;
@@ -596,8 +607,8 @@ var paginateTable = function (table) {
         ui.next.disabled = page === pageCount - 1;
     };
 
-    ui.prev.addEventListener('click', function () { page = Math.max(0, page - 1); show(); });
-    ui.next.addEventListener('click', function () { page = Math.min(pageCount - 1, page + 1); show(); });
+    ui.prev.addEventListener('click', function () { page = Math.max(0, page - 1); showKeepingPagerInPlace(ui.pager, show); });
+    ui.next.addEventListener('click', function () { page = Math.min(pageCount - 1, page + 1); showKeepingPagerInPlace(ui.pager, show); });
     show();
 };
 
@@ -635,8 +646,8 @@ var paginateTableByGroup = function (table) {
         ui.next.disabled = index === 0;
     };
 
-    ui.prev.addEventListener('click', function () { index = Math.min(months.length - 1, index + 1); show(); });
-    ui.next.addEventListener('click', function () { index = Math.max(0, index - 1); show(); });
+    ui.prev.addEventListener('click', function () { index = Math.min(months.length - 1, index + 1); showKeepingPagerInPlace(ui.pager, show); });
+    ui.next.addEventListener('click', function () { index = Math.max(0, index - 1); showKeepingPagerInPlace(ui.pager, show); });
     show();
 };
 
