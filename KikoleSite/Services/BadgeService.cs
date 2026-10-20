@@ -289,10 +289,10 @@ public class BadgeService : IBadgeService
             {
                 // Le barème (ScoreCalculator) n'a que des couts fixes multiples de 25 ;
                 // seul l'indice facile (-50% du reste, arrondi, achetable une seule fois)
-                // peut casser cette regle. 13 est le plancher mathematique non-nul du jeu :
-                // aucune combinaison de mauvaises reponses + indice ne peut faire moins.
+                // peut casser cette regle. Avec l'arrondi bancaire, le reste est 12 ou 13
+                // (ex. 25 -> 13, 75 -> 37 puis -25 -> 12) : aucun score non nul n'est plus bas.
                 Badges.DownToTheWire,
-                l => l.Points == 13
+                l => l.Points > 0 && l.Points < 25
             }
         };
 

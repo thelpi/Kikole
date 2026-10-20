@@ -1351,21 +1351,21 @@ public class BadgeServiceTests
 
     // ------------------------------------------------------------- DownToTheWire
 
-    [Fact]
-    public async Task FindingWith13PointsGrantsDownToTheWire()
+    [Theory]
+    [InlineData((ushort)12)]
+    [InlineData((ushort)13)]
+    public async Task FindingWithTheLowestNonZeroScoresGrantsDownToTheWire(ushort points)
     {
-        // 13 est le plancher mathematique non-nul du barème (cf. commentaire du service) :
-        // 25 points restants, achat de l'indice facile (arrondi bancaire de 12.5 -> 12)
-        await Run(Leader(13, 60), Player());
+        // 13 : 25 restants puis indice facile (12.5 -> 12) ; 12 : 75 -> 37 puis -25
+        await Run(Leader(points, 60), Player());
 
         ShouldHaveGranted(Badges.DownToTheWire);
     }
 
     [Theory]
     [InlineData((ushort)0)]
-    [InlineData((ushort)12)]
-    [InlineData((ushort)14)]
     [InlineData((ushort)25)]
+    [InlineData((ushort)37)]
     public async Task OtherScoresDoNotGrantDownToTheWire(ushort points)
     {
         await Run(Leader(points, 60), Player());
