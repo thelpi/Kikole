@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 
 namespace KikoleSite.Repositories;
 
@@ -14,13 +15,20 @@ public class LeaderRepository : BaseRepository, ILeaderRepository
 
     public async Task<ulong> CreateLeaderAsync(LeaderDto request)
     {
-        return await ExecuteInsertAsync(
-                "leaders",
-                ("user_id", request.UserId),
-                ("proposal_date", request.ProposalDate),
-                ("points", request.Points),
-                ("time", request.Time),
-                ("creation_date", request.CreationDate));
+        try
+        {
+            return await ExecuteInsertAsync(
+                    "leaders",
+                    ("user_id", request.UserId),
+                    ("proposal_date", request.ProposalDate),
+                    ("points", request.Points),
+                    ("time", request.Time),
+                    ("creation_date", request.CreationDate));
+        }
+        catch (MySqlException ex) when (ex.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
+        {
+            return 0;
+        }
     }
 
     public async Task<IReadOnlyCollection<LeaderDto>> GetLeadersAtDateAsync(DateOnly date, bool onTimeOnly)

@@ -4723,6 +4723,7 @@ ALTER TABLE languages
 
 ALTER TABLE leaders
   ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY user_id_proposal_date (user_id, proposal_date),
   ADD KEY user_id (user_id),
   ADD KEY proposal_date (proposal_date);
 

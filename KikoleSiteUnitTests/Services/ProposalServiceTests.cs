@@ -8,6 +8,7 @@ using KikoleSite.Handlers;
 using KikoleSite.Models;
 using KikoleSite.Models.Dtos;
 using KikoleSite.Models.Enums;
+using KikoleSite.Models.Requests;
 using KikoleSite.Repositories;
 using KikoleSite.Services;
 using Microsoft.Extensions.Localization;
@@ -342,5 +343,84 @@ public class ProposalServiceGrantTests
         var grant = await _service.GetGrantAccessForDayAsync(UserId, Day);
 
         grant.Should().Be(DayGrantTypes.None);
+    }
+}
+
+public class ProposalServiceWinTests
+{
+    private static readonly DateOnly Day = TestCalendar.FirstDate;
+    private const ulong UserId = 7;
+
+    private readonly Mock<IProposalRepository> _proposalRepository = new();
+    private readonly Mock<ILeaderRepository> _leaderRepository = new();
+    private readonly ProposalService _service;
+
+    public ProposalServiceWinTests()
+    {
+        var localizer = new Mock<IStringLocalizer<Translations>>();
+        localizer.Setup(_ => _[It.IsAny<string>()]).Returns<string>(k => new LocalizedString(k, k));
+
+        _proposalRepository
+            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateOnly>(), It.IsAny<ulong>()))
+            .ReturnsAsync(new List<ProposalDto>());
+
+        var clock = new Mock<IClock>();
+        clock.Setup(_ => _.Now).Returns(Day.ToDateTime(new TimeOnly(10, 0)));
+
+        _service = new ProposalService(
+            _proposalRepository.Object,
+            _leaderRepository.Object,
+            new Mock<IUserRepository>().Object,
+            new Mock<IPlayerHandler>().Object,
+            localizer.Object,
+            clock.Object);
+    }
+
+    private async Task<LeaderDto?> WinAsync()
+    {
+        var player = new PlayerFullDto
+        {
+            Player = PlayerDtoBuilder.Valid().Build(),
+            Clubs = [],
+            PlayerClubs = []
+        };
+        var request = new ProposalRequest
+        {
+            DaysBeforeNow = 0,
+            ProposalDateTime = Day.ToDateTime(new TimeOnly(10, 0)),
+            ProposalType = ProposalTypes.Name,
+            Value = "Zidane"
+        };
+
+        var (_, _, leader) = await _service.ManageProposalResponseAsync(
+            request, UserId, player, new Dictionary<ulong, ulong>());
+
+        return leader;
+    }
+
+    [Fact]
+    public async Task AWinningNameCreatesTheLeaderRow()
+    {
+        _leaderRepository
+            .Setup(_ => _.CreateLeaderAsync(It.IsAny<LeaderDto>()))
+            .ReturnsAsync(5UL);
+
+        var leader = await WinAsync();
+
+        leader.Should().NotBeNull();
+        leader!.UserId.Should().Be(UserId);
+    }
+
+    [Fact]
+    public async Task AWinAlreadyRecordedByAConcurrentRequestIsNotCountedTwice()
+    {
+        // le depot renvoie 0 quand l'utilisateur a deja une victoire ce jour-la
+        _leaderRepository
+            .Setup(_ => _.CreateLeaderAsync(It.IsAny<LeaderDto>()))
+            .ReturnsAsync(0UL);
+
+        var leader = await WinAsync();
+
+        leader.Should().BeNull();
     }
 }

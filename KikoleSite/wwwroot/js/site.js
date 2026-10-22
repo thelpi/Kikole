@@ -133,6 +133,25 @@ document.addEventListener('keydown', function (e) {
     if (giveUpModal && giveUpModal.classList.contains('open')) closeGiveUpModal();
 });
 
+/* anti double soumission : un double clic (ou double tap) postait deux fois le meme formulaire
+   en parallele, et chaque requete etait facturee / enregistree. Ecoute en phase de remontee,
+   donc apres les validations des formulaires : une soumission annulee ne verrouille rien. */
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (e.defaultPrevented || !form || form.method.toLowerCase() !== 'post') return;
+    if (form.dataset.submitting === '1') {
+        e.preventDefault();
+        return;
+    }
+    form.dataset.submitting = '1';
+    setTimeout(function () { delete form.dataset.submitting; }, 10000);
+});
+
+window.addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    document.querySelectorAll('form[data-submitting]').forEach(function (f) { delete f.dataset.submitting; });
+});
+
 /* validation cote client du nom de joueur (Home/Index.cshtml) : le serveur refusait deja
    une valeur vide (HomeController.IsValidInput), mais seulement apres un aller-retour
    complet. Bloque ici la soumission avant meme la requete, sans toucher au "Devoiler"

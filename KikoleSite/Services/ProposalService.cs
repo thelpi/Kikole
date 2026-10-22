@@ -102,8 +102,9 @@ public class ProposalService : IProposalService
                     CreationDate = _clock.Now
                 };
 
-                await _leaderRepository
-                    .CreateLeaderAsync(leader);
+                // 0 = victoire deja enregistree par une requete concurrente : pas de second gain
+                if (await _leaderRepository.CreateLeaderAsync(leader) == 0)
+                    leader = null;
             }
         }
 
