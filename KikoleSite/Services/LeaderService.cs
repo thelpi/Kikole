@@ -256,8 +256,12 @@ public class LeaderService : ILeaderService
         var allProposals = await _proposalRepository
             .GetProposalsAsync(currentDate, stopDate, userId);
 
-        var allLeaders = await _leaderRepository
-            .GetLeadersAsync(currentDate, stopDate, false);
+        // tolere les doublons (user_id, proposal_date) en base : seule la premiere victoire compte
+        var allLeaders = (await _leaderRepository
+            .GetLeadersAsync(currentDate, stopDate, false))
+            .GroupBy(l => (l.UserId, l.ProposalDate))
+            .Select(g => g.OrderBy(l => l.CreationDate).First())
+            .ToList();
 
         while (currentDate <= stopDate)
         {
