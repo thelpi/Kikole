@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using KikoleSite.Handlers;
 using KikoleSite.Helpers;
@@ -19,6 +20,10 @@ namespace KikoleSite.Services;
 /// <seealso cref="IProposalService"/>
 public class ProposalService : IProposalService
 {
+    private static readonly SemaphoreSlim[] UserLocks = Enumerable.Range(0, 64)
+        .Select(_ => new SemaphoreSlim(1, 1))
+        .ToArray();
+
     private readonly IProposalRepository _proposalRepository;
     private readonly ILeaderRepository _leaderRepository;
     private readonly IUserRepository _userRepository;
@@ -71,6 +76,23 @@ public class ProposalService : IProposalService
 
     /// <inheritdoc />
     public async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo,
+        IReadOnlyDictionary<ulong, ulong> countryContinents)
+    {
+        // lecture de l'historique puis ecriture doivent etre atomiques par utilisateur, sinon
+        // deux requetes simultanees (double clic) enregistrent et facturent la meme proposition
+        var userLock = UserLocks[userId % (ulong)UserLocks.Length];
+        await userLock.WaitAsync();
+        try
+        {
+            return await ManageProposalResponseCoreAsync(request, userId, pInfo, countryContinents);
+        }
+        finally
+        {
+            userLock.Release();
+        }
+    }
+
+    private async Task<(ProposalResponse, IReadOnlyCollection<ProposalDto>, LeaderDto?)> ManageProposalResponseCoreAsync(ProposalRequest request, ulong userId, PlayerFullDto pInfo,
         IReadOnlyDictionary<ulong, ulong> countryContinents)
     {
         LeaderDto? leader = null;

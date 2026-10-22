@@ -412,6 +412,32 @@ public class ProposalServiceWinTests
     }
 
     [Fact]
+    public async Task TwoSimultaneousIdenticalSubmissionsAreRecordedOnlyOnce()
+    {
+        var stored = new List<ProposalDto>();
+        _proposalRepository
+            .Setup(_ => _.GetProposalsAsync(It.IsAny<DateOnly>(), It.IsAny<ulong>()))
+            .Returns(async () =>
+            {
+                var snapshot = stored.ToList();
+                await Task.Delay(50);
+                return (IReadOnlyCollection<ProposalDto>)snapshot;
+            });
+        _proposalRepository
+            .Setup(_ => _.CreateProposalAsync(It.IsAny<ProposalDto>()))
+            .Callback<ProposalDto>(stored.Add)
+            .ReturnsAsync(1UL);
+        _leaderRepository
+            .Setup(_ => _.CreateLeaderAsync(It.IsAny<LeaderDto>()))
+            .ReturnsAsync(5UL);
+
+        var leaders = await Task.WhenAll(WinAsync(), WinAsync());
+
+        stored.Should().ContainSingle();
+        leaders.Count(l => l != null).Should().Be(1);
+    }
+
+    [Fact]
     public async Task AWinAlreadyRecordedByAConcurrentRequestIsNotCountedTwice()
     {
         // le depot renvoie 0 quand l'utilisateur a deja une victoire ce jour-la
