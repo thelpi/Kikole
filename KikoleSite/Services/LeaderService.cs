@@ -108,9 +108,13 @@ public class LeaderService : ILeaderService
         var leaders = await _leaderRepository
             .GetLeadersAsync(startDate, endDate, onTimeOnly);
 
-        // we need players to get creators
-        var players = await _playerRepository
-            .GetPlayersOfTheDayAsync(startDate, endDate);
+        // we need players to get creators ; l'anonyme du jour ne compte que le lendemain, sinon
+        // une plage d'un seul jour le designe
+        var today = _clock.Today;
+        var players = (await _playerRepository
+            .GetPlayersOfTheDayAsync(startDate, endDate))
+            .Where(p => !(p.HideCreator && p.PublicationDate == today))
+            .ToList();
 
         // mix of leaders and creators (some might not play during the period)
         var allUsersId = players
@@ -381,7 +385,9 @@ public class LeaderService : ILeaderService
                 UserName = users[_.UserId].Login
             });
 
-        if (users.ContainsKey(player.Player.CreationUserId))
+        // un createur anonyme ne se devoile qu'une fois le jour de jeu termine
+        var isCreatorHidden = player.Player.HideCreator && day == _clock.Today;
+        if (!isCreatorHidden && users.ContainsKey(player.Player.CreationUserId))
         {
             leaderItems = leaderItems.Append(new DayboardLeaderItem
             {

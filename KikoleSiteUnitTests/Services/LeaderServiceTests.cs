@@ -164,6 +164,35 @@ public class LeaderServiceTests
     }
 
     [Fact]
+    public async Task GetLeaderboardAsync_AnAnonymousCreatorOfTheDayInProgressIsNotCountedYet()
+    {
+        SetupUsers((1, "trouveur"), (5, "createur"));
+        SetupLeaderboard(
+            new[] { Leader(1, 800, 60) },
+            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithHiddenCreator().WithPublicationDate(Day).Build() });
+
+        var result = await _service
+            .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
+
+        result.Single().UserName.Should().Be("trouveur");
+    }
+
+    [Fact]
+    public async Task GetLeaderboardAsync_AnAnonymousCreatorIsCountedOnceTheDayIsOver()
+    {
+        _clock.Setup(_ => _.Today).Returns(Day.AddDays(1));
+        SetupUsers((1, "trouveur"), (5, "createur"));
+        SetupLeaderboard(
+            new[] { Leader(1, 800, 60) },
+            new[] { PlayerDtoBuilder.Valid().WithId(9).WithCreator(5).WithHiddenCreator().WithPublicationDate(Day).Build() });
+
+        var result = await _service
+            .GetLeaderboardAsync(Day, Day, LeaderSorts.TotalPoints);
+
+        result.Single(_ => _.UserName == "createur").KikolesProposed.Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetLeaderboardAsync_ADisabledCreatorIsExcluded()
     {
         SetupDisabledCreator(creatorId: 5);
@@ -503,17 +532,41 @@ public class LeaderServiceTests
     private void SetupDayboard(
         IEnumerable<LeaderDto> leaders,
         IEnumerable<ProposalDto> proposals,
-        ulong creatorId)
+        ulong creatorId,
+        bool hideCreator = false)
     {
         _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(Day, false)).ReturnsAsync(leaders.ToList());
         _proposalRepository.Setup(_ => _.GetProposalsAsync(Day, false)).ReturnsAsync(proposals.ToList());
         _playerHandler.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Day))
             .ReturnsAsync(new PlayerFullDto
             {
-                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithCreator(creatorId).Build(),
+                Player = PlayerDtoBuilder.Valid().WithId(1).WithName("Zidane").WithAllowedNames("zidane").WithCreator(creatorId).WithHiddenCreator(hideCreator).Build(),
                 Clubs = [],
                 PlayerClubs = []
             });
+    }
+
+    [Fact]
+    public async Task GetDayboardAsync_AnAnonymousCreatorIsLeftOffTheBoardOfTheDayInProgress()
+    {
+        SetupUsers((1, "trouveur"), (5, "createur"));
+        SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5, hideCreator: true);
+
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
+
+        result.Leaders.Should().ContainSingle().Which.UserName.Should().Be("trouveur");
+    }
+
+    [Fact]
+    public async Task GetDayboardAsync_AnAnonymousCreatorIsRevealedOnceTheDayIsOver()
+    {
+        _clock.Setup(_ => _.Today).Returns(Day.AddDays(1));
+        SetupUsers((1, "trouveur"), (5, "createur"));
+        SetupDayboard(new[] { Leader(1, 800, 60) }, new List<ProposalDto>(), creatorId: 5, hideCreator: true);
+
+        var result = await _service.GetDayboardAsync(Day, DayLeaderSorts.TotalPoints, TestCountryContinents.Map);
+
+        result.Leaders.Single(_ => _.IsCreator).UserName.Should().Be("createur");
     }
 
     [Fact]
