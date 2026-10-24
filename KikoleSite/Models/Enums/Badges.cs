@@ -36,5 +36,6 @@ public enum Badges
     DonCorleone,
     TheFamousFive,
     ConfederationsCup,
-    OkZoomer
+    OkZoomer,
+    ThirdWaveFeminist
 }

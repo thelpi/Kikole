@@ -550,6 +550,43 @@ public class BadgeServiceTests
         ShouldNotHaveGranted(Badges.ConfederationsCup);
     }
 
+    // ------------------------------------------------------------- Troisieme vague feministe
+
+    private static PlayerDto Woman() => Player() with { IsWoman = true };
+
+    [Theory]
+    [InlineData(800)]
+    [InlineData(1000)]
+    public async Task FindingAWomanOnTheDayWithEightHundredPointsOrMoreGrantsThirdWaveFeminist(ushort points)
+    {
+        await Run(Leader(points, 60), Woman());
+
+        ShouldHaveGranted(Badges.ThirdWaveFeminist);
+    }
+
+    [Fact]
+    public async Task FindingAWomanWithLessThanEightHundredPointsDoesNotGrantThirdWaveFeminist()
+    {
+        await Run(Leader(799, 60), Woman());
+
+        ShouldNotHaveGranted(Badges.ThirdWaveFeminist);
+    }
+
+    [Fact]
+    public async Task FindingAManDoesNotGrantThirdWaveFeminist()
+    {
+        await Run(Leader(1000, 60), Player());
+
+        ShouldNotHaveGranted(Badges.ThirdWaveFeminist);
+    }
+
+    [Fact]
+    public async Task FindingAWomanOnALaterDayDoesNotGrantThirdWaveFeminist()
+    {
+        await Run(Leader(1000, 60, sameDay: false), Woman());
+
+        ShouldNotHaveGranted(Badges.ThirdWaveFeminist);
+    }
     [Fact]
     public async Task AnAlternativePositionCanFillAMissingFourFourTwoSlot()
     {

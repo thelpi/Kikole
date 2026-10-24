@@ -131,6 +131,17 @@ public class BadgeService : IBadgeService
             }
         };
 
+    private static readonly IReadOnlyDictionary<Badges, Func<LeaderDto, PlayerDto, bool>> LeaderAndPlayerBasedBadgeCondition
+        = new Dictionary<Badges, Func<LeaderDto, PlayerDto, bool>>
+        {
+            {
+                Badges.ThirdWaveFeminist,
+                (l, p) => p.IsWoman && l.Points >= ThirdWaveFeministMinimalPoints
+            }
+        };
+
+    private const int ThirdWaveFeministMinimalPoints = 800;
+
     // formation 4-4-2 + gardien : les places a remplir et leur nombre
     private static readonly IReadOnlyDictionary<ulong, int> FourFourTwoSlots = new Dictionary<ulong, int>
     {
@@ -781,6 +792,15 @@ public class BadgeService : IBadgeService
             foreach (var badge in PlayerBasedBadgeCondition.Keys)
             {
                 if (PlayerBasedBadgeCondition[badge](playerOfTheDay))
+                {
+                    await InsertBadgeIfNotAlreadyAsync(
+                             leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);
+                }
+            }
+
+            foreach (var badge in LeaderAndPlayerBasedBadgeCondition.Keys)
+            {
+                if (LeaderAndPlayerBasedBadgeCondition[badge](leader, playerOfTheDay))
                 {
                     await InsertBadgeIfNotAlreadyAsync(
                              leader.ProposalDate, leader.UserId, (ulong)badge, collectedBadges, allBadges);

@@ -51,10 +51,11 @@ INSERT INTO badges (id, `name`, description, hidden, creation_date, update_date)
 (32, 'Don Corleone', 'Sponsor your first godchild', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (33, 'The Famous Five', 'Sponsor 5 godchildren', 0, '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 (34, 'Confederations Cup', 'Find kikolés from all six continents, one continent per kikolé (a player with two countries counts for only one continent)', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00'),
-(35, 'OK Zoomer', 'Find a kikolé born in 2005 or later', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00');
+(35, 'OK Zoomer', 'Find a kikolé born in 2005 or later', 0, '2026-10-02 00:00:00', '2026-10-02 00:00:00'),
+(36, 'Third-wave feminist', 'Find a women\'s football player on the day it is published, with 800 points or more', 0, '2026-10-24 00:00:00', '2026-10-24 00:00:00');
 
 -- rarete des badges : 1 commun (defaut), 2 rare, 3 epique, 4 legendaire
-UPDATE badges SET tier = 2 WHERE id IN (6, 7, 10, 15, 16, 22, 23, 26, 27, 32, 34);
+UPDATE badges SET tier = 2 WHERE id IN (6, 7, 10, 15, 16, 22, 23, 26, 27, 32, 34, 36);
 UPDATE badges SET tier = 3 WHERE id IN (11, 14, 17, 19, 24, 30);
 UPDATE badges SET tier = 4 WHERE id IN (12, 25, 28, 31, 33);
 
@@ -107,7 +108,8 @@ INSERT INTO badge_translations (badge_id, language_id, `name`, description) VALU
 (32, 2, 'Don Corleone', 'Parrainez votre premier filleul'),
 (33, 2, 'Le Club des Cinq', 'Parrainez 5 filleuls'),
 (34, 2, 'Coupe des confédérations', 'Trouvez des kikolés des six continents, un continent par kikolé (un joueur de deux nationalités ne compte que pour un seul continent)'),
-(35, 2, 'OK Zoomer', 'Trouvez un kikolé né en 2005 ou après');
+(35, 2, 'OK Zoomer', 'Trouvez un kikolé né en 2005 ou après'),
+(36, 2, 'Troisième vague féministe', 'Trouvez une joueuse du football féminin le jour de sa parution, en 800 points ou plus');
 
 CREATE TABLE clubs (
   id bigint(20) UNSIGNED NOT NULL,
