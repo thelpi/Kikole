@@ -148,7 +148,7 @@
     <value>Noms autorisés invalide</value>
   </data>
   <data name="InvalidBirthYear" xml:space="preserve">
-    <value>Année de naissance invalide</value>
+    <value>L'année de naissance doit être comprise entre 1850 et 2100</value>
   </data>
   <data name="InvalidClubs" xml:space="preserve">
     <value>Au moins un club invalide</value>
@@ -193,7 +193,7 @@
     <value>Pourcentage de points invalide</value>
   </data>
   <data name="InvalidPosition" xml:space="preserve">
-    <value>La position est invalide</value>
+    <value>La position est invalide : choisissez une valeur dans la liste</value>
   </data>
   <data name="InvalidPosition1" xml:space="preserve">
     <value>Position invalide</value>
@@ -232,7 +232,7 @@
     <value>Valeur incorrecte</value>
   </data>
   <data name="InvalidYear" xml:space="preserve">
-    <value>L'année est invalide</value>
+    <value>L'année de naissance est invalide (entre 1850 et 2100)</value>
   </data>
   <data name="MandatClue" xml:space="preserve">
     <value>L'indice est obligatoire</value>
@@ -347,5 +347,26 @@
   </data>
   <data name="PlanningOutOfDate" xml:space="preserve">
     <value>La liste a changé depuis l&apos;ouverture de la page (nouveau kikolé, date modifiée ou changement de jour) : l&apos;ordre n&apos;a pas été enregistré. La liste a été rechargée, refaites votre ordre.</value>
+  </data>
+  <data name="MandatEasyClue" xml:space="preserve">
+    <value>L'indice facile est obligatoire</value>
+  </data>
+  <data name="InvalidNationality" xml:space="preserve">
+    <value>La nationalité est invalide : choisissez une suggestion dans la liste</value>
+  </data>
+  <data name="InvalidAlternativeNationality" xml:space="preserve">
+    <value>La nationalité alternative est invalide : choisissez une suggestion dans la liste, ou videz le champ</value>
+  </data>
+  <data name="MandatPosition" xml:space="preserve">
+    <value>La position est obligatoire</value>
+  </data>
+  <data name="InvalidAlternativePosition" xml:space="preserve">
+    <value>La position alternative est invalide : choisissez une valeur dans la liste, ou laissez le champ vide</value>
+  </data>
+  <data name="MandatAlternativeName" xml:space="preserve">
+    <value>Il faut au moins un nom alternatif : au minimum le nom du joueur sans son prénom (ex. « Zidane »)</value>
+  </data>
+  <data name="UnknownClub" xml:space="preserve">
+    <value>Club n°{0} non reconnu : choisissez-le dans la liste de suggestions (ou créez-le d'abord)</value>
   </data>
 </root>

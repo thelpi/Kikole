@@ -1688,3 +1688,21 @@ $(function () {
         if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
     });
 });
+
+/* formulaire de creation/modification de joueur : retaper un nom d'autocompletion invalide
+   l'identifiant memorise (champ cache), pour que le serveur signale un nom saisi sans suggestion
+   choisie au lieu d'enregistrer l'ancienne selection (la selection renseigne les deux champs
+   par script, sans declencher "input") */
+$(function () {
+    if ($("#birthYearValue").length === 0) return;
+
+    var pairs = [["#countryName", "#countryId"], ["#alternativeCountryName", "#alternativeCountryId"]];
+    for (var i = 0; i < 15; i++) {
+        pairs.push(["#Club" + i, "#Club" + i + "Id"]);
+    }
+    pairs.forEach(function (pair) {
+        $(pair[0]).on("input", function () {
+            $(pair[1]).val("");
+        });
+    });
+});

@@ -3,6 +3,7 @@ using FluentAssertions;
 using KikoleSite.Controllers;
 using KikoleSite.Models;
 using KikoleSite.Models.Requests;
+using KikoleSite.ViewModels;
 using Xunit;
 
 namespace KikoleSiteUnitTests.Controllers;
@@ -64,6 +65,43 @@ public class AdminControllerHelpersTests
         new Club(ClubDtoBuilder.Valid().WithId(10).WithName("Real Madrid").Build(), []),
         new Club(ClubDtoBuilder.Valid().WithId(11).WithName("Juventus").Build(), []),
     ];
+
+    // ------------------------------------------------------------- FindUnknownClubLine
+
+    [Fact]
+    public void FindUnknownClubLine_WhenEveryTypedClubIsRecognised_ReturnsZero()
+    {
+        var model = new PlayerCreationModel { Club0Name = "Real Madrid", Club0Id = "10", Club1Name = "Juventus", Club1Id = "11" };
+
+        AdminController.FindUnknownClubLine(model, Referential).Should().Be(0);
+    }
+
+    [Fact]
+    public void FindUnknownClubLine_IgnoresEmptyLines()
+    {
+        var model = new PlayerCreationModel { Club0Name = "Real Madrid", Club0Id = "10", Club1Name = "  ", Club1Id = "" };
+
+        AdminController.FindUnknownClubLine(model, Referential).Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("", 2)]
+    [InlineData(null, 2)]
+    [InlineData("999", 2)]
+    public void FindUnknownClubLine_ReturnsTheOneBasedLineOfAClubTypedWithoutAKnownId(string? id, int expectedLine)
+    {
+        var model = new PlayerCreationModel { Club0Name = "Real Madrid", Club0Id = "10", Club1Name = "Juvenstus", Club1Id = id };
+
+        AdminController.FindUnknownClubLine(model, Referential).Should().Be(expectedLine);
+    }
+
+    [Fact]
+    public void FindUnknownClubLine_ReportsTheFirstOffendingLine()
+    {
+        var model = new PlayerCreationModel { Club4Name = "x", Club4Id = "", Club9Name = "y", Club9Id = "" };
+
+        AdminController.FindUnknownClubLine(model, Referential).Should().Be(5);
+    }
 
     [Fact]
     public void AddClubIfValid_WithAKnownId_AppendsItAndAdvancesTheHistoryPosition()

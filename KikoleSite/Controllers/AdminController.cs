@@ -667,7 +667,7 @@ public class AdminController : KikoleBaseController
 
         if (string.IsNullOrWhiteSpace(model.EasyClueEn))
         {
-            return (null, _localizer["MandatClue"].Value);
+            return (null, _localizer["MandatEasyClue"].Value);
         }
 
         var countries = await GetCountriesAsync();
@@ -676,24 +676,29 @@ public class AdminController : KikoleBaseController
             || !ulong.TryParse(model.Country, out var countryId)
             || !countries.Any(c => countryId == c.Key))
         {
-            return (null, _localizer["InvalidCountry"].Value);
+            return (null, _localizer["InvalidNationality"].Value);
         }
 
         // facultatif : uniquement pour un joueur ayant represente une nation sportive
-        // disparue en plus de son pays actuel (ex. RDA puis Allemagne)
+        // disparue en plus de son pays actuel (ex. RDA puis Allemagne) ; un nom saisi
+        // sans suggestion choisie (identifiant vide) est une erreur, pas un champ vide
         ulong? alternativeCountryId = null;
-        if (!string.IsNullOrWhiteSpace(model.AlternativeCountry))
+        if (!string.IsNullOrWhiteSpace(model.AlternativeCountry) || !string.IsNullOrWhiteSpace(model.AlternativeCountryName))
         {
             if (!ulong.TryParse(model.AlternativeCountry, out var parsedAlternativeCountryId)
                 || !countries.Any(c => parsedAlternativeCountryId == c.Key))
             {
-                return (null, _localizer["InvalidCountry"].Value);
+                return (null, _localizer["InvalidAlternativeNationality"].Value);
             }
             alternativeCountryId = parsedAlternativeCountryId;
         }
 
-        if (model.Position == null
-            || !ulong.TryParse(model.Position, out var positionId)
+        if (string.IsNullOrWhiteSpace(model.Position) || model.Position == "0")
+        {
+            return (null, _localizer["MandatPosition"].Value);
+        }
+
+        if (!ulong.TryParse(model.Position, out var positionId)
             || !GetPositions().Any(p => p.Key == positionId))
         {
             return (null, _localizer["InvalidPosition"].Value);
@@ -707,7 +712,7 @@ public class AdminController : KikoleBaseController
             if (!ulong.TryParse(model.AlternativePosition, out var parsedAlternativePositionId)
                 || !GetPositions().Any(p => p.Key == parsedAlternativePositionId))
             {
-                return (null, _localizer["InvalidPosition"].Value);
+                return (null, _localizer["InvalidAlternativePosition"].Value);
             }
             alternativePositionId = parsedAlternativePositionId;
         }
@@ -727,7 +732,18 @@ public class AdminController : KikoleBaseController
             .Distinct()
             .ToList();
 
+        if (names.Count == 0)
+        {
+            return (null, _localizer["MandatAlternativeName"].Value);
+        }
+
         var clubsReferential = await GetClubsAsync();
+
+        var unknownClubLine = FindUnknownClubLine(model, clubsReferential);
+        if (unknownClubLine > 0)
+        {
+            return (null, string.Format(_localizer["UnknownClub"].Value, unknownClubLine));
+        }
 
         byte iPos = 1;
         var clubs = new List<PlayerClubRequest>();
@@ -1078,6 +1094,22 @@ public class AdminController : KikoleBaseController
             .Distinct();
 
         return new[] { canonicalName }.Concat(aliases).ToList();
+    }
+
+    // numero (1 a 15) de la premiere ligne dont le nom est saisi sans club reconnu, 0 sinon
+    internal static int FindUnknownClubLine(PlayerCreationModel model, IReadOnlyCollection<Club> clubsReferential)
+    {
+        var names = new[] { model.Club0Name, model.Club1Name, model.Club2Name, model.Club3Name, model.Club4Name, model.Club5Name, model.Club6Name, model.Club7Name, model.Club8Name, model.Club9Name, model.Club10Name, model.Club11Name, model.Club12Name, model.Club13Name, model.Club14Name };
+        var ids = new[] { model.Club0Id, model.Club1Id, model.Club2Id, model.Club3Id, model.Club4Id, model.Club5Id, model.Club6Id, model.Club7Id, model.Club8Id, model.Club9Id, model.Club10Id, model.Club11Id, model.Club12Id, model.Club13Id, model.Club14Id };
+
+        for (var i = 0; i < names.Length; i++)
+        {
+            var isKnown = ulong.TryParse(ids[i], out var clubId) && clubsReferential.Any(c => c.Id == clubId);
+            if (!string.IsNullOrWhiteSpace(names[i]) && !isKnown)
+                return i + 1;
+        }
+
+        return 0;
     }
 
     internal static void AddClubIfValid(List<PlayerClubRequest> clubs, string? clubIdValue, IReadOnlyCollection<Club> clubsReferential, ref byte i, bool isLoan)

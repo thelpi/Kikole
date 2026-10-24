@@ -148,7 +148,7 @@
     <value>Invalid allowed names</value>
   </data>
   <data name="InvalidBirthYear" xml:space="preserve">
-    <value>Invalid year of birth</value>
+    <value>The year of birth must be between 1850 and 2100</value>
   </data>
   <data name="InvalidClubs" xml:space="preserve">
     <value>At least one invalid club</value>
@@ -193,7 +193,7 @@
     <value>Invalid points rate</value>
   </data>
   <data name="InvalidPosition" xml:space="preserve">
-    <value>Position is invalid</value>
+    <value>The position is invalid: pick a value from the list</value>
   </data>
   <data name="InvalidPosition1" xml:space="preserve">
     <value>Invalid position</value>
@@ -232,7 +232,7 @@
     <value>Invalid value</value>
   </data>
   <data name="InvalidYear" xml:space="preserve">
-    <value>Year is invalid</value>
+    <value>The year of birth is invalid (between 1850 and 2100)</value>
   </data>
   <data name="MandatClue" xml:space="preserve">
     <value>Clue is mandatory</value>
@@ -347,5 +347,26 @@
   </data>
   <data name="PlanningOutOfDate" xml:space="preserve">
     <value>The list changed since the page was opened (new kikolé, edited date or new day): the order was not saved. The list has been reloaded, please redo your order.</value>
+  </data>
+  <data name="MandatEasyClue" xml:space="preserve">
+    <value>The easy clue is mandatory</value>
+  </data>
+  <data name="InvalidNationality" xml:space="preserve">
+    <value>The nationality is invalid: pick a suggestion from the list</value>
+  </data>
+  <data name="InvalidAlternativeNationality" xml:space="preserve">
+    <value>The alternative nationality is invalid: pick a suggestion from the list, or clear the field</value>
+  </data>
+  <data name="MandatPosition" xml:space="preserve">
+    <value>The position is mandatory</value>
+  </data>
+  <data name="InvalidAlternativePosition" xml:space="preserve">
+    <value>The alternative position is invalid: pick a value from the list, or leave the field empty</value>
+  </data>
+  <data name="MandatAlternativeName" xml:space="preserve">
+    <value>At least one alternative name is required: at minimum the player's name without the first name (e.g. 'Zidane')</value>
+  </data>
+  <data name="UnknownClub" xml:space="preserve">
+    <value>Club #{0} not recognised: pick it from the suggestions list (or create it first)</value>
   </data>
 </root>

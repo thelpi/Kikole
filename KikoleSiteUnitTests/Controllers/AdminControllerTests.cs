@@ -676,6 +676,91 @@ public class AdminControllerTests : IDisposable
         PublicationDate = publicationDate
     };
 
+    private void SetupPlayerReferentials()
+    {
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.FRA, "France" } });
+        _internationalService.Setup(_ => _.GetClubsAsync())
+            .ReturnsAsync(new[] { new Club(ClubDtoBuilder.Valid().WithId(7).Build(), []) });
+    }
+
+    private async Task AssertPlayerCreationErrorAsync(PlayerCreationModel model, string expectedError)
+    {
+        SetupPlayerReferentials();
+
+        var result = await _controller.Index(model);
+
+        ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Which.ErrorMessage.Should().Be(expectedError);
+        _playerService.Verify(_ => _.CreatePlayerAsync(It.IsAny<KikoleSite.Models.Requests.PlayerRequest>(), It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_MissingEasyClue_NamesTheEasyClue()
+    {
+        var model = MinimalPlayerCreationModel();
+        model.EasyClueEn = null;
+
+        await AssertPlayerCreationErrorAsync(model, "MandatEasyClue");
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_NationalityTypedWithoutPickingASuggestion_IsRejected()
+    {
+        var model = MinimalPlayerCreationModel();
+        model.Country = null;
+        model.CountryName = "France";
+
+        await AssertPlayerCreationErrorAsync(model, "InvalidNationality");
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_AlternativeNationalityTypedWithoutPickingASuggestion_IsRejected()
+    {
+        var model = MinimalPlayerCreationModel();
+        model.AlternativeCountry = "";
+        model.AlternativeCountryName = "Allemagne de l'Est";
+
+        await AssertPlayerCreationErrorAsync(model, "InvalidAlternativeNationality");
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("0")]
+    public async Task PlayerCreationPost_EmptyPosition_IsMandatory(string? position)
+    {
+        var model = MinimalPlayerCreationModel();
+        model.Position = position;
+
+        await AssertPlayerCreationErrorAsync(model, "MandatPosition");
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_UnknownAlternativePosition_IsNamedAsSuch()
+    {
+        var model = MinimalPlayerCreationModel();
+        model.AlternativePosition = "999";
+
+        await AssertPlayerCreationErrorAsync(model, "InvalidAlternativePosition");
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_WithoutAnyAlternativeName_AsksForTheNameWithoutFirstName()
+    {
+        var model = MinimalPlayerCreationModel();
+        model.AlternativeName0 = "  ";
+
+        await AssertPlayerCreationErrorAsync(model, "MandatAlternativeName");
+    }
+
+    [Fact]
+    public async Task PlayerCreationPost_ClubTypedWithoutPickingASuggestion_IsNotSilentlyDropped()
+    {
+        var model = MinimalPlayerCreationModel();
+        model.Club1Name = "Juvenstus";
+
+        await AssertPlayerCreationErrorAsync(model, "UnknownClub");
+    }
+
     [Fact]
     public async Task PlayerCreationPost_AsAdministratorWithAFutureDate_ForcesIt()
     {
