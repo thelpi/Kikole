@@ -48,7 +48,7 @@ public class PlayerUpdateIntegrationTests
 
     private static PlayerDto UpdatedPlayer(ulong creatorId) => PlayerDtoBuilder.Valid()
         .WithName("Apres").WithAllowedNames("apres;alias").WithYearOfBirth(1980)
-        .WithClues("clue apres", "easy apres").WithHiddenCreator().WithCreator(creatorId).Build();
+        .WithClues("clue apres", "easy apres").WithHiddenCreator().WithWoman().WithCreator(creatorId).Build();
 
     [Fact]
     public async Task UpdatePlayerAsync_OnAScheduledPlayer_ReplacesTheSheetTheClubsAndTheTranslatedClues()
@@ -61,7 +61,7 @@ public class PlayerUpdateIntegrationTests
             UpdatedPlayer(0),
             [
                 new PlayerClubDto { PlayerId = playerId, ClubId = 4, HistoryPosition = 1 },
-                new PlayerClubDto { PlayerId = playerId, ClubId = 1, HistoryPosition = 2, IsLoan = 1 }
+                new PlayerClubDto { PlayerId = playerId, ClubId = 1, HistoryPosition = 2, IsLoan = true }
             ],
             new Dictionary<ulong, string> { { French, "indice apres" } },
             new Dictionary<ulong, string>());
@@ -73,13 +73,14 @@ public class PlayerUpdateIntegrationTests
         after.YearOfBirth.Should().Be(1980);
         after.Clue.Should().Be("clue apres");
         after.EasyClue.Should().Be("easy apres");
-        after.HideCreator.Should().Be(1);
+        after.HideCreator.Should().BeTrue();
+        after.IsWoman.Should().BeTrue();
         after.CreationUserId.Should().Be(before!.CreationUserId);
         after.PublicationDate.Should().Be(before.PublicationDate);
 
         var clubs = await repository.GetPlayerClubsAsync(playerId);
         clubs.OrderBy(c => c.HistoryPosition).Select(c => (c.ClubId, c.HistoryPosition, c.IsLoan))
-            .Should().Equal((4UL, (byte)1, (byte)0), (1UL, (byte)2, (byte)1));
+            .Should().Equal((4UL, (byte)1, false), (1UL, (byte)2, true));
 
         (await repository.GetClueAsync(playerId, 0, French)).Should().Be("indice apres");
         (await repository.GetClueAsync(playerId, 1, French)).Should().BeNull();

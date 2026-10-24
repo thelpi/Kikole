@@ -1,5 +1,6 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
 @inject KikoleSite.Services.IDiscussionService discussionService
+@inject KikoleSite.Services.IPlayerService playerService
 @inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.SiteOptions> siteOptions
 @inject Microsoft.Extensions.Options.IOptions<KikoleSite.Configuration.SeoOptions> seoOptions
 @{
@@ -29,13 +30,16 @@
     var isPowerUser = isLoggedIn && (ulong)userType >= (ulong)KikoleSite.Models.Enums.UserTypes.PowerUser;
     var isAdmin = isLoggedIn && (ulong)userType >= (ulong)KikoleSite.Models.Enums.UserTypes.Administrator;
 
-    // "a lire" sur l'icone Contact (utilisateur standard/power) ou Actions admin
-    // (administrateur, qui n'a pas de fil personnel - cf. Home/Contact) : fait ici
-    // plutot que via un ViewComponent (jamais utilise dans ce projet, et le layout
-    // injecte deja ses propres services directement, comme localizer ci-dessus).
+    // "a lire" sur l'icone Contact (utilisateur standard/power) ou "a traiter" sur l'icone
+    // Actions admin (message a repondre ou joueur a valider ; l'administrateur n'a pas de
+    // fil personnel - cf. Home/Contact) : fait ici plutot que via un ViewComponent (jamais
+    // utilise dans ce projet, et le layout injecte deja ses propres services directement,
+    // comme localizer ci-dessus).
     var hasUnreadMessages = false;
+    var hasAdminTodo = false;
     if (isAdmin)
-        hasUnreadMessages = await discussionService.HasUnreadMessagesForAdminAsync();
+        hasAdminTodo = await discussionService.HasUnreadMessagesForAdminAsync()
+            || await playerService.HasPendingSubmissionsAsync();
     else if (isLoggedIn)
         hasUnreadMessages = await discussionService.HasUnreadMessagesForUserAsync(currentUserId);
 
@@ -100,7 +104,7 @@
         <link rel="stylesheet" href="~/lib/jquery-ui/themes/smoothness/jquery-ui.min.css">
     </environment>
     <!-- apres jquery-ui.css : .ui-autocomplete doit gagner la cascade sur le theme "smoothness" -->
-    <link rel="stylesheet" href="~/css/kikole-board.css?v=45" />
+    <link rel="stylesheet" href="~/css/kikole-board.css?v=47" />
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/jquery-ui/dist/jquery-ui.js"></script>
@@ -160,7 +164,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2 2.8-2.8Z" />
                         </svg>
-                        @if (hasUnreadMessages)
+                        @if (hasAdminTodo)
                         {
                             <span class="site-nav-badge" aria-hidden="true"></span>
                         }
@@ -254,7 +258,7 @@
                             <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2 2.8-2.8Z" />
                         </svg>
                         @localizer["AdminActions"]
-                        @if (hasUnreadMessages)
+                        @if (hasAdminTodo)
                         {
                             <span class="site-nav-badge-inline" aria-hidden="true"></span>
                         }

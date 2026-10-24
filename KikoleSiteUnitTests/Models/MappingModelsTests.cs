@@ -67,7 +67,7 @@ public class MappingModelsTests
         };
 
         var pc = new PlayerClub(
-            new PlayerClubDto { ClubId = 2, HistoryPosition = 4, IsLoan = 1 }, clubs);
+            new PlayerClubDto { ClubId = 2, HistoryPosition = 4, IsLoan = true }, clubs);
 
         pc.Name.Should().Be("Real Madrid");
         pc.HistoryPosition.Should().Be(4);

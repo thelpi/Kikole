@@ -23,6 +23,6 @@ public class PlayerClub
 
         Name = club.Name;
         HistoryPosition = playerClub.HistoryPosition;
-        IsLoan = playerClub.IsLoan > 0;
+        IsLoan = playerClub.IsLoan;
     }
 }

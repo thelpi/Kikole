@@ -65,6 +65,11 @@ public interface IPlayerService
     Task<IReadOnlyCollection<Player>> GetPlayerSubmissionsAsync(IReadOnlyDictionary<ulong, ulong> countryContinents);
 
     /// <summary>
+    /// Indicates whether at least one player submission awaits validation.
+    /// </summary>
+    Task<bool> HasPendingSubmissionsAsync();
+
+    /// <summary>
     /// Valides a player submission.
     /// </summary>
     /// <param name="request">Request.</param>

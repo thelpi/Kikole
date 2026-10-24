@@ -315,6 +315,12 @@ public class PlayerService : IPlayerService
     }
 
     /// <inheritdoc />
+    public async Task<bool> HasPendingSubmissionsAsync()
+    {
+        return await _playerRepository.HasPendingValidationPlayersAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<(PlayerSubmissionErrors, ulong, IReadOnlyCollection<Badges>)> ValidatePlayerSubmissionAsync(PlayerSubmissionValidationRequest request)
     {
         var badges = new List<Badges>();

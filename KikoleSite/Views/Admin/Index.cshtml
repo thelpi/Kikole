@@ -82,6 +82,13 @@
             </div>
 
             <div class="form-field">
+                <div class="check-line">
+                    <label class="check-label" for="@Html.IdFor(m => m.IsWoman)">@localizer["WomenFootball"]</label>
+                    @Html.CheckBoxFor(m => m.IsWoman)
+                </div>
+            </div>
+
+            <div class="form-field">
                 <label>@localizer["YearOfBirth"]</label>
                 <input type="text" id="birthYearValue" name="YearOfBirth" class="blank" style="max-width:100px" value="@Model.YearOfBirth" />
             </div>

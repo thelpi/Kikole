@@ -236,13 +236,29 @@ public class PlayerRequestTests
     }
 
     [Theory]
-    [InlineData(true, (byte)1)]
-    [InlineData(false, (byte)0)]
-    public void ToDto_ConvertsHideCreatorToAFlag(bool hide, byte expected)
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ToDto_CarriesTheHideCreatorFlag(bool hide)
     {
         var request = Valid() with { HideCreator = hide };
 
-        request.ToDto(42, null).HideCreator.Should().Be(expected);
+        request.ToDto(42, null).HideCreator.Should().Be(hide);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ToDto_CarriesTheIsWomanFlag(bool isWoman)
+    {
+        var request = Valid() with { IsWoman = isWoman };
+
+        request.ToDto(42, null).IsWoman.Should().Be(isWoman);
+    }
+
+    [Fact]
+    public void ToDto_IsNotWomanByDefault()
+    {
+        Valid().ToDto(42, null).IsWoman.Should().BeFalse();
     }
 
     [Fact]

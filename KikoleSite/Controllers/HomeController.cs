@@ -101,6 +101,8 @@ public class HomeController : KikoleBaseController
 
         model.Messages = await _discussionService.GetOwnThreadAsync(UserId);
         model.NewMessage = null;
+        // le textarea relit d'abord la valeur postee (ModelState) : sans ca il resterait rempli
+        ModelState.Remove(nameof(ContactModel.NewMessage));
         return View(model);
     }
 

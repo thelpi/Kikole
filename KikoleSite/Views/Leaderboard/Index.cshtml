@@ -45,7 +45,7 @@
                         {
                             var trClass = leader.IsCreator ? "creator" : (i % 2 == 0 ? "even" : "odd");
                             var isYou = IsYou(leader.UserId);
-                            <tr class="@trClass@(isYou ? " you-row" : "")">
+                            <tr class="@trClass@(isYou ? " you-row" : "")@(leader.IsBest ? " best-row" : "")">
                                 <td class="tabData">@leader.Rank</td>
                                 <td class="tabData redtext@(isYou ? " you" : "")">
                                     <a href="/Leaderboard?userId=@leader.UserId">@leader.UserName</a>

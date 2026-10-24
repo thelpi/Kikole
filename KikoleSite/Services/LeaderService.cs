@@ -273,7 +273,7 @@ public class LeaderService : ILeaderService
 
             var meLeader = leaders.SingleOrDefault(l => l.UserId == userId);
 
-            var isCreator = (currentDate < stopDate || pDay.HideCreator == 0)
+            var isCreator = (currentDate < stopDate || !pDay.HideCreator)
                 && userId == pDay.CreationUserId;
 
             var pName = pDay.Name;

@@ -21,15 +21,27 @@ public class DayboardModel
     public required IReadOnlyCollection<DayboardLeaderRow> Leaders { get; init; }
     public required IReadOnlyCollection<DayboardSearcherItem> Searchers { get; init; }
 
-    public static DayboardModel From(Dayboard dayboard) => new()
+    public static DayboardModel From(Dayboard dayboard)
     {
-        Hidden = dayboard.Hidden,
-        CanViewDetails = dayboard.CanViewDetails,
-        Date = dayboard.Date,
-        Sort = dayboard.Sort,
-        Leaders = dayboard.Leaders.Select(DayboardLeaderRow.From).ToList(),
-        Searchers = dayboard.Searchers
-    };
+        // le createur ne concourt pas, et un meilleur score a 0 (abandon) ne se met pas en avant
+        var bestPoints = dayboard.Leaders
+            .Where(l => !l.IsCreator)
+            .Select(l => l.Points)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return new()
+        {
+            Hidden = dayboard.Hidden,
+            CanViewDetails = dayboard.CanViewDetails,
+            Date = dayboard.Date,
+            Sort = dayboard.Sort,
+            Leaders = dayboard.Leaders
+                .Select(l => DayboardLeaderRow.From(l, bestPoints > 0 && !l.IsCreator && l.Points == bestPoints))
+                .ToList(),
+            Searchers = dayboard.Searchers
+        };
+    }
 }
 
 public class DayboardLeaderRow
@@ -39,15 +51,17 @@ public class DayboardLeaderRow
     public required string UserName { get; init; }
     public int Points { get; init; }
     public bool IsCreator { get; init; }
+    public bool IsBest { get; init; }
     public required string TimeString { get; init; }
 
-    public static DayboardLeaderRow From(DayboardLeaderItem item) => new()
+    public static DayboardLeaderRow From(DayboardLeaderItem item, bool isBest = false) => new()
     {
         Rank = item.Rank,
         UserId = item.UserId,
         UserName = item.UserName,
         Points = item.Points,
         IsCreator = item.IsCreator,
+        IsBest = isBest,
         TimeString = item.Time.ToNaString()
     };
 }

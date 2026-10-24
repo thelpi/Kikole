@@ -34,7 +34,8 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 ("position_id", player.PositionId),
                 ("alternative_position_id", player.AlternativePositionId),
                 ("creation_user_id", player.CreationUserId),
-                ("hide_creator", player.HideCreator));
+                ("hide_creator", player.HideCreator),
+                ("is_woman", player.IsWoman));
     }
 
     public async Task CreatePlayerClubsAsync(PlayerClubDto playerClub)
@@ -145,6 +146,17 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 new { });
     }
 
+    public async Task<bool> HasPendingValidationPlayersAsync()
+    {
+        var count = await ExecuteScalarAsync(
+                "SELECT COUNT(*) FROM players " +
+                "WHERE publication_date IS NULL " +
+                "AND reject_date IS NULL",
+                null, 0);
+
+        return count > 0;
+    }
+
     public async Task RefusePlayerProposalAsync(ulong playerId)
     {
         await ExecuteNonQueryAsync(
@@ -219,7 +231,7 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                 "UPDATE players SET name = @Name, allowed_names = @AllowedNames, year_of_birth = @YearOfBirth, " +
                 "country_id = @CountryId, alternative_country_id = @AlternativeCountryId, " +
                 "clue = @Clue, easy_clue = @EasyClue, position_id = @PositionId, " +
-                "alternative_position_id = @AlternativePositionId, hide_creator = @HideCreator " +
+                "alternative_position_id = @AlternativePositionId, hide_creator = @HideCreator, is_woman = @IsWoman " +
                 "WHERE id = @playerId AND reject_date IS NULL " +
                 "AND (publication_date IS NULL OR publication_date > @today)",
                 new
@@ -235,7 +247,8 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
                     player.EasyClue,
                     player.PositionId,
                     player.AlternativePositionId,
-                    player.HideCreator
+                    player.HideCreator,
+                    player.IsWoman
                 },
                 transaction);
 

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using FluentAssertions;
 using KikoleSite.Models;
 using KikoleSite.ViewModels;
@@ -89,5 +90,50 @@ public class LeaderboardRowTests
         row.TimeString.Should().Be("00:12");
         row.Points.Should().Be(750);
         row.Rank.Should().Be(1);
+    }
+
+    private static DayboardLeaderItem Leader(ulong userId, int points, bool isCreator = false) => new()
+    {
+        UserId = userId,
+        UserName = $"joueur{userId}",
+        Points = points,
+        IsCreator = isCreator,
+        Time = new TimeSpan(0, 10, 0)
+    };
+
+    private static DayboardModel Board(params DayboardLeaderItem[] leaders) => DayboardModel.From(new Dayboard
+    {
+        Leaders = leaders,
+        Searchers = []
+    });
+
+    [Fact]
+    public void DayboardBestRowsAreAllTheLeadersTiedOnTheHighestScore()
+    {
+        var board = Board(Leader(1, 700), Leader(2, 750), Leader(3, 750), Leader(4, 400));
+
+        board.Leaders.Where(l => l.IsBest).Select(l => l.UserId).Should().BeEquivalentTo(new ulong[] { 2, 3 });
+    }
+
+    [Fact]
+    public void DayboardCreatorIsNeverTheBestRow()
+    {
+        var board = Board(Leader(1, 400), Leader(2, 1000, isCreator: true));
+
+        board.Leaders.Where(l => l.IsBest).Select(l => l.UserId).Should().BeEquivalentTo(new ulong[] { 1 });
+    }
+
+    [Fact]
+    public void DayboardHasNoBestRowWhenTheHighestScoreIsZero()
+    {
+        var board = Board(Leader(1, 0), Leader(2, 0));
+
+        board.Leaders.Should().OnlyContain(l => !l.IsBest);
+    }
+
+    [Fact]
+    public void DayboardHasNoBestRowWhenNobodyFoundTheKikole()
+    {
+        Board().Leaders.Should().BeEmpty();
     }
 }

@@ -4564,7 +4564,8 @@ CREATE TABLE players (
   -- creation_date pour un kikole cree directement par l'admin ; NULL tant qu'il n'est ni
   -- accepte ni date. Sert a recalculer les badges "Do it yourself" / "We are kikole".
   acceptance_date datetime DEFAULT NULL,
-  hide_creator tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
+  hide_creator tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  is_woman tinyint(1) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE player_clubs (

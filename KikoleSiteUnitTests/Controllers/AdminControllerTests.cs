@@ -236,6 +236,33 @@ public class AdminControllerTests : IDisposable
         view.ViewName.Should().Be("Actions");
         view.Model.Should().BeOfType<AdminModel>();
     }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task Actions_Get_FlagsWhatAwaitsTheAdministrator(bool pendingSubmissions, bool unreadMessages)
+    {
+        _playerService.Setup(_ => _.HasPendingSubmissionsAsync()).ReturnsAsync(pendingSubmissions);
+        _discussionService.Setup(_ => _.HasUnreadMessagesForAdminAsync()).ReturnsAsync(unreadMessages);
+
+        var result = await _controller.Actions();
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AdminModel>().Subject;
+        model.HasPendingSubmissions.Should().Be(pendingSubmissions);
+        model.HasUnreadMessages.Should().Be(unreadMessages);
+    }
+
+    [Fact]
+    public async Task DiscussionPost_EmptiesTheReplyBoxPostedBack()
+    {
+        _controller.ModelState.SetModelValue(nameof(AdminDiscussionModel.NewMessage), "une reponse", "une reponse");
+        _discussionService.Setup(_ => _.GetAllDiscussionsAsync()).ReturnsAsync([]);
+
+        await _controller.Discussion(new AdminDiscussionModel { DiscussionId = 5, UserLogin = "x", NewMessage = "une reponse" });
+
+        _controller.ModelState.ContainsKey(nameof(AdminDiscussionModel.NewMessage)).Should().BeFalse();
+    }
+
     [Fact]
     public async Task RecomputeBadges_Post_ResetsBadges()
     {
@@ -889,11 +916,11 @@ public class AdminControllerTests : IDisposable
             player ?? PlayerDtoBuilder.Valid()
                 .WithId(7).WithName("Zinédine Zidane").WithAllowedNames("zizou;zidane;zinedine zidane")
                 .WithAlternativeCountryId((ulong)Countries.ESP).WithAlternativePositionId((ulong)Positions.Forward)
-                .WithClues("clue en", "easy en").WithHiddenCreator()
+                .WithClues("clue en", "easy en").WithHiddenCreator().WithWoman()
                 .WithPublicationDate(Today.AddDays(3)).Build(),
             [
-                new KikoleSite.Models.Dtos.PlayerClubDto { PlayerId = 7, ClubId = 8, HistoryPosition = 1, IsLoan = 0 },
-                new KikoleSite.Models.Dtos.PlayerClubDto { PlayerId = 7, ClubId = 9, HistoryPosition = 2, IsLoan = 1 }
+                new KikoleSite.Models.Dtos.PlayerClubDto { PlayerId = 7, ClubId = 8, HistoryPosition = 1, IsLoan = false },
+                new KikoleSite.Models.Dtos.PlayerClubDto { PlayerId = 7, ClubId = 9, HistoryPosition = 2, IsLoan = true }
             ],
             "indice fr",
             "facile fr");
@@ -977,6 +1004,7 @@ public class AdminControllerTests : IDisposable
         model.ClueFr.Should().Be("indice fr");
         model.EasyClueFr.Should().Be("facile fr");
         model.HideCreator.Should().BeTrue();
+        model.IsWoman.Should().BeTrue();
         model.Club0Id.Should().Be("8");
         model.Club0Name.Should().Be("Juventus");
         model.IsLoan0.Should().BeFalse();

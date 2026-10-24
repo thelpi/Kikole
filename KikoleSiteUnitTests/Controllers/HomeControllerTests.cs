@@ -605,6 +605,17 @@ public class HomeControllerTests
         model.NewMessage.Should().BeNull();
     }
 
+    [Fact]
+    public async Task ContactPost_EmptiesTheMessageBoxPostedBack()
+    {
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        _controller.ModelState.SetModelValue(nameof(ContactModel.NewMessage), "un message", "un message");
+
+        await _controller.Contact(new ContactModel { NewMessage = "un message" });
+
+        _controller.ModelState.ContainsKey(nameof(ContactModel.NewMessage)).Should().BeFalse();
+    }
+
     // ------------------------------------------------------------- Error / ErrorIndex / SwitchLang
 
     [Fact]

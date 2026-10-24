@@ -8,5 +8,5 @@ public record PlayerClubDto
 
     public byte HistoryPosition { get; init; }
 
-    public byte IsLoan { get; init; }
+    public bool IsLoan { get; init; }
 }

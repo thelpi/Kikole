@@ -29,7 +29,7 @@ public record PlayerClubRequest
             HistoryPosition = HistoryPosition,
             ClubId = ClubId,
             PlayerId = playerId,
-            IsLoan = (byte)(IsLoan ? 1 : 0)
+            IsLoan = IsLoan
         };
     }
 }

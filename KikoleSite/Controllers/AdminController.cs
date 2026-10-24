@@ -364,10 +364,14 @@ public class AdminController : KikoleBaseController
         return message.Id == displayedId ? AnnouncementStatus.Displayed : AnnouncementStatus.Superseded;
     }
 
-    private Task<IActionResult> RenderActionsAsync(AdminModel model)
+    private async Task<IActionResult> RenderActionsAsync(AdminModel model)
     {
-        return Task.FromResult<IActionResult>(View("Actions", model));
+        model.HasPendingSubmissions = await _playerService.HasPendingSubmissionsAsync();
+        model.HasUnreadMessages = await _discussionService.HasUnreadMessagesForAdminAsync();
+
+        return View("Actions", model);
     }
+
     // un compte actif et non administrateur : seuls ceux-la se gerent depuis la page des utilisateurs
     private async Task<Models.Dtos.UserDto?> GetManageableUserAsync(ulong userId)
     {
@@ -466,6 +470,7 @@ public class AdminController : KikoleBaseController
             model.UserLogin = summary.UserLogin;
         model.Messages = await _discussionService.GetThreadForAdminAsync(model.DiscussionId);
         model.NewMessage = null;
+        ModelState.Remove(nameof(AdminDiscussionModel.NewMessage));
 
         return View(model);
     }
@@ -778,7 +783,8 @@ public class AdminController : KikoleBaseController
             Position = (Positions)positionId,
             AlternativePosition = alternativePositionId.HasValue ? (Positions)alternativePositionId.Value : null,
             YearOfBirth = yearValue,
-            HideCreator = model.HideCreator
+            HideCreator = model.HideCreator,
+            IsWoman = model.IsWoman
         };
 
         var validityRequest = req.IsValid(_clock.Today, _localizer);
@@ -990,7 +996,8 @@ public class AdminController : KikoleBaseController
             EasyClueEn = player.EasyClue,
             ClueFr = data.ClueFr,
             EasyClueFr = data.EasyClueFr,
-            HideCreator = player.HideCreator == 1
+            HideCreator = player.HideCreator,
+            IsWoman = player.IsWoman
         };
 
         // les noms acceptes sont stockes normalises : on ne retrouve que cette forme ; les alias
@@ -1009,7 +1016,7 @@ public class AdminController : KikoleBaseController
             var club = clubsReferential.FirstOrDefault(c => c.Id == playerClub.ClubId);
             SetIndexedProperty(model, "Club", i, "Id", playerClub.ClubId.ToString());
             SetIndexedProperty(model, "Club", i, "Name", club?.GetCanonicalName(language));
-            SetIndexedProperty(model, "IsLoan", i, string.Empty, playerClub.IsLoan == 1);
+            SetIndexedProperty(model, "IsLoan", i, string.Empty, playerClub.IsLoan);
         }
 
         return model;

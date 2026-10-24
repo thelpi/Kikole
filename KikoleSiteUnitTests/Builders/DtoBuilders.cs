@@ -38,13 +38,13 @@ internal sealed class PlayerDtoBuilder
     internal PlayerDtoBuilder WithAlternativePositionId(ulong? id) { _dto = _dto with { AlternativePositionId = id }; return this; }
     internal PlayerDtoBuilder WithClue(string clue) { _dto = _dto with { Clue = clue }; return this; }
     internal PlayerDtoBuilder WithEasyClue(string clue) { _dto = _dto with { EasyClue = clue }; return this; }
-    internal PlayerDtoBuilder WithHideCreatorFlag(byte flag) { _dto = _dto with { HideCreator = flag }; return this; }
     internal PlayerDtoBuilder WithPublicationDate(DateOnly? date) { _dto = _dto with { PublicationDate = date }; return this; }
     internal PlayerDtoBuilder WithRejectDate(DateTime? date) { _dto = _dto with { RejectDate = date }; return this; }
     internal PlayerDtoBuilder WithAcceptanceDate(DateTime? date) { _dto = _dto with { AcceptanceDate = date }; return this; }
     internal PlayerDtoBuilder WithCreator(ulong userId) { _dto = _dto with { CreationUserId = userId }; return this; }
     internal PlayerDtoBuilder WithBadge(ulong? badgeId) { _dto = _dto with { BadgeId = badgeId }; return this; }
-    internal PlayerDtoBuilder WithHiddenCreator(bool hidden = true) { _dto = _dto with { HideCreator = (byte)(hidden ? 1 : 0) }; return this; }
+    internal PlayerDtoBuilder WithHiddenCreator(bool hidden = true) { _dto = _dto with { HideCreator = hidden }; return this; }
+    internal PlayerDtoBuilder WithWoman(bool isWoman = true) { _dto = _dto with { IsWoman = isWoman }; return this; }
     internal PlayerDtoBuilder WithClues(string clue, string easyClue) { _dto = _dto with { Clue = clue }; _dto = _dto with { EasyClue = easyClue }; return this; }
 
     internal PlayerDto Build() => _dto;

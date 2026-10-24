@@ -15,9 +15,9 @@ public class PlayerCreatorTests
     private const ulong CreatorId = 100;
     private const ulong OtherUserId = 200;
 
-    private static PlayerDto Player(byte hideCreator = 0)
+    private static PlayerDto Player(bool hideCreator = false)
     {
-        return PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithCreator(CreatorId).WithHideCreatorFlag(hideCreator).Build();
+        return PlayerDtoBuilder.Valid().WithId(1).WithName("Zinédine Zidane").WithAllowedNames("zidane;zizou").WithCreator(CreatorId).WithHiddenCreator(hideCreator).Build();
     }
 
     private static UserDto User(ulong id, UserTypes type)
@@ -85,9 +85,9 @@ public class PlayerCreatorTests
     // ------------------------------------------------------------- anonymat volontaire
 
     [Theory]
-    [InlineData((byte)0, true)]
-    [InlineData((byte)1, false)]
-    public void CanDisplayCreator_FollowsTheHideCreatorFlag(byte hideCreator, bool expected)
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void CanDisplayCreator_FollowsTheHideCreatorFlag(bool hideCreator, bool expected)
     {
         var result = new PlayerCreator(
             User(OtherUserId, UserTypes.StandardUser), Player(hideCreator), User(CreatorId, UserTypes.PowerUser));
@@ -100,7 +100,7 @@ public class PlayerCreatorTests
     {
         // les deux regles sont independantes
         var result = new PlayerCreator(
-            User(CreatorId, UserTypes.StandardUser), Player(hideCreator: 1), User(CreatorId, UserTypes.StandardUser));
+            User(CreatorId, UserTypes.StandardUser), Player(hideCreator: true), User(CreatorId, UserTypes.StandardUser));
 
         result.CanDisplayCreator.Should().BeFalse();
         result.Name.Should().Be("Zinédine Zidane");

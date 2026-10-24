@@ -42,6 +42,8 @@ public record PlayerRequest
 
     public bool HideCreator { get; init; }
 
+    public bool IsWoman { get; init; }
+
     internal string? IsValid(DateOnly today, IStringLocalizer resources)
     {
         if (string.IsNullOrWhiteSpace(Name))
@@ -93,7 +95,8 @@ public record PlayerRequest
             PositionId = (ulong)Position,
             AlternativePositionId = AlternativePosition.HasValue ? (ulong)AlternativePosition.Value : null,
             CreationUserId = userId,
-            HideCreator = (byte)(HideCreator ? 1 : 0)
+            HideCreator = HideCreator,
+            IsWoman = IsWoman
         };
     }
 

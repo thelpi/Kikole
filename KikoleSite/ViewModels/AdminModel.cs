@@ -3,4 +3,8 @@
 public class AdminModel
 {
     public string? ActionFeedback { get; set; }
+
+    public bool HasPendingSubmissions { get; set; }
+
+    public bool HasUnreadMessages { get; set; }
 }

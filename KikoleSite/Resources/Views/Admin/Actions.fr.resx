@@ -150,4 +150,13 @@
   <data name="ManagePlanning" xml:space="preserve">
     <value>Réordonner les kikolés à venir</value>
   </data>
+  <data name="ConfirmText" xml:space="preserve">
+    <value>Lancer l'action « {0} » ?</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirmer</value>
+  </data>
 </root>

@@ -773,6 +773,9 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
 
                     var newRow = newtbody.insertRow();
                     newRow.classList.add(trClass);
+                    if (e.isBest) {
+                        newRow.classList.add('best-row');
+                    }
 
                     var newCell = newRow.insertCell();
                     var newText = document.createTextNode(e.rank);
@@ -1645,6 +1648,39 @@ $(function () {
         modal.querySelector('button[type="submit"]').focus();
     });
     document.getElementById('planningCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+});
+
+/* actions d'administration (Admin/Actions) : les boutons qui declenchent directement un
+   traitement passent par une modale de confirmation avant l'envoi du formulaire POST */
+$(function () {
+    var modal = document.getElementById('adminRunModal');
+    if (!modal) return;
+
+    var form = document.getElementById('adminRunForm');
+    var text = document.getElementById('adminRunModalText');
+    var confirmButton = document.getElementById('adminRunConfirm');
+    var opener = null;
+    var closeModal = function () {
+        modal.classList.remove('open');
+        if (opener) opener.focus();
+    };
+
+    document.querySelectorAll('.admin-run').forEach(function (button) {
+        button.addEventListener('click', function () {
+            opener = button;
+            form.action = button.dataset.action;
+            text.textContent = text.dataset.template.replace('{0}', button.textContent.trim());
+            modal.classList.add('open');
+            confirmButton.focus();
+        });
+    });
+    document.getElementById('adminRunCancel').addEventListener('click', closeModal);
     modal.addEventListener('click', function (e) {
         if (e.target === modal) closeModal();
     });

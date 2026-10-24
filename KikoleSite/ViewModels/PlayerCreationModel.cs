@@ -152,6 +152,8 @@ public class PlayerCreationModel
 
     public bool HideCreator { get; set; }
 
+    public bool IsWoman { get; set; }
+
     /// <summary>
     /// Reserve aux administrateurs (verifie cote controleur) : force la date de
     /// publication au lieu du "bout de chaine" habituel. Format "yyyy-MM-dd" (input HTML

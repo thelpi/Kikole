@@ -92,14 +92,14 @@ public class ClubRequestTests
 public class PlayerClubRequestTests
 {
     [Theory]
-    [InlineData(true, (byte)1)]
-    [InlineData(false, (byte)0)]
-    public void ToPlayerClubDto_ConvertsTheLoanFlag(bool isLoan, byte expected)
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ToPlayerClubDto_CarriesTheLoanFlag(bool isLoan)
     {
         var dto = new PlayerClubRequest { ClubId = 5, HistoryPosition = 2, IsLoan = isLoan }
             .ToPlayerClubDto(9);
 
-        dto.IsLoan.Should().Be(expected);
+        dto.IsLoan.Should().Be(isLoan);
         dto.ClubId.Should().Be(5);
         dto.HistoryPosition.Should().Be(2);
         dto.PlayerId.Should().Be(9);

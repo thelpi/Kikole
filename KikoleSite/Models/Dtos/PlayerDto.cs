@@ -48,5 +48,7 @@ public record PlayerDto : BaseDto
     /// </summary>
     public DateTime? AcceptanceDate { get; init; }
 
-    public byte HideCreator { get; init; }
+    public bool HideCreator { get; init; }
+
+    public bool IsWoman { get; init; }
 }

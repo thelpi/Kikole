@@ -9,23 +9,44 @@
 
     <div class="form-card">
         <h3>@localizer["AdminActions"]</h3>
-        <div class="small-link"><a href="/Admin/PlayerSubmission">@localizer["CheckSubmittedPlayers"]</a></div>
-        <div class="small-link"><a asp-controller="Admin" asp-action="Discussions">@localizer["ViewDiscussions"]</a></div>
-        <div class="small-link"><a asp-controller="Admin" asp-action="UpcomingPlayers">@localizer["UpcomingPlayers"]</a></div>
-        <div class="small-link"><a asp-controller="Admin" asp-action="Planning">@localizer["ManagePlanning"]</a></div>
-        <div class="small-link"><a asp-controller="Admin" asp-action="Announcements">@localizer["ManageAnnouncements"]</a></div>
-        <div class="small-link"><a asp-controller="Admin" asp-action="Users">@localizer["ManageUsers"]</a></div>
-        <div class="small-link"><a asp-controller="Admin" asp-action="Errors">@localizer["ViewErrors"]</a></div>
-        <div class="actions" style="margin-top:14px">
-            <form method="post" action="/Admin/RecomputeBadges">
-                <button type="submit">@localizer["RecomputeBadges"]</button>
-            </form>
-            <form method="post" action="/Admin/RecomputeLeaders">
-                <button type="submit">@localizer["RecomputeLeaders"]</button>
-            </form>
-            <form method="post" action="/Admin/ReassignPlayers">
-                <button type="submit">@localizer["ReassignPlayers"]</button>
-            </form>
+        <ul class="admin-list">
+            <li>
+                <a href="/Admin/PlayerSubmission">
+                    <span>@localizer["CheckSubmittedPlayers"]</span>
+                    @if (Model?.HasPendingSubmissions == true)
+                    {
+                        <span class="site-nav-badge-inline" aria-hidden="true"></span>
+                    }
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Admin" asp-action="Discussions">
+                    <span>@localizer["ViewDiscussions"]</span>
+                    @if (Model?.HasUnreadMessages == true)
+                    {
+                        <span class="site-nav-badge-inline" aria-hidden="true"></span>
+                    }
+                </a>
+            </li>
+            <li><a asp-controller="Admin" asp-action="UpcomingPlayers"><span>@localizer["UpcomingPlayers"]</span></a></li>
+            <li><a asp-controller="Admin" asp-action="Planning"><span>@localizer["ManagePlanning"]</span></a></li>
+            <li><a asp-controller="Admin" asp-action="Announcements"><span>@localizer["ManageAnnouncements"]</span></a></li>
+            <li><a asp-controller="Admin" asp-action="Users"><span>@localizer["ManageUsers"]</span></a></li>
+            <li><a asp-controller="Admin" asp-action="Errors"><span>@localizer["ViewErrors"]</span></a></li>
+            <li><button type="button" class="admin-run" data-action="/Admin/RecomputeBadges"><span>@localizer["RecomputeBadges"]</span></button></li>
+            <li><button type="button" class="admin-run" data-action="/Admin/RecomputeLeaders"><span>@localizer["RecomputeLeaders"]</span></button></li>
+            <li><button type="button" class="admin-run" data-action="/Admin/ReassignPlayers"><span>@localizer["ReassignPlayers"]</span></button></li>
+        </ul>
+        <form method="post" id="adminRunForm"></form>
+    </div>
+
+    <div class="confirm-modal" id="adminRunModal" role="dialog" aria-modal="true" aria-labelledby="adminRunModalText">
+        <div class="confirm-modal-box">
+            <p id="adminRunModalText" data-template="@localizer["ConfirmText"].Value"></p>
+            <div class="confirm-modal-actions">
+                <button type="button" class="secondary" id="adminRunCancel">@localizer["Cancel"]</button>
+                <button type="submit" form="adminRunForm" id="adminRunConfirm">@localizer["Confirm"]</button>
+            </div>
         </div>
     </div>
 </div>

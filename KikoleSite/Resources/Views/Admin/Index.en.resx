@@ -162,6 +162,9 @@
   <data name="Position" xml:space="preserve">
     <value>Position</value>
   </data>
+  <data name="WomenFootball" xml:space="preserve">
+    <value>Women's football?</value>
+  </data>
   <data name="RemainsAnonymous" xml:space="preserve">
     <value>Remains anonymous:</value>
   </data>

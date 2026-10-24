@@ -33,6 +33,8 @@ public interface IPlayerRepository
 
     Task<IReadOnlyCollection<PlayerDto>> GetPendingValidationPlayersAsync();
 
+    Task<bool> HasPendingValidationPlayersAsync();
+
     Task RefusePlayerProposalAsync(ulong playerId);
 
     Task<string?> GetClueAsync(ulong playerId, byte isEasy, ulong languageId);
