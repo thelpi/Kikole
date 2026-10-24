@@ -124,6 +124,32 @@ public class LeaderboardRowTests
     }
 
     [Fact]
+    public void DayboardBestRowsIgnoreThoseWhoFoundTheKikoleAfterTheDay()
+    {
+        var day = new DateOnly(2026, 8, 21);
+        var onTime = Leader(1, 700);
+        onTime.Date = day;
+        var catchUp = Leader(2, 900);
+        catchUp.Date = day.AddDays(3);
+
+        var board = DayboardModel.From(new Dayboard { Date = day, Leaders = [onTime, catchUp], Searchers = [] });
+
+        board.Leaders.Where(l => l.IsBest).Select(l => l.UserId).Should().BeEquivalentTo(new ulong[] { 1 });
+    }
+
+    [Fact]
+    public void DayboardHasNoBestRowWhenOnlyCatchUpWinnersFoundIt()
+    {
+        var day = new DateOnly(2026, 8, 21);
+        var catchUp = Leader(2, 900);
+        catchUp.Date = day.AddDays(3);
+
+        var board = DayboardModel.From(new Dayboard { Date = day, Leaders = [catchUp], Searchers = [] });
+
+        board.Leaders.Should().OnlyContain(l => !l.IsBest);
+    }
+
+    [Fact]
     public void DayboardHasNoBestRowWhenTheHighestScoreIsZero()
     {
         var board = Board(Leader(1, 0), Leader(2, 0));

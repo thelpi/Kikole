@@ -23,9 +23,12 @@ public class DayboardModel
 
     public static DayboardModel From(Dayboard dayboard)
     {
-        // le createur ne concourt pas, et un meilleur score a 0 (abandon) ne se met pas en avant
+        // seuls comptent ceux qui ont trouve le jour meme (pas le rattrapage) ; le createur ne
+        // concourt pas, et un meilleur score a 0 (abandon) ne se met pas en avant
+        bool IsContender(DayboardLeaderItem l) => !l.IsCreator && l.Date == dayboard.Date;
+
         var bestPoints = dayboard.Leaders
-            .Where(l => !l.IsCreator)
+            .Where(IsContender)
             .Select(l => l.Points)
             .DefaultIfEmpty(0)
             .Max();
@@ -37,7 +40,7 @@ public class DayboardModel
             Date = dayboard.Date,
             Sort = dayboard.Sort,
             Leaders = dayboard.Leaders
-                .Select(l => DayboardLeaderRow.From(l, bestPoints > 0 && !l.IsCreator && l.Points == bestPoints))
+                .Select(l => DayboardLeaderRow.From(l, bestPoints > 0 && IsContender(l) && l.Points == bestPoints))
                 .ToList(),
             Searchers = dayboard.Searchers
         };
