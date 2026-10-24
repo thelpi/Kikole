@@ -253,6 +253,63 @@ public class AdminControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task StartDiscussion_ByUserId_OpensTheDiscussionOfAnActiveUser()
+    {
+        SetupUser(5, login: "lea");
+        _discussionService.Setup(_ => _.GetOrCreateDiscussionAsync(5)).ReturnsAsync(9UL);
+
+        var result = await _controller.StartDiscussion(5, null);
+
+        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirect.ActionName.Should().Be("Discussion");
+        redirect.RouteValues!["discussionId"].Should().Be(9UL);
+    }
+
+    [Theory]
+    [InlineData("lea")]
+    [InlineData("  LEA ")]
+    public async Task StartDiscussion_ByLogin_FindsTheUserWhateverTheCase(string login)
+    {
+        SetupUser(5, login: "lea");
+        _userRepository.Setup(_ => _.GetUserByNormalizedLoginAsync("LEA"))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(5).WithLogin("lea").Build());
+        _discussionService.Setup(_ => _.GetOrCreateDiscussionAsync(5)).ReturnsAsync(9UL);
+
+        var result = await _controller.StartDiscussion(0, login);
+
+        result.Should().BeOfType<RedirectToActionResult>().Which.RouteValues!["discussionId"].Should().Be(9UL);
+    }
+
+    [Fact]
+    public async Task StartDiscussion_OnAnAdministrator_IsRefused()
+    {
+        SetupUser(1, UserTypes.Administrator, "admin");
+        _discussionService.Setup(_ => _.GetAllDiscussionsAsync()).ReturnsAsync([]);
+
+        var result = await _controller.StartDiscussion(1, null);
+
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Discussions");
+        view.Model.Should().BeOfType<AdminDiscussionsModel>().Which.ErrorMessage.Should().Be("UserNotContactable");
+        _discussionService.Verify(_ => _.GetOrCreateDiscussionAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("  ")]
+    [InlineData("inconnu")]
+    public async Task StartDiscussion_WithAnUnknownOrEmptyLogin_IsRefused(string? login)
+    {
+        _discussionService.Setup(_ => _.GetAllDiscussionsAsync()).ReturnsAsync([]);
+
+        var result = await _controller.StartDiscussion(0, login);
+
+        result.Should().BeOfType<ViewResult>().Which.Model.Should().BeOfType<AdminDiscussionsModel>()
+            .Which.ErrorMessage.Should().Be("UserNotContactable");
+        _discussionService.Verify(_ => _.GetOrCreateDiscussionAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
     public async Task DiscussionPost_EmptiesTheReplyBoxPostedBack()
     {
         _controller.ModelState.SetModelValue(nameof(AdminDiscussionModel.NewMessage), "une reponse", "une reponse");

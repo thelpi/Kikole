@@ -27,6 +27,14 @@ public interface IDiscussionService
     Task PostUserMessageAsync(ulong userId, string message);
 
     /// <summary>
+    /// Gets a user's discussion, creating it (empty) if the user never wrote, so that the
+    /// administrator can start the conversation.
+    /// </summary>
+    /// <param name="userId">User identifier.</param>
+    /// <returns>The discussion identifier.</returns>
+    Task<ulong> GetOrCreateDiscussionAsync(ulong userId);
+
+    /// <summary>
     /// Gets a discussion thread for the administrator. Marks the user's messages as
     /// read as a side effect.
     /// </summary>

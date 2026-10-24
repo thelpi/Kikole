@@ -95,6 +95,37 @@ public class DiscussionServiceTests
         _discussionRepository.Verify(_ => _.CreateMessageAsync(DiscussionId, "second message", false), Times.Once);
     }
 
+    // ------------------------------------------------------------- conversation initiee par l'admin
+
+    [Fact]
+    public async Task GetOrCreateDiscussionAsync_WhenTheUserNeverWrote_CreatesAnEmptyDiscussion()
+    {
+        _discussionRepository
+            .Setup(_ => _.GetDiscussionByUserIdAsync(UserId))
+            .ReturnsAsync((DiscussionDto?)null);
+        _discussionRepository
+            .Setup(_ => _.CreateDiscussionAsync(UserId))
+            .ReturnsAsync(DiscussionId);
+
+        var discussionId = await _service.GetOrCreateDiscussionAsync(UserId);
+
+        discussionId.Should().Be(DiscussionId);
+        _discussionRepository.Verify(_ => _.CreateMessageAsync(It.IsAny<ulong>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetOrCreateDiscussionAsync_WhenADiscussionExists_ReturnsItWithoutCreatingAnother()
+    {
+        _discussionRepository
+            .Setup(_ => _.GetDiscussionByUserIdAsync(UserId))
+            .ReturnsAsync(new DiscussionDto { Id = DiscussionId, UserId = UserId });
+
+        var discussionId = await _service.GetOrCreateDiscussionAsync(UserId);
+
+        discussionId.Should().Be(DiscussionId);
+        _discussionRepository.Verify(_ => _.CreateDiscussionAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
     // ------------------------------------------------------------- fil admin
 
     [Fact]

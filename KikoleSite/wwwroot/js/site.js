@@ -1728,3 +1728,25 @@ $(function () {
         });
     });
 });
+
+/* nouvelle conversation (Admin/Discussions) : meme source d'identifiants que la page des utilisateurs */
+$(function () {
+    var $login = $("#newDiscussionLogin");
+    if ($login.length === 0) return;
+
+    $login.autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '/Admin/AutoCompleteUserLogins/',
+                data: { "prefix": request.term },
+                type: "POST",
+                success: response
+            });
+        },
+        select: function (e, i) {
+            $login.val(i.item.value);
+            return false;
+        },
+        minLength: 1
+    });
+});

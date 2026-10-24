@@ -27,11 +27,17 @@ public class DiscussionService : IDiscussionService
 
     public async Task PostUserMessageAsync(ulong userId, string message)
     {
-        var discussion = await _discussionRepository.GetDiscussionByUserIdAsync(userId);
-        var discussionId = discussion?.Id
-            ?? await _discussionRepository.CreateDiscussionAsync(userId);
+        var discussionId = await GetOrCreateDiscussionAsync(userId);
 
         await _discussionRepository.CreateMessageAsync(discussionId, message, isFromAdmin: false);
+    }
+
+    public async Task<ulong> GetOrCreateDiscussionAsync(ulong userId)
+    {
+        var discussion = await _discussionRepository.GetDiscussionByUserIdAsync(userId);
+
+        return discussion?.Id
+            ?? await _discussionRepository.CreateDiscussionAsync(userId);
     }
 
     public async Task<IReadOnlyCollection<DiscussionMessageDto>> GetThreadForAdminAsync(ulong discussionId)

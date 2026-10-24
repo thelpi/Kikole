@@ -237,4 +237,10 @@
   <data name="LoginConfirmMismatch" xml:space="preserve">
     <value>The login typed is different</value>
   </data>
+  <data name="C" xml:space="preserve">
+    <value>o</value>
+  </data>
+  <data name="M" xml:space="preserve">
+    <value>e</value>
+  </data>
 </root>

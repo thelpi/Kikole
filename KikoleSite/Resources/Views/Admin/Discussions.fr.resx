@@ -135,4 +135,13 @@
   <data name="UnreadTag" xml:space="preserve">
     <value>non lu</value>
   </data>
+  <data name="NewDiscussionTitle" xml:space="preserve">
+    <value>Nouvelle conversation</value>
+  </data>
+  <data name="NewDiscussionLogin" xml:space="preserve">
+    <value>Identifiant de l'utilisateur</value>
+  </data>
+  <data name="NewDiscussionGo" xml:space="preserve">
+    <value>Ouvrir la conversation</value>
+  </data>
 </root>

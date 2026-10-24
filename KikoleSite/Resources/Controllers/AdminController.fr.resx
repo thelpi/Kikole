@@ -369,4 +369,10 @@
   <data name="UnknownClub" xml:space="preserve">
     <value>Club n°{0} non reconnu : choisissez-le dans la liste de suggestions (ou créez-le d'abord)</value>
   </data>
+  <data name="U" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="C" xml:space="preserve">
+    <value>e</value>
+  </data>
 </root>

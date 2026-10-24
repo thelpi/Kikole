@@ -369,4 +369,10 @@
   <data name="UnknownClub" xml:space="preserve">
     <value>Club #{0} not recognised: pick it from the suggestions list (or create it first)</value>
   </data>
+  <data name="U" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="T" xml:space="preserve">
+    <value>h</value>
+  </data>
 </root>

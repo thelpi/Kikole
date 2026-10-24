@@ -3,6 +3,22 @@
 @model AdminDiscussionsModel
 
 <div class="kikole-board">
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="banner error">@Model.ErrorMessage</div>
+    }
+    <div class="form-card">
+        <h3>@localizer["NewDiscussionTitle"]</h3>
+        <form method="post" action="/Admin/StartDiscussion">
+            <div class="form-field">
+                <label for="newDiscussionLogin">@localizer["NewDiscussionLogin"]</label>
+                <input type="text" id="newDiscussionLogin" name="login" class="blank" autocomplete="off" />
+            </div>
+            <div class="actions">
+                <button type="submit">@localizer["NewDiscussionGo"]</button>
+            </div>
+        </form>
+    </div>
     <div class="form-card">
         <h3>@localizer["Title"]</h3>
         @if (Model.Discussions.Count == 0)

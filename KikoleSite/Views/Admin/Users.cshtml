@@ -90,6 +90,10 @@
                                 <div class="user-actions">
                                     @if (!row.IsDisabled)
                                     {
+                                        <form method="post" action="/Admin/StartDiscussion" style="margin:0">
+                                            <input type="hidden" name="userId" value="@row.Id" />
+                                            <button type="submit" class="secondary">@localizer["ContactUser"]</button>
+                                        </form>
                                         <button type="button" class="secondary"
                                                 data-action="/Admin/ChangeUserType" data-user-id="@row.Id" data-input="none"
                                                 data-new-type="@((int)(isPower ? UserTypes.StandardUser : UserTypes.PowerUser))"

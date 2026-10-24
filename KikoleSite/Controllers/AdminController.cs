@@ -434,6 +434,38 @@ public class AdminController : KikoleBaseController
         return View(new AdminDiscussionsModel { Discussions = discussions });
     }
 
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> StartDiscussion(ulong userId, string? login)
+    {
+        var target = userId > 0
+            ? await GetManageableUserAsync(userId)
+            : await FindManageableUserByLoginAsync(login);
+
+        if (target == null)
+        {
+            return View("Discussions", new AdminDiscussionsModel
+            {
+                Discussions = await _discussionService.GetAllDiscussionsAsync(),
+                ErrorMessage = _localizer["UserNotContactable"]
+            });
+        }
+
+        var discussionId = await _discussionService.GetOrCreateDiscussionAsync(target.Id);
+
+        return RedirectToAction("Discussion", "Admin", new { discussionId });
+    }
+
+    private async Task<Models.Dtos.UserDto?> FindManageableUserByLoginAsync(string? login)
+    {
+        if (string.IsNullOrWhiteSpace(login))
+            return null;
+
+        var user = await _userRepository.GetUserByNormalizedLoginAsync(login.Trim().ToUpperInvariant());
+
+        return user == null ? null : await GetManageableUserAsync(user.Id);
+    }
+
     [HttpGet]
     [Authorization(UserTypes.Administrator)]
     public async Task<IActionResult> Discussion(ulong discussionId)
