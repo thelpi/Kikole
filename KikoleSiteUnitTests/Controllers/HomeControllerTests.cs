@@ -454,6 +454,85 @@ public class HomeControllerTests
         _internationalService.Verify(_ => _.GetCountryContinentsAsync(), Times.Once);
     }
 
+    private PlayerFullDto SetupNameProposalContext(string previousIncorrectName)
+    {
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        SetupCountryContinents();
+        SetupClues();
+        SetFormKeys("submit-Name");
+
+        var playerFull = PlayerFullDtoBuilder.Valid().Build();
+        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(Today)).ReturnsAsync(playerFull);
+
+        var requestUser = UserDtoBuilder.Valid().WithId(7).WithType(UserTypes.StandardUser).Build();
+        _playerService
+            .Setup(_ => _.GetPlayerOfTheDayFromUserPovAsync(7, Today))
+            .ReturnsAsync(new PlayerCreator(requestUser, playerFull.Player, UserDtoBuilder.Valid().WithId(42).Build()));
+        _leaderService.Setup(_ => _.GetUserStreakAsync(7)).ReturnsAsync(new UserStreak { Current = 0, Best = 0 });
+
+        var previous = BuildResponse(
+            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(0).WithValue(previousIncorrectName).Build(),
+            playerFull);
+        _proposalService
+            .Setup(_ => _.GetProposalsAsync(Today, 7, TestCountryContinents.Map))
+            .ReturnsAsync(new[] { previous });
+
+        var response = BuildResponse(
+            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Name).WithSuccessfulFlag(0).WithValue("nouvelle").Build(),
+            playerFull);
+        _proposalService
+            .Setup(_ => _.ManageProposalResponseAsync(
+                It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), 7, playerFull, TestCountryContinents.Map))
+            .ReturnsAsync((response, (IReadOnlyCollection<ProposalDto>)Array.Empty<ProposalDto>(), (LeaderDto?)null));
+        _badgeService
+            .Setup(_ => _.PrepareNonLeaderBadgesAsync(7, It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), Lang))
+            .ReturnsAsync(Array.Empty<UserBadge>());
+
+        return playerFull;
+    }
+
+    private void VerifyNameProposalRecorded(PlayerFullDto playerFull, Times times)
+    {
+        _proposalService.Verify(_ => _.ManageProposalResponseAsync(
+            It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), 7, playerFull, TestCountryContinents.Map), times);
+    }
+
+    [Fact]
+    public async Task IndexPost_NameCloseToAnIncorrectOne_AsksForConfirmationBeforeRecordingAnything()
+    {
+        var playerFull = SetupNameProposalContext("Zinedine Zidane");
+
+        var result = await _controller.Index(new HomeModel { PlayerNameSubmission = "Ziddane" });
+
+        ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Which.SimilarIncorrectName.Should().Be("Zinedine Zidane");
+        VerifyNameProposalRecorded(playerFull, Times.Never());
+    }
+
+    [Fact]
+    public async Task IndexPost_NameCloseToAnIncorrectOne_ConfirmedByTheUser_IsRecorded()
+    {
+        var playerFull = SetupNameProposalContext("Zinedine Zidane");
+
+        var result = await _controller.Index(new HomeModel { PlayerNameSubmission = "Ziddane", ConfirmSimilarName = true });
+
+        ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Which.SimilarIncorrectName.Should().BeNull();
+        VerifyNameProposalRecorded(playerFull, Times.Once());
+    }
+
+    [Theory]
+    [InlineData("Ronaldinho", "Ronaldo")]
+    [InlineData("Thierry Henry", "Thierry Sagnol")]
+    [InlineData("Zinedine Zidane", "ZINÉDINE ZIDANE")]
+    public async Task IndexPost_NameNotCloseToAnIncorrectOneOrAlreadyBilledAsIs_IsRecordedDirectly(string submitted, string previous)
+    {
+        var playerFull = SetupNameProposalContext(previous);
+
+        var result = await _controller.Index(new HomeModel { PlayerNameSubmission = submitted });
+
+        ((ViewResult)result).Model.Should().BeOfType<HomeModel>().Which.SimilarIncorrectName.Should().BeNull();
+        VerifyNameProposalRecorded(playerFull, Times.Once());
+    }
+
     [Fact]
     public async Task IndexPost_ValidWinningProposal_AlsoCallsLeaderBadges()
     {

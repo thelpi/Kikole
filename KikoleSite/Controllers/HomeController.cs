@@ -282,6 +282,24 @@ public class HomeController : KikoleBaseController
 
         var countryContinents = await countryContinentsTask;
 
+        if (!isGiveUp && proposalType == ProposalTypes.Name && !model.ConfirmSimilarName)
+        {
+            var history = await _proposalService
+                .GetProposalsAsync(_clock.Today.AddDays(-(int)daysBefore), UserId, countryContinents);
+
+            model.SimilarIncorrectName = (history ?? [])
+                .Where(p => p.ProposalType == ProposalTypes.Name && !p.Successful)
+                .Select(p => p.Value?.ToString())
+                .OfType<string>()
+                .FindSimilarName(value!);
+
+            if (model.SimilarIncorrectName != null)
+            {
+                await SetAnnouncementAsync(model);
+                return await SetAndGetViewModelAsync(null, model, countryContinents);
+            }
+        }
+
         var ip = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
         ProposalResponse response;

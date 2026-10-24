@@ -189,6 +189,58 @@ public class StringHelperTests
         name.ContainsApproximately(withOneMore).Should().BeFalse();
     }
 
+    // ------------------------------------------------------------- IsSimilarName
+
+    [Theory]
+    // fautes de frappe, meme tolerance que la bonne reponse
+    [InlineData("Ziddane", "Zinedine Zidane", true)]
+    [InlineData("Zinedine Ziddane", "Zinedine Zidane", true)]
+    [InlineData("Zinedinezidane", "Zinedine Zidane", true)]
+    // nom seul, prenom seul, prenom et nom inverses
+    [InlineData("Zidane", "Zinedine Zidane", true)]
+    [InlineData("Zinedine Zidane", "Zidane", true)]
+    [InlineData("Zinedine", "Zinedine Zidane", true)]
+    [InlineData("Zidane Zinedine", "Zinedine Zidane", true)]
+    [InlineData("Ziddane Zinedine", "Zinedine Zidane", true)]
+    // initiale, ponctuation, accents
+    [InlineData("C. Ronaldo", "Cristiano Ronaldo", true)]
+    [InlineData("Zinédine-Zidane", "Zinedine Zidane", true)]
+    // des joueurs differents ne se ressemblent pas, meme avec un prenom ou un nom commun
+    [InlineData("Ronaldo", "Ronaldinho", false)]
+    [InlineData("Pedro", "Pedri", false)]
+    [InlineData("Thierry Henry", "Thierry Sagnol", false)]
+    [InlineData("Eden Hazard", "Thorgan Hazard", false)]
+    [InlineData("Luis Suarez", "Luis Enrique", false)]
+    [InlineData("Rodri", "Modric", false)]
+    [InlineData("", "Zidane", false)]
+    public void IsSimilarName_FollowsTheSameToleranceAsTheCorrectAnswer(string value, string other, bool expected)
+    {
+        value.IsSimilarName(other).Should().Be(expected);
+        other.IsSimilarName(value).Should().Be(expected);
+    }
+
+    [Fact]
+    public void FindSimilarName_ReturnsTheClosestPreviousName()
+    {
+        var previous = new[] { "Zinedine Zidane", "Zidane Zinedine", "Kylian Mbappe" };
+
+        previous.FindSimilarName("Zinedine Ziddane").Should().Be("Zinedine Zidane");
+    }
+
+    [Theory]
+    [InlineData("zinedine zidane")]
+    [InlineData("  ZINÉDINE ZIDANE ")]
+    public void FindSimilarName_IgnoresTheSameProposalAlreadyBilledOnce(string value)
+    {
+        new[] { "Zinedine Zidane" }.FindSimilarName(value).Should().BeNull();
+    }
+
+    [Fact]
+    public void FindSimilarName_WithoutAnyPreviousName_ReturnsNull()
+    {
+        new List<string>().FindSimilarName("Zidane").Should().BeNull();
+    }
+
     // ------------------------------------------------------------- GetEditDistance
 
     [Theory]

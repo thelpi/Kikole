@@ -53,6 +53,64 @@ internal static class StringHelper
     {
         return (length - 1) / 5;
     }
+
+    private static bool IsWithinTypos(string a, string b)
+    {
+        return a.GetEditDistance(b) <= MaxTypos(Math.Max(a.Length, b.Length));
+    }
+
+    private static List<string> SplitWords(string sanitizedValue)
+    {
+        return new string(sanitizedValue.Select(c => char.IsLetterOrDigit(c) ? c : ' ').ToArray())
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .ToList();
+    }
+
+    private static bool IsSameWord(string a, string b)
+    {
+        return IsWithinTypos(a, b)
+            || (a.Length == 1 && b.StartsWith(a, StringComparison.Ordinal))
+            || (b.Length == 1 && a.StartsWith(b, StringComparison.Ordinal));
+    }
+
+    // meme tolerance aux fautes que ContainsApproximately, en plus souple sur la forme : mots dans
+    // le desordre (prenom/nom inverses), nom seul ou prenom seul, initiale, ponctuation et espaces
+    internal static bool IsSimilarName(this string value, string other)
+    {
+        var a = SplitWords(value.Sanitize());
+        var b = SplitWords(other.Sanitize());
+        if (a.Count == 0 || b.Count == 0)
+            return false;
+
+        if (IsWithinTypos(string.Join(' ', a), string.Join(' ', b))
+            || IsWithinTypos(string.Concat(a), string.Concat(b)))
+            return true;
+
+        var (shorter, longer) = a.Count <= b.Count ? (a, b) : (b, a);
+        var remaining = new List<string>(longer);
+        foreach (var word in shorter)
+        {
+            var index = remaining.FindIndex(w => IsSameWord(word, w));
+            if (index < 0)
+                return false;
+
+            remaining.RemoveAt(index);
+        }
+
+        return true;
+    }
+
+    // la mauvaise proposition deja faite qui ressemble le plus a la nouvelle, sans compter la meme
+    // proposition a la casse et aux accents pres (deja non facturee une seconde fois)
+    internal static string? FindSimilarName(this IEnumerable<string> previousNames, string value)
+    {
+        var sanitizedValue = value.Sanitize();
+
+        return previousNames
+            .Where(p => p.Sanitize() != sanitizedValue && value.IsSimilarName(p))
+            .OrderBy(p => p.Sanitize().GetEditDistance(sanitizedValue))
+            .FirstOrDefault();
+    }
     internal static IReadOnlyList<string> Disjoin(this string value)
     {
         return value.Split(Separator).ToList();

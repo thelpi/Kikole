@@ -294,10 +294,11 @@
                 <div class="field">@localizer["TypePlayerName"]</div>
                 <form method="post" action="/" style="margin:0" id="playerNameForm">
                     @Html.HiddenFor(m => m.CurrentDay)<input type="hidden" name="PageDate" value="@Model.PageDate" />
+                    <input type="hidden" name="ConfirmSimilarName" id="confirmSimilarName" value="false" />
                     <div class="final-input">
                         <input type="text" name="PlayerNameSubmission" id="playerNameInput" value="@Model.PlayerNameSubmission" placeholder="Zinédine Zidane, Kylian Mbappé…" aria-describedby="playerNameError" />
                         <div class="final-actions">
-                            <button type="submit" name="submit-Name" class="final-submit">Valider</button>
+                            <button type="submit" name="submit-Name" id="playerNameSubmit" class="final-submit">Valider</button>
                             @if (Model.CurrentDay > 0)
                             {
                                 <button type="submit" form="giveUpForm" onclick="return openGiveUpModal(event)" id="giveUpTrigger" name="submit-GiveUp" class="final-reveal" title="@localizer["RevealPlayer"]" aria-label="@localizer["RevealPlayer"]">
@@ -323,6 +324,18 @@
                 }
                 <p class="caption">-<strong>@KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points @localizer["PointsIfIncorrect"]</strong></p>
             </div>
+            @if (!string.IsNullOrWhiteSpace(Model.SimilarIncorrectName))
+            {
+                <div class="confirm-modal open" id="similarNameModal" role="dialog" aria-modal="true" aria-labelledby="similarNameText">
+                    <div class="confirm-modal-box">
+                        <p id="similarNameText">@string.Format(localizer["SimilarNameConfirmation"].Value, Model.SimilarIncorrectName, Model.PlayerNameSubmission, KikoleSite.Models.ScoreCalculator.ProposalTypesCost[KikoleSite.Models.Enums.ProposalTypes.Name].points)</p>
+                        <div class="confirm-modal-actions">
+                            <button type="button" class="secondary" id="similarNameEdit" onclick="closeSimilarNameModal()">@localizer["SimilarNameEdit"]</button>
+                            <button type="button" onclick="confirmSimilarName()">@localizer["SimilarNameSubmitAnyway"]</button>
+                        </div>
+                    </div>
+                </div>
+            }
             @if (Model.CurrentDay > 0)
             {
                 <form method="post" action="/" id="giveUpForm" style="margin:0">

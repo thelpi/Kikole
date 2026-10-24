@@ -125,8 +125,30 @@ var confirmClue = function () {
     form.requestSubmit(document.getElementById('clueTrigger'));
 };
 
+/* nom proche d'une mauvaise proposition deja faite : la modale est rendue ouverte par le serveur
+   (qui a compare avec l'historique). "Modifier" revient a la saisie ; "Valider quand meme"
+   reposte le formulaire avec ConfirmSimilarName, le serveur n'ayant alors plus rien a demander. */
+var closeSimilarNameModal = function () {
+    document.getElementById('similarNameModal').classList.remove('open');
+    var input = document.getElementById('playerNameInput');
+    input.focus();
+    input.select();
+};
+
+var confirmSimilarName = function () {
+    document.getElementById('confirmSimilarName').value = 'true';
+    document.getElementById('playerNameForm').requestSubmit(document.getElementById('playerNameSubmit'));
+};
+
+$(function () {
+    var editButton = document.getElementById('similarNameEdit');
+    if (editButton) editButton.focus();
+});
+
 document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
+    var similarNameModal = document.getElementById('similarNameModal');
+    if (similarNameModal && similarNameModal.classList.contains('open')) closeSimilarNameModal();
     var clueModal = document.getElementById('clueModal');
     if (clueModal && clueModal.classList.contains('open')) closeClueModal();
     var giveUpModal = document.getElementById('giveUpModal');

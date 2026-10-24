@@ -309,4 +309,13 @@
   <data name="ConfirmAction" xml:space="preserve">
     <value>Confirm</value>
   </data>
+  <data name="SimilarNameConfirmation" xml:space="preserve">
+    <value>You already submitted &#8220;{0}&#8221;, which was incorrect. &#8220;{1}&#8221; looks similar: another miss would cost {2} points. Continue?</value>
+  </data>
+  <data name="SimilarNameEdit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="SimilarNameSubmitAnyway" xml:space="preserve">
+    <value>Submit anyway</value>
+  </data>
 </root>

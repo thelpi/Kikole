@@ -37,6 +37,12 @@ public class HomeModel
     public IReadOnlyList<PlayerClub> KnownPlayerClubs { get; set; } = [];
     public string? ClubIdSubmission { get; set; }
     public string? PlayerNameSubmission { get; set; }
+
+    /// <summary>Reposte a vrai quand l'utilisateur confirme une proposition proche d'une mauvaise deja faite.</summary>
+    public bool ConfirmSimilarName { get; set; }
+
+    /// <summary>Mauvaise proposition deja faite dont <see cref="PlayerNameSubmission"/> se rapproche : declenche la confirmation.</summary>
+    public string? SimilarIncorrectName { get; set; }
     public string? CountryNameSubmission { get; set; }
     public string? ContinentNameSubmission { get; set; }
     public string? BirthYearSubmission { get; set; }
