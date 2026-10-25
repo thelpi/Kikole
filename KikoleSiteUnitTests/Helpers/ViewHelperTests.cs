@@ -288,6 +288,28 @@ public class ViewHelperTests
     }
 
     [Theory]
+    [InlineData("https://exemple.com/indice.mp3", true)]
+    [InlineData("  http://exemple.com/indice.mp4  ", true)]
+    [InlineData("/media/clues/abc.mp4", false)]
+    [InlineData("media/clues/abc.mp3", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void IsExternalUrl_OnlyForAbsoluteHttpLinks(string? value, bool expected)
+    {
+        value.IsExternalUrl().Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("/media/clues/51e33796-9b00.mp4", "indice-kikole", "indice-kikole.mp4")]
+    [InlineData("/media/clues/A1B2.MP3", "kikole-clue", "kikole-clue.mp3")]
+    [InlineData("https://exemple.com/a/b/son.mp3?token=1#t=2", "indice", "indice.mp3")]
+    [InlineData("/media/clues/sans-extension", "indice", "indice")]
+    [InlineData(null, "indice", "indice")]
+    public void GetClueDownloadName_KeepsOnlyTheReadableNameAndTheOriginalExtension(string? url, string baseName, string expected)
+    {
+        url.GetClueDownloadName(baseName).Should().Be(expected);
+    }
+    [Theory]
     [InlineData("https://example.com/indice.mp3")]
     [InlineData("/media/clues/2f6b1e2e-cafe-4a5e-9c1a-abcdefabcdef.MP3")]
     public void IsAudioUrl_DetectsMp3(string url)

@@ -1,0 +1,19 @@
+@using KikoleSite.Helpers
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model string
+
+<div class="clue-media">
+    @if (Model.IsAudioUrl())
+    {
+        <audio class="clue-audio" controls src="@Model"></audio>
+    }
+    else
+    {
+        <video class="clue-video" controls src="@Model"></video>
+    }
+    <a class="clue-download" href="@Model" download="@Model.GetClueDownloadName(localizer["DownloadFileName"].Value)"
+       @(Model.IsExternalUrl() ? "target=_blank rel=\"noopener noreferrer\"" : "")>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11" /><path d="M7.5 11 12 15.5 16.5 11" /><path d="M5 20h14" /></svg>
+        @localizer["Download"]
+    </a>
+</div>

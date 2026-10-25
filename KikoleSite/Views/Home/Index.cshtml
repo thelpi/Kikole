@@ -138,13 +138,9 @@
                     {
                         <img class="clue-image" src="@Model.Clue" alt="@localizer["DayClue"]" />
                     }
-                    else if (Model.Clue.IsAudioUrl())
+                    else if (Model.Clue.IsAudioUrl() || Model.Clue.IsVideoUrl())
                     {
-                        <audio class="clue-audio" controls src="@Model.Clue"></audio>
-                    }
-                    else if (Model.Clue.IsVideoUrl())
-                    {
-                        <video class="clue-video" controls src="@Model.Clue"></video>
+                        @await Html.PartialAsync("Partial/ClueMedia", Model.Clue)
                     }
                     else
                     {
@@ -157,13 +153,9 @@
                     {
                         <img class="clue-image" src="@Model.EasyClue" alt="@localizer["EasyDayClue"]" />
                     }
-                    else if (Model.EasyClue.IsAudioUrl())
+                    else if (Model.EasyClue.IsAudioUrl() || Model.EasyClue.IsVideoUrl())
                     {
-                        <audio class="clue-audio" controls src="@Model.EasyClue"></audio>
-                    }
-                    else if (Model.EasyClue.IsVideoUrl())
-                    {
-                        <video class="clue-video" controls src="@Model.EasyClue"></video>
+                        @await Html.PartialAsync("Partial/ClueMedia", Model.EasyClue)
                     }
                     else
                     {
@@ -250,13 +242,9 @@
                     {
                         <img class="clue-image" src="@Model.Clue" alt="@localizer["DayClue"]" />
                     }
-                    else if (Model.Clue.IsAudioUrl())
+                    else if (Model.Clue.IsAudioUrl() || Model.Clue.IsVideoUrl())
                     {
-                        <audio class="clue-audio" controls src="@Model.Clue"></audio>
-                    }
-                    else if (Model.Clue.IsVideoUrl())
-                    {
-                        <video class="clue-video" controls src="@Model.Clue"></video>
+                        @await Html.PartialAsync("Partial/ClueMedia", Model.Clue)
                     }
                     else
                     {
@@ -271,13 +259,9 @@
                         {
                             <img class="clue-image" src="@Model.EasyClue" alt="@localizer["EasyDayClue"]" />
                         }
-                        else if (Model.EasyClue.IsAudioUrl())
+                        else if (Model.EasyClue.IsAudioUrl() || Model.EasyClue.IsVideoUrl())
                         {
-                            <audio class="clue-audio" controls src="@Model.EasyClue"></audio>
-                        }
-                        else if (Model.EasyClue.IsVideoUrl())
-                        {
-                            <video class="clue-video" controls src="@Model.EasyClue"></video>
+                            @await Html.PartialAsync("Partial/ClueMedia", Model.EasyClue)
                         }
                         else
                         {

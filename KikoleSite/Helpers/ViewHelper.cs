@@ -31,6 +31,15 @@ public static class ViewHelper
 
     public static bool IsVideoUrl(this string? value) => value.HasMediaExtension(VideoExtensions);
 
+    // un fichier heberge ailleurs (http/https) : l'attribut "download" y est ignore par les
+    // navigateurs, le lien s'ouvre alors dans un nouvel onglet
+    public static bool IsExternalUrl(this string? value)
+        => Uri.TryCreate(value?.Trim(), UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+    // nom propose au telechargement : un libelle lisible et l'extension du fichier d'origine
+    public static string GetClueDownloadName(this string? value, string baseName)
+        => baseName + System.IO.Path.GetExtension((value ?? string.Empty).Trim().Split('?', '#')[0]).ToLowerInvariant();
+
     private static bool HasMediaExtension(this string? value, string[] extensions)
     {
         if (string.IsNullOrWhiteSpace(value))
