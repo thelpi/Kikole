@@ -110,6 +110,31 @@ public abstract class BaseRepository
         return result;
     }
 
+    /// <summary>
+    /// Execute une requete dans une transaction en lecture seule (toujours annulee) et avec un
+    /// delai maximal court : pour les requetes saisies en base, jamais pour celles du code.
+    /// </summary>
+    protected async Task<IReadOnlyList<T>> ExecuteReadOnlyReaderAsync<T>(string sql, object? parameters, int timeoutSeconds = 5)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await connection.ExecuteAsync("START TRANSACTION READ ONLY");
+
+        try
+        {
+            return (await connection
+                .QueryAsync<T>(
+                    sql,
+                    parameters,
+                    commandTimeout: timeoutSeconds,
+                    commandType: CommandType.Text)).ToList();
+        }
+        finally
+        {
+            await connection.ExecuteAsync("ROLLBACK");
+        }
+    }
+
     protected async Task<IReadOnlyList<T>> ExecuteReaderAsync<T>(string sql, object? parameters)
     {
         using var connection = new MySqlConnection(_connectionString);

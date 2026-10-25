@@ -57,6 +57,8 @@ public class BadgeServiceTests
             .ReturnsAsync(false);
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(It.IsAny<ulong>()))
             .ReturnsAsync(new List<UserBadgeDto>());
+        _badgeRepository.Setup(_ => _.GetUserBadgesAsync(It.IsAny<ulong>()))
+            .ReturnsAsync(new List<UserBadgeDto>());
         _badgeRepository.Setup(_ => _.GetUsersOfTheDayWithBadgeAsync(It.IsAny<ulong>(), It.IsAny<DateOnly>()))
             .ReturnsAsync(new List<UserBadgeDto>());
         _badgeRepository.Setup(_ => _.InsertUserBadgeAsync(It.IsAny<UserBadgeDto>()))
@@ -1058,7 +1060,7 @@ public class BadgeServiceTests
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(1)).ReturnsAsync(new List<UserBadgeDto> { new(), new() });
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(2)).ReturnsAsync(new List<UserBadgeDto> { new() });
 
-        var result = await _service.GetAllBadgesAsync(Languages.en);
+        var result = await _service.GetAllBadgesAsync(Languages.en, 0);
 
         result.Select(b => b.Id).Should().ContainInOrder(1UL, 2UL);
     }
@@ -1075,7 +1077,7 @@ public class BadgeServiceTests
         _badgeRepository.Setup(_ => _.GetBadgeTranslationAsync(1, (ulong)Languages.fr))
             .ReturnsAsync(new BadgeTranslationDto { Name = "Nom en francais", Description = "Description en francais" });
 
-        var result = await _service.GetAllBadgesAsync(Languages.fr);
+        var result = await _service.GetAllBadgesAsync(Languages.fr, 0);
 
         var badge = result.Should().ContainSingle().Subject;
         badge.Name.Should().Be("Nom en francais");
@@ -1092,7 +1094,7 @@ public class BadgeServiceTests
             });
         _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(1)).ReturnsAsync(new List<UserBadgeDto>());
 
-        var result = await _service.GetAllBadgesAsync(Languages.en);
+        var result = await _service.GetAllBadgesAsync(Languages.en, 0);
 
         var badge = result.Should().ContainSingle().Subject;
         badge.Name.Should().Be("A");
@@ -1112,15 +1114,196 @@ public class BadgeServiceTests
         _badgeRepository.Setup(_ => _.GetBadgeTranslationAsync(1, (ulong)Languages.fr))
             .ReturnsAsync((BadgeTranslationDto?)null);
 
-        var result = await _service.GetAllBadgesAsync(Languages.fr);
+        var result = await _service.GetAllBadgesAsync(Languages.fr, 0);
 
         var badge = result.Should().ContainSingle().Subject;
         badge.Name.Should().Be("A");
         badge.Description.Should().Be("English description");
     }
 
-    // ------------------------------------------------------------- OverTheTopPart1 / Part2 (unicite du jour)
+    // ------------------------------------------------------------- badges decides par une requete en base
 
+    private const ulong RuleBadgeId = 900;
+    private const string RuleSql = "SELECT user_id, badge_date FROM regle";
+
+    private void SetupRuleBadge()
+    {
+        _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<BadgeDto>
+            {
+                BadgeDtoBuilder.Valid().WithId(RuleBadgeId).WithName("Regle").WithDescription("Secrete")
+                    .WithConditionSql(RuleSql).WithCreationDate(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue)).Build()
+            });
+    }
+
+    private static BadgeRuleMatchDto Match(ulong userId, DateOnly date) => new() { UserId = userId, BadgeDate = date };
+
+    [Fact]
+    public async Task ARuleBadgeIsGrantedToTheUserWhoMatchesItOnTheEarliestMatchDate()
+    {
+        SetupRuleBadge();
+        _badgeRepository.Setup(_ => _.ExecuteBadgeRuleAsync(RuleSql, UserId))
+            .ReturnsAsync(new List<BadgeRuleMatchDto> { Match(UserId, Day), Match(UserId, Day.AddDays(-2)) });
+
+        var result = await _service.PrepareNonLeaderBadgesAsync(UserId, TodayPlayerRequest() with { DaysBeforeNow = 1 }, Languages.en);
+
+        _inserted.Should().ContainSingle(_ => _.BadgeId == RuleBadgeId).Which.GetDate.Should().Be(Day.AddDays(-2));
+        result.Should().ContainSingle(_ => _.Id == RuleBadgeId).Which.Description.Should().Be("Secrete");
+    }
+
+    [Fact]
+    public async Task ARuleBadgeIsNotGrantedWhenTheRuleReturnsNothingForTheUser()
+    {
+        SetupRuleBadge();
+        _badgeRepository.Setup(_ => _.ExecuteBadgeRuleAsync(RuleSql, UserId))
+            .ReturnsAsync(new List<BadgeRuleMatchDto> { Match(UserId + 1, Day) });
+
+        await _service.PrepareNonLeaderBadgesAsync(UserId, TodayPlayerRequest() with { DaysBeforeNow = 1 }, Languages.en);
+
+        _inserted.Should().NotContain(_ => _.BadgeId == RuleBadgeId);
+    }
+
+    [Fact]
+    public async Task ARuleBadgeAlreadyOwnedIsNotEvaluatedAgain()
+    {
+        SetupRuleBadge();
+        _badgeRepository.Setup(_ => _.CheckUserHasBadgeAsync(UserId, RuleBadgeId)).ReturnsAsync(true);
+
+        await _service.PrepareNonLeaderBadgesAsync(UserId, TodayPlayerRequest() with { DaysBeforeNow = 1 }, Languages.en);
+
+        _badgeRepository.Verify(_ => _.ExecuteBadgeRuleAsync(It.IsAny<string>(), It.IsAny<ulong?>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ABadgeWithoutRuleNeverRunsAQuery()
+    {
+        await _service.PrepareNonLeaderBadgesAsync(UserId, TodayPlayerRequest() with { DaysBeforeNow = 1 }, Languages.en);
+
+        _badgeRepository.Verify(_ => _.ExecuteBadgeRuleAsync(It.IsAny<string>(), It.IsAny<ulong?>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task TheGlobalRecomputeGrantsARuleBadgeToEveryMatchingUserOnTheirEarliestDate()
+    {
+        SetupRuleBadge();
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(TestCalendar.HiddenDate, Day)).ReturnsAsync(new List<PlayerDto>());
+        _badgeRepository.Setup(_ => _.ExecuteBadgeRuleAsync(RuleSql, null))
+            .ReturnsAsync(new List<BadgeRuleMatchDto>
+            {
+                Match(1, Day), Match(1, Day.AddDays(-3)), Match(2, Day.AddDays(-1))
+            });
+
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        _inserted.Where(_ => _.BadgeId == RuleBadgeId).Select(_ => (_.UserId, _.GetDate))
+            .Should().BeEquivalentTo(new[] { (1UL, Day.AddDays(-3)), (2UL, Day.AddDays(-1)) });
+    }
+
+    // ------------------------------------------------------------- description masquee
+
+    private void SetupMaskedBadge(string? translatedDescription = null)
+    {
+        _badgeRepository.Setup(_ => _.GetBadgesAsync(It.IsAny<bool>()))
+            .ReturnsAsync(new List<BadgeDto>
+            {
+                BadgeDtoBuilder.Valid().WithId(RuleBadgeId).WithName("Titre").WithDescription("Description secrete")
+                    .WithDescriptionHidden().WithCreationDate(Day.AddYears(-1).ToDateTime(TimeOnly.MinValue)).Build()
+            });
+        _badgeRepository.Setup(_ => _.GetUserBadgesAsync(UserId))
+            .ReturnsAsync(new List<UserBadgeDto> { new() { UserId = UserId, BadgeId = RuleBadgeId, GetDate = Day.AddDays(-1) } });
+        _badgeRepository.Setup(_ => _.GetBadgeTranslationAsync(RuleBadgeId, (ulong)Languages.fr))
+            .ReturnsAsync(new BadgeTranslationDto { Name = "Titre fr", Description = translatedDescription ?? "Description secrete fr" });
+    }
+
+    private void SetupViewer(ulong viewerId, UserTypes type, params ulong[] ownedBadgeIds)
+    {
+        _userRepository.Setup(_ => _.GetUserByIdAsync(viewerId))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(viewerId).WithType(type).Build());
+        _badgeRepository.Setup(_ => _.GetUserBadgesAsync(viewerId))
+            .ReturnsAsync(ownedBadgeIds.Select(id => new UserBadgeDto { UserId = viewerId, BadgeId = id, GetDate = Day.AddDays(-1) }).ToList());
+    }
+
+    [Fact]
+    public async Task AMaskedDescriptionIsReadableByTheHolderOnTheirOwnPage()
+    {
+        SetupMaskedBadge();
+
+        var result = await _service.GetUserBadgesAsync(UserId, UserId, Languages.en, foundToday: true);
+
+        result.Should().ContainSingle().Which.Description.Should().Be("Description secrete");
+    }
+
+    [Theory]
+    [InlineData(0UL)]
+    [InlineData(999UL)]
+    public async Task AMaskedDescriptionStaysMaskedOnAHoldersPageForAnyoneWhoDoesNotHaveTheBadge(ulong viewerId)
+    {
+        SetupMaskedBadge();
+        SetupViewer(999, UserTypes.StandardUser);
+
+        var result = await _service.GetUserBadgesAsync(UserId, viewerId, Languages.fr, foundToday: true);
+
+        var badge = result.Should().ContainSingle().Subject;
+        badge.Name.Should().Be("Titre fr");
+        badge.Description.Should().Be(KikoleSite.Models.Badge.MaskedDescription);
+    }
+
+    [Fact]
+    public async Task AMaskedDescriptionIsReadableOnAHoldersPageByAnotherHolder()
+    {
+        SetupMaskedBadge();
+        SetupViewer(999, UserTypes.StandardUser, RuleBadgeId);
+
+        var result = await _service.GetUserBadgesAsync(UserId, 999, Languages.en, foundToday: true);
+
+        result.Should().ContainSingle().Which.Description.Should().Be("Description secrete");
+    }
+
+    [Fact]
+    public async Task AMaskedDescriptionIsReadableByAnAdministrator()
+    {
+        SetupMaskedBadge();
+        SetupViewer(999, UserTypes.Administrator);
+
+        var result = await _service.GetUserBadgesAsync(UserId, 999, Languages.en, foundToday: true);
+
+        result.Should().ContainSingle().Which.Description.Should().Be("Description secrete");
+    }
+
+    [Fact]
+    public async Task TheCatalogShowsTheTitleButMasksTheDescriptionToThoseWhoDoNotHaveTheBadge()
+    {
+        SetupMaskedBadge();
+        SetupViewer(999, UserTypes.StandardUser);
+        _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(RuleBadgeId)).ReturnsAsync(new List<UserBadgeDto>());
+
+        var anonymous = await _service.GetAllBadgesAsync(Languages.fr, 0);
+        var other = await _service.GetAllBadgesAsync(Languages.fr, 999);
+
+        foreach (var catalog in new[] { anonymous, other })
+        {
+            var badge = catalog.Should().ContainSingle().Subject;
+            badge.Name.Should().Be("Titre fr");
+            badge.Description.Should().Be(KikoleSite.Models.Badge.MaskedDescription);
+        }
+    }
+
+    [Fact]
+    public async Task TheCatalogRevealsAMaskedDescriptionToItsHoldersAndAdministrators()
+    {
+        SetupMaskedBadge();
+        SetupViewer(998, UserTypes.StandardUser, RuleBadgeId);
+        SetupViewer(999, UserTypes.Administrator);
+        _badgeRepository.Setup(_ => _.GetUsersWithBadgeAsync(RuleBadgeId)).ReturnsAsync(new List<UserBadgeDto>());
+
+        var holder = await _service.GetAllBadgesAsync(Languages.en, 998);
+        var admin = await _service.GetAllBadgesAsync(Languages.en, 999);
+
+        holder.Single().Description.Should().Be("Description secrete");
+        admin.Single().Description.Should().Be("Description secrete");
+    }
+
+    // ------------------------------------------------------------- OverTheTopPart1 / Part2 (unicite du jour)
     [Fact]
     public async Task SoloLeaderOfTheDayGrantsBothOverTheTopBadges()
     {

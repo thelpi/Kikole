@@ -204,6 +204,8 @@ internal sealed class BadgeDtoBuilder
     internal BadgeDtoBuilder WithTier(byte tier) { _dto = _dto with { Tier = tier }; return this; }
     internal BadgeDtoBuilder Disabled(bool disabled = true) { _dto = _dto with { IsDisabled = disabled }; return this; }
     internal BadgeDtoBuilder WithCreationDate(DateTime date) { _dto = _dto with { CreationDate = date }; return this; }
+    internal BadgeDtoBuilder WithDescriptionHidden(bool hidden = true) { _dto = _dto with { DescriptionHidden = hidden }; return this; }
+    internal BadgeDtoBuilder WithConditionSql(string? sql) { _dto = _dto with { ConditionSql = sql }; return this; }
 
     internal BadgeDto Build() => _dto;
 }

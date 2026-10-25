@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using KikoleSite.Helpers;
 using KikoleSite.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
@@ -23,6 +24,14 @@ public class BadgeRepository : BaseRepository, IBadgeRepository
         return await GetDtosAsync<BadgeDto>(
                 "badges",
                 parameters.ToArray());
+    }
+
+    public async Task<IReadOnlyCollection<BadgeRuleMatchDto>> ExecuteBadgeRuleAsync(string sql, ulong? userId)
+    {
+        if (!BadgeRuleSql.IsAllowed(sql))
+            return [];
+
+        return await ExecuteReadOnlyReaderAsync<BadgeRuleMatchDto>(sql, new { userId });
     }
 
     public async Task<IReadOnlyCollection<UserBadgeDto>> GetUsersWithBadgeAsync(ulong badgeId)

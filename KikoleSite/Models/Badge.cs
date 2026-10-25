@@ -18,14 +18,20 @@ public class Badge
 
     public BadgeTiers Tier { get; }
 
+    /// <summary>Texte affiche a la place de la description d'un badge a description masquee.</summary>
+    public const string MaskedDescription = "?????";
+
     /// <param name="dto">Badge en base.</param>
     /// <param name="usersCount">Nombre de joueurs détenant le badge.</param>
     /// <param name="translation">Nom et description dans la langue demandée ; à défaut (ou champ vide), ceux du badge (anglais).</param>
-    internal Badge(BadgeDto dto, int usersCount, BadgeTranslationDto? translation)
+    /// <param name="revealDescription">Faux : la description d'un badge à description masquée est remplacée par <see cref="MaskedDescription"/>.</param>
+    internal Badge(BadgeDto dto, int usersCount, BadgeTranslationDto? translation, bool revealDescription = true)
     {
         Id = dto.Id;
         Name = string.IsNullOrWhiteSpace(translation?.Name) ? dto.Name : translation.Name;
-        Description = string.IsNullOrWhiteSpace(translation?.Description) ? dto.Description : translation.Description;
+        Description = dto.DescriptionHidden && !revealDescription
+            ? MaskedDescription
+            : string.IsNullOrWhiteSpace(translation?.Description) ? dto.Description : translation.Description;
         Users = usersCount;
         Hidden = dto.Hidden > 0;
         Tier = Enum.IsDefined((BadgeTiers)dto.Tier) ? (BadgeTiers)dto.Tier : BadgeTiers.Common;

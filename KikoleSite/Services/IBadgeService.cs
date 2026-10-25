@@ -65,8 +65,9 @@ public interface IBadgeService
     /// Gets all badges.
     /// </summary>
     /// <param name="language">User language.</param>
+    /// <param name="connectedUserId">User identifier who request information (0 if anonymous) : descriptions of masked badges are readable only by their holders and administrators.</param>
     /// <returns>Collection of <see cref="Badge"/> sorted by <see cref="Badge.Users"/> descending.</returns>
-    Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync(Languages language);
+    Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync(Languages language, ulong connectedUserId);
 
     /// <summary>
     /// Gets every badge of a user.

@@ -404,6 +404,8 @@ public class BadgeService : IBadgeService
 
         await PrepareSubmissionBadgesInternalAsync(allBadges);
 
+        await InsertRuleBasedBadgesAsync(null, allBadges, []);
+
         if (_registrationOptions.SponsorshipEnabled)
         {
             var sponsorUserIds = await _userRepository
@@ -539,8 +541,41 @@ public class BadgeService : IBadgeService
             }
         }
 
+        await InsertRuleBasedBadgesAsync(userId, allBadges, collectedBadges);
+
         return await GetUserBadgesAsync(
                 collectedBadges, DateOnly.FromDateTime(request.ProposalDateTime), allBadges, language);
+    }
+
+    /// <summary>
+    /// Badges decides par une requete stockee en base (<see cref="BadgeDto.ConditionSql"/>) : pour un
+    /// utilisateur apres chacune de ses propositions, ou pour tous (<paramref name="userId"/>
+    /// <c>null</c>) lors du recalcul global. La date retenue est la plus ancienne de la requete.
+    /// </summary>
+    private async Task InsertRuleBasedBadgesAsync(
+        ulong? userId,
+        IReadOnlyCollection<BadgeDto> allBadges,
+        List<ulong> collectedBadges)
+    {
+        foreach (var badge in allBadges.Where(b => !string.IsNullOrWhiteSpace(b.ConditionSql)))
+        {
+            if (userId.HasValue && await _badgeRepository.CheckUserHasBadgeAsync(userId.Value, badge.Id))
+                continue;
+
+            var matches = await _badgeRepository
+                .ExecuteBadgeRuleAsync(badge.ConditionSql!, userId);
+
+            var firstMatchByUser = matches
+                .Where(m => !userId.HasValue || m.UserId == userId.Value)
+                .GroupBy(m => m.UserId)
+                .Select(g => g.OrderBy(m => m.BadgeDate).First());
+
+            foreach (var match in firstMatchByUser)
+            {
+                await InsertBadgeIfNotAlreadyAsync(
+                        match.BadgeDate, match.UserId, badge.Id, collectedBadges, allBadges);
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -603,16 +638,18 @@ public class BadgeService : IBadgeService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync(Languages language)
+    public async Task<IReadOnlyCollection<Badge>> GetAllBadgesAsync(Languages language, ulong connectedUserId)
     {
         var dtos = await _badgeRepository
             .GetBadgesAsync(false);
+
+        var revealedBadgeIds = await GetRevealedBadgeIdsAsync(connectedUserId);
 
         var badges = new List<Badge>(dtos.Count);
         foreach (var dto in dtos)
         {
             var b = await GetBadgeAsync(
-                    dto.Id, dtos, language);
+                    dto.Id, dtos, language, revealedBadgeIds);
             badges.Add(b);
         }
 
@@ -636,6 +673,10 @@ public class BadgeService : IBadgeService
 
             isAllowedToSeeHiddenBadge = userDto?.UserTypeId == (ulong)UserTypes.Administrator;
         }
+
+        var revealedBadgeIds = isAllowedToSeeHiddenBadge
+            ? null
+            : await GetRevealedBadgeIdsAsync(connectedUserId);
 
         var badges = await _badgeRepository
            .GetBadgesAsync(true);
@@ -665,7 +706,7 @@ public class BadgeService : IBadgeService
             }
 
             var ub = await GetUserBadgeAsync(
-                    dto.BadgeId, badges, dto.GetDate, language);
+                    dto.BadgeId, badges, dto.GetDate, language, revealedBadgeIds);
 
             badgesFull.Add(ub);
         }
@@ -995,21 +1036,43 @@ public class BadgeService : IBadgeService
         return collectedUserBadges;
     }
 
+    /// <summary>
+    /// Badges dont le spectateur peut lire la description : <c>null</c> pour un administrateur
+    /// (tous), sinon ceux qu'il possede (aucun s'il n'est pas connecte).
+    /// </summary>
+    private async Task<IReadOnlySet<ulong>?> GetRevealedBadgeIdsAsync(ulong connectedUserId)
+    {
+        if (connectedUserId == 0)
+            return new HashSet<ulong>();
+
+        var user = await _userRepository
+            .GetUserByIdAsync(connectedUserId);
+
+        if (user?.UserTypeId == (ulong)UserTypes.Administrator)
+            return null;
+
+        return (await _badgeRepository.GetUserBadgesAsync(connectedUserId))
+            .Select(b => b.BadgeId)
+            .ToHashSet();
+    }
+
     private async Task<UserBadge> GetUserBadgeAsync(
         ulong badge,
         IReadOnlyCollection<BadgeDto> badgesDto,
         DateOnly proposalDate,
-        Languages language)
+        Languages language,
+        IReadOnlySet<ulong>? revealedBadgeIds = null)
     {
         var b = await GetBadgeAsync(
-                badge, badgesDto, language);
+                badge, badgesDto, language, revealedBadgeIds);
         return new UserBadge(b, proposalDate);
     }
 
     private async Task<Badge> GetBadgeAsync(
         ulong badge,
         IReadOnlyCollection<BadgeDto> badgesDto,
-        Languages language)
+        Languages language,
+        IReadOnlySet<ulong>? revealedBadgeIds = null)
     {
         BadgeTranslationDto? translation = null;
 
@@ -1022,7 +1085,11 @@ public class BadgeService : IBadgeService
         var users = await _badgeRepository
             .GetUsersWithBadgeAsync(badge);
 
-        return new Badge(badgesDto.Single(_ => _.Id == badge), users.Count, translation);
+        return new Badge(
+            badgesDto.Single(_ => _.Id == badge),
+            users.Count,
+            translation,
+            revealedBadgeIds == null || revealedBadgeIds.Contains(badge));
     }
 
     private async Task<IReadOnlyCollection<LeaderDto>> GetLeadersHistoryAsync(

@@ -32,5 +32,10 @@ public interface IBadgeRepository
 
     Task ResetBadgeDatasAsync(ulong badgeId);
 
+    /// <summary>Execute la requete d'un badge (<see cref="BadgeDto.ConditionSql"/>) en lecture
+    /// seule ; <paramref name="userId"/> <c>null</c> evalue tous les utilisateurs. Une requete
+    /// refusee par <see cref="Helpers.BadgeRuleSql.IsAllowed"/> ne renvoie rien.</summary>
+    Task<IReadOnlyCollection<BadgeRuleMatchDto>> ExecuteBadgeRuleAsync(string sql, ulong? userId);
+
     Task<BadgeTranslationDto?> GetBadgeTranslationAsync(ulong badgeId, ulong languageId);
 }

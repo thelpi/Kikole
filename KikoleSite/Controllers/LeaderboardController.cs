@@ -75,7 +75,7 @@ public class LeaderboardController : KikoleBaseController
              .GetUserBadgesAsync(userId, UserId, language, canViewToday);
 
         var allBadges = await _badgeService
-            .GetAllBadgesAsync(language);
+            .GetAllBadgesAsync(language, UserId);
 
         return View("User", new UserStatsModel(stats, badges, allBadges, userId == UserId, _clock));
     }

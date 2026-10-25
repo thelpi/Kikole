@@ -12,6 +12,10 @@ CREATE TABLE badges (
   -- rarete : 1 commun, 2 rare, 3 epique, 4 legendaire (couleur de la plaque du badge)
   tier tinyint(3) UNSIGNED NOT NULL DEFAULT '1',
   is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  -- description visible seulement du proprietaire du badge (et des administrateurs) : les autres lisent ?????
+  description_hidden tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
+  -- requete SELECT facultative (user_id, badge_date) decidant de l'attribution, executee en lecture seule
+  condition_sql text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   creation_date datetime NOT NULL,
   update_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;

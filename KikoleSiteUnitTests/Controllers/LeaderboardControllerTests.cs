@@ -624,7 +624,7 @@ public class LeaderboardControllerTests
         _badgeService
             .Setup(_ => _.GetUserBadgesAsync(viewedUser, viewer, language, true))
             .ReturnsAsync(Array.Empty<UserBadge>());
-        _badgeService.Setup(_ => _.GetAllBadgesAsync(language)).ReturnsAsync(Array.Empty<Badge>());
+        _badgeService.Setup(_ => _.GetAllBadgesAsync(language, It.IsAny<ulong>())).ReturnsAsync(Array.Empty<Badge>());
 
         var result = await _controller.Index(userId: viewedUser);
 
@@ -660,7 +660,7 @@ public class LeaderboardControllerTests
         _badgeService
             .Setup(_ => _.GetUserBadgesAsync(viewedUser, viewer, language, It.IsAny<bool>()))
             .ReturnsAsync(Array.Empty<UserBadge>());
-        _badgeService.Setup(_ => _.GetAllBadgesAsync(language)).ReturnsAsync(Array.Empty<Badge>());
+        _badgeService.Setup(_ => _.GetAllBadgesAsync(language, It.IsAny<ulong>())).ReturnsAsync(Array.Empty<Badge>());
 
         await _controller.Index(userId: viewedUser);
 
@@ -692,7 +692,7 @@ public class LeaderboardControllerTests
         _badgeService
             .Setup(_ => _.GetUserBadgesAsync(viewedUser, viewer, language, true))
             .ReturnsAsync(Array.Empty<UserBadge>());
-        _badgeService.Setup(_ => _.GetAllBadgesAsync(language)).ReturnsAsync(Array.Empty<Badge>());
+        _badgeService.Setup(_ => _.GetAllBadgesAsync(language, It.IsAny<ulong>())).ReturnsAsync(Array.Empty<Badge>());
 
         var result = await _controller.Index(userId: viewedUser);
 
