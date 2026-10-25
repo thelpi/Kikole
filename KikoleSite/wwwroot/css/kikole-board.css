@@ -2560,3 +2560,23 @@ body { padding-top: 0; }
   padding-left: 39px;
   min-height: 32px;
 }
+/* comptes dont l'email n'a jamais ete confirme : fond ocre + barre a gauche + etiquette, pour ne pas
+   dependre de la seule couleur ; un compte desactive garde son fond (la barre et l'etiquette restent) */
+.kikole-board #usersTable tr.user-unconfirmed:not(.user-disabled) td {
+  background: #4a3b1c;
+  border-bottom: 1px solid #6b5527;
+}
+
+.kikole-board #usersTable tr.user-unconfirmed td:first-child { box-shadow: inset 4px 0 0 #c9962b; }
+
+.kikole-board .unconfirmed-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f0cf7d;
+  background: rgba(201, 150, 43, 0.18);
+  border: 1px solid #c9962b;
+  border-radius: 5px;
+}

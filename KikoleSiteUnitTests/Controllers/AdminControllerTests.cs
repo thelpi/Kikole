@@ -1520,7 +1520,7 @@ public class AdminControllerTests : IDisposable
     public async Task ForceUserPassword_Valid_ReplacesThePassword()
     {
         SetupUser(5, login: "lea");
-        var user = new ApplicationUser { Id = 5, UserName = "lea" };
+        var user = new ApplicationUser { Id = 5, UserName = "lea", EmailConfirmed = true };
         _userManager.Setup(_ => _.FindByIdAsync("5")).ReturnsAsync(user);
         _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("jeton");
         _userManager.Setup(_ => _.ResetPasswordAsync(user, "jeton", "un-mot-de-passe-long")).ReturnsAsync(IdentityResult.Success);
@@ -1529,6 +1529,56 @@ public class AdminControllerTests : IDisposable
 
         UsersViewModel(result).Feedback.Should().Be("PasswordForced:lea");
         _userManager.Verify(_ => _.ResetAccessFailedCountAsync(user), Times.Once);
+        _userManager.Verify(_ => _.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+    }
+
+    private ApplicationUser SetupForcedPasswordOn(bool emailConfirmed)
+    {
+        SetupUser(5, login: "lea");
+        var user = new ApplicationUser { Id = 5, UserName = "lea", EmailConfirmed = emailConfirmed };
+        _userManager.Setup(_ => _.FindByIdAsync("5")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("jeton");
+        _userManager.Setup(_ => _.ResetPasswordAsync(user, "jeton", "un-mot-de-passe-long")).ReturnsAsync(IdentityResult.Success);
+        _userManager.Setup(_ => _.GenerateEmailConfirmationTokenAsync(user)).ReturnsAsync("jeton-email");
+        return user;
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_OnAnUnconfirmedAccount_AlsoConfirmsTheEmail()
+    {
+        var user = SetupForcedPasswordOn(emailConfirmed: false);
+        _userManager.Setup(_ => _.ConfirmEmailAsync(user, "jeton-email")).ReturnsAsync(IdentityResult.Success);
+
+        var result = await _controller.ForceUserPassword(new UserActionRequest { UserId = 5, NewPassword = "un-mot-de-passe-long", NewPasswordConfirm = "un-mot-de-passe-long" });
+
+        UsersViewModel(result).Feedback.Should().Be("PasswordForcedAndConfirmed:lea");
+        _userManager.Verify(_ => _.ConfirmEmailAsync(user, "jeton-email"), Times.Once);
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_WhenTheConfirmationFails_StillReportsThePasswordChangeOnly()
+    {
+        var user = SetupForcedPasswordOn(emailConfirmed: false);
+        _userManager.Setup(_ => _.ConfirmEmailAsync(user, "jeton-email")).ReturnsAsync(IdentityResult.Failed());
+
+        var result = await _controller.ForceUserPassword(new UserActionRequest { UserId = 5, NewPassword = "un-mot-de-passe-long", NewPasswordConfirm = "un-mot-de-passe-long" });
+
+        UsersViewModel(result).Feedback.Should().Be("PasswordForced:lea");
+    }
+
+    [Fact]
+    public async Task ForceUserPassword_WhenThePasswordIsRejected_DoesNotConfirmTheEmail()
+    {
+        SetupUser(5);
+        var user = new ApplicationUser { Id = 5, UserName = "lea", EmailConfirmed = false };
+        _userManager.Setup(_ => _.FindByIdAsync("5")).ReturnsAsync(user);
+        _userManager.Setup(_ => _.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("jeton");
+        _userManager.Setup(_ => _.ResetPasswordAsync(user, "jeton", "court"))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = nameof(IdentityErrorDescriber.PasswordTooShort) }));
+
+        await _controller.ForceUserPassword(new UserActionRequest { UserId = 5, NewPassword = "court", NewPasswordConfirm = "court" });
+
+        _userManager.Verify(_ => _.ConfirmEmailAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]

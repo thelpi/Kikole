@@ -387,4 +387,7 @@
   <data name="ClubDeletedWithProposals" xml:space="preserve">
     <value>Club « {0} » supprimé ({1} proposition(s) incorrecte(s) conservée(s) sous son nom).</value>
   </data>
+  <data name="PasswordForcedAndConfirmed" xml:space="preserve">
+    <value>Le mot de passe de {0} a été remplacé, et son email est maintenant marqué comme confirmé.</value>
+  </data>
 </root>

@@ -74,12 +74,16 @@
                     @foreach (var row in Model.Rows)
                     {
                         var isPower = row.UserType == UserTypes.PowerUser;
-                        <tr class="@(i++ % 2 == 0 ? "even" : "odd")@(row.IsDisabled ? " user-disabled" : "")">
+                        <tr class="@(i++ % 2 == 0 ? "even" : "odd")@(row.IsDisabled ? " user-disabled" : "")@(row.IsEmailUnconfirmed ? " user-unconfirmed" : "")">
                             <td class="tabData redtext">
                                 @row.Login
                                 @if (row.IsDisabled)
                                 {
                                     <span class="sr-only">(@localizer["DisabledAccount"])</span>
+                                }
+                                @if (row.IsEmailUnconfirmed)
+                                {
+                                    <span class="unconfirmed-tag">@localizer["UnconfirmedAccount"]</span>
                                 }
                                 <div class="user-email">@row.Email</div>
                             </td>
@@ -101,7 +105,7 @@
                                                 onclick="openUserActionModal(this)">@(isPower ? localizer["ToStandard"] : localizer["ToPower"])</button>
                                         <button type="button" class="secondary"
                                                 data-action="/Admin/ForceUserPassword" data-user-id="@row.Id" data-input="password"
-                                                data-confirm="@string.Format(localizer["ConfirmForcePassword"].Value, row.Login)"
+                                                data-confirm="@string.Format(localizer[row.IsEmailUnconfirmed ? "ConfirmForcePasswordAndConfirm" : "ConfirmForcePassword"].Value, row.Login)"
                                                 onclick="openUserActionModal(this)">@localizer["ForcePassword"]</button>
                                         <button type="button" class="secondary"
                                                 data-action="/Admin/DisableUser" data-user-id="@row.Id" data-input="reason"

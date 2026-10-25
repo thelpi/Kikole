@@ -240,4 +240,10 @@
   <data name="ContactUser" xml:space="preserve">
     <value>Message</value>
   </data>
+  <data name="UnconfirmedAccount" xml:space="preserve">
+    <value>email not confirmed</value>
+  </data>
+  <data name="ConfirmForcePasswordAndConfirm" xml:space="preserve">
+    <value>Replace the password of {0}? Its email, never confirmed, will also be marked as confirmed.</value>
+  </data>
 </root>

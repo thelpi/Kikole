@@ -387,4 +387,7 @@
   <data name="ClubDeletedWithProposals" xml:space="preserve">
     <value>Club &#8220;{0}&#8221; deleted ({1} incorrect proposal(s) kept under its name).</value>
   </data>
+  <data name="PasswordForcedAndConfirmed" xml:space="preserve">
+    <value>The password of {0} has been replaced, and the email is now marked as confirmed.</value>
+  </data>
 </root>

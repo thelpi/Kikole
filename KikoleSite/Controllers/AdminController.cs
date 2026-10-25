@@ -182,7 +182,17 @@ public class AdminController : KikoleBaseController
         // le nouveau mot de passe leve aussi un verrouillage en cours (comme la reinitialisation par email)
         await _userManager.ResetAccessFailedCountAsync(user);
 
-        return await RenderUsersAsync(request, _localizer["PasswordForced", user.UserName ?? string.Empty], null);
+        // un compte jamais confirme (mail non recu, adresse inutilisable) le devient : l'administrateur
+        // a verifie la personne en dehors du site, qui n'a plus besoin du lien pour se connecter
+        var confirmedNow = false;
+        if (!user.EmailConfirmed)
+        {
+            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            confirmedNow = (await _userManager.ConfirmEmailAsync(user, confirmationToken)).Succeeded;
+        }
+
+        var feedbackKey = confirmedNow ? "PasswordForcedAndConfirmed" : "PasswordForced";
+        return await RenderUsersAsync(request, _localizer[feedbackKey, user.UserName ?? string.Empty], null);
     }
 
     [HttpPost]

@@ -18,6 +18,9 @@ public class UserAdminRow
 
     public bool IsDisabled { get; init; }
 
+    /// <summary>L'adresse email n'a jamais ete confirmee (lien du mail d'inscription jamais ouvert).</summary>
+    public bool IsEmailUnconfirmed { get; init; }
+
     public UserTypes UserType { get; init; }
 
     public static UserAdminRow From(UserDto user, string email) => new()
@@ -28,6 +31,7 @@ public class UserAdminRow
         CreationDate = user.CreationDate,
         Ip = user.Ip,
         IsDisabled = user.IsDisabled,
+        IsEmailUnconfirmed = !user.EmailConfirmed,
         UserType = (UserTypes)user.UserTypeId
     };
 }
