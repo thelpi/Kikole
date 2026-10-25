@@ -271,6 +271,14 @@ public static class ViewHelper
         };
     }
 
+    // libelle du ruban de la plaque : "Legende" y remplace "Legendaire", trop long pour la bande
+    internal static string GetRibbonLabel(this BadgeTiers tier)
+    {
+        return tier == BadgeTiers.Legendary
+            ? (IsFrench() ? "Légende" : "Legend")
+            : tier.GetLabel();
+    }
+
     // classe CSS de la plaque du badge (couleur de rarete)
     internal static string GetCssClass(this BadgeTiers tier)
     {

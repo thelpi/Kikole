@@ -9,11 +9,7 @@
         {
             <div class="badge-card @badge.Tier.GetCssClass() @(badge.Hidden ? "secret" : "")" title="@badge.Tier.GetLabel()">
                 <div class="badge-head">
-                    <svg class="badge-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6" />
-                        <path d="M9 14.5L7.5 21L12 18.5L16.5 21L15 14.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-                        <path d="M12 6.2L12.9 8.1L15 8.4L13.5 9.8L13.9 11.9L12 10.9L10.1 11.9L10.5 9.8L9 8.4L11.1 8.1L12 6.2Z" fill="currentColor" />
-                    </svg>
+                    <span class="badge-ribbon" aria-hidden="true">@badge.Tier.GetRibbonLabel()</span>
                     <div class="badge-name">@badge.Name <span class="sr-only">(@badge.Tier.GetLabel())</span></div>
                     @if (badge.Hidden)
                     {

@@ -221,6 +221,29 @@ public class ViewHelperTests
         }
     }
 
+    [Theory]
+    [InlineData(BadgeTiers.Common, "Commun", "Common")]
+    [InlineData(BadgeTiers.Rare, "Rare", "Rare")]
+    [InlineData(BadgeTiers.Epic, "Épique", "Epic")]
+    [InlineData(BadgeTiers.Legendary, "Légende", "Legend")]
+    public void GetRibbonLabel_ShortensOnlyTheLegendaryTier(BadgeTiers tier, string french, string english)
+    {
+        using (Culture.French())
+            tier.GetRibbonLabel().Should().Be(french);
+
+        using (Culture.English())
+            tier.GetRibbonLabel().Should().Be(english);
+    }
+
+    [Fact]
+    public void GetLabel_KeepsTheFullLegendaryNameOutsideTheRibbon()
+    {
+        using (Culture.French())
+            BadgeTiers.Legendary.GetLabel().Should().Be("Légendaire");
+
+        using (Culture.English())
+            BadgeTiers.Legendary.GetLabel().Should().Be("Legendary");
+    }
     [Fact]
     public void GetSimpleLabel_InEnglishFallsBackToTheEnumName()
     {
