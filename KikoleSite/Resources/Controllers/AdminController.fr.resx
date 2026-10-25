@@ -375,4 +375,16 @@
   <data name="C" xml:space="preserve">
     <value>e</value>
   </data>
+  <data name="ClubDeleted" xml:space="preserve">
+    <value>Club « {0} » supprimé ({1} proposition(s) incorrecte(s) conservée(s) sous son nom).</value>
+  </data>
+  <data name="ClubNotFound" xml:space="preserve">
+    <value>Ce club n'existe plus.</value>
+  </data>
+  <data name="ClubUsedByPlayers" xml:space="preserve">
+    <value>Suppression impossible : au moins un kikolé utilise ce club.</value>
+  </data>
+  <data name="ClubUsedByProposals" xml:space="preserve">
+    <value>Suppression impossible : des propositions réussies visent ce club.</value>
+  </data>
 </root>

@@ -1002,12 +1002,133 @@ public class AdminControllerTests : IDisposable
                 ClubTranslationDtoBuilder.Valid().WithClubId(7).WithLanguage(Languages.fr).WithName("Real Madrid").Build()
             ]);
         _internationalService.Setup(_ => _.GetClubAsync(7)).ReturnsAsync(club);
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.ESP, "Espagne" } });
+        _internationalService.Setup(_ => _.GetClubUsageAsync(7))
+            .ReturnsAsync(new ClubUsage(["Zidane", "Modric"], 3, 0));
 
         var result = await _controller.Club(clubId: 7);
 
         var model = ((ViewResult)result).Model.Should().BeOfType<ClubCreationModel>().Subject;
         model.MainNameEn.Should().Be("Real Madrid");
         model.Id.Should().Be(7);
+        model.CountryName.Should().Be("Espagne");
+        model.CanEditExisting.Should().BeTrue();
+        model.PlayerNames.Should().Equal("Zidane", "Modric");
+        model.IncorrectProposals.Should().Be(3);
+        model.CanDelete.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ClubGet_ForANewClub_OffersTheSearchOfExistingClubsToAdministratorsOnly()
+    {
+        var asAdmin = ((ViewResult)await _controller.Club(clubId: 0)).Model.Should().BeOfType<ClubCreationModel>().Subject;
+
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.PowerUser).ToString()) };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+        var asPowerUser = ((ViewResult)await _controller.Club(clubId: 0)).Model.Should().BeOfType<ClubCreationModel>().Subject;
+
+        asAdmin.CanEditExisting.Should().BeTrue();
+        asPowerUser.CanEditExisting.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ClubPost_ModifyingAnExistingClub_IsRefusedToAPowerUser()
+    {
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1"), new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.PowerUser).ToString()) };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth", ClaimTypes.Name, null));
+
+        var result = await _controller.Club(new ClubCreationModel { Id = 7, MainNameEn = "x", MainNameFr = "x", Country = ((ulong)Countries.ESP).ToString() });
+
+        result.Should().BeOfType<RedirectToActionResult>().Which.ActionName.Should().Be("ErrorIndex");
+        _internationalService.Verify(_ => _.CreateOrUpdateClubAsync(It.IsAny<KikoleSite.Models.Requests.ClubRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ClubPost_ModifyingAClub_StaysOnItsPageWithTheSavedNames()
+    {
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.ESP, "Espagne" } });
+        var saved = new Club(
+            ClubDtoBuilder.Valid().WithId(7).WithCountryId((ulong)Countries.ESP).Build(),
+            [
+                ClubTranslationDtoBuilder.Valid().WithClubId(7).WithLanguage(Languages.en).WithName("Real Madrid").Build(),
+                ClubTranslationDtoBuilder.Valid().WithClubId(7).WithLanguage(Languages.fr).WithName("Real Madrid").Build()
+            ]);
+        _internationalService.Setup(_ => _.GetClubAsync(7)).ReturnsAsync(saved);
+        _internationalService.Setup(_ => _.GetClubUsageAsync(7)).ReturnsAsync(new ClubUsage([], 0, 0));
+
+        var result = await _controller.Club(new ClubCreationModel
+        {
+            Id = 7,
+            MainNameEn = "Real Madrid",
+            MainNameFr = "Real Madrid",
+            AlternativeNamesEn = "Real",
+            Country = ((ulong)Countries.ESP).ToString()
+        });
+
+        _internationalService.Verify(_ => _.CreateOrUpdateClubAsync(It.Is<KikoleSite.Models.Requests.ClubRequest>(r => r.Id == 7)), Times.Once);
+        var model = ((ViewResult)result).Model.Should().BeOfType<ClubCreationModel>().Subject;
+        model.InfoMessage.Should().Be("ClubOk");
+        model.Id.Should().Be(7);
+        model.CanDelete.Should().BeTrue();
+    }
+
+    private void SetupClubToDelete()
+    {
+        var club = new Club(
+            ClubDtoBuilder.Valid().WithId(7).WithName("Real Madrid").WithCountryId((ulong)Countries.ESP).Build(),
+            [
+                ClubTranslationDtoBuilder.Valid().WithClubId(7).WithLanguage(Languages.en).WithName("Real Madrid").Build(),
+                ClubTranslationDtoBuilder.Valid().WithClubId(7).WithLanguage(Languages.fr).WithName("Real Madrid").Build()
+            ]);
+        _internationalService.Setup(_ => _.GetClubAsync(7)).ReturnsAsync(club);
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
+            .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.ESP, "Espagne" } });
+        _internationalService.Setup(_ => _.GetClubUsageAsync(7)).ReturnsAsync(new ClubUsage(["Zidane"], 0, 0));
+    }
+
+    [Fact]
+    public async Task DeleteClub_Deleted_ReportsTheKeptProposalsOnAnEmptyForm()
+    {
+        SetupClubToDelete();
+        _internationalService.Setup(_ => _.DeleteClubAsync(7))
+            .ReturnsAsync(new ClubDeletionResult(ClubDeletionOutcomes.Deleted, 4));
+
+        var result = await _controller.DeleteClub(7);
+
+        var view = result.Should().BeOfType<ViewResult>().Subject;
+        view.ViewName.Should().Be("Club");
+        var model = view.Model.Should().BeOfType<ClubCreationModel>().Subject;
+        model.Id.Should().Be(0);
+        model.InfoMessage.Should().Be("ClubDeleted");
+    }
+
+    [Fact]
+    public async Task DeleteClub_Unknown_SaysSo()
+    {
+        _internationalService.Setup(_ => _.DeleteClubAsync(99))
+            .ReturnsAsync(new ClubDeletionResult(ClubDeletionOutcomes.NotFound));
+
+        var result = await _controller.DeleteClub(99);
+
+        ((ViewResult)result).Model.Should().BeOfType<ClubCreationModel>().Which.ErrorMessage.Should().Be("ClubNotFound");
+    }
+
+    [Theory]
+    [InlineData(ClubDeletionOutcomes.UsedByPlayers, "ClubUsedByPlayers")]
+    [InlineData(ClubDeletionOutcomes.UsedByCorrectProposals, "ClubUsedByProposals")]
+    public async Task DeleteClub_InUse_StaysOnTheClubWithTheReason(ClubDeletionOutcomes outcome, string expectedError)
+    {
+        SetupClubToDelete();
+        _internationalService.Setup(_ => _.DeleteClubAsync(7)).ReturnsAsync(new ClubDeletionResult(outcome));
+
+        var result = await _controller.DeleteClub(7);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<ClubCreationModel>().Subject;
+        model.ErrorMessage.Should().Be(expectedError);
+        model.Id.Should().Be(7);
+        model.PlayerNames.Should().Equal("Zidane");
     }
 
     [Fact]

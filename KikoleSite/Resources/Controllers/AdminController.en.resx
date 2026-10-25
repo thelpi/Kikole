@@ -375,4 +375,16 @@
   <data name="T" xml:space="preserve">
     <value>h</value>
   </data>
+  <data name="ClubDeleted" xml:space="preserve">
+    <value>Club &#8220;{0}&#8221; deleted ({1} incorrect proposal(s) kept under its name).</value>
+  </data>
+  <data name="ClubNotFound" xml:space="preserve">
+    <value>This club no longer exists.</value>
+  </data>
+  <data name="ClubUsedByPlayers" xml:space="preserve">
+    <value>Deletion impossible: at least one kikolé uses this club.</value>
+  </data>
+  <data name="ClubUsedByProposals" xml:space="preserve">
+    <value>Deletion impossible: correct proposals target this club.</value>
+  </data>
 </root>

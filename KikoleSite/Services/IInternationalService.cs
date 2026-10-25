@@ -40,6 +40,22 @@ public interface IInternationalService
     Task CreateOrUpdateClubAsync(ClubRequest request);
 
     /// <summary>
+    /// Kikolés (par leur nom) et propositions qui visent le club : ce qui empêche sa suppression
+    /// ou sera conservé sous son nom.
+    /// </summary>
+    /// <param name="clubId">Identifiant du club.</param>
+    /// <returns>L'usage du club.</returns>
+    Task<ClubUsage> GetClubUsageAsync(ulong clubId);
+
+    /// <summary>
+    /// Supprime un club inutilisé (voir <see cref="IClubRepository.DeleteClubAsync"/>) et rafraîchit
+    /// le cache quand la suppression a eu lieu.
+    /// </summary>
+    /// <param name="clubId">Identifiant du club.</param>
+    /// <returns>L'issue de la suppression.</returns>
+    Task<ClubDeletionResult> DeleteClubAsync(ulong clubId);
+
+    /// <summary>
     /// Indique si un autre club du même pays porte déjà l'un des noms de la demande
     /// (nom principal ou alternatif, dans n'importe quelle langue, sans tenir compte de la
     /// casse, des accents ni de la ponctuation : "Milan A.C." = "Milan AC").

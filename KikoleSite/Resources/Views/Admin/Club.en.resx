@@ -150,4 +150,31 @@
   <data name="SearchAlreadyExists" xml:space="preserve">
     <value>Search if the club already exists:</value>
   </data>
+  <data name="EditExistingClub" xml:space="preserve">
+    <value>Edit an existing club (search)</value>
+  </data>
+  <data name="DeleteClubTitle" xml:space="preserve">
+    <value>Delete the club</value>
+  </data>
+  <data name="ClubUsedBy" xml:space="preserve">
+    <value>This club is in the career of: {0}. Remove it from these kikolés first to be able to delete it.</value>
+  </data>
+  <data name="ClubUsedByProposals" xml:space="preserve">
+    <value>Correct proposals target this club: deletion is not possible.</value>
+  </data>
+  <data name="ClubDeleteHint" xml:space="preserve">
+    <value>No kikolé uses this club. {0} incorrect player proposal(s) target it: they will be kept with the club name.</value>
+  </data>
+  <data name="DeleteClub" xml:space="preserve">
+    <value>Delete this club</value>
+  </data>
+  <data name="ClubDeleteConfirm" xml:space="preserve">
+    <value>Permanently delete &#8220;{0}&#8221;? {1} incorrect proposal(s) will keep its name.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
 </root>

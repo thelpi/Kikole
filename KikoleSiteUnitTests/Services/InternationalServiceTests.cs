@@ -223,6 +223,38 @@ public class InternationalServiceTests
     }
 
     [Fact]
+    public async Task DeleteClubAsync_WhenDeleted_RefreshesTheCache()
+    {
+        await _service.GetClubsAsync();
+        _clubRepository.Setup(_ => _.DeleteClubAsync(1))
+            .ReturnsAsync(new KikoleSite.Models.ClubDeletionResult(KikoleSite.Models.ClubDeletionOutcomes.Deleted, 2));
+        _clubRepository.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new List<ClubDto>
+        {
+            ClubDtoBuilder.Valid().WithId(2).WithName("Real Madrid").Build()
+        });
+
+        var result = await _service.DeleteClubAsync(1);
+
+        result.ConvertedProposals.Should().Be(2);
+        (await _service.GetClubsAsync()).Should().ContainSingle().Which.Name.Should().Be("Real Madrid");
+    }
+
+    [Theory]
+    [InlineData(KikoleSite.Models.ClubDeletionOutcomes.UsedByPlayers)]
+    [InlineData(KikoleSite.Models.ClubDeletionOutcomes.UsedByCorrectProposals)]
+    [InlineData(KikoleSite.Models.ClubDeletionOutcomes.NotFound)]
+    public async Task DeleteClubAsync_WhenRefused_KeepsTheCache(KikoleSite.Models.ClubDeletionOutcomes outcome)
+    {
+        await _service.GetClubsAsync();
+        _clubRepository.Setup(_ => _.DeleteClubAsync(1)).ReturnsAsync(new KikoleSite.Models.ClubDeletionResult(outcome));
+
+        await _service.DeleteClubAsync(1);
+        await _service.GetClubsAsync();
+
+        _clubRepository.Verify(_ => _.GetClubsAsync(), Times.Once);
+    }
+
+    [Fact]
     public async Task CreateOrUpdateClubAsync_LeavesTheTranslationsAlone()
     {
         await _service.GetCountriesAsync(Languages.fr);

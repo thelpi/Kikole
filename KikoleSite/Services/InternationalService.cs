@@ -94,6 +94,23 @@ public class InternationalService : IInternationalService
     }
 
     /// <inheritdoc />
+    public async Task<ClubUsage> GetClubUsageAsync(ulong clubId)
+    {
+        return await _clubRepository.GetClubUsageAsync(clubId);
+    }
+
+    /// <inheritdoc />
+    public async Task<ClubDeletionResult> DeleteClubAsync(ulong clubId)
+    {
+        var result = await _clubRepository.DeleteClubAsync(clubId);
+
+        if (result.Outcome == ClubDeletionOutcomes.Deleted)
+            InvalidateClubs();
+
+        return result;
+    }
+
+    /// <inheritdoc />
     public async Task<bool> ClubNameAlreadyExistsAsync(ClubRequest request)
     {
         var requested = request.NamesByLanguage.Values

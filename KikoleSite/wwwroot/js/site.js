@@ -1750,3 +1750,50 @@ $(function () {
         minLength: 1
     });
 });
+
+/* fiche club (Admin/Club) : recherche d'un club existant pour le modifier, et confirmation de suppression */
+$(function () {
+    var $search = $("#clubEditSearch");
+    if ($search.length > 0) {
+        $search.autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: '/Home/AutoCompleteClubs/',
+                    data: { "prefix": request.term },
+                    type: "POST",
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.display, value: item.key };
+                        }));
+                    }
+                });
+            },
+            select: function (e, i) {
+                window.location.href = '/Admin/Club?clubId=' + i.item.value;
+                return false;
+            },
+            focus: function () { return false; },
+            minLength: 1
+        });
+    }
+
+    var modal = document.getElementById('clubDeleteModal');
+    var trigger = document.getElementById('clubDeleteBtn');
+    if (!modal || !trigger) return;
+
+    var closeModal = function () {
+        modal.classList.remove('open');
+        trigger.focus();
+    };
+    trigger.addEventListener('click', function () {
+        modal.classList.add('open');
+        document.getElementById('clubDeleteCancel').focus();
+    });
+    document.getElementById('clubDeleteCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+});

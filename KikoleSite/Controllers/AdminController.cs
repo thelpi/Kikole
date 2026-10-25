@@ -899,31 +899,95 @@ public class AdminController : KikoleBaseController
             if (club == null)
                 return RedirectToAction("ErrorIndex", "Home");
 
-            var namesEn = club.NamesByLanguage[Languages.en];
-            var namesFr = club.NamesByLanguage[Languages.fr];
-            var model = new ClubCreationModel
-            {
-                MainNameEn = namesEn[0],
-                MainNameFr = namesFr[0],
-                AlternativeNamesEn = string.Join('\n', namesEn.Skip(1)),
-                AlternativeNamesFr = string.Join('\n', namesFr.Skip(1)),
-                Country = club.CountryId.ToString(),
-                Id = clubId
-            };
-
-            return View("Club", model);
+            return View("Club", await BuildClubEditModelAsync(club));
         }
 
-        return View("Club", new ClubCreationModel());
+        return View("Club", new ClubCreationModel { CanEditExisting = IsTypeOfUser(UserTypes.Administrator) });
+    }
+
+    private async Task<ClubCreationModel> BuildClubEditModelAsync(Club club)
+    {
+        var namesEn = club.NamesByLanguage[Languages.en];
+        var namesFr = club.NamesByLanguage[Languages.fr];
+
+        var model = new ClubCreationModel
+        {
+            MainNameEn = namesEn[0],
+            MainNameFr = namesFr[0],
+            AlternativeNamesEn = string.Join('\n', namesEn.Skip(1)),
+            AlternativeNamesFr = string.Join('\n', namesFr.Skip(1)),
+            Country = club.CountryId.ToString(),
+            Id = club.Id
+        };
+
+        await FillClubAdminInfoAsync(model);
+
+        return model;
+    }
+
+    // nom du pays (le champ de saisie est vide sinon) et usage du club, pour le seul administrateur
+    private async Task FillClubAdminInfoAsync(ClubCreationModel model)
+    {
+        if (!IsTypeOfUser(UserTypes.Administrator))
+            return;
+
+        model.CanEditExisting = true;
+
+        if (ulong.TryParse(model.Country, out var countryId))
+            model.CountryName = (await GetCountriesAsync()).GetValueOrDefault(countryId);
+
+        if (model.Id > 0)
+        {
+            var usage = await _internationalService.GetClubUsageAsync(model.Id);
+            model.PlayerNames = usage.PlayerNames;
+            model.IncorrectProposals = usage.IncorrectProposals;
+            model.CorrectProposals = usage.CorrectProposals;
+        }
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> DeleteClub(ulong clubId)
+    {
+        var club = await _internationalService.GetClubAsync(clubId);
+        var result = await _internationalService.DeleteClubAsync(clubId);
+
+        switch (result.Outcome)
+        {
+            case ClubDeletionOutcomes.Deleted:
+                ModelState.Clear();
+                return View("Club", new ClubCreationModel
+                {
+                    CanEditExisting = true,
+                    InfoMessage = string.Format(_localizer["ClubDeleted"], club?.Name, result.ConvertedProposals)
+                });
+
+            case ClubDeletionOutcomes.NotFound:
+                return View("Club", new ClubCreationModel
+                {
+                    CanEditExisting = true,
+                    ErrorMessage = _localizer["ClubNotFound"]
+                });
+
+            default:
+                var editModel = await BuildClubEditModelAsync(club!);
+                editModel.ErrorMessage = _localizer[result.Outcome == ClubDeletionOutcomes.UsedByPlayers ? "ClubUsedByPlayers" : "ClubUsedByProposals"];
+                return View("Club", editModel);
+        }
     }
 
     [HttpPost]
     [Authorization(UserTypes.PowerUser)]
     public async Task<IActionResult> Club(ClubCreationModel model)
     {
+        // meme garde que le GET : seul un administrateur modifie un club existant
+        if (model.Id > 0 && !IsTypeOfUser(UserTypes.Administrator))
+            return RedirectToAction("ErrorIndex", "Home");
+
         if (string.IsNullOrWhiteSpace(model.MainNameEn) || string.IsNullOrWhiteSpace(model.MainNameFr))
         {
             model.ErrorMessage = _localizer["ClubNameMiss"];
+            await FillClubAdminInfoAsync(model);
             return View("Club", model);
         }
 
@@ -934,6 +998,7 @@ public class AdminController : KikoleBaseController
             || !countries.Any(c => countryId == c.Key))
         {
             model.ErrorMessage = _localizer["InvalidCountry"];
+            await FillClubAdminInfoAsync(model);
             return View("Club", model);
         }
 
@@ -961,12 +1026,17 @@ public class AdminController : KikoleBaseController
             // les champs re-affiches viennent d'abord de ce que le formulaire a poste
             // (ModelState), pas du nouveau modele : sans ca le formulaire resterait rempli
             ModelState.Clear();
-            model = new ClubCreationModel
-            {
-                InfoMessage = _localizer["ClubOk"]
-            };
+
+            // une modification reste sur la fiche du club, une creation repart d'un formulaire vide
+            var saved = model.Id > 0 ? await _internationalService.GetClubAsync(model.Id) : null;
+            model = saved != null
+                ? await BuildClubEditModelAsync(saved)
+                : new ClubCreationModel { CanEditExisting = IsTypeOfUser(UserTypes.Administrator) };
+            model.InfoMessage = _localizer["ClubOk"];
+            return View("Club", model);
         }
 
+        await FillClubAdminInfoAsync(model);
         return View("Club", model);
     }
 
