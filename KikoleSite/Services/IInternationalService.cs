@@ -48,7 +48,7 @@ public interface IInternationalService
     Task<ClubUsage> GetClubUsageAsync(ulong clubId);
 
     /// <summary>
-    /// Supprime un club inutilisé (voir <see cref="IClubRepository.DeleteClubAsync"/>) et rafraîchit
+    /// Supprime un club inutilisé (voir <see cref="Repositories.IClubRepository.DeleteClubAsync"/>) et rafraîchit
     /// le cache quand la suppression a eu lieu.
     /// </summary>
     /// <param name="clubId">Identifiant du club.</param>
