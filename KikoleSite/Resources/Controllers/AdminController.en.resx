@@ -348,9 +348,6 @@
   <data name="PlanningOutOfDate" xml:space="preserve">
     <value>The list changed since the page was opened (new kikolé, edited date or new day): the order was not saved. The list has been reloaded, please redo your order.</value>
   </data>
-  <data name="MandatEasyClue" xml:space="preserve">
-    <value>The easy clue is mandatory</value>
-  </data>
   <data name="InvalidNationality" xml:space="preserve">
     <value>The nationality is invalid: pick a suggestion from the list</value>
   </data>
@@ -369,14 +366,8 @@
   <data name="UnknownClub" xml:space="preserve">
     <value>Club #{0} not recognised: pick it from the suggestions list (or create it first)</value>
   </data>
-  <data name="U" xml:space="preserve">
-    <value>s</value>
-  </data>
-  <data name="T" xml:space="preserve">
-    <value>h</value>
-  </data>
   <data name="ClubDeleted" xml:space="preserve">
-    <value>Club &#8220;{0}&#8221; deleted ({1} incorrect proposal(s) kept under its name).</value>
+    <value>Club &#8220;{0}&#8221; deleted.</value>
   </data>
   <data name="ClubNotFound" xml:space="preserve">
     <value>This club no longer exists.</value>
@@ -386,5 +377,14 @@
   </data>
   <data name="ClubUsedByProposals" xml:space="preserve">
     <value>Deletion impossible: correct proposals target this club.</value>
+  </data>
+  <data name="UserNotContactable" xml:space="preserve">
+    <value>This account was not found, is disabled or is an administrator: cannot open a conversation.</value>
+  </data>
+  <data name="ClubUpdated" xml:space="preserve">
+    <value>Club updated!</value>
+  </data>
+  <data name="ClubDeletedWithProposals" xml:space="preserve">
+    <value>Club &#8220;{0}&#8221; deleted ({1} incorrect proposal(s) kept under its name).</value>
   </data>
 </root>

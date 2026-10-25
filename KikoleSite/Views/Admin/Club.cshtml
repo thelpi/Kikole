@@ -12,31 +12,40 @@
     }
 
     <div class="form-card">
-        <h3>@localizer["CreateClubTitle"]</h3>
+        <h3>@localizer[Model.Id > 0 ? "EditClubTitle" : "CreateClubTitle"]</h3>
         @if (Model.CanEditExisting)
         {
             <div class="form-field">
-                <label for="clubEditSearch">@localizer["EditExistingClub"]</label>
+                <label for="clubEditSearch">@localizer[Model.Id > 0 ? "EditExistingClub" : "SearchExistingClub"]</label>
                 <input type="text" id="clubEditSearch" class="blank" autocomplete="off" />
             </div>
         }
         <form method="post" action="/Admin/Club">
             @if (Model.Id == 0)
             {
-                <div class="form-field">
-                    <label>@localizer["SearchAlreadyExists"]</label>
-                    <input type="text" name="dummyClub" id="clubName" class="blank" />
-                </div>
+                if (!Model.CanEditExisting)
+                {
+                    <div class="form-field">
+                        <label>@localizer["SearchAlreadyExists"]</label>
+                        <input type="text" name="dummyClub" id="clubName" class="blank" />
+                    </div>
+                }
             }
             else
             {
                 <div class="form-hint">
-                    @if (Model.Id > 1)
+                    @if (Model.PreviousClubId.HasValue)
                     {
-                        <a href="/Admin/Club?clubId=@(Model.Id - 1)">Précédent</a>
+                        <a href="/Admin/Club?clubId=@Model.PreviousClubId">@localizer["PreviousClub"]</a>
+                    }
+                    @if (Model.PreviousClubId.HasValue && Model.NextClubId.HasValue)
+                    {
                         <span> - </span>
                     }
-                    <a href="/Admin/Club?clubId=@(Model.Id + 1)">Suivant</a>
+                    @if (Model.NextClubId.HasValue)
+                    {
+                        <a href="/Admin/Club?clubId=@Model.NextClubId">@localizer["NextClub"]</a>
+                    }
                 </div>
             }
             <div class="form-field">
@@ -68,7 +77,7 @@
 
             @Html.HiddenFor(x => x.Id)
             <div class="actions">
-                <button type="submit" name="submit-club">@localizer["DoCreate"]</button>
+                <button type="submit" name="submit-club">@localizer[Model.Id > 0 ? "DoSave" : "DoCreate"]</button>
             </div>
         </form>
     </div>
@@ -79,7 +88,7 @@
             <h3>@localizer["DeleteClubTitle"]</h3>
             @if (Model.PlayerNames.Count > 0)
             {
-                <p>@string.Format(localizer["ClubUsedBy"].Value, string.Join(", ", Model.PlayerNames))</p>
+                <p>@string.Format(localizer["ClubUsedBy"].Value, string.Join(", ", Model.PlayerNames) + (Model.PlayerNames.Count >= 20 ? "…" : ""))</p>
             }
             else if (Model.CorrectProposals > 0)
             {
@@ -87,7 +96,7 @@
             }
             else
             {
-                <p>@string.Format(localizer["ClubDeleteHint"].Value, Model.IncorrectProposals)</p>
+                <p>@(Model.IncorrectProposals > 0 ? string.Format(localizer["ClubDeleteHintWithProposals"].Value, Model.IncorrectProposals) : localizer["ClubDeleteHint"].Value)</p>
                 <div class="actions">
                     <button type="button" id="clubDeleteBtn">@localizer["DeleteClub"]</button>
                 </div>
@@ -101,7 +110,7 @@
         {
             <div class="confirm-modal" id="clubDeleteModal" role="dialog" aria-modal="true" aria-labelledby="clubDeleteText">
                 <div class="confirm-modal-box">
-                    <p id="clubDeleteText">@string.Format(localizer["ClubDeleteConfirm"].Value, Model.MainNameFr, Model.IncorrectProposals)</p>
+                    <p id="clubDeleteText">@string.Format(localizer[Model.IncorrectProposals > 0 ? "ClubDeleteConfirmWithProposals" : "ClubDeleteConfirm"].Value, Model.MainNameFr, Model.IncorrectProposals)</p>
                     <div class="confirm-modal-actions">
                         <button type="button" class="secondary" id="clubDeleteCancel">@localizer["Cancel"]</button>
                         <button type="submit" form="clubDeleteForm" id="clubDeleteConfirm">@localizer["Confirm"]</button>

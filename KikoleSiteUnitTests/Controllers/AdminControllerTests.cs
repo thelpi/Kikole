@@ -1006,6 +1006,8 @@ public class AdminControllerTests : IDisposable
             .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.ESP, "Espagne" } });
         _internationalService.Setup(_ => _.GetClubUsageAsync(7))
             .ReturnsAsync(new ClubUsage(["Zidane", "Modric"], 3, 0));
+        _internationalService.Setup(_ => _.GetClubsAsync())
+            .ReturnsAsync(new[] { ClubWithName(3, "A"), club, ClubWithName(12, "B") });
 
         var result = await _controller.Club(clubId: 7);
 
@@ -1017,6 +1019,23 @@ public class AdminControllerTests : IDisposable
         model.PlayerNames.Should().Equal("Zidane", "Modric");
         model.IncorrectProposals.Should().Be(3);
         model.CanDelete.Should().BeFalse();
+        // les identifiants ont des trous (clubs supprimes) : voisins reels, pas id - 1 / id + 1
+        model.PreviousClubId.Should().Be(3);
+        model.NextClubId.Should().Be(12);
+    }
+
+    [Fact]
+    public async Task ClubGet_ForTheFirstAndLastClub_HasNoPreviousOrNextNeighbour()
+    {
+        _internationalService.Setup(_ => _.GetClubAsync(7)).ReturnsAsync(ClubWithName(7, "Seul"));
+        _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>())).ReturnsAsync(new Dictionary<ulong, string>());
+        _internationalService.Setup(_ => _.GetClubUsageAsync(7)).ReturnsAsync(new ClubUsage([], 0, 0));
+        _internationalService.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new[] { ClubWithName(7, "Seul") });
+
+        var model = ((ViewResult)await _controller.Club(clubId: 7)).Model.Should().BeOfType<ClubCreationModel>().Subject;
+
+        model.PreviousClubId.Should().BeNull();
+        model.NextClubId.Should().BeNull();
     }
 
     [Fact]
@@ -1057,6 +1076,7 @@ public class AdminControllerTests : IDisposable
             ]);
         _internationalService.Setup(_ => _.GetClubAsync(7)).ReturnsAsync(saved);
         _internationalService.Setup(_ => _.GetClubUsageAsync(7)).ReturnsAsync(new ClubUsage([], 0, 0));
+        _internationalService.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new[] { saved });
 
         var result = await _controller.Club(new ClubCreationModel
         {
@@ -1069,7 +1089,7 @@ public class AdminControllerTests : IDisposable
 
         _internationalService.Verify(_ => _.CreateOrUpdateClubAsync(It.Is<KikoleSite.Models.Requests.ClubRequest>(r => r.Id == 7)), Times.Once);
         var model = ((ViewResult)result).Model.Should().BeOfType<ClubCreationModel>().Subject;
-        model.InfoMessage.Should().Be("ClubOk");
+        model.InfoMessage.Should().Be("ClubUpdated");
         model.Id.Should().Be(7);
         model.CanDelete.Should().BeTrue();
     }
@@ -1086,6 +1106,7 @@ public class AdminControllerTests : IDisposable
         _internationalService.Setup(_ => _.GetCountriesAsync(It.IsAny<Languages>()))
             .ReturnsAsync(new Dictionary<ulong, string> { { (ulong)Countries.ESP, "Espagne" } });
         _internationalService.Setup(_ => _.GetClubUsageAsync(7)).ReturnsAsync(new ClubUsage(["Zidane"], 0, 0));
+        _internationalService.Setup(_ => _.GetClubsAsync()).ReturnsAsync(new[] { club });
     }
 
     [Fact]
@@ -1101,7 +1122,19 @@ public class AdminControllerTests : IDisposable
         view.ViewName.Should().Be("Club");
         var model = view.Model.Should().BeOfType<ClubCreationModel>().Subject;
         model.Id.Should().Be(0);
-        model.InfoMessage.Should().Be("ClubDeleted");
+        model.InfoMessage.Should().Be("ClubDeletedWithProposals");
+    }
+
+    [Fact]
+    public async Task DeleteClub_Deleted_WithoutAnyProposal_UsesTheShortMessage()
+    {
+        SetupClubToDelete();
+        _internationalService.Setup(_ => _.DeleteClubAsync(7))
+            .ReturnsAsync(new ClubDeletionResult(ClubDeletionOutcomes.Deleted, 0));
+
+        var result = await _controller.DeleteClub(7);
+
+        ((ViewResult)result).Model.Should().BeOfType<ClubCreationModel>().Which.InfoMessage.Should().Be("ClubDeleted");
     }
 
     [Fact]

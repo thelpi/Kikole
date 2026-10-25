@@ -942,6 +942,11 @@ public class AdminController : KikoleBaseController
             model.PlayerNames = usage.PlayerNames;
             model.IncorrectProposals = usage.IncorrectProposals;
             model.CorrectProposals = usage.CorrectProposals;
+
+            // voisins reels : les identifiants ont des trous des qu'un club est supprime
+            var clubIds = (await _internationalService.GetClubsAsync()).Select(c => c.Id).ToList();
+            model.PreviousClubId = clubIds.Where(id => id < model.Id).Select(id => (ulong?)id).Max();
+            model.NextClubId = clubIds.Where(id => id > model.Id).Select(id => (ulong?)id).Min();
         }
     }
 
@@ -959,7 +964,9 @@ public class AdminController : KikoleBaseController
                 return View("Club", new ClubCreationModel
                 {
                     CanEditExisting = true,
-                    InfoMessage = string.Format(_localizer["ClubDeleted"], club?.Name, result.ConvertedProposals)
+                    InfoMessage = result.ConvertedProposals > 0
+                        ? string.Format(_localizer["ClubDeletedWithProposals"], club?.Name, result.ConvertedProposals)
+                        : string.Format(_localizer["ClubDeleted"], club?.Name)
                 });
 
             case ClubDeletionOutcomes.NotFound:
@@ -1032,7 +1039,7 @@ public class AdminController : KikoleBaseController
             model = saved != null
                 ? await BuildClubEditModelAsync(saved)
                 : new ClubCreationModel { CanEditExisting = IsTypeOfUser(UserTypes.Administrator) };
-            model.InfoMessage = _localizer["ClubOk"];
+            model.InfoMessage = _localizer[saved != null ? "ClubUpdated" : "ClubOk"];
             return View("Club", model);
         }
 

@@ -163,18 +163,39 @@
     <value>Des propositions réussies visent ce club : suppression impossible.</value>
   </data>
   <data name="ClubDeleteHint" xml:space="preserve">
-    <value>Ce club n'est utilisé par aucun kikolé. {0} proposition(s) incorrecte(s) de joueurs le visent : elles seront conservées avec le nom du club.</value>
+    <value>Ce club n'est utilisé par aucun kikolé ni par aucune proposition : il peut être supprimé.</value>
   </data>
   <data name="DeleteClub" xml:space="preserve">
     <value>Supprimer ce club</value>
   </data>
   <data name="ClubDeleteConfirm" xml:space="preserve">
-    <value>Supprimer définitivement « {0} » ? {1} proposition(s) incorrecte(s) garderont son nom.</value>
+    <value>Supprimer définitivement « {0} » ?</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
   <data name="Confirm" xml:space="preserve">
     <value>Confirmer</value>
+  </data>
+  <data name="EditClubTitle" xml:space="preserve">
+    <value>Modifier le club</value>
+  </data>
+  <data name="DoSave" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="PreviousClub" xml:space="preserve">
+    <value>Club précédent</value>
+  </data>
+  <data name="NextClub" xml:space="preserve">
+    <value>Club suivant</value>
+  </data>
+  <data name="SearchExistingClub" xml:space="preserve">
+    <value>Chercher un club existant (pour le modifier, ou vérifier qu'il n'existe pas déjà) :</value>
+  </data>
+  <data name="ClubDeleteHintWithProposals" xml:space="preserve">
+    <value>Ce club n'est utilisé par aucun kikolé. {0} proposition(s) incorrecte(s) de joueurs le visent : elles seront conservées avec le nom du club.</value>
+  </data>
+  <data name="ClubDeleteConfirmWithProposals" xml:space="preserve">
+    <value>Supprimer définitivement « {0} » ? {1} proposition(s) incorrecte(s) garderont son nom.</value>
   </data>
 </root>

@@ -348,9 +348,6 @@
   <data name="PlanningOutOfDate" xml:space="preserve">
     <value>La liste a changé depuis l&apos;ouverture de la page (nouveau kikolé, date modifiée ou changement de jour) : l&apos;ordre n&apos;a pas été enregistré. La liste a été rechargée, refaites votre ordre.</value>
   </data>
-  <data name="MandatEasyClue" xml:space="preserve">
-    <value>L'indice facile est obligatoire</value>
-  </data>
   <data name="InvalidNationality" xml:space="preserve">
     <value>La nationalité est invalide : choisissez une suggestion dans la liste</value>
   </data>
@@ -369,14 +366,8 @@
   <data name="UnknownClub" xml:space="preserve">
     <value>Club n°{0} non reconnu : choisissez-le dans la liste de suggestions (ou créez-le d'abord)</value>
   </data>
-  <data name="U" xml:space="preserve">
-    <value>s</value>
-  </data>
-  <data name="C" xml:space="preserve">
-    <value>e</value>
-  </data>
   <data name="ClubDeleted" xml:space="preserve">
-    <value>Club « {0} » supprimé ({1} proposition(s) incorrecte(s) conservée(s) sous son nom).</value>
+    <value>Club « {0} » supprimé.</value>
   </data>
   <data name="ClubNotFound" xml:space="preserve">
     <value>Ce club n'existe plus.</value>
@@ -386,5 +377,14 @@
   </data>
   <data name="ClubUsedByProposals" xml:space="preserve">
     <value>Suppression impossible : des propositions réussies visent ce club.</value>
+  </data>
+  <data name="UserNotContactable" xml:space="preserve">
+    <value>Ce compte est introuvable, désactivé ou administrateur : impossible d'ouvrir une conversation.</value>
+  </data>
+  <data name="ClubUpdated" xml:space="preserve">
+    <value>Club modifié !</value>
+  </data>
+  <data name="ClubDeletedWithProposals" xml:space="preserve">
+    <value>Club « {0} » supprimé ({1} proposition(s) incorrecte(s) conservée(s) sous son nom).</value>
   </data>
 </root>

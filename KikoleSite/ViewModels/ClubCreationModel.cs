@@ -37,5 +37,11 @@ public class ClubCreationModel
     /// <summary>Propositions réussies visant le club : elles interdisent aussi la suppression.</summary>
     public int CorrectProposals { get; set; }
 
+    /// <summary>Club existant qui précède (par identifiant) celui qu'on modifie ; <c>null</c> s'il n'y en a pas.</summary>
+    public ulong? PreviousClubId { get; set; }
+
+    /// <summary>Club existant qui suit (par identifiant) celui qu'on modifie ; <c>null</c> s'il n'y en a pas.</summary>
+    public ulong? NextClubId { get; set; }
+
     public bool CanDelete => Id > 0 && PlayerNames.Count == 0 && CorrectProposals == 0;
 }
