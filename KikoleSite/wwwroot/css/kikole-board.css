@@ -2512,3 +2512,35 @@ body { padding-top: 0; }
 .kikole-board .clue-download:hover { text-decoration: underline; }
 
 .kikole-board .clue-download:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* mobile : le libelle de l'indice passe au-dessus, et le contenu (texte, image, audio, video)
+   ne depasse jamais la largeur de la carte */
+@media (max-width: 600px) {
+  .kikole-board .clue {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .kikole-board .clue > * { min-width: 0; max-width: 100%; }
+
+  .kikole-board .clue p { overflow-wrap: anywhere; }
+
+  .kikole-board .clue-media { align-self: stretch; }
+
+  .kikole-board .clue-audio {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .kikole-board .clue-video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+  }
+
+  .kikole-board .clue-image {
+    max-width: 100%;
+    height: auto;
+  }
+}
