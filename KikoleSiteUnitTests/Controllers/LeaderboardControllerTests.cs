@@ -415,6 +415,104 @@ public class LeaderboardControllerTests
         _leaderService.Verify(_ => _.GetDayboardAsync(It.IsAny<DateOnly>(), It.IsAny<DayLeaderSorts>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
     }
 
+    // ------------------------------------------------------------- classement quotidien de la journee cachee
+
+    private void SetupHiddenDayAccess(ulong userId, bool unlockedBySeries, DayGrantTypes hiddenDayGrant)
+    {
+        SetUser(userId);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(userId, Today)).ReturnsAsync(DayGrantTypes.Found);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(userId, TestCalendar.HiddenDate)).ReturnsAsync(hiddenDayGrant);
+        _proposalService.Setup(_ => _.GetGrantAccessForDayAsync(userId, TestCalendar.FirstDate)).ReturnsAsync(DayGrantTypes.Found);
+        _playerService.Setup(_ => _.CanDisplayHiddenPlayerAsync(userId)).ReturnsAsync(unlockedBySeries);
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        _leaderService
+            .Setup(_ => _.GetDayboardAsync(It.IsAny<DateOnly>(), DayLeaderSorts.BestTime, TestCountryContinents.Map))
+            .ReturnsAsync((DateOnly d, DayLeaderSorts _, IReadOnlyDictionary<ulong, ulong> __) => new Dayboard { Date = d, Leaders = [], Searchers = [] });
+    }
+
+    [Theory]
+    [InlineData(DayGrantTypes.Found)]
+    [InlineData(DayGrantTypes.Creator)]
+    [InlineData(DayGrantTypes.Admin)]
+    public async Task GetDailyLeaderboardDetailsAsync_TheHiddenDayIsReadableByThoseWhoFoundOrCreatedIt(DayGrantTypes grant)
+    {
+        SetupHiddenDayAccess(1, unlockedBySeries: true, grant);
+
+        var result = await _controller.GetDailyLeaderboardDetailsAsync(DayLeaderSorts.BestTime, TestCalendar.HiddenDate);
+
+        var dayboard = result.Value.Should().BeOfType<KikoleSite.ViewModels.DayboardModel>().Subject;
+        dayboard.Date.Should().Be(TestCalendar.HiddenDate);
+        dayboard.CanViewDetails.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(DayGrantTypes.None)]
+    [InlineData(DayGrantTypes.PaidBoard)]
+    public async Task GetDailyLeaderboardDetailsAsync_TheHiddenDayStaysClosedToThoseWhoOnlyUnlockedItBySeries(DayGrantTypes grant)
+    {
+        SetupHiddenDayAccess(1, unlockedBySeries: true, grant);
+
+        var result = await _controller.GetDailyLeaderboardDetailsAsync(DayLeaderSorts.BestTime, TestCalendar.HiddenDate);
+
+        result.Value.Should().BeOfType<KikoleSite.ViewModels.DayboardModel>().Which.Date.Should().Be(TestCalendar.FirstDate);
+        _leaderService.Verify(_ => _.GetDayboardAsync(TestCalendar.HiddenDate, It.IsAny<DayLeaderSorts>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetDailyLeaderboardDetailsAsync_TheHiddenDayStaysClosedToThoseWhoCannotDisplayIt()
+    {
+        SetupHiddenDayAccess(1, unlockedBySeries: false, DayGrantTypes.Found);
+
+        var result = await _controller.GetDailyLeaderboardDetailsAsync(DayLeaderSorts.BestTime, TestCalendar.HiddenDate);
+
+        result.Value.Should().BeOfType<KikoleSite.ViewModels.DayboardModel>().Which.Date.Should().Be(TestCalendar.FirstDate);
+    }
+
+    private async Task<KikoleSite.ViewModels.LeaderboardModel> BuildIndexModelAsync()
+    {
+        _leaderService
+            .Setup(_ => _.GetLeaderboardAsync(It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), LeaderSorts.TotalPoints))
+            .ReturnsAsync(new List<LeaderboardItem>());
+        _leaderService.Setup(_ => _.GetPodiumsAsync()).ReturnsAsync(new Podiums
+        {
+            MonthlyPodiums = new Dictionary<(int month, int year), (User first, User second, User third)>(),
+            OverallPodium = []
+        });
+
+        var result = await _controller.Index(userId: 0);
+
+        return ((ViewResult)result).Model.Should().BeOfType<KikoleSite.ViewModels.LeaderboardModel>().Subject;
+    }
+
+    [Fact]
+    public async Task Index_LetsThoseWhoFoundTheHiddenDayBrowseBackToIt()
+    {
+        SetupHiddenDayAccess(1, unlockedBySeries: true, DayGrantTypes.Found);
+
+        (await BuildIndexModelAsync()).FirstDayboardDate.Should().Be(TestCalendar.HiddenDate);
+    }
+
+    [Fact]
+    public async Task Index_StopsOtherVisitorsAtTheFirstPlayableDay()
+    {
+        SetupHiddenDayAccess(1, unlockedBySeries: true, DayGrantTypes.None);
+
+        (await BuildIndexModelAsync()).FirstDayboardDate.Should().Be(TestCalendar.FirstDate);
+    }
+
+    [Fact]
+    public async Task Index_StopsAnonymousVisitorsAtTheFirstPlayableDay()
+    {
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+        _internationalService.Setup(_ => _.GetCountryContinentsAsync()).ReturnsAsync(TestCountryContinents.Map);
+        _leaderService
+            .Setup(_ => _.GetDayboardAsync(It.IsAny<DateOnly>(), DayLeaderSorts.BestTime, TestCountryContinents.Map))
+            .ReturnsAsync((DateOnly d, DayLeaderSorts _, IReadOnlyDictionary<ulong, ulong> __) => new Dayboard { Date = d, Leaders = [], Searchers = [] });
+
+        (await BuildIndexModelAsync()).FirstDayboardDate.Should().Be(TestCalendar.FirstDate);
+        _proposalService.Verify(_ => _.GetGrantAccessForDayAsync(It.IsAny<ulong>(), TestCalendar.HiddenDate), Times.Never);
+    }
+
     // ------------------------------------------------------------- UnlockDailyLeaderboardAsync
 
     [Fact]

@@ -503,8 +503,34 @@ var initializeLeaderboards = function (noUserInTableText, noTimeYetText, noPoint
         loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
     };
     dailyDate.onchange = function () {
+        dailyDate.addEventListener('daily-day-clamped', updateDailyArrows);
+    updateDailyArrows();
         loadDailyLeaderboard(dailySortType.value, dailyDate.value, noUserInTableText, noTimeYetText, noPointsYetText, hiddenBoardText, currentUserId, discoverLeaderboardText, leaderboardCostText);
     };
+
+    /* fleches jour precedent / suivant : memes bornes que le calendrier (data-min-date /
+       data-max-date du champ) ; le serveur recadre de toute facon une date non autorisee */
+    var prevDay = document.getElementById('dailyPrevDay');
+    var nextDay = document.getElementById('dailyNextDay');
+    var updateDailyArrows = function () {
+        prevDay.disabled = dailyDate.dataset.minDate && dailyDate.value <= dailyDate.dataset.minDate;
+        nextDay.disabled = dailyDate.dataset.maxDate && dailyDate.value >= dailyDate.dataset.maxDate;
+    };
+    var shiftDailyDate = function (delta) {
+        var shifted = parseIsoDate(dailyDate.value);
+        shifted.setDate(shifted.getDate() + delta);
+        var iso = shifted.yyyymmdd();
+        if ((dailyDate.dataset.minDate && iso < dailyDate.dataset.minDate)
+            || (dailyDate.dataset.maxDate && iso > dailyDate.dataset.maxDate)) {
+            return;
+        }
+        $(dailyDate).datepicker('setDate', shifted);
+        $(dailyDate).trigger('change');
+    };
+    prevDay.addEventListener('click', function () { shiftDailyDate(-1); });
+    nextDay.addEventListener('click', function () { shiftDailyDate(1); });
+    dailyDate.addEventListener('daily-day-clamped', updateDailyArrows);
+    updateDailyArrows();
 
     /* bouton "Decouvrez le classement" affiche quand le tableau du jour est masque
        (rendu cote serveur au premier chargement, recree en JS a chaque rafraichissement
@@ -781,6 +807,11 @@ var loadDailyLeaderboard = function (sortType, date, noUserInTableText, noTimeYe
         type: "GET",
         dataType: "json",
         success: function (data) {
+            var shownDay = document.getElementById('LeaderboardDay');
+            if (data.date && shownDay.value !== data.date) {
+                $(shownDay).datepicker('setDate', parseIsoDate(data.date));
+                shownDay.dispatchEvent(new CustomEvent('daily-day-clamped'));
+            }
             var table = document.getElementById('dailyLeaderboardTable');
             var tbodyRef = table.getElementsByTagName('tbody')[0];
             var newtbody = document.createElement('tbody');
@@ -1301,12 +1332,17 @@ $(function () {
         }
     });
 
-    var minDate = $leaderboardDatepickers.data("minDate");
-    if (minDate) options.minDate = parseIsoDate(minDate);
-    var maxDate = $leaderboardDatepickers.data("maxDate");
-    if (maxDate) options.maxDate = parseIsoDate(maxDate);
+    $leaderboardDatepickers.each(function () {
+        var $picker = $(this);
+        var pickerOptions = $.extend({}, options);
 
-    $leaderboardDatepickers.datepicker(options);
+        var minDate = $picker.data("minDate");
+        if (minDate) pickerOptions.minDate = parseIsoDate(minDate);
+        var maxDate = $picker.data("maxDate");
+        if (maxDate) pickerOptions.maxDate = parseIsoDate(maxDate);
+
+        $picker.datepicker(pickerOptions);
+    });
 });
 
 Date.prototype.yyyymmdd = function () {

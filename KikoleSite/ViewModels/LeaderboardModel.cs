@@ -31,6 +31,10 @@ public class LeaderboardModel
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateOnly LeaderboardDay { get; set; }
 
+    /// <summary>Premier jour que le visiteur peut parcourir dans le classement quotidien : la journee cachee s'il l'a trouvee, sinon la premiere journee jouable.</summary>
+    [DataType(DataType.Date, ErrorMessage = "Date only")]
+    public DateOnly FirstDayboardDate { get; set; }
+
     public LeaderSorts SortType { get; set; }
 
     public DayLeaderSorts DaySortType { get; set; }

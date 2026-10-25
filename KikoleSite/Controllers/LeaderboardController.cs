@@ -325,6 +325,10 @@ public class LeaderboardController : KikoleBaseController
 
         var podiums = await podiumsTask;
 
+        // la journee cachee n'est consultable (classement quotidien) que par ceux qui l'ont trouvee
+        var canBrowseHiddenDay = UserId > 0
+            && CanSeeDayboard(await _proposalService.GetGrantAccessForDayAsync(UserId, _gameCalendar.HiddenDate));
+
         async Task<(Models.Dayboard, IReadOnlyCollection<Models.LeaderboardItem>)> GetBoardsAsync()
         {
             var (daily, foundToday) = await GetDailyboardAsync(_clock.Today, DayLeaderSorts.BestTime, null);
@@ -341,6 +345,7 @@ public class LeaderboardController : KikoleBaseController
             MaximalDate = _clock.Today,
             SortType = LeaderSorts.TotalPoints,
             LeaderboardDay = _clock.Today,
+            FirstDayboardDate = canBrowseHiddenDay ? _gameCalendar.HiddenDate : _gameCalendar.FirstDate,
             DaySortType = DayLeaderSorts.BestTime,
             Dayboard = DayboardModel.From(dailyBoard),
             GlobalLeaderboard = globalLeaderboard.Select(LeaderboardRow.From).ToList(),
@@ -425,6 +430,18 @@ public class LeaderboardController : KikoleBaseController
 
         date = await dateTask;
 
+        // le classement du jour cache n'est lisible que par ceux qui ont trouve ce kikole (ou l'ont
+        // cree, ou administrateurs) : avoir debloque sa page par une serie parfaite ne suffit pas
+        DayGrantTypes? hiddenDayGrant = null;
+        if (date == _gameCalendar.HiddenDate)
+        {
+            var grant = await _proposalService.GetGrantAccessForDayAsync(UserId, date);
+            if (CanSeeDayboard(grant))
+                hiddenDayGrant = grant;
+            else
+                date = _gameCalendar.FirstDate;
+        }
+
         Dayboard dayboard;
         if (date == _clock.Today && todayGrantEnsured == DayGrantTypes.None)
         {
@@ -452,10 +469,15 @@ public class LeaderboardController : KikoleBaseController
         // tableau mais pas le detail (meme regle que la garde de l'action UserDay).
         var dayGrant = date == _clock.Today
             ? todayGrantEnsured
-            : await _proposalService.GetGrantAccessForDayAsync(UserId, date);
-        dayboard.CanViewDetails = dayGrant is DayGrantTypes.Found or DayGrantTypes.Creator or DayGrantTypes.Admin;
+            : hiddenDayGrant ?? await _proposalService.GetGrantAccessForDayAsync(UserId, date);
+        dayboard.CanViewDetails = CanSeeDayboard(dayGrant);
 
         return (dayboard, todayGrantEnsured);
+    }
+
+    private static bool CanSeeDayboard(DayGrantTypes grant)
+    {
+        return grant is DayGrantTypes.Found or DayGrantTypes.Creator or DayGrantTypes.Admin;
     }
 
     private async Task<DateOnly> EnsureDateAsync(DateOnly date, DayGrantTypes todayGrant)

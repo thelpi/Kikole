@@ -22,8 +22,16 @@
                 @Html.DropDownListFor(m => m.DaySortType, Model.DaySortTypes.Select(x => new SelectListItem(x.GetLabel(), x.ToString())), new { @class = "blank" })
             </div>
             <div class="form-field">
-                <label>@localizer["Date"]</label>
-                <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" data-min-date="@minDate" data-max-date="@maxDate" />
+                <label for="LeaderboardDay">@localizer["Date"]</label>
+                <div class="day-nav">
+                    <button type="button" class="day-nav-arrow" id="dailyPrevDay" title="@localizer["PreviousDay"]" aria-label="@localizer["PreviousDay"]">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
+                    </button>
+                    <input type="text" id="LeaderboardDay" name="LeaderboardDay" class="date-field" readonly value="@Model.LeaderboardDay.ToString("yyyy-MM-dd")" data-min-date="@Model.FirstDayboardDate.ToString("yyyy-MM-dd")" data-max-date="@maxDate" />
+                    <button type="button" class="day-nav-arrow" id="dailyNextDay" title="@localizer["NextDay"]" aria-label="@localizer["NextDay"]">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="table-wrap" data-prev-label="@localizer["PagerPrevious"]" data-next-label="@localizer["PagerNext"]">

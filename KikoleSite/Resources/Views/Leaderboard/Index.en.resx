@@ -264,4 +264,10 @@
   <data name="PageDescription" xml:space="preserve">
     <value>The Kikolé ? leaderboard: points, best times, monthly podiums and ranking by badges.</value>
   </data>
+  <data name="PreviousDay" xml:space="preserve">
+    <value>Previous day</value>
+  </data>
+  <data name="NextDay" xml:space="preserve">
+    <value>Next day</value>
+  </data>
 </root>

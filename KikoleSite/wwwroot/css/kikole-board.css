@@ -2473,3 +2473,19 @@ body { padding-top: 0; }
 /* meilleur(s) score(s) du jour (classement quotidien) : fond dore plus marque que la ligne du createur, plus une barre */
 .kikole-board tr.best-row td { background: color-mix(in srgb, var(--gold) 26%, var(--surface)); }
 .kikole-board tr.best-row:not(.you-row) td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
+/* fleches jour precedent / suivant du classement quotidien : memes boutons que la navigation de la page d'accueil */
+.kikole-board button.day-nav-arrow {
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.kikole-board button.day-nav-arrow:hover:not(:disabled) { color: var(--text); border-color: var(--text-faint); }
+
+.kikole-board button.day-nav-arrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.kikole-board button.day-nav-arrow:disabled {
+  color: var(--text-faint);
+  opacity: 0.45;
+  cursor: default;
+}
