@@ -1829,6 +1829,25 @@ public class BadgeServiceTests
         }
     }
 
+    [Fact]
+    public async Task ResetBadgesAsync_WithSponsorshipDisabled_KeepsTheSponsorshipBadges()
+    {
+        await BuildService(sponsorshipEnabled: false).ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        _badgeRepository.Verify(_ => _.ResetBadgeDatasAsync((ulong)Badges.DonCorleone), Times.Never);
+        _badgeRepository.Verify(_ => _.ResetBadgeDatasAsync((ulong)Badges.TheFamousFive), Times.Never);
+        _badgeRepository.Verify(_ => _.ResetBadgeDatasAsync((ulong)Badges.YourFirstSuccess), Times.Once);
+    }
+
+    [Fact]
+    public async Task ResetBadgesAsync_WithSponsorshipEnabled_ClearsTheSponsorshipBadgesToRecomputeThem()
+    {
+        await _service.ResetBadgesAsync(Languages.en, TestCountryContinents.Map);
+
+        _badgeRepository.Verify(_ => _.ResetBadgeDatasAsync((ulong)Badges.DonCorleone), Times.Once);
+        _badgeRepository.Verify(_ => _.ResetBadgeDatasAsync((ulong)Badges.TheFamousFive), Times.Once);
+    }
+
     // ------------------------------------------------------------- ResetBadgesAsync : Do it yourself / We are kikole
 
     private static readonly DateTime Accepted = new(2026, 9, 1, 14, 30, 0);

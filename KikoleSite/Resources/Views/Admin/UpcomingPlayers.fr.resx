@@ -120,7 +120,7 @@
     <value>Kikolés à venir</value>
   </data>
   <data name="UpcomingHelp" xml:space="preserve">
-    <value>Kikolés programmés après aujourd&apos;hui et soumissions en attente. Un kikolé déjà joué ne peut plus être modifié.</value>
+    <value>Kikolé du jour, kikolés programmés et soumissions en attente. Un kikolé d&apos;un jour passé ne peut plus être modifié.</value>
   </data>
   <data name="NoPlayers" xml:space="preserve">
     <value>Aucun kikolé à venir.</value>
@@ -142,5 +142,11 @@
   </data>
   <data name="BackToActions" xml:space="preserve">
     <value>Retour aux actions</value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Aujourd&apos;hui</value>
+  </data>
+  <data name="SavedToday" xml:space="preserve">
+    <value>Modifications enregistrées. Le kikolé du jour a changé : lancez « Recalculer les badges » depuis les actions si nécessaire.</value>
   </data>
 </root>

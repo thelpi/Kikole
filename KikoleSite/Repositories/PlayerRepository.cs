@@ -226,14 +226,14 @@ public class PlayerRepository : BaseRepository, IPlayerRepository
     {
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
-            // garde atomique : seul un kikole en attente ou programme apres aujourd'hui est modifiable
+            // garde atomique : seul un kikole en attente ou programme (aujourd'hui compris) est modifiable
             var updated = await connection.ExecuteAsync(
                 "UPDATE players SET name = @Name, allowed_names = @AllowedNames, year_of_birth = @YearOfBirth, " +
                 "country_id = @CountryId, alternative_country_id = @AlternativeCountryId, " +
                 "clue = @Clue, easy_clue = @EasyClue, position_id = @PositionId, " +
                 "alternative_position_id = @AlternativePositionId, hide_creator = @HideCreator, is_woman = @IsWoman " +
                 "WHERE id = @playerId AND reject_date IS NULL " +
-                "AND (publication_date IS NULL OR publication_date > @today)",
+                "AND (publication_date IS NULL OR publication_date >= @today)",
                 new
                 {
                     playerId,

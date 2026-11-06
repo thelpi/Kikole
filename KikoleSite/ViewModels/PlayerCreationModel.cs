@@ -154,6 +154,12 @@ public class PlayerCreationModel
 
     public bool IsWoman { get; set; }
 
+    /// <summary>Edition du kikole du jour : bandeau d'avertissement permanent sur le formulaire.</summary>
+    public bool IsEditingToday { get; set; }
+
+    /// <summary>Nombre de joueurs ayant deja trouve le kikole du jour (edition du jour uniquement).</summary>
+    public int TodayFinderCount { get; set; }
+
     /// <summary>
     /// Reserve aux administrateurs (verifie cote controleur) : force la date de
     /// publication au lieu du "bout de chaine" habituel. Format "yyyy-MM-dd" (input HTML

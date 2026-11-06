@@ -100,13 +100,28 @@ public class PlayerUpdateIntegrationTests
     }
 
     [Fact]
-    public async Task UpdatePlayerAsync_OnAPlayerPublishedTodayOrRefused_ChangesNothing()
+    public async Task UpdatePlayerAsync_OnTodaysPlayer_IsAllowed()
     {
-        var (repository, todayId) = await CreatePlayerAsync("integration_update_today", _fixture.Clock.Today);
+        var (repository, playerId) = await CreatePlayerAsync("integration_update_today", _fixture.Clock.Today);
+
+        var updated = await repository.UpdatePlayerAsync(
+            playerId, UpdatedPlayer(0), [new PlayerClubDto { PlayerId = playerId, ClubId = 4, HistoryPosition = 1 }],
+            new Dictionary<ulong, string>(), new Dictionary<ulong, string>());
+
+        updated.Should().BeTrue();
+        var after = await repository.GetPlayerByIdAsync(playerId);
+        after!.Name.Should().Be("Apres");
+        after.PublicationDate.Should().Be(_fixture.Clock.Today);
+    }
+
+    [Fact]
+    public async Task UpdatePlayerAsync_OnAPastDayOrRefusedPlayer_ChangesNothing()
+    {
+        var (repository, pastId) = await CreatePlayerAsync("integration_update_past", _fixture.Clock.Today.AddDays(-700));
         var (_, refusedId) = await CreatePlayerAsync("integration_update_refused", null);
         await repository.RefusePlayerProposalAsync(refusedId);
 
-        foreach (var playerId in new[] { todayId, refusedId })
+        foreach (var playerId in new[] { pastId, refusedId })
         {
             var updated = await repository.UpdatePlayerAsync(
                 playerId, UpdatedPlayer(0), [new PlayerClubDto { PlayerId = playerId, ClubId = 4, HistoryPosition = 1 }],

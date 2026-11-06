@@ -229,4 +229,13 @@
   <data name="CluesPreview" xml:space="preserve">
     <value>Clues preview</value>
   </data>
+  <data name="TodayEditTitle" xml:space="preserve">
+    <value>WARNING: you are editing TODAY&apos;s kikolé</value>
+  </data>
+  <data name="TodayEditWarning" xml:space="preserve">
+    <value>It is being played right now. Proposals and points already recorded are never recomputed. After saving, run &quot;Recompute badges&quot; from the actions.</value>
+  </data>
+  <data name="TodayEditFinders" xml:space="preserve">
+    <value>{0} player(s) have already found it.</value>
+  </data>
 </root>

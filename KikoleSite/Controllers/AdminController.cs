@@ -1059,15 +1059,16 @@ public class AdminController : KikoleBaseController
 
     [HttpGet]
     [Authorization(UserTypes.Administrator)]
-    public async Task<IActionResult> UpcomingPlayers(bool saved)
+    public async Task<IActionResult> UpcomingPlayers(bool saved, bool today = false)
     {
         var players = await _playerService.GetEditablePlayersAsync();
 
         return View(new UpcomingPlayersModel
         {
             Saved = saved,
+            SavedToday = saved && today,
             Players = players
-                .Select(p => new UpcomingPlayerRow(p.Id, p.Name, p.PublicationDate))
+                .Select(p => new UpcomingPlayerRow(p.Id, p.Name, p.PublicationDate, p.PublicationDate == _clock.Today))
                 .ToList()
         });
     }
@@ -1094,15 +1095,20 @@ public class AdminController : KikoleBaseController
 
         model.DisplayPlayerSubmissionLink = true;
 
+        var editable = await _playerService.GetEditablePlayerAsync(model.PlayerId.Value);
+        var isToday = editable?.Player.PublicationDate == _clock.Today;
+
         var (request, error) = await BuildPlayerRequestAsync(model, true, false);
         if (request != null)
         {
             if (await _playerService.UpdatePlayerAsync(model.PlayerId.Value, request))
-                return RedirectToAction("UpcomingPlayers", new { saved = true });
+                return RedirectToAction("UpcomingPlayers", new { saved = true, today = isToday });
 
             error = _localizer["PlayerNotEditable"].Value;
         }
 
+        model.IsEditingToday = isToday;
+        model.TodayFinderCount = editable?.FinderCount ?? 0;
         model.ErrorMessage = error;
         SetPositionsOnModel(model);
         return View("Index", model);
@@ -1132,7 +1138,9 @@ public class AdminController : KikoleBaseController
             ClueFr = data.ClueFr,
             EasyClueFr = data.EasyClueFr,
             HideCreator = player.HideCreator,
-            IsWoman = player.IsWoman
+            IsWoman = player.IsWoman,
+            IsEditingToday = player.PublicationDate == _clock.Today,
+            TodayFinderCount = data.FinderCount
         };
 
         // les noms acceptes sont stockes normalises : on ne retrouve que cette forme ; les alias

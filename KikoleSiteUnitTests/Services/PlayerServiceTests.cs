@@ -690,18 +690,19 @@ public class PlayerServiceTests
     // ------------------------------------------------------------- edition d'un kikole
 
     [Fact]
-    public async Task GetEditablePlayersAsync_ReturnsTheScheduledPlayersByDateThenThePendingOnes()
+    public async Task GetEditablePlayersAsync_ReturnsTodaysAndScheduledPlayersByDateThenThePendingOnes()
     {
         var later = PlayerDtoBuilder.Valid().WithId(1).WithPublicationDate(FirstDate.AddDays(5)).Build();
+        var today = PlayerDtoBuilder.Valid().WithId(4).WithPublicationDate(FirstDate).Build();
         var sooner = PlayerDtoBuilder.Valid().WithId(2).WithPublicationDate(FirstDate.AddDays(2)).Build();
         var pending = PlayerDtoBuilder.Valid().WithId(3).Build();
-        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate.AddDays(1), null))
-            .ReturnsAsync(new[] { later, sooner });
+        _playerRepository.Setup(_ => _.GetPlayersOfTheDayAsync(FirstDate, null))
+            .ReturnsAsync(new[] { later, sooner, today });
         _playerRepository.Setup(_ => _.GetPendingValidationPlayersAsync()).ReturnsAsync(new[] { pending });
 
         var players = await _service.GetEditablePlayersAsync();
 
-        players.Select(p => p.Id).Should().Equal(2UL, 1UL, 3UL);
+        players.Select(p => p.Id).Should().Equal(4UL, 2UL, 1UL, 3UL);
     }
 
     [Fact]
@@ -735,15 +736,40 @@ public class PlayerServiceTests
         (await _service.GetEditablePlayerAsync(7)).Should().NotBeNull();
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-3)]
-    public async Task GetEditablePlayerAsync_ForAPlayerPublishedTodayOrBefore_IsRefused(int daysFromToday)
+    [Fact]
+    public async Task GetEditablePlayerAsync_ForAPlayerOfAPastDay_IsRefused()
     {
         _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
-            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate.AddDays(daysFromToday)).Build());
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate.AddDays(-1)).Build());
 
         (await _service.GetEditablePlayerAsync(7)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetEditablePlayerAsync_ForTodaysPlayer_IsAllowedAndCountsWhoAlreadyFoundIt()
+    {
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate).Build());
+        _playerRepository.Setup(_ => _.GetPlayerClubsAsync(7)).ReturnsAsync(new List<PlayerClubDto>());
+        _leaderRepository.Setup(_ => _.GetLeadersAtDateAsync(FirstDate, false))
+            .ReturnsAsync(new[] { new LeaderDto(), new LeaderDto(), new LeaderDto() });
+
+        var data = await _service.GetEditablePlayerAsync(7);
+
+        data.Should().NotBeNull();
+        data!.FinderCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GetEditablePlayerAsync_ForAScheduledPlayer_DoesNotLookForFinders()
+    {
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate.AddDays(1)).Build());
+        _playerRepository.Setup(_ => _.GetPlayerClubsAsync(7)).ReturnsAsync(new List<PlayerClubDto>());
+
+        (await _service.GetEditablePlayerAsync(7))!.FinderCount.Should().Be(0);
+
+        _leaderRepository.Verify(_ => _.GetLeadersAtDateAsync(It.IsAny<DateOnly>(), It.IsAny<bool>()), Times.Never);
     }
 
     [Fact]
@@ -784,10 +810,10 @@ public class PlayerServiceTests
     }
 
     [Fact]
-    public async Task UpdatePlayerAsync_OnAPlayerPublishedToday_WritesNothing()
+    public async Task UpdatePlayerAsync_OnAPlayerOfAPastDay_WritesNothing()
     {
         _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
-            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate).Build());
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate.AddDays(-1)).Build());
 
         (await _service.UpdatePlayerAsync(7, Request())).Should().BeFalse();
 
@@ -795,6 +821,24 @@ public class PlayerServiceTests
             It.IsAny<ulong>(), It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyList<PlayerClubDto>>(),
             It.IsAny<IReadOnlyDictionary<ulong, string>>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()), Times.Never);
     }
+
+    [Fact]
+    public async Task UpdatePlayerAsync_OnTodaysPlayer_UpdatesItAndKeepsThePublicationDate()
+    {
+        _playerRepository.Setup(_ => _.GetPlayerByIdAsync(7))
+            .ReturnsAsync(PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(FirstDate).Build());
+        _playerRepository
+            .Setup(_ => _.UpdatePlayerAsync(7, It.IsAny<PlayerDto>(), It.IsAny<IReadOnlyList<PlayerClubDto>>(),
+                It.IsAny<IReadOnlyDictionary<ulong, string>>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()))
+            .ReturnsAsync(true);
+
+        (await _service.UpdatePlayerAsync(7, Request())).Should().BeTrue();
+
+        _playerRepository.Verify(_ => _.UpdatePlayerAsync(
+            7, It.Is<PlayerDto>(d => d.PublicationDate == FirstDate), It.IsAny<IReadOnlyList<PlayerClubDto>>(),
+            It.IsAny<IReadOnlyDictionary<ulong, string>>(), It.IsAny<IReadOnlyDictionary<ulong, string>>()), Times.Once);
+    }
+
     // ------------------------------------------------------------- ordre de publication
 
     private static PlayerDto Scheduled(ulong id, int daysFromToday)

@@ -120,7 +120,7 @@
     <value>Upcoming kikolés</value>
   </data>
   <data name="UpcomingHelp" xml:space="preserve">
-    <value>Kikolés scheduled after today and pending submissions. A kikolé that has already been played can no longer be edited.</value>
+    <value>Today's kikolé, scheduled kikolés and pending submissions. A kikolé of a past day can no longer be edited.</value>
   </data>
   <data name="NoPlayers" xml:space="preserve">
     <value>No upcoming kikolé.</value>
@@ -142,5 +142,11 @@
   </data>
   <data name="BackToActions" xml:space="preserve">
     <value>Back to actions</value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="SavedToday" xml:space="preserve">
+    <value>Changes saved. Today&apos;s kikolé has changed: run &quot;Recompute badges&quot; from the actions if needed.</value>
   </data>
 </root>

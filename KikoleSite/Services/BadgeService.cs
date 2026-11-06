@@ -142,6 +142,12 @@ public class BadgeService : IBadgeService
 
     private const int ThirdWaveFeministMinimalPoints = 800;
 
+    private static readonly IReadOnlySet<ulong> SponsorshipBadgeIds = new HashSet<ulong>
+    {
+        (ulong)Badges.DonCorleone,
+        (ulong)Badges.TheFamousFive
+    };
+
     // formation 4-4-2 + gardien : les places a remplir et leur nombre
     private static readonly IReadOnlyDictionary<ulong, int> FourFourTwoSlots = new Dictionary<ulong, int>
     {
@@ -355,6 +361,10 @@ public class BadgeService : IBadgeService
 
         foreach (var badge in allBadges)
         {
+            // desactive, le parrainage n'est pas recalcule plus bas : ses badges restent en place
+            if (!_registrationOptions.SponsorshipEnabled && SponsorshipBadgeIds.Contains(badge.Id))
+                continue;
+
             await _badgeRepository
                 .ResetBadgeDatasAsync(badge.Id);
         }

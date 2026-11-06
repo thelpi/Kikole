@@ -17,6 +17,18 @@
 }
 
 <div class="kikole-board">
+    @if (Model.IsEditingToday)
+    {
+        <div class="banner today-edit" role="alert">
+            <strong>@localizer["TodayEditTitle"]</strong>
+            <span>@localizer["TodayEditWarning"]</span>
+            @if (Model.TodayFinderCount > 0)
+            {
+                <span>@string.Format(localizer["TodayEditFinders"].Value, Model.TodayFinderCount)</span>
+            }
+        </div>
+    }
+
     @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
     {
         <div class="banner error">@Model.ErrorMessage</div>

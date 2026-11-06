@@ -2580,3 +2580,30 @@ body { padding-top: 0; }
   border: 1px solid #c9962b;
   border-radius: 5px;
 }
+/* edition du kikole du jour : bandeau permanent tres visible (fond jaune, texte sombre, gros) */
+.kikole-board .banner.today-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #ffd23f;
+  border: 3px solid #b8860b;
+  border-left-width: 10px;
+  color: #1a1300;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.kikole-board .banner.today-edit strong { font-size: 19px; font-weight: 800; }
+
+.kikole-board #upcomingPlayersTable tr.today-row td { background: #4a3b1c; border-bottom: 1px solid #6b5527; }
+
+.kikole-board .today-tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #ffd23f;
+  color: #1a1300;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}

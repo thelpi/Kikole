@@ -1262,6 +1262,57 @@ public class AdminControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task UpcomingPlayers_FlagsTodaysPlayerAndTheSavedTodayMessage()
+    {
+        _playerService.Setup(_ => _.GetEditablePlayersAsync()).ReturnsAsync(new[]
+        {
+            PlayerDtoBuilder.Valid().WithId(2).WithName("Du jour").WithPublicationDate(Today).Build(),
+            PlayerDtoBuilder.Valid().WithId(3).WithName("Planifie").WithPublicationDate(Today.AddDays(2)).Build()
+        });
+
+        var result = await _controller.UpcomingPlayers(saved: true, today: true);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<UpcomingPlayersModel>().Subject;
+        model.SavedToday.Should().BeTrue();
+        model.Players.Select(p => p.IsToday).Should().Equal(true, false);
+    }
+
+    [Fact]
+    public async Task UpcomingPlayers_WhenNothingWasSaved_NeverShowsTheSavedTodayMessage()
+    {
+        _playerService.Setup(_ => _.GetEditablePlayersAsync()).ReturnsAsync(Array.Empty<KikoleSite.Models.Dtos.PlayerDto>());
+
+        var result = await _controller.UpcomingPlayers(saved: false, today: true);
+
+        ((ViewResult)result).Model.Should().BeOfType<UpcomingPlayersModel>().Which.SavedToday.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task PlayerEditGet_OnTodaysPlayer_FlagsTheEditionAndCarriesTheFinderCount()
+    {
+        SetupEditReferentials();
+        var today = PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(Today).Build();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData(today) with { FinderCount = 4 });
+
+        var result = await _controller.PlayerEdit(playerId: 7);
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Subject;
+        model.IsEditingToday.Should().BeTrue();
+        model.TodayFinderCount.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task PlayerEditGet_OnAScheduledPlayer_DoesNotFlagTheEdition()
+    {
+        SetupEditReferentials();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData());
+
+        var result = await _controller.PlayerEdit(playerId: 7);
+
+        ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Which.IsEditingToday.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task PlayerEditGet_OnAPlayerThatIsNoLongerEditable_RedirectsToTheList()
     {
         _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync((PlayerEditData?)null);
@@ -1364,6 +1415,52 @@ public class AdminControllerTests : IDisposable
         var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
         redirect.ActionName.Should().Be("UpcomingPlayers");
         redirect.RouteValues!["saved"].Should().Be(true);
+    }
+
+    [Fact]
+    public async Task PlayerEditPost_OnTodaysPlayer_RedirectsWithTheTodayFlag()
+    {
+        SetupEditReferentials();
+        var today = PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(Today).Build();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData(today));
+        _playerService.Setup(_ => _.UpdatePlayerAsync(7, It.IsAny<PlayerRequest>())).ReturnsAsync(true);
+        var model = MinimalPlayerCreationModel();
+        model.PlayerId = 7;
+        model.Club0Id = "8";
+
+        var result = await _controller.PlayerEdit(model);
+
+        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirect.RouteValues!["saved"].Should().Be(true);
+        redirect.RouteValues["today"].Should().Be(true);
+    }
+
+    [Fact]
+    public async Task PlayerEditPost_OnAScheduledPlayer_RedirectsWithoutTheTodayFlag()
+    {
+        SetupEditReferentials();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData());
+        _playerService.Setup(_ => _.UpdatePlayerAsync(7, It.IsAny<PlayerRequest>())).ReturnsAsync(true);
+        var model = MinimalPlayerCreationModel();
+        model.PlayerId = 7;
+        model.Club0Id = "8";
+
+        var result = await _controller.PlayerEdit(model);
+
+        result.Should().BeOfType<RedirectToActionResult>().Which.RouteValues!["today"].Should().Be(false);
+    }
+
+    [Fact]
+    public async Task PlayerEditPost_WithAValidationErrorOnTodaysPlayer_KeepsTheTodayBanner()
+    {
+        var today = PlayerDtoBuilder.Valid().WithId(7).WithPublicationDate(Today).Build();
+        _playerService.Setup(_ => _.GetEditablePlayerAsync(7)).ReturnsAsync(EditableData(today) with { FinderCount = 2 });
+
+        var result = await _controller.PlayerEdit(new PlayerCreationModel { PlayerId = 7 });
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<PlayerCreationModel>().Subject;
+        model.IsEditingToday.Should().BeTrue();
+        model.TodayFinderCount.Should().Be(2);
     }
 
     [Fact]

@@ -229,4 +229,13 @@
   <data name="CluesPreview" xml:space="preserve">
     <value>Prévisualisation des indices</value>
   </data>
+  <data name="TodayEditTitle" xml:space="preserve">
+    <value>ATTENTION : vous modifiez le kikolé d&apos;AUJOURD&apos;HUI</value>
+  </data>
+  <data name="TodayEditWarning" xml:space="preserve">
+    <value>Il est en cours de jeu. Les propositions et les points déjà enregistrés ne sont jamais recalculés. Après l&apos;enregistrement, lancez « Recalculer les badges » depuis les actions.</value>
+  </data>
+  <data name="TodayEditFinders" xml:space="preserve">
+    <value>{0} joueur(s) l&apos;ont déjà trouvé.</value>
+  </data>
 </root>

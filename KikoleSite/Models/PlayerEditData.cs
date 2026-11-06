@@ -7,4 +7,5 @@ public record PlayerEditData(
     PlayerDto Player,
     IReadOnlyList<PlayerClubDto> Clubs,
     string? ClueFr,
-    string? EasyClueFr);
+    string? EasyClueFr,
+    int FinderCount = 0);

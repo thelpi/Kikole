@@ -77,7 +77,7 @@ public class PlayerService : IPlayerService
     public async Task<IReadOnlyList<PlayerDto>> GetEditablePlayersAsync()
     {
         var scheduled = await _playerRepository
-            .GetPlayersOfTheDayAsync(_clock.Tomorrow, null);
+            .GetPlayersOfTheDayAsync(_clock.Today, null);
 
         var pending = await _playerRepository
             .GetPendingValidationPlayersAsync();
@@ -139,7 +139,14 @@ public class PlayerService : IPlayerService
         var easyClueFr = await _playerRepository
             .GetClueAsync(playerId, 1, (ulong)Languages.fr);
 
-        return new PlayerEditData(player, clubs.OrderBy(c => c.HistoryPosition).ToList(), clueFr, easyClueFr);
+        var finderCount = 0;
+        if (player.PublicationDate == _clock.Today)
+        {
+            finderCount = (await _leaderRepository
+                .GetLeadersAtDateAsync(_clock.Today, false)).Count;
+        }
+
+        return new PlayerEditData(player, clubs.OrderBy(c => c.HistoryPosition).ToList(), clueFr, easyClueFr, finderCount);
     }
 
     /// <inheritdoc />
@@ -417,7 +424,7 @@ public class PlayerService : IPlayerService
     private bool IsEditable(PlayerDto player)
     {
         return !player.RejectDate.HasValue
-            && (!player.PublicationDate.HasValue || player.PublicationDate.Value > _clock.Today);
+            && (!player.PublicationDate.HasValue || player.PublicationDate.Value >= _clock.Today);
     }
 
     private static Dictionary<ulong, string> ToTranslations(IReadOnlyDictionary<Languages, string?>? clues)
