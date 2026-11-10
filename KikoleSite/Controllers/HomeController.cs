@@ -263,9 +263,9 @@ public class HomeController : KikoleBaseController
 
         var daysBefore = (uint)model.CurrentDay;
 
-        // le joueur de la journee cachee ne se joue jamais, ni le jour meme ni en rattrapage :
-        // seule la serie parfaite (ou la consultation reservee) le revele, cf. CanDisplayHiddenPlayerAsync
-        if (_clock.Today.AddDays(-(int)daysBefore) == _gameCalendar.HiddenDate)
+        // journee cachee : injouable le jour meme, ensuite reservee a qui y a acces (meme controle que le GET)
+        if (_clock.Today.AddDays(-(int)daysBefore) == _gameCalendar.HiddenDate
+            && (daysBefore == 0 || !await _playerService.CanDisplayHiddenPlayerAsync(UserId)))
         {
             return Redirect("/");
         }

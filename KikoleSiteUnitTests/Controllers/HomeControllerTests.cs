@@ -298,13 +298,14 @@ public class HomeControllerTests
     }
 
     [Theory]
-    [InlineData(0)] // le jour meme
-    [InlineData(1)] // en rattrapage, le lendemain
-    public async Task IndexPost_OnTheHiddenDay_RecordsNothingAndRedirects(int daysBefore)
+    [InlineData(0, true)] // le jour meme, meme avec l'acces
+    [InlineData(1, false)] // en rattrapage, sans l'acces
+    public async Task IndexPost_OnTheHiddenDay_RecordsNothingAndRedirects(int daysBefore, bool hasAccess)
     {
         _clock.Setup(_ => _.Today).Returns(TestCalendar.HiddenDate.AddDays(daysBefore));
         SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
         SetFormKeys("submit-Continent");
+        _playerService.Setup(_ => _.CanDisplayHiddenPlayerAsync(7)).ReturnsAsync(hasAccess);
 
         var result = await _controller.Index(new HomeModel { CurrentDay = daysBefore, ContinentNameSubmission = "Europe" });
 
@@ -312,6 +313,45 @@ public class HomeControllerTests
         _proposalService.Verify(_ => _.ManageProposalResponseAsync(
             It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), It.IsAny<ulong>(), It.IsAny<PlayerFullDto>(), It.IsAny<IReadOnlyDictionary<ulong, ulong>>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task IndexPost_OnTheHiddenDay_WhenTheUserHasAccess_RecordsTheProposal()
+    {
+        var hidden = TestCalendar.HiddenDate;
+        var daysBefore = Today.DayNumber - hidden.DayNumber;
+        SetUser(userId: 7, login: "joueur1", userType: UserTypes.StandardUser);
+        SetupCountryContinents();
+        SetFormKeys("submit-Continent");
+        _playerService.Setup(_ => _.CanDisplayHiddenPlayerAsync(7)).ReturnsAsync(true);
+        _playerService.Setup(_ => _.GetPlayerClueAsync(hidden, false, Lang)).ReturnsAsync("un indice");
+        _playerService.Setup(_ => _.GetPlayerClueAsync(hidden, true, Lang)).ReturnsAsync("un indice facile");
+
+        var playerFull = PlayerFullDtoBuilder.Valid().Build();
+        _playerService.Setup(_ => _.GetPlayerOfTheDayFullInfoAsync(hidden)).ReturnsAsync(playerFull);
+        var requestUser = UserDtoBuilder.Valid().WithId(7).WithType(UserTypes.StandardUser).Build();
+        _playerService
+            .Setup(_ => _.GetPlayerOfTheDayFromUserPovAsync(7, hidden))
+            .ReturnsAsync(new PlayerCreator(requestUser, playerFull.Player, UserDtoBuilder.Valid().WithId(42).Build()));
+        _proposalService.Setup(_ => _.GetProposalsAsync(hidden, 7, TestCountryContinents.Map)).ReturnsAsync(Array.Empty<ProposalResponse>());
+        _leaderService.Setup(_ => _.GetUserStreakAsync(7)).ReturnsAsync(new UserStreak { Current = 0, Best = 0 });
+
+        var response = BuildResponse(
+            ProposalDtoBuilder.Valid().OfType(ProposalTypes.Continent).WithSuccessfulFlag(0).WithValue("Europe").Build(),
+            playerFull);
+        _proposalService
+            .Setup(_ => _.ManageProposalResponseAsync(
+                It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), 7, playerFull, TestCountryContinents.Map))
+            .ReturnsAsync((response, (IReadOnlyCollection<ProposalDto>)Array.Empty<ProposalDto>(), (LeaderDto?)null));
+        _badgeService
+            .Setup(_ => _.PrepareNonLeaderBadgesAsync(7, It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), Lang))
+            .ReturnsAsync(Array.Empty<UserBadge>());
+
+        var result = await _controller.Index(new HomeModel { CurrentDay = daysBefore, ContinentNameSubmission = "Europe" });
+
+        result.Should().BeOfType<ViewResult>();
+        _proposalService.Verify(_ => _.ManageProposalResponseAsync(
+            It.IsAny<KikoleSite.Models.Requests.ProposalRequest>(), 7, playerFull, TestCountryContinents.Map), Times.Once);
     }
     [Fact]
     public async Task IndexPost_NullModel_RedirectsToRoot()
