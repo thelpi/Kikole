@@ -108,6 +108,43 @@
             </form>
         </div>
 
+        @if (Model.DeletionRequested || Model.CanRequestDeletion)
+        {
+            <div class="form-card">
+                <h3>@localizer["DeleteAccountTitle"]</h3>
+                @if (Model.DeletionRequested)
+                {
+                    <p class="deletion-pending">@string.Format(localizer["DeletionPending"].Value, Model.DeletionRequestedDate?.ToString("yyyy-MM-dd"))</p>
+                }
+                else
+                {
+                    <p>@localizer["DeleteAccountHelp"]</p>
+                    <div class="actions">
+                        <button type="button" class="danger" id="deletionOpen">@localizer["RequestDeletion"]</button>
+                    </div>
+                }
+            </div>
+
+            @if (!Model.DeletionRequested)
+            {
+                <div class="confirm-modal" id="deletionModal" role="dialog" aria-modal="true" aria-labelledby="deletionModalText">
+                    <div class="confirm-modal-box">
+                        <form method="post" action="/Account/RequestDeletion">
+                            <p id="deletionModalText">@localizer["DeletionConfirmText"]</p>
+                            <div class="form-field">
+                                <label for="deletionReason">@localizer["DeletionReasonLabel"]</label>
+                                <textarea id="deletionReason" name="DeletionReasonSubmission" class="blank" maxlength="500" rows="3"></textarea>
+                            </div>
+                            <div class="confirm-modal-actions">
+                                <button type="button" class="secondary" id="deletionCancel">@localizer["Cancel"]</button>
+                                <button type="submit" class="danger">@localizer["DeletionConfirm"]</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+
         @if (Model.HasSponsorshipInfo)
         {
             <div class="form-card">

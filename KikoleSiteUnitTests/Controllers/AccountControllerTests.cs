@@ -1007,6 +1007,96 @@ public class AccountControllerTests
         model.SuccessInfo.Should().Be("PasswordChanged");
     }
 
+    // ------------------------------------------------------------- RequestDeletion
+
+    [Fact]
+    public async Task RequestDeletion_RecordsTheRequestWithTheTrimmedReason()
+    {
+        SetCurrentUser(1);
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(BuildUser());
+        _userRepository.Setup(_ => _.RequestAccountDeletionAsync(1, "je pars")).ReturnsAsync(true);
+
+        var result = await _controller.RequestDeletion(new AccountModel { DeletionReasonSubmission = "  je pars  " });
+
+        ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Which.SuccessInfo.Should().Be("DeletionRequested");
+        _userRepository.Verify(_ => _.RequestAccountDeletionAsync(1, "je pars"), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task RequestDeletion_WithoutReason_RecordsTheRequestAnyway(string? reason)
+    {
+        SetCurrentUser(1);
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(BuildUser());
+        _userRepository.Setup(_ => _.RequestAccountDeletionAsync(1, null)).ReturnsAsync(true);
+
+        var result = await _controller.RequestDeletion(new AccountModel { DeletionReasonSubmission = reason });
+
+        ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Which.SuccessInfo.Should().Be("DeletionRequested");
+    }
+
+    [Fact]
+    public async Task RequestDeletion_WithATooLongReason_RecordsNothing()
+    {
+        SetCurrentUser(1);
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(BuildUser());
+
+        var result = await _controller.RequestDeletion(new AccountModel { DeletionReasonSubmission = new string('a', 501) });
+
+        ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Which.Error.Should().Be("DeletionReasonTooLong");
+        _userRepository.Verify(_ => _.RequestAccountDeletionAsync(It.IsAny<ulong>(), It.IsAny<string?>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RequestDeletion_WhenTheRepositoryRefuses_ReportsIt()
+    {
+        SetCurrentUser(1);
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(BuildUser());
+        _userRepository.Setup(_ => _.RequestAccountDeletionAsync(1, It.IsAny<string?>())).ReturnsAsync(false);
+
+        var result = await _controller.RequestDeletion(new AccountModel());
+
+        ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Which.Error.Should().Be("DeletionNotPossible");
+    }
+
+    [Fact]
+    public async Task RequestDeletion_ByAnAdministrator_IsRefusedWithoutTouchingTheRepository()
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim(UserTypeClaimsPrincipalFactory.UserTypeClaimType, ((ulong)UserTypes.Administrator).ToString())
+        };
+        _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"));
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(BuildUser());
+
+        var result = await _controller.RequestDeletion(new AccountModel());
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.Error.Should().Be("DeletionNotPossible");
+        model.CanRequestDeletion.Should().BeFalse();
+        _userRepository.Verify(_ => _.RequestAccountDeletionAsync(It.IsAny<ulong>(), It.IsAny<string?>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Index_ForAUserWithAPendingDeletionRequest_ExposesIt()
+    {
+        SetCurrentUser(1);
+        var requestDate = new DateTime(2026, 11, 20, 10, 0, 0);
+        _userManager.Setup(_ => _.FindByIdAsync("1")).ReturnsAsync(BuildUser());
+        _userRepository.Setup(_ => _.GetUserByIdAsync(1)).ReturnsAsync(
+            UserDtoBuilder.Valid().WithId(1).Build() with { DeletionRequested = true, DeletionRequestedDate = requestDate });
+
+        var result = await _controller.Index();
+
+        var model = ((ViewResult)result).Model.Should().BeOfType<AccountModel>().Subject;
+        model.DeletionRequested.Should().BeTrue();
+        model.DeletionRequestedDate.Should().Be(requestDate);
+        model.CanRequestDeletion.Should().BeTrue();
+    }
+
     // ------------------------------------------------------------- helpers
 
     private void SetCurrentUser(ulong userId)

@@ -213,6 +213,18 @@ public class AdminController : KikoleBaseController
 
     [HttpPost]
     [Authorization(UserTypes.Administrator)]
+    public async Task<IActionResult> DismissDeletionRequest(UserActionRequest request)
+    {
+        var target = await _userRepository.GetUserByIdIncludingDisabledAsync(request.UserId);
+        if (target == null || target.UserTypeId == (ulong)UserTypes.Administrator
+            || !await _userRepository.DismissDeletionRequestAsync(target.Id))
+            return await RenderUsersAsync(request, null, _localizer["UserNotManageable"]);
+
+        return await RenderUsersAsync(request, _localizer["DeletionRequestDismissed", target.Login], null);
+    }
+
+    [HttpPost]
+    [Authorization(UserTypes.Administrator)]
     public async Task<IActionResult> DeleteUser(UserActionRequest request)
     {
         var target = await _userRepository.GetUserByIdIncludingDisabledAsync(request.UserId);
@@ -378,6 +390,7 @@ public class AdminController : KikoleBaseController
     {
         model.HasPendingSubmissions = await _playerService.HasPendingSubmissionsAsync();
         model.HasUnreadMessages = await _discussionService.HasUnreadMessagesForAdminAsync();
+        model.HasPendingDeletionRequests = await _userRepository.HasPendingDeletionRequestsAsync();
 
         return View("Actions", model);
     }

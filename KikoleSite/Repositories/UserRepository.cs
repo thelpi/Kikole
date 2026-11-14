@@ -178,6 +178,33 @@ public class UserRepository : BaseRepository, IUserRepository
                 new { userId, reason, disabledDate = Clock.Now });
     }
 
+    public async Task<bool> RequestAccountDeletionAsync(ulong userId, string? reason)
+    {
+        return await ExecuteNonQueryAndGetAffectedRowsAsync(
+                "UPDATE users " +
+                "SET deletion_requested = 1, deletion_requested_date = @requestDate, deletion_reason = @reason " +
+                "WHERE id = @userId AND deletion_requested = 0 AND is_disabled = 0 AND user_type_id <> @adminType",
+                new { userId, reason, requestDate = Clock.Now, adminType = (ulong)UserTypes.Administrator }) > 0;
+    }
+
+    public async Task<bool> DismissDeletionRequestAsync(ulong userId)
+    {
+        return await ExecuteNonQueryAndGetAffectedRowsAsync(
+                "UPDATE users " +
+                "SET deletion_requested = 0, deletion_requested_date = NULL, deletion_reason = NULL " +
+                "WHERE id = @userId AND deletion_requested = 1",
+                new { userId }) > 0;
+    }
+
+    public async Task<bool> HasPendingDeletionRequestsAsync()
+    {
+        var count = await ExecuteScalarAsync(
+                "SELECT COUNT(*) FROM users WHERE deletion_requested = 1",
+                null, 0);
+
+        return count > 0;
+    }
+
     public async Task<(IReadOnlyList<UserDto> Users, int Total)> SearchUsersAsync(
         string? login, UserStatusFilter status, UserTypes? type, bool descending, int page, int pageSize)
     {

@@ -7,4 +7,6 @@ public class AdminModel
     public bool HasPendingSubmissions { get; set; }
 
     public bool HasUnreadMessages { get; set; }
+
+    public bool HasPendingDeletionRequests { get; set; }
 }

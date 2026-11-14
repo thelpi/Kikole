@@ -32,7 +32,15 @@
             <li><a asp-controller="Admin" asp-action="Club"><span>@localizer["ManageClubs"]</span></a></li>
             <li><a asp-controller="Admin" asp-action="Planning"><span>@localizer["ManagePlanning"]</span></a></li>
             <li><a asp-controller="Admin" asp-action="Announcements"><span>@localizer["ManageAnnouncements"]</span></a></li>
-            <li><a asp-controller="Admin" asp-action="Users"><span>@localizer["ManageUsers"]</span></a></li>
+            <li>
+                <a asp-controller="Admin" asp-action="Users">
+                    <span>@localizer["ManageUsers"]</span>
+                    @if (Model?.HasPendingDeletionRequests == true)
+                    {
+                        <span class="site-nav-badge-inline" aria-hidden="true"></span>
+                    }
+                </a>
+            </li>
             <li><a asp-controller="Admin" asp-action="Errors"><span>@localizer["ViewErrors"]</span></a></li>
             <li><button type="button" class="admin-run" data-action="/Admin/RecomputeBadges"><span>@localizer["RecomputeBadges"]</span></button></li>
             <li><button type="button" class="admin-run" data-action="/Admin/RecomputeLeaders"><span>@localizer["RecomputeLeaders"]</span></button></li>

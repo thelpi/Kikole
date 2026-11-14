@@ -2607,3 +2607,37 @@ body { padding-top: 0; }
   font-weight: 800;
   text-transform: uppercase;
 }
+
+/* suppression de compte (Account/Index.cshtml, admin : Users.cshtml) : bouton rouge plein, bien contraste */
+.kikole-board .actions button.danger,
+.kikole-board .confirm-modal-actions button.danger {
+  background: var(--warn);
+  border: 2px solid var(--warn);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.kikole-board .actions button.danger:hover,
+.kikole-board .confirm-modal-actions button.danger:hover {
+  background: var(--accent-ink);
+  color: var(--warn);
+}
+
+.kikole-board .deletion-pending { font-weight: 600; color: var(--warn); }
+
+.kikole-board .confirm-modal-box:has(#deletionReason) { max-width: 420px; width: 100%; }
+
+/* demande de suppression en attente (Admin/Users.cshtml) */
+.kikole-board #usersTable tr.user-deletion:not(.user-disabled) td { background: var(--warn-soft); border-bottom: 1px solid var(--warn); }
+.kikole-board #usersTable tr.user-deletion td:first-child { box-shadow: inset 4px 0 0 var(--warn); }
+.kikole-board .deletion-tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--warn);
+  border-radius: 8px;
+  color: var(--warn);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.kikole-board .deletion-reason { margin-top: 4px; font-size: 13px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }

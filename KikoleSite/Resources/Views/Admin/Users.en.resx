@@ -246,4 +246,16 @@
   <data name="ConfirmForcePasswordAndConfirm" xml:space="preserve">
     <value>Replace the password of {0}? Its email, never confirmed, will also be marked as confirmed.</value>
   </data>
+  <data name="DeletionRequestedTag" xml:space="preserve">
+    <value>deletion requested</value>
+  </data>
+  <data name="DeletionRequestedOn" xml:space="preserve">
+    <value>Deletion requested on {0}</value>
+  </data>
+  <data name="DismissDeletion" xml:space="preserve">
+    <value>Dismiss request</value>
+  </data>
+  <data name="ConfirmDismissDeletion" xml:space="preserve">
+    <value>Dismiss the deletion request of {0}? The account is kept and the request disappears.</value>
+  </data>
 </root>

@@ -4647,6 +4647,10 @@ CREATE TABLE users (
   is_disabled tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
   disabled_date datetime DEFAULT NULL,
   disabled_reason varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  -- demande de suppression de compte faite par l'utilisateur (traitee a la main par l'administrateur)
+  deletion_requested tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
+  deletion_requested_date datetime DEFAULT NULL,
+  deletion_reason varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   concurrency_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   security_stamp char(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   lockout_end datetime DEFAULT NULL,

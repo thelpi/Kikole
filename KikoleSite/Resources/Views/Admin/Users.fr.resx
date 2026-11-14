@@ -246,4 +246,16 @@
   <data name="ConfirmForcePasswordAndConfirm" xml:space="preserve">
     <value>Remplacer le mot de passe de {0} ? Son email, jamais confirmé, sera aussi marqué comme confirmé.</value>
   </data>
+  <data name="DeletionRequestedTag" xml:space="preserve">
+    <value>suppression demandée</value>
+  </data>
+  <data name="DeletionRequestedOn" xml:space="preserve">
+    <value>Suppression demandée le {0}</value>
+  </data>
+  <data name="DismissDeletion" xml:space="preserve">
+    <value>Classer la demande</value>
+  </data>
+  <data name="ConfirmDismissDeletion" xml:space="preserve">
+    <value>Classer la demande de suppression de {0} ? Le compte est conservé et la demande disparaît.</value>
+  </data>
 </root>

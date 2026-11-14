@@ -21,6 +21,13 @@ public class UserAdminRow
     /// <summary>L'adresse email n'a jamais ete confirmee (lien du mail d'inscription jamais ouvert).</summary>
     public bool IsEmailUnconfirmed { get; init; }
 
+    /// <summary>L'utilisateur a demande la suppression de son compte (en attente de traitement).</summary>
+    public bool DeletionRequested { get; init; }
+
+    public DateTime? DeletionRequestedDate { get; init; }
+
+    public string? DeletionReason { get; init; }
+
     public UserTypes UserType { get; init; }
 
     public static UserAdminRow From(UserDto user, string email) => new()
@@ -32,6 +39,9 @@ public class UserAdminRow
         Ip = user.Ip,
         IsDisabled = user.IsDisabled,
         IsEmailUnconfirmed = !user.EmailConfirmed,
+        DeletionRequested = user.DeletionRequested,
+        DeletionRequestedDate = user.DeletionRequestedDate,
+        DeletionReason = user.DeletionReason,
         UserType = (UserTypes)user.UserTypeId
     };
 }

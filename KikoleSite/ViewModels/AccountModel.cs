@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace KikoleSite.ViewModels;
@@ -49,6 +50,17 @@ public class AccountModel
     public string? SponsorLogin { get; set; }
 
     public IReadOnlyList<(string Login, bool IsDisabled)> Godchildren { get; set; } = [];
+
+    /// <summary>Motif facultatif saisi dans la confirmation de demande de suppression du compte.</summary>
+    public string? DeletionReasonSubmission { get; set; }
+
+    /// <summary>L'utilisateur connecte a deja demande la suppression de son compte.</summary>
+    public bool DeletionRequested { get; set; }
+
+    public DateTime? DeletionRequestedDate { get; set; }
+
+    /// <summary>Un administrateur ne peut pas demander la suppression de son compte.</summary>
+    public bool CanRequestDeletion { get; set; }
 
     /// <summary>La section parrainage ne s'affiche que si le systeme est actif et qu'elle
     /// a quelque chose a montrer.</summary>

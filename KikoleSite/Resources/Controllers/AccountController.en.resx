@@ -252,4 +252,13 @@
   <data name="AccountCreatedConfirmEmail" xml:space="preserve">
     <value>Your account has been created. A confirmation email has just been sent to you: click the link it contains to activate your account (check your spam folder).</value>
   </data>
+  <data name="DeletionReasonTooLong" xml:space="preserve">
+    <value>The reason is too long (500 characters maximum).</value>
+  </data>
+  <data name="DeletionNotPossible" xml:space="preserve">
+    <value>The request could not be recorded: one may already be pending.</value>
+  </data>
+  <data name="DeletionRequested" xml:space="preserve">
+    <value>Your account deletion request has been sent to the administrator.</value>
+  </data>
 </root>

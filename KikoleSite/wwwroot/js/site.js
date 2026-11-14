@@ -1833,3 +1833,25 @@ $(function () {
         if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
     });
 });
+/* demande de suppression de compte (Account/Index.cshtml) : fenetre de confirmation avec motif facultatif */
+$(function () {
+    var modal = document.getElementById('deletionModal');
+    var trigger = document.getElementById('deletionOpen');
+    if (!modal || !trigger) return;
+
+    var closeModal = function () {
+        modal.classList.remove('open');
+        trigger.focus();
+    };
+    trigger.addEventListener('click', function () {
+        modal.classList.add('open');
+        document.getElementById('deletionReason').focus();
+    });
+    document.getElementById('deletionCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+});

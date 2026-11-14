@@ -91,6 +91,16 @@ public abstract class BaseRepository
                 commandType: CommandType.Text);
     }
 
+    protected async Task<int> ExecuteNonQueryAndGetAffectedRowsAsync(string sql, object? parameters)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        return await connection
+            .ExecuteAsync(
+                sql,
+                parameters,
+                commandType: CommandType.Text);
+    }
+
     protected async Task<T?> ExecuteScalarAsync<T>(string sql, object? parameters, T? defaultValue = default)
     {
         var result = defaultValue;

@@ -65,8 +65,8 @@
     <value>Éditeur et hébergement</value>
   </data>
   <data name="PublisherBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Éditeur du site&lt;/strong&gt;&lt;br/&gt;Le site « Kikolé ? » est édité à titre personnel et non commercial par Charles Nicollas. Pour toute question : &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Directeur de la publication&lt;/strong&gt;&lt;br/&gt;Charles Nicollas.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Éditeur du site&lt;/strong&gt;&lt;br/&gt;Le site « Kikolé ? » est édité à titre personnel et non commercial par Charles N. Pour toute question : &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Directeur de la publication&lt;/strong&gt;&lt;br/&gt;Charles N.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Hébergement&lt;/strong&gt;&lt;br/&gt;Hébergeur : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — téléphone 1007 — ovhcloud.com.&lt;/p&gt;</value>
   </data>
   <data name="LiabilityTitle" xml:space="preserve">
@@ -80,7 +80,7 @@
     <value>Protection des données personnelles (RGPD)</value>
   </data>
   <data name="PrivacyBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Responsable du traitement&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, éditeur du site (&lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;).&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Responsable du traitement&lt;/strong&gt;&lt;br/&gt;Charles N., éditeur du site (&lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Données collectées&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Un identifiant (login) choisi à l&apos;inscription, visible des autres joueurs dans les classements.&lt;/li&gt;

@@ -213,4 +213,28 @@
   <data name="ResendConfirmationHint" xml:space="preserve">
     <value>Confirmation email not received? Enter your login and password, then use &quot;Resend the confirmation email&quot;.</value>
   </data>
+  <data name="DeleteAccountTitle" xml:space="preserve">
+    <value>Account deletion</value>
+  </data>
+  <data name="DeleteAccountHelp" xml:space="preserve">
+    <value>You can ask for your account and all its data to be deleted. The request is sent to the administrator, who will process it: the deletion is permanent.</value>
+  </data>
+  <data name="RequestDeletion" xml:space="preserve">
+    <value>Request account deletion</value>
+  </data>
+  <data name="DeletionPending" xml:space="preserve">
+    <value>Your deletion request was sent on {0}. The administrator will process it soon.</value>
+  </data>
+  <data name="DeletionConfirmText" xml:space="preserve">
+    <value>Request the deletion of your account? Your history, badges and messages will be erased, with no way back.</value>
+  </data>
+  <data name="DeletionReasonLabel" xml:space="preserve">
+    <value>Reason for the request (optional)</value>
+  </data>
+  <data name="DeletionConfirm" xml:space="preserve">
+    <value>Yes, request deletion</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
 </root>

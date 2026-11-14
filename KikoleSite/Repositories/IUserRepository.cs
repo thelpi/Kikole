@@ -33,6 +33,18 @@ public interface IUserRepository
     Task DisableUserAsync(ulong userId, string reason);
 
     /// <summary>
+    /// Enregistre la demande de suppression d'un compte actif non administrateur, avec un motif
+    /// facultatif. Renvoie <c>false</c> si le compte n'est pas éligible ou a déjà une demande en cours.
+    /// </summary>
+    Task<bool> RequestAccountDeletionAsync(ulong userId, string? reason);
+
+    /// <summary>Classe une demande de suppression sans supprimer le compte. Renvoie <c>false</c> s'il n'y en avait pas.</summary>
+    Task<bool> DismissDeletionRequestAsync(ulong userId);
+
+    /// <summary>Au moins un compte a une demande de suppression en attente.</summary>
+    Task<bool> HasPendingDeletionRequestsAsync();
+
+    /// <summary>
     /// Page d'utilisateurs pour l'administration (désactivés inclus, administrateurs exclus),
     /// triés par date de création, avec le total des résultats avant pagination.
     /// <paramref name="login"/> est cherché par « contient ».

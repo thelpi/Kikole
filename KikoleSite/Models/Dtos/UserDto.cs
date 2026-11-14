@@ -30,6 +30,12 @@ public record UserDto : BaseDto
 
     public string? DisabledReason { get; init; }
 
+    public bool DeletionRequested { get; init; }
+
+    public DateTime? DeletionRequestedDate { get; init; }
+
+    public string? DeletionReason { get; init; }
+
     public required string ConcurrencyStamp { get; init; }
 
     public required string SecurityStamp { get; init; }

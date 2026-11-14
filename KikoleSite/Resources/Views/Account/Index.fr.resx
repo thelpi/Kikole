@@ -213,4 +213,28 @@
   <data name="ResendConfirmationHint" xml:space="preserve">
     <value>Email de confirmation non reçu ? Saisissez votre login et votre mot de passe puis utilisez « Renvoyer l&apos;email de confirmation ».</value>
   </data>
+  <data name="DeleteAccountTitle" xml:space="preserve">
+    <value>Suppression du compte</value>
+  </data>
+  <data name="DeleteAccountHelp" xml:space="preserve">
+    <value>Vous pouvez demander la suppression de votre compte et de toutes les données associées. La demande est transmise à l&apos;administrateur, qui la traitera : la suppression est définitive.</value>
+  </data>
+  <data name="RequestDeletion" xml:space="preserve">
+    <value>Demander la suppression de compte</value>
+  </data>
+  <data name="DeletionPending" xml:space="preserve">
+    <value>Votre demande de suppression a été transmise le {0}. L&apos;administrateur la traitera prochainement.</value>
+  </data>
+  <data name="DeletionConfirmText" xml:space="preserve">
+    <value>Demander la suppression de votre compte ? Votre historique, vos badges et vos messages seront effacés, sans retour possible.</value>
+  </data>
+  <data name="DeletionReasonLabel" xml:space="preserve">
+    <value>Raison de la demande (facultatif)</value>
+  </data>
+  <data name="DeletionConfirm" xml:space="preserve">
+    <value>Oui, demander la suppression</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
 </root>

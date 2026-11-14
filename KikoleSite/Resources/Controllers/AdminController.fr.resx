@@ -390,4 +390,7 @@
   <data name="PasswordForcedAndConfirmed" xml:space="preserve">
     <value>Le mot de passe de {0} a été remplacé, et son email est maintenant marqué comme confirmé.</value>
   </data>
+  <data name="DeletionRequestDismissed" xml:space="preserve">
+    <value>La demande de suppression de {0} a été classée.</value>
+  </data>
 </root>

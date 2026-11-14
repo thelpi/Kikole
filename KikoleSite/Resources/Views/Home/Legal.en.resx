@@ -65,8 +65,8 @@
     <value>Publisher and hosting</value>
   </data>
   <data name="PublisherBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Site publisher&lt;/strong&gt;&lt;br/&gt;The "Kikolé ?" website is published on a personal, non-commercial basis by Charles Nicollas. For any question: &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Publication director&lt;/strong&gt;&lt;br/&gt;Charles Nicollas.&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Site publisher&lt;/strong&gt;&lt;br/&gt;The "Kikolé ?" website is published on a personal, non-commercial basis by Charles N. For any question: &lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Publication director&lt;/strong&gt;&lt;br/&gt;Charles N.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Hosting&lt;/strong&gt;&lt;br/&gt;Host: OVH SAS, 2 rue Kellermann, 59100 Roubaix, France — phone 1007 — ovhcloud.com.&lt;/p&gt;</value>
   </data>
   <data name="LiabilityTitle" xml:space="preserve">
@@ -80,7 +80,7 @@
     <value>Personal data protection (GDPR)</value>
   </data>
   <data name="PrivacyBody" xml:space="preserve">
-    <value>&lt;p&gt;&lt;strong&gt;Data controller&lt;/strong&gt;&lt;br/&gt;Charles Nicollas, publisher of the site (&lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;).&lt;/p&gt;
+    <value>&lt;p&gt;&lt;strong&gt;Data controller&lt;/strong&gt;&lt;br/&gt;Charles N., publisher of the site (&lt;a href=&quot;mailto:{0}&quot;&gt;{0}&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Data collected&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;A login chosen at registration, visible to other players in the leaderboards.&lt;/li&gt;

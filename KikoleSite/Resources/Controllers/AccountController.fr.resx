@@ -336,4 +336,13 @@
   <data name="AccountCreatedConfirmEmail" xml:space="preserve">
     <value>Votre compte est créé. Un email de confirmation vient de vous être envoyé : cliquez sur le lien qu&apos;il contient pour activer votre compte (vérifiez vos courriers indésirables).</value>
   </data>
+  <data name="DeletionReasonTooLong" xml:space="preserve">
+    <value>La raison est trop longue (500 caractères maximum).</value>
+  </data>
+  <data name="DeletionNotPossible" xml:space="preserve">
+    <value>La demande n&apos;a pas pu être enregistrée : une demande est peut-être déjà en cours.</value>
+  </data>
+  <data name="DeletionRequested" xml:space="preserve">
+    <value>Votre demande de suppression de compte a bien été transmise à l&apos;administrateur.</value>
+  </data>
 </root>

@@ -1729,6 +1729,52 @@ public class AdminControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task DismissDeletionRequest_ClearsTheRequestAndKeepsTheAccount()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(5))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(5).WithLogin("lea").Build());
+        _userRepository.Setup(_ => _.DismissDeletionRequestAsync(5)).ReturnsAsync(true);
+
+        var result = await _controller.DismissDeletionRequest(new UserActionRequest { UserId = 5 });
+
+        UsersViewModel(result).Feedback.Should().Be("DeletionRequestDismissed:lea");
+        _userRepository.Verify(_ => _.DeleteUserWithAllDataAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DismissDeletionRequest_WithoutPendingRequest_IsRefused()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(5))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(5).WithLogin("lea").Build());
+        _userRepository.Setup(_ => _.DismissDeletionRequestAsync(5)).ReturnsAsync(false);
+
+        var result = await _controller.DismissDeletionRequest(new UserActionRequest { UserId = 5 });
+
+        UsersViewModel(result).Error.Should().Be("UserNotManageable");
+    }
+
+    [Fact]
+    public async Task DismissDeletionRequest_OnAnAdministratorOrAnUnknownAccount_IsRefused()
+    {
+        _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(1))
+            .ReturnsAsync(UserDtoBuilder.Valid().WithId(1).WithLogin("admin").WithType(UserTypes.Administrator).Build());
+
+        UsersViewModel(await _controller.DismissDeletionRequest(new UserActionRequest { UserId = 1 })).Error.Should().Be("UserNotManageable");
+        UsersViewModel(await _controller.DismissDeletionRequest(new UserActionRequest { UserId = 9 })).Error.Should().Be("UserNotManageable");
+        _userRepository.Verify(_ => _.DismissDeletionRequestAsync(It.IsAny<ulong>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Actions_Get_FlagsAPendingDeletionRequest()
+    {
+        _userRepository.Setup(_ => _.HasPendingDeletionRequestsAsync()).ReturnsAsync(true);
+
+        var result = await _controller.Actions();
+
+        ((ViewResult)result).Model.Should().BeOfType<AdminModel>().Which.HasPendingDeletionRequests.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task DeleteUser_WithAnotherLogin_DeletesNothing()
     {
         _userRepository.Setup(_ => _.GetUserByIdIncludingDisabledAsync(5))

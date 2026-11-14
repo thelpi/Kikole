@@ -74,7 +74,7 @@
                     @foreach (var row in Model.Rows)
                     {
                         var isPower = row.UserType == UserTypes.PowerUser;
-                        <tr class="@(i++ % 2 == 0 ? "even" : "odd")@(row.IsDisabled ? " user-disabled" : "")@(row.IsEmailUnconfirmed ? " user-unconfirmed" : "")">
+                        <tr class="@(i++ % 2 == 0 ? "even" : "odd")@(row.IsDisabled ? " user-disabled" : "")@(row.IsEmailUnconfirmed ? " user-unconfirmed" : "")@(row.DeletionRequested ? " user-deletion" : "")">
                             <td class="tabData redtext">
                                 @row.Login
                                 @if (row.IsDisabled)
@@ -84,6 +84,11 @@
                                 @if (row.IsEmailUnconfirmed)
                                 {
                                     <span class="unconfirmed-tag">@localizer["UnconfirmedAccount"]</span>
+                                }
+                                @if (row.DeletionRequested)
+                                {
+                                    <span class="deletion-tag">@localizer["DeletionRequestedTag"]</span>
+                                    <div class="deletion-reason">@string.Format(localizer["DeletionRequestedOn"].Value, row.DeletionRequestedDate?.ToString("yyyy-MM-dd"))@(string.IsNullOrWhiteSpace(row.DeletionReason) ? "" : " : " + row.DeletionReason)</div>
                                 }
                                 <div class="user-email">@row.Email</div>
                             </td>
@@ -111,6 +116,13 @@
                                                 data-action="/Admin/DisableUser" data-user-id="@row.Id" data-input="reason"
                                                 data-confirm="@string.Format(localizer["ConfirmDisable"].Value, row.Login)"
                                                 onclick="openUserActionModal(this)">@localizer["Disable"]</button>
+                                    }
+                                    @if (row.DeletionRequested)
+                                    {
+                                        <button type="button" class="secondary"
+                                                data-action="/Admin/DismissDeletionRequest" data-user-id="@row.Id" data-input="none"
+                                                data-confirm="@string.Format(localizer["ConfirmDismissDeletion"].Value, row.Login)"
+                                                onclick="openUserActionModal(this)">@localizer["DismissDeletion"]</button>
                                     }
                                     <button type="button" class="danger"
                                             data-action="/Admin/DeleteUser" data-user-id="@row.Id" data-input="login" data-login="@row.Login"

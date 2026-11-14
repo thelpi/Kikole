@@ -24,6 +24,8 @@ namespace KikoleSite.Controllers;
 
 public class AccountController : KikoleBaseController
 {
+    private const int MaxDeletionReasonLength = 500;
+
     private readonly IStringLocalizer<AccountController> _localizer;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
@@ -546,6 +548,26 @@ public class AccountController : KikoleBaseController
         return await RenderIndexAsync(model);
     }
 
+    [HttpPost]
+    [Authorization]
+    public async Task<IActionResult> RequestDeletion(AccountModel model)
+    {
+        var reason = model.DeletionReasonSubmission?.Trim();
+        if (string.IsNullOrEmpty(reason))
+            reason = null;
+
+        if (reason?.Length > MaxDeletionReasonLength)
+            model.Error = _localizer["DeletionReasonTooLong"];
+        else if (IsTypeOfUser(UserTypes.Administrator)
+            || !await _userRepository.RequestAccountDeletionAsync(UserId, reason))
+            model.Error = _localizer["DeletionNotPossible"];
+        else
+            model.SuccessInfo = _localizer["DeletionRequested"];
+
+        model.DeletionReasonSubmission = null;
+        return await RenderIndexAsync(model);
+    }
+
     /// <summary>
     /// Resout le login de parrain saisi a l'inscription en identifiant, silencieusement :
     /// aucune des trois raisons de refus (login inconnu, parrain desactive, auto-parrainage)
@@ -593,6 +615,11 @@ public class AccountController : KikoleBaseController
         {
             var me = await _userManager.FindByIdAsync(UserId.ToString());
             model.Email = me?.Email;
+
+            var account = await _userRepository.GetUserByIdAsync(UserId);
+            model.DeletionRequested = account?.DeletionRequested == true;
+            model.DeletionRequestedDate = account?.DeletionRequestedDate;
+            model.CanRequestDeletion = !IsTypeOfUser(UserTypes.Administrator);
 
             if (_registrationOptions.SponsorshipEnabled)
             {
